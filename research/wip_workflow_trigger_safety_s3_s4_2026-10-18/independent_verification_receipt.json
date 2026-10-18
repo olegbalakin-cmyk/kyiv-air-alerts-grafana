@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-18",
+  "verdict": "PROVEN_WITH_RESIDUAL_RISKS_PROMOTION_BLOCKED",
+  "tested_commit": "cd8944e77a1a132d548c1769126ffcc02d971ecc",
+  "actions_run": 39124775905,
+  "actions_jobs": {
+    "A": 117667482231,
+    "B": 117667482418,
+    "compare": 117667616796
+  },
+  "test_count_per_replica": 20,
+  "tests": "PASS",
+  "ab_semantic_differences": 0,
+  "inflight_snapshots": "not semantically compared due observation timing",
+  "inventory": {
+    "branches": 381,
+    "tags": 0,
+    "unique_monitor_workflow_blobs": 11,
+    "dispatch_executable_branches": 346
+  },
+  "guards": {
+    "main": "1bf3385b3438a0ed471375db446ab08132d5bd87",
+    "candidate": "70bbd19a8550311ee60745724793aa8a938080f4",
+    "operational_wip": "dfb98ce13ecfe76675eb32e204670f835096e1dc"
+  },
+  "artifacts": {
+    "A": {
+      "id": 12135931202,
+      "zip_digest": "sha256:811627c433df5d8e895007dca82394681ce9c475a141debddafa4f9aeec3f43e"
+    },
+    "B": {
+      "id": 12135431795,
+      "zip_digest": "sha256:826c3181d12bdf5fa540206cf6e4f53af29f40cc8802ee49400d3bb7f31195f9"
+    }
+  },
+  "independently_hashed_outputs": {
+    "execution_receipt": "72a39765368b0efd5ceea637efac0f62ed50035816a9143a88aa05596253d292",
+    "git_ref_inventory": "3c79074b8af03b236356fe7be2fcf2d9913b8d8aff584f269a11dd5c75b1a5ea",
+    "historical_cascade_matrix": "cb15c80b7d7a599fbecd02b2bdf2126b3503dd91e1cadad35ea0cfc1bbf2feb7",
+    "manual_dispatch_s3_matrix": "bd0cd4072d11b34b5a6fce6017c6fd234618d18b93413ec8e50b8e83d2c172f6",
+    "workflow_run_s4_matrix": "94cc79286252404f657c4b46a99b64cbb5061d12fe64f69fcbc79045f52632b5"
+  },
+  "historical_cascade": "four current-default-branch consumer files absent; no workflow_run chain created under current default",
+  "inflight_snapshot": "one active proof workflow only",
+  "scope_limits": [
+    "no operational dispatch tested",
+    "S1/S2 accepted predecessor not rerun in current run",
+    "full JSON matrices retained in Actions ZIPs, not yet individually frozen in Git",
+    "limited real runtime credential proof",
+    "test suite does not cover every requested matrix/mutation/inflight historical semantic case"
+  ],
+  "operational": {
+    "WIP_ACTIVATION": "NO-GO",
+    "RUNTIME_PROMOTION": "NOT EXECUTED",
+    "OPERATIONAL_WIP_WORKFLOW_CHANGES": "NONE",
+    "PRODUCTION_UPDATER": "UNCHANGED"
+  }
+}
