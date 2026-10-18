@@ -10,7 +10,7 @@ def main():
  assert len(raw)==m["bundle_text_bytes"] and sha(raw)==m["bundle_text_sha256"]
  git_blob=subprocess.check_output(["git","hash-object",str(path)],text=True).strip()
  assert git_blob==m["bundle_git_blob"]
- compressed=base64.b64decode(raw,validate=True)
+ compressed=base64.b64decode(raw.strip(),validate=True)
  assert len(compressed)==m["xz_bytes"] and sha(compressed)==m["xz_sha256"]
  decoded=lzma.decompress(compressed)
  assert len(decoded)==m["map_bytes"] and sha(decoded)==m["map_sha256"]
