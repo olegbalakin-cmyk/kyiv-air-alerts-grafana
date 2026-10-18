@@ -303,7 +303,7 @@ def worker(args):
     # byte-identical local inputs; only B's source gate accepts those switches.
     if args.variant == "A":
         argv = [token for i, token in enumerate(argv)
-                if i not in (5, 6, 7, 8)]
+                if i not in (4, 5, 6, 7)]
     sys.argv = argv
     try:
         with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
