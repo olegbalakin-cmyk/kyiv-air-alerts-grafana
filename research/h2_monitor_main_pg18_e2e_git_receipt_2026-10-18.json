@@ -1,0 +1,46 @@
+{
+  "document_type": "H2_MONITOR_MAIN_PG18_E2E_INDEPENDENT_GIT_READBACK_RECEIPT",
+  "date_utc": "2026-10-18",
+  "verdict": "PASS_OFFLINE_REDUCED_SYNTHETIC_PG18_PENDING_SEPARATE_ACCEPTANCE",
+  "accepted_checkpoint_awarded": false,
+  "proof_path": "research/h2_monitor_main_pg18_e2e_proof_2026-10-18.json",
+  "proof_frozen_commit": "ee8baa4f73cc99773f3678769d6fa42f83fddf82",
+  "proof_blob": "901f90fb9f7a7ceb92e3b93f8fac6f93b7b1b2ef",
+  "proof_bytes": 9450,
+  "proof_sha256": "49d62ab65a00bcc4ac4976e811f41f396b1646cc78e4cbb6c73e245f88c4f78f",
+  "verified_at_commit": "c63cae083cd549df61892eb97c34c317bd0f0115",
+  "verification_run": {
+    "id": 39121401569,
+    "job_id": 117657587476,
+    "conclusion": "success",
+    "proof_hash_and_source_blobs_verified": true
+  },
+  "independently_executed_pg18": [
+    {
+      "run_id": 39121230968,
+      "job_id": 117657083097,
+      "commit": "8f448862404803336e4ca8204b7261a320c4a6ed",
+      "conclusion": "success",
+      "artifact_id": 12133264983
+    },
+    {
+      "run_id": 39121282275,
+      "job_id": 117657237939,
+      "commit": "a39f2b738059d03b091fb35a2f37044236de1c50",
+      "conclusion": "success",
+      "artifact_id": 12134845420
+    }
+  ],
+  "execution_results": "M1-M10 PASS; N1-N3 PASS; T1-T24 + three regressions PASS; I1-I15 PASS in both fresh PG18.6 instances",
+  "identical_A_B_blobs": {
+    "monitor": "a94741aa3a65c18d7bffb846a2c26973564c7812",
+    "parent": "d43ee3573d78e70e4d9fa3559e81cf950799db0b",
+    "tip_snapshot": "4e8890c88381fad5af3ecc4721ff435c0dd958f5",
+    "writer": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+    "main_test": "7cebb4416ca3bef7ae9d6b8699f7d7f0b5ef952c"
+  },
+  "safety": "Neon, main, site-prod, operational WIP and production untouched; no live source calls",
+  "archive_limitation": "Raw report ZIPs currently only retained for 30 days in GitHub Actions; not durably Git-frozen. Report row-level and file hashes asserted in CI.",
+  "scope_limit": "Reduced synthetic PG18 schema; does not prove canonical Neon DDL equivalence, live-source integration, operational WIP workflow safety or production cutover",
+  "next_task": "H2 CANONICAL NEON SCHEMA EQUIVALENCE AND DISPOSABLE APPLICATION INTEGRATION PREFLIGHT — separately authorized only"
+}
