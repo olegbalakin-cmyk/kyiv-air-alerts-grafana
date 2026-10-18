@@ -1,0 +1,54 @@
+name: H2 Offline PG18 Canonical Writer Proof
+on:
+  push:
+    branches: [research-h2-app-writer-pg18-cas-2026-10-18]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py"
+      - "kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py"
+      - ".github/workflows/h2-offline-canonical-writer-pg18.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  run-offline-pg18:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: h2_offline
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_offline"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      H2_OFFLINE_POSTGRES_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_offline
+      H2_OUTPUT: /tmp/h2_pg18_result.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install single offline dependency
+        run: python -m pip install "psycopg[binary]==3.2.12"
+      - name: Compile exact branch source
+        run: |
+          python -m py_compile kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
+          python -m py_compile kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py
+      - name: Execute real application writer against ephemeral PostgreSQL 18
+        run: python kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: h2-offline-pg18-receipt
+          path: /tmp/h2_pg18_result.json
+          if-no-files-found: ignore
+          retention-days: 30
