@@ -190,7 +190,7 @@ with conn() as c:
     check("T11",t11)
     def t12():
         before=read(c)
-        x=writer.persist_episode_classification(c,r1,expected_current_tip=first["classification_uid"])
+        x=writer.persist_episode_classification(c,r1,expected_current_tip=second["classification_uid"])
         assert x["source_inserts"]==0 and not x["classification_inserted"] and read(c)==before
     check("T12",t12)
     def t13():
@@ -245,7 +245,9 @@ with conn() as c:
         writer._current_tip=original
     assert negative_control_detected
 receipts["negative_control"]="TIP_OBSERVER_MUTATION_DETECTED_ONLY_NOT_EXECUTED"
-report={"postgres_version":conn().execute("SHOW server_version").fetchone()[0],
+with conn() as version_conn:
+    version = version_conn.execute("SHOW server_version").fetchone()[0]
+report={"postgres_version":version,
         "schema":"REDUCED_SYNTHETIC_SCHEMA_NOT_EQUIVALENT_TO_ACCEPTED_NEON",
         "tests":test_results,"receipts":receipts,"final_counts":final_counts,
         "verdict":"PARTIAL_SCHEMA_EQUIVALENCE_UNPROVEN"}
