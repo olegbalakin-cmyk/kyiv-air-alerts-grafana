@@ -1,0 +1,222 @@
+{
+  "document_type": "H2_OBSERVED_PARTIAL_NEON_SCHEMA_ACTUAL_MONITOR_PG18_E2E_INDEPENDENT_READBACK",
+  "as_of_utc": "2026-10-18",
+  "checkpoint": "H2 OBSERVED PARTIAL NEON SCHEMA MONITOR E2E = PASS — OFFLINE (LIMITED TO RECONSTRUCTED FIXTURE)",
+  "readiness": {
+    "schema_213": "PARTIAL",
+    "hardening": "REQUIRED",
+    "exact_neon_schema": "NOT PROVEN",
+    "disposable_integration": "BLOCKED"
+  },
+  "preflight": {
+    "main": "9bd64b9fc0eebd3b9b112fa6227e217cd00d9bb2",
+    "site_prod": "f0d1ef9cf50f6e9088f6c3937a90185e07807273",
+    "operational_wip": "9ce2ae7584baf582b42a255c1d9e304df6a8ab04",
+    "accepted_predecessor": "e82134d0961dd027f591ced942cc42616ce36a2c",
+    "tested_commit": "17d5573778b1c06b120620d8630538db469663f7"
+  },
+  "sources": {
+    "monitor": "a94741aa3a65c18d7bffb846a2c26973564c7812",
+    "writer": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+    "snapshot": "4e8890c88381fad5af3ecc4721ff435c0dd958f5",
+    "parent_ordering": "d43ee3573d78e70e4d9fa3559e81cf950799db0b",
+    "parent_core": "dda23c268e08f74367f33b189a8bafc1358aadd2",
+    "parent_persistence": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+    "partial_fixture": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+    "neon_catalog": "60246ffa7a436eef830592c7999c9e7dc3941123",
+    "matrix_v4": "87123b0d7f0fe4c93a442be29dd37b9eea960953"
+  },
+  "tested_environment": {
+    "postgres": "18.6 (Debian 18.6-1.pgdg13+2)",
+    "run_id": 39166480370,
+    "workflow": "h2-observed-neon-partial-real-monitor-e2e-2026-10-18.yml",
+    "jobs_in_one_run": true,
+    "independent_fresh_pg18_services": 2,
+    "separate_databases_per_job": [
+      "h2_legacy",
+      "h2_observed"
+    ],
+    "raw_view_count": 0,
+    "notes": "These are two independent jobs in a single workflow run; NOT two separate workflow runs."
+  },
+  "schema_fingerprint": {
+    "sha256": "089938b20ac7b61f3b67c3e371c50c22b592b83f5ec713682e9f4082c4407b30",
+    "checks_each_job": 21,
+    "counts": {
+      "tables": 7,
+      "views": 0,
+      "table_columns": 167,
+      "constraints": 221,
+      "indexes": 30,
+      "user_triggers": 0,
+      "rls_tables": 0,
+      "rls_policies": 0
+    },
+    "fixture_intact": true,
+    "legacy_reset_not_invoked_on_observed_db": true,
+    "missing_view": "public.current_ingestion_checkpoints (18 view columns excluded from observed fixture)"
+  },
+  "verified_runs": {
+    "A": {
+      "job_id": 117790372462,
+      "status": "SUCCESS",
+      "artifact_id": 12151185495,
+      "zip_bytes": 8616,
+      "zip_sha256": "e40ff3782adc48cf5bbc9f27a5cff61ac6506080f80a4ebf2ac3bbe13b16607b",
+      "zip_crc": "PASS",
+      "members": {
+        "h2_legacy_main_report_json": {
+          "bytes": 20712,
+          "sha256": "7bd6b8d01ed327e1e1f9a3c786339bbd0cc891fa7072ba7a0c6f199c37bf48b2",
+          "verdict": "PASS"
+        },
+        "h2_legacy_caller_report_json": {
+          "bytes": 1364,
+          "sha256": "b01c9706e7607990442f529e7328571354867806e4656013ac82bf52ad72283e",
+          "verdict": "PARTIAL_OFFLINE_SCHEMA_EQUIVALENCE_UNPROVEN"
+        },
+        "h2_observed_result_json": {
+          "bytes": 38502,
+          "sha256": "746af44c531e1efcfb6be2fbdb32a57c16699df614204b10ae83bc2cf424d6c4",
+          "verdict": "PASS_OFFLINE_PARTIAL_OBSERVED_SCHEMA"
+        }
+      }
+    },
+    "B": {
+      "job_id": 117790372638,
+      "status": "SUCCESS",
+      "artifact_id": 12151220377,
+      "zip_bytes": 8568,
+      "zip_sha256": "947994a1aae4eff5e9f068e03782a62a34143c57be8c34f37d48f29732a59685",
+      "zip_crc": "PASS",
+      "members": {
+        "h2_legacy_main_report_json": {
+          "bytes": 20712,
+          "sha256": "296736dc87e4dfe7c40348f9b23a221af475c059f279ef7e8d60081414681ce0",
+          "verdict": "PASS"
+        },
+        "h2_legacy_caller_report_json": {
+          "bytes": 1364,
+          "sha256": "b01c9706e7607990442f529e7328571354867806e4656013ac82bf52ad72283e",
+          "verdict": "PARTIAL_OFFLINE_SCHEMA_EQUIVALENCE_UNPROVEN"
+        },
+        "h2_observed_result_json": {
+          "bytes": 38502,
+          "sha256": "3ff070873ee599c7619e052a74e53ac4d0251571cb982ed5ab5e1e61fc15d2f6",
+          "verdict": "PASS_OFFLINE_PARTIAL_OBSERVED_SCHEMA"
+        }
+      }
+    }
+  },
+  "cases": {
+    "E1": "PASS",
+    "E2": "PASS",
+    "E3": "PASS",
+    "E4": "PASS",
+    "E5": "PASS",
+    "E6": "PASS",
+    "E7": "PASS",
+    "E8": "PASS",
+    "E9": "PASS",
+    "E10": "PASS",
+    "E11": "PASS",
+    "E12": "PASS",
+    "E13": "PASS",
+    "E14": "PASS",
+    "E15": "PASS"
+  },
+  "case_execution_scope": {
+    "E1": "ACTUAL_MAIN",
+    "E2": "ACTUAL_MAIN",
+    "E3": "ACTUAL_MAIN",
+    "E4": "ACTUAL_WRITER_CONCURRENT_WITH_MAIN_INITIALIZATION",
+    "E5": "ACTUAL_WRITER_CONCURRENT_WITH_CANONICAL_PARENT",
+    "E6": "ACTUAL_MAIN_STALE_SNAPSHOT",
+    "E7": "DIRECT_ADVERSARIAL_SYNTHETIC_SQL",
+    "E8": "ACTUAL_MAIN_WRITER_PLUS_DIRECT_SQL",
+    "E9": "SQL_READBACK_DERIVED_FROM_E4_E5",
+    "E10": "ACTUAL_MAIN_ROLLBACK",
+    "E11": "ACTUAL_MAIN_PARTIAL_BATCH_FAILURE",
+    "E12": "ACTUAL_MAIN_RESTART",
+    "E13": "ACTUAL_MAIN_SQL_AND_JSON_BYTES",
+    "E14": "ACTUAL_MAIN_SQL_FK_INTEGRITY",
+    "E15": "ACTUAL_MAIN_SQL_COMPATIBILITY"
+  },
+  "observed_outcomes": {
+    "fresh_one": {
+      "parents": 1,
+      "ingestion_runs": 1,
+      "classifications": 1,
+      "sources": 1,
+      "events": 1
+    },
+    "partial_failure": {
+      "parents": 2,
+      "ingestion_runs": 2,
+      "classifications": 1,
+      "sources": 1,
+      "events": 1
+    },
+    "after_restart": {
+      "parents": 2,
+      "ingestion_runs": 2,
+      "classifications": 2,
+      "sources": 2,
+      "events": 2
+    },
+    "concurrent_E4_and_E5": {
+      "distinct_backend_pids": true,
+      "each_one_accepted": true,
+      "each_one_rejected": "STALE_EXPECTED_TIP",
+      "final_current_tips": 1,
+      "raw_uuid_receipts": "See exact member h2_observed_result.json in Actions artifacts"
+    },
+    "stale_monitor_E6": "STALE_EXPECTED_TIP",
+    "post_restart_duplicate_count": 0,
+    "network_requests_to_external_sources": 0,
+    "stubbed_news_queries_each": 12,
+    "stubbed_telegram_pages_each": 30
+  },
+  "negative_controls": {
+    "DB_ONLY_SIBLING_INSERT_PERMITTED": "PASS_ROLLED_BACK",
+    "DB_ONLY_OWNER_UPDATE_PERMITTED": "PASS_ROLLED_BACK",
+    "BYPASSED_WRITER_DETECTED": "PASS",
+    "FALSE_JSON_CHECKPOINT_DETECTED": "PASS",
+    "ORPHAN_SOURCE_FK_REJECTED": "PASS",
+    "critical_missing_mutation_controls": "No direct stale-CAS removal mutation or intentionally duplicated post-restart application write mutation tested."
+  },
+  "legacy_regressions": {
+    "M": "10/10_PASS",
+    "N": "3/3_PASS",
+    "I": "15/15_PASS",
+    "T": "24/24_PASS",
+    "writer_extra": "3/3_PASS",
+    "isolation": "Separate h2_legacy database; these are not counted as observed-fixture E2E"
+  },
+  "outstanding_contracts": {
+    "match_structural": 203,
+    "mismatch_db_enforcement": 3,
+    "unverified_neon_specific": 7
+  },
+  "known_db_only_gaps": [
+    "No unique supersedes_classification_uid",
+    "No DB-owner-level append-only enforcement",
+    "No DB-only current-tip unique arbiter"
+  ],
+  "limitations": [
+    "Partially reconstructed observed catalog fixture; missing canonical view and owner ACL/function environment",
+    "Only one workflow run with two fresh PostgreSQL 18 jobs; requested separate Actions runs not executed",
+    "Direct full Neon disposable application integration not authorized and not executed",
+    "Git proof includes exact digests and source pointer; raw 38,502-byte A/B machine reports are retained in time-limited Actions artifacts, not yet archived into Git",
+    "Not all requested targeted mutation negative controls executed"
+  ],
+  "safety": {
+    "live_neon_sql_requests": 0,
+    "neon_branches_created": 0,
+    "production_mutations": 0,
+    "site_prod_mutations": 0,
+    "operational_wip_mutations": 0,
+    "external_source_calls": 0,
+    "production_cutover": false
+  }
+}
