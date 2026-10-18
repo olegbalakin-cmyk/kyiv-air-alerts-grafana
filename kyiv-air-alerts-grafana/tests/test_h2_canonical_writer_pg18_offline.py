@@ -7,6 +7,9 @@ equivalence or Neon integration. No external credentials are used.
 import concurrent.futures
 import copy
 import hashlib
+import inspect
+import contextlib
+import textwrap
 import json
 import os
 import re
@@ -183,7 +186,8 @@ with conn() as c:
         baseline=read(c)
         try:
             with c.transaction():
-                writer.persist_episode_classification(c,r2,expected_current_tip=second["classification_uid"])
+                pending = writer.persist_episode_classification(c,r2,expected_current_tip=second["classification_uid"])
+                assert pending["commit_state"] == "CALLER_TRANSACTION_PENDING"
                 raise RuntimeError("outer rollback")
         except RuntimeError:pass
         assert read(c)==baseline
@@ -202,6 +206,7 @@ with conn() as c:
     def t14():
         expect_contract(lambda:writer.persist_episode_classification(c,r2))
         expect_contract(lambda:writer.persist_due_episode_classifications(queue=[],due={"testcity":[({"episode_id":"a"*24}, {})]},coverage_by_city={"testcity":True},dsn=None))
+        expect_contract(lambda:writer.persist_due_episode_classifications(queue=[],due={"testcity":[({"episode_id":"a"*24}, {})]},coverage_by_city={"testcity":True},connection=c))
         assert read(c)==(2,2,1)
     check("T14",t14)
 
@@ -232,19 +237,54 @@ assert sorted(x["result"] for x in outcomes)==["ACCEPTED","STALE"],outcomes
 assert len(tips)==1 and final_counts==(3,3,1) and orphan==0,(tips,final_counts,orphan)
 test_results["T5"]="PASS"
 receipts["T5"]={"connections":outcomes,"tip_count":len(tips),"final_counts":final_counts,"orphan_count":orphan}
-# Negative control: monkeypatch _current_tip to misreport a stale expected tip.
-# A valid CAS implementation must reject a caller's stale predecessor even when the lock is held.
+# Negative controls deliberately mutate application code ONLY in memory.
+# The published, committed writer module remains untouched.
+source = textwrap.dedent(inspect.getsource(writer.persist_episode_classification))
+cas_gate = "if not exact_current_retry and actual_tip != expected_current_tip:"
+tx_gate = "with conn.transaction():"
+assert cas_gate in source and tx_gate in source
+class ExpectedRollback(RuntimeError):
+    pass
 with conn() as c:
-    original=writer._current_tip
+    before = read(c)
+    # Disable the explicit stale expected-tip check: the stale caller now
+    # incorrectly inserts a successor instead of producing STALE_EXPECTED_TIP.
+    weakened_ns = dict(vars(writer))
+    exec(source.replace(cas_gate,"if False and actual_tip != expected_current_tip:"),weakened_ns)
+    weakened = weakened_ns["persist_episode_classification"]
+    candidate = record("cas-disabled", verdict="NO_CONFIRMED_EVENT")
     try:
-        writer._current_tip=lambda cur,record: {"classification_uid":str(second["classification_uid"]),"classification_key":r1["classification_key"],"verdict":r1["verdict"],"origin_provenance":{"kind":writer.ORIGIN_KIND}}
-        # This intentionally weakened test-only tip observer is expected to break a guard.
-        # Do not execute a mutation against this artificial observer: test only the diagnostic flag.
-        negative_control_detected = (original is not writer._current_tip)
-    finally:
-        writer._current_tip=original
-    assert negative_control_detected
-receipts["negative_control"]="TIP_OBSERVER_MUTATION_DETECTED_ONLY_NOT_EXECUTED"
+        with c.transaction():
+            outcome=weakened(c,candidate,expected_current_tip=first["classification_uid"])
+            assert outcome["classification_inserted"]
+            raise ExpectedRollback("negative control isolated rollback")
+    except ExpectedRollback:
+        pass
+    assert read(c)==before
+    receipts["negative_cas"]={"stale_insert_observed_with_cas_disabled":True,
+                              "persisted_after_rollback":False}
+    # Disable the writer transaction and inject a fault. An autocommit
+    # connection now leaks a classification row, proving the rollback test
+    # detects absent transaction protection. Delete exact synthetic row.
+    weakened_tx_ns = dict(vars(writer))
+    exec(source.replace(tx_gate,"with contextlib.nullcontext():"),weakened_tx_ns)
+    weakened_tx = weakened_tx_ns["persist_episode_classification"]
+    candidate_tx = record("tx-disabled",verdict="NO_CONFIRMED_EVENT")
+    try:
+        weakened_tx(c,candidate_tx,expected_current_tip=str(tips[0][0]),
+                    fault_after="classification")
+    except RuntimeError as exc:
+        assert "FORCED_PERSISTENCE_FAILURE" in str(exc)
+    else:
+        raise AssertionError("injected fault missing")
+    leaked = read(c)
+    assert leaked[0] == before[0]+1, (before, leaked)
+    c.execute("DELETE FROM public.attack_event_classifications WHERE classification_key=%s",
+              (candidate_tx["classification_key"],))
+    assert read(c)==before
+    receipts["negative_rollback"]={"leaked_classification_with_tx_disabled":True,
+                                  "synthetic_cleanup_confirmed":True}
+
 with conn() as version_conn:
     version = version_conn.execute("SHOW server_version").fetchone()[0]
 report={"postgres_version":version,
