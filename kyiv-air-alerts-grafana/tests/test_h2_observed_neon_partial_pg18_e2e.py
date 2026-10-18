@@ -98,14 +98,11 @@ def fp():
     counts = {"tables":tables,"views":views,"columns":len(cols),
               "constraints":len(cons),"indexes":len(idx),"user_triggers":trig,
               "rls_tables":rls,"rls_policies":policies}
-    assert counts == {"tables":7,"views":0,"columns":184 if False else 0,
+    # Seven frozen TABLE definitions have exactly 167 columns. The catalog's
+    # 185 columns include 18 columns from the not-reconstructed VIEW.
+    assert counts == {"tables":7,"views":0,"columns":167,
                       "constraints":221,"indexes":30,"user_triggers":0,
-                      "rls_tables":0,"rls_policies":0} or (
-        counts["tables"]==7 and counts["views"]==0 and counts["constraints"]==221
-        and counts["indexes"]==30 and counts["user_triggers"]==0
-        and counts["rls_tables"]==0 and counts["rls_policies"]==0
-        and counts["columns"]>=180
-    ), counts
+                      "rls_tables":0,"rls_policies":0}, counts
     raw = json.dumps({"cols":cols,"cons":cons,"indexes":idx},sort_keys=True,default=str,
                      ensure_ascii=True,separators=(",",":")).encode()
     return {"sha256":hashlib.sha256(raw).hexdigest(),"counts":counts,"postgres_version":version}
