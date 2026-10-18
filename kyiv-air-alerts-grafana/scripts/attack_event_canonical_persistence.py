@@ -994,6 +994,11 @@ def persist_episode_classification(
         f"{record['city_key']}|{record['historical_episode_id']}|"
         f"{record['alert_start_utc_microseconds']}|{record['alert_end_utc_microseconds']}"
     )
+    # An outer transaction belongs to the caller; nested conn.transaction()
+    # is only a savepoint and cannot provide a durable acknowledgement.
+    caller_owns_transaction = (
+        conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE
+    )
     with conn.transaction():
         cur = conn.cursor()
         cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (lock_key,))
@@ -1073,11 +1078,9 @@ def persist_episode_classification(
         if fault_after == "source":
             raise RuntimeError("FORCED_PERSISTENCE_FAILURE_AFTER_SOURCE")
 
-        # The savepoint or nested transaction can finish before the owner commits.
-        # The result must never be interpreted as a durable ACK by outer callers.
-        transaction_commit_pending = conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
-        return {
-            "commit_state": ("CALLER_TRANSACTION_PENDING" if transaction_commit_pending else "COMMITTED"),
+        # Construct the payload inside the transaction, but do not acknowledge
+        # a successful commit until the context manager has exited.
+        outcome = {
             "classification_uid": classification_uid,
             "classification_key": record["classification_key"],
             "classification_inserted": classification_inserted,
@@ -1088,6 +1091,15 @@ def persist_episode_classification(
             "source_inserts": source_inserts,
             "source_count": len(record["source_rows"]),
         }
+
+    # Reaching this point proves a writer-owned transaction exited without a
+    # commit error. Nested caller-owned transactions are still uncommitted.
+    # Never use the current connection's transaction status from inside the
+    # context: it is INTRANS even for an about-to-commit owned transaction.
+    outcome["commit_state"] = (
+        "CALLER_TRANSACTION_PENDING" if caller_owns_transaction else "COMMITTED"
+    )
+    return outcome
 
 
 def persist_due_episode_classifications(
