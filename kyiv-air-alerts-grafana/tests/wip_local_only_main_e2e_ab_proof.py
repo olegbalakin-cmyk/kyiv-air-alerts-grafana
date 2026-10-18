@@ -564,6 +564,9 @@ def run_proof():
                 v = launch(roots[variant], scenario, variant, cycle)
                 v["output_sha256"] = save_output(roots[variant], scenario, variant, cycle)
                 records[variant].append(v)
+        for variant in ("A", "B"):
+            for idx, rr in enumerate(records[variant], 1):
+                print("CYCLE_DIAG=" + json.dumps({"scenario":scenario,"variant":variant,"cycle":idx,"exit":rr["main_exit"],"error":rr["error"],"trace":rr["stderr_tail"][-1100:],"calls":rr["call_counts"]}, ensure_ascii=False))
         parity = {}
         for cycle in (1, 2):
             a, b = records["A"][cycle - 1], records["B"][cycle - 1]
