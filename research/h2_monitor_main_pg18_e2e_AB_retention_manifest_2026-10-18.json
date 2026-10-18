@@ -1,0 +1,75 @@
+{
+  "document_type": "H2_FULL_MONITOR_E2E_A_B_DURABLE_EVIDENCE_RETENTION",
+  "as_of_utc": "2026-10-18",
+  "source_runs": [
+    39121230968,
+    39121282275
+  ],
+  "source_workflow": "h2-monitor-main-pg18-e2e-2026-10-18.yml",
+  "source_test_blob": "7cebb4416ca3bef7ae9d6b8699f7d7f0b5ef952c",
+  "format": "base64(xz(LZMA2)(UTF-8 JSON map of artifact-ID/filename to original exact UTF-8 JSON file contents))",
+  "bundle_path": "research/h2_monitor_main_pg18_e2e_AB_receipts_2026-10-18.json.xz.b64",
+  "bundle_git_blob": "286c6cd4a0972a26a48ca7651356839ecd9b0245",
+  "bundle_text_bytes": 5661,
+  "bundle_text_sha256": "32b00e9579cf9931fa0cf274b8e2d06247311956143f4bb9b28030e9bad8984f",
+  "compressed_xz_bytes": 4244,
+  "compressed_xz_sha256": "25b666794f2b9d5346b9283283f4d4c74a13bdc264b472ced42cc1f144b65a74",
+  "decoded_json_map_bytes": 62175,
+  "decoded_json_map_sha256": "a56a8e9934418b754de23e4d9117a8cb09a060512fe69f738f3dbbd9f679daad",
+  "artifacts": [
+    {
+      "artifact_id": 12133264983,
+      "run_id": 39121230968,
+      "head_sha": "8f448862404803336e4ca8204b7261a320c4a6ed",
+      "original_zip_bytes": 5128,
+      "original_zip_sha256": "5a89963dc518c69e61cf507f250d92041455253b1fce12f0c8764fa580e2a295",
+      "expires_at": "2026-11-17T10:57:00Z",
+      "members": {
+        "h2_caller_report.json": {
+          "bytes": 1364,
+          "sha256": "b01c9706e7607990442f529e7328571354867806e4656013ac82bf52ad72283e"
+        },
+        "h2_monitor_main_report.json": {
+          "bytes": 20712,
+          "sha256": "988f3c2592c06b275759fb8bd5bad7937cb5dc25a336ded75742d111ef42a646"
+        },
+        "h2_pg18_result.json": {
+          "bytes": 5909,
+          "sha256": "289ef12540b3ba180a51cac52a3f78da494045ffa06424066f7fb9eee5e1f4a1"
+        }
+      }
+    },
+    {
+      "artifact_id": 12134845420,
+      "run_id": 39121282275,
+      "head_sha": "a39f2b738059d03b091fb35a2f37044236de1c50",
+      "original_zip_bytes": 5125,
+      "original_zip_sha256": "416e432fd2f18459b44dc11f7a8aba2ba92671683af19c34bb895c2001133148",
+      "expires_at": "2026-11-17T10:57:51Z",
+      "members": {
+        "h2_caller_report.json": {
+          "bytes": 1364,
+          "sha256": "b01c9706e7607990442f529e7328571354867806e4656013ac82bf52ad72283e"
+        },
+        "h2_monitor_main_report.json": {
+          "bytes": 20712,
+          "sha256": "427415ebb64291df43b5560d694b9ecdbe7d15211413301ac27d42fb7e8c53a6"
+        },
+        "h2_pg18_result.json": {
+          "bytes": 5909,
+          "sha256": "d448fb0da984727a3fb8db90c8fdba6f5cde83d40129fe0ba09555603080b63f"
+        }
+      }
+    }
+  ],
+  "validation": {
+    "source_zips": "Downloaded from verified Actions run artifacts; ZIP CRC PASS both; six JSON parse PASS; each report has source PG18 18.6; M1-M10 and N1-N3 success both; no typical credential signatures found in six JSON reports.",
+    "decode_example": "import base64,lzma,json; data=json.loads(lzma.decompress(base64.b64decode(open(path).read())).decode('utf8')); raw=data['12133264983/h2_monitor_main_report.json'].encode('utf8')",
+    "note": "Preserves original six JSON member bytes, not original ZIP container metadata. Original ZIP SHA fingerprints retained separately. This is evidence retention, not Neon schema acceptance."
+  },
+  "environment": {
+    "neon_operations": 0,
+    "project_data_retained": false,
+    "real_credentials_retained": false
+  }
+}
