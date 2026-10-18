@@ -102,7 +102,8 @@ def i7():
         z2=w.build_episode_classification(d["testcity"][0][0],[legacy["_batch_source"](label="other")],origin=w._origin_context())
         # Controlled negative fixture: create another unsuperseded tip using the
         # same genuine insert SQL but a different classification key.
-        w._insert_classification(c,z2,alert_episode_uid=str(c.execute(
+        cur=c.cursor()
+        w._insert_classification(cur,z2,alert_episode_uid=str(c.execute(
             "SELECT episode_uid FROM alert_episodes").fetchone()[0]),
             supersedes_uid=None,revision_reason=None,correction_provenance={})
     fails(lambda:read_due(d),"EXPECTED_TIP_MULTIPLE_CURRENT_REVISIONS")
