@@ -42,7 +42,7 @@ legacy = runpy.run_path(str(HERE / "test_h2_canonical_writer_pg18_offline.py"))
 assert all(x == "PASS" for x in legacy["test_results"].values()), legacy["test_results"]
 
 UTC = timezone.utc
-T0 = datetime(2026, 1, 1, 0, 21, tzinfo=UTC)
+T0 = datetime(2026, 1, 1, 4, 21, tzinfo=UTC)
 CITY = "kharkiv"
 CASE_LOG = {}
 NETWORK = {"live_calls": 0, "stubbed_news_queries": 0, "stubbed_telegram_pages": 0}
@@ -313,10 +313,8 @@ def stale_race(refresh_badly=False):
     f = Fixture()
     pins = {}
     try:
+        original = snapshot.observe_expected_tips
         with f.isolated(), mock.patch.object(snapshot, "observe_expected_tips") as hook:
-            original = snapshot.observe_expected_tips
-            # mock.patch captures the original before replacement; use its saved callable.
-            hook.side_effect = None
             def race(due, *, dsn=None, connection=None):
                 with conn() as c_snapshot:
                     pins["snapshot_pid"] = c_snapshot.execute("SELECT pg_backend_pid()").fetchone()[0]
