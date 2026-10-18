@@ -284,78 +284,13 @@ def poll_sevastopol() -> list[dict]:
 
 
 def poll_ukrainealarm() -> tuple[dict[str, list[dict]], dict[str, str]]:
-    # Explicitly block direct imports/calls as well as the CLI entry point.
-    # The production updater is the sole UkraineAlarm API collector.
+    """Reject legacy direct API entry points without constructing a client."""
     raise RuntimeError("CASUALTY_UKRAINEALARM_API_DISABLED: use persisted production alerts")
-    token = os.getenv(ua.TOKEN_ENV, "").strip()
-    if not token:
-        raise RuntimeError(f"{ua.TOKEN_ENV} is not configured")
-
-    bridge = load_json(BRIDGE_FILE, {})
-    regions = bridge.get("regions") or {}
-    client = ua.UkraineAlarmClient(token)
-    output: dict[str, list[dict]] = {}
-    errors: dict[str, str] = {}
-
-    api_cities = [
-        key for key in CITY_CONFIG
-        if key not in {"kyiv", "sevastopol"}
-    ]
-    for index, city_key in enumerate(api_cities, 1):
-        cfg = CITY_CONFIG[city_key]
-        region = regions.get(cfg["alert_key"]) or {}
-        region_id = str(region.get("region_id") or "")
-        api_name = str(region.get("api_region_name") or region.get("target") or cfg["label"])
-        if not region_id:
-            errors[city_key] = "missing_region_id"
-            continue
-        try:
-            history = ua.history_rows(client, region_id, api_name)
-            rows = [(row["start"], row["end"]) for row in history]
-            output[city_key] = normalize_events(
-                rows,
-                city_key,
-                "ukrainealarm_regionHistory",
-            )
-            print(
-                f"[{index}/{len(api_cities)}] {city_key}: "
-                f"{len(output[city_key])} completed alerts",
-                flush=True,
-            )
-        except Exception as exc:
-            errors[city_key] = f"{type(exc).__name__}: {exc}"
-            print(
-                f"[{index}/{len(api_cities)}] {city_key}: ERROR {errors[city_key]}",
-                file=sys.stderr,
-                flush=True,
-            )
-    return output, errors
-
 
 def poll_all(local_only: bool) -> tuple[dict[str, list[dict]], dict[str, str]]:
     if not local_only:
         raise RuntimeError("CASUALTY_NETWORK_MODE_DISABLED: use --local-only")
-    if local_only:
-        return local_bridge_events(), {}
-
-    out: dict[str, list[dict]] = {}
-    errors: dict[str, str] = {}
-    api_rows, api_errors = poll_ukrainealarm()
-    out.update(api_rows)
-    errors.update(api_errors)
-
-    try:
-        out["kyiv"] = poll_kyiv()
-    except Exception as exc:
-        errors["kyiv"] = f"{type(exc).__name__}: {exc}"
-
-    try:
-        out["sevastopol"] = poll_sevastopol()
-    except Exception as exc:
-        errors["sevastopol"] = f"{type(exc).__name__}: {exc}"
-
-    return out, errors
-
+    return local_bridge_events(), {}
 
 def clean_text(value: str) -> str:
     text = BeautifulSoup(html.unescape(value or ""), "html.parser").get_text(" ", strip=True)
