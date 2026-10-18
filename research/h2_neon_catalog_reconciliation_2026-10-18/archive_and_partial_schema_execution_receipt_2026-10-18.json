@@ -1,0 +1,72 @@
+{
+  "document_type": "H2_ARCHIVE_FREEZE_AND_PARTIAL_SCHEMA_OFFLINE_PREPARATION_RECEIPT",
+  "utc_date": "2026-10-18",
+  "branch": "research-h2-exact-neon-schema-offline-e2e-2026-10-18",
+  "source_commit": "5f29583e5889d66850f3e2892e43c5c521eef1cd",
+  "archive": {
+    "original_runs": [
+      39121230968,
+      39121282275
+    ],
+    "original_artifact_ids": [
+      12133264983,
+      12134845420
+    ],
+    "zip_hash_verified": "2/2",
+    "zip_integrity": "2/2",
+    "exact_json_members": "6/6",
+    "json_parse": "6/6",
+    "reported_original_regressions": "M1-M10 N1-N3 PASS in both source reports",
+    "bundle_path": "research/h2_monitor_main_pg18_e2e_AB_receipts_repaired_v2_2026-10-18.json.xz.b64",
+    "git_blob": "3a290279d7eb34f895d14b701a616ed60251340b",
+    "sha256": "32b00e9579cf9931fa0cf274b8e2d06247311956143f4bb9b28030e9bad8984f",
+    "xz_sha256": "25b666794f2b9d5346b9283283f4d4c74a13bdc264b472ced42cc1f144b65a74",
+    "map_sha256": "a56a8e9934418b754de23e4d9117a8cb09a060512fe69f738f3dbbd9f679daad",
+    "git_readback": "EXACT_EXPECTED_GIT_BLOB_MATCH",
+    "tamper_detection": "4/4 local mutations rejected"
+  },
+  "contracts": {
+    "total": 213,
+    "match_structural": 203,
+    "mismatch_database_enforcement": 3,
+    "unverified": 7,
+    "qualification": "Structural matches do not confer runtime equivalence, semantic or role-grant acceptance"
+  },
+  "fixture": {
+    "classification": "PARTIALLY_RECONSTRUCTED_SCHEMA",
+    "schema_fixture_blob": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+    "view_body_missing": true,
+    "role_acl_missing": true,
+    "not_applied": true
+  },
+  "integration": {
+    "postgres_local_environment": "PostgreSQL 18 server executables unavailable in current container",
+    "actual_monitor_main_pg18": "NOT EXECUTED",
+    "independent_pg18_ab": "NOT EXECUTED",
+    "e1_to_e15": "NOT EXECUTED",
+    "m_n_i_t_regressions_new": "NOT EXECUTED",
+    "actions_run_ids_new": []
+  },
+  "safety": {
+    "live_neon_sql": 0,
+    "live_neon_writes": 0,
+    "neon_resource_changes": 0,
+    "production_mutations": 0,
+    "operational_wip_mutations": 0,
+    "site_prod_mutations": 0,
+    "historical_mutations": 0
+  },
+  "disposition": {
+    "archive_retention": "PASS_FROZEN_GIT_BLOB_AND_LOCAL_ORIGINAL_MEMBER_RECONCILIATION",
+    "schema_contract_reconciliation": "PARTIAL",
+    "exact_neon_schema_offline_e2e": "NOT_EXECUTED",
+    "disposable_integration_preflight": "BLOCKED",
+    "production_cutover": "NO"
+  },
+  "unresolved": [
+    "Exact view definition and runtime grants cannot be recovered from frozen catalog",
+    "PostgreSQL18 execution environment unavailable in container",
+    "No independently executed E1-E15 against reconstructed DDL",
+    "Three database-level classification revision gaps remain"
+  ]
+}
