@@ -48,6 +48,11 @@ jobs:
             .github/workflows/proof-wip-workflow-trigger-safety-2026-10-18.yml \
             2>&1 | tee "$RUNNER_TEMP/actionlint-results.txt"
 
+      - name: Read current default branch for downstream cascade validation
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+
       - name: Parse all WIP YAML and prove five trigger scenarios
         run: |
           set -euo pipefail
@@ -62,4 +67,5 @@ jobs:
             ${{ runner.temp }}/wip-workflow-trigger-safety-receipt.json
             ${{ runner.temp }}/actionlint-results.txt
             ${{ runner.temp }}/actionlint-version.txt
+            ${{ runner.temp }}/workflow-structural-diff.json
           if-no-files-found: warn
