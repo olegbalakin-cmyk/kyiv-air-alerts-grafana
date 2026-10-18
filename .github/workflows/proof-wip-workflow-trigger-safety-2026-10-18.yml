@@ -52,6 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          git fetch --no-tags --depth=1 origin 1a8b57553ba66319db326d65080ade93ae6ca01c
 
       - name: Parse all WIP YAML and prove five trigger scenarios
         run: |

@@ -72,7 +72,7 @@ def strip_holds(x,bridge=False):
  return x
 
 def main():
- assert git('rev-parse','HEAD~2') == BASE
+ assert git('cat-file','-t',BASE) == 'commit'
  orig=git('ls-tree','-r',BASE,str(DIR)).splitlines()
  latest=git('ls-tree','-r','HEAD',str(DIR)).splitlines()
  assert len(orig)==54 and len(latest)==55, (len(orig),len(latest))
