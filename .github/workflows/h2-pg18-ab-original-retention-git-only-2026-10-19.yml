@@ -1,0 +1,22 @@
+name: H2 PG18 A-B original Git-only archival verification
+on:
+  push:
+    branches: [research-h2-pg18-ab-raw-retention-2026-10-19]
+    paths:
+      - 'research/h2_pg18_revision_invariant_hardening_2026-10-19/**'
+      - '.github/workflows/h2-pg18-ab-original-retention-git-only-2026-10-19.yml'
+permissions:
+  contents: read
+jobs:
+  git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify byte-exact archive and ten deliberate corruptions
+        run: python research/h2_pg18_revision_invariant_hardening_2026-10-19/verify_original_ab_evidence.py

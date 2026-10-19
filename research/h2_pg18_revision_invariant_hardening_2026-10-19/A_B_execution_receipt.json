@@ -7,20 +7,20 @@
   "jobs": [
     {
       "copy": "A",
-      "id": 118274403678,
-      "conclusion": "success",
-      "assertions": 31,
-      "passed": 31,
-      "report_sha256_from_CI_verifier": "77978f45f97c6e00e48386409b3e0ac33b0a8c1eebfc27d93cb0ce0e981e0a01",
-      "artifact_id": 12217413297
-    },
-    {
-      "copy": "B",
       "id": 118274404141,
       "conclusion": "success",
       "assertions": 31,
       "passed": 31,
       "report_sha256_from_CI_verifier": "cabcf5a884c2f4be1ab95f1e47d5d8e4ba87a630d201e5046a53e746d5cdfef0",
+      "artifact_id": 12217413297
+    },
+    {
+      "copy": "B",
+      "id": 118274403678,
+      "conclusion": "success",
+      "assertions": 31,
+      "passed": 31,
+      "report_sha256_from_CI_verifier": "77978f45f97c6e00e48386409b3e0ac33b0a8c1eebfc27d93cb0ce0e981e0a01",
       "artifact_id": 12217258590
     }
   ],
@@ -33,14 +33,15 @@
     "correction": "Verify effective has_table_privilege after ineffective GRANT; 31/31 both A/B"
   },
   "limits": [
-    "Original raw JSON reports remain in expiring Actions artifacts; not Git-frozen",
+    "Original raw JSON and ZIP files frozen in Git; Actions source artifacts expire 2026-11-18",
     "Partial observed Neon fixture, not full exact Neon catalog",
     "Owner roles can alter schema and historical rows",
     "Current tip head CAS app integration not checked",
     "No intentional dropped-index/trigger mutation controls executed",
     "No actual Neon role binding or grants tested",
     "No authorized live Neon access",
-    "Two-concurrent-head advance isn't independently distinguished from predecessor unique enforcement"
+    "negative_control_unprotected_owner_can_mutate was a hardcoded True; no executable owner mutation test",
+    "Two concurrent head advances not independently distinguished from predecessor unique enforcement"
   ],
   "matrix_unchanged": {
     "MATCH": 203,
@@ -57,5 +58,12 @@
   },
   "NEON_AUTHORITY_ACTIVE": "NO",
   "PRODUCTION_CUTOVER_EXECUTED": "NO",
-  "WIP_ACTIVATION": "NO-GO"
+  "WIP_ACTIVATION": "NO-GO",
+  "archival_correction": {
+    "supersedes_original_receipt_blob": "485aa5256a8768058930c03e55370eca84a4e3a0",
+    "original_commit_preserved": "c1c0b1efb17c17fd2ff22711dbc6b5e4aaa2b26a",
+    "reason": "Original receipt transposed job IDs A/B. Exact Actions logs confirm real job/artifact mapping.",
+    "manifest": "A_B_original_evidence_manifest_v1.json",
+    "verifier": "verify_original_ab_evidence.py"
+  }
 }

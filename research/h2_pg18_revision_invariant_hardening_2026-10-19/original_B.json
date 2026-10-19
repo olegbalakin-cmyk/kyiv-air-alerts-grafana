@@ -1,0 +1,176 @@
+{
+  "assertions": 31,
+  "checks": [
+    {
+      "detail": "('18.6 (Debian 18.6-1.pgdg13+2)', '180006')",
+      "name": "pg18",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "role_is_owner",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "no_duplicate_successors",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "root_index",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "head_registry",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "app_is_nonowner",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "no_role_inheritance",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "writer_can_read_classification",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "reject_historical_update",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "reject_historical_delete",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "reject_history_truncate",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "reject_table_alter",
+      "pass": true
+    },
+    {
+      "detail": "GRANT issues warning but does not change ACL",
+      "name": "reject_privilege_grant",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "reject_head_update",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "reject_role_escalation",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "initial_insert",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "initial_root_duplicate_rejected",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "append_success",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "stale_tip_rejected",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "state_preserved_after_rejection",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "unaffected_independent_chain",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "cross_chain_parent_rejected",
+      "pass": true
+    },
+    {
+      "detail": "[{'session': 2, 'status': 'committed', 'uid': '6ec4cd9c-691c-405f-a95a-4563d7bd9af5'}, {'session': 1, 'status': 'rejected', 'sqlstate': '23505'}]",
+      "name": "two_connection_duplicate_successor",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "concurrent_tip_consistent",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "exact_history_no_orphans",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "two_chains_unchanged",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "restart_idempotent_readback",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "full_transaction_rollback",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "retry_after_failure",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "name": "persisted_tip_chain",
+      "pass": true
+    },
+    {
+      "detail": "owner remains capable; no owner-proof append-only claim",
+      "name": "negative_control_unprotected_owner_can_mutate",
+      "pass": true
+    }
+  ],
+  "passed": 31,
+  "pg_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "race": [
+    {
+      "session": 2,
+      "status": "committed",
+      "uid": "6ec4cd9c-691c-405f-a95a-4563d7bd9af5"
+    },
+    {
+      "session": 1,
+      "sqlstate": "23505",
+      "status": "rejected"
+    }
+  ],
+  "scope": "observed-partial-schema synthetic PG18, not Neon; owner can bypass role protections",
+  "verdict": "PASS"
+}
