@@ -223,7 +223,7 @@
     button.title = translated(
       "Надіслати PNG або скопіювати зображення для вставлення в чат",
       "Send the PNG or copy the image to paste into a chat");
-    button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg><span class="chart-share-label"></span>';
+    button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg><span class="chart-share-label"></span>';
     button.querySelector(".chart-share-label").textContent = translated("Поділитися", "Share");
 
     button.addEventListener("click", async function () {

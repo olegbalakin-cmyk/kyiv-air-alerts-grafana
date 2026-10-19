@@ -136,6 +136,11 @@ assert.equal(exportRow.children.length, 2);
 assert.equal(exportRow.children[0].className, "csv-export-button chart-image-button");
 assert.equal(exportRow.children[0].dataset.shareImage, "compareCumulativeHoursChart");
 assert.equal(exportRow.children[0].querySelector(".chart-share-label").textContent, "Поділитися");
+const shareIcon = exportRow.children[0].markup;
+assert.match(shareIcon, /<svg aria-hidden="true" viewBox="0 0 24 24">/);
+assert.equal((shareIcon.match(/<circle\b/g) || []).length, 3, "share icon must have three connected points");
+assert.equal((shareIcon.match(/<line\b/g) || []).length, 2, "share icon must have two connections");
+assert.ok(!shareIcon.includes("<rect"), "old image icon must be absent");
 assert.match(exportRow.children[0].attributes["aria-label"], /зображенням/);
 assert.equal(typeof exportRow.children[0].handler, "function");
 s.setup({
