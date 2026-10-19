@@ -1,0 +1,169 @@
+{
+  "document_type": "H2_NEON_SEVEN_CONTRACT_CATALOG_COMPLETION_PARTIAL",
+  "date": "2026-10-19",
+  "verdict": "CATALOG_READ_ONLY_INSPECTION_PASS_WITH_RUNTIME_LIMITS",
+  "git_preflight": {
+    "main": "ba6885be19615633cc9cd26d6daa6a3b8c806e9d",
+    "site_prod": "92afb8869232119c4adeb91347e38d388c48151b",
+    "wip": "7593622de76652db462b98d7a76e8a7f0466a142",
+    "predecessor": "23388021084cb907e150d64bc13e5e11a70088cc"
+  },
+  "neon": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "parent": "br-young-feather-b5q19nli",
+    "database": "neondb",
+    "compute": "ep-calm-rice-b5073ypp",
+    "compute_type": "read_only",
+    "compute_state_pre": "idle",
+    "compute_state_post": "active",
+    "auto_wake_observed": true,
+    "branch_slots": "9/10",
+    "owner": "neondb_owner",
+    "transaction_read_only": "on",
+    "transaction_isolation": "read committed",
+    "statement_timeout": "15s",
+    "lock_timeout": "5s",
+    "postgres_version": "18.6",
+    "search_path": "\"$user\", public",
+    "no_application_rows_queried": true,
+    "no_neon_writes": true,
+    "no_neon_resources_created": true
+  },
+  "catalog_query_provenance": {
+    "connector": "Neon.run_sql_transaction",
+    "explicit_project_branch_database_compute": true,
+    "statements": [
+      "SET TRANSACTION READ ONLY",
+      "SET LOCAL statement_timeout = '15s'",
+      "SET LOCAL lock_timeout = '5s'",
+      "SELECT current_database(),current_user,current_setting('transaction_read_only'),current_setting('transaction_isolation'),current_setting('search_path'),version()",
+      "SELECT pg_get_viewdef(c.oid,true),pg_get_userbyid(c.relowner) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='current_ingestion_checkpoints'",
+      "SELECT pg_get_constraintdef(con.oid,true) FROM pg_constraint con JOIN pg_class t ON t.oid=con.conrelid JOIN pg_namespace n ON n.oid=t.relnamespace WHERE n.nspname='public' AND t.relname IN ('alert_episodes','attack_event_classifications')",
+      "SELECT pg_get_indexdef(i.oid),pg_get_expr(ind.indpred,ind.indrelid) FROM pg_index ind JOIN pg_class t ON t.oid=ind.indrelid JOIN pg_class i ON i.oid=ind.indexrelid JOIN pg_namespace n ON n.oid=t.relnamespace WHERE n.nspname='public' AND t.relname IN ('alert_episodes','attack_event_classifications')",
+      "SELECT p.oid,n.nspname,p.proname,pg_get_function_identity_arguments(p.oid),p.provolatile,p.prosecdef,has_function_privilege(current_user,p.oid,'EXECUTE') FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE p.proname IN ('pg_advisory_xact_lock','hashtextextended','gen_random_uuid')",
+      "SELECT e.extname,n.nspname,e.extversion FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace",
+      "SELECT c.relname,c.relkind,pg_get_userbyid(c.relowner),c.relacl,has_table_privilege(current_user,c.oid,'SELECT'),has_table_privilege(current_user,c.oid,'INSERT'),has_table_privilege(current_user,c.oid,'UPDATE'),has_table_privilege(current_user,c.oid,'DELETE') FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','v','S','p')",
+      "SELECT r.rolname,r.rolcanlogin,r.rolinherit,r.rolsuper,r.rolcreaterole FROM pg_roles r WHERE r.rolname=current_user OR r.rolname IN ('neondb_owner','authenticated','anonymous')",
+      "SELECT a.attname,format_type(a.atttypid,a.atttypmod),a.attnotnull,pg_get_expr(ad.adbin,ad.adrelid) FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_attrdef ad ON ad.adrelid=c.oid AND ad.adnum=a.attnum WHERE n.nspname='public' AND c.relname='current_ingestion_checkpoints' AND a.attnum>0 AND NOT a.attisdropped"
+    ]
+  },
+  "contracts": {
+    "U1": {
+      "ordinal": 183,
+      "status": "UNVERIFIED",
+      "evidence": {
+        "constraints": [
+          "PRIMARY KEY(episode_uid)",
+          "UNIQUE(city_key,alert_type,start_at,end_at)",
+          "UNIQUE(legacy_episode_id)"
+        ],
+        "partial_unique": "UNIQUE(city_key,alert_type,start_at) WHERE end_at IS NULL",
+        "exclusion": "none observed"
+      },
+      "limit": "Exact identity enforced; overlapping distinct intervals not excluded by these keys; app contract requires inspection"
+    },
+    "U2": {
+      "ordinal": 190,
+      "status": "UNVERIFIED",
+      "view_owner": "neondb_owner",
+      "columns": 18,
+      "view_definition": " SELECT DISTINCT ON (source_key, city_key, stream_key) checkpoint_id,\n    source_key,\n    city_key,\n    stream_key,\n    checkpoint_seq,\n    checkpoint_kind,\n    previous_checkpoint_id,\n    checked_at,\n    continuity_verified,\n    continuity_method,\n    continuity_anchor_at,\n    observed_oldest_start_at,\n    observed_latest_end_at,\n    observed_record_count,\n    cursor,\n    metadata,\n    created_by_run_id,\n    created_at\n   FROM ingestion_checkpoints\n  ORDER BY source_key, city_key, stream_key, checkpoint_seq DESC;",
+      "limit": "dependency and pinned Phase1 code comparison outstanding; default read-only owner role does not prove runtime role access"
+    },
+    "U3": {
+      "ordinal": 206,
+      "status": "UNVERIFIED",
+      "observed_owner": "neondb_owner",
+      "relacl": "NULL for public tables",
+      "owner_effective_select_insert_update_delete": true,
+      "limit": "actual H2 runtime role independently unverified"
+    },
+    "U4": {
+      "ordinal": 210,
+      "status": "UNVERIFIED",
+      "functions": [
+        {
+          "name": "pg_catalog.gen_random_uuid()",
+          "oid": 3432,
+          "execute_owner": true
+        },
+        {
+          "name": "pg_catalog.hashtextextended(text,bigint)",
+          "oid": 448,
+          "execute_owner": true
+        },
+        {
+          "name": "pg_catalog.pg_advisory_xact_lock(bigint)",
+          "oid": 3089,
+          "execute_owner": true
+        }
+      ],
+      "limit": "no advisory lock execution; application runtime privileges unverified"
+    },
+    "U5": {
+      "ordinal": 211,
+      "status": "UNVERIFIED",
+      "pg": "18.6",
+      "observed_isolation": "read committed",
+      "read_only": "on",
+      "constraint_deferrability": "inspected selected relations non-deferrable",
+      "limit": "future writer COMMIT and concurrency not proved"
+    },
+    "U6": {
+      "ordinal": 212,
+      "status": "UNVERIFIED",
+      "extension": "plpgsql 1.0 in pg_catalog",
+      "search_path": "\"$user\", public",
+      "limit": "app role path and bindings unverified"
+    },
+    "U7": {
+      "ordinal": 213,
+      "status": "UNVERIFIED",
+      "classification_unique": "UNIQUE(classification_key)",
+      "classification_indexes": [
+        "(city_key,historical_episode_id,created_at)",
+        "(alert_episode_uid,created_at) WHERE alert_episode_uid IS NOT NULL",
+        "(verdict,city_key,alert_start_at)"
+      ],
+      "missing": [
+        "UNIQUE(supersedes_classification_uid)",
+        "append-only restriction against owner",
+        "database current-tip uniqueness"
+      ],
+      "limit": "offline CAS successful; direct database bypass possible"
+    }
+  },
+  "matrix": {
+    "v5_source_git_blob": "810fa36d0064888587ec88a0ab1380b6ef7e2a1e",
+    "v6_total": 213,
+    "match": 203,
+    "mismatch": 3,
+    "unverified": 7
+  },
+  "hardening": {
+    "successor": "Propose UNIQUE index on non-null supersedes_classification_uid after duplicate audit and writer migration compatibility review; no DDL executed",
+    "append_only": "Dedicated minimally privileged writer role: revoke UPDATE/DELETE for historical classification rows, grant append-only INSERT and limited SELECT; validate exact ON CONFLICT and owner privileges; no grant modification",
+    "current_tip": "Define explicit tip ownership/closure or serialized constraint strategy with dependency migration; a partial unique index on derived NOT EXISTS successor is not a valid direct substitute."
+  },
+  "offline_fixture": {
+    "state": "NOT_EXECUTED",
+    "reason": "No local Postgres 18 or faithful full-schema fixture regression executed in this task"
+  },
+  "archive_retention": {
+    "source_run": 39212648444,
+    "original_zips_verified": true,
+    "original_zip_crc_both_pass": true,
+    "eight_member_hashes_verified_locally": true,
+    "local_archive_sha256": "9a03b33bc9eb0cbd70acd171163801b33750e07700f13a06d77236486e147832",
+    "local_map_sha256": "0c93b7f8bace21de0666b07e8bfc69041392c71914204c6a16c50a477a6df89d",
+    "git_archive_committed": false,
+    "verdict": "PARTIAL; exact Git freeze not executed"
+  },
+  "integration_preflight": "BLOCKED",
+  "production_cutover": false,
+  "neon_authority_active": false,
+  "unbound_unresolved": 25,
+  "c4": "NOT PROVEN",
+  "c5": "NOT PROVEN"
+}
