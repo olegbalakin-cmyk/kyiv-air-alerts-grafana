@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-19
 
+### Share button pictogram — test draft updated, automated PASS
+
+- Test-only [commit `e4c5a883b41b24ddbb24cdd7d04578afd18a7582`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/e4c5a883b41b24ddbb24cdd7d04578afd18a7582) changes only the Share button's image icon to a conventional three-node/two-link Share glyph; PNG/copy/download, CSV and embed behavior untouched. Updated markup test and JS cache version. [Actions `39324531903`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39324531903), job `118306823922`, SUCCESS; proof artifact `12222085951`; Netlify draft `6ad685f8f875146263ff7337` verified `ready`, `branch-deploy` at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ . Production and all operational/data tracks unchanged. Browser visual acceptance pending.
+
+
 ### Approved logo option #12 — draft branded header, PNG and embed deployed (automated PASS)
 
 - **Accepted preview-only transition:** [commit `339e2ff6a9bc41086e3f1c92eebeed9084ce7612`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/339e2ff6a9bc41086e3f1c92eebeed9084ce7612) on `preview-chart-share-2026-10-19`, parent `876d03b96434faf6fed3c7030cfe4d19dca81550`; [GitHub Actions `39323510253`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39323510253), job `118303318759`, SUCCESS. Artifact `12221036958` contains Netlify draft `6ad6844435b78a3003d63337`; independent readback `ready`, `branch-deploy`, alias https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ . All 46 supplied brand assets verified against archive manifest (ZIP SHA-256 `8f7ae6addf4efc776df172566eb93a91216829daa87da13f6636e8e62230de49`).
