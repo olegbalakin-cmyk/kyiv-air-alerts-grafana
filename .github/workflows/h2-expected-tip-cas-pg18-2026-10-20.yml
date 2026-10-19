@@ -50,12 +50,39 @@ jobs:
       - name: Compile candidate implementation
         run: |
           python -m py_compile kyiv-air-alerts-grafana/scripts/{monitor_explosion_candidates,attack_event_canonical_persistence,attack_event_tip_snapshot}.py
+      - name: Run accepted original operational mutation regressions
+        env:
+          H2_REPORT: /tmp/h2_mutation_controls.json
+        run: python research/h2_pg18_mutation_operational_writer_2026-10-19/test_mutation_operational.py
       - name: Execute concurrent CAS and transaction regression
         run: python research/h2_pg18_mutation_operational_writer_2026-10-19/test_expected_tip_e2e.py
+      - name: Emit exact synthetic A-B reports for Git archive
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, hashlib, io, zipfile, base64
+          for label, path in [('cas', Path('/tmp/h2_expected_tip.json')), ('mutation', Path('/tmp/h2_mutation_controls.json'))]:
+              if not path.exists():
+                  continue
+              raw = path.read_bytes()
+              zip_buffer = io.BytesIO()
+              with zipfile.ZipFile(zip_buffer,'w',compression=zipfile.ZIP_DEFLATED) as z:
+                  z.writestr(path.name,raw)
+              zip_bytes=zip_buffer.getvalue()
+              print('H2_FREEZE_BEGIN:'+label)
+              print('H2_FREEZE_JSON_B64:'+base64.b64encode(raw).decode('ascii'))
+              print('H2_FREEZE_ZIP_B64:'+base64.b64encode(zip_bytes).decode('ascii'))
+              print('H2_FREEZE_DIGESTS:'+json.dumps({'label':label,'json_bytes':len(raw),'json_sha256':hashlib.sha256(raw).hexdigest(),'zip_bytes':len(zip_bytes),'zip_sha256':hashlib.sha256(zip_bytes).hexdigest()},sort_keys=True))
+              print('H2_FREEZE_END:'+label)
+          PY
       - name: Archive original JSON even upon failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: h2-expected-tip-${{ matrix.copy }}
-          path: /tmp/h2_expected_tip.json
+          path: |
+            /tmp/h2_expected_tip.json
+            /tmp/h2_mutation_controls.json
           retention-days: 30
