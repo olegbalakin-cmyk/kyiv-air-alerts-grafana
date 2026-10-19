@@ -1,0 +1,1202 @@
+{
+  "assertions": [
+    {
+      "context": "",
+      "expected": "18",
+      "name": "pg_major_is_18",
+      "observed": "18",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+      "name": "input_blob.observed_partial_schema.sql",
+      "observed": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "339b9b44a90f8b5e8ba216576f63daac393a5eb3",
+      "name": "input_blob.001_revision_invariants.sql",
+      "observed": "339b9b44a90f8b5e8ba216576f63daac393a5eb3",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "b4c1be395b0cfdc16086729ad903ef10e00b1fb0",
+      "name": "input_blob.002_synthetic_writer_grants.sql",
+      "observed": "b4c1be395b0cfdc16086729ad903ef10e00b1fb0",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+      "name": "operational_blob_exact",
+      "observed": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "real_writer_autocommit_false",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "h2_app_writer_test",
+      "name": "A1.restricted_role",
+      "observed": "h2_app_writer_test",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "h2_local",
+      "name": "A1.owner_role",
+      "observed": "h2_local",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "1784c482-cf2e-43ae-a4c6-7ee778e7f9ee",
+      "name": "A1.append_and_head",
+      "observed": "1784c482-cf2e-43ae-a4c6-7ee778e7f9ee",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A1.reject_stale_or_duplicate",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "name": "A1.after_failed_insert_unchanged",
+      "observed": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [],
+      "name": "A1.one_tip",
+      "observed": [],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "name": "A1.independent_readback",
+      "observed": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A1.immutable_history.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "name": "A1.immutable_history.no_persisted_mutation",
+      "observed": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": false,
+      "name": "A2.index_actually_removed",
+      "observed": false,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [
+        "committed",
+        "rejected"
+      ],
+      "name": "A2.CAS_rejects_one",
+      "observed": [
+        "committed",
+        "rejected"
+      ],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [
+        "P0001"
+      ],
+      "name": "A2.rejection_is_CAS_not_unique",
+      "observed": [
+        "P0001"
+      ],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [],
+      "name": "A2.one_tip_without_index",
+      "observed": [],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 2,
+      "name": "A2.one_committed_successor",
+      "observed": 2,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "D",
+      "name": "A3.trigger_disabled",
+      "observed": "D",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A3.detect_head_mismatch",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A3.index_still_enabled",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A4.two_tips_detected",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A4.duplicate_successor_detected",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "11553bf5-993c-49d6-b4b6-3a0c83a15391",
+      "name": "A4.head_stale_detected",
+      "observed": "11553bf5-993c-49d6-b4b6-3a0c83a15391",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.update_history.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.update_history.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.delete_history.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.delete_history.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.truncate_history.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.truncate_history.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.alter_table.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.alter_table.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.disable_trigger.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.disable_trigger.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.drop_index.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.drop_index.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.change_head.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.change_head.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.alter_role.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.alter_role.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.restricted.grant_owner.sql_error",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "name": "A5.restricted.grant_owner.no_persisted_mutation",
+      "observed": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": false,
+      "name": "A5.no_self_granted_update",
+      "observed": false,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": false,
+      "name": "A5.no_owner_membership",
+      "observed": false,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.owner_update_executed",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "owner_changed_it",
+      "name": "A5.owner_historical_column_changed",
+      "observed": "owner_changed_it",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "D",
+      "name": "A5.owner_trigger_disable_executed",
+      "observed": "D",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "A5.owner_DDL_executed",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 0,
+      "name": "A5.owner_delete_executed",
+      "observed": 0,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 0,
+      "name": "A5.owner_truncate_executed",
+      "observed": 0,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "OP.initial_classification_durable",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "OP.initial_event_durable",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "OP.source_link_durable",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.initial_independent_changed",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": false,
+      "name": "OP.same_classification_idempotent",
+      "observed": false,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "OP.no_duplicate_source_link",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.fault_classification.expected",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "name": "OP.fault_classification.rolled_back",
+      "observed": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.fault_event.expected",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "name": "OP.fault_event.rolled_back",
+      "observed": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.revision_inserted",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.event_updated",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "WITHDRAWN",
+      "name": "OP.withdrawn_after_revision",
+      "observed": "WITHDRAWN",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [],
+      "name": "OP.one_tip_after_revision",
+      "observed": [],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": "4df5b602ca4c001a7a186842df2e4ee74e38ee885ad7f5b823cae5009753cce4",
+      "name": "OP.history_immutable",
+      "observed": "4df5b602ca4c001a7a186842df2e4ee74e38ee885ad7f5b823cae5009753cce4",
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.old_existing_classification_rejected",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": false,
+      "name": "OP.expected_tip_parameter_missing",
+      "observed": false,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": false,
+      "name": "OP.batch_expected_tips_missing",
+      "observed": false,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": true,
+      "name": "OP.explicit_expected_tip_unsupported",
+      "observed": true,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 2,
+      "name": "OP.concurrent_two_outcomes",
+      "observed": 2,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [],
+      "name": "OP.concurrent_graph_consistent",
+      "observed": [],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": {
+        "count": 1,
+        "head": "77d7da6d-8e98-432d-8af6-071dd4331ae6",
+        "head_count": 1,
+        "revisions": [
+          [
+            "77d7da6d-8e98-432d-8af6-071dd4331ae6",
+            null
+          ]
+        ],
+        "tips": [
+          "77d7da6d-8e98-432d-8af6-071dd4331ae6"
+        ]
+      },
+      "name": "OP.unrelated_chain_tip_unchanged",
+      "observed": {
+        "count": 1,
+        "head": "77d7da6d-8e98-432d-8af6-071dd4331ae6",
+        "head_count": 1,
+        "revisions": [
+          [
+            "77d7da6d-8e98-432d-8af6-071dd4331ae6",
+            null
+          ]
+        ],
+        "tips": [
+          "77d7da6d-8e98-432d-8af6-071dd4331ae6"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [
+        [
+          "e94d99e655b2c74f9facccba126d7444bbff0aca58ffb282ff40838ac42793f0",
+          "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+        ]
+      ],
+      "name": "OP.unrelated_row_unchanged",
+      "observed": [
+        [
+          "e94d99e655b2c74f9facccba126d7444bbff0aca58ffb282ff40838ac42793f0",
+          "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+        ]
+      ],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [
+        "committed",
+        "committed"
+      ],
+      "name": "OP.concurrent_no_expected_tip_reject",
+      "observed": [
+        "committed",
+        "committed"
+      ],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": [
+        1,
+        1,
+        1
+      ],
+      "name": "COMMIT.own_batch_independent_visible",
+      "observed": [
+        1,
+        1,
+        1
+      ],
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "COMMIT.own_batch_ack_matches",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "COMMIT.close_reopen_restart_idempotent",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 0,
+      "name": "COMMIT.nested_savepoint_not_durable",
+      "observed": 0,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 0,
+      "name": "COMMIT.external_rollback_undoes_return",
+      "observed": 0,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "COMMIT.explicit_commit_second_connection",
+      "observed": 1,
+      "pass": true
+    },
+    {
+      "context": "",
+      "expected": 1,
+      "name": "COMMIT.close_without_commit_rollback",
+      "observed": 1,
+      "pass": true
+    }
+  ],
+  "assertions_passed": 83,
+  "assertions_total": 83,
+  "cases": [
+    {
+      "id": "A1",
+      "kind": "protected_baseline",
+      "result": "EXECUTED"
+    },
+    {
+      "id": "A2",
+      "kind": "index_disabled_CAS_retained",
+      "result": "EXECUTED"
+    },
+    {
+      "id": "A3",
+      "kind": "trigger_disabled_index_retained",
+      "result": "EXECUTED"
+    },
+    {
+      "id": "A4",
+      "kind": "index_and_trigger_disabled",
+      "result": "EXECUTED"
+    },
+    {
+      "id": "A5",
+      "kind": "owner_bypass_and_nonowner_denials",
+      "result": "EXECUTED"
+    },
+    {
+      "id": "OP",
+      "kind": "real_operational_writer_all_paths",
+      "result": "EXECUTED"
+    },
+    {
+      "id": "COMMIT",
+      "kind": "own_batch_nested_savepoint_commit_rollback_restart",
+      "result": "EXECUTED"
+    }
+  ],
+  "copy": "A",
+  "failed_assertions": [],
+  "harness_verdict": "EXECUTED_COMPLETE",
+  "input_git_blobs": {
+    "001_revision_invariants.sql": "339b9b44a90f8b5e8ba216576f63daac393a5eb3",
+    "002_synthetic_writer_grants.sql": "b4c1be395b0cfdc16086729ad903ef10e00b1fb0",
+    "observed_partial_schema.sql": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3"
+  },
+  "operational_source_commit": "b05d1ea61aabb7d9d476a88778a0599103407d94",
+  "operational_writer_git_blob": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+  "pg_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "research_writer_git_blob": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+  "schema": "h2-offline-mutation-operational-v1",
+  "scope": "two fresh PostgreSQL 18.6 containers, synthetic only; no Neon SQL",
+  "source_ref": "multicity-wip-2026-09-16",
+  "test_commit": "96b1d7b894fb11f7a5f1fd899d4ba5d3d822f5d9",
+  "traces": [
+    {
+      "dbname": "h2_a_a1",
+      "label": "a1",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "fingerprint": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "sql_result": {
+        "error_class": "UniqueViolation",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "23505"
+      },
+      "step": "A1.duplicate_and_stale"
+    },
+    {
+      "fingerprint_after": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "fingerprint_before": "44bc3009891087f967b7242308ae6f615087422a3b431127712dad6fe0afbec1",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A1.immutable_history"
+    },
+    {
+      "dbname": "h2_a_a2",
+      "label": "a2",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "after": "b31f26d78afb9c1f68b270c91358de29732dfa8aca1d45f0ba85e977982cd591",
+      "before": "505392af2647c13b7e865e03205aa7897874d447b5f655bbb1d17a6d1d606adc",
+      "outcomes": [
+        {
+          "session": 1,
+          "sqlstate": "P0001",
+          "status": "rejected"
+        },
+        {
+          "session": 2,
+          "status": "committed",
+          "uid": "0f36b53b-018b-4ad4-ad68-8e1e81a61ff4"
+        }
+      ],
+      "state": {
+        "count": 2,
+        "head": "0f36b53b-018b-4ad4-ad68-8e1e81a61ff4",
+        "head_count": 1,
+        "revisions": [
+          [
+            "be59b420-4134-479f-bf55-8b5548535f1a",
+            null
+          ],
+          [
+            "0f36b53b-018b-4ad4-ad68-8e1e81a61ff4",
+            "be59b420-4134-479f-bf55-8b5548535f1a"
+          ]
+        ],
+        "tips": [
+          "0f36b53b-018b-4ad4-ad68-8e1e81a61ff4"
+        ]
+      },
+      "step": "A2.race_without_index"
+    },
+    {
+      "dbname": "h2_a_a3",
+      "label": "a3",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "anomalies": [
+        "HEAD_DIFFERS_FROM_CLASSIFICATION_TIP"
+      ],
+      "before_tip": "3594bd3e-3280-48ac-a624-b25eeaeed82f",
+      "committed_child": "bfd54ecd-4970-4485-aad1-8b1e7599f635",
+      "fingerprint": "5e32e552db4642a958dfbf82220d71c94049a1bf8efc2d9b85c5a818b9cfa99c",
+      "state": {
+        "count": 2,
+        "head": "3594bd3e-3280-48ac-a624-b25eeaeed82f",
+        "head_count": 1,
+        "revisions": [
+          [
+            "3594bd3e-3280-48ac-a624-b25eeaeed82f",
+            null
+          ],
+          [
+            "bfd54ecd-4970-4485-aad1-8b1e7599f635",
+            "3594bd3e-3280-48ac-a624-b25eeaeed82f"
+          ]
+        ],
+        "tips": [
+          "bfd54ecd-4970-4485-aad1-8b1e7599f635"
+        ]
+      },
+      "step": "A3.disabled_trigger_committed"
+    },
+    {
+      "dbname": "h2_a_a4",
+      "label": "a4",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "anomalies": [
+        "MULTIPLE_OR_NO_TIPS",
+        "DUPLICATE_SUCCESSOR"
+      ],
+      "base": "11553bf5-993c-49d6-b4b6-3a0c83a15391",
+      "committed": [
+        "c73b550d-9cbd-489f-ad0d-5b6896615b10",
+        "7aa1a785-9b3c-493a-82fb-6769397e9d59"
+      ],
+      "fingerprint": "13e7974ee11d1deb634103ba5aefcfc31fa373567ba36be4d7a30e3d8e5cecbe",
+      "state": {
+        "count": 3,
+        "head": "11553bf5-993c-49d6-b4b6-3a0c83a15391",
+        "head_count": 1,
+        "revisions": [
+          [
+            "11553bf5-993c-49d6-b4b6-3a0c83a15391",
+            null
+          ],
+          [
+            "c73b550d-9cbd-489f-ad0d-5b6896615b10",
+            "11553bf5-993c-49d6-b4b6-3a0c83a15391"
+          ],
+          [
+            "7aa1a785-9b3c-493a-82fb-6769397e9d59",
+            "11553bf5-993c-49d6-b4b6-3a0c83a15391"
+          ]
+        ],
+        "tips": [
+          "7aa1a785-9b3c-493a-82fb-6769397e9d59",
+          "c73b550d-9cbd-489f-ad0d-5b6896615b10"
+        ]
+      },
+      "step": "A4.both_disabled_committed"
+    },
+    {
+      "dbname": "h2_a_a5",
+      "label": "a5",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.update_history"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.delete_history"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.truncate_history"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.alter_table"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.disable_trigger"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.drop_index"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.change_head"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.alter_role"
+    },
+    {
+      "fingerprint_after": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "fingerprint_before": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "result": {
+        "error_class": "InsufficientPrivilege",
+        "expected_error": true,
+        "outcome": "rejected",
+        "sqlstate": "42501"
+      },
+      "step": "A5.restricted.grant_owner"
+    },
+    {
+      "result": {
+        "outcome": "committed",
+        "rows": 0
+      },
+      "step": "A5.restricted.GRANT",
+      "update_privilege": false
+    },
+    {
+      "DDL": true,
+      "after_update_fingerprint": "22dce72f5cba38a99c8438d14cfdee0a6d752494e2768203678febd8f07d9d38",
+      "column_update": true,
+      "delete": true,
+      "final_fingerprint": "91d25c674e72986948b7de0d4ac14cb8bd43fbea7ff84a5e55f3d9fcdf69b222",
+      "first_fingerprint": "68a3ebf67547207c5ac9aaa4fdf3092772bedd0e41d5e803688ab5adac9abc57",
+      "step": "A5.owner_bypass_executed",
+      "trigger_disabled": true,
+      "truncate_cascade": true
+    },
+    {
+      "dbname": "h2_a_oper",
+      "label": "oper",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "after": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "before": "80092e8c70a6f3b994558f045c72134001b2badf5afb76027d16b496689c8a52",
+      "receipt": {
+        "classification_inserted": true,
+        "classification_key": "4df5b602ca4c001a7a186842df2e4ee74e38ee885ad7f5b823cae5009753cce4",
+        "classification_uid": "aae246a9-4d6f-4db2-8d46-1082289ceadc",
+        "event_inserted": true,
+        "event_updated": false,
+        "revision_inserted": false,
+        "source_count": 1,
+        "source_inserts": 1,
+        "verdict": "STRICT_EVENT_POSITIVE"
+      },
+      "step": "OP.initial"
+    },
+    {
+      "fingerprint": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "observed": "FORCED_PERSISTENCE_FAILURE_AFTER_CLASSIFICATION",
+      "step": "OP.fault_classification"
+    },
+    {
+      "fingerprint": "9f20666acda7512184729db366e6cb508fbe23282ff401b55b9ad4376bfed2e4",
+      "observed": "FORCED_PERSISTENCE_FAILURE_AFTER_EVENT",
+      "step": "OP.fault_event"
+    },
+    {
+      "after": "73a754c7db86b32c6a4bb42364720864defb1ae630aecf3403ac0fcdc6e88719",
+      "receipt": {
+        "classification_inserted": true,
+        "classification_key": "c7948bc35391b813d6cff87e26ed2bdbf236994c25095d97102dd4fde29913f5",
+        "classification_uid": "b895c01c-af8c-403d-9b1d-df26bb34f1c0",
+        "event_inserted": false,
+        "event_updated": true,
+        "revision_inserted": true,
+        "source_count": 0,
+        "source_inserts": 0,
+        "verdict": "NO_CONFIRMED_EVENT"
+      },
+      "step": "OP.revision"
+    },
+    {
+      "result": "PersistenceContractError:deterministic classification exists but is not the current revision tip",
+      "step": "OP.old_existing_key"
+    },
+    {
+      "batch_signature": "(*, queue: 'list[dict[str, Any]]', due: 'dict[str, list[tuple[dict[str, Any], dict[str, Any]]]]', coverage_by_city: 'dict[str, bool]', dsn: 'str | None' = None, connection=None) -> 'dict[str, Any]'",
+      "explicit_expected_tip_rejected": true,
+      "signature": "(conn, record: 'dict[str, Any]', *, fault_after: 'str | None' = None) -> 'dict[str, Any]'",
+      "step": "OP.expected_tip_authority"
+    },
+    {
+      "both_started_from_tip": "b895c01c-af8c-403d-9b1d-df26bb34f1c0",
+      "final_state": {
+        "count": 4,
+        "head": "606362b9-7330-4649-a3b1-71de360586ea",
+        "head_count": 1,
+        "revisions": [
+          [
+            "aae246a9-4d6f-4db2-8d46-1082289ceadc",
+            null
+          ],
+          [
+            "b895c01c-af8c-403d-9b1d-df26bb34f1c0",
+            "aae246a9-4d6f-4db2-8d46-1082289ceadc"
+          ],
+          [
+            "606362b9-7330-4649-a3b1-71de360586ea",
+            "4a12fca6-d0cd-4290-8be8-b6814cdeb951"
+          ],
+          [
+            "4a12fca6-d0cd-4290-8be8-b6814cdeb951",
+            "b895c01c-af8c-403d-9b1d-df26bb34f1c0"
+          ]
+        ],
+        "tips": [
+          "606362b9-7330-4649-a3b1-71de360586ea"
+        ]
+      },
+      "fingerprint": "cf5420e39c91410e6ed22bd599076989e9703afea954786443a9ccd41261ee74",
+      "outcomes": [
+        {
+          "classification_uid": "4a12fca6-d0cd-4290-8be8-b6814cdeb951",
+          "session": 1,
+          "status": "committed"
+        },
+        {
+          "classification_uid": "606362b9-7330-4649-a3b1-71de360586ea",
+          "session": 2,
+          "status": "committed"
+        }
+      ],
+      "step": "OP.concurrent"
+    },
+    {
+      "dbname": "h2_a_batch",
+      "label": "batch",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "after": "a7d6e1fd50990495cd8c6491d3b0cf3bec79847cddece797cad7889af5843431",
+      "before": "a641b9f0a1abe98c764b9f01b85194626f835ebd4e442e84802166d54a6d2ed4",
+      "independent_rows": {
+        "classifications": 1,
+        "events": 1,
+        "source_links": 1
+      },
+      "result": {
+        "cities_with_due_checks": [
+          "kyiv"
+        ],
+        "classification_inserts": 1,
+        "classification_revisions": 0,
+        "enabled": true,
+        "episodes_considered": 1,
+        "episodes_persisted": 1,
+        "episodes_skipped_incomplete_coverage": 0,
+        "event_inserts": 1,
+        "event_updates": 0,
+        "records": [
+          {
+            "city_key": "kyiv",
+            "classification_inserted": true,
+            "classification_key": "074dd20e5a1d779e7cf4c8552723667a3cc405b7b15ca3f08cecf898d9e774fa",
+            "episode_id": "000000000000000000000000",
+            "event_inserted": true,
+            "event_updated": false,
+            "revision_inserted": false,
+            "source_inserts": 1,
+            "verdict": "STRICT_EVENT_POSITIVE"
+          }
+        ],
+        "source_inserts": 1,
+        "verdicts": {
+          "STRICT_EVENT_POSITIVE": 1
+        }
+      },
+      "step": "COMMIT.own_batch"
+    },
+    {
+      "fingerprint": "a7d6e1fd50990495cd8c6491d3b0cf3bec79847cddece797cad7889af5843431",
+      "result": {
+        "cities_with_due_checks": [
+          "kyiv"
+        ],
+        "classification_inserts": 0,
+        "classification_revisions": 0,
+        "enabled": true,
+        "episodes_considered": 1,
+        "episodes_persisted": 1,
+        "episodes_skipped_incomplete_coverage": 0,
+        "event_inserts": 0,
+        "event_updates": 0,
+        "records": [
+          {
+            "city_key": "kyiv",
+            "classification_inserted": false,
+            "classification_key": "074dd20e5a1d779e7cf4c8552723667a3cc405b7b15ca3f08cecf898d9e774fa",
+            "episode_id": "000000000000000000000000",
+            "event_inserted": false,
+            "event_updated": false,
+            "revision_inserted": false,
+            "source_inserts": 0,
+            "verdict": "STRICT_EVENT_POSITIVE"
+          }
+        ],
+        "source_inserts": 0,
+        "verdicts": {
+          "STRICT_EVENT_POSITIVE": 1
+        }
+      },
+      "step": "COMMIT.restart"
+    },
+    {
+      "dbname": "h2_a_outer",
+      "label": "outer",
+      "schema": "synthetic-frozen-partial",
+      "step": "environment"
+    },
+    {
+      "independent_count": 0,
+      "inner_return": {
+        "classification_inserted": true,
+        "classification_key": "ccf13c95a780516394ca10c3877999ea2be743403d893997f88dba36fd908546",
+        "classification_uid": "ad9e6f15-016e-4f81-bdd5-7b1555066bc8",
+        "event_inserted": true,
+        "event_updated": false,
+        "revision_inserted": false,
+        "source_count": 1,
+        "source_inserts": 1,
+        "verdict": "STRICT_EVENT_POSITIVE"
+      },
+      "step": "COMMIT.caller_owned_uncommitted",
+      "transaction_status": "2"
+    },
+    {
+      "independent_fingerprint": "504708c92e8d7e96250f214a51fb14dad4ea181926590d6b1ca94f889b56f050",
+      "result": {
+        "classification_inserted": true,
+        "classification_key": "ccf13c95a780516394ca10c3877999ea2be743403d893997f88dba36fd908546",
+        "classification_uid": "bf5741b6-2086-424b-a169-9225153020d7",
+        "event_inserted": true,
+        "event_updated": false,
+        "revision_inserted": false,
+        "source_count": 1,
+        "source_inserts": 1,
+        "verdict": "STRICT_EVENT_POSITIVE"
+      },
+      "step": "COMMIT.explicit_commit"
+    },
+    {
+      "independently_persisted": 1,
+      "step": "COMMIT.close_without_commit",
+      "transient_result": {
+        "classification_inserted": true,
+        "classification_key": "c7948bc35391b813d6cff87e26ed2bdbf236994c25095d97102dd4fde29913f5",
+        "classification_uid": "72c31fff-15b2-4de3-a21e-74885cef289d",
+        "event_inserted": false,
+        "event_updated": true,
+        "revision_inserted": true,
+        "source_count": 0,
+        "source_inserts": 0,
+        "verdict": "NO_CONFIRMED_EVENT"
+      }
+    }
+  ],
+  "unexpected": []
+}
