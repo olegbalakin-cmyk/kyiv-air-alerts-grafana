@@ -6,7 +6,7 @@ P={
 "observed_partial_schema.sql":"09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
 "001_revision_invariants.sql":"339b9b44a90f8b5e8ba216576f63daac393a5eb3",
 "002_synthetic_writer_grants.sql":"b4c1be395b0cfdc16086729ad903ef10e00b1fb0",
-"test_pg18.py":"6bada34023f92ab567485907a911a41db2d84b33"}
+"test_pg18.py":"cca5bba2b6fbf16e58a51816be9300870e7e6707"}
 if sys.argv[1]=="static":
  for name,expected in P.items():
   b=(R/name).read_bytes()
