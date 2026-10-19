@@ -1,0 +1,40 @@
+name: Validate and publish isolated chart-share preview
+on:
+  push:
+    branches: [preview-chart-share-2026-10-19]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/tests/test_chart_share.js"
+      - ".github/workflows/chart-share-preview.yml"
+permissions:
+  contents: read
+concurrency:
+  group: isolated-chart-share-preview-2026-10-19
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate frontend and share links
+        run: |
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
+      - name: Assemble preview
+        run: |
+          mkdir -p _preview
+          cp kyiv-air-alerts-grafana/pages-preview/{index.html,app.js,chart-share.js,styles.css,features.json} _preview/
+      - name: Deploy draft only, never production
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_preview --alias=chart-share-test-20261019 --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json | tee chart-share-preview-deploy.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chart-share-preview-receipt
+          path: chart-share-preview-deploy.json
+          if-no-files-found: warn

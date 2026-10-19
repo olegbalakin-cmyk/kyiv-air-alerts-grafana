@@ -1302,7 +1302,7 @@ function updateUrl() {
   ]) {
     if ($(id)?.value) params.set(param, $(id).value);
   }
-  history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+  history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`);
 }
 
 
@@ -3296,8 +3296,15 @@ async function init() {
   renderComparison();
   renderAllCitiesTable();
   setupCsvExports();
+  window.ChartShare?.setup({
+    chartIds: Object.keys(CSV_CHART_CONFIG),
+    getChart: id => state.charts[id],
+    language: () => currentLanguage,
+    syncUrl: updateUrl
+  });
   updateUrl();
-  maybeStartIntroTour();
+  const sharedChartOpened = window.ChartShare?.restore() === true;
+  if (!sharedChartOpened) maybeStartIntroTour();
 }
 
 applyStaticLanguage();

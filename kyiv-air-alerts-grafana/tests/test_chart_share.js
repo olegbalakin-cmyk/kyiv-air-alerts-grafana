@@ -1,0 +1,15 @@
+const assert=require("node:assert/strict"),s=require("../pages-preview/chart-share.js");
+const ids=["cityIntensityChart","compareCumulativeHoursChart"];
+const c={data:{datasets:[{},{},{}]},hidden:[false,true,false],isDatasetVisible(i){return !this.hidden[i]},setDatasetVisibility(i,v){this.hidden[i]=!v},update(m){this.updated=m}};
+const original="https://example.test/?lang=uk&city=kyiv&compare=monthly&a=kyiv&b=kharkiv";
+const url=s.makeShareUrl(original,ids[1],c);
+assert.equal(new URL(url).search,new URL(original).search);
+assert.equal(new URL(url).hash,"#chart-compareCumulativeHoursChart.101");
+assert.deepEqual(s.parseSharedView(new URL(url).hash,ids),{chartId:ids[1],visibility:"101"});
+assert.equal(s.parseSharedView("#chart-otherChart",ids),null);
+assert.equal(s.restoreVisibility(c,"110"),true);
+assert.deepEqual(c.hidden,[false,false,true]);
+assert.equal(s.restoreVisibility(c,"01"),false);
+assert.equal(s.visibilityBits(c),"110");
+assert.throws(()=>s.makeShareUrl(original,"bad/id",c));
+console.log("chart share unit checks PASS");
