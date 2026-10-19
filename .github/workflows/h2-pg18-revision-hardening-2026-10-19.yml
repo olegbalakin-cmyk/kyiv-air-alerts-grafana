@@ -1,0 +1,61 @@
+name: H2 isolated PG18 revision invariants A-B
+on:
+  push:
+    branches: [research-h2-pg18-revision-hardening-2026-10-19]
+    paths:
+      - 'research/h2_pg18_revision_invariant_hardening_2026-10-19/**'
+      - '.github/workflows/h2-pg18-revision-hardening-2026-10-19.yml'
+permissions:
+  contents: read
+jobs:
+  pg18:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: h2_offline
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_offline"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      PGPASSWORD: synthetic_only
+      H2_PG18_OWNER_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_offline
+      H2_PG18_WRITER_DSN: postgresql://h2_app_writer_test:synthetic_local_only@127.0.0.1:5432/h2_offline
+      H2_PG18_REPORT: /tmp/h2_pg18_result.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify pins
+        run: python research/h2_pg18_revision_invariant_hardening_2026-10-19/verify_offline.py static
+      - name: Build observed partial schema
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U h2_local -d h2_offline -f research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U h2_local -d h2_offline -f research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U h2_local -d h2_offline -f research/h2_pg18_revision_invariant_hardening_2026-10-19/002_synthetic_writer_grants.sql
+      - name: Test PG18
+        run: |
+          python -m pip install "psycopg[binary]==3.2.12"
+          python research/h2_pg18_revision_invariant_hardening_2026-10-19/test_pg18.py
+      - name: Check report
+        if: always()
+        run: python research/h2_pg18_revision_invariant_hardening_2026-10-19/verify_offline.py report /tmp/h2_pg18_result.json
+      - name: Retain A-B raw reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-pg18-revision-hardening-${{ matrix.copy }}
+          path: /tmp/h2_pg18_result.json
+          retention-days: 30
