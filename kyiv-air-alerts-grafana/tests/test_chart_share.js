@@ -25,6 +25,7 @@ const mockSelections = {
 };
 const drawContext = {
   fillRect(){}, fillText(v){calls.text.push(v)},
+  save(){},restore(){},translate(){},scale(){},beginPath(){},roundRect(){},rect(){},fill(){},stroke(){},arc(){},
   drawImage(source, x, y, w, h){
     assert.equal(source, sourceCanvas);
     assert.ok(w > 0 && h > 0);
@@ -191,7 +192,7 @@ const mainNode = makeNode("main");
 const bodyClasses = [];
 global.document.querySelector = selector => selector === "main" ? mainNode : null;
 global.document.body = { classList: { add(cls) { bodyClasses.push(cls); } } };
-global.document.createElement = tag => ["section","header","h2","p","footer","a","span"].includes(tag)
+global.document.createElement = tag => ["section","header","h2","p","footer","a","span","img","strong"].includes(tag)
   ? makeNode(tag) : createElementOriginal(tag);
 global.location = { hostname: "chart-share-test-20261019--ukraine-air-alerts.netlify.app",
   href: embedUrl, hash: embedParsed.hash };
@@ -209,7 +210,11 @@ assert.equal(resized, 1, "Chart must resize after relocation");
 assert.equal(section.children[0].children[0].textContent, "Накопичений час під тривогою");
 assert.match(section.children[0].children[1].textContent, /Київ/);
 const footer = section.children[2];
-assert.match(footer.children[0].textContent, /Дані/);
+assert.equal(footer.children[0].tag, "a");
+assert.equal(footer.children[0].className, "embed-brand-link");
+assert.equal(footer.children[0].children[0].src, "brand-mark.svg");
+assert.equal(footer.children[0].children[1].children[0].textContent, "Повітряні тривоги");
+assert.match(footer.children[0].children[1].children[1].textContent, /netlify\.app/);
 assert.equal(footer.children[1].target, "_blank");
 assert.equal(new URL(footer.children[1].href).searchParams.has("embed"), false);
 assert.equal(new URL(footer.children[1].href).hash, embedParsed.hash);
@@ -217,3 +222,6 @@ assert.equal(new URL(footer.children[1].href).hash, embedParsed.hash);
 global.location.href = "https://example.test/?embed=notAllowedChart";
 assert.equal(s.currentEmbedId(), null);
 console.log("embed URL HTML escaping, exact-state restoration, iframe DOM relocation checks PASS");
+assert.ok(calls.text.some(v => String(v).includes("https://test-preview.example/")), "PNG must display readable source URL");
+assert.ok(drawContext.stroke, "logo vector support must be present");
+console.log("logo branding/source URL PNG and linked embed assertions PASS");

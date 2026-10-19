@@ -22,10 +22,12 @@ jobs:
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_chart_share.js
           grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
+          test -s kyiv-air-alerts-grafana/pages-preview/brand-mark.svg
+          grep -q 'brand-mark.svg' kyiv-air-alerts-grafana/pages-preview/chart-share.js
       - name: Assemble preview
         run: |
           mkdir -p _preview
-          cp kyiv-air-alerts-grafana/pages-preview/{index.html,app.js,chart-share.js,styles.css,features.json} _preview/
+          cp kyiv-air-alerts-grafana/pages-preview/{index.html,app.js,chart-share.js,styles.css,features.json,brand-mark.svg} _preview/
       - name: Deploy draft only, never production
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

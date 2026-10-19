@@ -89,6 +89,35 @@
     return text + "…";
   }
 
+
+  // Geometry/palette match brand-mark.svg. Draw vectors directly for a crisp PNG.
+  function drawBrandMark(ctx, x, y, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size / 64, size / 64);
+    ctx.fillStyle = "#142131";
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(0, 0, 64, 64, 16);
+    } else {
+      ctx.rect(0, 0, 64, 64);
+    }
+    ctx.fill();
+    ctx.strokeStyle = "#62a0ea";
+    ctx.lineWidth = 4.5;
+    ctx.lineCap = "round";
+    for (const radius of [12, 22, 32]) {
+      ctx.beginPath();
+      ctx.arc(18, 44, radius, -Math.PI / 2, 0);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#f8e45c";
+    ctx.beginPath();
+    ctx.arc(18, 44, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   function renderChartPng(chartId, card) {
     const source = root.document.getElementById(chartId);
     if (!source || source.width < 1 || source.height < 1) {
@@ -98,7 +127,7 @@
       card.closest(".comparison-section")?.querySelector("h2")?.textContent?.trim() ||
       translated("Повітряні тривоги", "Air alerts");
     const caption = chartContext(chartId);
-    const size = { width: 1440, inset: 64, maxChartHeight: 820, chartTop: 222 };
+    const size = { width: 1440, inset: 64, maxChartHeight: 820, chartTop: 260 };
     const usableWidth = size.width - 2 * size.inset;
     const factor = Math.min(usableWidth / source.width, size.maxChartHeight / source.height);
     const drawnWidth = Math.round(source.width * factor);
@@ -111,15 +140,16 @@
 
     ctx.fillStyle = "#0b0f14";
     ctx.fillRect(0, 0, output.width, output.height);
+    drawBrandMark(ctx, size.inset, 30, 62);
     ctx.fillStyle = "#62a0ea";
     ctx.font = "700 20px Inter, system-ui, sans-serif";
-    ctx.fillText(translated("ПОВІТРЯНІ ТРИВОГИ · ГРАФІК", "AIR ALERTS · CHART"), size.inset, 55);
+    ctx.fillText(translated("ПОВІТРЯНІ ТРИВОГИ · ГРАФІК", "AIR ALERTS · CHART"), size.inset + 84, 65);
     ctx.fillStyle = "#e7edf3";
     ctx.font = "700 43px Inter, system-ui, sans-serif";
-    ctx.fillText(fitCanvasText(ctx, title, usableWidth), size.inset, 118);
+    ctx.fillText(fitCanvasText(ctx, title, usableWidth), size.inset, 157);
     ctx.fillStyle = "#aabcca";
     ctx.font = "25px Inter, system-ui, sans-serif";
-    ctx.fillText(fitCanvasText(ctx, caption, usableWidth), size.inset, 168);
+    ctx.fillText(fitCanvasText(ctx, caption, usableWidth), size.inset, 209);
 
     ctx.drawImage(source,
       size.inset + Math.round((usableWidth - drawnWidth) / 2), size.chartTop,
@@ -139,7 +169,7 @@
         " · Europe/Kyiv", usableWidth), size.inset, footerY + 12);
     ctx.fillStyle = "#7592a5";
     ctx.font = "18px Inter, system-ui, sans-serif";
-    ctx.fillText(root.location.hostname, size.inset, footerY + 47);
+    ctx.fillText("https://" + root.location.hostname + "/", size.inset, footerY + 47);
     const dataUrl = output.toDataURL("image/png");
     if (!dataUrl.startsWith("data:image/png;base64,")) {
       throw new Error("Browser did not produce PNG");
@@ -373,18 +403,44 @@
 
     const footer = root.document.createElement("footer");
     footer.className = "embed-footer";
-    const source = root.document.createElement("span");
-    source.textContent = translated(
-      "Дані: Повітряні тривоги · міста України",
-      "Source: Air alerts · Ukrainian cities");
-    const link = root.document.createElement("a");
     const full = new URL(root.location.href);
     full.searchParams.delete("embed");
+
+    const brandLink = root.document.createElement("a");
+    brandLink.className = "embed-brand-link";
+    brandLink.href = full.toString();
+    brandLink.target = "_blank";
+    brandLink.rel = "noopener noreferrer";
+    brandLink.setAttribute("aria-label", translated(
+      "Повітряні тривоги — відкрити джерело графіка",
+      "Air alerts — open chart source"));
+
+    const brandIcon = root.document.createElement("img");
+    brandIcon.className = "embed-brand-icon";
+    brandIcon.src = "brand-mark.svg";
+    brandIcon.width = 40;
+    brandIcon.height = 40;
+    brandIcon.alt = "";
+    brandIcon.setAttribute("aria-hidden", "true");
+    const identity = root.document.createElement("span");
+    identity.className = "embed-brand-identity";
+    const brandName = root.document.createElement("strong");
+    brandName.textContent = translated("Повітряні тривоги", "Air alerts");
+    const sourceUrl = root.document.createElement("span");
+    sourceUrl.className = "embed-brand-domain";
+    sourceUrl.textContent = full.hostname;
+    identity.appendChild(brandName);
+    identity.appendChild(sourceUrl);
+    brandLink.appendChild(brandIcon);
+    brandLink.appendChild(identity);
+
+    const link = root.document.createElement("a");
+    link.className = "embed-open-chart";
     link.href = full.toString();
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.textContent = translated("Відкрити графік", "Open full chart");
-    footer.appendChild(source);
+    link.textContent = translated("Відкрити графік ↗", "Open full chart ↗");
+    footer.appendChild(brandLink);
     footer.appendChild(link);
     rootSection.appendChild(footer);
     main.appendChild(rootSection);
