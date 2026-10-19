@@ -1,0 +1,52 @@
+{
+  "schema": "H2_EXPECTED_TIP_CAS_GIT_READBACK_V1",
+  "independent_review": "GIT_ONLY_VERIFICATION_OF_FROZEN_RUNNER_REPORTS",
+  "research_branch": "research-h2-expected-tip-cas-e2e-2026-10-20",
+  "proof_commit": "1673f0e5eb97d50e6b82fa3d04a5b76ca1b62c5e",
+  "test_commit": "d6019f2fdf910273fa6bd19d9229b7595b846b1a",
+  "pg18_ab_run": 39326315620,
+  "job_A": 118312985192,
+  "job_B": 118312985580,
+  "git_only_run": 39326619194,
+  "git_only_job": 118314023005,
+  "git_only_conclusion": "success",
+  "independently_readback": "PASS_GIT_ONLY original_pairs=4 rejected_corruptions=8",
+  "expected_tip_assertions_each": 48,
+  "original_mutation_assertions_each": 83,
+  "original_control_blobs": {
+    "operational_writer": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+    "operational_monitor": "95e0eb313c6c68016601f681ab5186bf147d6dd1"
+  },
+  "tested_sources": {
+    "monitor": "41997947555e43b6630489b058ea2b43c67f72fa",
+    "writer": "41bf81e6853572234e4951df04387eeb950c1b33",
+    "snapshot": "ecca8d8702e4afa7a157178d1a17a147c5fd6f95",
+    "test": "45f8655cc9934582b400e73fdb0495721f3449b9"
+  },
+  "verdicts": {
+    "H2_EXPECTED_TIP_SNAPSHOT_AUTHORITY": "PASS_OFFLINE_IN_PROCESS_ONLY",
+    "H2_OPERATIONAL_WRITER_CAS": "PASS_OFFLINE",
+    "H2_REAL_MONITOR_CALLER_INTEGRATION": "PASS_BOUNDED_REAL_MAIN_MOCKED_SOURCES",
+    "H2_STALE_CONCURRENT_WRITE_REJECTION": "PASS_OFFLINE_TWO_INDEPENDENT_CONNECTIONS",
+    "H2_TRANSACTION_COMMIT_ACK": "PASS_OFFLINE",
+    "H2_DUE_WORK_FAIL_CLOSED": "PASS_OFFLINE_TESTED_STALE_EXCEPTION",
+    "H2_PG18_A_B_EXECUTION": "PASS",
+    "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED_NO_GO"
+  },
+  "limits": {
+    "observed_partial_schema_not_exact_neon": true,
+    "synthetic_fixture_only": true,
+    "neon_sql_or_resources_touched": false,
+    "operational_wip_modified": false,
+    "main_operational_source_modified": false,
+    "site_prod_or_production_modified": false,
+    "current_213_contracts": "203 MATCH / 3 MISMATCH / 7 UNVERIFIED",
+    "neondb_roles_runtime": "UNVERIFIED",
+    "neon_authority_active": "NO",
+    "production_cutover_executed": "NO",
+    "wip_activation": "NO-GO",
+    "unbound_unresolved": 25,
+    "c4_c5": "NOT PROVEN",
+    "final_disposable_integration": "NO-GO pending separately authorized catalog/role/transaction review"
+  }
+}
