@@ -1,0 +1,108 @@
+{
+  "kind": "H2_PG18_VIEW_AB_BYTE_EXACT_RETENTION_MANIFEST",
+  "version": 1,
+  "date": "2026-10-19",
+  "source": {
+    "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+    "workflow_run_id": 39241969351,
+    "workflow_id": 389311071,
+    "tested_commit": "2735b0b50960b12178ef82337f11942d90bc994a",
+    "workflow_event": "push",
+    "execution_topology": "one workflow run, two separate fresh PostgreSQL 18.6 service instances",
+    "postgres_version": "18.6 (Debian 18.6-1.pgdg13+2)"
+  },
+  "jobs": {
+    "A": {
+      "job_id": 118024700635,
+      "artifact_id": 12180769759,
+      "zip_size_bytes": 3491,
+      "zip_sha256": "ffff30a2b13337aa6f6e70ec758f9b2cfc9a0169f3f75fc0c3441a9da5b260b8",
+      "zip_crc_pass": true,
+      "conclusion": "success"
+    },
+    "B": {
+      "job_id": 118024700964,
+      "artifact_id": 12181577406,
+      "zip_size_bytes": 3492,
+      "zip_sha256": "172affcf3da346ed64c586854afe0f31209927a644e27a4db2b504dc5fa8b751",
+      "zip_crc_pass": true,
+      "conclusion": "success"
+    }
+  },
+  "original_members": [
+    {
+      "archive_path": "A/h2_neon_checkpoint_view_pg18_A.json",
+      "source_copy": "A",
+      "original_zip_name": "h2_neon_checkpoint_view_pg18_A.json",
+      "byte_size": 7822,
+      "sha256": "8f60b5706be97696f906ef530b1a554d5dae4fd7ff36c00175d5ef6adf6be9e8",
+      "kind": "report"
+    },
+    {
+      "archive_path": "A/h2_neon_job_provenance.json",
+      "source_copy": "A",
+      "original_zip_name": "h2_neon_job_provenance.json",
+      "byte_size": 546,
+      "sha256": "0ab752b31a0fd8ed1c0ade0bc551371c9ceea9c04d78e4f3d2c7ae9accc73ae5",
+      "kind": "provenance"
+    },
+    {
+      "archive_path": "B/h2_neon_checkpoint_view_pg18_B.json",
+      "source_copy": "B",
+      "original_zip_name": "h2_neon_checkpoint_view_pg18_B.json",
+      "byte_size": 7822,
+      "sha256": "3db878b06b643a75e5adf766eecc3c4955068e5dd9daf827ea5ddc3d158984ba",
+      "kind": "report"
+    },
+    {
+      "archive_path": "B/h2_neon_job_provenance.json",
+      "source_copy": "B",
+      "original_zip_name": "h2_neon_job_provenance.json",
+      "byte_size": 546,
+      "sha256": "8771f40c7a219f8650ff6e724d751bde878e4c33485dc3b173d6d70f729d1d7f",
+      "kind": "provenance"
+    }
+  ],
+  "archive": {
+    "path": "research/h2_neon_view_pg18_original_AB_reports_2026-10-19.json.xz.b64",
+    "git_blob": "d83a1e0660f0c786c770b8b4cff0ca000b96670b",
+    "bytes": 6153,
+    "sha256": "f38df3a6dff26dcd647e494049811297fd3d486053af285937305510202bf9cb",
+    "compressed_bytes": 4612,
+    "decompressed_map_bytes": 22525,
+    "map_format": "h2_pg18_view_AB_raw_map_v1"
+  },
+  "source_git_blobs": {
+    "test_script": "fc71ce89cb3fec0dac916fb58a01764665183acf",
+    "workflow": "283fd874abefdcb56bc84f5d04e6de3088e7a2b6",
+    "original_fixture": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+    "checkpoint_view_supplement": "d44eda04f20034b28125bf3e94d5881ab340db5a",
+    "pinned_phase1_source": "ed014e61fc6186fa9daf91c763c847e7df2f0306"
+  },
+  "verdicts": {
+    "A": "PASS_PG18_OFFLINE_TARGETED",
+    "B": "PASS_PG18_OFFLINE_TARGETED",
+    "checks_A": 34,
+    "checks_B": 34,
+    "schema": "7 tables, 167 columns, 221 constraints, 30 indexes, 1 view of 18 columns",
+    "matrix": {
+      "MATCH": 203,
+      "MISMATCH": 3,
+      "UNVERIFIED": 7
+    }
+  },
+  "limits": {
+    "raw_original_zip_bytes_committed": false,
+    "raw_original_json_bytes_committed": true,
+    "exact_live_neon_schema": false,
+    "neon_connections": 0,
+    "neon_writes": 0,
+    "production_modifications": 0,
+    "disposable_neon_integration": "BLOCKED",
+    "missing_DB_guarantees": [
+      "UNIQUE(supersedes_classification_uid)",
+      "owner append-only",
+      "current-tip uniqueness arbiter"
+    ]
+  }
+}
