@@ -1,0 +1,48 @@
+{
+  "document_type": "H2_LIVE_NEON_CATALOG_POSTCOMMIT_INDEPENDENT_GIT_READBACK_RECEIPT",
+  "date": "2026-10-19",
+  "source_execution": "October 19 authorized read-only Neon catalog, not re-executed",
+  "research_branch": "research-h2-live-neon-catalog-evidence-freeze-2026-10-19",
+  "first_frozen_commit": "3de322b8ee93c5be5341e0dad51fb1fe36cf2534",
+  "git_only_ci": {
+    "run_id": 39273063710,
+    "job_id": 118130162879,
+    "tested_commit": "3de322b8ee93c5be5341e0dad51fb1fe36cf2534",
+    "status": "completed",
+    "conclusion": "success",
+    "observed_output": "PASS GIT-ONLY",
+    "negative_corruption_controls_passed": 7,
+    "negative_corruption_controls_total": 7,
+    "log_verified": true
+  },
+  "readback": {
+    "source": "fresh GitHub fetch_file at first frozen commit",
+    "files": 9,
+    "all_exact_blob_sha1_match": true,
+    "original_response_path": "research/h2_live_neon_catalog_readonly_response_2026-10-19.json",
+    "original_response_blob": "e550b35578283b2af4e0e8fba956e98c4bcc0f03",
+    "original_response_bytes": 60689,
+    "original_response_sha256": "60d829053bb7d7e9a734c12c154b6db5552cdc558b60105babbecdbec0d3e624"
+  },
+  "limitations": [
+    "The source SQL was reconstructed and hash-verified at preflight, but original raw-byte file could not be materialized from the Library: it is not in Git. The Git-only CI explicitly reports source_sql_byte_check_in_this_run = NOT REPEATABLE.",
+    "Git-only catalog proof does not verify actual H2 runtime SQL login, Neon write/COMMIT or concurrent behavior.",
+    "The accepted 203/3/7 matrix remains unchanged; the earlier research catalog-completion candidate is not automatically accepted."
+  ],
+  "verdicts": {
+    "raw_response": "PASS_FROZEN_BYTE_EXACT_AND_INDEPENDENT_GIT_READBACK",
+    "catalog_inspection": "PASS_CANDIDATE_BOUNDED",
+    "runtime_role": "UNVERIFIED",
+    "full_runtime_equivalence": "NOT_PROVEN",
+    "disposable_neon_write_test": "BLOCKED"
+  },
+  "changes": {
+    "neon_calls": 0,
+    "sql_executions": 0,
+    "production_changes": 0,
+    "site_prod_changes": 0,
+    "operational_wip_changes": 0,
+    "app_code_changes": 0
+  },
+  "coordination_update": "Do not update main PROJECT_STATE.md / CHANGELOG.md until separate independent acceptance of this new candidate."
+}
