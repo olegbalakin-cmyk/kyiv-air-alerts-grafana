@@ -70,7 +70,7 @@ def setup():
   c.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(DATABASE)))
  execfile(BASE/'observed_partial_schema.sql')
  # The exact 18-column view is an acknowledged reconstruction adaptation.
- execfile(REPO/'research/h2_neon_contract_role_pg18_2026-10-20/current_view_fixture.sql')
+ execfile(ROOT/'current_view_fixture.sql')
 def clean():
  with con() as c:
   original=objects(c)
