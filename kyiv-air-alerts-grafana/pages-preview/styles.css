@@ -46,3 +46,83 @@
   .insight-year-control{width:100%;min-width:100%;flex-basis:auto}
   .insight-chart{height:330px}
 }
+
+/* Per-chart sharing actions sit beside CSV export. */
+.chart-export-row{gap:8px;flex-wrap:wrap}
+.chart-image-button{color:#c4e6fa}
+.chart-image-button:hover{border-color:#82c1fa}
+.chart-image-button:focus-visible{outline:2px solid #79bfff;outline-offset:2px}
+.shared-chart-target{outline:2px solid #427eb0;outline-offset:3px;scroll-margin-top:24px}
+
+
+/* Single-chart iframe view keeps the source graph live and interactive. */
+body.embed-mode{margin:0;min-width:0;min-height:0;background:#0b0f14}
+body.embed-mode > header,
+body.embed-mode > footer,
+body.embed-mode > #introTour{display:none!important}
+body.embed-mode > main{display:block;margin:0!important;padding:0!important;width:100%!important;max-width:none!important;min-width:0}
+body.embed-mode > main > :not(.embed-container){display:none!important}
+body.embed-mode .embed-container{display:block;width:100%;margin:0;padding:10px 12px 12px;min-width:0}
+body.embed-mode .embed-heading{padding:8px 6px 10px}
+body.embed-mode .embed-heading h2{margin:0 0 7px;font-size:19px;line-height:1.32;color:#e7edf3;overflow-wrap:anywhere}
+body.embed-mode .embed-context{margin:0;color:#b8c4cf;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+body.embed-mode .embed-container > .chart-card{display:block!important;grid-column:auto!important;margin:0;padding:12px 14px;min-height:0;min-width:0}
+body.embed-mode .embed-container > .chart-card h3{display:none}
+body.embed-mode .embed-container .chart-export-row,
+body.embed-mode .embed-container .section-range-controls,
+body.embed-mode .embed-container .compare-casualty-controls,
+body.embed-mode .embed-container .inline-check{display:none!important}
+body.embed-mode .embed-container .chart-wrap{height:390px;min-height:240px;max-width:100%;min-width:0}
+body.embed-mode .embed-container .time-profile-chart,
+body.embed-mode .embed-container .insight-chart,
+body.embed-mode .embed-container .casualty-chart,
+body.embed-mode .embed-container .kyiv-threat-causes-chart{height:390px}
+body.embed-mode .embed-container .chart-subtitle{font-size:11px;line-height:1.36;margin:5px 0 8px}
+body.embed-mode .embed-container .time-profile-card-heading{display:block}
+body.embed-mode .embed-footer{display:flex!important;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0;padding:10px 6px 0;font-size:12px;color:#b8c4cf}
+body.embed-mode .embed-footer a{color:#8bc8ff;text-decoration:none}
+body.embed-mode .embed-footer a:hover{text-decoration:underline}
+body.embed-mode .embed-unavailable{padding:32px 12px;color:#e7edf3}
+.chart-embed-button{color:#9dd1fd}
+.chart-embed-button:hover{border-color:#7db9e8}
+.chart-embed-button:focus-visible{outline:2px solid #79bfff;outline-offset:2px}
+@media(max-width:620px){
+ body.embed-mode .embed-container{padding:6px}
+ body.embed-mode .embed-container > .chart-card{padding:10px}
+ body.embed-mode .embed-container .chart-wrap,
+ body.embed-mode .embed-container .time-profile-chart,
+ body.embed-mode .embed-container .insight-chart,
+ body.embed-mode .embed-container .casualty-chart,
+ body.embed-mode .embed-container .kyiv-threat-causes-chart{height:365px}
+ body.embed-mode .embed-heading h2{font-size:16px}
+}
+
+/* Shared identity for chart embeds: linked brand mark + source domain. */
+body.embed-mode .embed-footer{align-items:center;padding-top:12px;border-top:1px solid #253747}
+body.embed-mode .embed-brand-link{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:100%;color:#e7edf3;text-decoration:none}
+body.embed-mode .embed-brand-icon{display:block;flex:0 0 40px;width:40px;height:40px;border-radius:10px}
+body.embed-mode .embed-brand-identity{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.2}
+body.embed-mode .embed-brand-identity strong{font-size:13px;font-weight:700;color:#e7edf3}
+body.embed-mode .embed-brand-domain{display:block;font-size:11px;color:#a6bed1;overflow-wrap:anywhere}
+body.embed-mode .embed-open-chart{font-size:12px;white-space:nowrap}
+body.embed-mode .embed-brand-link:hover .embed-brand-identity strong{color:#8bc8ff}
+body.embed-mode .embed-brand-link:focus-visible,
+body.embed-mode .embed-open-chart:focus-visible{outline:2px solid #8bc8ff;outline-offset:4px;border-radius:4px}
+
+body.embed-mode .embed-footer{align-items:center;padding-top:12px;border-top:1px solid #253747}
+body.embed-mode .embed-brand-link{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:100%;color:#e7edf3;text-decoration:none}
+body.embed-mode .embed-brand-icon{display:block;flex:0 0 40px;width:40px;height:40px;border-radius:10px}
+body.embed-mode .embed-brand-identity{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.2}
+body.embed-mode .embed-brand-identity strong{font-size:13px;font-weight:700;color:#e7edf3}
+body.embed-mode .embed-brand-domain{display:block;font-size:11px;color:#a6bed1;overflow-wrap:anywhere}
+body.embed-mode .embed-open-chart{font-size:12px;white-space:nowrap}
+body.embed-mode .embed-brand-link:hover strong{color:#8bc8ff}
+
+/* Approved logo #12: responsive vector lockup, with one semantic H1. */
+.header-brand{display:block;width:min(100%,470px);max-width:100%;height:auto;aspect-ratio:945/244;object-fit:contain;object-position:left center;margin:0 0 12px}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.header-copy{min-width:0;max-width:820px}
+@media(max-width:620px){.header-brand{width:min(100%,390px);margin-bottom:9px}}
+body.embed-mode .embed-footer{flex-wrap:wrap;gap:10px}
+body.embed-mode .embed-brand-link{flex:1 1 180px;min-width:0}
+body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wrap:anywhere}

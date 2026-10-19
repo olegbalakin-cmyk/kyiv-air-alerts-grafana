@@ -5,10 +5,10 @@ on:
   push:
     branches: [site-prod]
     paths:
-      - "kyiv-air-alerts-grafana/pages-preview/index.html"
-      - "kyiv-air-alerts-grafana/pages-preview/app.js"
-      - "kyiv-air-alerts-grafana/pages-preview/styles.css"
-      - "kyiv-air-alerts-grafana/pages-preview/features.json"
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/tests/test_chart_share.js"
+      - ".github/workflows/netlify-production.yml"
+      - "netlify.toml"
 
 concurrency:
   group: netlify-production-site
@@ -19,12 +19,13 @@ permissions:
 
 jobs:
   deploy-production:
+    if: github.ref == 'refs/heads/site-prod'
     runs-on: ubuntu-latest
     steps:
       - name: Check out production site branch
         uses: actions/checkout@v4
         with:
-          ref: site-prod
+          ref: ${{ github.sha }}
 
       - name: Verify frontend-only production bundle
         run: |
@@ -34,15 +35,22 @@ jobs:
           test -s kyiv-air-alerts-grafana/pages-preview/features.json
           grep -q 'raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/' kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
+          grep -q 'name="robots" content="index,follow,max-snippet:-1"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'rel="canonical" href="https://ukraine-air-alerts.netlify.app/"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'chart-share.js?v=20261019-share2-1' kyiv-air-alerts-grafana/pages-preview/index.html
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          for asset in brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
+            test -s "kyiv-air-alerts-grafana/pages-preview/$asset"
+          done
 
       - name: Build static frontend
         run: |
           rm -rf _site
           mkdir -p _site
-          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
-          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
-          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
-          cp kyiv-air-alerts-grafana/pages-preview/features.json _site/features.json
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 10
 
       - name: Deploy production to Netlify
         env:
