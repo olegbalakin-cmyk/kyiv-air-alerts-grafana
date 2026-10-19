@@ -1,0 +1,197 @@
+{
+  "document_type": "H2_LIVE_NEON_SEVEN_CONTRACT_CATALOG_INDEPENDENT_AUDIT",
+  "date": "2026-10-19",
+  "raw_blob": "e550b35578283b2af4e0e8fba956e98c4bcc0f03",
+  "raw_sha256": "60d829053bb7d7e9a734c12c154b6db5552cdc558b60105babbecdbec0d3e624",
+  "source_sql_sha256": "eac52ff8dd6628d322dfc71e94a1ec0a053ed4c55ac3867dd85228d233be1d26",
+  "query_population": "3 READ ONLY/timeout SET and 16 SELECT, 19 arrays confirmed; exact statement-map in accompanying JSON",
+  "observed_session": {
+    "database_name": "neondb",
+    "effective_role": "neondb_owner",
+    "session_role": "neondb_owner",
+    "transaction_read_only": "on",
+    "transaction_isolation": "read committed",
+    "statement_timeout": "15s",
+    "lock_timeout": "5s",
+    "server_version": "18.6 (653b019)"
+  },
+  "contracts": [
+    {
+      "key": "U1",
+      "original_ordinal": 183,
+      "source_results": [
+        5,
+        6
+      ],
+      "catalog_proven": [
+        "PK(episode_uid)",
+        "UNIQUE(legacy_episode_id)",
+        "UNIQUE(city_key,alert_type,start_at,end_at)",
+        "partial unique open (city_key,alert_type,start_at) WHERE end_at IS NULL",
+        "no observed exclusion constraint"
+      ],
+      "not_proven": [
+        "distinct overlapping finite intervals not prohibited by unique keys",
+        "application overlap behavior"
+      ]
+    },
+    {
+      "key": "U2",
+      "original_ordinal": 190,
+      "source_results": [
+        7,
+        8
+      ],
+      "catalog_proven": [
+        "18 named/typed columns ordered 1..18",
+        "DISTINCT ON (source_key,city_key,stream_key)",
+        "ORDER BY source_key,city_key,stream_key,checkpoint_seq DESC",
+        "18 dependencies on public.ingestion_checkpoints",
+        "view owner neondb_owner"
+      ],
+      "comparison": "Same substantive SELECT and 18-column contract as accepted PG18 synthetic view; synthetic FROM public.ingestion_checkpoints vs Neon unqualified FROM ingestion_checkpoints; catalog search_path resolves public; app role search_path not proven",
+      "not_proven": [
+        "application login grants",
+        "actual application role"
+      ]
+    },
+    {
+      "key": "U3",
+      "original_ordinal": 206,
+      "source_results": [
+        9,
+        10,
+        11
+      ],
+      "catalog_proven": [
+        "4 selected available roles",
+        "9 membership edges",
+        "effective object grant results for cloud_admin, neon_service, neondb_owner (24 rows)",
+        "view/table owner neondb_owner"
+      ],
+      "not_proven": [
+        "true runtime application SQL username",
+        "real application permissions"
+      ]
+    },
+    {
+      "key": "U4",
+      "original_ordinal": 210,
+      "source_results": [
+        12
+      ],
+      "catalog_proven": [
+        "pg_catalog.gen_random_uuid()",
+        "pg_catalog.hashtextextended(text,bigint)",
+        "pg_catalog.pg_advisory_xact_lock(bigint)",
+        "12 role/function execute observations"
+      ],
+      "not_proven": [
+        "concurrent real Neon locks/writes",
+        "application role privileges beyond observed login roles"
+      ]
+    },
+    {
+      "key": "U5",
+      "original_ordinal": 211,
+      "source_results": [
+        4,
+        13,
+        14
+      ],
+      "catalog_proven": [
+        "PostgreSQL 18.6",
+        "read-only session succeeded",
+        "read committed isolation",
+        "15s statement_timeout and 5s lock_timeout",
+        "134 constraint rows, none deferrable",
+        "default_transaction_read_only off outside inspected read-only session"
+      ],
+      "not_proven": [
+        "future write transaction COMMIT",
+        "durable acknowledgement uncertainty",
+        "Neon write/concurrency runtime"
+      ]
+    },
+    {
+      "key": "U6",
+      "original_ordinal": 212,
+      "source_results": [
+        15,
+        16,
+        17
+      ],
+      "catalog_proven": [
+        "plpgsql v1.0 in pg_catalog only installed extension in result",
+        "session search_path = \"$user\", public",
+        "effective schemas = pg_catalog, public",
+        "zero role/database overrides returned"
+      ],
+      "not_proven": [
+        "application role-specific search_path and unqualified binding"
+      ]
+    },
+    {
+      "key": "U7",
+      "original_ordinal": 213,
+      "source_results": [
+        18,
+        19
+      ],
+      "catalog_proven": [
+        "UNIQUE(classification_key)",
+        "classification PK and 5 observed indexes",
+        "FK supersedes_classification_uid not UNIQUE",
+        "classification owner effective UPDATE/DELETE",
+        "no direct current-tip arbiter among observed indexes/constraints"
+      ],
+      "not_proven": [
+        "DB-enforced single successor",
+        "DB owner-proof append-only",
+        "DB current-tip uniqueness",
+        "Neon concurrent write behavior"
+      ]
+    }
+  ],
+  "matrix": {
+    "source_v5_blob": "810fa36d0064888587ec88a0ab1380b6ef7e2a1e",
+    "candidate_v6_blob": "6f1269c7d3134f2c3bfce2373a01641c26f10fa6",
+    "same_all_213_original_ordinals_objects_requirements_statuses": true,
+    "statuses": {
+      "MATCH": 203,
+      "MISMATCH": 3,
+      "UNVERIFIED": 7
+    },
+    "three_mismatches": [
+      193,
+      196,
+      197
+    ],
+    "seven_unverified": [
+      183,
+      190,
+      206,
+      210,
+      211,
+      212,
+      213
+    ],
+    "new_matrix_not_created": true
+  },
+  "candidate_comparison": "Confirms and extends earlier unaccepted partial catalog candidate U1-U7; role, DB-only invariants, Neon concurrency and write behavior remain open. New 19-result SQL response is distinct from candidate report's abbreviated query listing.",
+  "verdicts": {
+    "raw_response_object": "BYTE_EXACT_VERIFIED_BEFORE_COMMIT",
+    "catalog_audit": "PASS_CANDIDATE_IF_DURABLE_READBACK",
+    "actual_runtime_role": "UNVERIFIED",
+    "full_neon_equivalence": "NOT_PROVEN",
+    "disposable_write_readiness": "BLOCKED"
+  },
+  "preserved": {
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "WIP_ACTIVATION": "NO-GO"
+  }
+}

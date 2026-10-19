@@ -1,0 +1,53 @@
+{
+  "document_type": "H2_ACTUAL_RUNTIME_SQL_ROLE_GIT_ONLY_ATTRIBUTION",
+  "date": "2026-10-19",
+  "verdict": "H2 ACTUAL RUNTIME SQL ROLE = UNVERIFIED",
+  "catalog_session_role": "neondb_owner",
+  "catalog_owner_not_equivalent_to_application_login": true,
+  "credential_inspection_performed": false,
+  "actual_connection_username_in_nonsecret_git_configuration": false,
+  "configuration_interface": "ATTACK_EVENT_DATABASE_URL",
+  "research_writer": {
+    "git_blob": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+    "code_file": "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py",
+    "connection_behavior": "psycopg.connect(str(dsn), autocommit=True) if connection not supplied",
+    "dsn_role_behavior": "username is supplied by DSN or libpq defaults, not an explicit SQL SET ROLE in the inspected writer"
+  },
+  "operational_wip_writer": {
+    "git_blob": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+    "code_file": "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py",
+    "connection_behavior": "psycopg.connect(str(dsn), autocommit=False) if connection not supplied",
+    "differs_from_research": true
+  },
+  "monitor": {
+    "research_blob": "a94741aa3a65c18d7bffb846a2c26973564c7812",
+    "operational_wip_blob": "95e0eb313c6c68016601f681ab5186bf147d6dd1",
+    "dsn_source": "os.environ.get('ATTACK_EVENT_DATABASE_URL')",
+    "username_in_source": false
+  },
+  "workflow_observation": {
+    "main_explosion_workflow_blob": "1bf3385b3438a0ed471375db446ab08132d5bd87",
+    "main_job_guard": "if: ${{ false }}",
+    "secret_variable_reference_name": "PHASE1_PROD_SHADOW_DATABASE_URL",
+    "main_workflow_exports_as": "ATTACK_EVENT_DATABASE_URL",
+    "actual_secret_value_or_user": "not accessed",
+    "operational_wip_explosion_workflow_blob": "dfb98ce13ecfe76675eb32e204670f835096e1dc",
+    "observed_h2_db_env_binding_in_operational_wip_workflow": false
+  },
+  "catalog_roles": [
+    "cloud_admin",
+    "neon_service",
+    "neon_superuser",
+    "neondb_owner"
+  ],
+  "observed_grants_cover": [
+    "cloud_admin",
+    "neon_service",
+    "neondb_owner"
+  ],
+  "role_override_query_returned": 0,
+  "reason": "No approved committed non-secret configuration proves the actual deployed H2 DSN user; catalog session neondb_owner is not enough. Neither research proof nor operational WIP automatically proves H2 runtime deployment.",
+  "smallest_later_nonsecret_evidence": "Deployment-specific confirmed PostgreSQL username (only username, never full DSN or password), plus evidence that the actual H2 runtime process binds that endpoint/secret reference. Reconcile against already saved catalog role/grants if that username is among the observed roles; otherwise obtain separately authorized catalog-only grant evidence.",
+  "no_neon_access": true,
+  "no_secrets_access": true
+}

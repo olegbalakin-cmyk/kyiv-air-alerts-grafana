@@ -1,0 +1,2176 @@
+[
+  [],
+  [],
+  [],
+  [
+    {
+      "database_name": "neondb",
+      "effective_role": "neondb_owner",
+      "session_role": "neondb_owner",
+      "transaction_read_only": "on",
+      "transaction_isolation": "read committed",
+      "statement_timeout": "15s",
+      "lock_timeout": "5s",
+      "server_version": "18.6 (653b019)"
+    }
+  ],
+  [
+    {
+      "conname": "alert_episodes_alert_type_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (btrim(alert_type) <> ''::text)"
+    },
+    {
+      "conname": "alert_episodes_alert_type_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL alert_type"
+    },
+    {
+      "conname": "alert_episodes_canonicalization_version_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (canonicalization_version = 'alert-canonicalization-v1'::text)"
+    },
+    {
+      "conname": "alert_episodes_canonicalization_version_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL canonicalization_version"
+    },
+    {
+      "conname": "alert_episodes_city_key_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (btrim(city_key) <> ''::text)"
+    },
+    {
+      "conname": "alert_episodes_city_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL city_key"
+    },
+    {
+      "conname": "alert_episodes_created_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "conname": "alert_episodes_created_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT"
+    },
+    {
+      "conname": "alert_episodes_created_by_run_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL created_by_run_id"
+    },
+    {
+      "conname": "alert_episodes_episode_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (episode_state = ANY (ARRAY['open'::text, 'closed'::text]))"
+    },
+    {
+      "conname": "alert_episodes_episode_state_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL episode_state"
+    },
+    {
+      "conname": "alert_episodes_episode_uid_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL episode_uid"
+    },
+    {
+      "conname": "alert_episodes_exact_interval_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "UNIQUE (city_key, alert_type, start_at, end_at)"
+    },
+    {
+      "conname": "alert_episodes_legacy_episode_id_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "UNIQUE (legacy_episode_id)"
+    },
+    {
+      "conname": "alert_episodes_legacy_id_format_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (legacy_episode_id IS NULL OR legacy_episode_id ~ '^[0-9a-f]{24}$'::text)"
+    },
+    {
+      "conname": "alert_episodes_open_legacy_id_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (episode_state <> 'open'::text OR legacy_episode_id IS NULL)"
+    },
+    {
+      "conname": "alert_episodes_pkey",
+      "contype": "p",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "PRIMARY KEY (episode_uid)"
+    },
+    {
+      "conname": "alert_episodes_start_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL start_at"
+    },
+    {
+      "conname": "alert_episodes_state_interval_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (episode_state = 'open'::text AND end_at IS NULL OR episode_state = 'closed'::text AND end_at IS NOT NULL AND end_at > start_at)"
+    },
+    {
+      "conname": "alert_episodes_updated_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "conname": "alert_episodes_updated_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "FOREIGN KEY (updated_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT"
+    },
+    {
+      "conname": "alert_episodes_updated_by_run_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "NOT NULL updated_by_run_id"
+    },
+    {
+      "conname": "alert_episodes_updated_time_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "CHECK (updated_at >= created_at)"
+    }
+  ],
+  [
+    {
+      "index_name": "alert_episodes_city_start_idx",
+      "indisunique": false,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE INDEX alert_episodes_city_start_idx ON public.alert_episodes USING btree (city_key, start_at)",
+      "predicate": null
+    },
+    {
+      "index_name": "alert_episodes_exact_interval_key",
+      "indisunique": true,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE UNIQUE INDEX alert_episodes_exact_interval_key ON public.alert_episodes USING btree (city_key, alert_type, start_at, end_at)",
+      "predicate": null
+    },
+    {
+      "index_name": "alert_episodes_legacy_episode_id_key",
+      "indisunique": true,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE UNIQUE INDEX alert_episodes_legacy_episode_id_key ON public.alert_episodes USING btree (legacy_episode_id)",
+      "predicate": null
+    },
+    {
+      "index_name": "alert_episodes_open_interval_uidx",
+      "indisunique": true,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE UNIQUE INDEX alert_episodes_open_interval_uidx ON public.alert_episodes USING btree (city_key, alert_type, start_at) WHERE (end_at IS NULL)",
+      "predicate": "(end_at IS NULL)"
+    },
+    {
+      "index_name": "alert_episodes_pkey",
+      "indisunique": true,
+      "indisprimary": true,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE UNIQUE INDEX alert_episodes_pkey ON public.alert_episodes USING btree (episode_uid)",
+      "predicate": null
+    }
+  ],
+  [
+    {
+      "relname": "current_ingestion_checkpoints",
+      "relkind": "v",
+      "view_owner": "neondb_owner",
+      "relacl": null,
+      "view_definition": " SELECT DISTINCT ON (source_key, city_key, stream_key) checkpoint_id,\n    source_key,\n    city_key,\n    stream_key,\n    checkpoint_seq,\n    checkpoint_kind,\n    previous_checkpoint_id,\n    checked_at,\n    continuity_verified,\n    continuity_method,\n    continuity_anchor_at,\n    observed_oldest_start_at,\n    observed_latest_end_at,\n    observed_record_count,\n    cursor,\n    metadata,\n    created_by_run_id,\n    created_at\n   FROM ingestion_checkpoints\n  ORDER BY source_key, city_key, stream_key, checkpoint_seq DESC;",
+      "view_columns": [
+        {
+          "position": 1,
+          "name": "checkpoint_id",
+          "type": "uuid"
+        },
+        {
+          "position": 2,
+          "name": "source_key",
+          "type": "text"
+        },
+        {
+          "position": 3,
+          "name": "city_key",
+          "type": "text"
+        },
+        {
+          "position": 4,
+          "name": "stream_key",
+          "type": "text"
+        },
+        {
+          "position": 5,
+          "name": "checkpoint_seq",
+          "type": "bigint"
+        },
+        {
+          "position": 6,
+          "name": "checkpoint_kind",
+          "type": "text"
+        },
+        {
+          "position": 7,
+          "name": "previous_checkpoint_id",
+          "type": "uuid"
+        },
+        {
+          "position": 8,
+          "name": "checked_at",
+          "type": "timestamp with time zone"
+        },
+        {
+          "position": 9,
+          "name": "continuity_verified",
+          "type": "boolean"
+        },
+        {
+          "position": 10,
+          "name": "continuity_method",
+          "type": "text"
+        },
+        {
+          "position": 11,
+          "name": "continuity_anchor_at",
+          "type": "timestamp with time zone"
+        },
+        {
+          "position": 12,
+          "name": "observed_oldest_start_at",
+          "type": "timestamp with time zone"
+        },
+        {
+          "position": 13,
+          "name": "observed_latest_end_at",
+          "type": "timestamp with time zone"
+        },
+        {
+          "position": 14,
+          "name": "observed_record_count",
+          "type": "bigint"
+        },
+        {
+          "position": 15,
+          "name": "cursor",
+          "type": "jsonb"
+        },
+        {
+          "position": 16,
+          "name": "metadata",
+          "type": "jsonb"
+        },
+        {
+          "position": 17,
+          "name": "created_by_run_id",
+          "type": "uuid"
+        },
+        {
+          "position": 18,
+          "name": "created_at",
+          "type": "timestamp with time zone"
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 1
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 2
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 3
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 4
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 5
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 6
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 7
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 8
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 9
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 10
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 11
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 12
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 13
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 14
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 15
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 16
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 17
+    },
+    {
+      "dependent_schema": "public",
+      "dependent_relation": "ingestion_checkpoints",
+      "dependent_column_number": 18
+    }
+  ],
+  [
+    {
+      "rolname": "cloud_admin",
+      "rolcanlogin": true,
+      "rolinherit": true,
+      "rolsuper": true,
+      "rolcreaterole": true,
+      "rolbypassrls": true
+    },
+    {
+      "rolname": "neon_service",
+      "rolcanlogin": true,
+      "rolinherit": true,
+      "rolsuper": false,
+      "rolcreaterole": true,
+      "rolbypassrls": true
+    },
+    {
+      "rolname": "neon_superuser",
+      "rolcanlogin": false,
+      "rolinherit": true,
+      "rolsuper": false,
+      "rolcreaterole": true,
+      "rolbypassrls": true
+    },
+    {
+      "rolname": "neondb_owner",
+      "rolcanlogin": true,
+      "rolinherit": true,
+      "rolsuper": false,
+      "rolcreaterole": true,
+      "rolbypassrls": true
+    }
+  ],
+  [
+    {
+      "member_role": "neon_service",
+      "granted_role": "neon_superuser",
+      "admin_option": false,
+      "inherit_option": true,
+      "set_option": true
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_create_subscription",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": true
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_maintain",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": false
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_monitor",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": true
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_read_all_data",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": true
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_signal_autovacuum_worker",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": false
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_signal_backend",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": true
+    },
+    {
+      "member_role": "neon_superuser",
+      "granted_role": "pg_write_all_data",
+      "admin_option": true,
+      "inherit_option": true,
+      "set_option": true
+    },
+    {
+      "member_role": "neondb_owner",
+      "granted_role": "neon_superuser",
+      "admin_option": false,
+      "inherit_option": true,
+      "set_option": true
+    }
+  ],
+  [
+    {
+      "rolname": "cloud_admin",
+      "object_name": "alert_episode_sources",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "alert_episodes",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "attack_event_classifications",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "attack_event_sources",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "attack_events",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "current_ingestion_checkpoints",
+      "relkind": "v",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "ingestion_checkpoints",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "cloud_admin",
+      "object_name": "ingestion_runs",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "alert_episode_sources",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "alert_episodes",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "attack_event_classifications",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "attack_event_sources",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "attack_events",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "current_ingestion_checkpoints",
+      "relkind": "v",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "ingestion_checkpoints",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neon_service",
+      "object_name": "ingestion_runs",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "alert_episode_sources",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "alert_episodes",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "attack_event_classifications",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "attack_event_sources",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "attack_events",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "current_ingestion_checkpoints",
+      "relkind": "v",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "ingestion_checkpoints",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    },
+    {
+      "rolname": "neondb_owner",
+      "object_name": "ingestion_runs",
+      "relkind": "r",
+      "object_owner": "neondb_owner",
+      "relacl": null,
+      "schema_usage": true,
+      "can_select": true,
+      "can_insert": true,
+      "can_update": true,
+      "can_delete": true,
+      "sequence_usage": null
+    }
+  ],
+  [
+    {
+      "rolname": "cloud_admin",
+      "function_schema": "pg_catalog",
+      "proname": "gen_random_uuid",
+      "identity_arguments": "",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "cloud_admin",
+      "function_schema": "pg_catalog",
+      "proname": "hashtextextended",
+      "identity_arguments": "text, bigint",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "i",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "cloud_admin",
+      "function_schema": "pg_catalog",
+      "proname": "pg_advisory_xact_lock",
+      "identity_arguments": "bigint",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "cloud_admin",
+      "function_schema": "pg_catalog",
+      "proname": "pg_advisory_xact_lock",
+      "identity_arguments": "integer, integer",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neon_service",
+      "function_schema": "pg_catalog",
+      "proname": "gen_random_uuid",
+      "identity_arguments": "",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neon_service",
+      "function_schema": "pg_catalog",
+      "proname": "hashtextextended",
+      "identity_arguments": "text, bigint",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "i",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neon_service",
+      "function_schema": "pg_catalog",
+      "proname": "pg_advisory_xact_lock",
+      "identity_arguments": "bigint",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neon_service",
+      "function_schema": "pg_catalog",
+      "proname": "pg_advisory_xact_lock",
+      "identity_arguments": "integer, integer",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neondb_owner",
+      "function_schema": "pg_catalog",
+      "proname": "gen_random_uuid",
+      "identity_arguments": "",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neondb_owner",
+      "function_schema": "pg_catalog",
+      "proname": "hashtextextended",
+      "identity_arguments": "text, bigint",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "i",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neondb_owner",
+      "function_schema": "pg_catalog",
+      "proname": "pg_advisory_xact_lock",
+      "identity_arguments": "bigint",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    },
+    {
+      "rolname": "neondb_owner",
+      "function_schema": "pg_catalog",
+      "proname": "pg_advisory_xact_lock",
+      "identity_arguments": "integer, integer",
+      "function_owner": "cloud_admin",
+      "prosecdef": false,
+      "provolatile": "v",
+      "proacl": null,
+      "can_execute": true
+    }
+  ],
+  [
+    {
+      "name": "TimeZone",
+      "setting": "GMT",
+      "source": "default"
+    },
+    {
+      "name": "default_transaction_isolation",
+      "setting": "read committed",
+      "source": "default"
+    },
+    {
+      "name": "default_transaction_read_only",
+      "setting": "off",
+      "source": "default"
+    },
+    {
+      "name": "lock_timeout",
+      "setting": "5000",
+      "source": "session"
+    },
+    {
+      "name": "search_path",
+      "setting": "\"$user\", public",
+      "source": "default"
+    },
+    {
+      "name": "server_version",
+      "setting": "18.6 (653b019)",
+      "source": "default"
+    },
+    {
+      "name": "statement_timeout",
+      "setting": "15000",
+      "source": "session"
+    },
+    {
+      "name": "transaction_isolation",
+      "setting": "read committed",
+      "source": "override"
+    },
+    {
+      "name": "transaction_read_only",
+      "setting": "on",
+      "source": "session"
+    }
+  ],
+  [
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_alert_type_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_alert_type_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_canonicalization_version_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_canonicalization_version_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_city_key_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_city_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_created_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_created_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_created_by_run_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_episode_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_episode_state_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_episode_uid_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_exact_interval_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_legacy_episode_id_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_legacy_id_format_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_open_legacy_id_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_pkey",
+      "contype": "p",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_start_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_state_interval_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_updated_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_updated_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_updated_by_run_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "alert_episodes",
+      "conname": "alert_episodes_updated_time_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classification_classification_key_version_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classification_classifier_methodology_ver_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classification_originating_frozen_case_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_alert_end_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_alert_episode_uid_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_alert_start_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_alert_type_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_alert_type_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_binding_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_binding_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_binding_state_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_city_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_city_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_classification_key_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_classification_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_classification_uid_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_classifier_blob_sha_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_classifier_reason_codes_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_classifier_sha_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_correction_provenance_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_created_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_episode_id_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_event_types_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_evidence_set_sha256_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_evidence_sha_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_frozen_case_id_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_frozen_case_id_value_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_historical_episode_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_human_review_state_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_interval_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_is_event_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_key_format_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_key_version_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_normalization_version_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_origin_commit_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_origin_provenance_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_origin_provenance_sha256_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_origin_provenance_sha256_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_origin_repository_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_origin_state_sha_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_persisted_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_pkey",
+      "contype": "p",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_positive_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_qa_reasons_state_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_qa_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_qa_value_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_review_provenance_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_review_sha_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_review_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_supersedes_classification_uid_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_verdict_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_event_classifications",
+      "conname": "attack_event_classifications_verdict_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_alert_end_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_alert_episode_uid_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_alert_start_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_alert_type_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_alert_type_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_attack_event_key_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_attack_event_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_attack_event_key_version_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_attack_event_uid_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_binding_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_binding_state_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_binding_state_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_city_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_city_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_correction_provenance_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_created_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_created_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_current_classification_uid_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_current_classification_uid_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_episode_id_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_event_grain_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_event_status_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_grain_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_historical_episode_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_historical_episode_unique",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_interval_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_key_format_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_key_version_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_pkey",
+      "contype": "p",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_status_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_updated_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "attack_events",
+      "conname": "attack_events_updated_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_checked_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_checkpoint_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_checkpoint_kind_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_checkpoint_kind_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_checkpoint_seq_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_city_key_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_city_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_continuity_method_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_continuity_verified_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_created_at_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_created_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_created_by_run_id_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_cursor_object_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_identity_stream_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_metadata_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_metadata_object_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_no_self_previous_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_observed_count_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_observed_interval_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_pkey",
+      "contype": "p",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_previous_presence_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_previous_same_stream_fk",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_seq_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_source_key_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_source_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_stream_key_check",
+      "contype": "c",
+      "condeferrable": false,
+      "condeferred": false
+    },
+    {
+      "nspname": "public",
+      "relname": "ingestion_checkpoints",
+      "conname": "ingestion_checkpoints_stream_key_not_null",
+      "contype": "n",
+      "condeferrable": false,
+      "condeferred": false
+    }
+  ],
+  [
+    {
+      "extname": "plpgsql",
+      "extversion": "1.0",
+      "extension_schema": "pg_catalog"
+    }
+  ],
+  [
+    {
+      "configured_session_search_path": "\"$user\", public",
+      "effective_session_schemas": "{pg_catalog,public}"
+    }
+  ],
+  [],
+  [
+    {
+      "index_name": "attack_event_classifications_classification_key_key",
+      "indisunique": true,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE UNIQUE INDEX attack_event_classifications_classification_key_key ON public.attack_event_classifications USING btree (classification_key)",
+      "predicate": null
+    },
+    {
+      "index_name": "attack_event_classifications_episode_idx",
+      "indisunique": false,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE INDEX attack_event_classifications_episode_idx ON public.attack_event_classifications USING btree (city_key, historical_episode_id, created_at)",
+      "predicate": null
+    },
+    {
+      "index_name": "attack_event_classifications_parent_idx",
+      "indisunique": false,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE INDEX attack_event_classifications_parent_idx ON public.attack_event_classifications USING btree (alert_episode_uid, created_at) WHERE (alert_episode_uid IS NOT NULL)",
+      "predicate": "(alert_episode_uid IS NOT NULL)"
+    },
+    {
+      "index_name": "attack_event_classifications_pkey",
+      "indisunique": true,
+      "indisprimary": true,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE UNIQUE INDEX attack_event_classifications_pkey ON public.attack_event_classifications USING btree (classification_uid)",
+      "predicate": null
+    },
+    {
+      "index_name": "attack_event_classifications_verdict_idx",
+      "indisunique": false,
+      "indisprimary": false,
+      "indnullsnotdistinct": false,
+      "index_definition": "CREATE INDEX attack_event_classifications_verdict_idx ON public.attack_event_classifications USING btree (verdict, city_key, alert_start_at)",
+      "predicate": null
+    }
+  ],
+  [
+    {
+      "conname": "attack_event_classifications_alert_episode_uid_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT"
+    },
+    {
+      "conname": "attack_event_classifications_classification_key_key",
+      "contype": "u",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "UNIQUE (classification_key)"
+    },
+    {
+      "conname": "attack_event_classifications_persisted_by_run_id_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "FOREIGN KEY (persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT"
+    },
+    {
+      "conname": "attack_event_classifications_pkey",
+      "contype": "p",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "PRIMARY KEY (classification_uid)"
+    },
+    {
+      "conname": "attack_event_classifications_supersedes_classification_uid_fkey",
+      "contype": "f",
+      "condeferrable": false,
+      "condeferred": false,
+      "definition": "FOREIGN KEY (supersedes_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT"
+    }
+  ]
+]

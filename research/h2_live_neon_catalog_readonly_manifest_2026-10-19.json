@@ -1,0 +1,76 @@
+{
+  "document_type": "H2_LIVE_NEON_CATALOG_RAW_EVIDENCE_MANIFEST",
+  "date": "2026-10-19",
+  "separate_evidence_event": true,
+  "status": "RAW_BLOB_EXACT_VERIFIED_AWAITING_POSTCOMMIT_INDEPENDENT_READBACK",
+  "source": {
+    "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+    "git_object_type": "blob",
+    "git_object_sha1": "e550b35578283b2af4e0e8fba956e98c4bcc0f03",
+    "size_bytes": 60689,
+    "sha256": "60d829053bb7d7e9a734c12c154b6db5552cdc558b60105babbecdbec0d3e624",
+    "json_outer_results": 19,
+    "transaction_settings_statements": 3,
+    "catalog_only_select_statements": 16,
+    "attached_without_reserialization": true,
+    "statement_map": "research/h2_live_neon_catalog_statement_map_2026-10-19.json"
+  },
+  "authorized_sql": {
+    "library_source": "h2_neon_catalog_queries_2026-10-19.sql",
+    "size_bytes": 10389,
+    "sha256": "eac52ff8dd6628d322dfc71e94a1ec0a053ed4c55ac3867dd85228d233be1d26",
+    "final_newline_included": true,
+    "hash_recovered_from_indexed_text": true,
+    "original_sql_bytes_durable_git_retained": false,
+    "materialization_limitation": "Project Library returned 401 Unauthorized when requesting raw-byte or text container materialization; an earlier 10388-character full read plus final newline matched both exact 10389-byte size and SHA-256."
+  },
+  "endpoint": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "database_name": "neondb",
+    "compute_id": "ep-calm-rice-b5073ypp",
+    "preflight_type": "read_only",
+    "excluded_read_write_compute_id": "ep-still-violet-b5bg6mhp",
+    "metadata_preflight": "Previously independently observed on authorized Oct 19 execution; not rechecked by this Git-only audit",
+    "state_before": "idle",
+    "state_after": "active",
+    "wake_observed": true,
+    "suspension_after_execution": "UNVERIFIED"
+  },
+  "transaction": {
+    "current_database": "neondb",
+    "current_user": "neondb_owner",
+    "session_user": "neondb_owner",
+    "read_only": "on",
+    "isolation": "read committed",
+    "statement_timeout": "15s",
+    "lock_timeout": "5s",
+    "postgres_version": "18.6 (653b019)"
+  },
+  "privacy": {
+    "catalog_only": true,
+    "unexpected_application_rows_observed": false,
+    "secret_password_token_url_signatures": 0,
+    "raw_retention_safe_for_repo_by_bounded_content_scan": true
+  },
+  "previous_research": {
+    "branch": "research-h2-neon-seven-contract-catalog-completion-2026-10-19",
+    "head": "b7d395a2363aa51fa283489738cdc7a88f5af252",
+    "candidate_report_blob": "46bc8ea60c682054873c3bbf76f576f7f9c6d8c7",
+    "important": "Earlier candidate's narrative catalog statement list differs from the exact 19-statement Oct 19 source; do not merge evidence events. This later exact raw response supports and extends catalog observations, without making the earlier candidate accepted."
+  },
+  "baseline": {
+    "main": "d9a60720454a8acbaeaaf5174d79d8016b96aef3",
+    "site_prod": "92afb8869232119c4adeb91347e38d388c48151b",
+    "operational_wip": "7593622de76652db462b98d7a76e8a7f0466a142"
+  },
+  "boundaries": {
+    "new_neon_calls": 0,
+    "new_postgresql_tests": 0,
+    "production_changes": 0,
+    "operational_wip_changes": 0,
+    "app_table_records_read": 0,
+    "cutover": false,
+    "neon_authority_active": false
+  }
+}

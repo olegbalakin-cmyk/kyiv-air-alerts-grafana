@@ -1,0 +1,24 @@
+name: H2 live Neon catalog Git-only verifier
+on:
+  push:
+    branches:
+      - research-h2-live-neon-catalog-evidence-freeze-2026-10-19
+    paths:
+      - 'research/h2_live_neon_catalog_*_2026-10-19.json'
+      - 'research/h2_live_neon_runtime_role_attribution_2026-10-19.json'
+      - 'research/h2_neon_catalog_queries_2026-10-19.sql'
+      - 'research/h2_verify_live_neon_catalog_2026-10-19.py'
+      - '.github/workflows/h2-live-neon-catalog-git-only-2026-10-19.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' && github.ref == 'refs/heads/research-h2-live-neon-catalog-evidence-freeze-2026-10-19'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Hash, exact catalog, role and negative corruption checks
+        run: python3 research/h2_verify_live_neon_catalog_2026-10-19.py --self-test

@@ -1,0 +1,273 @@
+{
+  "document_type": "H2_EXACT_AUTHORIZED_SQL_TO_RETURNED_CATALOG_RESULT_MAP",
+  "date": "2026-10-19",
+  "source_sql": {
+    "library_filename": "h2_neon_catalog_queries_2026-10-19.sql",
+    "size_bytes": 10389,
+    "sha256": "eac52ff8dd6628d322dfc71e94a1ec0a053ed4c55ac3867dd85228d233be1d26",
+    "source_byte_verification": "PASS via full indexed-text reconstruction plus final newline; byte-original not available for new Git retention"
+  },
+  "response": {
+    "original_git_blob": "e550b35578283b2af4e0e8fba956e98c4bcc0f03",
+    "bytes": 60689,
+    "sha256": "60d829053bb7d7e9a734c12c154b6db5552cdc558b60105babbecdbec0d3e624"
+  },
+  "mapping": [
+    {
+      "statement_ordinal": 1,
+      "type": "SET",
+      "select_ordinal": null,
+      "purpose": "SET TRANSACTION READ ONLY",
+      "returned_rows": 0,
+      "returned_fieldnames": []
+    },
+    {
+      "statement_ordinal": 2,
+      "type": "SET",
+      "select_ordinal": null,
+      "purpose": "SET LOCAL statement_timeout",
+      "returned_rows": 0,
+      "returned_fieldnames": []
+    },
+    {
+      "statement_ordinal": 3,
+      "type": "SET",
+      "select_ordinal": null,
+      "purpose": "SET LOCAL lock_timeout",
+      "returned_rows": 0,
+      "returned_fieldnames": []
+    },
+    {
+      "statement_ordinal": 4,
+      "type": "SELECT",
+      "select_ordinal": 1,
+      "purpose": "Q0 session identity and safety",
+      "returned_rows": 1,
+      "returned_fieldnames": [
+        "database_name",
+        "effective_role",
+        "lock_timeout",
+        "server_version",
+        "session_role",
+        "statement_timeout",
+        "transaction_isolation",
+        "transaction_read_only"
+      ]
+    },
+    {
+      "statement_ordinal": 5,
+      "type": "SELECT",
+      "select_ordinal": 2,
+      "purpose": "U1 episode constraints",
+      "returned_rows": 23,
+      "returned_fieldnames": [
+        "condeferrable",
+        "condeferred",
+        "conname",
+        "contype",
+        "definition"
+      ]
+    },
+    {
+      "statement_ordinal": 6,
+      "type": "SELECT",
+      "select_ordinal": 3,
+      "purpose": "U1 episode indexes",
+      "returned_rows": 5,
+      "returned_fieldnames": [
+        "index_definition",
+        "index_name",
+        "indisprimary",
+        "indisunique",
+        "indnullsnotdistinct",
+        "predicate"
+      ]
+    },
+    {
+      "statement_ordinal": 7,
+      "type": "SELECT",
+      "select_ordinal": 4,
+      "purpose": "U2 checkpoint view/18 columns",
+      "returned_rows": 1,
+      "returned_fieldnames": [
+        "relacl",
+        "relkind",
+        "relname",
+        "view_columns",
+        "view_definition",
+        "view_owner"
+      ]
+    },
+    {
+      "statement_ordinal": 8,
+      "type": "SELECT",
+      "select_ordinal": 5,
+      "purpose": "U2 checkpoint view dependencies",
+      "returned_rows": 18,
+      "returned_fieldnames": [
+        "dependent_column_number",
+        "dependent_relation",
+        "dependent_schema"
+      ]
+    },
+    {
+      "statement_ordinal": 9,
+      "type": "SELECT",
+      "select_ordinal": 6,
+      "purpose": "U3 PostgreSQL roles",
+      "returned_rows": 4,
+      "returned_fieldnames": [
+        "rolbypassrls",
+        "rolcanlogin",
+        "rolcreaterole",
+        "rolinherit",
+        "rolname",
+        "rolsuper"
+      ]
+    },
+    {
+      "statement_ordinal": 10,
+      "type": "SELECT",
+      "select_ordinal": 7,
+      "purpose": "U3 role inheritance",
+      "returned_rows": 9,
+      "returned_fieldnames": [
+        "admin_option",
+        "granted_role",
+        "inherit_option",
+        "member_role",
+        "set_option"
+      ]
+    },
+    {
+      "statement_ordinal": 11,
+      "type": "SELECT",
+      "select_ordinal": 8,
+      "purpose": "U3 schema/object effective privileges",
+      "returned_rows": 24,
+      "returned_fieldnames": [
+        "can_delete",
+        "can_insert",
+        "can_select",
+        "can_update",
+        "object_name",
+        "object_owner",
+        "relacl",
+        "relkind",
+        "rolname",
+        "schema_usage",
+        "sequence_usage"
+      ]
+    },
+    {
+      "statement_ordinal": 12,
+      "type": "SELECT",
+      "select_ordinal": 9,
+      "purpose": "U4 function signatures/EXECUTE",
+      "returned_rows": 12,
+      "returned_fieldnames": [
+        "can_execute",
+        "function_owner",
+        "function_schema",
+        "identity_arguments",
+        "proacl",
+        "proname",
+        "prosecdef",
+        "provolatile",
+        "rolname"
+      ]
+    },
+    {
+      "statement_ordinal": 13,
+      "type": "SELECT",
+      "select_ordinal": 10,
+      "purpose": "U5 PostgreSQL transaction settings",
+      "returned_rows": 9,
+      "returned_fieldnames": [
+        "name",
+        "setting",
+        "source"
+      ]
+    },
+    {
+      "statement_ordinal": 14,
+      "type": "SELECT",
+      "select_ordinal": 11,
+      "purpose": "U5 constraint deferrability",
+      "returned_rows": 134,
+      "returned_fieldnames": [
+        "condeferrable",
+        "condeferred",
+        "conname",
+        "contype",
+        "nspname",
+        "relname"
+      ]
+    },
+    {
+      "statement_ordinal": 15,
+      "type": "SELECT",
+      "select_ordinal": 12,
+      "purpose": "U6 installed extensions",
+      "returned_rows": 1,
+      "returned_fieldnames": [
+        "extension_schema",
+        "extname",
+        "extversion"
+      ]
+    },
+    {
+      "statement_ordinal": 16,
+      "type": "SELECT",
+      "select_ordinal": 13,
+      "purpose": "U6 session search_path",
+      "returned_rows": 1,
+      "returned_fieldnames": [
+        "configured_session_search_path",
+        "effective_session_schemas"
+      ]
+    },
+    {
+      "statement_ordinal": 17,
+      "type": "SELECT",
+      "select_ordinal": 14,
+      "purpose": "U6 role/database overrides",
+      "returned_rows": 0,
+      "returned_fieldnames": []
+    },
+    {
+      "statement_ordinal": 18,
+      "type": "SELECT",
+      "select_ordinal": 15,
+      "purpose": "U7 classification indexes",
+      "returned_rows": 5,
+      "returned_fieldnames": [
+        "index_definition",
+        "index_name",
+        "indisprimary",
+        "indisunique",
+        "indnullsnotdistinct",
+        "predicate"
+      ]
+    },
+    {
+      "statement_ordinal": 19,
+      "type": "SELECT",
+      "select_ordinal": 16,
+      "purpose": "U7 classification constraints",
+      "returned_rows": 5,
+      "returned_fieldnames": [
+        "condeferrable",
+        "condeferred",
+        "conname",
+        "contype",
+        "definition"
+      ]
+    }
+  ],
+  "notes": [
+    "Fields were independently compared with the SHA-256-verified original 19-statement SQL text during preflight.",
+    "The SQL byte stream could not be materialized from the Project Library for durable Git retention; no claim of SQL source byte-exact Git freeze.",
+    "Empty SELECT result at statement 17 is the authorized role/database settings override query, not a missing response."
+  ]
+}
