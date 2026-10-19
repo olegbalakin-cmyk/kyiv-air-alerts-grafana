@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-19",
+  "scope": "Target GitHub Actions registry GET by ID and filename; first 100 of 316 registered workflows. Responses USER-SUPPLIED, independently parsed and SHA-256 checked; no direct authenticated GitHub registry GET in reviewer environment.",
+  "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "target": {
+    "id": 361643589,
+    "node_id": "W_kwDOUaRfns4Vjj5F",
+    "name": "Monitor explosion metric WIP",
+    "path": ".github/workflows/explosion-monitor-wip.yml",
+    "reported_state": "active",
+    "created_at": "2026-09-18T19:34:56.000Z",
+    "updated_at": "2026-09-18T19:34:56.000Z"
+  },
+  "source_files": {
+    "361643589.json": {
+      "bytes": 639,
+      "sha256": "3c9a761b251d4e234eab8f05ce2462caf089c94bf527f73d2293e98d3ac4f2ea"
+    },
+    "explosion-monitor-wip.json": {
+      "bytes": 639,
+      "sha256": "3c9a761b251d4e234eab8f05ce2462caf089c94bf527f73d2293e98d3ac4f2ea"
+    },
+    "workflows.json": {
+      "bytes": 76544,
+      "sha256": "11e06cccef80f81028bb040d39e7ebb122815ef76188d08a8bb598cbb35f0ff8"
+    }
+  },
+  "consistency": {
+    "target_responses_byte_identical": true,
+    "target_matches_accepted_old_run_metadata": true,
+    "first_page_target_matches": 0,
+    "first_page_duplicate_ids": 0
+  },
+  "first_page": {
+    "reported_total_count": 316,
+    "records_present": 100,
+    "records_not_yet_seen": 216,
+    "required_pages": [
+      2,
+      3,
+      4
+    ],
+    "all_first_100_states": "active"
+  },
+  "confidence": "USER-SUPPLIED REGISTRY READBACK PARTIAL; cannot independently verify server response or live state, can check internal fields and source file SHA.",
+  "gates": {
+    "R1_target_identity": "PARTIAL_ACCEPTED_FROM_USER_SUPPLIED_GET",
+    "R1_exact_state": "ACTIVE_AT_UNTIMESTAMPED_CAPTURE_REPORTED",
+    "R1_duplicate_registered_ids": "UNVERIFIED_PAGES_2_TO_4_MISSING",
+    "R2_historical_refs": "UNVERIFIED",
+    "R3_reruns_when_disabled": "UNVERIFIED",
+    "R5_actions_write_permission": "UNVERIFIED",
+    "central_disable": "NO_GO_NOT_EXECUTED"
+  },
+  "next": "Obtain complete registry pages 2, 3 and 4 with per_page=100, independently check exact duplicate IDs/path/name, then get authoritative disabled_manually rerun semantics; no dispatch/rerun/disable permitted.",
+  "operational_changes": 0,
+  "evidence_receipt_kind": "PARSED_METADATA_AND_FILE_DIGESTS; ORIGINAL_639_BYTE_GET_RESPONSES_NOT_STORED_IN_GIT"
+}
