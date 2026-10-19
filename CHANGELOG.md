@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-19
 
+### Approved logo #12, PNG Share, iframe embed and Share glyph — production promotion
+
+- **User-authorized production release:** [`site-prod@4c8dafab15d26f0220eb911c67844d522974081d`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/4c8dafab15d26f0220eb911c67844d522974081d) over previous `fc88b3ff1fea4b9cab3405e29b626355dd9a3828`, derived from [tested preview `e4c5a883`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/e4c5a883b41b24ddbb24cdd7d04578afd18a7582) with no preview-behind delta. Existing 15-chart configuration, dynamic site-prod JSON inputs, production SEO/canonical and WIP-disabled flags retained; no data, script, collector, casualty, historical/backfill, Neon or operational workflow changes.
+- **Acceptance evidence:** [production Actions run `39325904374`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39325904374), job `118311557857` SUCCESS, proof artifact `12221223823`; tests validate JS, chart share/embed state, proper header SVG and 10-file build. Netlify independent readback: production deploy `6ad6886cf03aeb5c5ed632e6` `ready`, `context=production`, published `2026-10-19T21:15:27.170Z`, current project deployment at https://ukraine-air-alerts.netlify.app/ . Production workflow now ships all required JS/SVG/PNG brand assets and pins checkout to exact triggering SHA. Production `netlify.toml` copies the same asset set and retains source data file only for the independent Netlify build path.
+- **Evidence boundary:** `PRODUCTION PROMOTED / AUTOMATED PASS`. Real-user browser/phone/third-party iframe rendering, PNG native sharing and direct external HTTP file verification remain **NOT VERIFIED** in this environment; manual QA recommended. No extra production deployment needed for data-only changes.
+
+
 ### Share button pictogram — test draft updated, automated PASS
 
 - Test-only [commit `e4c5a883b41b24ddbb24cdd7d04578afd18a7582`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/e4c5a883b41b24ddbb24cdd7d04578afd18a7582) changes only the Share button's image icon to a conventional three-node/two-link Share glyph; PNG/copy/download, CSV and embed behavior untouched. Updated markup test and JS cache version. [Actions `39324531903`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39324531903), job `118306823922`, SUCCESS; proof artifact `12222085951`; Netlify draft `6ad685f8f875146263ff7337` verified `ready`, `branch-deploy` at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ . Production and all operational/data tracks unchanged. Browser visual acceptance pending.
