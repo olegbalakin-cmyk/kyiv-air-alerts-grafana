@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-19
 
+### One-button PNG chart sharing on test — deployed, automated PASS
+
+- Isolated chart share branch [da3384f30a028c385b5eafc14533cfaea92adb1a](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/da3384f30a028c385b5eafc14533cfaea92adb1a), [Actions run 39307472775](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39307472775) SUCCESS (PNG unit and single-action regression PASS), Netlify draft deploy `6ad6694496d6d9ccb73bf2b7` ready at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/. One `Поділитися` / `Share` button per chart now performs PNG sharing/copy/download; removed the redundant direct-link button, retained CSV and deep-link decoding. Preview only; production unaffected. Device/app compatibility manual QA pending.
+
+
 ### Isolated chart PNG share preview — deployed, unit tests PASS, manual QA pending
 
 - Test-only implementation at [9f9b431f2893e1c40289aaa3b335d1b1df14f514](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/9f9b431f2893e1c40289aaa3b335d1b1df14f514) on preview-chart-share-2026-10-19. [Actions 39305832964](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39305832964) SUCCESS, receipt artifact 12213566710. Netlify draft 6ad6668e9cf3d9936f148971 ready at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/; production deploy 6accfe4db54bde9cf10159da unchanged.

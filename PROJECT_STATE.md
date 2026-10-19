@@ -1,5 +1,11 @@
 # Project State
 
+### Preview chart share UI simplified to one PNG action — DEPLOYED / AUTOMATED PASS (2026-10-19)
+
+- **New accepted test-only checkpoint:** Isolated branch `preview-chart-share-2026-10-19` commit [da3384f30a028c385b5eafc14533cfaea92adb1a](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/da3384f30a028c385b5eafc14533cfaea92adb1a), successful [Actions run 39307472775](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39307472775), job 118248161066. GitHub run logs prove JS syntax, PNG render/packaging and new single-action UI/idempotency regression PASS. Netlify isolated draft deploy `6ad6694496d6d9ccb73bf2b7` confirmed `ready`, context `branch-deploy`, at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ .
+- **Exact change:** Per chart there is one action labeled `Поділитися` / `Share`, implementing PNG image sharing, copying or download. The redundant URL-link share button is removed; chart deep-link parsing/restore remains supported internally (and image native-share text may still carry a chart URL where supported). Existing CSV control remains. No separate `Посилання` control added. Public production, site-prod, monitor, WIP, casualty, historical/backfill and Neon unchanged.
+- **Limit:** Automated UI tests and Netlify readiness do not certify actual mobile/browser Telegram and WhatsApp delivery or visual fidelity. Manual device acceptance remains pending.
+
 Last updated: 2026-10-19  
 Main baseline inspected for this update: `d9a60720454a8acbaeaaf5174d79d8016b96aef3`
 
