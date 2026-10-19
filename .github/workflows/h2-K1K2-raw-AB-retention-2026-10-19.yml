@@ -1,0 +1,40 @@
+name: H2 K1K2 exact raw A B retention Git only
+on:
+  push:
+    branches: [research-h2-neon-seven-contract-catalog-completion-2026-10-19]
+    paths:
+      - '.github/workflows/h2-K1K2-raw-AB-retention-2026-10-19.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  exact-retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Download exact original source ZIPs, freeze raw members
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 research/h2_archive_K1K2_full_AB_from_actions_2026-10-19.py
+      - name: Verify source member byte identities and tampering negatives
+        run: python3 research/h2_verify_K1K2_full_AB_retention_2026-10-19.py --root research
+      - name: Commit only frozen research archive and manifest
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/h2_K1K2_full_AB_reports_2026-10-19.json.xz.b64 research/h2_K1K2_full_AB_retention_manifest_2026-10-19.json research/h2_K1K2_full_AB_retention_receipt_2026-10-19.json
+          git diff --cached --quiet && exit 1
+          git commit -m "research(H2): freeze byte-exact K1K2 A/B original reports"
+          git push origin HEAD:research-h2-neon-seven-contract-catalog-completion-2026-10-19
+      - name: Independent Git-only readback and negative tampering controls
+        run: |
+          set -euo pipefail
+          git fetch origin research-h2-neon-seven-contract-catalog-completion-2026-10-19
+          git checkout --detach FETCH_HEAD
+          python3 research/h2_verify_K1K2_full_AB_retention_2026-10-19.py --root research
+          git ls-tree -r --name-only HEAD | grep -F 'research/h2_K1K2_full_AB_reports_2026-10-19.json.xz.b64'
