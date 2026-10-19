@@ -1,0 +1,51 @@
+{
+  "kind": "H2_CHECKPOINT_INDEPENDENT_GIT_ACCEPTANCE",
+  "date": "2026-10-19",
+  "preflight": {
+    "main": "4a9a13fb78a4ae9472e561b5dd3c398fe15d26a4",
+    "site_prod": "92afb8869232119c4adeb91347e38d388c48151b",
+    "wip": "7593622de76652db462b98d7a76e8a7f0466a142",
+    "research_base": "b7d395a2363aa51fa283489738cdc7a88f5af252",
+    "main_newer_h2_accepted": false
+  },
+  "k1k2": {
+    "verdict": "PASS_GIT_ARCHIVE_READBACK_AND_PG18_A_B_NEGATIVE_CONTROLS",
+    "archive_blob": "620d195f16ce686f92f66b3da6d702e126bc66fe",
+    "manifest_blob": "40b4d4e6d53b422e73b376bcd821ae7d999ab84d",
+    "archive_sha256": "9a03b33bc9eb0cbd70acd171163801b33750e07700f13a06d77236486e147832",
+    "map_sha256": "0c93b7f8bace21de0666b07e8bfc69041392c71914204c6a16c50a477a6df89d",
+    "members": 8,
+    "negative_controls": 3,
+    "source_run": 39212648444,
+    "source_commit": "edb3faa5e5e3fd303db357d5b2fd01b236fe255c",
+    "independent_retention_run": 39227106268,
+    "original_source_zip_sha256": {
+      "A": "1b98ea776474088b20c5551646b5447d11ab70d2b149ba7a000ae56abbb64217",
+      "B": "e21506972e57393892b50be263c72084e72504245c2498f06a873ef976078a29"
+    },
+    "limit": "K2 confirms duplicate INSERT attempt rejected by UNIQUE(classification_key) / ON CONFLICT DO NOTHING, not independently proven application-only suppression"
+  },
+  "catalog": {
+    "verdict": "PARTIAL_CAPTURE_ACCURATE_RUNTIME_ASSUMPTIONS_UNVERIFIED",
+    "catalog_blob": "46bc8ea60c682054873c3bbf76f576f7f9c6d8c7",
+    "v6_blob": "6f1269c7d3134f2c3bfce2373a01641c26f10fa6",
+    "v5_blob": "810fa36d0064888587ec88a0ab1380b6ef7e2a1e",
+    "live_catalog_capture": "60246ffa7a436eef830592c7999c9e7dc3941123",
+    "contracts": {
+      "U1": "UNVERIFIED_overlap_exclusion",
+      "U2": "UNVERIFIED_full_runtime_binding",
+      "U3": "UNVERIFIED_actual_app_role",
+      "U4": "UNVERIFIED_actual_app_function_grants",
+      "U5": "UNVERIFIED_future_Neon_commit_concurrency",
+      "U6": "UNVERIFIED_actual_role_search_path",
+      "U7": "UNVERIFIED_revision_current_tip_invariants"
+    },
+    "note": "Captured read-only neondb_owner privileges are not application-role permissions; no Neon connection during this acceptance"
+  },
+  "source_provenance": {
+    "pin": "site-prod:kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py",
+    "blob": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+    "function": "read_current_checkpoint",
+    "sql": "/* PHASE1:CHECKPOINT_REREAD */ SELECT 18 columns FROM current_ingestion_checkpoints WHERE source_key=%s AND city_key=%s AND stream_key=%s"
+  }
+}
