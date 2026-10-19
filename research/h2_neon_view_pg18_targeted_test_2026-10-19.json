@@ -1,0 +1,51 @@
+{
+  "kind": "H2_NEON_VIEW_SYNTHETIC_PG18_EXECUTION_PROOF",
+  "date": "2026-10-19",
+  "verdict": "PASS_BOUNDED_OFFLINE",
+  "workflow_run_id": 39241969351,
+  "head_sha": "2735b0b50960b12178ef82337f11942d90bc994a",
+  "jobs": {
+    "A": {
+      "id": 118024700635,
+      "conclusion": "success",
+      "artifact_id": 12180769759,
+      "artifact_zip_sha256": "ffff30a2b13337aa6f6e70ec758f9b2cfc9a0169f3f75fc0c3441a9da5b260b8"
+    },
+    "B": {
+      "id": 118024700964,
+      "conclusion": "success",
+      "artifact_id": 12181577406,
+      "artifact_zip_sha256": "172affcf3da346ed64c586854afe0f31209927a644e27a4db2b504dc5fa8b751"
+    }
+  },
+  "execution_topology": "ONE workflow run; TWO separate fresh PostgreSQL 18.6 service containers in A/B jobs",
+  "postgres_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "checks_passed_each": 32,
+  "coverage": [
+    "9 frozen blob identities",
+    "8 K1K2 raw original reports plus 3 corruption rejection controls",
+    "213 original ordinals, requirement and status v5/v6 identity",
+    "captured SQL definition matches separate view supplement",
+    "original 7 tables/167 columns/221 constraints/30 indexes remain",
+    "new 18-column view matches saved PG metadata",
+    "genuine pinned site-prod Phase-1 SQL executed against view",
+    "empty/single/multiple/cross-source/city/stream/nullable cases",
+    "checkpoint_seq precedence over nonchronological checked_at",
+    "equal-sequence duplicate rejected by actual unique index",
+    "schema usage, view select, table denial and privilege-negative controls",
+    "local PostgreSQL built-ins and advisory xact lock",
+    "read committed vs repeatable read read-only snapshot checks",
+    "rollback, repeated lookup, no extra tables/indexes/constraints/triggers/policies",
+    "3 classification revision DB-only enforcement gaps remain"
+  ],
+  "retention": "machine-readable A/B reports in Actions artifacts through 2026-11-18; this Git file is a bounded summary, not a byte-exact raw report freeze",
+  "safety": {
+    "neon_connections": 0,
+    "neon_writes": 0,
+    "operational_modifications": 0,
+    "source_payloads_read": 0
+  },
+  "pinned_phase1_blob": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+  "original_fixture_blob": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+  "view_supplement_blob": "d44eda04f20034b28125bf3e94d5881ab340db5a"
+}
