@@ -1,0 +1,58 @@
+name: H2 isolated PG18 mutation controls and operational writer A-B
+on:
+  push:
+    branches: [research-h2-pg18-mutation-operational-writer-2026-10-19]
+    paths:
+      - 'research/h2_pg18_mutation_operational_writer_2026-10-19/**'
+      - '.github/workflows/h2-pg18-mutation-operational-writer-2026-10-19.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_DB: h2_offline
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_offline"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      H2_COPY: ${{ matrix.copy }}
+      H2_PG18_OWNER_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_offline
+      H2_PG18_WRITER_DSN: postgresql://h2_app_writer_test:synthetic_local_only@127.0.0.1:5432/h2_offline
+      H2_REPORT: /tmp/h2_mutation_report.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated SQL client and Python driver
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+          python -m pip install "psycopg[binary]==3.2.12"
+      - name: Run actual PG18 controls and unmodified operational writer
+        run: python research/h2_pg18_mutation_operational_writer_2026-10-19/test_mutation_operational.py
+      - name: Check report status without concealing failures
+        if: always()
+        run: |
+          python research/h2_pg18_mutation_operational_writer_2026-10-19/check_report.py /tmp/h2_mutation_report.json
+      - name: Preserve complete JSON report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-pg18-mutation-operational-${{ matrix.copy }}
+          path: /tmp/h2_mutation_report.json
+          retention-days: 30
