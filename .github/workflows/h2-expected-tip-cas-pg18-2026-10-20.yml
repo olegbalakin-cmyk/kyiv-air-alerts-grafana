@@ -46,7 +46,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y postgresql-client
-          python -m pip install "psycopg[binary]==3.2.12"
+          python -m pip install "psycopg[binary]==3.2.12" requests beautifulsoup4
       - name: Compile candidate implementation
         run: |
           python -m py_compile kyiv-air-alerts-grafana/scripts/{monitor_explosion_candidates,attack_event_canonical_persistence,attack_event_tip_snapshot}.py

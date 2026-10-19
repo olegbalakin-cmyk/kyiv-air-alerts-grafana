@@ -170,6 +170,93 @@ def negative_control():
     finally: writer._assert_expected_tip_cas=original
     fail_closed(lambda:put(db,classification("four"),old),"STALE_EXPECTED_TIP")
 
+
+def real_monitor_main():
+    """Invoke the genuine monitor.main, not just a fabricated writer record.
+
+    Only external API and filesystem services are stubbed. Actual due selection,
+    candidate matching/classifier, CAS snapshot and SQL writer remain real.
+    """
+    import datetime
+    import tempfile
+    import unittest.mock as mock
+    import monitor_explosion_candidates as monitor
+
+    def attempt(stale=False):
+        db=init("main_stale" if stale else "main_clean")
+        ep, ck=item()
+        ep=dict(ep, checks=[dict(ck)], city="Київ")
+        fixed=datetime.datetime(2026,1,1,4,tzinfo=datetime.timezone.utc)
+        state_data={"schema_version":1,"cities":{"kyiv":{
+            "city":"Київ","episodes":[ep]}}}
+        observed_outputs={}
+        calls={"classification":0,"published":0,"competition":0}
+        prev=monitor.classify_candidate
+        def real_classifier(*args,**kwargs):
+            calls["classification"]+=1
+            return prev(*args,**kwargs)
+        def discover(*args,**kwargs):
+            if stale:
+                # Deliberately commit another classification AFTER main() obtains
+                # its snapshot but BEFORE this source is classified.
+                rival_ep,rival_check=item()
+                rival_snapshot=snapshot(db,rival_ep,rival_check)
+                put(db,classification("rival-main"),rival_snapshot)
+                calls["competition"]+=1
+            return [{
+                "url":"https://example.invalid/news-event-"+("stale" if stale else "clean"),
+                "title":"Київ: повідомлення про вибухи під час повітряної тривоги",
+                "snippet":"У Києві під час повітряної тривоги пролунали вибухи.",
+                "publisher":"synthetic",
+                "source":"synthetic-offline",
+                "published_at":"2026-01-01T01:30:00Z",
+            }],None,{"fulltext_fetches":0,"fulltext_rescued_candidates":0}
+        def capture(path,data):
+            calls["published"]+=1
+            observed_outputs[str(path)]=data
+        patchers=[
+            mock.patch.object(monitor,"CITY_CONFIG",{"kyiv":monitor.ALL_CITY_CONFIG["kyiv"]}),
+            mock.patch.object(monitor,"now_utc",lambda:fixed),
+            mock.patch.object(monitor,"ensure_state",lambda:state_data),
+            mock.patch.object(monitor,"load_json",lambda path, default: []),
+            mock.patch.object(monitor,"poll_cached_bridge",lambda *args:({"kyiv":[ep]},{})),
+            mock.patch.object(monitor,"process_events",lambda *args:0),
+            mock.patch.object(monitor,"load_live_persistence_activation",lambda **kwargs:(fixed-datetime.timedelta(days=1),{"activation_cutoff_utc":"2025-12-31T00:00:00Z"})),
+            mock.patch.object(monitor.live_parent_ordering,"preclassification_parent_gate",lambda *args,**kwargs:{"records":[{"city":"kyiv","episode_id":ep["episode_id"]}]}),
+            mock.patch.object(monitor,"refresh_queue_matching",lambda *args:{}),
+            mock.patch.object(monitor,"refresh_telegram_cache",lambda *args:{}),
+            mock.patch.object(monitor,"telegram_candidates_for_city",lambda *args:[]),
+            mock.patch.object(monitor,"search_city_news",discover),
+            mock.patch.object(monitor,"classify_candidate",real_classifier),
+            mock.patch.object(monitor,"apply_episode_composition",lambda *args:{}),
+            mock.patch.object(monitor,"atomic_json",capture),
+            mock.patch.object(sys,"argv",["monitor_explosion_candidates.py","--local-only"]),
+            mock.patch.dict(os.environ,{"ATTACK_EVENT_DATABASE_URL":dsn(db)},clear=False),
+        ]
+        with contextlib.ExitStack() as stack:
+            for patcher in patchers: stack.enter_context(patcher)
+            if stale:
+                try: monitor.main()
+                except writer.PersistenceContractError as exc:
+                    check("main_stale_error", "STALE_EXPECTED_TIP" in str(exc),str(exc))
+                else: check("main_stale_error",False,"monitor ignored CAS error")
+            else:
+                monitor.main()
+        check("main_classifier_executed_"+str(stale),calls["classification"]>=1,calls)
+        if stale:
+            check("main_competitor_durably_committed",counts(db)[0]==1,counts(db))
+            check("main_no_false_json_checkpoint",calls["published"]==0,calls)
+            check("main_due_remains_unchecked",ep["checks"][0].get("checked_at") is None)
+        else:
+            check("main_committed_after_classifier",counts(db)[0]==1,counts(db))
+            check("main_all_three_json_outputs",calls["published"]==3,calls)
+            check("main_due_completed_after_commit",bool(ep["checks"][0].get("checked_at")))
+            report_data=observed_outputs.get(str(monitor.LAST_RUN_FILE))
+            check("main_durable_ack",report_data["canonical_persistence"]["commit_state"]=="COMMITTED")
+    import contextlib
+    attempt(False)
+    attempt(True)
+
 def main():
     with baseline.connect(baseline.OWNER) as c:
         check("PG18",baseline.query(c,"SHOW server_version")[0][0].split(".")[0]=="18")
@@ -181,6 +268,7 @@ def main():
         ("transaction_ownership",transaction_contract),
         ("batch_independent_readback",batch_readback),
         ("negative_guard_bypass",negative_control),
+        ("real_monitor_main",real_monitor_main),
     ]: case(name,fn)
     report["passed"]=sum(c["pass"] for c in report["assertions"])
     report["total"]=len(report["assertions"])

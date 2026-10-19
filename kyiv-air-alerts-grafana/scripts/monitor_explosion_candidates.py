@@ -5157,12 +5157,14 @@ def main() -> None:
             for row in canonical_persistence.get("records") or []
             if row.get("commit_state") == "COMMITTED"
         }
-        for city_key, rows in due.items():
-            for episode, check in rows:
+        # A persisted classification completes precisely the selected due
+        # attempt, not every pending follow-up for the same episode.
+        for city_key, selected_rows in persistence_due.items():
+            for episode, check in selected_rows:
                 if (city_key, str(episode.get("episode_id") or "")) in acknowledged:
                     check["checked_at"] = iso(followup_cutoff)
                     check["new_candidates"] = searches.get(city_key, {}).get("new_candidates", 0)
-                # Every unacknowledged due check stays retryable.
+                # Unselected and unacknowledged checks remain retryable.
     (
         due_checks_at_cutoff,
         checked_due_checks_at_cutoff,
