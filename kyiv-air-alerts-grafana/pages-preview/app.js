@@ -133,6 +133,8 @@ function methodologyHtml(){
 }
 function applyStaticLanguage(){
  document.documentElement.lang=currentLanguage==="en"?"en":"uk";
+ const brandLogo=document.getElementById("headerBrandLogo");
+ if(brandLogo)brandLogo.src=(currentLanguage==="en"?"brand-horizontal-en-dark.svg":"brand-horizontal-uk-dark.svg")+"?v=20261019-logo12-1";
  document.title=tr("Статистика повітряних тривог у містах України — графіки та порівняння","Air alerts in Ukrainian cities — charts and comparisons");
  const md=tr("Статистика повітряних тривог у Києві та обласних центрах України: кількість тривог, години під тривогою, середня тривалість, порівняння міст і дані про загиблих від повітряних атак.","Air-alert statistics for Kyiv and Ukrainian regional centres: alert counts, hours under alert, average duration, city comparisons and deaths from aerial attacks.");
  document.querySelector('meta[name="description"]')?.setAttribute("content",md);document.querySelector('meta[property="og:locale"]')?.setAttribute("content",currentLanguage==="en"?"en_US":"uk_UA");document.querySelector('meta[property="og:site_name"]')?.setAttribute("content",tr("Повітряні тривоги — міста України","Air alerts — Ukrainian cities"));document.querySelector('meta[property="og:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[property="og:description"]')?.setAttribute("content",md);document.querySelector('meta[name="twitter:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[name="twitter:description"]')?.setAttribute("content",md);

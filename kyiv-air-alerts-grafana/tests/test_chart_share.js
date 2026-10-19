@@ -16,7 +16,7 @@ console.log("chart share unit checks PASS");
 
 
 
-const calls = { text: [], drawn: 0, saves: [] };
+const calls = { text: [], drawn: 0, saves: [], strokes: [] };
 const sourceCanvas = { width: 1200, height: 560 };
 const mockSelections = {
   citySelect: "Київ", cityPeriod: "Місяці",
@@ -25,8 +25,7 @@ const mockSelections = {
 };
 const drawContext = {
   fillRect(){}, fillText(v){calls.text.push(v)},
-  save(){},restore(){},translate(){},scale(){},beginPath(){},roundRect(){},rect(){},fill(){},arc(){},stroke(){},
-  save(){},restore(){},translate(){},scale(){},beginPath(){},roundRect(){},rect(){},fill(){},stroke(){},arc(){},
+  save(){},restore(){},translate(){},scale(){},beginPath(){},roundRect(){},rect(){},fill(){},arc(){},moveTo(){},lineTo(){},bezierCurveTo(){},closePath(){},stroke(){calls.strokes.push(this.strokeStyle)},
   drawImage(source, x, y, w, h){
     assert.equal(source, sourceCanvas);
     assert.ok(w > 0 && h > 0);
@@ -76,6 +75,7 @@ assert.match(image.caption,/Харків/);
 assert.match(image.caption,/2025-01-01/);
 assert.equal(image.dataUrl,encoded);
 assert.equal(calls.drawn,1);
+assert.deepEqual(calls.strokes.slice(0,3),["#F6F8FC","#FFD000","#007BFF"],"approved bell + exactly two colored waves");
 assert.ok(calls.text.some(t=>t.includes("Накопичений час")));
 assert.ok(calls.text.some(t=>t.includes("Знімок")));
 const file=s.pngFile(image.dataUrl,image.filename);
@@ -213,7 +213,7 @@ assert.match(section.children[0].children[1].textContent, /Київ/);
 const footer = section.children[2];
 assert.equal(footer.children[0].tag, "a");
 assert.equal(footer.children[0].className, "embed-brand-link");
-assert.equal(footer.children[0].children[0].src, "brand-mark.svg");
+assert.match(footer.children[0].children[0].src, /^brand-mark\.svg\?v=20261019-logo12-1$/);
 assert.equal(footer.children[0].children[1].children[0].textContent, "Повітряні тривоги");
 assert.match(footer.children[0].children[1].children[1].textContent, /netlify\.app/);
 assert.equal(footer.children[1].target, "_blank");

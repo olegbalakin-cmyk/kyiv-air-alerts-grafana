@@ -90,31 +90,46 @@
   }
 
 
-  // Geometry/palette match brand-mark.svg. Draw vectors directly for a crisp PNG.
+  // Approved logo #12: navy tile, white bell, inner yellow and outer blue waves.
+  // The same vector geometry and palette are shipped as brand-mark.svg.
   function drawBrandMark(ctx, x, y, size) {
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(size / 64, size / 64);
-    ctx.fillStyle = "#142131";
+    ctx.scale(size / 256, size / 256);
+    ctx.fillStyle = "#0B1E3A";
     ctx.beginPath();
-    if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(0, 0, 64, 64, 16);
-    } else {
-      ctx.rect(0, 0, 64, 64);
-    }
+    if (typeof ctx.roundRect === "function") ctx.roundRect(0, 0, 256, 256, 52);
+    else ctx.rect(0, 0, 256, 256);
     ctx.fill();
-    ctx.strokeStyle = "#62a0ea";
-    ctx.lineWidth = 4.5;
+    ctx.translate(8, 8);
     ctx.lineCap = "round";
-    for (const radius of [12, 22, 32]) {
-      ctx.beginPath();
-      ctx.arc(18, 44, radius, -Math.PI / 2, 0);
-      ctx.stroke();
-    }
-    ctx.fillStyle = "#f8e45c";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#F6F8FC";
+    ctx.lineWidth = 13;
     ctx.beginPath();
-    ctx.arc(18, 44, 5, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.moveTo(67, 175);
+    ctx.bezierCurveTo(60, 175, 59, 168, 65, 161);
+    ctx.lineTo(72, 151);
+    ctx.bezierCurveTo(82, 136, 83, 121, 83, 109);
+    ctx.lineTo(83, 94);
+    ctx.bezierCurveTo(83, 68, 99, 51, 120, 51);
+    ctx.bezierCurveTo(143, 51, 156, 68, 156, 94);
+    ctx.lineTo(156, 109);
+    ctx.bezierCurveTo(156, 126, 159, 141, 170, 155);
+    ctx.lineTo(178, 165);
+    ctx.bezierCurveTo(182, 170, 179, 175, 172, 175);
+    ctx.closePath();
+    ctx.moveTo(110, 184);
+    ctx.bezierCurveTo(115, 195, 126, 195, 131, 184);
+    ctx.stroke();
+    ctx.fillStyle = "#F6F8FC";
+    ctx.beginPath(); ctx.arc(120, 50, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#FFD000";
+    ctx.lineWidth = 15;
+    ctx.beginPath(); ctx.moveTo(177, 59); ctx.bezierCurveTo(190, 71, 198, 89, 197, 109); ctx.stroke();
+    ctx.strokeStyle = "#007BFF";
+    ctx.lineWidth = 16;
+    ctx.beginPath(); ctx.moveTo(185, 27); ctx.bezierCurveTo(213, 44, 225, 71, 226, 109); ctx.stroke();
     ctx.restore();
   }
 
@@ -417,7 +432,7 @@
 
     const brandIcon = root.document.createElement("img");
     brandIcon.className = "embed-brand-icon";
-    brandIcon.src = "brand-mark.svg";
+    brandIcon.src = "brand-mark.svg?v=20261019-logo12-1";
     brandIcon.width = 40;
     brandIcon.height = 40;
     brandIcon.alt = "";
