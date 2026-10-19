@@ -244,6 +244,154 @@
     root.setTimeout(function () { label.textContent = original; }, 1800);
   }
 
+
+  // An embed is a live, read-only view of one configured Chart.js panel.
+  // The full URL contains the same filters and series visibility as chart sharing.
+  function makeEmbedUrl(currentHref, chartId, chart) {
+    const url = new URL(makeShareUrl(currentHref, chartId, chart));
+    url.searchParams.set("embed", chartId);
+    return url.toString();
+  }
+
+  function escapeAttribute(value) {
+    return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function makeEmbedHtml(currentHref, chartId, chart, title) {
+    const src = escapeAttribute(makeEmbedUrl(currentHref, chartId, chart));
+    const caption = escapeAttribute(title ||
+      translated("Графік повітряних тривог", "Air alert chart"));
+    return '<iframe src="' + src + '" title="' + caption +
+      '" loading="lazy" width="100%" height="700" ' +
+      'style="display:block;width:100%;max-width:100%;height:700px;border:0;border-radius:12px" ' +
+      'referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+  }
+
+  function makeEmbedButton(chartId, card) {
+    const button = root.document.createElement("button");
+    button.type = "button";
+    button.className = "csv-export-button chart-embed-button";
+    button.dataset.embedChart = chartId;
+    button.setAttribute("aria-label", translated(
+      "Скопіювати HTML-код для вбудовування цього графіка",
+      "Copy the HTML embed code for this chart"));
+    button.title = translated(
+      "Скопіювати iframe-код графіка з поточними фільтрами",
+      "Copy iframe code with current chart filters");
+    button.innerHTML =
+      '<svg aria-hidden="true" viewBox="0 0 24 24">' +
+      '<path d="m8 5-7 7 7 7m8-14 7 7-7 7M14 3l-4 18"/></svg>' +
+      '<span class="chart-share-label"></span>';
+    button.querySelector(".chart-share-label").textContent =
+      translated("Вбудувати", "Embed");
+
+    button.addEventListener("click", async function () {
+      const chart = settings.getChart(chartId);
+      if (!chart || card.closest(".hidden")) {
+        showStatus(button, "Немає графіка", "Unavailable", "Вбудувати", "Embed");
+        return;
+      }
+      settings.syncUrl();
+      const title = card.querySelector("h3")?.textContent ||
+        card.closest(".comparison-section")?.querySelector("h2")?.textContent ||
+        translated("Повітряні тривоги", "Air alerts");
+      let code;
+      try {
+        code = makeEmbedHtml(root.location.href, chartId, chart, title);
+      } catch (error) {
+        showStatus(button, "Помилка", "Failed", "Вбудувати", "Embed");
+        return;
+      }
+      try {
+        await root.navigator.clipboard.writeText(code);
+        showStatus(button, "Код скопійовано", "Code copied", "Вбудувати", "Embed");
+      } catch (error) {
+        if (typeof root.prompt === "function") {
+          root.prompt(translated(
+            "Скопіюйте iframe-код:", "Copy this iframe code:"), code);
+        } else {
+          showStatus(button, "Не вдалося", "Failed", "Вбудувати", "Embed");
+        }
+      }
+    });
+    return button;
+  }
+
+  function currentEmbedId() {
+    if (!settings) return null;
+    const value = new URL(root.location.href).searchParams.get("embed");
+    return settings.chartIds.includes(value) ? value : null;
+  }
+
+  function activateEmbed() {
+    const chartId = currentEmbedId();
+    if (!chartId) return false;
+    const main = root.document.querySelector("main");
+    if (!main) return false;
+    const canvas = root.document.getElementById(chartId);
+    const card = canvas?.closest(".chart-card");
+    const chart = settings.getChart(chartId);
+    const oldTitle = card?.querySelector("h3")?.textContent ||
+      card?.closest(".comparison-section")?.querySelector("h2")?.textContent ||
+      translated("Повітряні тривоги", "Air alerts");
+
+    const rootSection = root.document.createElement("section");
+    rootSection.className = "embed-container";
+    rootSection.setAttribute("aria-label", translated(
+      "Вбудований графік повітряних тривог", "Embedded air alert chart"));
+
+    if (!card || !chart || card.classList.contains("hidden") ||
+        card.closest(".hidden")) {
+      const unavailable = root.document.createElement("p");
+      unavailable.className = "embed-unavailable";
+      unavailable.textContent = translated(
+        "Графік зараз недоступний. Відкрийте повну сторінку.",
+        "Chart currently unavailable. Open the full dashboard.");
+      rootSection.appendChild(unavailable);
+    } else {
+      const requested = parseSharedView(root.location.hash, settings.chartIds);
+      if (requested && requested.chartId === chartId) {
+        restoreVisibility(chart, requested.visibility);
+      }
+      const h = root.document.createElement("header");
+      h.className = "embed-heading";
+      const title = root.document.createElement("h2");
+      title.textContent = oldTitle;
+      const context = root.document.createElement("p");
+      context.className = "embed-context";
+      context.textContent = chartContext(chartId);
+      h.appendChild(title);
+      h.appendChild(context);
+      rootSection.appendChild(h);
+      rootSection.appendChild(card); // Move the original chart; do not copy its canvas.
+      root.requestAnimationFrame(function () {
+        chart.resize();
+        chart.update("none");
+      });
+    }
+
+    const footer = root.document.createElement("footer");
+    footer.className = "embed-footer";
+    const source = root.document.createElement("span");
+    source.textContent = translated(
+      "Дані: Повітряні тривоги · міста України",
+      "Source: Air alerts · Ukrainian cities");
+    const link = root.document.createElement("a");
+    const full = new URL(root.location.href);
+    full.searchParams.delete("embed");
+    link.href = full.toString();
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = translated("Відкрити графік", "Open full chart");
+    footer.appendChild(source);
+    footer.appendChild(link);
+    rootSection.appendChild(footer);
+    main.appendChild(rootSection);
+    root.document.body.classList.add("embed-mode");
+    return true;
+  }
+
   function setup(options) {
     settings = options;
     for (const chartId of options.chartIds) {
@@ -260,6 +408,9 @@
       }
       if (!row.querySelector('[data-share-image="' + chartId + '"]')) {
         row.appendChild(makeImageButton(chartId, card));
+      }
+      if (!row.querySelector('[data-embed-chart="' + chartId + '"]')) {
+        row.appendChild(makeEmbedButton(chartId, card));
       }
     }
   }
@@ -279,7 +430,7 @@
     return true;
   }
 
-  const api = { parseSharedView, visibilityBits, makeShareUrl, restoreVisibility, chartContext, renderChartPng, pngFile, setup, restore };
+  const api = { parseSharedView, visibilityBits, makeShareUrl, restoreVisibility, chartContext, renderChartPng, pngFile, makeEmbedUrl, makeEmbedHtml, currentEmbedId, activateEmbed, setup, restore };
   root.ChartShare = api;
   if (typeof module === "object" && module.exports) module.exports = api;
 }(typeof window === "undefined" ? globalThis : window));

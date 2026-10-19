@@ -1302,6 +1302,10 @@ function updateUrl() {
   ]) {
     if ($(id)?.value) params.set(param, $(id).value);
   }
+  const embedId = new URLSearchParams(location.search).get("embed");
+  if (embedId && Object.prototype.hasOwnProperty.call(CSV_CHART_CONFIG, embedId)) {
+    params.set("embed", embedId);
+  }
   history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`);
 }
 
@@ -3303,8 +3307,11 @@ async function init() {
     syncUrl: updateUrl
   });
   updateUrl();
-  const sharedChartOpened = window.ChartShare?.restore() === true;
-  if (!sharedChartOpened) maybeStartIntroTour();
+  const embeddedChartOpened = window.ChartShare?.activateEmbed() === true;
+  if (!embeddedChartOpened) {
+    const sharedChartOpened = window.ChartShare?.restore() === true;
+    if (!sharedChartOpened) maybeStartIntroTour();
+  }
 }
 
 applyStaticLanguage();

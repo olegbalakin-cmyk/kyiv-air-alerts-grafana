@@ -104,14 +104,22 @@ const exportRow = {
   children: [],
   appendChild(button) { this.children.push(button); },
   querySelector(selector) {
-    return selector === '[data-share-image="compareCumulativeHoursChart"]'
-      ? this.children.find(b => b.dataset.shareImage === "compareCumulativeHoursChart") || null
-      : null;
+    if (selector === '[data-share-image="compareCumulativeHoursChart"]')
+      return this.children.find(b => b.dataset.shareImage === "compareCumulativeHoursChart") || null;
+    if (selector === '[data-embed-chart="compareCumulativeHoursChart"]')
+      return this.children.find(b => b.dataset.embedChart === "compareCumulativeHoursChart") || null;
+    return null;
   }
 };
-const chartCard = { querySelector(selector) {
-  return selector === '[data-csv-chart="compareCumulativeHoursChart"]' ? exportRow : null;
-}};
+const chartCard = {
+  classList: { contains: () => false },
+  closest() { return null; },
+  querySelector(selector) {
+    if (selector === '[data-csv-chart="compareCumulativeHoursChart"]') return exportRow;
+    if (selector === "h3") return { textContent: "Накопичений час під тривогою" };
+    return null;
+  }
+};
 const chartWrap = {};
 sourceCanvas.closest = (selector) =>
   selector === ".chart-card" ? chartCard :
@@ -122,7 +130,7 @@ s.setup({
   language: () => "uk",
   syncUrl: () => {}
 });
-assert.equal(exportRow.children.length, 1);
+assert.equal(exportRow.children.length, 2);
 assert.equal(exportRow.children[0].className, "csv-export-button chart-image-button");
 assert.equal(exportRow.children[0].dataset.shareImage, "compareCumulativeHoursChart");
 assert.equal(exportRow.children[0].querySelector(".chart-share-label").textContent, "Поділитися");
@@ -134,6 +142,78 @@ s.setup({
   language: () => "uk",
   syncUrl: () => {}
 });
-assert.equal(exportRow.children.length, 1, "Repeated setup must not add another share button");
-assert.equal(actionButtons.length, 1);
-console.log("single PNG share button UI contract PASS");
+assert.equal(exportRow.children.length, 2, "Repeated setup must not add duplicate share/embed buttons");
+assert.equal(actionButtons.length, 2);
+assert.equal(exportRow.children[1].className, "csv-export-button chart-embed-button");
+assert.equal(exportRow.children[1].dataset.embedChart, "compareCumulativeHoursChart");
+assert.equal(exportRow.children[1].querySelector(".chart-share-label").textContent, "Вбудувати");
+assert.equal(typeof exportRow.children[1].handler, "function");
+console.log("single PNG share action + embed code action UI contract PASS");
+
+
+// Embed URLs preserve the complete filter query and visible-series hash.
+const exampleHref = "https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/?" +
+  "lang=uk&city=kyiv&period=monthly&a=kyiv&b=kharkiv&compare=monthly" +
+  "&cmpfrom=2025-01-01&cmpto=2025-12-31";
+const embedUrl = s.makeEmbedUrl(exampleHref, "compareCumulativeHoursChart", c);
+const embedParsed = new URL(embedUrl);
+assert.equal(embedParsed.searchParams.get("embed"), "compareCumulativeHoursChart");
+assert.equal(embedParsed.searchParams.get("cmpfrom"), "2025-01-01");
+assert.equal(embedParsed.searchParams.get("cmpto"), "2025-12-31");
+assert.equal(embedParsed.searchParams.get("a"), "kyiv");
+assert.equal(embedParsed.searchParams.get("b"), "kharkiv");
+assert.equal(embedParsed.hash, "#chart-compareCumulativeHoursChart.110");
+
+const embedHtml = s.makeEmbedHtml(exampleHref, "compareCumulativeHoursChart", c,
+  'Час під тривогою <Kyiv> "2025"');
+assert.match(embedHtml, /^<iframe src="https:\/\//);
+assert.match(embedHtml, /&amp;embed=compareCumulativeHoursChart/);
+assert.match(embedHtml, /title="Час під тривогою &lt;Kyiv&gt; &quot;2025&quot;"/);
+assert.match(embedHtml, /width="100%" height="700"/);
+assert.match(embedHtml, /referrerpolicy="strict-origin-when-cross-origin"/);
+assert.ok(!embedHtml.includes('title="Час під тривогою <Kyiv>'));
+assert.throws(() => s.makeEmbedUrl(exampleHref, "invalid/id", c));
+assert.equal(embedHtml.match(/<iframe/g).length, 1);
+
+// Embedded mode uses the actual chart card, not a clone or screenshot.
+const created = [];
+function makeNode(tag) {
+  const node = {
+    tag, children: [], attributes: {}, className: "", textContent: "",
+    appendChild(child) { this.children.push(child); return child; },
+    setAttribute(key,val) { this.attributes[key]=val; },
+    classList: { contains(){return false;} }
+  };
+  created.push(node);
+  return node;
+}
+const mainNode = makeNode("main");
+const bodyClasses = [];
+global.document.querySelector = selector => selector === "main" ? mainNode : null;
+global.document.body = { classList: { add(cls) { bodyClasses.push(cls); } } };
+global.document.createElement = tag => ["section","header","h2","p","footer","a","span"].includes(tag)
+  ? makeNode(tag) : createElementOriginal(tag);
+global.location = { hostname: "chart-share-test-20261019--ukraine-air-alerts.netlify.app",
+  href: embedUrl, hash: embedParsed.hash };
+let resized=0;
+c.resize = function() { resized++; };
+global.requestAnimationFrame = function(callback) {callback();};
+assert.equal(s.currentEmbedId(), "compareCumulativeHoursChart");
+assert.equal(s.activateEmbed(), true);
+assert.deepEqual(bodyClasses, ["embed-mode"]);
+assert.equal(mainNode.children.length, 1);
+const section = mainNode.children[0];
+assert.equal(section.className, "embed-container");
+assert.equal(section.children[1], chartCard, "Must move existing chart card");
+assert.equal(resized, 1, "Chart must resize after relocation");
+assert.equal(section.children[0].children[0].textContent, "Накопичений час під тривогою");
+assert.match(section.children[0].children[1].textContent, /Київ/);
+const footer = section.children[2];
+assert.match(footer.children[0].textContent, /Дані/);
+assert.equal(footer.children[1].target, "_blank");
+assert.equal(new URL(footer.children[1].href).searchParams.has("embed"), false);
+assert.equal(new URL(footer.children[1].href).hash, embedParsed.hash);
+
+global.location.href = "https://example.test/?embed=notAllowedChart";
+assert.equal(s.currentEmbedId(), null);
+console.log("embed URL HTML escaping, exact-state restoration, iframe DOM relocation checks PASS");
