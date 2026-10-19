@@ -1,5 +1,12 @@
 # Project State
 
+### H2 GitHub secret URI metadata check — PASS BOUNDED, temporary workflow retired (2026-10-19)
+
+- **Accepted single-run evidence:** [H2 Secret Role Check run 39309315728](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39309315728), workflow ID `389768617`, job `118254518270`, event `workflow_dispatch`, tested `main@3810d2627d3ef8454dd31bdeaa41b9fdfd520888`, attempt 1, completed **SUCCESS**. Independently fetched job logs report exactly `URI_FORMAT=YES`, `USERNAME_MATCH=YES`, `ENDPOINT_MATCH=YES`, `DATABASE_MATCH=YES`. Script parsed secret `PHASE1_PROD_SHADOW_DATABASE_URL` locally in the Actions runner and matched PostgreSQL URL syntax, username `neondb_owner`, the first DNS label `ep-still-violet-b5bg6mhp` or `ep-still-violet-b5bg6mhp-pooler` with `.neon.tech` suffix, and database path `/neondb`; no secret contents/password were logged and no Neon SQL/connection was performed.
+- **Evidence ceiling:** `H2 SECRET URI METADATA=PASS — BOUNDED ACCEPTED (RUN-TIME SNAPSHOT)`. This parser did **not** prove exact complete hostname, Neon project/branch ownership, DB connectivity, password validity, effective SQL role/grants, application runtime DSN binding, COMMIT/readback, concurrent CAS or persistence authority. Therefore `H2 ACTUAL RUNTIME SQL ROLE=UNVERIFIED` remains; unchanged higher-level reconciliation `203 structural-only MATCH / 3 DB-invariant MISMATCH / 7 runtime-scoped UNVERIFIED` (out of 213), open DB enforcement 193/196/197, `UNBOUND_UNRESOLVED=25`, `C4/C5=NOT PROVEN`, `NEON_AUTHORITY_ACTIVE=NO`, `PRODUCTION_CUTOVER_EXECUTED=NO`, `WIP_ACTIVATION=NO-GO`.
+- **Authorized closure:** This coordination commit removes only `.github/workflows/h2-secret-role-check.yml` from `main` (previous Git blob `0f040e72cd4ea5d87fa74d75a35411730a111cf9`) and updates the two coordination files. Exactly 17 other present-`main` workflow files have unchanged Git blobs; independently inspected `push` path filters match none of the three changed paths and the sole present `workflow_run` consumer listens to another workflow. The preceding one-time GitHub Actions status snapshot showed zero requested/queued/pending/waiting/in-progress runs. Removal from current `main` is **not** a globally enforced historical-ref or rerun disable and does not change repository secrets. No Neon, site-prod, production, operational WIP, casualty, historical or backfill work was performed.
+- **Next H2 work:** Reconcile the secret's verified non-sensitive username against the frozen grants and explicitly identify the intended runtime binding; plan three DB-only append-only/successor/current-tip protections offline before any **separately authorized** isolated Neon SQL write/concurrency exercise.
+
 ### Isolated single-chart iframe embedding — TEST DEPLOYED / AUTOMATED PASS (2026-10-19)
 
 - **Accepted bounded test checkpoint:** preview-only commit [b528b97f026734b20840bbc068d33d2e4fdbcbae](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/b528b97f026734b20840bbc068d33d2e4fdbcbae), [GitHub Actions 39310452363](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39310452363) SUCCESS (job 118258345855; JS syntax, existing PNG checks, embed HTML escaping/state preservation and isolated DOM tests PASS). Netlify branch deploy `6ad66e2cbb9274484bd632e8` `ready` at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ . Production Netlify and `site-prod` were not changed.
@@ -14,7 +21,7 @@
 - **Limit:** Automated UI tests and Netlify readiness do not certify actual mobile/browser Telegram and WhatsApp delivery or visual fidelity. Manual device acceptance remains pending.
 
 Last updated: 2026-10-19  
-Main baseline inspected for this update: `d9a60720454a8acbaeaaf5174d79d8016b96aef3`
+Main baseline inspected for this update: `f57cb7bc6a25d53c323e223ed1ca0bd1dcc53c1d`
 
 > This file records the **accepted coordination state** of the repository, not a new technical acceptance. Read it before proposing work in another ChatGPT chat. Detailed authority remains in the linked immutable commits, workflow runs and proof artifacts; if this summary conflicts with a more specific accepted artifact, that artifact governs. **Never infer production activation from a development-only proof.** Update this file only after an accepted checkpoint.
 
