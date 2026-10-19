@@ -1,0 +1,60 @@
+{
+  "scope": "isolated_synthetic_pg18_only",
+  "status": "INDEPENDENT_GIT_READBACK_PASS_WITH_LIMITED_OPERATIONAL_WRITER",
+  "evidence_git_head_verified": "522861e29e7fd83dbbaaa0e9cc329c3075a6f65f",
+  "tested_commit": "96b1d7b894fb11f7a5f1fd899d4ba5d3d822f5d9",
+  "tested_run_id": 39322183236,
+  "tested_jobs": [
+    118298743563,
+    118298743705
+  ],
+  "a_b": "83/83 + 83/83",
+  "source_role": "synthetic h2_app_writer_test, NOT confirmed Neon runtime role",
+  "operational_writer_blob": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+  "independent_freeze_run": 39322541596,
+  "freeze_commit": "2f4cfa48a7171435861cf37819a9a82ab7cd2b64",
+  "independent_git_only_run": 39322772577,
+  "independent_git_only_status": "SUCCESS",
+  "exact_original_git_blobs": {
+    "A_json": "cac05c39ec0feb43a4dd3661eb5007683179df71",
+    "A_zip": "c2fed319c90732f9efbe99afa0b20b96e196e29c",
+    "B_json": "c3aeaf1db56d7e0f05d3a8a29506a0f8f55b408b",
+    "B_zip": "1e11d034eb2506ccf0ceb76c09745855e8f2bc88",
+    "manifest": "dc9cda4f6373b4dbbfd981dfcc972f4bb7623301"
+  },
+  "sha256_json": {
+    "A": "e77d27c99ea25b55fe24497381a9b14f17781ea239474737dcc7bfc052720b84",
+    "B": "28e72763334b92925fb9c20ccead204f56a95e629565d29a3a0970b2883c84ec"
+  },
+  "sha256_zip": {
+    "A": "2b1a25077c3fbccd72e45032184dca15fcdefb86166cd9a8b8f360dd396636d0",
+    "B": "e3eb64fca6c90052c16849ddc5cc0ce3b549a4a3306ec4ae24a51b7096abceb8"
+  },
+  "corruption_negative_controls_rejected": 9,
+  "verdicts": {
+    "H2_DISABLED_SUCCESSOR_INDEX_CONTROL": "PASS",
+    "H2_DISABLED_TRIGGER_CAS_CONTROL": "PASS",
+    "H2_OWNER_BYPASS_CONTROL": "PASS",
+    "H2_RESTRICTED_WRITER_PROTECTION": "PASS",
+    "H2_REAL_OPERATIONAL_WRITER_INTEGRATION": "PARTIAL",
+    "H2_DURABLE_COMMIT_READBACK": "PASS",
+    "H2_CONCURRENT_REVISION_SAFETY": "PARTIAL",
+    "H2_OFFLINE_MUTATION_CONTROL_CLOSURE": "PARTIAL",
+    "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED"
+  },
+  "limits": [
+    "Operational writer has no explicit expected-tip argument; both concurrent writers committed sequential revisions; an independent stale planned snapshot rejection was NOT demonstrated.",
+    "User-owned transactions require caller COMMIT; release of a savepoint is not COMMIT; own-connection batch readback confirmed within observed PG18 synthetic fixture.",
+    "Owner can execute UPDATE, DELETE, TRUNCATE, DDL and trigger disable in synthetic test; nonowner ACL does not protect against database owner.",
+    "Exact Neon schema parity, real Neon runtime role, and live Neon SQL are NOT tested.",
+    "213 contracts remain 203 structural MATCH / 3 DB-invariant MISMATCH / 7 runtime-scoped UNVERIFIED."
+  ],
+  "preserved": {
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "WIP_ACTIVATION": "NO-GO",
+    "C4_C5": "NOT PROVEN",
+    "UNBOUND_UNRESOLVED": 25
+  },
+  "neon_integration_recommendation": "NO-GO; require separately reviewed expected-tip writer correction and fresh authorization; no Neon operations now"
+}
