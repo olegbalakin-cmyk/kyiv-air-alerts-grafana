@@ -1,0 +1,21 @@
+name: H2 PG18 original operational writer Git-only readback
+on:
+  push:
+    branches: [research-h2-pg18-mutation-operational-writer-2026-10-19]
+    paths:
+      - '.github/workflows/h2-pg18-mutation-git-only-2026-10-19.yml'
+permissions:
+  contents: read
+jobs:
+  independent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify two frozen original reports, ZIP CRC and tamper detection
+        run: python research/h2_pg18_mutation_operational_writer_2026-10-19/verify_git_readback.py
