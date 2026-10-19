@@ -1,0 +1,79 @@
+name: H2 independently verify checkpoint view in synthetic PG18
+on:
+  push:
+    branches: [research-h2-neon-view-pg18-independent-closure-2026-10-19]
+    paths:
+      - 'research/h2_neon_checkpoint_view_pg18_test_2026-10-19.py'
+      - '.github/workflows/h2-neon-checkpoint-view-pg18-2026-10-19.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-pg18:
+    name: Independent fresh PostgreSQL 18 / ${{ matrix.copy }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+          POSTGRES_DB: h2_synthetic
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_synthetic"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      H2_PG18_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_synthetic
+      H2_PG18_COPY: ${{ matrix.copy }}
+      H2_PG18_OUTPUT: /tmp/h2_neon_checkpoint_view_pg18_${{ matrix.copy }}.json
+    steps:
+      - name: Checkout exact tested research commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install isolated Python test dependencies
+        run: python3 -m pip install "psycopg[binary]==3.2.12"
+      - name: Fetch pinned production Phase-1 Git object with read-only Git
+        run: |
+          git fetch --no-tags origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py >/tmp/h2_exact_phase1.py
+          test "$(git hash-object /tmp/h2_exact_phase1.py)" = ed014e61fc6186fa9daf91c763c847e7df2f0306
+      - name: Independently execute exact view and pinned Phase-1 SQL on fresh PG18
+        run: python3 research/h2_neon_checkpoint_view_pg18_test_2026-10-19.py
+      - name: Record machine-readable independent job metadata
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,subprocess
+          report=pathlib.Path(os.environ["H2_PG18_OUTPUT"])
+          p=pathlib.Path("/tmp/h2_neon_job_provenance.json")
+          p.write_text(json.dumps({
+            "tested_commit":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
+            "test_blob":subprocess.check_output(["git","hash-object","research/h2_neon_checkpoint_view_pg18_test_2026-10-19.py"],text=True).strip(),
+            "fixture_blob":subprocess.check_output(["git","hash-object","research/h2_neon_catalog_reconciliation_2026-10-18/neon_observed_partial_schema_fixture_v1.sql"],text=True).strip(),
+            "view_supplement_blob":subprocess.check_output(["git","hash-object","research/h2_neon_current_ingestion_checkpoints_view_reconstruction_2026-10-19.sql"],text=True).strip(),
+            "source_phase1_blob":"ed014e61fc6186fa9daf91c763c847e7df2f0306",
+            "report_sha256":hashlib.sha256(report.read_bytes()).hexdigest() if report.exists() else None,
+            "runner_job":os.getenv("GITHUB_JOB"),"copy":os.getenv("H2_PG18_COPY"),
+            "run_id":os.getenv("GITHUB_RUN_ID"),"neon_connections":0,
+            "production_modifications":0
+          },sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload raw reports and provenance, even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-neon-view-pg18-${{ matrix.copy }}
+          path: |
+            /tmp/h2_neon_checkpoint_view_pg18_${{ matrix.copy }}.json
+            /tmp/h2_neon_job_provenance.json
+          if-no-files-found: warn
+          retention-days: 30
