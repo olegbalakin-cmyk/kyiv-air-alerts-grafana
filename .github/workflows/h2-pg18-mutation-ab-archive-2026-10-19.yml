@@ -1,0 +1,52 @@
+name: H2 PG18 original operational mutation A-B Git freeze
+on:
+  push:
+    branches: [research-h2-pg18-mutation-operational-writer-2026-10-19]
+    paths:
+      - '.github/workflows/h2-pg18-mutation-ab-archive-2026-10-19.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  freeze:
+    if: github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download exact original CI artifact ZIP files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          p=research/h2_pg18_mutation_operational_writer_2026-10-19
+          for item in A:12219934083 B:12220721947; do
+            copy="${item%%:*}"
+            artifact="${item##*:}"
+            curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/artifacts/${artifact}/zip" \
+              -o "${p}/original_${copy}.zip"
+            unzip -p "${p}/original_${copy}.zip" h2_mutation_report.json > "${p}/original_${copy}.json"
+          done
+      - name: Verify exact 2 JSON and 2 ZIP inputs
+        run: |
+          python research/h2_pg18_mutation_operational_writer_2026-10-19/verify_original_ab.py --write-manifest
+          python research/h2_pg18_mutation_operational_writer_2026-10-19/verify_original_ab.py
+      - name: Commit frozen bytes to isolated research branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/h2_pg18_mutation_operational_writer_2026-10-19/original_A.json
+          git add research/h2_pg18_mutation_operational_writer_2026-10-19/original_B.json
+          git add research/h2_pg18_mutation_operational_writer_2026-10-19/original_A.zip
+          git add research/h2_pg18_mutation_operational_writer_2026-10-19/original_B.zip
+          git add research/h2_pg18_mutation_operational_writer_2026-10-19/AB_original_evidence_manifest.json
+          git diff --cached --quiet && { echo 'No new freeze files'; exit 1; }
+          git commit -m "research(h2): freeze exact original operational PG18 A/B reports [skip ci]"
+          git push origin HEAD:research-h2-pg18-mutation-operational-writer-2026-10-19
