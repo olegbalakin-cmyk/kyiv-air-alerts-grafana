@@ -1,0 +1,131 @@
+{
+  "document_type": "H2_PARTIAL_SCHEMA_MUTATION_K1_K2_AND_AB_DURABLE_RETENTION_PROOF",
+  "date_utc": "2026-10-19",
+  "acceptance_status": "CANDIDATE_PASS_AWAITING_SEPARATE_INDEPENDENT_ACCEPTANCE",
+  "preflight": {
+    "main": "061304875e0af7498f115530e8403d3b38baa715",
+    "site_prod": "f0d1ef9cf50f6e9088f6c3937a90185e07807273",
+    "operational_wip": "9ce2ae7584baf582b42a255c1d9e304df6a8ab04",
+    "predecessor": "198a4dac76ddb1604a813dc286cb28ec1f6d83e7"
+  },
+  "test_commits": {
+    "initial_failed_assert": "08dfbf3b922e339f8a49a49b046a86d4a4a35237",
+    "fixed_final_assert_success": "5a872f9f4b034433a5481620acd8f11bba700394",
+    "corrected_receipt_field_success": "edb3faa5e5e3fd303db357d5b2fd01b236fe255c"
+  },
+  "independent_runs": [
+    {
+      "id": 39212435057,
+      "sha": "5a872f9f4b034433a5481620acd8f11bba700394",
+      "conclusion": "SUCCESS",
+      "jobs": [
+        117928620164,
+        117928619866
+      ],
+      "note": "First successful run; K1/K2 report metadata expected_writer_blob contained typo, independently flagged and fixed"
+    },
+    {
+      "id": 39212648444,
+      "sha": "edb3faa5e5e3fd303db357d5b2fd01b236fe255c",
+      "conclusion": "SUCCESS",
+      "jobs": [
+        117929281026,
+        117929280622
+      ],
+      "note": "Second successful workflow run; same frozen runtime and fixture blobs; only test report metadata expected_writer_blob corrected"
+    }
+  ],
+  "last_run_exact_reports": {
+    "A": {
+      "artifact": 12168038465,
+      "zip_bytes": 13056,
+      "zip_sha256": "1b98ea776474088b20c5551646b5447d11ab70d2b149ba7a000ae56abbb64217",
+      "mutation_result_bytes": 42716,
+      "mutation_result_sha256": "142e6ed4940fde6e42327d5710ca9319795f0625b0a3e691eefa11bb8320887c",
+      "observed_result_sha256": "306dc1f8628cde4314702593a4fc2c783a0c8b5c4af96e60ae5f8a4f322a34e8"
+    },
+    "B": {
+      "artifact": 12167869611,
+      "zip_bytes": 13051,
+      "zip_sha256": "e21506972e57393892b50be263c72084e72504245c2498f06a873ef976078a29",
+      "mutation_result_bytes": 42716,
+      "mutation_result_sha256": "c1515afd66b7abf4894129152b10f76dbeb0a210a475d712977eadfdf2b7e3e4",
+      "observed_result_sha256": "b86430b49b107bcbcb1e104c77931245b6f0175dfee741175643a2efbb3b32db"
+    }
+  },
+  "pinned_blobs": {
+    "monitor": "a94741aa3a65c18d7bffb846a2c26973564c7812",
+    "writer": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+    "snapshot": "4e8890c88381fad5af3ecc4721ff435c0dd958f5",
+    "observed_partial_fixture": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3"
+  },
+  "K1": {
+    "baseline": "STALE_EXPECTED_TIP; unchanged JSON hashes; single committed competitor classification",
+    "target": "actual writer expected-tip decision guard",
+    "mutation_reached_both_runs": true,
+    "mutated_db": "2 classifications forming one revision chain; one current tip; competitor and monitor both committed",
+    "mutated_files": "state checked_at advanced; last_run success checkpoint written; queue unchanged",
+    "oracle": "EXPECTED_MUTANT_REJECTION: STALE_WRITE_COMMITTED_AND_JSON_CHECKPOINT_ADVANCED",
+    "restored": "baseline STALE_EXPECTED_TIP again; original pinned writer Git blob restored"
+  },
+  "K2": {
+    "baseline": "Episode A committed, B rolled back, original restart reconciled A and committed B, subsequent main() idempotent",
+    "target": "actual restart-time writer existing-classification detection",
+    "mutation_reached_both_runs": true,
+    "mutated_db": "actual attempt to insert previously committed same classification_key on monitor.main restart; unique classification_key + ON CONFLICT DO NOTHING prevented duplicate row; two legitimate classifications total (episodes A and B)",
+    "oracle": "EXPECTED_MUTANT_REJECTION: already committed classification_key attempted a second INSERT",
+    "restored": "original baseline and idempotent restart pass",
+    "distinction": "application-level duplicate detector not proven; barrier is DB key uniqueness"
+  },
+  "AB_original_git_retention": {
+    "source_run": 39166480370,
+    "source_artifact_ids": [
+      12151185495,
+      12151220377
+    ],
+    "all_6_original_reports_recovered_byte_exact": true,
+    "zip_crc_both": "PASS",
+    "git_bundle_path": "research/h2_observed_neon_partial_pg18_AB_reports_2026-10-19.json.xz.b64",
+    "manifest_path": "research/h2_observed_neon_partial_pg18_AB_retention_manifest_2026-10-19.json",
+    "verifier_path": "research/h2_verify_observed_partial_AB_retention_2026-10-19.py",
+    "git_only_verifier": "6/6 original SHA256 and sizes PASS, 3/3 deliberate-corruption tests rejected",
+    "archive_text_sha256": "ac9003d35806c10018a2ff21b2bad83df4643ca134cd241c51f6a154a9a50fd0",
+    "archive_bytes": 18257
+  },
+  "regressions_each_job": {
+    "E": "15/15 PASS",
+    "M": "10/10 PASS",
+    "N": "3/3 PASS",
+    "I": "15/15 PASS",
+    "T": "24/24 PASS",
+    "writer_extra": "3/3 PASS",
+    "postgres": "18.6",
+    "independent_ephemeral_databases": true
+  },
+  "contracts": {
+    "total": 213,
+    "structural_match": 203,
+    "db_enforced_mismatch": 3,
+    "neon_specific_unverified": 7,
+    "db_invariant_hardening": "REQUIRED",
+    "exact_neon_equivalence": "NOT PROVEN"
+  },
+  "safety": {
+    "live_neon_calls": 0,
+    "live_neon_branches_created": 0,
+    "external_source_calls": 0,
+    "main_mutations": 0,
+    "site_prod_mutations": 0,
+    "operational_wip_mutations": 0,
+    "historical_backfill_casualty_mutations": 0,
+    "production_cutover": false
+  },
+  "limitations": [
+    "Fixture is partially reconstructed observed Neon catalog; missing exact Neon view/ACL/function/transaction/index contexts",
+    "Two independently triggered successful workflow runs at commits differing by a single test-report metadata correction, not the exact same test commit",
+    "K2 mutation observed and blocked by DB-level deterministic key uniqueness; no separate application-level duplicate detector established",
+    "Exact new K1/K2 row-level JSON readbacks stored in time-limited Actions artifacts; this Git proof freezes their SHA256 and concise outcomes, not raw new mutation JSON files",
+    "Separate independent coordination acceptance still required"
+  ],
+  "next_task": "Separately authorized, narrowly bounded read-only Neon catalog completion of seven view/ACL/function/transaction/index contracts, after independent acceptance."
+}
