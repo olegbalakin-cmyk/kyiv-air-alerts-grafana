@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-19
 
+### Brand mark and source attribution for PNG sharing and embed — preview PASS
+
+- Test-only `brand-mark.svg` logo, matching Chart.js PNG canvas vector mark with source domain, and branded embed footer linking back to the current full chart state. Preview branch [876d03b96434faf6fed3c7030cfe4d19dca81550](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/876d03b96434faf6fed3c7030cfe4d19dca81550), [Actions 39314685694](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39314685694) SUCCESS, Netlify draft `6ad6756962a4e332177a6fbf` ready. Initial pre-fix candidate 31497bc had failing syntax test and was not deployed. Only test visual identity; manual visual QA remains pending. Production/site-prod and all operational data tracks unchanged.
+
+
 ### Preview chart PNG and embed brand/source attribution — deployed, automated PASS
 
 - Test preview [commit `11c4aae387186e17a0b4b968ecd3e83ceceb8f15`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/11c4aae387186e17a0b4b968ecd3e83ceceb8f15), [Actions `39312205615`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39312205615) SUCCESS (job 118264413445, logo and link checks PASS), draft Netlify `6ad6711f8fd9bbb7e1745e6b` READY. Added an original SVG signal mark mirrored in PNG canvas, a visible HTTPS source URL on PNG and clickable branded embed footer linking to the full filtered chart. No production/site-prod/WIP/Neon/casualty/historical change; user approval of mark and manual real-world visual QA pending.

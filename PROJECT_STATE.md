@@ -1,5 +1,11 @@
 # Project State
 
+### Preview chart brand mark and attribution — TEST DEPLOYED / AUTOMATED PASS (2026-10-19)
+
+- **Accepted preview-only checkpoint:** isolated branch `preview-chart-share-2026-10-19` commit [876d03b96434faf6fed3c7030cfe4d19dca81550](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/876d03b96434faf6fed3c7030cfe4d19dca81550); first commit 31497bc40bdb44d88523973099fc43efd041718b failed CI because of a test-only escaped-newline syntax error (never deployed), repaired in tested commit. [Actions run 39314685694](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39314685694) SUCCESS with chart share/embed and branding tests; Netlify draft `6ad6756962a4e332177a6fbf` ready at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/. Separate production Netlify/site-prod unchanged.
+- **Features:** Added new test-only `brand-mark.svg` (radar arcs and yellow dot), brand mark drawn as vectors into chart PNG header, readable https site-address in exported image; embed source footer carries same SVG and clickable identity/domain linking to the source full chart with filters; icon added to test HTML and Netlify preview bundle. No production adoption/brand approval implied. Browser screenshot and third-party embed/Telegram manual QA pending. No WIP, Neon, casualty, historical/backfill or data-pipeline changes.
+
+
 ### Chart branding on isolated test preview — DEPLOYED / AUTOMATED PASS (2026-10-19)
 
 - **Accepted bounded preview:** [commit `11c4aae387186e17a0b4b968ecd3e83ceceb8f15`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/11c4aae387186e17a0b4b968ecd3e83ceceb8f15) on `preview-chart-share-2026-10-19`; [Actions `39312205615`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39312205615) SUCCESS, job `118264413445` PASS for existing PNG/embed and new branding attribution; Netlify branch deploy `6ad6711f8fd9bbb7e1745e6b` READY at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ .
