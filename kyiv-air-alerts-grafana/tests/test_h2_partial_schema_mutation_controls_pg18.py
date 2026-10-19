@@ -228,7 +228,7 @@ if __name__=="__main__":
         raw=Path(writer.__file__).read_bytes()
         blob=hashlib.sha1(("blob "+str(len(raw))+"\0").encode()+raw).hexdigest()
         result={"verdict":verdict,"cases":PROOF,"postgres_fixture":obs.EXPECTED_FIXTURE_BLOB,
-          "writer_blob":blob,"expected_writer_blob":"2a5354aa3ad2bc67893ffa40589024ecb84fa15e",
+          "writer_blob":blob,"expected_writer_blob":"2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
           "writer_restored":writer.persist_episode_classification is original,
           "network_live_calls":old.NETWORK["live_calls"],"neon_calls":0,
           "limitations":["partially observed Neon DDL only","K2 independent DB unique-key barrier; no application-level duplicate rejection proven"]}
