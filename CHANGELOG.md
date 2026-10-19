@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-19
 
+### Preview chart PNG and embed brand/source attribution — deployed, automated PASS
+
+- Test preview [commit `11c4aae387186e17a0b4b968ecd3e83ceceb8f15`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/11c4aae387186e17a0b4b968ecd3e83ceceb8f15), [Actions `39312205615`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39312205615) SUCCESS (job 118264413445, logo and link checks PASS), draft Netlify `6ad6711f8fd9bbb7e1745e6b` READY. Added an original SVG signal mark mirrored in PNG canvas, a visible HTTPS source URL on PNG and clickable branded embed footer linking to the full filtered chart. No production/site-prod/WIP/Neon/casualty/historical change; user approval of mark and manual real-world visual QA pending.
+
+
 ### H2 GitHub secret metadata check — PASS bounded; temporary main verifier removed
 
 - **Accepted:** [manual Actions run 39309315728](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39309315728), job `118254518270` at `main@3810d2627d3ef8454dd31bdeaa41b9fdfd520888`, `SUCCESS`; independently fetched logs yield `URI_FORMAT=YES`, `USERNAME_MATCH=YES`, `ENDPOINT_MATCH=YES`, `DATABASE_MATCH=YES`. The repo secret `PHASE1_PROD_SHADOW_DATABASE_URL` matches `neondb_owner`, the expected direct/pooler endpoint first DNS label with `.neon.tech` suffix, and `/neondb` URI path. No DSN/password disclosure, Neon SQL or network connection by verifier.

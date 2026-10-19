@@ -1,5 +1,12 @@
 # Project State
 
+### Chart branding on isolated test preview — DEPLOYED / AUTOMATED PASS (2026-10-19)
+
+- **Accepted bounded preview:** [commit `11c4aae387186e17a0b4b968ecd3e83ceceb8f15`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/11c4aae387186e17a0b4b968ecd3e83ceceb8f15) on `preview-chart-share-2026-10-19`; [Actions `39312205615`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39312205615) SUCCESS, job `118264413445` PASS for existing PNG/embed and new branding attribution; Netlify branch deploy `6ad6711f8fd9bbb7e1745e6b` READY at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ .
+- **Feature:** Original preview-only SVG radar mark (`brand-mark.svg`), same vector geometry directly on client-side exported PNG with a readable test-site HTTPS URL; embedded chart footer has logo, project name, visible host/domain and linked full chart URL retaining current filters. No data refresh or pipeline change; production Netlify, `site-prod`, operational WIP, casualty, backfill, historical, Neon and classifier unchanged. Brand mark is a test proposal, not an approved final brand.
+- **Limit:** Automated JS and mocked DOM tests, visually rendered SVG mark and Netlify READY are confirmed. True exported PNG visual composition and real cross-origin embed link behavior on external devices/CMS require manual browser QA. No public production promotion.
+
+
 ### H2 GitHub secret URI metadata check — PASS BOUNDED, temporary workflow retired (2026-10-19)
 
 - **Accepted single-run evidence:** [H2 Secret Role Check run 39309315728](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39309315728), workflow ID `389768617`, job `118254518270`, event `workflow_dispatch`, tested `main@3810d2627d3ef8454dd31bdeaa41b9fdfd520888`, attempt 1, completed **SUCCESS**. Independently fetched job logs report exactly `URI_FORMAT=YES`, `USERNAME_MATCH=YES`, `ENDPOINT_MATCH=YES`, `DATABASE_MATCH=YES`. Script parsed secret `PHASE1_PROD_SHADOW_DATABASE_URL` locally in the Actions runner and matched PostgreSQL URL syntax, username `neondb_owner`, the first DNS label `ep-still-violet-b5bg6mhp` or `ep-still-violet-b5bg6mhp-pooler` with `.neon.tech` suffix, and database path `/neondb`; no secret contents/password were logged and no Neon SQL/connection was performed.
