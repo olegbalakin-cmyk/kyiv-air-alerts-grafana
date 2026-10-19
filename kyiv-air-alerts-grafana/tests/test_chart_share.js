@@ -226,4 +226,6 @@ console.log("embed URL HTML escaping, exact-state restoration, iframe DOM reloca
 assert.ok(calls.text.some(v => String(v).includes("https://test-preview.example/")), "PNG must display readable source URL");
 assert.ok(drawContext.stroke, "logo vector support must be present");
 console.log("logo branding/source URL PNG and linked embed assertions PASS");
-\nassert.ok(calls.text.some(t=>t.includes("https://test-preview.example/")), "PNG needs readable source link");\nconsole.log("brand mark and source URL contract PASS");\n
+
+assert.ok(calls.text.some(t=>t.includes("https://test-preview.example/")), "PNG needs readable source link");
+console.log("brand mark and source URL contract PASS");
