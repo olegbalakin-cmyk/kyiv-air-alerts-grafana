@@ -82,3 +82,58 @@ assert.match(file.name,/air-alerts_comparecumulativehours_/);
 assert.deepEqual([...file.chunks[0]],[137,80,78,71,13,10,26,10]);
 assert.throws(()=>s.pngFile("data:text/plain;base64,YQ==","wrong.png"));
 console.log("chart image render and PNG packaging checks PASS");
+
+
+// One visible per-chart share button: image sharing, not a duplicate link action.
+const actionButtons = [];
+const createElementOriginal = global.document.createElement;
+global.document.createElement = function(tag) {
+  if (tag !== "button") return createElementOriginal(tag);
+  const label = { textContent: "" };
+  const button = {
+    dataset: {}, attributes: {}, title: "",
+    setAttribute(name, value) { this.attributes[name] = value; },
+    addEventListener(name, handler) { this.handler = handler; },
+    querySelector(selector) { return selector === ".chart-share-label" ? label : null; },
+    set innerHTML(value) { this.markup = value; }
+  };
+  actionButtons.push(button);
+  return button;
+};
+const exportRow = {
+  children: [],
+  appendChild(button) { this.children.push(button); },
+  querySelector(selector) {
+    return selector === '[data-share-image="compareCumulativeHoursChart"]'
+      ? this.children.find(b => b.dataset.shareImage === "compareCumulativeHoursChart") || null
+      : null;
+  }
+};
+const chartCard = { querySelector(selector) {
+  return selector === '[data-csv-chart="compareCumulativeHoursChart"]' ? exportRow : null;
+}};
+const chartWrap = {};
+sourceCanvas.closest = (selector) =>
+  selector === ".chart-card" ? chartCard :
+  selector === ".chart-wrap" ? chartWrap : null;
+s.setup({
+  chartIds: ["compareCumulativeHoursChart"],
+  getChart: () => c,
+  language: () => "uk",
+  syncUrl: () => {}
+});
+assert.equal(exportRow.children.length, 1);
+assert.equal(exportRow.children[0].className, "csv-export-button chart-image-button");
+assert.equal(exportRow.children[0].dataset.shareImage, "compareCumulativeHoursChart");
+assert.equal(exportRow.children[0].querySelector(".chart-share-label").textContent, "Поділитися");
+assert.match(exportRow.children[0].attributes["aria-label"], /зображенням/);
+assert.equal(typeof exportRow.children[0].handler, "function");
+s.setup({
+  chartIds: ["compareCumulativeHoursChart"],
+  getChart: () => c,
+  language: () => "uk",
+  syncUrl: () => {}
+});
+assert.equal(exportRow.children.length, 1, "Repeated setup must not add another share button");
+assert.equal(actionButtons.length, 1);
+console.log("single PNG share button UI contract PASS");

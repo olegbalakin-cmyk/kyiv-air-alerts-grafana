@@ -179,12 +179,12 @@
       "Надіслати PNG або скопіювати зображення для вставлення в чат",
       "Send the PNG or copy the image to paste into a chat");
     button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 5"/></svg><span class="chart-share-label"></span>';
-    button.querySelector(".chart-share-label").textContent = translated("Картинка", "Image");
+    button.querySelector(".chart-share-label").textContent = translated("Поділитися", "Share");
 
     button.addEventListener("click", async function () {
       const chart = settings.getChart(chartId);
       if (!chart || card.closest(".hidden")) {
-        showStatus(button, "Немає графіка", "Unavailable", "Картинка", "Image");
+        showStatus(button, "Немає графіка", "Unavailable");
         return;
       }
       let image, file, shareUrl;
@@ -195,7 +195,7 @@
         file = pngFile(image.dataUrl, image.filename);
       } catch (error) {
         root.console?.warn("PNG chart share unavailable", error);
-        showStatus(button, "Помилка PNG", "PNG failed", "Картинка", "Image");
+        showStatus(button, "Помилка PNG", "PNG failed");
         return;
       }
 
@@ -215,7 +215,7 @@
           typeof root.ClipboardItem === "function") {
         try {
           await navigator.clipboard.write([new root.ClipboardItem({ "image/png": file })]);
-          showStatus(button, "PNG скопійовано", "PNG copied", "Картинка", "Image");
+          showStatus(button, "PNG скопійовано", "PNG copied");
           return;
         } catch (error) {
           // Browser denied image clipboard; let the user download instead.
@@ -223,10 +223,10 @@
       }
       try {
         downloadPng(file);
-        showStatus(button, "PNG завантажено", "PNG downloaded", "Картинка", "Image");
+        showStatus(button, "PNG завантажено", "PNG downloaded");
       } catch (error) {
         root.console?.warn("PNG download failed", error);
-        showStatus(button, "Не вдалося", "Failed", "Картинка", "Image");
+        showStatus(button, "Не вдалося", "Failed");
       }
     });
     return button;
@@ -244,57 +244,6 @@
     root.setTimeout(function () { label.textContent = original; }, 1800);
   }
 
-  function makeButton(chartId, card) {
-    const button = root.document.createElement("button");
-    button.type = "button";
-    button.className = "csv-export-button chart-share-button";
-    button.dataset.shareChart = chartId;
-    button.setAttribute("aria-label", translated("Поділитися поточним виглядом графіка", "Share this chart's current view"));
-    button.title = translated(
-      "Скопіювати посилання або поділитися графіком з поточними фільтрами й видимими серіями",
-      "Share a link with the current filters and visible chart series"
-    );
-    button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2.1-2.1a5 5 0 0 0-7.1-7.1L10.7 5.2"/><path d="M14 11a5 5 0 0 0-7.1 0l-2.1 2.1a5 5 0 0 0 7.1 7.1l1.4-1.4"/></svg><span class="chart-share-label"></span>';
-    button.querySelector(".chart-share-label").textContent = translated("Поділитися", "Share");
-
-    button.addEventListener("click", async function () {
-      const chart = settings.getChart(chartId);
-      if (!chart) {
-        showStatus(button, "Немає графіка", "Unavailable");
-        return;
-      }
-      settings.syncUrl();
-      const url = makeShareUrl(root.location.href, chartId, chart);
-      const title = card.querySelector("h3")?.textContent ||
-        card.closest(".comparison-section")?.querySelector("h2")?.textContent ||
-        translated("Повітряні тривоги", "Air alerts");
-
-      if (typeof root.navigator.share === "function") {
-        try {
-          await root.navigator.share({ title, url });
-          return;
-        } catch (error) {
-          if (error && error.name === "AbortError") return;
-        }
-      }
-      try {
-        if (!root.navigator.clipboard ||
-            typeof root.navigator.clipboard.writeText !== "function") {
-          throw new Error("Clipboard unavailable");
-        }
-        await root.navigator.clipboard.writeText(url);
-        showStatus(button, "Скопійовано", "Copied");
-      } catch (error) {
-        if (typeof root.prompt === "function") {
-          root.prompt(translated("Скопіюйте посилання на графік:", "Copy this chart link:"), url);
-        } else {
-          showStatus(button, "Не вдалося", "Failed");
-        }
-      }
-    });
-    return button;
-  }
-
   function setup(options) {
     settings = options;
     for (const chartId of options.chartIds) {
@@ -308,9 +257,6 @@
         row = root.document.createElement("div");
         row.className = "chart-export-row";
         card.insertBefore(row, wrap);
-      }
-      if (!row.querySelector('[data-share-chart="' + chartId + '"]')) {
-        row.appendChild(makeButton(chartId, card));
       }
       if (!row.querySelector('[data-share-image="' + chartId + '"]')) {
         row.appendChild(makeImageButton(chartId, card));
