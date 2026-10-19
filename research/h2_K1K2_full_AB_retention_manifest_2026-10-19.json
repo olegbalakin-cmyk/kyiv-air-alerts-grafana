@@ -1,0 +1,87 @@
+{
+  "acceptance_limits": {
+    "K1": "intentional stale CAS bypass detected offline",
+    "K2": "duplicate insert ATTEMPT; UNIQUE(classification_key) and ON CONFLICT DO NOTHING suppress committed duplicate; application-level duplicate rejection unproven",
+    "Neon": "no live Neon SQL or writes"
+  },
+  "archive": {
+    "byte_size": 27641,
+    "map_byte_size": 275722,
+    "map_sha256": "0c93b7f8bace21de0666b07e8bfc69041392c71914204c6a16c50a477a6df89d",
+    "path": "research/h2_K1K2_full_AB_reports_2026-10-19.json.xz.b64",
+    "sha256": "9a03b33bc9eb0cbd70acd171163801b33750e07700f13a06d77236486e147832",
+    "xz_byte_size": 20728,
+    "xz_sha256": "407751f2a954c33efbbdded95250e7684e5318c01a321559244247846215de07"
+  },
+  "artifacts": {
+    "A": {
+      "artifact_id": 12168038465,
+      "members": {
+        "h2_legacy_caller_report.json": {
+          "sha256": "b01c9706e7607990442f529e7328571354867806e4656013ac82bf52ad72283e",
+          "size": 1364,
+          "verdict": "PARTIAL"
+        },
+        "h2_legacy_main_report.json": {
+          "sha256": "df9d94da73630e5d027509d9e6884828891743799aab160b2694eed091668262",
+          "size": 20712,
+          "verdict": "PASS"
+        },
+        "h2_mutation_result.json": {
+          "sha256": "142e6ed4940fde6e42327d5710ca9319795f0625b0a3e691eefa11bb8320887c",
+          "size": 42716,
+          "verdict": "PASS_MUTATION_CONTROLS_BOUNDED_PG18"
+        },
+        "h2_observed_result.json": {
+          "sha256": "306dc1f8628cde4314702593a4fc2c783a0c8b5c4af96e60ae5f8a4f322a34e8",
+          "size": 38502,
+          "verdict": "PASS_OFFLINE_PARTIAL_OBSERVED_SCHEMA"
+        }
+      },
+      "run_id": 39212648444,
+      "tested_commit": "edb3faa5e5e3fd303db357d5b2fd01b236fe255c",
+      "zip_crc": "PASS",
+      "zip_sha256": "1b98ea776474088b20c5551646b5447d11ab70d2b149ba7a000ae56abbb64217",
+      "zip_size": 13056
+    },
+    "B": {
+      "artifact_id": 12167869611,
+      "members": {
+        "h2_legacy_caller_report.json": {
+          "sha256": "b01c9706e7607990442f529e7328571354867806e4656013ac82bf52ad72283e",
+          "size": 1364,
+          "verdict": "PARTIAL"
+        },
+        "h2_legacy_main_report.json": {
+          "sha256": "c611002781102fb5839883703eb0538e5487f6efa6818aea52c1959675fc4fe3",
+          "size": 20712,
+          "verdict": "PASS"
+        },
+        "h2_mutation_result.json": {
+          "sha256": "c1515afd66b7abf4894129152b10f76dbeb0a210a475d712977eadfdf2b7e3e4",
+          "size": 42716,
+          "verdict": "PASS_MUTATION_CONTROLS_BOUNDED_PG18"
+        },
+        "h2_observed_result.json": {
+          "sha256": "b86430b49b107bcbcb1e104c77931245b6f0175dfee741175643a2efbb3b32db",
+          "size": 38502,
+          "verdict": "PASS_OFFLINE_PARTIAL_OBSERVED_SCHEMA"
+        }
+      },
+      "run_id": 39212648444,
+      "tested_commit": "edb3faa5e5e3fd303db357d5b2fd01b236fe255c",
+      "zip_crc": "PASS",
+      "zip_sha256": "e21506972e57393892b50be263c72084e72504245c2498f06a873ef976078a29",
+      "zip_size": 13051
+    }
+  },
+  "format": "H2-K1K2-full-AB-v1",
+  "member_count": 8,
+  "previous_run": {
+    "retained": false,
+    "run_id": 39212435057,
+    "tested_commit": "5a872f9f4b034433a5481620acd8f11bba700394"
+  },
+  "source": "exact original ZIP member bytes; original JSON never reserialized",
+  "tested_commit": "edb3faa5e5e3fd303db357d5b2fd01b236fe255c"
+}
