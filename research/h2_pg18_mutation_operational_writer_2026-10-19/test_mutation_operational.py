@@ -159,7 +159,7 @@ def new_database(label):
         if cp.returncode:
             raise RuntimeError("fixture SQL failed in " + label + " for " + file
                                + ": " + cp.stderr[-900:])
-    trace("environment", name=label, dbname=name, schema="synthetic-frozen-partial")
+    trace("environment", label=label, dbname=name, schema="synthetic-frozen-partial")
     return name
 
 def mkrow(city, episode, tag, predecessor=None):
