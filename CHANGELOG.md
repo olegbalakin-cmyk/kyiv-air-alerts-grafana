@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-19
 
+### Isolated per-chart iframe embed — published on test, automated PASS
+
+- Preview commit [b528b97f026734b20840bbc068d33d2e4fdbcbae](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/b528b97f026734b20840bbc068d33d2e4fdbcbae), [Actions run 39310452363](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39310452363) SUCCESS; Netlify draft `6ad66e2cbb9274484bd632e8` ready at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ . Added `Вбудувати` / `Embed` control to chart blocks; copies responsive iframe HTML embedding just the current live graph/title/context and an attribution link, preserving filters/series. Original `Поділитися` PNG and CSV unchanged. Verified in mocked JS and CI, manual real external-iframe QA pending. No production/site-prod, WIP, historical, casualty, or Neon mutation.
+
+
 ### One-button PNG chart sharing on test — deployed, automated PASS
 
 - Isolated chart share branch [da3384f30a028c385b5eafc14533cfaea92adb1a](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/da3384f30a028c385b5eafc14533cfaea92adb1a), [Actions run 39307472775](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39307472775) SUCCESS (PNG unit and single-action regression PASS), Netlify draft deploy `6ad6694496d6d9ccb73bf2b7` ready at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/. One `Поділитися` / `Share` button per chart now performs PNG sharing/copy/download; removed the redundant direct-link button, retained CSV and deep-link decoding. Preview only; production unaffected. Device/app compatibility manual QA pending.

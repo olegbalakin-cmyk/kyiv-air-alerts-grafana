@@ -1,5 +1,12 @@
 # Project State
 
+### Isolated single-chart iframe embedding — TEST DEPLOYED / AUTOMATED PASS (2026-10-19)
+
+- **Accepted bounded test checkpoint:** preview-only commit [b528b97f026734b20840bbc068d33d2e4fdbcbae](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/b528b97f026734b20840bbc068d33d2e4fdbcbae), [GitHub Actions 39310452363](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39310452363) SUCCESS (job 118258345855; JS syntax, existing PNG checks, embed HTML escaping/state preservation and isolated DOM tests PASS). Netlify branch deploy `6ad66e2cbb9274484bd632e8` `ready` at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ . Production Netlify and `site-prod` were not changed.
+- **Feature:** Each of 15 chart cards adds `Вбудувати` / `Embed`, copying escaped HTML iframe at 100% width and nominal height 700px. URL carries the current filtered city/period state and visible Chart.js series; `embed` mode renders only the original live chart card, section title and caption with source/link back to the full chart. The previous PNG share action and CSV controls remain in the full view; UI hides irrelevant controls in the iframe. No server rendering, external database or source strategy changes.
+- **Limit:** Netlify `ready` and mocked JS/DOM contract PASS do not prove operation inside real third-party iframe browsers/CMS, cross-origin permissions, live canvas visual fidelity or all host responsive sizes. Manual embed QA on at least one external page remains pending; do not declare production promotion or operational track progress.
+
+
 ### Preview chart share UI simplified to one PNG action — DEPLOYED / AUTOMATED PASS (2026-10-19)
 
 - **New accepted test-only checkpoint:** Isolated branch `preview-chart-share-2026-10-19` commit [da3384f30a028c385b5eafc14533cfaea92adb1a](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/da3384f30a028c385b5eafc14533cfaea92adb1a), successful [Actions run 39307472775](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39307472775), job 118248161066. GitHub run logs prove JS syntax, PNG render/packaging and new single-action UI/idempotency regression PASS. Netlify isolated draft deploy `6ad6694496d6d9ccb73bf2b7` confirmed `ready`, context `branch-deploy`, at https://chart-share-test-20261019--ukraine-air-alerts.netlify.app/ .
