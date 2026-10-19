@@ -1,0 +1,23 @@
+name: H2 expected-tip independent Git-only archive verifier
+on:
+  push:
+    branches: [research-h2-expected-tip-cas-e2e-2026-10-20]
+    paths:
+      - 'research/h2_expected_tip_proof_2026-10-20/**'
+      - '.github/workflows/h2-expected-tip-git-only-2026-10-20.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Byte and semantic verification from immutable Git only
+        run: python research/h2_expected_tip_proof_2026-10-20/verify_git_archive.py
+      - name: Ensure research is not deployed
+        run: |
+          test "${GITHUB_REF_NAME}" = "research-h2-expected-tip-cas-e2e-2026-10-20"
+          test "${GITHUB_EVENT_NAME}" = "push"
