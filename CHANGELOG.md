@@ -2,6 +2,15 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-20
+
+### H2 end-to-end expected-tip CAS repair — isolated offline PG18 bounded PASS / Neon NO-GO
+
+- Accepted bounded research transition: [isolated H2 final receipt `3c1cf86ac0eaee1b1de246022c19acbb58037948`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3c1cf86ac0eaee1b1de246022c19acbb58037948), tested commit `d6019f2fdf910273fa6bd19d9229b7595b846b1a`. Original operational writer `0118ca9e5f1308173e657257f1b49fe91cc19fe1` and monitor `95e0eb313c6c68016601f681ab5186bf147d6dd1` remain unchanged; repair exists ONLY on `research-h2-expected-tip-cas-e2e-2026-10-20`.
+- [PG18 A/B `39326315620`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39326315620) SUCCESS for each independent synthetic PG18.6 container: **48/48 new CAS/main/concurrency/transaction cases + 83/83 accepted mutation-controls**. Independent competing sessions from same frozen tip: exactly one COMMIT, one `STALE_EXPECTED_TIP`, no committed stale side effects or false main checkpoint; rollback, restart/idempotency, caller-owned savepoint/no-ACK, independent readback and guard-disabled negative oracle passed. Earlier combined run `39326165932` failed due synthetic database-name collision, corrected in exact tested commit. No live polling, Neon, deployment or WIP mutation.
+- [Git-frozen original A/B JSON and locally wrapped ZIPs, manifest, verifier](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/tree/3c1cf86ac0eaee1b1de246022c19acbb58037948/research/h2_expected_tip_proof_2026-10-20); Git-only [runs `39326619194`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39326619194) and [`39326753309`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39326753309) SUCCESS, 4/4 pairs + 8/8 tampering rejections. Local runner ZIPs are not original Actions artifact-download ZIP envelopes.
+- Offline verdicts: `H2_EXPECTED_TIP_SNAPSHOT_AUTHORITY`, `H2_OPERATIONAL_WRITER_CAS`, `H2_REAL_MONITOR_CALLER_INTEGRATION`, `H2_STALE_CONCURRENT_WRITE_REJECTION`, `H2_TRANSACTION_COMMIT_ACK`, `H2_DUE_WORK_FAIL_CLOSED`, `H2_PG18_A_B_EXECUTION` = **PASS in bounded synthetic offline scope**; `H2_DISPOSABLE_NEON_TEST_READINESS=BLOCKED / NO-GO` pending separate exact Neon contract/role verification and authorization. Preserve `203/3/7`, `UNBOUND_UNRESOLVED=25`, `C4/C5=NOT PROVEN`, `NEON_AUTHORITY_ACTIVE=NO`, `PRODUCTION_CUTOVER_EXECUTED=NO`, `WIP_ACTIVATION=NO-GO`. Separate production chart/logo rollout does not indicate H2 promotion.
+
 ## 2026-10-19
 
 ### Approved logo #12, PNG Share, iframe embed and Share glyph — production promotion
