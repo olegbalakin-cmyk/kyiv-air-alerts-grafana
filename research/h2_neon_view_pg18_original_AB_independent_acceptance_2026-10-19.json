@@ -1,0 +1,78 @@
+{
+  "kind": "H2_PG18_VIEW_AB_INDEPENDENT_ACCEPTANCE_2026_10_19",
+  "date": "2026-10-19",
+  "research_branch": "research-h2-neon-view-pg18-raw-AB-retention-2026-10-19",
+  "base_commit": "eb2f3e484ff8e3515b04cd8367de04ad054b1806",
+  "source": {
+    "run": 39241969351,
+    "tested_commit": "2735b0b50960b12178ef82337f11942d90bc994a",
+    "jobs": {
+      "A": 118024700635,
+      "B": 118024700964
+    },
+    "artifacts": {
+      "A": 12180769759,
+      "B": 12181577406
+    },
+    "one_run_two_fresh_pg_instances": true
+  },
+  "git_only_run": {
+    "run": 39245540441,
+    "job": 118036439758,
+    "tested_commit": "8d17318077dc28b201c5948b4ab4f88c00c8e3f3",
+    "conclusion": "success",
+    "verified_original_json_members": 4,
+    "verified_checks_each": 34,
+    "negative_controls": 5,
+    "negative_controls_rejected": 5
+  },
+  "evidence": {
+    "archive": "research/h2_neon_view_pg18_original_AB_reports_2026-10-19.json.xz.b64",
+    "archive_blob": "d83a1e0660f0c786c770b8b4cff0ca000b96670b",
+    "archive_sha256": "f38df3a6dff26dcd647e494049811297fd3d486053af285937305510202bf9cb",
+    "manifest": "research/h2_neon_view_pg18_original_AB_manifest_2026-10-19.json",
+    "manifest_blob": "45252b34db38e3be971f1a70172f3b838a850be0",
+    "verifier": "research/h2_verify_view_pg18_original_AB_2026-10-19.py",
+    "verifier_blob": "c62029255d08f6e5626412af301beec3c8bcd07f"
+  },
+  "verdicts": {
+    "A_original_raw_artifact_integrity": "PASS",
+    "B_byte_exact_git_retention": "PASS",
+    "C_git_only_independent_verifier": "PASS",
+    "D_pg18_view_compatibility": "PASS_BOUNDED_OFFLINE",
+    "E_genuine_pinned_phase1_sql": "PASS_BOUNDED_OFFLINE",
+    "F_live_neon_schema_parity": "PARTIAL",
+    "G_213_contract_reconciliation": "PARTIAL",
+    "H_disposable_neon_integration": "BLOCKED"
+  },
+  "matrix": {
+    "MATCH": 203,
+    "MISMATCH": 3,
+    "UNVERIFIED": 7,
+    "TOTAL": 213,
+    "version": "v6_unmodified"
+  },
+  "missing_DB_guarantees": [
+    "UNIQUE(supersedes_classification_uid)",
+    "DB-enforced append-only against owner",
+    "direct database current-tip uniqueness arbiter"
+  ],
+  "preserved": {
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT_PROVEN",
+    "C5": "NOT_PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "DISPOSABLE_NEON_WRITE_TEST": "BLOCKED",
+    "WIP_ACTIVATION": "NO_GO"
+  },
+  "boundaries": {
+    "neon_connections": 0,
+    "neon_writes": 0,
+    "operational_modifications": 0,
+    "production_deployment": false,
+    "full_live_neon_parity_proven": false,
+    "original_zip_archived_in_git": false
+  },
+  "next_task": "Separately authorized read-only Neon catalog/effective application role verification for seven unresolved contracts. No Neon actions under this checkpoint."
+}
