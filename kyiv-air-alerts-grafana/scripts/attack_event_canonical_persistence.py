@@ -976,31 +976,60 @@ def _ensure_sources(
     return inserted_count
 
 
+def _assert_expected_tip_cas(
+    actual_tip: str | None, expected_tip: str | None, exact_current_retry: bool,
+) -> None:
+    """Mandatory CAS gate. The test deliberately disables this for its oracle."""
+    if actual_tip != expected_tip and not exact_current_retry:
+        raise PersistenceContractError("STALE_EXPECTED_TIP")
+
+
 def persist_episode_classification(
     conn,
     record: dict[str, Any],
     *,
+    expected_snapshot: object = None,
     fault_after: str | None = None,
 ) -> dict[str, Any]:
+    # The token is issued only by a canonical SQL read before classification.
+    # Missing, user-constructed and replayed-for-another-episode values fail.
+    from attack_event_tip_snapshot import require_snapshot_authority
+    expected_tip, expected_parent_uid = require_snapshot_authority(
+        expected_snapshot, record=record,
+    )
     lock_key = (
         f"{record['city_key']}|{record['historical_episode_id']}|"
         f"{record['alert_start_utc_microseconds']}|{record['alert_end_utc_microseconds']}"
+    )
+    caller_owns_transaction = (
+        conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE
     )
     with conn.transaction():
         cur = conn.cursor()
         cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (lock_key,))
         parent_uid = _parent_binding(cur, record)
+        if parent_uid != expected_parent_uid:
+            raise PersistenceContractError("STALE_CANONICAL_PARENT_IDENTITY")
         current = _current_tip(cur, record)
+        actual_tip = current["classification_uid"] if current is not None else None
         existing = _existing_classification(cur, record["classification_key"])
-
+        # A retry is only exempt from stale CAS when the *same* canonical
+        # classification is already the current tip AND semantic identity matches.
+        exact_current_retry = False
         if existing is not None:
             _assert_existing_classification(existing, record)
-            existing_uid = str(existing["classification_uid"])
-            if current is not None and current["classification_uid"] != existing_uid:
+            exact_current_retry = (
+                actual_tip is not None
+                and str(existing["classification_uid"]) == actual_tip
+            )
+        _assert_expected_tip_cas(actual_tip, expected_tip, exact_current_retry)
+
+        if existing is not None:
+            if not exact_current_retry:
                 raise PersistenceContractError(
-                    "deterministic classification exists but is not the current revision tip"
+                    "CLASSIFICATION_KEY_EXISTS_BUT_NOT_CURRENT_TIP"
                 )
-            classification_uid = existing_uid
+            classification_uid = str(existing["classification_uid"])
             classification_inserted = False
             revision = False
             correction = {}
@@ -1018,7 +1047,7 @@ def persist_episode_classification(
                     "previous_classification_key": current["classification_key"],
                     "previous_verdict": current["verdict"],
                 }
-                supersedes_uid = current["classification_uid"]
+                supersedes_uid = actual_tip
                 revision_reason = "LIVE_FOLLOWUP_RECLASSIFICATION"
                 revision = True
             else:
@@ -1037,7 +1066,6 @@ def persist_episode_classification(
 
         if fault_after == "classification":
             raise RuntimeError("FORCED_PERSISTENCE_FAILURE_AFTER_CLASSIFICATION")
-
         event_inserted, event_updated = _ensure_event(
             cur,
             record,
@@ -1045,17 +1073,16 @@ def persist_episode_classification(
             alert_episode_uid=parent_uid,
             correction_provenance=correction,
         )
-
         if fault_after == "event":
             raise RuntimeError("FORCED_PERSISTENCE_FAILURE_AFTER_EVENT")
-
         source_inserts = _ensure_sources(
-            cur,
-            record,
-            classification_uid=classification_uid,
+            cur, record, classification_uid=classification_uid,
         )
-
-        return {
+        if fault_after == "source":
+            raise RuntimeError("FORCED_PERSISTENCE_FAILURE_AFTER_SOURCE")
+        if exact_current_retry and (event_inserted or event_updated or source_inserts):
+            raise PersistenceContractError("IDEMPOTENT_RETRY_HAS_SIDE_EFFECTS")
+        pending = {
             "classification_uid": classification_uid,
             "classification_key": record["classification_key"],
             "classification_inserted": classification_inserted,
@@ -1066,6 +1093,34 @@ def persist_episode_classification(
             "source_inserts": source_inserts,
             "source_count": len(record["source_rows"]),
         }
+    # conn.transaction() commits when it owns the outer transaction, but only
+    # releases a savepoint when the caller already owns an outer transaction.
+    pending["commit_state"] = (
+        "CALLER_TRANSACTION_PENDING" if caller_owns_transaction else "COMMITTED"
+    )
+    return pending
+
+
+def _independent_committed_readback(dsn: str, pending_rows: list[dict[str, Any]]) -> None:
+    """After an actual batch COMMIT, verify every ACK from a different backend."""
+    with psycopg.connect(str(dsn), autocommit=True, connect_timeout=8) as reader:
+        with reader.transaction():
+            reader.execute("SET TRANSACTION READ ONLY")
+            for item in pending_rows:
+                record = item["record"]
+                persisted = item["persisted"]
+                row = reader.execute(
+                    """SELECT classification_uid::text, classification_key,
+                              alert_episode_uid::text
+                       FROM public.attack_event_classifications
+                       WHERE classification_uid = %s::uuid""",
+                    (persisted["classification_uid"],),
+                ).fetchone()
+                if not row or row[0] != persisted["classification_uid"] or row[1] != record["classification_key"]:
+                    raise PersistenceContractError("INDEPENDENT_COMMIT_READBACK_MISMATCH")
+                # Validate canonical parent across transaction boundary, too.
+                if row[2] != item["parent_uid"]:
+                    raise PersistenceContractError("INDEPENDENT_COMMIT_PARENT_MISMATCH")
 
 
 def persist_due_episode_classifications(
@@ -1075,7 +1130,11 @@ def persist_due_episode_classifications(
     coverage_by_city: dict[str, bool],
     dsn: str | None = None,
     connection=None,
+    expected_snapshots: dict[tuple[str, str, str, str], object] | None = None,
+    fault_after: str | None = None,
 ) -> dict[str, Any]:
+    from attack_event_tip_snapshot import episode_identity, require_snapshot_authority
+
     city_keys = sorted(due)
     result: dict[str, Any] = {
         "enabled": bool(connection is not None or dsn),
@@ -1090,59 +1149,95 @@ def persist_due_episode_classifications(
         "source_inserts": 0,
         "verdicts": {},
         "records": [],
+        "commit_state": "NOT_REQUESTED",
     }
     if connection is None and not dsn:
         result["reason"] = "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"
         return result
 
     origin = _origin_context()
+    selected: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for city_key in city_keys:
+        for episode, check in due.get(city_key) or []:
+            result["episodes_considered"] += 1
+            if str(episode.get("city_key") or "") != city_key:
+                raise PersistenceContractError("PERSISTENCE_DUE_CITY_IDENTITY_MISMATCH")
+            if not coverage_by_city.get(city_key):
+                result["episodes_skipped_incomplete_coverage"] += 1
+                continue
+            if not isinstance(expected_snapshots, dict):
+                raise PersistenceContractError("EXPECTED_TIP_SNAPSHOTS_NOT_SUPPLIED")
+            identity = episode_identity(episode)
+            if identity in seen:
+                raise PersistenceContractError("DUPLICATE_PERSISTENCE_DUE_EPISODE")
+            seen.add(identity)
+            if identity not in expected_snapshots:
+                raise PersistenceContractError("EXPECTED_TIP_SNAPSHOT_NOT_SUPPLIED_FOR_EPISODE")
+            snapshot = expected_snapshots[identity]
+            tip, parent_uid = require_snapshot_authority(snapshot, episode=episode, check=check)
+            record = build_episode_classification(episode, queue, origin=origin)
+            require_snapshot_authority(snapshot, record=record, check=check)
+            selected.append({
+                "record": record,
+                "snapshot": snapshot,
+                "parent_uid": parent_uid,
+                "observed_tip": tip,
+                "observation_id": snapshot.observation_id,
+            })
+    if not selected:
+        return result
+
     own_connection = connection is None
-    conn = connection or psycopg.connect(str(dsn), autocommit=False)
+    conn = connection if connection is not None else psycopg.connect(str(dsn), autocommit=True)
     try:
-        for city_key in city_keys:
-            city_due = due.get(city_key) or []
-            coverage_complete = bool(coverage_by_city.get(city_key))
-            for episode, _check in city_due:
-                result["episodes_considered"] += 1
-                if not coverage_complete:
-                    result["episodes_skipped_incomplete_coverage"] += 1
-                    continue
-                record = build_episode_classification(
-                    episode,
-                    queue,
-                    origin=origin,
+        if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+            raise PersistenceContractError("CALLER_TRANSACTION_PENDING: BATCH_DURABLE_ACK_UNAVAILABLE")
+        # The entire selected due batch has exactly one durability boundary.
+        # On stale CAS, source failure or commit failure it rolls back as a unit.
+        with conn.transaction():
+            for item in selected:
+                persisted = persist_episode_classification(
+                    conn, item["record"],
+                    expected_snapshot=item["snapshot"], fault_after=fault_after,
                 )
-                persisted = persist_episode_classification(conn, record)
-                result["episodes_persisted"] += 1
-                result["classification_inserts"] += int(
-                    persisted["classification_inserted"]
-                )
-                result["classification_revisions"] += int(
-                    persisted["revision_inserted"]
-                )
-                result["event_inserts"] += int(persisted["event_inserted"])
-                result["event_updates"] += int(persisted["event_updated"])
-                result["source_inserts"] += int(persisted["source_inserts"])
-                verdict = str(record["verdict"])
-                result["verdicts"][verdict] = int(
-                    result["verdicts"].get(verdict, 0)
-                ) + 1
-                result["records"].append(
-                    {
-                        "city_key": record["city_key"],
-                        "episode_id": record["historical_episode_id"],
-                        "classification_key": record["classification_key"],
-                        "verdict": verdict,
-                        "classification_inserted": persisted[
-                            "classification_inserted"
-                        ],
-                        "revision_inserted": persisted["revision_inserted"],
-                        "event_inserted": persisted["event_inserted"],
-                        "event_updated": persisted["event_updated"],
-                        "source_inserts": persisted["source_inserts"],
-                    }
-                )
+                if persisted["commit_state"] != "CALLER_TRANSACTION_PENDING":
+                    raise PersistenceContractError("PREMATURE_INNER_TRANSACTION_COMMIT_ACK")
+                item["persisted"] = persisted
+        # We are now *outside* the owning SQL transaction. Read back through a
+        # new connection, not the writer's still-open session or its savepoint.
+        readback_dsn = str(dsn or conn.info.dsn or "")
+        if not readback_dsn:
+            raise PersistenceContractError("INDEPENDENT_READBACK_DSN_UNAVAILABLE")
+        _independent_committed_readback(readback_dsn, selected)
+        result["commit_state"] = "COMMITTED"
+        result["independent_readback"] = "PASS"
+        for item in selected:
+            record = item["record"]
+            persisted = item["persisted"]
+            result["episodes_persisted"] += 1
+            result["classification_inserts"] += int(persisted["classification_inserted"])
+            result["classification_revisions"] += int(persisted["revision_inserted"])
+            result["event_inserts"] += int(persisted["event_inserted"])
+            result["event_updates"] += int(persisted["event_updated"])
+            result["source_inserts"] += int(persisted["source_inserts"])
+            verdict = str(record["verdict"])
+            result["verdicts"][verdict] = result["verdicts"].get(verdict, 0) + 1
+            result["records"].append({
+                "city_key": record["city_key"],
+                "episode_id": record["historical_episode_id"],
+                "classification_key": record["classification_key"],
+                "classification_uid": persisted["classification_uid"],
+                "verdict": verdict,
+                "classification_inserted": persisted["classification_inserted"],
+                "revision_inserted": persisted["revision_inserted"],
+                "event_inserted": persisted["event_inserted"],
+                "event_updated": persisted["event_updated"],
+                "source_inserts": persisted["source_inserts"],
+                "observation_id": item["observation_id"],
+                "commit_state": "COMMITTED",
+            })
+        return result
     finally:
         if own_connection:
             conn.close()
-    return result

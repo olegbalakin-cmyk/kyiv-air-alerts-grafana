@@ -1,0 +1,61 @@
+name: H2 isolated expected-tip CAS PG18 A-B
+on:
+  push:
+    branches: [research-h2-expected-tip-cas-e2e-2026-10-20]
+    paths:
+      - 'research/h2_pg18_mutation_operational_writer_2026-10-19/**'
+      - 'research/h2_pg18_revision_invariant_hardening_2026-10-19/*.sql'
+      - 'kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py'
+      - 'kyiv-air-alerts-grafana/scripts/attack_event_tip_snapshot.py'
+      - 'kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py'
+      - '.github/workflows/h2-expected-tip-cas-pg18-2026-10-20.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_DB: h2_offline
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_offline"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      H2_COPY: ${{ matrix.copy }}
+      H2_PG18_OWNER_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_offline
+      H2_PG18_WRITER_DSN: postgresql://h2_app_writer_test:synthetic_local_only@127.0.0.1:5432/h2_offline
+      H2_REPORT: /tmp/h2_expected_tip.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare isolated PostgreSQL 18
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+          python -m pip install "psycopg[binary]==3.2.12"
+      - name: Compile candidate implementation
+        run: |
+          python -m py_compile kyiv-air-alerts-grafana/scripts/{monitor_explosion_candidates,attack_event_canonical_persistence,attack_event_tip_snapshot}.py
+      - name: Execute concurrent CAS and transaction regression
+        run: python research/h2_pg18_mutation_operational_writer_2026-10-19/test_expected_tip_e2e.py
+      - name: Archive original JSON even upon failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-expected-tip-${{ matrix.copy }}
+          path: /tmp/h2_expected_tip.json
+          retention-days: 30

@@ -5054,6 +5054,22 @@ def main() -> None:
     # canonical-parent synchronization were still running.
     followup_cutoff = now_utc()
     due = due_checks(state, followup_cutoff)
+    from attack_event_tip_snapshot import observe_expected_tips
+    persistence_due = select_persistence_due(
+        due, parent_ready_keys,
+        parent_gate_enabled=canary_cutoff is not None,
+    )
+    # Canonical SQL authority must predate any publisher discovery or classification.
+    if persistence_enabled and persistence_due:
+        eligible_due = {
+            city: rows for city, rows in persistence_due.items()
+            if city not in errors
+        }
+        expected_snapshots = observe_expected_tips(
+            eligible_due, dsn=os.environ["ATTACK_EVENT_DATABASE_URL"],
+        ) if eligible_due else {}
+    else:
+        expected_snapshots = None
     searches = {}
     composition_target_episode_ids = set()
     new_candidates = 0
@@ -5104,8 +5120,11 @@ def main() -> None:
             "google_error": google_error,
         }
         for _, check in city_due:
-            check["checked_at"] = iso(followup_cutoff)
-            check["new_candidates"] = added
+            # Completion is deferred until canonical SQL COMMIT + independent
+            # readback. No persistence: retain original JSON-only semantics.
+            if not persistence_enabled:
+                check["checked_at"] = iso(followup_cutoff)
+                check["new_candidates"] = added
 
     composition_refresh = apply_episode_composition(
         queue,
@@ -5123,18 +5142,27 @@ def main() -> None:
         for city_key in CITY_CONFIG
     }
 
-    persistence_due = select_persistence_due(
-        due,
-        parent_ready_keys,
-        parent_gate_enabled=canary_cutoff is not None,
-    )
-
     canonical_persistence = persist_due_episode_classifications(
         queue=queue,
         due=persistence_due,
         coverage_by_city=persistence_coverage_by_city,
         dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+        expected_snapshots=expected_snapshots,
     )
+    if persistence_enabled:
+        if canonical_persistence.get("commit_state") not in ("COMMITTED", "NOT_REQUESTED"):
+            raise RuntimeError("CANONICAL_PERSISTENCE_NOT_DURABLY_ACKNOWLEDGED")
+        acknowledged = {
+            (row["city_key"], row["episode_id"])
+            for row in canonical_persistence.get("records") or []
+            if row.get("commit_state") == "COMMITTED"
+        }
+        for city_key, rows in due.items():
+            for episode, check in rows:
+                if (city_key, str(episode.get("episode_id") or "")) in acknowledged:
+                    check["checked_at"] = iso(followup_cutoff)
+                    check["new_candidates"] = searches.get(city_key, {}).get("new_candidates", 0)
+                # Every unacknowledged due check stays retryable.
     (
         due_checks_at_cutoff,
         checked_due_checks_at_cutoff,
