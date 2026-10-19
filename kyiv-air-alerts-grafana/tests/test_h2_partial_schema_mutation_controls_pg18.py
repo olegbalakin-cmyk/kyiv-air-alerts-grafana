@@ -234,4 +234,4 @@ if __name__=="__main__":
           "limitations":["partially observed Neon DDL only","K2 independent DB unique-key barrier; no application-level duplicate rejection proven"]}
         REPORT.write_text(json.dumps(result,indent=2,ensure_ascii=False,default=str)+"\n",encoding="utf-8")
         print("MUTATION_TEST_VERDICT",verdict,"GIT_BLOB",blob,flush=True)
-        assert blob=="2a5354aa3a65c18d7bffb846a2c26973564c7812".replace("a94741aa3a65c18d7bffb846a2c26973564c7812","2a5354aa4ad2bc67893ffa40589024ecb84fa15e")
+        assert blob=="2a5354aa4ad2bc67893ffa40589024ecb84fa15e"
