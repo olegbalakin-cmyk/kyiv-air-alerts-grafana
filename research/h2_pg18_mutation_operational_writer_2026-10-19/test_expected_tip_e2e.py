@@ -40,7 +40,7 @@ def dsn(database):
 def session(database):
     return baseline.connect(baseline.WRITER, database)
 def init(label, episode=None):
-    db=baseline.new_database(label)
+    db=baseline.new_database('tip_'+label)
     baseline.seed_parent(db, "kyiv", episode or "0"*24)
     return db
 def item(episode="0"*24, label="immediate"):
