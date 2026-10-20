@@ -72,6 +72,19 @@ def continuation(label,db):
     ]:
       observations.append([sql.replace(label,"LABEL"),probe(db,sql)])
     return observations
+def run_instrumented(db,fault,ok):
+    cmd=["psql","-X","-v","ON_ERROR_STOP=1","-v","VERBOSITY=verbose",
+      "-v","fault="+fault,"-v","expected_history="+ns.history(db),
+      "-h","127.0.0.1","-U","h2_migrator_test","-d",db,"-f",str(INSTR)]
+    x=subprocess.run(cmd,env={**os.environ,"PGPASSWORD":"synthetic_migrator_only"},
+      capture_output=True,text=True,timeout=90)
+    match=re.search(r"ERROR:\s+([0-9A-Z]{5}):",x.stderr)
+    sqlstate=match.group(1) if match else ("00000" if x.returncode==0 else "UNKNOWN")
+    rep.setdefault("instrumented_sessions",[]).append(
+      {"db":db,"fault":fault,"exit":x.returncode,"sqlstate":sqlstate,
+       "stderr":x.stderr[-1800:],"stdout":x.stdout[-1800:]})
+    if ok != (x.returncode==0): raise AssertionError("unexpected instrumented exit "+str(x.returncode)+" "+x.stderr[-900:])
+    return sqlstate
 def main():
     ver=ns.q("postgres","SHOW server_version")[0][0]
     rep["server_version"]=ver
@@ -90,7 +103,7 @@ def main():
     case("precondition_three_real_grants",grants(trial)==(True,True,True),grants(trial))
     ns.temp(trial)
     try:
-        state=ns.run(trial,INSTR,role="h2_migrator_test",history=ns.history(trial),fault="late_acl",ok=False)
+        state=run_instrumented(trial,"late_acl",False)
         case("actual_008_late_fault_sqlstate_23514",state=="23514",state)
         case("actual_008_late_fault_full_catalog_atomicity",acl(trial)==old,{"equal":acl(trial)==old})
         case("actual_008_late_fault_effective_rights_atomicity",rights(trial)==old_rights)
@@ -100,7 +113,7 @@ def main():
     try:case("actual_original_008_success",ns.run(trial,ORIGINAL,role="h2_migrator_test",history=ns.history(trial))=="00000")
     finally:ns.untemp(trial)
     ns.temp(normal)
-    try:case("instrumented_008_no_fault_success",ns.run(normal,INSTR,role="h2_migrator_test",history=ns.history(normal),fault="none")=="00000")
+    try:case("instrumented_008_no_fault_success",run_instrumented(normal,"none",True)=="00000")
     finally:ns.untemp(normal)
     c=acl(control);d=acl(trial);n=acl(normal)
     rep["observations"]["catalog_original_vs_rollback"]={"before":c,"after":d}
