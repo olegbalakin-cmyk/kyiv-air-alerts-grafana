@@ -69,7 +69,7 @@ def case(name,fn):
   report["errors"].append({"case":name,"error":repr(exc),"traceback":traceback.format_exc()[-1300:]})
 def clean():
  db=newdb("clean");original=snapshot(db)
- check("baseline_no_migration_roles",not original["roles"],original["roles"])
+ check("baseline_no_migration_roles",not any(x[0] in ("h2_head_guard_test","h2_app_ingest_writer_test") for x in original["roles"]),original["roles"])
  migrate(db)
  check("migrated_catalog_differs",snapshot(db)!=original)
  res=exec_sql(db,ROLLBACK,history=original["history"])
