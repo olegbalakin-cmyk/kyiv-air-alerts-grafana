@@ -22,6 +22,30 @@ try:
  assert temp_rollback(mutated,historical(mutated))=="00000"
  original=snapshot(ctl);rolled=snapshot(mutated)
  original_dump=dump(ctl);rolled_dump=dump(mutated)
+ # pg_dump 18 may emit a newly randomized psql restrict marker even for an
+ # unchanged schema. Never claim semantic drift from raw ZIP/text hashes alone.
+ def stable_dump(raw):
+  return "".join(line for line in raw.splitlines(keepends=True)
+                 if not line.startswith(chr(92)+"restrict ")
+                 and not line.startswith(chr(92)+"unrestrict "))
+ control_again=dump(ctl)
+ import difflib
+ stable_control=stable_dump(original_dump["text"])
+ stable_control_again=stable_dump(control_again["text"])
+ stable_rolled=stable_dump(rolled_dump["text"])
+ semantic_diff=list(difflib.unified_diff(stable_control.splitlines(),stable_rolled.splitlines(),
+                                         fromfile="original",tofile="rolled",lineterm=""))
+ rep["pg_dump_comparison"]={"original_raw":original_dump["sha256"],
+   "original_repeat_raw":control_again["sha256"],
+   "rolled_raw":rolled_dump["sha256"],
+   "original_normalized":hashlib.sha256(stable_control.encode()).hexdigest(),
+   "original_repeat_normalized":hashlib.sha256(stable_control_again.encode()).hexdigest(),
+   "rolled_normalized":hashlib.sha256(stable_rolled.encode()).hexdigest(),
+   "normalized_equal":stable_control==stable_rolled,
+   "normalized_diff_lines":semantic_diff[:120]}
+ record("pg_dump_repeat_normalization",stable_control==stable_control_again,
+        {"original_raw_same":original_dump["sha256"]==control_again["sha256"],
+         "original_normalized_same":stable_control==stable_control_again})
  rel1={x[0]:x for x in original["relations"]};rel2={x[0]:x for x in rolled["relations"]}
  delta=[k for k in rel1.keys()|rel2.keys() if rel1.get(k)!=rel2.get(k)]
  record("raw_catalog_residual_identified",bool(delta),{"changed_relations":delta})
