@@ -82,7 +82,7 @@ def catalog(db):
         "column":owner(db,"SELECT c.relname,a.attname,a.attacl::text FROM pg_attribute a JOIN pg_class c ON a.attrelid=c.oid WHERE c.relnamespace='public'::regnamespace AND a.attnum>0 AND NOT a.attisdropped ORDER BY 1,2"),
         "function":owner(db,"SELECT proname,proowner::regrole::text,prosecdef,proacl::text,proconfig::text FROM pg_proc WHERE pronamespace='public'::regnamespace ORDER BY 1"),
         "defaults":owner(db,"SELECT defaclrole::regrole::text,defaclnamespace::regnamespace::text,defaclobjtype,defaclacl::text FROM pg_default_acl ORDER BY 1,2,3"),
-        "membership":owner("postgres","SELECT roleid::regrole::text,member::regrole::text,inherit_option,set_option,admin_option FROM pg_auth_members WHERE roleid::regrole::text LIKE 'h2_%' ORDER BY 1,2"),
+        "membership":owner("postgres","SELECT roleid::regrole::text,member::regrole::text,inherit_option,set_option,admin_option FROM pg_auth_members WHERE roleid::regrole::text LIKE 'h2_%%' ORDER BY 1,2"),
         "public":owner(db,"SELECT c.relname,a.privilege_type,a.is_grantable FROM pg_class c CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl,acldefault('r',c.relowner))) a WHERE c.relnamespace='public'::regnamespace AND c.relkind='r' AND a.grantee=0 ORDER BY 1,2,3")}
 def perform_007_008(db):
     orig=ns.history(db)
