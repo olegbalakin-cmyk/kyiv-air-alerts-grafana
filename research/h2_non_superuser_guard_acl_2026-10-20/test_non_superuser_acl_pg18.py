@@ -139,11 +139,51 @@ def negative():
  try:ck('destination_schema_create_required',denied(d,'h2_migrator_test','synthetic_migrator_only','ALTER FUNCTION public.h2_enforce_revision_head() OWNER TO h2_head_guard_test')=='42501')
  finally:q('postgres','REVOKE h2_head_guard_test FROM h2_migrator_test')
  ck('app_replace_function_denied',denied(d,'h2_app_ingest_writer_test','synthetic_only_local_role',"ALTER FUNCTION public.h2_enforce_revision_head() RESET ALL")=='42501')
+
+def writer_revision():
+ d=fresh('writer');base(d);temp(d)
+ try:run(d,UP,role='h2_migrator_test')
+ finally:untemp(d)
+ before=history(d)
+ with dbconn(d,'h2_app_ingest_writer_test','synthetic_only_local_role') as conn:
+  conn.execute("""INSERT INTO public.attack_event_classifications(
+   classification_key_version,classification_key,historical_episode_id,city_key,
+   alert_type,alert_start_at,alert_end_at,verdict,is_event,qa_reasons_state,
+   qa_reasons,classifier_blob_sha,classifier_methodology_version,
+   normalization_version,evidence_set_sha256,binding_state,origin_repository,
+   origin_provenance,origin_provenance_sha256,originating_frozen_case_id_state)
+   VALUES ('attack-event-classification-key-v2',%s,%s,'kyiv','AIR',
+   '2026-01-01T01:00:00Z','2026-01-01T02:00:00Z','NO_CONFIRMED_EVENT',
+   false,'MATERIALIZED','[]'::jsonb,%s,'synthetic','synthetic',%s,'UNBOUND',
+   'synthetic','{}'::jsonb,%s,'NOT_APPLICABLE')""",
+   ('a'*64,'0'*24,'a'*40,'b'*64,'c'*64))
+ ck('restricted_writer_revision_insert',q(d,'SELECT count(*) FROM public.attack_event_classifications')[0][0]==1)
+ ck('security_definer_advances_head',q(d,'SELECT count(*) FROM public.h2_classification_heads')[0][0]==1)
+ ck('changed_history_after_new_revision',history(d)!=before)
+ ck('writer_cannot_modify_history',denied(d,'h2_app_ingest_writer_test','synthetic_only_local_role',"UPDATE public.attack_event_classifications SET origin_repository='bad'")=='42501')
+ temp(d)
+ try:
+  before_rollback=snapshot(d)
+  ck('committed_new_revision_prevents_rollback',run(d,DOWN,role='h2_migrator_test',history=before,ok=False)=='23514')
+  ck('rejected_rollback_keeps_all_history_and_acl',snapshot(d)==before_rollback)
+ finally:untemp(d)
+
+def cross_database_role_dependency():
+ d=fresh('crossdb')
+ q(d,'GRANT USAGE ON SCHEMA public TO h2_head_guard_test')
+ try:
+  with dbconn('postgres') as con:
+   try:con.execute('DROP ROLE h2_head_guard_test');state='SUCCESS'
+   except psycopg.Error as e:state=e.sqlstate
+  ck('role_drop_cross_database_dependency_rejected',state=='2BP01',state)
+  ck('guard_role_preserved',q('postgres',"SELECT count(*) FROM pg_roles WHERE rolname='h2_head_guard_test'")==[(1,)])
+ finally:q(d,'REVOKE USAGE ON SCHEMA public FROM h2_head_guard_test')
+
 def main():
  try:
   ver=q('postgres','SHOW server_version')[0][0];rep['server_version']=ver;ck('pg18_6_exact',ver.startswith('18.6'),ver)
   roles()
-  for n,f in [('positive_transfer_and_restore',good),('fault_atomicity',fault),('permission_negative',negative)]:case(n,f)
+  for n,f in [('positive_transfer_and_restore',good),('fault_atomicity',fault),('permission_negative',negative),('real_restricted_revision',writer_revision),('cross_database_role_dependency',cross_database_role_dependency)]:case(n,f)
  except Exception as e:rep['errors'].append({'case':'bootstrap','error':repr(e),'trace':traceback.format_exc()[-1800:]})
  finally:
   rep['total']=len(rep['checks']);rep['passed']=sum(x['passed'] for x in rep['checks']);rep['skipped']=0
