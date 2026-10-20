@@ -105,9 +105,13 @@ suite.baseline.new_database=actual_007_database
 suite.main()
 assert suite.report["verdict"]=="PASS"
 names=[a["name"] for a in suite.report["assertions"]]
-assert len(names)>=77 and len(set(names))==len(names)
+from collections import Counter
 original_names=[n for n in names if not n.startswith("007_")]
-assert len(original_names)==77, (len(names),len(original_names))
+archived = ROOT / "research/h2_pg18_full_offline_2026-10-20/new_original_artifacts" / (COPY + ".cas.original.json")
+expected_names = [x["name"] for x in json.loads(archived.read_bytes())["assertions"]]
+assert len(expected_names)==77 and Counter(original_names)==Counter(expected_names), (
+    len(names),len(original_names), Counter(original_names)-Counter(expected_names),
+    Counter(expected_names)-Counter(original_names))
 suite.report["accepted_original_77_executed"] = len(original_names)
 suite.report["topology_additions"] = len(names)-77
 suite.OUT.write_text(json.dumps(suite.report,indent=2,sort_keys=True,default=str)+"\n")
