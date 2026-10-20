@@ -31,7 +31,19 @@ def api(path):
     request=urllib.request.Request(url,headers={"Authorization":"Bearer "+token,
         "Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",
         "User-Agent":"h2-synthetic-original-freeze"})
-    with urllib.request.urlopen(request,timeout=90) as r:return r.read()
+    # GitHub Actions artifact ZIP is served by a signed cross-host redirect.
+    # Never propagate the GitHub Bearer token to the presigned storage URL.
+    class SignedZipRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            redirected=super().redirect_request(req,fp,code,msg,headers,newurl)
+            if redirected is not None:
+                from urllib.parse import urlsplit
+                if urlsplit(req.full_url).netloc!=urlsplit(newurl).netloc:
+                    redirected.remove_header("Authorization")
+                    redirected.remove_header("X-GitHub-Api-Version")
+            return redirected
+    opener=urllib.request.build_opener(SignedZipRedirect())
+    with opener.open(request,timeout=90) as r:return r.read()
 def sha(b):return hashlib.sha256(b).hexdigest()
 def git_blob(path,at=TESTED):
     return subprocess.check_output(["git","rev-parse",at+":"+path]).decode().strip()
