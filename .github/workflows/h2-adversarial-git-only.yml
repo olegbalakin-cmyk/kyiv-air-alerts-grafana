@@ -1,0 +1,21 @@
+name: H2 adversarial independently frozen Git-only
+on:
+  push:
+    branches: [research-h2-rollback-adversarial-pg18-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-adversarial-git-only.yml'
+      - 'research/h2_rollback_adversarial_2026-10-20/frozen_2026-10-20/**'
+      - 'research/h2_rollback_adversarial_2026-10-20/verify_frozen_originals.py'
+permissions:
+  contents: read
+jobs:
+  git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Independent original ZIP JSON SHA CRC attribution and 10 corruptions
+        run: python research/h2_rollback_adversarial_2026-10-20/verify_frozen_originals.py
