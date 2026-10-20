@@ -63,6 +63,11 @@ context.inputs = {
   compareDateFrom: {value:"2026-10-19"}, compareDateTo: {value:"2026-10-20"},
   cityDateFrom: {value:"2026-10-19"}, cityDateTo: {value:"2026-10-20"}
 };
+for (const input of Object.values(context.inputs)) {
+  input.classList = {add(){},remove(){}};
+  input.setCustomValidity = () => {};
+  input.removeAttribute = () => {};
+}
 context.document = { getElementById(id) { return context.inputs[id] || null; } };
 assert.equal(evaluate("sharedRows(Object.keys(state.data.cities), 'calendarWeekly').length"), 1,
   "comparison must include partial week even when selected to-date is Tuesday");
