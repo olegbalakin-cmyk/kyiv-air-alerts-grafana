@@ -161,6 +161,7 @@ assert.match(outputElements.daily28Range.textContent,/Data as of 20\.10/);
 // Frozen, unmodified source shapes from the real 2026-10-20 site-prod blobs:
 // dashboard_data.json (28 completed daily rows) and
 // site_derived.json (23 precise ISO8601 partial-through timestamps).
+evalJS("currentLanguage='uk'");
 const snapshot = JSON.parse(fs.readFileSync(path.join(
   __dirname, "fixtures/daily28_20261020_live.json"), "utf8"));
 assert.equal(snapshot.provenance.dashboard_blob, "bcd96b56129e804a84cc50b064de6cb3d1d410f4");

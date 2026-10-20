@@ -628,8 +628,10 @@ function isPartialPeriod(row) {
 function partialPeriodFooter(row) {
   if (!isPartialPeriod(row)) return "";
   const through = String(row.partial_through || "");
-  if (/^\d{4}-\d{2}-\d{2}$/.test(through)) {
-    const asOf = shortDateLabel(through);
+  const date = through.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      (through === date || validPartialThrough(through, date))) {
+    const asOf = shortDateLabel(date);
     return tr("Дані станом на " + asOf, "Data as of " + asOf);
   }
   return tr("Поточний неповний період", "Current incomplete period");
