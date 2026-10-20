@@ -28,7 +28,7 @@ def rights(db):
 def acl(db):
     return ns.snapshot(db)
 def dump(db):
-    runp=subprocess.run(["pg_dump","-X","--schema-only","--no-owner",
+    runp=subprocess.run(["pg_dump","--schema-only","--no-owner",
        "-h","127.0.0.1","-U","h2_local","-d",db],
        env={**os.environ,"PGPASSWORD":"synthetic_only"},capture_output=True,text=True,timeout=90)
     if runp.returncode: raise RuntimeError(runp.stderr[-900:])
