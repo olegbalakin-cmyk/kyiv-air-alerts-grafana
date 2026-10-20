@@ -72,9 +72,11 @@ def duplicate_successor(d):
     # Existing 001 unique successor index prevents this synthetic corruption;
     # explicitly remove only in disposable fixture.
     q(d,"DROP INDEX public.h2_classification_one_successor_uidx")
+    q(d,"DROP TRIGGER h2_revision_head_after_insert ON public.attack_event_classifications")
     put(d,"fork_"+d,parent=a)
 def duplicate_roots(d):
     q(d,"DROP INDEX public.h2_classification_one_root_uidx")
+    q(d,"DROP TRIGGER h2_revision_head_after_insert ON public.attack_event_classifications")
     put(d,"root1"+d)
     put(d,"root2"+d)
 def invalid_parent(d):
