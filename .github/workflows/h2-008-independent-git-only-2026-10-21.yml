@@ -1,0 +1,20 @@
+name: H2 independent original 008 Git only A B evidence
+on:
+  push:
+    branches: [research-h2-008-late-acl-rollback-2026-10-21-gpt6]
+    paths:
+      - '.github/workflows/h2-008-independent-git-only-2026-10-21.yml'
+      - 'research/h2_008_late_acl_2026_10_21/verify_original_ab_git_only.py'
+permissions:
+  contents: read
+jobs:
+  independent-git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Independently verify original Git ZIP CRC JSON provenance and negative controls
+        run: python3 research/h2_008_late_acl_2026_10_21/verify_original_ab_git_only.py
