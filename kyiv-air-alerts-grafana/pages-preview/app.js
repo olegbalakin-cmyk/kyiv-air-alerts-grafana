@@ -185,6 +185,7 @@ function setDurationChart(id, labels, datasets, unit = "minutes") {
   const options = chartOptions(yTitle);
   options.scales.y.ticks.callback = value => formatter(value);
   options.plugins.tooltip.callbacks = {
+    ...options.plugins.tooltip.callbacks,
     label(context) {
       const prefix = context.dataset.label ? `${context.dataset.label}: ` : "";
       return prefix + formatter(context.parsed.y);
@@ -283,7 +284,7 @@ function chartOptions(yTitle, extra = {}) {
     interaction: { mode: "index", intersect: false },
     plugins: {
       legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
-      tooltip: { mode: "index", intersect: false }
+      tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } }
     },
     scales: {
       x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
@@ -618,6 +619,24 @@ function isPartialPeriod(row) {
   return Boolean(row?.is_partial_period);
 }
 
+function partialPeriodFooter(row) {
+  if (!isPartialPeriod(row)) return "";
+  const through = String(row.partial_through || "");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(through)) {
+    const asOf = shortDateLabel(through);
+    return tr("Дані станом на " + asOf, "Data as of " + asOf);
+  }
+  return tr("Поточний неповний період", "Current incomplete period");
+}
+
+function chartPartialFooter(items) {
+  if (!Array.isArray(items)) return "";
+  const partialRow = items
+    .map(item => item?.dataset?._exportRows?.[item.dataIndex])
+    .find(isPartialPeriod);
+  return partialPeriodFooter(partialRow);
+}
+
 function partialSegment(rows, color) {
   return {
     borderDash(ctx) {
@@ -672,8 +691,8 @@ function seriesDataset(label, values, color, dashed = false, rows = null) {
     data: values,
     borderColor: color,
     backgroundColor: color + "22",
-    pointRadius: 0,
-    pointHoverRadius: 0,
+    pointRadius: rows ? rows.map(row => isPartialPeriod(row) ? 4 : 0) : 0,
+    pointHoverRadius: rows ? rows.map(row => isPartialPeriod(row) ? 5 : 0) : 0,
     borderWidth: 2,
     borderDash: dashed ? [7, 5] : [],
     segment: rows ? partialSegment(rows, color) : undefined,
@@ -716,6 +735,38 @@ function rowTime(row, period) {
   return row.week_start || String(row.time || "").slice(0, 10);
 }
 
+function calendarWeekLabel(row) {
+  const start = String(row?.week_start || "");
+  const end = String(row?.week_end || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) {
+    return rowTime(row, "calendarWeekly");
+  }
+  const firstDay = start.slice(8, 10);
+  const lastDay = end.slice(8, 10);
+  const firstMonth = start.slice(5, 7);
+  const lastMonth = end.slice(5, 7);
+  const firstYear = start.slice(0, 4);
+  const lastYear = end.slice(0, 4);
+  if (firstYear !== lastYear) {
+    return firstDay + "." + firstMonth + "." + firstYear + "–" +
+      lastDay + "." + lastMonth + "." + lastYear;
+  }
+  if (firstMonth !== lastMonth) {
+    return firstDay + "." + firstMonth + "–" + lastDay + "." + lastMonth;
+  }
+  return firstDay + "–" + lastDay + "." + lastMonth;
+}
+
+function periodDisplayLabel(row, period) {
+  return period === "calendarWeekly" ? calendarWeekLabel(row) : rowTime(row, period);
+}
+
+function calendarWeekOverlapsRange(row, from, to) {
+  if (!row?.week_start || !row?.week_end) {
+    return dateKeyInRange(rowTime(row, "calendarWeekly"), from, to);
+  }
+  return (!from || row.week_end >= from) && (!to || row.week_start <= to);
+}
 
 function addIsoDays(value, days) {
   const d = new Date(`${String(value).slice(0,10)}T00:00:00Z`);
@@ -756,11 +807,14 @@ function derivedCalendarWeeks(city) {
   const daily = derivedDaily28Rows(city);
   if (!daily.length) return complete;
 
-  const latest = daily[daily.length - 1]?.date;
+  const latestRow = daily[daily.length - 1];
+  const latest = latestRow?.date;
   const offset = mondayIndex(latest);
-  if (offset == null || offset === 6) return complete;
+  if (offset == null || (offset === 6 && !isPartialPeriod(latestRow))) return complete;
 
   const monday = addIsoDays(latest, -offset);
+  const sunday = addIsoDays(monday, 6);
+  if (!sunday || complete.some(row => row.week_start === monday)) return complete;
   const partialDays = daily.filter(row => row.date >= monday && row.date <= latest);
   if (!partialDays.length || partialDays[0].date !== monday) return complete;
 
@@ -770,17 +824,18 @@ function derivedCalendarWeeks(city) {
   let durationWeight = 0;
   for (const row of partialDays) {
     const n = Number(row.alerts_started) || 0;
-    const avg = Number(row.avg_alert_duration_minutes);
+    const avg = Number(row.avg_alert_duration_min);
     if (n > 0 && Number.isFinite(avg)) {
       durationWeighted += n * avg;
       durationWeight += n;
     }
   }
 
+  // Calendar boundaries identify the week; partial_through identifies the last observed day.
   complete.push({
-    time: `${latest}T00:00:00`,
+    time: `${sunday}T00:00:00`,
     week_start: monday,
-    week_end: latest,
+    week_end: sunday,
     alerts_per_day: alertsStarted / partialDays.length,
     avg_daily_alert_hours: alertHours / partialDays.length,
     avg_alert_duration_min: durationWeight ? durationWeighted / durationWeight : null,
@@ -1026,7 +1081,9 @@ function fullPeriodInsideRange(value, from, to) {
 function filterRowsByDateRange(rows, period, fromId, toId) {
   const allRows = rows || [];
   const range = syncDateRange(fromId, toId, allRows.map(row => rowTime(row, period)));
-  return allRows.filter(row => dateKeyInRange(rowTime(row, period), range.from, range.to));
+  return allRows.filter(row => period === "calendarWeekly"
+    ? calendarWeekOverlapsRange(row, range.from, range.to)
+    : dateKeyInRange(rowTime(row, period), range.from, range.to));
 }
 
 function setDateRangeValues(fromId, toId, from, to) {
@@ -1990,7 +2047,7 @@ function renderCity() {
 
   const allRows = periodRows(city, period);
   const rows = filterRowsByDateRange(allRows, period, "cityDateFrom", "cityDateTo");
-  const labels = rows.map(r => rowTime(r, period));
+  const labels = rows.map(r => periodDisplayLabel(r, period));
   const dashed = type === "raion_proxy";
 
   const intensityDatasets = [
@@ -2011,8 +2068,8 @@ function renderCity() {
       yAxisID: "yAlerts",
       borderColor: COLORS[1],
       backgroundColor: COLORS[1] + "22",
-      pointRadius: 0,
-      pointHoverRadius: 0,
+      pointRadius: rows.map(r => isPartialPeriod(r) ? 4 : 0),
+      pointHoverRadius: rows.map(r => isPartialPeriod(r) ? 5 : 0),
       borderWidth: 2,
       borderDash: dashed ? [7, 5] : [],
       segment: partialSegment(rows, COLORS[1]),
@@ -2044,7 +2101,9 @@ function renderCity() {
 
   const intensitySubtitle = $("cityIntensityChart")?.closest(".chart-card")?.querySelector(".chart-subtitle");
   if (intensitySubtitle) {
-    intensitySubtitle.textContent = period === "daily28" && explosion?.strict_daily
+    intensitySubtitle.textContent = period === "calendarWeekly" && rows.some(isPartialPeriod)
+      ? tr("Тижні підписано повними календарними межами. Останній неповний тиждень позначено пунктиром; середні значення обчислено лише за доступні дні.", "Week labels show full calendar intervals. The incomplete final week is dashed; averages use available days only.")
+      : period === "daily28" && explosion?.strict_daily
       ? tr(
           "Стовпчики: години під тривогою за день. Зелена лінія: кількість тривог за день. Помаранчева: тривоги з підтвердженим повідомленням про вибухи. Останній пунктирний день — поточний неповний день станом на останнє оновлення.",
           "Bars: hours under alert per day. Green line: alerts per day. Orange: alerts with a confirmed report of explosions. The final dashed day is the current incomplete day as of the latest update."
@@ -2081,7 +2140,7 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              return isPartialPeriod(rows[i])?tr("Поточний неповний період","Current incomplete period"):"";
+              return partialPeriodFooter(rows[i]);
             }
           }
         },
@@ -2241,7 +2300,7 @@ function renderRolling7d(key) {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              return isPartialPeriod(rows[i])?tr("Поточний неповний період","Current incomplete period"):"";
+              return partialPeriodFooter(rows[i]);
             }
           }
         },
@@ -2467,8 +2526,10 @@ function sharedRows(keys, period) {
   const times = commonPeriodTimes(keys, period);
   const range = syncDateRange("compareDateFrom", "compareDateTo", times);
   return times
-    .filter(t => dateKeyInRange(t, range.from, range.to))
-    .map(t => ({ time: t, rows: maps.map(m => m.get(t)) }));
+    .map(t => ({ time: t, rows: maps.map(m => m.get(t)) }))
+    .filter(item => period === "calendarWeekly"
+      ? calendarWeekOverlapsRange(item.rows[0], range.from, range.to)
+      : dateKeyInRange(item.time, range.from, range.to));
 }
 
 
@@ -2688,7 +2749,8 @@ function renderComparison() {
   const keys = [$("compareA").value, $("compareB").value, $("compareC").value].filter(Boolean);
   const period = $("comparePeriod").value;
   const shared = sharedRows(keys, period);
-  const labels = shared.map(x => x.time);
+  const labels = shared.map(x => period === "calendarWeekly" && x.rows[0]
+    ? calendarWeekLabel(x.rows[0]) : x.time);
   let countLabel=tr("періодів","periods");
   if(period==="monthly")countLabel=tr("міс.","months");
   if(period==="calendarWeekly")countLabel=tr("тиж.","weeks");
@@ -2698,7 +2760,11 @@ function renderComparison() {
   if(period==="rolling180")countLabel=tr("180-денних вікон","180-day windows");
   if(period==="daily28")countLabel=tr("днів","days");
   const note=shared.length?tr(`Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length-1]} (${shared.length} ${countLabel}).`,`Common series for ${keys.length} cities: ${labels[0]} — ${labels[labels.length-1]} (${shared.length} ${countLabel}).`):tr("Немає спільних періодів для цієї комбінації.","No common periods are available for this combination.");
-  $("comparisonNote").textContent = note;
+  const partial = period === "calendarWeekly"
+    ? shared.flatMap(item => item.rows).find(isPartialPeriod) : null;
+  $("comparisonNote").textContent = note + (partial
+    ? " " + tr("Неповний тиждень позначено пунктиром. ", "The incomplete week is dashed. ") + partialPeriodFooter(partial) + "."
+    : "");
 
   const metricChart = (id, metric, yTitle) => {
     const datasets = keys.map((key, idx) => seriesDataset(
