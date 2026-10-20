@@ -1,0 +1,20 @@
+name: H2 independent original integrated A B Git only verification
+on:
+  push:
+    branches: [research-h2-integrated-failclosed-preflight-2026-10-21-gpt6]
+    paths:
+      - '.github/workflows/h2-integrated-independent-git-only-2026-10-21.yml'
+      - 'research/h2_integrated_preflight_2026-10-21/verify_original_ab.py'
+permissions:
+  contents: read
+jobs:
+  independent-git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify original A B ZIP SHA, CRC, JSON, provenance, immutable executed blobs and 10 tamper controls
+        run: python3 research/h2_integrated_preflight_2026-10-21/verify_original_ab.py
