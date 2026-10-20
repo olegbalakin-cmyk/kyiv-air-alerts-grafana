@@ -63,7 +63,7 @@ def scenario_public_create(label,filename,expect_atomic):
  with conn(db) as c:
   c.execute("GRANT CREATE ON SCHEMA public TO PUBLIC")
   before=acl(c)
-  check(label+"_public_create",query(c,"SELECT has_schema_privilege('public','public','CREATE')")[0][0])
+  check(label+"_public_create",query(c,"SELECT EXISTS(SELECT 1 FROM pg_namespace n, LATERAL aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) a WHERE n.nspname='public' AND a.grantee=0 AND a.privilege_type='CREATE')")[0][0])
  result=apply(db,filename,False)
  check(label+"_sqlstate_42501",'42501' in result.stderr and 'H2_UNSAFE_PUBLIC_SCHEMA_CREATE' in result.stderr,result.stderr[-300:])
  with conn(db) as c:
@@ -77,7 +77,7 @@ def scenario_public_create(label,filename,expect_atomic):
 def positive():
  db=prepare('positive')
  with conn(db) as c:
-  check("public_create_absent",not query(c,"SELECT has_schema_privilege('public','public','CREATE')")[0][0])
+  check("public_create_absent",not query(c,"SELECT EXISTS(SELECT 1 FROM pg_namespace n, LATERAL aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) a WHERE n.nspname='public' AND a.grantee=0 AND a.privilege_type='CREATE')")[0][0])
  apply(db,ROOT/'003_candidate_app_role_v3_atomic.sql')
  with conn(db) as c:
   check("v3_writer_no_create",not query(c,"SELECT has_schema_privilege('h2_app_ingest_writer_test','public','CREATE')")[0][0])
@@ -88,7 +88,7 @@ def positive():
   check("v3_writer_events_insert",query(c,"SELECT has_table_privilege('h2_app_ingest_writer_test','public.attack_events','INSERT')")[0][0])
   check("v3_writer_events_column_update",query(c,"SELECT has_column_privilege('h2_app_ingest_writer_test','public.attack_events','event_status','UPDATE')")[0][0])
   check("v3_writer_events_unrelated_update_denied",not query(c,"SELECT has_column_privilege('h2_app_ingest_writer_test','public.attack_events','classification_key','UPDATE')")[0][0] if query(c,"SELECT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='attack_events' AND column_name='classification_key')")[0][0] else True)
-  check("v3_public_create_unchanged",not query(c,"SELECT has_schema_privilege('public','public','CREATE')")[0][0])
+  check("v3_public_create_unchanged",not query(c,"SELECT EXISTS(SELECT 1 FROM pg_namespace n, LATERAL aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) a WHERE n.nspname='public' AND a.grantee=0 AND a.privilege_type='CREATE')")[0][0])
  with conn(db,'h2_app_ingest_writer_test','synthetic_only_local_role') as c:
   for name,stmt in [
    ("forbid_create","CREATE TABLE public.v3_forbidden(x int)"),
