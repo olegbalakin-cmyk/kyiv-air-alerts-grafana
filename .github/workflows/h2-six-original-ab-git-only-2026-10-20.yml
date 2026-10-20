@@ -1,0 +1,20 @@
+name: H2 Six Original A B Git Only Proof
+on:
+  push:
+    branches: [research-h2-six-original-ab-freeze-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-six-original-ab-git-only-2026-10-20.yml'
+      - 'research/h2_six_original_ab_evidence_2026-10-20/**'
+permissions:
+  contents: read
+jobs:
+  independent-git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify original ZIP, enclosed JSON, source Git blobs and corruption rejection
+        run: python3 research/h2_six_original_ab_evidence_2026-10-20/verify_git_only.py
