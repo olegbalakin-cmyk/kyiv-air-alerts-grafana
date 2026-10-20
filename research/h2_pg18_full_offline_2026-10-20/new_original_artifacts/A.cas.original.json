@@ -1,0 +1,459 @@
+{
+  "assertions": [
+    {
+      "detail": "18.6 (Debian 18.6-1.pgdg13+2)",
+      "name": "postgres_version_exact_18_6",
+      "pass": true
+    },
+    {
+      "detail": "('h2_app_ingest_writer_test', 'h2_app_ingest_writer_test', 'h2_app_ingest_writer_test')",
+      "name": "v3_actual_login_and_role",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False, False)",
+      "name": "v3_no_superuser_inheritance_or_administration",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_not_guard_member",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_not_database_owner",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_function_search_path",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_history_update",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_history_delete",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_history_truncate",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_head_update",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_head_insert",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_disable_trigger",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_guard_function_ddl",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_schema_ddl",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_guard_set_role",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_grant_owner",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "name": "deny_role_escalation",
+      "pass": true
+    },
+    {
+      "detail": "{'classification_uid': '08018ca4-636d-4966-8a81-894673186cac', 'classification_key': 'cac0f5749614ade56f1e3766ebe7e1a32b",
+      "name": "v3_real_writer_committed",
+      "pass": true
+    },
+    {
+      "detail": "(1, 1, 1, 1)",
+      "name": "v3_classification_event_source_and_head",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_history_fingerprint_changed_only_by_append",
+      "pass": true
+    },
+    {
+      "detail": "[]",
+      "name": "v3_head_unique",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_event_binds_classification",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_source_binds_classification",
+      "pass": true
+    },
+    {
+      "detail": "{'classification_uid': '08018ca4-636d-4966-8a81-894673186cac', 'classification_key': 'cac0f5749614ade56f1e3766ebe7e1a32b",
+      "name": "v3_semantic_retry_durable",
+      "pass": true
+    },
+    {
+      "detail": "(1, 1, 1, 1)",
+      "name": "v3_semantic_retry_no_row_growth",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "authoritative_null_tip",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "immutable_token",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "first_committed",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "first_independent_tip",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "tip_matches_prior",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "revision_committed",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "exact_retry_idempotent",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "no_idempotent_event_side_effects",
+      "pass": true
+    },
+    {
+      "detail": "STALE_EXPECTED_TIP",
+      "name": "STALE_EXPECTED_TIP",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "stale_zero_rows",
+      "pass": true
+    },
+    {
+      "detail": "EXPECTED_TIP_SNAPSHOT_AUTHORITY_INVALID",
+      "name": "EXPECTED_TIP_SNAPSHOT_AUTHORITY_INVALID",
+      "pass": true
+    },
+    {
+      "detail": "EXPECTED_TIP_SNAPSHOT_AUTHORITY_INVALID",
+      "name": "EXPECTED_TIP_SNAPSHOT_AUTHORITY_INVALID",
+      "pass": true
+    },
+    {
+      "detail": "EXPECTED_TIP_SNAPSHOT_EPISODE_MISMATCH",
+      "name": "EXPECTED_TIP_SNAPSHOT_EPISODE_MISMATCH",
+      "pass": true
+    },
+    {
+      "detail": "EXPECTED_TIP_SNAPSHOT_ATTEMPT_MISMATCH",
+      "name": "EXPECTED_TIP_SNAPSHOT_ATTEMPT_MISMATCH",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "invalid_zero_rows",
+      "pass": true
+    },
+    {
+      "detail": "[{'tag': 'conflicting_left', 'failure': 'STALE_EXPECTED_TIP'}, {'tag': 'conflicting_right', 'state': 'COMMITTED'}]",
+      "name": "v3_two_sessions_one_commit_one_stale",
+      "pass": true
+    },
+    {
+      "detail": "(1, 1, 1, 1)",
+      "name": "v3_stale_no_any_committed_side_effects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_concurrent_single_tip",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_concurrent_role_readback",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "fault_classification_raised",
+      "pass": true
+    },
+    {
+      "detail": "(0, 0, 0, 0)",
+      "name": "fault_classification_zero_effects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "fault_event_raised",
+      "pass": true
+    },
+    {
+      "detail": "(0, 0, 0, 0)",
+      "name": "fault_event_zero_effects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "fault_source_raised",
+      "pass": true
+    },
+    {
+      "detail": "(0, 0, 0, 0)",
+      "name": "fault_source_zero_effects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "caller_pending_no_durable_ack",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "pending_not_visible",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "caller_rollback_zero_rows",
+      "pass": true
+    },
+    {
+      "detail": "CALLER_TRANSACTION_PENDING: BATCH_DURABLE_ACK_UNAVAILABLE",
+      "name": "CALLER_TRANSACTION_PENDING",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "commit_ack_after_context_exit",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "reader_sees_committed",
+      "pass": true
+    },
+    {
+      "detail": "{'classification_uid': 'f09fb096-6868-46b0-96c5-6b0caf7320a8', 'classification_key': 'cee2c226be3159c4076c917c53b0f6574f",
+      "name": "v3_outer_does_not_claim_commit",
+      "pass": true
+    },
+    {
+      "detail": "(0, 0, 0, 0)",
+      "name": "v3_outer_not_yet_visible",
+      "pass": true
+    },
+    {
+      "detail": "(1, 1, 1, 1)",
+      "name": "v3_outer_caller_commit_readback",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "v3_after_reconnect_tip",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "batch_commit_readback",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "batch_one_ack",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "retry_no_duplicate",
+      "pass": true
+    },
+    {
+      "detail": "STALE_EXPECTED_TIP",
+      "name": "STALE_EXPECTED_TIP",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "batch_stale_no_effects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "disabled_guard_detects_unsafe_commit",
+      "pass": true
+    },
+    {
+      "detail": "STALE_EXPECTED_TIP",
+      "name": "STALE_EXPECTED_TIP",
+      "pass": true
+    },
+    {
+      "detail": "{'classification': 1, 'published': 3, 'competition': 0}",
+      "name": "main_classifier_executed_False",
+      "pass": true
+    },
+    {
+      "detail": "(1, 1, 1, 1)",
+      "name": "main_committed_after_classifier",
+      "pass": true
+    },
+    {
+      "detail": "{'classification': 1, 'published': 3, 'competition': 0}",
+      "name": "main_all_three_json_outputs",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "main_due_completed_after_commit",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "main_durable_ack",
+      "pass": true
+    },
+    {
+      "detail": "STALE_EXPECTED_TIP",
+      "name": "main_stale_error",
+      "pass": true
+    },
+    {
+      "detail": "{'classification': 1, 'published': 0, 'competition': 1}",
+      "name": "main_classifier_executed_True",
+      "pass": true
+    },
+    {
+      "detail": "(1, 1, 1, 1)",
+      "name": "main_competitor_durably_committed",
+      "pass": true
+    },
+    {
+      "detail": "{'classification': 1, 'published': 0, 'competition': 1}",
+      "name": "main_no_false_json_checkpoint",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "name": "main_due_remains_unchecked",
+      "pass": true
+    }
+  ],
+  "cases": [
+    {
+      "id": "v3_restricted_privileges_and_actual_write",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_expected_tip_initial_revision_retry",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_bad_authoritative_snapshots",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_genuine_competing_sessions",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_fault_stage_rollback",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_external_transaction_rollback",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_external_transaction_commit",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_batch_independent_commit_readback",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_expected_tip_bypass_negative_control",
+      "status": "PASS"
+    },
+    {
+      "id": "v3_real_monitor_main_stale_injection",
+      "status": "PASS"
+    }
+  ],
+  "copy": "A",
+  "database_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "errors": [],
+  "executed_sql_sha256": {
+    "research/h2_neon_contract_role_pg18_2026-10-20/004_candidate_guard_owner.sql": "4862feea37da52ec01c849e43ee04454a8036daa0b29990ce9be3a81e057f259",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/005_guard_search_path_v2.sql": "f163f010a70d8c0fb70cc1339b86f735ad4ce079b88f3c0705fed4dcf6198967",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/current_view_fixture.sql": "ee414c4d58811f30fc02a032b5b6c4d3af716b20fd10a77295e188b3dc30fee6",
+    "research/h2_pg18_security_closure_2026-10-20/003_candidate_app_role_v3_atomic.sql": "fdaf24f151bef1e9ab7327bf92aa72ddd37ec97619b20f12fbbb2d902026b037"
+  },
+  "passed": 77,
+  "real_components": [
+    "attack_event_canonical_persistence",
+    "attack_event_tip_snapshot",
+    "monitor_explosion_candidates.main",
+    "psycopg3",
+    "PostgreSQL 18.6 trigger/CAS",
+    "real two-session concurrency"
+  ],
+  "reference_commit": "3c1cf86ac0eaee1b1de246022c19acbb58037948",
+  "restricted_login": "h2_app_ingest_writer_test",
+  "schema": "h2-restricted-real-cas-pg18-v1",
+  "stubbed_interfaces": [
+    "live external publisher HTTP",
+    "local-only synthetic monitor inputs and JSON file sink"
+  ],
+  "tested_commit": "1a1a63e61eef1e43bb7eefbb5a736bf920e56071",
+  "total": 77,
+  "verdict": "PASS"
+}

@@ -1,0 +1,129 @@
+{
+  "acl_physical_residual": [
+    "relations"
+  ],
+  "cases": [
+    {
+      "id": "positive_full_catalog_rollback",
+      "outcome": "PASS"
+    },
+    {
+      "id": "post_migration_history_fail_closed",
+      "outcome": "PASS"
+    },
+    {
+      "id": "missing_migration_object",
+      "outcome": "PASS"
+    },
+    {
+      "id": "mid_acl_failure",
+      "outcome": "PASS"
+    },
+    {
+      "id": "mid_owner_failure",
+      "outcome": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "detail": "18.6 (Debian 18.6-1.pgdg13+2)",
+      "id": "PG18_6",
+      "pass": true
+    },
+    {
+      "detail": "[('h2_local', True, True, True, True, True, True)]",
+      "id": "baseline_no_migration_roles",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "migrated_catalog_differs",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "rollback_psql_success",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "rollback_effective_relation_ACL",
+      "pass": true
+    },
+    {
+      "detail": "['relations']",
+      "id": "rollback_no_other_catalog_deviation",
+      "pass": true
+    },
+    {
+      "detail": "['relations']",
+      "id": "rollback_raw_catalog_difference_recorded",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql:30: ERROR:  23514: H2_FULL_ROLLBACK_MISSING_OBJECT\nCONTEXT:  PL/pgSQL function inline_code_block line 10 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+      "id": "repeat_rollback_fails_23514",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "repeat_preserves_catalog",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql:30: ERROR:  23514: H2_FULL_ROLLBACK_HISTORY_CHANGED\nCONTEXT:  PL/pgSQL function inline_code_block line 21 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+      "id": "committed_revisions_block_23514",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "committed_history_preserved",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql:30: ERROR:  23514: H2_FULL_ROLLBACK_MISSING_OBJECT\nCONTEXT:  PL/pgSQL function inline_code_block line 10 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+      "id": "missing_object_rejected_23514",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "missing_object_no_partial_rollback",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql:45: ERROR:  23514: H2_FULL_ROLLBACK_INJECTED_ACL\nCONTEXT:  PL/pgSQL function inline_code_block line 10 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+      "id": "acl_rollback_injection_23514",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "acl_snapshot_unchanged",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql:53: ERROR:  23514: H2_FULL_ROLLBACK_INJECTED_OWNER\nCONTEXT:  PL/pgSQL function inline_code_block line 4 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+      "id": "owner_rollback_injection_23514",
+      "pass": true
+    },
+    {
+      "detail": "None",
+      "id": "owner_snapshot_unchanged",
+      "pass": true
+    }
+  ],
+  "copy": "A",
+  "errors": [],
+  "passed": 17,
+  "sql_sha256": {
+    "reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql": "2ed89b91feb3c208c8da8c81d47fdc2a1dcd272dc48ed7fdedb746a416f35a74",
+    "reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql": "50b17f219f0340569f65b82567c1741c2a3fc7f78a6426c7e16ef59c30aff49f",
+    "research/h2_neon_contract_role_pg18_2026-10-20/004_candidate_guard_owner.sql": "4862feea37da52ec01c849e43ee04454a8036daa0b29990ce9be3a81e057f259",
+    "research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql": "c1e255f1b429ff19d43cd16192f2a10f946765e3c0d244a444585c1355323c59",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/005_guard_search_path_v2.sql": "f163f010a70d8c0fb70cc1339b86f735ad4ce079b88f3c0705fed4dcf6198967",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/current_view_fixture.sql": "ee414c4d58811f30fc02a032b5b6c4d3af716b20fd10a77295e188b3dc30fee6",
+    "research/h2_pg18_security_closure_2026-10-20/003_candidate_app_role_v3_atomic.sql": "fdaf24f151bef1e9ab7327bf92aa72ddd37ec97619b20f12fbbb2d902026b037"
+  },
+  "tested_commit": "1a1a63e61eef1e43bb7eefbb5a736bf920e56071",
+  "total": 17,
+  "verdict": "PARTIAL"
+}
