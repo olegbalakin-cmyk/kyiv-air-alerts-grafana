@@ -1,0 +1,20 @@
+name: H2 007 original 31 independent Git-only proof
+on:
+  push:
+    branches: [research-h2-full-cas-007-acl-2026-10-20-gpt6]
+    paths:
+      - 'research/h2_full_cas_007_2026-10-20/verify_original_31.py'
+      - 'research/h2_full_cas_007_2026-10-20/original_31_artifacts/**'
+      - '.github/workflows/h2-007-original-31-git-only.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify original Git byte envelopes, attribution, and corruptions
+        run: python research/h2_full_cas_007_2026-10-20/verify_original_31.py
