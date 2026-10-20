@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Read and independently rehash original A/B byte receipts
         run: |
           python research/h2_pg18_full_offline_2026-10-20/verify_restricted_originals.py
