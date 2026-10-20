@@ -1,0 +1,33 @@
+name: H2 freeze original integrated H11 R09 AB archives
+on:
+  push:
+    branches: [research-h2-integrated-failclosed-preflight-2026-10-21-gpt6]
+    paths:
+      - '.github/workflows/h2-integrated-original-freeze-2026-10-21.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  frozen-originals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Download exact original 39499796916 artifact bytes, validate provenance and CRC
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 research/h2_integrated_preflight_2026-10-21/freeze_originals.py
+      - name: Commit frozen original A/B byte-exact ZIPs and manifest on research ref only
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/h2_integrated_preflight_2026-10-21/original_ab
+          git diff --cached --quiet && { echo "ALREADY_FROZEN"; exit 0; }
+          test "$(git branch --show-current)" = "research-h2-integrated-failclosed-preflight-2026-10-21-gpt6"
+          git commit -m "research(H2): Git-freeze original A/B Actions artifact ZIPs and provenance"
+          git push origin HEAD:refs/heads/research-h2-integrated-failclosed-preflight-2026-10-21-gpt6
