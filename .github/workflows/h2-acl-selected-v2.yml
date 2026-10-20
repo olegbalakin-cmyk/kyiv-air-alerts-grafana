@@ -1,0 +1,53 @@
+name: H2 ACL PG18 selected future and rollback A B
+on:
+  push:
+    branches: [research-h2-h11-r09-acl-provenance-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-acl-selected-v2.yml'
+      - 'research/h2_security_closure_2026-10-20/acl_selected_test.py'
+permissions:
+  contents: read
+jobs:
+  pg18:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      H2_COPY: ${{ matrix.copy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 3c1cf86ac0eaee1b1de246022c19acbb58037948
+          path: reference
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+          pip install "psycopg[binary]==3.2.12"
+      - run: python research/h2_security_closure_2026-10-20/acl_selected_test.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-acl-v2-${{ matrix.copy }}
+          path: /tmp/h2_acl_${{ matrix.copy }}.json
+          retention-days: 30
