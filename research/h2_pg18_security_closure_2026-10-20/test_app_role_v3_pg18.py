@@ -62,6 +62,7 @@ def scenario_public_create(label,filename,expect_atomic):
  db=prepare(label)
  with conn(db) as c:
   c.execute("GRANT CREATE ON SCHEMA public TO PUBLIC")
+  c.execute("REVOKE SELECT ON public.alert_episodes FROM h2_app_ingest_writer_test")
   before=acl(c)
   check(label+"_public_create",query(c,"SELECT EXISTS(SELECT 1 FROM pg_namespace n, LATERAL aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) a WHERE n.nspname='public' AND a.grantee=0 AND a.privilege_type='CREATE')")[0][0])
  result=apply(db,filename,False)
