@@ -99,10 +99,10 @@ def main():
         ns.temp(db)
         try:ns.run(db,ns.UP,role="h2_migrator_test")
         finally:ns.untemp(db)
-    old=acl(trial);old_rights=rights(trial)
     case("precondition_three_real_grants",grants(trial)==(True,True,True),grants(trial))
     ns.temp(trial)
     try:
+        old=acl(trial);old_rights=rights(trial)
         state=run_instrumented(trial,"late_acl",False)
         case("actual_008_late_fault_sqlstate_23514",state=="23514",state)
         case("actual_008_late_fault_full_catalog_atomicity",acl(trial)==old,{"equal":acl(trial)==old})
