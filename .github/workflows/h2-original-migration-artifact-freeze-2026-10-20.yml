@@ -1,0 +1,39 @@
+name: H2 isolated original migration artifact freeze
+on:
+  push:
+    branches: [research-h2-pg18-security-closure-2026-10-20]
+    paths:
+      - '.github/workflows/h2-original-migration-artifact-freeze-2026-10-20.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  original-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Freeze only the four original Actions A/B artifact ZIPs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python research/h2_pg18_security_closure_2026-10-20/freeze_original_ab.py
+          python research/h2_pg18_security_closure_2026-10-20/verify_original_ab.py
+      - name: Retain exact originals in isolated research Git history
+        run: |
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name 'github-actions[bot]'
+          git add research/h2_pg18_security_closure_2026-10-20/original_artifacts/
+          git diff --cached --check
+          git commit -m 'research(h2): freeze verified original 37/37 and failure A/B ZIP and JSON'
+          git push origin HEAD:research-h2-pg18-security-closure-2026-10-20
+      - name: Upload verification receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-original-migration-artifact-freeze
+          path: research/h2_pg18_security_closure_2026-10-20/original_artifacts/
+          retention-days: 30
