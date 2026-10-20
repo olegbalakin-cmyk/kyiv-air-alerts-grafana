@@ -32,7 +32,20 @@ for copy in ["A","B"]:
     a,=[x for x in arts if x["name"]=="h2-008-late-acl-"+copy]
     assert j["conclusion"]=="success" and j["head_sha"]==TESTED
     assert a["workflow_run"]["id"]==RUN and a["workflow_run"]["head_sha"]==TESTED
-    data=request("actions/artifacts/"+str(a["id"])+"/zip")
+    # Download ZIP without forwarding GitHub Authorization to signed blob storage.
+    import urllib.error
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self,*args,**kwargs):return None
+    req=urllib.request.Request("https://api.github.com/repos/"+R+"/actions/artifacts/"+str(a["id"])+"/zip",
+      headers={"Authorization":"Bearer "+os.environ["GITHUB_TOKEN"],"User-Agent":"h2-008-proof"})
+    try:
+        with urllib.request.build_opener(NoRedirect()).open(req,timeout=75) as response:data=response.read()
+    except urllib.error.HTTPError as error:
+        if error.code not in (301,302,303,307,308):raise
+        target=error.headers.get("Location")
+        if not target or not target.startswith("https://"):raise RuntimeError("UNSAFE_ARTIFACT_REDIRECT")
+        with urllib.request.urlopen(urllib.request.Request(target,
+             headers={"User-Agent":"h2-008-proof"}),timeout=75) as response:data=response.read()
     assert len(data)==a["size_in_bytes"] and "sha256:"+digest(data)==a["digest"]
     z=zipfile.ZipFile(io.BytesIO(data));assert z.testzip() is None
     members={}
