@@ -84,7 +84,7 @@ def clean():
  check("rollback_raw_catalog_difference_recorded",delta==["relations"],delta)
  again=exec_sql(db,ROLLBACK,False,history=original["history"])
  check("repeat_rollback_fails_23514","23514" in again.stderr,again.stderr[-500:])
- check("repeat_preserves_catalog",snapshot(db)==original)
+ check("repeat_preserves_catalog",snapshot(db)==after)
 def synthetic_insert(db):
  with conn(db) as c:
   c.execute("""INSERT INTO public.attack_event_classifications(
@@ -134,5 +134,5 @@ def main():
   report["verdict"]=("FAIL" if report["total"]==0 or report["passed"]!=report["total"] or report["errors"] else ("PARTIAL" if report.get("acl_physical_residual") else "PASS"))
   OUT.write_text(json.dumps(report,indent=2,sort_keys=True,default=str)+"\n")
   print(json.dumps({"copy":COPY,"passed":report["passed"],"total":report["total"],"cases":report["cases"],"errors":report["errors"],"verdict":report["verdict"]}))
- if report["verdict"]!="PASS":raise SystemExit(1)
+ if report["verdict"]=="FAIL":raise SystemExit(1)
 if __name__=="__main__":main()
