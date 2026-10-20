@@ -143,6 +143,10 @@ function applyStaticLanguage(){
  setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  for(const id of ["cityDateFrom","rolling7dDateFrom","shortDateFrom","compareDateFrom","tableDateFrom"])setLocalizedText(`label[for="${id}"]`,"Від","From");
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
+ for(const picker of document.querySelectorAll(".date-picker-native")) {
+   const isTo=picker.dataset.dateFor.endsWith("To");
+   picker.setAttribute("aria-label",isTo?tr("Обрати кінцеву дату","Choose end date"):tr("Обрати початкову дату","Choose start date"));
+ }
  setKpiLabel("kpiAlerts","Тривог за останні 28 завершених днів","Alerts in the last 28 completed days");setKpiLabel("kpiHours","Годин під тривогою за останні 28 завершених днів","Hours under alert in the last 28 completed days");setKpiLabel("kpiDuration","Середня тривалість тривог, що почалися за останні 28 завершених днів","Average duration of alerts that started in the last 28 completed days");setKpiLabel("kpiMaxDay","Найбільше тривог за день у цьому 28-денному вікні","Most alerts in one day within this 28-day window");setKpiLabel("kpiExplosionsPct","Тривог, під час яких повідомлялось про вибухи","Alerts with reported explosions");
  setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
  setSectionHeading("timeOfDaySection","Час доби","Time of day","Як тривоги розподіляються протягом доби","How alerts are distributed through the day","Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.","Two complementary views: a detailed normalized profile and the actual distribution of all alert time across parts of the day.");setSectionHeading("alertBurdenSection","Структура навантаження","Burden structure","Тривалість і навантаження","Duration and burden","Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.","How days were distributed by time under alert and how the longest episodes changed.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText('label[for="timeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#timeOfDayBin","aria-label","Інтервал добового профілю","Time-of-day profile interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("timeOfDayBin",v,u,e);setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");setLocalizedText('label[for="burdenYear"]',"Період","Period");setLocalizedAttr("#burdenYear","aria-label","Період графіків структури навантаження","Period for burden charts");setLocalizedText('label[for="daypartMode"]',"Розподіл","Grouping");setLocalizedAttr("#daypartMode","aria-label","Спосіб розподілу часу під тривогою","Alert time grouping");setOptionText("daypartMode","four","4 частини доби","Four time bands");setOptionText("daypartMode","daynight","День / вечір і ніч","Day / evening & night");setLocalizedText('label[for="daypartYear"]',"Рік","Year");setLocalizedText("#heavyDaysExcludeZeroLabel","Не враховувати дні без тривог","Exclude days without alerts");setCardCopy("heavyDaysChart","Розподіл днів за часом під тривогою","Distribution of days by time under alert","100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.","Each month is normalized to 100% and split by days with no alert, under 1 hour, 1–3, 3–6, 6–12, and 12+ hours under alert.");setCardCopy("extremesChart","Найдовша тривога і найдовша тиша","Longest alert and longest quiet spell","Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.","Left axis: the longest alert that started in the month. Right axis: the longest continuous alert-free spell within the month.");setCardCopy("daypartChart","Розподіл часу під тривогою за частинами доби","Distribution of alert time by part of day","100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.","100% of actual alert time in each month is split into 00–06, 06–12, 12–18 and 18–24 in Europe/Kyiv time.");setLocalizedText("#timeOfDaySection .daypart-note","На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.","Unlike the profile above, this shows the share of all actual alert time that fell in each part of the day.");
@@ -945,9 +949,14 @@ function validOptionalParam(name, values, fallback) {
   return values.includes(value) ? value : fallback;
 }
 
-function normalizeTypedDate(value) {
+function normalizeTypedDate(value, boundary = "from") {
   const raw = String(value || "").trim();
   if (!raw) return "";
+
+  // A year-only range endpoint means the start or end of that calendar year.
+  if (/^\d{4}$/.test(raw)) {
+    return normalizeTypedDate(`${raw}-${boundary === "to" ? "12-31" : "01-01"}`);
+  }
 
   let year, month, day;
   let match = /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/.exec(raw);
@@ -973,9 +982,19 @@ function normalizeTypedDate(value) {
   return `${String(year).padStart(4,"0")}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
 }
 
+function syncNativeDatePicker(el) {
+  const picker = el?.parentElement?.querySelector(".date-picker-native");
+  if (!picker) return;
+  picker.value = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : "";
+  if (el.min) picker.min = el.min;
+  else picker.removeAttribute("min");
+  if (el.max) picker.max = el.max;
+  else picker.removeAttribute("max");
+}
+
 function normalizeDateInputElement(el) {
   if (!el) return true;
-  const normalized = normalizeTypedDate(el.value);
+  const normalized = normalizeTypedDate(el.value, el.id?.endsWith("To") ? "to" : "from");
   if (normalized === null) {
     el.classList.add("invalid");
     el.title = tr(
@@ -987,17 +1006,18 @@ function normalizeDateInputElement(el) {
   el.classList.remove("invalid");
   el.removeAttribute("title");
   el.value = normalized;
+  syncNativeDatePicker(el);
   return true;
 }
 
-function validDateParam(name) {
-  const normalized = normalizeTypedDate(getParams().get(name) || "");
+function validDateParam(name, boundary = "from") {
+  const normalized = normalizeTypedDate(getParams().get(name) || "", boundary);
   return normalized || "";
 }
 
 function setDateInputFromParam(id, name) {
   const el = $(id);
-  if (el) el.value = validDateParam(name);
+  if (el) el.value = validDateParam(name, id.endsWith("To") ? "to" : "from");
 }
 
 function monthEndDate(month) {
@@ -1035,6 +1055,7 @@ function syncDateRange(fromId, toId, values) {
       el.value = "";
       el.removeAttribute("min");
       el.removeAttribute("max");
+      syncNativeDatePicker(el);
     }
     return { from: "", to: "", min: "", max: "" };
   }
@@ -1049,6 +1070,8 @@ function syncDateRange(fromId, toId, values) {
   if (!fromEl.value || fromEl.value < min || fromEl.value > max) fromEl.value = min;
   if (!toEl.value || toEl.value < min || toEl.value > max) toEl.value = max;
   if (fromEl.value > toEl.value) toEl.value = fromEl.value;
+  syncNativeDatePicker(fromEl);
+  syncNativeDatePicker(toEl);
 
   return { from: fromEl.value, to: toEl.value, min, max };
 }
@@ -1064,6 +1087,8 @@ function normalizeDatePair(fromId, toId, changedId) {
   if (!fromEl || !toEl || !fromEl.value || !toEl.value || fromEl.value <= toEl.value) return;
   if (changedId === fromId) toEl.value = fromEl.value;
   else fromEl.value = toEl.value;
+  syncNativeDatePicker(fromEl);
+  syncNativeDatePicker(toEl);
 }
 
 function dateKeyInRange(value, from, to) {
@@ -1093,6 +1118,8 @@ function setDateRangeValues(fromId, toId, from, to) {
   if (from) fromEl.value = from < (fromEl.min || from) ? fromEl.min : (from > (fromEl.max || from) ? fromEl.max : from);
   if (to) toEl.value = to < (toEl.min || to) ? toEl.min : (to > (toEl.max || to) ? toEl.max : to);
   if (fromEl.value && toEl.value && fromEl.value > toEl.value) toEl.value = fromEl.value;
+  syncNativeDatePicker(fromEl);
+  syncNativeDatePicker(toEl);
 }
 
 function applyRolling7dQuickRange(key, presetValue = null) {
@@ -3239,6 +3266,16 @@ function bind() {
   bindRange("compareDateFrom", "compareDateTo", renderComparison);
   bindRange("tableDateFrom", "tableDateTo", renderAllCitiesTable, () => {
     if ($("allCitiesRange")) $("allCitiesRange").value = "custom";
+  });
+  // The transparent native input remains directly tappable on iOS, where
+  // programmatic showPicker() is not reliably available.
+  document.querySelectorAll(".date-picker-native").forEach(picker => {
+    picker.addEventListener("change", () => {
+      const input = $(picker.dataset.dateFor);
+      if (!input || !picker.value) return;
+      input.value = picker.value;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
   });
 
   setupTableSorting();

@@ -114,3 +114,27 @@ assert.equal(evaluate("partialPeriodFooter(derivedCalendarWeeks(state.data.citie
 assert.match(code, /const labels = rows\.map\(r => periodDisplayLabel\(r, period\)\)/);
 assert.match(code, /const labels = shared\.map\(x => period === "calendarWeekly"/);
 console.log("calendar week end/label/as-of/day divisor/23-city alignment/Sunday/date filters/chart tooltips PASS");
+
+const dateMarkup = fs.readFileSync(path.join(__dirname, "../pages-preview/index.html"), "utf8");
+for (const id of ["cityDateFrom","cityDateTo","compareDateFrom","compareDateTo","tableDateFrom","tableDateTo"]) {
+  assert.match(dateMarkup, new RegExp(`id="${id}"[^>]*inputmode="text"`), id + " must allow punctuation on iOS");
+  assert.ok(dateMarkup.includes(`data-date-for="${id}"`), id + " must have a native picker");
+}
+assert.equal((dateMarkup.match(/class="date-picker-native"/g) || []).length, 6);
+assert.ok(!dateMarkup.includes('inputmode="numeric"'), "numeric keyboard cannot enter a separator on iPhone");
+for (const [raw, boundary, expected] of [
+  ["2026-10-20", "from", "2026-10-20"],
+  ["2026.10.20", "from", "2026-10-20"],
+  ["20.10.2026", "from", "2026-10-20"],
+  ["2026", "from", "2026-01-01"],
+  ["2026", "to", "2026-12-31"],
+  ["2026-02-30", "from", null],
+  ["garbage", "from", null]
+]) {
+  context.testDateRaw = raw;
+  context.testDateBoundary = boundary;
+  assert.equal(evaluate("normalizeTypedDate(testDateRaw, testDateBoundary)"), expected, raw + " normalization");
+}
+assert.match(code, /picker\.addEventListener\("change",/);
+assert.match(code, /input\.dispatchEvent\(new Event\("change"/);
+console.log("iPhone date keyboard/native picker/ISO normalization/year-only range PASS");
