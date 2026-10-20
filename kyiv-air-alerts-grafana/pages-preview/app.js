@@ -824,7 +824,7 @@ function derivedCalendarWeeks(city) {
   let durationWeight = 0;
   for (const row of partialDays) {
     const n = Number(row.alerts_started) || 0;
-    const avg = Number(row.avg_alert_duration_minutes);
+    const avg = Number(row.avg_alert_duration_min);
     if (n > 0 && Number.isFinite(avg)) {
       durationWeighted += n * avg;
       durationWeight += n;
