@@ -45,7 +45,7 @@ def acl(c):
   (SELECT coalesce(array_agg(proname||':'||coalesce(proacl::text,'NULL') ORDER BY proname)::text,'NULL')
    FROM pg_proc WHERE pronamespace='public'::regnamespace),
   (SELECT coalesce(array_agg(rolname||':'||rolcanlogin::text ORDER BY rolname)::text,'NULL')
-   FROM pg_roles WHERE rolname LIKE 'h2_%')
+   FROM pg_roles WHERE rolname LIKE 'h2_%%')
   """)[0]
 def prepare(label):
  db="h2_"+COPY.lower()+"_v3_"+label
