@@ -5,6 +5,7 @@
 BEGIN;
 SET LOCAL lock_timeout = '10s';
 SELECT set_config('h2.expected_history_md5', :'expected_history', true);
+SELECT set_config('h2.rollback_fault', :'fault', true);
 DO $pre$
 DECLARE actual text;
 BEGIN
@@ -58,6 +59,9 @@ DROP INDEX public.h2_classification_one_successor_uidx;
 -- Both principals are created solely for this fresh isolated synthetic cluster.
 -- Revoke their schema and table access, including any column-level UPDATE.
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM h2_app_ingest_writer_test;
+REVOKE UPDATE (event_status, current_classification_uid, binding_state,
+ alert_episode_uid, correction_provenance, updated_by_run_id, updated_at)
+ ON public.attack_events FROM h2_app_ingest_writer_test;
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM h2_head_guard_test;
 REVOKE ALL ON SCHEMA public FROM h2_app_ingest_writer_test;
 REVOKE ALL ON SCHEMA public FROM h2_head_guard_test;
