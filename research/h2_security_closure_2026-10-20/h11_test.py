@@ -39,6 +39,33 @@ try:
  one("missing_head",["MISSING_HEAD"],lambda d:(build(d),query(d,"DELETE FROM public.h2_classification_heads")))
  one("wrong_identity",["HEAD_NOT_CANONICAL_TIP"],lambda d:(lambda a,b:query(d,"UPDATE public.h2_classification_heads SET tip_classification_uid=%s WHERE city_key='kyiv'",(b,)))(build(d),put(d,"secondid"+d,identity=2,city="kharkiv")))
  one("repeated",[],lambda d:(chain(d),check(d),check(d)))
+
+ one("orphan_head",["ORPHAN_HEAD","HEAD_NOT_CANONICAL_TIP"],lambda d:
+     (lambda uid:query(d,"INSERT INTO public.h2_classification_heads (city_key,historical_episode_id,alert_start_at,alert_end_at,tip_classification_uid) VALUES ('wrong','999999999999999999999999','2026-01-01T01:00:00Z','2026-01-01T02:00:00Z',%s)",(uid,)))(build(d)))
+ # A snapshot alone is NOT durable until a later migration transaction COMMIT.
+ # This separate controlled synthetic fixture shows a same-transaction lock barrier:
+ # the competing restricted writer must be refused (55P03), with no partial history.
+ d=new("h11v2lock")
+ before=truth(d)
+ with conn(d,autocommit=False) as locking:
+  locking.execute("LOCK TABLE public.attack_event_classifications, public.h2_classification_heads IN SHARE ROW EXCLUSIVE MODE")
+  assert locking.execute(SQL).fetchall()==[]
+  with conn(d,"h2_app_ingest_writer_test","synthetic_only_local_role",autocommit=True) as writer:
+   writer.execute("SET lock_timeout='350ms'")
+   try:
+    put(d,"h11_held_writer_"+d,session=writer)
+    concurrent="00000"
+   except psycopg.Error as e:
+    concurrent=e.sqlstate
+  assert concurrent=="55P03",concurrent
+  assert truth(d)==before
+  locking.commit()
+ after=truth(d)
+ item={"id":"lock_barrier","expected_sqlstate":"55P03","actual_sqlstate":concurrent,"history_unchanged":after==before,"status":"PASS" if concurrent=="55P03" and after==before else "FAIL"}
+ report["cases"].append(item)
+ print(json.dumps(item),flush=True)
+ if item["status"]!="PASS":raise AssertionError("lock_barrier")
+
 except Exception as e:
  report["error"]=repr(e);report["trace"]=traceback.format_exc()[-1200:]
 finally:
