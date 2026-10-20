@@ -29,6 +29,7 @@ jobs:
     env:
       H2_COPY: ${{ matrix.copy }}
       H2_PG18_OWNER_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/postgres
+      H2_PG18_WRITER_DSN: postgresql://h2_app_ingest_writer_test:synthetic_only_local_role@127.0.0.1:5432/postgres
     steps:
       - uses: actions/checkout@v4
         with:
