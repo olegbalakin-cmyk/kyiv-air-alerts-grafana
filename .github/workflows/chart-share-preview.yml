@@ -5,6 +5,7 @@ on:
     paths:
       - "kyiv-air-alerts-grafana/pages-preview/**"
       - "kyiv-air-alerts-grafana/tests/test_chart_share.js"
+      - "kyiv-air-alerts-grafana/tests/test_daily28_rollover.js"
       - ".github/workflows/chart-share-preview.yml"
 permissions:
   contents: read
@@ -22,6 +23,7 @@ jobs:
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_chart_share.js
           node kyiv-air-alerts-grafana/tests/test_calendar_week.js
+          node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
           grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
           test -s kyiv-air-alerts-grafana/pages-preview/brand-mark.svg
           test -s kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg

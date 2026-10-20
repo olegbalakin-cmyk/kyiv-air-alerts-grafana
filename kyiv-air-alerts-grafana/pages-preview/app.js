@@ -300,10 +300,12 @@ function chartOptions(yTitle, extra = {}) {
 
 function setChart(id, labels, datasets, yTitle, type = "line", extra = {}) {
   if (state.charts[id]) state.charts[id].destroy();
+  const { chartPlugins = [], ...chartOptionsExtra } = extra;
   state.charts[id] = new Chart($(id), {
     type,
     data: { labels, datasets },
-    options: chartOptions(yTitle, extra)
+    plugins: chartPlugins,
+    options: chartOptions(yTitle, chartOptionsExtra)
   });
 }
 
@@ -707,24 +709,43 @@ function seriesDataset(label, values, color, dashed = false, rows = null) {
 }
 
 
-function mergeCurrentDayDaily28(cities, envelope) {
-  const meta=envelope?.meta, overlay=envelope?.cities;
-  if (!cities || !meta || !overlay || meta.timezone!=="Europe/Kyiv" ||
-      meta.current_day_is_partial!==true || meta.kpi_period_unchanged!==true) return false;
-  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-  if (meta.current_day!==today) return false;
-  const keys=Object.keys(cities);
-  if (keys.length!==23 || Object.keys(overlay).length!==23 || keys.some(key=>!overlay[key])) return false;
-  const corrected={};
+function kyivCalendarToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Kyiv", year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(now);
+}
+
+// Keep the newest observed *partial* day visible across midnight until a
+// complete day supersedes it. Never invent missing days or promote it to final.
+function mergeCurrentDayDaily28(cities, envelope, todayKyiv = kyivCalendarToday()) {
+  const meta = envelope?.meta, overlay = envelope?.cities;
+  if (!cities || !meta || !overlay || meta.timezone !== "Europe/Kyiv" ||
+      meta.current_day_is_partial !== true || meta.kpi_period_unchanged !== true) return false;
+  const sourceDay = String(meta.current_day || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sourceDay) || addIsoDays(sourceDay, 0) !== sourceDay ||
+      sourceDay > todayKyiv) return false;
+
+  const keys = Object.keys(cities);
+  if (keys.length !== 23 || Object.keys(overlay).length !== 23 ||
+      keys.some(key => !Object.prototype.hasOwnProperty.call(overlay, key))) return false;
+  const expectedCompleteDay = addIsoDays(sourceDay, -1);
+  const corrected = {};
   for (const key of keys) {
-    const row=overlay[key], base=cities[key]?.daily28 || [];
-    const past=base.filter(r=>r.date<today).slice(-27);
-    if (past.length!==27 || !row || row.date!==today || row.is_partial_period!==true ||
-        !row.partial_through || !Number.isFinite(Number(row.total_alert_duration_hours)) ||
-        Number(row.total_alert_duration_hours)<0) return false;
-    corrected[key]=[...past,row];
+    const row = overlay[key], base = cities[key]?.daily28;
+    if (!Array.isArray(base) || base[base.length - 1]?.date !== expectedCompleteDay ||
+        !row || row.date !== sourceDay || row.is_partial_period !== true ||
+        row.partial_through !== sourceDay ||
+        !Number.isFinite(Number(row.total_alert_duration_hours)) ||
+        Number(row.total_alert_duration_hours) < 0) return false;
+
+    // Last 27 completed days plus the observed partial day: exactly 28 dates.
+    const past = base.filter(item => item.date < sourceDay).slice(-27);
+    if (past.length !== 27 ||
+        past.some((item, i) => item.date !== addIsoDays(sourceDay, i - 27))) return false;
+    corrected[key] = [...past, row];
   }
-  for (const key of keys) cities[key].daily28=corrected[key];
+  // All 23 rows must validate before any city is mutated.
+  for (const key of keys) cities[key].daily28 = corrected[key];
   return true;
 }
 
@@ -2367,11 +2388,18 @@ function renderShortHorizon(key) {
   const labels = rows.map(r => r.date || String(r.time || "").slice(0, 10));
   const range = $("daily28Range");
   if (range) {
+    const partial = rows.find(isPartialPeriod);
     range.textContent = labels.length
-      ? (rows.some(isPartialPeriod)
-      ? tr(`Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Сьогоднішній день неповний станом на оновлення.`,`Daily view ${labels[0]} — ${labels[labels.length-1]}. Today is partial as of the latest update.`)
-      : tr(`Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Лише завершені дні.`,`Daily view ${labels[0]} — ${labels[labels.length-1]}. Completed days only.`))
-      : tr(`Для ${labelFor(key)} немає доступного 28-денного ряду.`,`No 28-day series is available for ${labelFor(key)}.`);
+      ? partial
+        ? tr(
+            `Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Останній доступний день (${shortDateLabel(partial.date)}) неповний. ${partialPeriodFooter(partial)}.`,
+            `Daily view ${labels[0]} — ${labels[labels.length-1]}. The latest available day (${shortDateLabel(partial.date)}) is incomplete. ${partialPeriodFooter(partial)}.`
+          )
+        : tr(
+            `Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Лише завершені дні.`,
+            `Daily view ${labels[0]} — ${labels[labels.length-1]}. Completed days only.`
+          )
+      : tr(`Для ${labelFor(key)} немає доступного 28-денного ряду.`, `No 28-day series is available for ${labelFor(key)}.`);
   }
 
   setChart(
@@ -2380,15 +2408,21 @@ function renderShortHorizon(key) {
     [{
       label: tr("Годин під тривогою","Hours under alert"),
       data: rows.map(r => r.total_alert_duration_hours),
-      backgroundColor: COLORS[0] + "88",
+      backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "88"),
       borderColor: COLORS[0],
-      borderWidth: 1
+      borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
+      _exportRows: rows
     }],
     "Годин",
     "bar",
     {
+      chartPlugins: [partialPeriodBarPlugin],
       layout: { padding: { right: 70 } },
-      plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } },
+        partialPeriodBar: { rows, datasetIndices: [0] }
+      },
       scales: {
         x: {
           offset: true,
@@ -2441,8 +2475,17 @@ function renderShortHorizon(key) {
     borderWidth: 1
   }];
 
+  // Both stacked and single alert bars use the same dashed partial-day styling.
+  for (const dataset of alertBarDatasets) {
+    const fullFill = dataset.backgroundColor;
+    dataset.backgroundColor = rows.map(r => isPartialPeriod(r) ? fullFill.slice(0, 7) + "22" : fullFill);
+    dataset.borderWidth = rows.map(r => isPartialPeriod(r) ? 0 : 1);
+    dataset._exportRows = rows;
+  }
+
   if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
   state.charts.daily28AlertsDurationChart = new Chart($("daily28AlertsDurationChart"), {
+    plugins: [partialPeriodBarPlugin],
     data: {
       labels,
       datasets: [
@@ -2454,10 +2497,12 @@ function renderShortHorizon(key) {
           yAxisID: "yDuration",
           borderColor: COLORS[2],
           backgroundColor: COLORS[2] + "22",
-          pointRadius: 0,
-          pointHoverRadius: 0,
+          pointRadius: rows.map(r => isPartialPeriod(r) ? 4 : 0),
+          pointHoverRadius: rows.map(r => isPartialPeriod(r) ? 5 : 0),
           borderWidth: 2,
           borderDash: sourceType(key) === "raion_proxy" ? [7, 5] : [],
+          segment: partialSegment(rows, COLORS[2]),
+          _exportRows: rows,
           tension: 0,
           spanGaps: false
         }
@@ -2470,7 +2515,8 @@ function renderShortHorizon(key) {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
-        tooltip: { mode: "index", intersect: false }
+        tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } },
+        partialPeriodBar: { rows, datasetIndices: alertBarDatasets.map((_dataset, index) => index) }
       },
       scales: {
         x: {
