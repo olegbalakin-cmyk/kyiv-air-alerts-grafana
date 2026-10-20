@@ -1,0 +1,28 @@
+name: H2 independent Git-only restricted CAS and rollback receipt audit
+on:
+  push:
+    branches: [research-h2-restricted-cas-rollback-pg18-2026-10-20]
+    paths:
+      - 'research/h2_pg18_full_offline_2026-10-20/new_original_artifacts/**'
+      - '.github/workflows/h2-restricted-cas-evidence-independent-git-2026-10-20.yml'
+permissions:
+  contents: read
+jobs:
+  independent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read and independently rehash original A/B byte receipts
+        run: |
+          python research/h2_pg18_full_offline_2026-10-20/verify_restricted_originals.py
+      - name: Confirm tested source blobs retained across evidence commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_restricted_cas_pg18.py)" = "$(git rev-parse 1a1a63e61eef1e43bb7eefbb5a736bf920e56071:research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_restricted_cas_pg18.py)"
+          test "$(git rev-parse HEAD:research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_full_rollback_pg18.py)" = "$(git rev-parse 1a1a63e61eef1e43bb7eefbb5a736bf920e56071:research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_full_rollback_pg18.py)"
+          test "$(git rev-parse HEAD:research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql)" = "$(git rev-parse 1a1a63e61eef1e43bb7eefbb5a736bf920e56071:research/h2_pg18_full_offline_2026-10-20/restricted_cas/006_full_acl_rollback_candidate.sql)"
+          echo 'H2_TESTED_EXECUTABLE_SOURCE_BLOBS_IDENTICAL=PASS'
