@@ -722,7 +722,7 @@ function kyivCalendarToday(now = new Date()) {
 function validPartialThrough(value, sourceDay) {
   if (typeof value !== "string") return false;
   if (value === sourceDay) return true;
-  if (!/^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)$/.test(value)) return false;
+  if (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(value)) return false;
   return value.slice(0, 10) === sourceDay && Number.isFinite(Date.parse(value));
 }
 
