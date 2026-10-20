@@ -27,6 +27,33 @@ def request(url):
              "X-GitHub-Api-Version":"2022-11-28","User-Agent":"h2-offline-evidence-freeze"}
     with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=60) as r:
         return r.read()
+def original_zip(artifact_id):
+    import urllib.error
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self,*args,**kwargs):
+            return None
+    token=os.environ["GITHUB_TOKEN"]
+    api_url="https://api.github.com/repos/"+OWNER_REPO+"/actions/artifacts/"+str(artifact_id)+"/zip"
+    source=urllib.request.Request(api_url,headers={
+         "Authorization":"Bearer "+token,
+         "Accept":"application/vnd.github+json",
+         "X-GitHub-Api-Version":"2022-11-28",
+         "User-Agent":"h2-offline-evidence-freeze"})
+    try:
+        with urllib.request.build_opener(NoRedirect()).open(source,timeout=45) as resp:
+            return resp.read()
+    except urllib.error.HTTPError as err:
+        if err.code not in (301,302,303,307,308):
+            raise
+        redirect=err.headers.get("Location")
+        if not redirect or not redirect.startswith("https://"):
+            raise RuntimeError("UNSAFE_ARTIFACT_REDIRECT")
+        # GitHub returns a signed temporary blob URL. It must be fetched
+        # WITHOUT the GitHub bearer header, which breaks Azure signature auth.
+        with urllib.request.urlopen(urllib.request.Request(
+             redirect,headers={"User-Agent":"h2-offline-evidence-freeze"}),timeout=60) as resp:
+            return resp.read()
+
 def api(path):
     return json.loads(request("https://api.github.com/repos/"+OWNER_REPO+"/"+path))
 def main():
@@ -48,7 +75,7 @@ def main():
         meta=by_artifact[known["id"]]
         assert meta["name"]==known["name"] and meta["expired"] is False
         assert meta["size_in_bytes"]==known["bytes"] and meta["digest"]=="sha256:"+known["sha256"],meta
-        data=request("https://api.github.com/repos/"+OWNER_REPO+"/actions/artifacts/"+str(known["id"])+"/zip")
+        data=original_zip(known["id"])
         assert len(data)==known["bytes"] and sha(data)==known["sha256"],copy
         members=[]
         with zipfile.ZipFile(io.BytesIO(data)) as z:
