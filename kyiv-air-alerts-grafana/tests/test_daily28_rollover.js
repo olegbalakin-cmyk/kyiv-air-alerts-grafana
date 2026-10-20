@@ -158,4 +158,48 @@ context.testEnvelope=envelope();
 evalJS("mergeCurrentDayDaily28(testCities, testEnvelope, '2026-10-21');state.data.cities=testCities;renderShortHorizon('city_0')");
 assert.match(outputElements.daily28Range.textContent,/latest available day \(20\.10\) is incomplete/);
 assert.match(outputElements.daily28Range.textContent,/Data as of 20\.10/);
+// Frozen, unmodified source shapes from the real 2026-10-20 site-prod blobs:
+// dashboard_data.json (28 completed daily rows) and
+// site_derived.json (23 precise ISO8601 partial-through timestamps).
+const snapshot = JSON.parse(fs.readFileSync(path.join(
+  __dirname, "fixtures/daily28_20261020_live.json"), "utf8"));
+assert.equal(snapshot.provenance.dashboard_blob, "bcd96b56129e804a84cc50b064de6cb3d1d410f4");
+assert.equal(snapshot.provenance.derived_blob, "035d592494240d9539b0649c83a50d7974e5e283");
+assert.equal(snapshot.current_day.meta.current_day, "2026-10-20");
+assert.equal(Object.keys(snapshot.complete_daily28).length, 23);
+assert.equal(Object.keys(snapshot.current_day.cities).length, 23);
+const productionCities = Object.fromEntries(Object.entries(snapshot.complete_daily28).map(
+  ([key, rows]) => [key, {daily28:rows, weekly: [], kpis:[{alerts_28d:56}]}]
+));
+assert.equal(snapshot.current_day.cities.kyiv.partial_through, "2026-10-20T23:25:39.257068+03:00");
+const liveBefore = JSON.stringify(snapshot.current_day);
+assert.equal(merge(productionCities, snapshot.current_day, "2026-10-21"), true,
+  "must accept actual ISO8601 timestamp from the live production payload");
+assert.equal(JSON.stringify(snapshot.current_day),liveBefore,"live envelope not mutated");
+for(const key of Object.keys(productionCities)) {
+  assert.equal(productionCities[key].daily28.length,28, key);
+  assert.equal(productionCities[key].daily28.at(-1).date,"2026-10-20",key);
+  assert.equal(productionCities[key].daily28.at(-1).is_partial_period,true,key);
+}
+context.productionCities=productionCities;
+assert.equal(evalJS("periodRows(productionCities.kyiv, 'daily28').at(-1).date"),"2026-10-20");
+assert.equal(evalJS("derivedCalendarWeeks(productionCities.kyiv).at(-1).partial_through"),"2026-10-20");
+assert.equal(evalJS("partialPeriodFooter(productionCities.kyiv.daily28.at(-1))"),"Дані станом на 20.10");
+// The user-visible daily28 charts must use real full timestamp payloads too.
+evalJS("currentLanguage='uk';state.data={cities:productionCities,multicity_meta:{weekly_mode:'rolling_7d'}};renderShortHorizon('kyiv')");
+assert.equal(evalJS("state.charts.daily28HoursChart.config.data.labels.at(-1)"),"2026-10-20");
+assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.data.labels.at(-1)"),"2026-10-20");
+assert.match(outputElements.daily28Range.textContent,/Дані станом на 20\.10/);
+const mismatch = JSON.parse(JSON.stringify(snapshot.current_day));
+mismatch.cities.kyiv.partial_through = "2026-10-19T23:25:39+03:00";
+const mismatchCities = Object.fromEntries(Object.entries(snapshot.complete_daily28).map(
+  ([key, rows]) => [key, {daily28:rows}]
+));
+assert.equal(merge(mismatchCities,mismatch,"2026-10-21"),false,
+  "reject a timestamp whose local date disagrees with the row");
+const malformedTime = JSON.parse(JSON.stringify(snapshot.current_day));
+malformedTime.cities.kyiv.partial_through="2026-10-20T88:88:88+03:00";
+assert.equal(merge(mismatchCities,malformedTime,"2026-10-21"),false,
+  "reject syntactically invalid timestamps");
+
 console.log("PASS: midnight carryover, 23-city atomicity, continuity, completed precedence, week, both 28-day charts, freshness UI and EN/UK");
