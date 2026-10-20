@@ -65,7 +65,7 @@ def negatives(m):
  def edit(field,val):
   c=copy.deepcopy(m);c["entries"][0][field]=val;return c
  for n,field,value in [("wrong_job","job_id",118802020005),("swapped_A_B","environment","H2_COPY=B"),("wrong_artifact","artifact_id",12288715327),("wrong_tested_commit","tested_commit","0"*40),("incorrect_verdict","verdict","PASS"),("corrupted_manifest","version",99)]:
-  tests.append((n,edit(field,value),None,False))
+  tests.append((n,({**m,"version":99} if n=="corrupted_manifest" else edit(field,value)),None,False))
  b=(P/"h11_A.zip").read_bytes()
  z=bytearray(b);z[30]^=1;tests.append(("modified_zip",m,bytes(z),False))
  with zipfile.ZipFile(io.BytesIO(b)) as f:name=f.namelist()[0];payload=f.read(name)
