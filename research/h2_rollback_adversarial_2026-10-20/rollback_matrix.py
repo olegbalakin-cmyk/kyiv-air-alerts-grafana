@@ -45,13 +45,13 @@ def run():
             c.close()
             if p.poll() is None:p.kill()
             ns.untemp(d)
-        # Interleaving II: hold table ACCESS EXCLUSIVE in a pre-rollback guard transaction,
-        # then begin restricted writer; RELEASE guard and run actual rollback.
+        # Interleaving II: hold ROW SHARE in a pre-rollback guard transaction,
+        # wait for rollback ACCESS EXCLUSIVE request in pg_locks, then begin writer; release guard.
         # PostgreSQL DDL and writer serialize; if the rollback wins, writer must fail closed.
         d2=new("r03b"); h2=historical(d2)
         guard=conn(d2,autocommit=False,application_name="H2_R03_A")
         guard.execute("BEGIN")
-        guard.execute("LOCK TABLE public.attack_event_classifications IN ACCESS EXCLUSIVE MODE")
+        guard.execute("LOCK TABLE public.attack_event_classifications IN ROW SHARE MODE")
         ns.temp(d2)
         rollbackp=process(d2,ns.DOWN,h2,"H2_R03_B")
         observed(d2,lambda ls:any(x["app"]=="H2_R03_B" and not x["granted"] and x["relation"]=="attack_event_classifications" for x in ls))
