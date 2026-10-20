@@ -21,6 +21,7 @@ jobs:
           node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          node kyiv-air-alerts-grafana/tests/test_calendar_week.js
           grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
           test -s kyiv-air-alerts-grafana/pages-preview/brand-mark.svg
           test -s kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg
