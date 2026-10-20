@@ -69,6 +69,7 @@ for (const input of Object.values(context.inputs)) {
   input.removeAttribute = () => {};
 }
 context.document = { getElementById(id) { return context.inputs[id] || null; } };
+evaluate("syncDateRange = (_a, _b, values) => ({from: '2026-10-19', to: '2026-10-20', min:values[0], max:values[values.length - 1]})");
 assert.equal(evaluate("sharedRows(Object.keys(state.data.cities), 'calendarWeekly').length"), 1,
   "comparison must include partial week even when selected to-date is Tuesday");
 assert.equal(evaluate("sharedRows(Object.keys(state.data.cities), 'calendarWeekly')[0].rows.length"), 23);
