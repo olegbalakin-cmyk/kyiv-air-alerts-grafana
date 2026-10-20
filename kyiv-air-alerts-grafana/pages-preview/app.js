@@ -831,6 +831,7 @@ function derivedCalendarWeeks(city) {
     }
   }
 
+  // Calendar boundaries identify the week; partial_through identifies the last observed day.
   complete.push({
     time: `${sunday}T00:00:00`,
     week_start: monday,
