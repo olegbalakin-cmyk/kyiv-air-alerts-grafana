@@ -78,6 +78,7 @@ def sql(c, query, args=()):
 
 def privileges_and_persistence():
     db=restricted_database("privilege")
+    baseline.seed_parent(db)
     with baseline.connect(APP_DSN,db) as c:
         ident=sql(c,"SELECT session_user,current_user,current_role")[0]
         check("v3_actual_login_and_role",ident==(APP_ROLE,APP_ROLE,APP_ROLE),ident)
@@ -130,6 +131,7 @@ def privileges_and_persistence():
 
 def concurrency_full_side_effects():
     db=restricted_database("concurrency")
+    baseline.seed_parent(db)
     ep,ch=e2e.item()
     initial=e2e.snapshot(db,ep,ch)
     b=threading.Barrier(2)
@@ -153,6 +155,7 @@ def concurrency_full_side_effects():
 
 def caller_owned_outer_commit():
     db=restricted_database("external_commit")
+    baseline.seed_parent(db)
     ep,ch=e2e.item()
     auth=e2e.snapshot(db,ep,ch)
     c=baseline.connect(APP_DSN,db,autocommit=False)
