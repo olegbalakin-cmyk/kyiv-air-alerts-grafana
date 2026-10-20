@@ -70,6 +70,8 @@ def verify(m,blobs):
                 assert len(raw)==x["uncompressed_bytes"]
                 assert info.CRC==x["crc32"]
                 assert sha(raw)==want_sha==x["sha256"]
+                assert x["verdict"]==want_verdict
+                assert x["passed"]==want_count and x["total"]==want_count
                 if "preflight" in fname:
                     assert len(data["cases"])==20
                     assert all(y["status"]=="PASS" for y in data["cases"])
