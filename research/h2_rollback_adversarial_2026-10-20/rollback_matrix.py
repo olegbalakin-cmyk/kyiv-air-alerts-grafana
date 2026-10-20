@@ -106,9 +106,10 @@ def run():
         d=new("r08",stage="base")
         ns.temp(d)
         try:
+            query(d,"REVOKE CREATE ON SCHEMA public FROM h2_head_guard_test")
             before=fingerprint(d)
             step("R","R08","missing_schema_create",d,"007","42501",ns.run(d,ns.UP,role="h2_migrator_test",ok=False),before,fingerprint(d))
-            # ns.temp added CREATE, so remove while retaining guard membership.
+            requires(before==fingerprint(d),"transfer altered state despite missing CREATE")
         finally:ns.untemp(d)
     record("R","R08",r08)
     def r09():
