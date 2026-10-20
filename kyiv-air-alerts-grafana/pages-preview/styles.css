@@ -126,3 +126,12 @@ body.embed-mode .embed-brand-link:hover strong{color:#8bc8ff}
 body.embed-mode .embed-footer{flex-wrap:wrap;gap:10px}
 body.embed-mode .embed-brand-link{flex:1 1 180px;min-width:0}
 body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+/* Touch-friendly native calendar picker alongside editable date fields. */
+.date-entry-wrap{position:relative;width:100%}
+.date-entry-wrap>.date-entry{padding-right:47px}
+.date-picker-access{position:absolute;top:2px;bottom:2px;right:2px;width:40px;display:flex;align-items:center;justify-content:center;color:#b7c9d8;border-left:1px solid #33404c;border-radius:0 6px 6px 0}
+.date-picker-access svg{width:20px;height:20px;pointer-events:none}
+.date-picker-native{position:absolute;inset:0;width:100%;height:100%;opacity:.01;cursor:pointer;z-index:1;border:0;margin:0;padding:0}
+.date-picker-access:focus-within{outline:2px solid #8dbfff;outline-offset:1px}
+@media (min-width:701px){.date-control{min-width:183px;width:183px;flex:0 0 183px}}

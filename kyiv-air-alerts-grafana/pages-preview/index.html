@@ -30,7 +30,7 @@
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261019-logo12-1">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261019-logo12-1">
-  <link rel="stylesheet" href="styles.css?v=20261019-logo12-1">
+  <link rel="stylesheet" href="styles.css?v=20261021-date-time-prod1">
 </head>
 <body>
   <header class="page-header">
@@ -74,11 +74,23 @@
       </div>
       <div class="control date-control">
         <label for="cityDateFrom">Від</label>
-        <input id="cityDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+        <div class="date-entry-wrap">
+          <input id="cityDateFrom" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <span class="date-picker-access">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+            <input type="date" class="date-picker-native" data-date-for="cityDateFrom" aria-label="Обрати початкову дату" autocomplete="off">
+          </span>
+        </div>
       </div>
       <div class="control date-control">
         <label for="cityDateTo">До</label>
-        <input id="cityDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+        <div class="date-entry-wrap">
+          <input id="cityDateTo" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <span class="date-picker-access">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+            <input type="date" class="date-picker-native" data-date-for="cityDateTo" aria-label="Обрати кінцеву дату" autocomplete="off">
+          </span>
+        </div>
       </div>
     </section>
 
@@ -303,11 +315,23 @@
         </div>
         <div class="control date-control">
           <label for="compareDateFrom">Від</label>
-          <input id="compareDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <div class="date-entry-wrap">
+          <input id="compareDateFrom" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <span class="date-picker-access">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+            <input type="date" class="date-picker-native" data-date-for="compareDateFrom" aria-label="Обрати початкову дату" autocomplete="off">
+          </span>
+        </div>
         </div>
         <div class="control date-control">
           <label for="compareDateTo">До</label>
-          <input id="compareDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <div class="date-entry-wrap">
+          <input id="compareDateTo" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <span class="date-picker-access">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+            <input type="date" class="date-picker-native" data-date-for="compareDateTo" aria-label="Обрати кінцеву дату" autocomplete="off">
+          </span>
+        </div>
         </div>
       </div>
 
@@ -419,11 +443,23 @@
           </div>
           <div class="control date-control">
             <label for="tableDateFrom">Від</label>
-            <input id="tableDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+            <div class="date-entry-wrap">
+          <input id="tableDateFrom" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <span class="date-picker-access">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+            <input type="date" class="date-picker-native" data-date-for="tableDateFrom" aria-label="Обрати початкову дату" autocomplete="off">
+          </span>
+        </div>
           </div>
           <div class="control date-control">
             <label for="tableDateTo">До</label>
-            <input id="tableDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+            <div class="date-entry-wrap">
+          <input id="tableDateTo" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          <span class="date-picker-access">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+            <input type="date" class="date-picker-native" data-date-for="tableDateTo" aria-label="Обрати кінцеву дату" autocomplete="off">
+          </span>
+        </div>
           </div>
         </div>
       </div>
@@ -554,6 +590,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="chart-share.js?v=20261019-share2-1"></script>
-  <script src="app.js?v=20261019-embed-1"></script>
+  <script src="app.js?v=20261021-date-time-prod1"></script>
 </body>
 </html>

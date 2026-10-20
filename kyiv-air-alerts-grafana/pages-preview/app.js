@@ -143,6 +143,10 @@ function applyStaticLanguage(){
  setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  for(const id of ["cityDateFrom","rolling7dDateFrom","shortDateFrom","compareDateFrom","tableDateFrom"])setLocalizedText(`label[for="${id}"]`,"Від","From");
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
+ for(const picker of document.querySelectorAll(".date-picker-native")) {
+   const isTo=picker.dataset.dateFor.endsWith("To");
+   picker.setAttribute("aria-label",isTo?tr("Обрати кінцеву дату","Choose end date"):tr("Обрати початкову дату","Choose start date"));
+ }
  setKpiLabel("kpiAlerts","Тривог за останні 28 завершених днів","Alerts in the last 28 completed days");setKpiLabel("kpiHours","Годин під тривогою за останні 28 завершених днів","Hours under alert in the last 28 completed days");setKpiLabel("kpiDuration","Середня тривалість тривог, що почалися за останні 28 завершених днів","Average duration of alerts that started in the last 28 completed days");setKpiLabel("kpiMaxDay","Найбільше тривог за день у цьому 28-денному вікні","Most alerts in one day within this 28-day window");setKpiLabel("kpiExplosionsPct","Тривог, під час яких повідомлялось про вибухи","Alerts with reported explosions");
  setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
  setSectionHeading("timeOfDaySection","Час доби","Time of day","Як тривоги розподіляються протягом доби","How alerts are distributed through the day","Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.","Two complementary views: a detailed normalized profile and the actual distribution of all alert time across parts of the day.");setSectionHeading("alertBurdenSection","Структура навантаження","Burden structure","Тривалість і навантаження","Duration and burden","Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.","How days were distributed by time under alert and how the longest episodes changed.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText('label[for="timeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#timeOfDayBin","aria-label","Інтервал добового профілю","Time-of-day profile interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("timeOfDayBin",v,u,e);setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");setLocalizedText('label[for="burdenYear"]',"Період","Period");setLocalizedAttr("#burdenYear","aria-label","Період графіків структури навантаження","Period for burden charts");setLocalizedText('label[for="daypartMode"]',"Розподіл","Grouping");setLocalizedAttr("#daypartMode","aria-label","Спосіб розподілу часу під тривогою","Alert time grouping");setOptionText("daypartMode","four","4 частини доби","Four time bands");setOptionText("daypartMode","daynight","День / вечір і ніч","Day / evening & night");setLocalizedText('label[for="daypartYear"]',"Рік","Year");setLocalizedText("#heavyDaysExcludeZeroLabel","Не враховувати дні без тривог","Exclude days without alerts");setCardCopy("heavyDaysChart","Розподіл днів за часом під тривогою","Distribution of days by time under alert","100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.","Each month is normalized to 100% and split by days with no alert, under 1 hour, 1–3, 3–6, 6–12, and 12+ hours under alert.");setCardCopy("extremesChart","Найдовша тривога і найдовша тиша","Longest alert and longest quiet spell","Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.","Left axis: the longest alert that started in the month. Right axis: the longest continuous alert-free spell within the month.");setCardCopy("daypartChart","Розподіл часу під тривогою за частинами доби","Distribution of alert time by part of day","100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.","100% of actual alert time in each month is split into 00–06, 06–12, 12–18 and 18–24 in Europe/Kyiv time.");setLocalizedText("#timeOfDaySection .daypart-note","На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.","Unlike the profile above, this shows the share of all actual alert time that fell in each part of the day.");
@@ -296,10 +300,12 @@ function chartOptions(yTitle, extra = {}) {
 
 function setChart(id, labels, datasets, yTitle, type = "line", extra = {}) {
   if (state.charts[id]) state.charts[id].destroy();
+  const { chartPlugins = [], ...chartOptionsExtra } = extra;
   state.charts[id] = new Chart($(id), {
     type,
     data: { labels, datasets },
-    options: chartOptions(yTitle, extra)
+    plugins: chartPlugins,
+    options: chartOptions(yTitle, chartOptionsExtra)
   });
 }
 
@@ -619,11 +625,29 @@ function isPartialPeriod(row) {
   return Boolean(row?.is_partial_period);
 }
 
+// Show a source-observed clock only for valid timezone-aware ISO timestamps.
+// Legacy date-only markers remain dates; never invent midnight or viewer time.
+function partialThroughKyivClock(through, sourceDay) {
+  if (through === sourceDay || !validPartialThrough(through, sourceDay)) return "";
+  const instant = new Date(through);
+  const dateParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Kyiv", year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(instant);
+  const part = type => dateParts.find(item => item.type === type)?.value;
+  // Do not attach a different Kyiv calendar day's clock to this daily point.
+  if (`${part("year")}-${part("month")}-${part("day")}` !== sourceDay) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Kyiv", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).format(instant);
+}
+
 function partialPeriodFooter(row) {
   if (!isPartialPeriod(row)) return "";
   const through = String(row.partial_through || "");
-  if (/^\d{4}-\d{2}-\d{2}$/.test(through)) {
-    const asOf = shortDateLabel(through);
+  const date = through.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      (through === date || validPartialThrough(through, date))) {
+    const asOf = partialThroughKyivClock(through, date) || shortDateLabel(date);
     return tr("Дані станом на " + asOf, "Data as of " + asOf);
   }
   return tr("Поточний неповний період", "Current incomplete period");
@@ -703,24 +727,52 @@ function seriesDataset(label, values, color, dashed = false, rows = null) {
 }
 
 
-function mergeCurrentDayDaily28(cities, envelope) {
-  const meta=envelope?.meta, overlay=envelope?.cities;
-  if (!cities || !meta || !overlay || meta.timezone!=="Europe/Kyiv" ||
-      meta.current_day_is_partial!==true || meta.kpi_period_unchanged!==true) return false;
-  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-  if (meta.current_day!==today) return false;
-  const keys=Object.keys(cities);
-  if (keys.length!==23 || Object.keys(overlay).length!==23 || keys.some(key=>!overlay[key])) return false;
-  const corrected={};
+function kyivCalendarToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Kyiv", year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(now);
+}
+
+// Keep the newest observed *partial* day visible across midnight until a
+// complete day supersedes it. Never invent missing days or promote it to final.
+// Accept both a date-only marker and the producer's timezone-offset ISO timestamp.
+// Retain original precision for provenance; never interpret a mismatching date as today.
+function validPartialThrough(value, sourceDay) {
+  if (typeof value !== "string") return false;
+  if (value === sourceDay) return true;
+  if (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(value)) return false;
+  return value.slice(0, 10) === sourceDay && Number.isFinite(Date.parse(value));
+}
+
+function mergeCurrentDayDaily28(cities, envelope, todayKyiv = kyivCalendarToday()) {
+  const meta = envelope?.meta, overlay = envelope?.cities;
+  if (!cities || !meta || !overlay || meta.timezone !== "Europe/Kyiv" ||
+      meta.current_day_is_partial !== true || meta.kpi_period_unchanged !== true) return false;
+  const sourceDay = String(meta.current_day || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sourceDay) || addIsoDays(sourceDay, 0) !== sourceDay ||
+      sourceDay > todayKyiv) return false;
+
+  const keys = Object.keys(cities);
+  if (keys.length !== 23 || Object.keys(overlay).length !== 23 ||
+      keys.some(key => !Object.prototype.hasOwnProperty.call(overlay, key))) return false;
+  const expectedCompleteDay = addIsoDays(sourceDay, -1);
+  const corrected = {};
   for (const key of keys) {
-    const row=overlay[key], base=cities[key]?.daily28 || [];
-    const past=base.filter(r=>r.date<today).slice(-27);
-    if (past.length!==27 || !row || row.date!==today || row.is_partial_period!==true ||
-        !row.partial_through || !Number.isFinite(Number(row.total_alert_duration_hours)) ||
-        Number(row.total_alert_duration_hours)<0) return false;
-    corrected[key]=[...past,row];
+    const row = overlay[key], base = cities[key]?.daily28;
+    if (!Array.isArray(base) || base[base.length - 1]?.date !== expectedCompleteDay ||
+        !row || row.date !== sourceDay || row.is_partial_period !== true ||
+        !validPartialThrough(row.partial_through, sourceDay) ||
+        !Number.isFinite(Number(row.total_alert_duration_hours)) ||
+        Number(row.total_alert_duration_hours) < 0) return false;
+
+    // Last 27 completed days plus the observed partial day: exactly 28 dates.
+    const past = base.filter(item => item.date < sourceDay).slice(-27);
+    if (past.length !== 27 ||
+        past.some((item, i) => item.date !== addIsoDays(sourceDay, i - 27))) return false;
+    corrected[key] = [...past, row];
   }
-  for (const key of keys) cities[key].daily28=corrected[key];
+  // All 23 rows must validate before any city is mutated.
+  for (const key of keys) cities[key].daily28 = corrected[key];
   return true;
 }
 
@@ -841,7 +893,11 @@ function derivedCalendarWeeks(city) {
     avg_alert_duration_min: durationWeight ? durationWeighted / durationWeight : null,
     alerts_started: alertsStarted,
     is_partial_period: true,
-    partial_through: latest,
+    // Preserve the actual observation time when the latest day is partial.
+    // A week consisting only of completed days stays date-only.
+    partial_through: isPartialPeriod(latestRow) &&
+      validPartialThrough(latestRow.partial_through, latest)
+      ? latestRow.partial_through : latest,
     interval_mode: "calendar_week"
   });
   return complete;
@@ -945,9 +1001,14 @@ function validOptionalParam(name, values, fallback) {
   return values.includes(value) ? value : fallback;
 }
 
-function normalizeTypedDate(value) {
+function normalizeTypedDate(value, boundary = "from") {
   const raw = String(value || "").trim();
   if (!raw) return "";
+
+  // A year-only range endpoint means the start or end of that calendar year.
+  if (/^\d{4}$/.test(raw)) {
+    return normalizeTypedDate(`${raw}-${boundary === "to" ? "12-31" : "01-01"}`);
+  }
 
   let year, month, day;
   let match = /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/.exec(raw);
@@ -973,9 +1034,19 @@ function normalizeTypedDate(value) {
   return `${String(year).padStart(4,"0")}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
 }
 
+function syncNativeDatePicker(el) {
+  const picker = el?.parentElement?.querySelector(".date-picker-native");
+  if (!picker) return;
+  picker.value = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : "";
+  if (el.min) picker.min = el.min;
+  else picker.removeAttribute("min");
+  if (el.max) picker.max = el.max;
+  else picker.removeAttribute("max");
+}
+
 function normalizeDateInputElement(el) {
   if (!el) return true;
-  const normalized = normalizeTypedDate(el.value);
+  const normalized = normalizeTypedDate(el.value, el.id?.endsWith("To") ? "to" : "from");
   if (normalized === null) {
     el.classList.add("invalid");
     el.title = tr(
@@ -987,17 +1058,18 @@ function normalizeDateInputElement(el) {
   el.classList.remove("invalid");
   el.removeAttribute("title");
   el.value = normalized;
+  syncNativeDatePicker(el);
   return true;
 }
 
-function validDateParam(name) {
-  const normalized = normalizeTypedDate(getParams().get(name) || "");
+function validDateParam(name, boundary = "from") {
+  const normalized = normalizeTypedDate(getParams().get(name) || "", boundary);
   return normalized || "";
 }
 
 function setDateInputFromParam(id, name) {
   const el = $(id);
-  if (el) el.value = validDateParam(name);
+  if (el) el.value = validDateParam(name, id.endsWith("To") ? "to" : "from");
 }
 
 function monthEndDate(month) {
@@ -1035,6 +1107,7 @@ function syncDateRange(fromId, toId, values) {
       el.value = "";
       el.removeAttribute("min");
       el.removeAttribute("max");
+      syncNativeDatePicker(el);
     }
     return { from: "", to: "", min: "", max: "" };
   }
@@ -1049,6 +1122,8 @@ function syncDateRange(fromId, toId, values) {
   if (!fromEl.value || fromEl.value < min || fromEl.value > max) fromEl.value = min;
   if (!toEl.value || toEl.value < min || toEl.value > max) toEl.value = max;
   if (fromEl.value > toEl.value) toEl.value = fromEl.value;
+  syncNativeDatePicker(fromEl);
+  syncNativeDatePicker(toEl);
 
   return { from: fromEl.value, to: toEl.value, min, max };
 }
@@ -1064,6 +1139,8 @@ function normalizeDatePair(fromId, toId, changedId) {
   if (!fromEl || !toEl || !fromEl.value || !toEl.value || fromEl.value <= toEl.value) return;
   if (changedId === fromId) toEl.value = fromEl.value;
   else fromEl.value = toEl.value;
+  syncNativeDatePicker(fromEl);
+  syncNativeDatePicker(toEl);
 }
 
 function dateKeyInRange(value, from, to) {
@@ -1093,6 +1170,8 @@ function setDateRangeValues(fromId, toId, from, to) {
   if (from) fromEl.value = from < (fromEl.min || from) ? fromEl.min : (from > (fromEl.max || from) ? fromEl.max : from);
   if (to) toEl.value = to < (toEl.min || to) ? toEl.min : (to > (toEl.max || to) ? toEl.max : to);
   if (fromEl.value && toEl.value && fromEl.value > toEl.value) toEl.value = fromEl.value;
+  syncNativeDatePicker(fromEl);
+  syncNativeDatePicker(toEl);
 }
 
 function applyRolling7dQuickRange(key, presetValue = null) {
@@ -2340,11 +2419,18 @@ function renderShortHorizon(key) {
   const labels = rows.map(r => r.date || String(r.time || "").slice(0, 10));
   const range = $("daily28Range");
   if (range) {
+    const partial = rows.find(isPartialPeriod);
     range.textContent = labels.length
-      ? (rows.some(isPartialPeriod)
-      ? tr(`Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Сьогоднішній день неповний станом на оновлення.`,`Daily view ${labels[0]} — ${labels[labels.length-1]}. Today is partial as of the latest update.`)
-      : tr(`Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Лише завершені дні.`,`Daily view ${labels[0]} — ${labels[labels.length-1]}. Completed days only.`))
-      : tr(`Для ${labelFor(key)} немає доступного 28-денного ряду.`,`No 28-day series is available for ${labelFor(key)}.`);
+      ? partial
+        ? tr(
+            `Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Останній доступний день (${shortDateLabel(partial.date)}) неповний. ${partialPeriodFooter(partial)}.`,
+            `Daily view ${labels[0]} — ${labels[labels.length-1]}. The latest available day (${shortDateLabel(partial.date)}) is incomplete. ${partialPeriodFooter(partial)}.`
+          )
+        : tr(
+            `Щоденний розріз ${labels[0]} — ${labels[labels.length-1]}. Лише завершені дні.`,
+            `Daily view ${labels[0]} — ${labels[labels.length-1]}. Completed days only.`
+          )
+      : tr(`Для ${labelFor(key)} немає доступного 28-денного ряду.`, `No 28-day series is available for ${labelFor(key)}.`);
   }
 
   setChart(
@@ -2353,15 +2439,21 @@ function renderShortHorizon(key) {
     [{
       label: tr("Годин під тривогою","Hours under alert"),
       data: rows.map(r => r.total_alert_duration_hours),
-      backgroundColor: COLORS[0] + "88",
+      backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "88"),
       borderColor: COLORS[0],
-      borderWidth: 1
+      borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
+      _exportRows: rows
     }],
     "Годин",
     "bar",
     {
+      chartPlugins: [partialPeriodBarPlugin],
       layout: { padding: { right: 70 } },
-      plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } },
+        partialPeriodBar: { rows, datasetIndices: [0] }
+      },
       scales: {
         x: {
           offset: true,
@@ -2414,8 +2506,17 @@ function renderShortHorizon(key) {
     borderWidth: 1
   }];
 
+  // Both stacked and single alert bars use the same dashed partial-day styling.
+  for (const dataset of alertBarDatasets) {
+    const fullFill = dataset.backgroundColor;
+    dataset.backgroundColor = rows.map(r => isPartialPeriod(r) ? fullFill.slice(0, 7) + "22" : fullFill);
+    dataset.borderWidth = rows.map(r => isPartialPeriod(r) ? 0 : 1);
+    dataset._exportRows = rows;
+  }
+
   if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
   state.charts.daily28AlertsDurationChart = new Chart($("daily28AlertsDurationChart"), {
+    plugins: [partialPeriodBarPlugin],
     data: {
       labels,
       datasets: [
@@ -2427,10 +2528,12 @@ function renderShortHorizon(key) {
           yAxisID: "yDuration",
           borderColor: COLORS[2],
           backgroundColor: COLORS[2] + "22",
-          pointRadius: 0,
-          pointHoverRadius: 0,
+          pointRadius: rows.map(r => isPartialPeriod(r) ? 4 : 0),
+          pointHoverRadius: rows.map(r => isPartialPeriod(r) ? 5 : 0),
           borderWidth: 2,
           borderDash: sourceType(key) === "raion_proxy" ? [7, 5] : [],
+          segment: partialSegment(rows, COLORS[2]),
+          _exportRows: rows,
           tension: 0,
           spanGaps: false
         }
@@ -2443,7 +2546,8 @@ function renderShortHorizon(key) {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
-        tooltip: { mode: "index", intersect: false }
+        tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } },
+        partialPeriodBar: { rows, datasetIndices: alertBarDatasets.map((_dataset, index) => index) }
       },
       scales: {
         x: {
@@ -3239,6 +3343,16 @@ function bind() {
   bindRange("compareDateFrom", "compareDateTo", renderComparison);
   bindRange("tableDateFrom", "tableDateTo", renderAllCitiesTable, () => {
     if ($("allCitiesRange")) $("allCitiesRange").value = "custom";
+  });
+  // The transparent native input remains directly tappable on iOS, where
+  // programmatic showPicker() is not reliably available.
+  document.querySelectorAll(".date-picker-native").forEach(picker => {
+    picker.addEventListener("change", () => {
+      const input = $(picker.dataset.dateFor);
+      if (!input || !picker.value) return;
+      input.value = picker.value;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
   });
 
   setupTableSorting();

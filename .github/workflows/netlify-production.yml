@@ -41,6 +41,8 @@ jobs:
           node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          node kyiv-air-alerts-grafana/tests/test_calendar_week.js
+          node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
           for asset in brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
             test -s "kyiv-air-alerts-grafana/pages-preview/$asset"
           done
