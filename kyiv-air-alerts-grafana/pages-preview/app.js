@@ -717,6 +717,15 @@ function kyivCalendarToday(now = new Date()) {
 
 // Keep the newest observed *partial* day visible across midnight until a
 // complete day supersedes it. Never invent missing days or promote it to final.
+// Accept both a date-only marker and the producer's timezone-offset ISO timestamp.
+// Retain original precision for provenance; never interpret a mismatching date as today.
+function validPartialThrough(value, sourceDay) {
+  if (typeof value !== "string") return false;
+  if (value === sourceDay) return true;
+  if (!/^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)$/.test(value)) return false;
+  return value.slice(0, 10) === sourceDay && Number.isFinite(Date.parse(value));
+}
+
 function mergeCurrentDayDaily28(cities, envelope, todayKyiv = kyivCalendarToday()) {
   const meta = envelope?.meta, overlay = envelope?.cities;
   if (!cities || !meta || !overlay || meta.timezone !== "Europe/Kyiv" ||
@@ -734,7 +743,7 @@ function mergeCurrentDayDaily28(cities, envelope, todayKyiv = kyivCalendarToday(
     const row = overlay[key], base = cities[key]?.daily28;
     if (!Array.isArray(base) || base[base.length - 1]?.date !== expectedCompleteDay ||
         !row || row.date !== sourceDay || row.is_partial_period !== true ||
-        row.partial_through !== sourceDay ||
+        !validPartialThrough(row.partial_through, sourceDay) ||
         !Number.isFinite(Number(row.total_alert_duration_hours)) ||
         Number(row.total_alert_duration_hours) < 0) return false;
 
