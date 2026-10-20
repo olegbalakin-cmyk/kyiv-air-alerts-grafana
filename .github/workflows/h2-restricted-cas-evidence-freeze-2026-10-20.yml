@@ -1,0 +1,32 @@
+name: H2 research original restricted A-B evidence archive
+on:
+  push:
+    branches: [research-h2-restricted-cas-rollback-pg18-2026-10-20]
+    paths:
+      - '.github/workflows/h2-restricted-cas-evidence-freeze-2026-10-20.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-h2-restricted-cas-rollback-pg18-2026-10-20
+          persist-credentials: true
+      - name: Archive only original A/B reports and ZIPs from tested Actions run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python research/h2_pg18_full_offline_2026-10-20/freeze_restricted_ab.py
+          python research/h2_pg18_full_offline_2026-10-20/verify_restricted_originals.py
+      - name: Preserve on isolated research branch only
+        run: |
+          git config user.name "h2-proof-bot"
+          git config user.email "h2-proof-bot@users.noreply.github.com"
+          git add research/h2_pg18_full_offline_2026-10-20/new_original_artifacts/
+          git diff --cached --quiet && exit 1
+          git commit -m "research H2: freeze original PG18 restricted CAS and rollback A/B evidence"
+          git push origin HEAD:research-h2-restricted-cas-rollback-pg18-2026-10-20
