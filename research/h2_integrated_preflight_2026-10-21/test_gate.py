@@ -126,6 +126,57 @@ def main():
         finally:q("postgres","REVOKE "+cleanup+" FROM h2_app_ingest_writer_test")
     case("history_update_grant",mutator=unsafe_history,expected="42501")
     case("schema_create_grant",mutator=unsafe_schema,expected="42501")
+    # Integrated migration session and restricted writer session contend on
+    # actual relation locks, not merely a stand-in lock statement.
+    from concurrent.futures import ThreadPoolExecutor
+    def migration_lock_observed(db,seconds=7):
+        deadline=time.monotonic()+seconds
+        while time.monotonic()<deadline:
+            rows=q(db,"""SELECT count(*) FROM pg_locks l
+                      JOIN pg_stat_activity a ON a.pid=l.pid
+                      WHERE a.application_name=%s
+                        AND l.relation='public.attack_event_classifications'::regclass
+                        AND l.mode='ShareRowExclusiveLock' AND l.granted""",
+                   ("H2_INTEGRATED_MIGRATION_"+COPY,))
+            if rows[0][0]:return True
+            time.sleep(.035)
+        return False
+    db=new("migrationfirst")
+    initial=truth(db)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        migrating=pool.submit(exec_gate,db,"3s",2)
+        seen=migration_lock_observed(db)
+        with conn(db,"h2_app_ingest_writer_test","synthetic_only_local_role",autocommit=True) as writer:
+            writer.execute("SET lock_timeout='350ms'")
+            try:put(db,"race_denied_"+db,session=writer);writer_state="00000"
+            except psycopg.Error as e:writer_state=e.sqlstate
+        migration_result=migrating.result(timeout=12)
+    consistent=(seen and writer_state=="55P03" and migration_result[0]=="00000"
+       and truth(db)==initial)
+    REPORT["cases"].append({"case":"migration_first_vs_restricted_writer",
+       "expected":"migration 00000, writer 55P03",
+       "sqlstate":[migration_result[0],writer_state],"lock_observed":seen,
+       "status":"PASS" if consistent else "FAIL"})
+    if not consistent:raise AssertionError("migration_first_vs_restricted_writer")
+    # Writer owns ROW EXCLUSIVE lock and commits a real valid revision.
+    # Migration cannot inspect an out-of-date snapshot while waiting:
+    # its subsequent H11 check must see the newly committed history.
+    db=new("writerfirst")
+    with conn(db,"h2_app_ingest_writer_test","synthetic_only_local_role",autocommit=False) as writer:
+        inserted=put(db,"writer_first_"+db,session=writer)
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            migrating=pool.submit(exec_gate,db,"10s",0)
+            time.sleep(.4)
+            pending=not migrating.done()
+            writer.commit()
+            migration_result=migrating.result(timeout=12)
+    readback=q(db,"SELECT tip_classification_uid::text FROM public.h2_classification_heads")[0][0]
+    good=pending and migration_result[0]=="00000" and readback==inserted and truth(db)["history_count"]==1
+    REPORT["cases"].append({"case":"writer_first_commits_before_migration",
+       "expected":"00000","sqlstate":migration_result[0],
+       "writer_visible_after_commit":readback==inserted,"pending_behind_writer":pending,
+       "status":"PASS" if good else "FAIL"})
+    if not good:raise AssertionError("writer_first_commits_before_migration")
     # Real concurrent restricted writer blocked while gate lock held.
     db=new("concurrent")
     before=truth(db)
