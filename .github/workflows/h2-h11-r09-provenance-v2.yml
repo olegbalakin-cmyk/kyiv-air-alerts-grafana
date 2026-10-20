@@ -1,0 +1,21 @@
+name: H2 H11 R09 ACL provenance corrected Git-only
+on:
+  push:
+    branches: [research-h2-h11-r09-acl-provenance-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-h11-r09-provenance-v2.yml'
+      - 'research/h2_security_closure_2026-10-20/provenance_v2/**'
+      - 'research/h2_security_closure_2026-10-20/verify_provenance_v2.py'
+permissions:
+  contents: read
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify immutable original attribution and true negative controls
+        run: python research/h2_security_closure_2026-10-20/verify_provenance_v2.py

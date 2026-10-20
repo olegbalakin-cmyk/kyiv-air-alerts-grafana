@@ -1,0 +1,508 @@
+{
+  "copies": {
+    "A": {
+      "artifact_id": 12276507122,
+      "gate_results": {
+        "H2_ACL_RAW_CATALOG_EQUIVALENCE": "PARTIAL",
+        "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED",
+        "H2_FULL_SCHEMA_ACL_OWNERSHIP_ROLLBACK": "PARTIAL",
+        "H2_MIGRATION_INVALID_HISTORY_MATRIX": "PARTIAL",
+        "H2_READONLY_NEON_PREFLIGHT_READINESS": "BLOCKED",
+        "H2_ROLLBACK_CONCURRENT_WRITER_SERIALIZATION": "PASS",
+        "H2_SECURITY_DEFINER_ADVERSARIAL_CLOSURE": "PASS"
+      },
+      "job": 118710199384,
+      "json_bytes": 145320,
+      "json_member": "h2_adversarial_A.json",
+      "json_sha256": "f14387800f9f119e9c7643bd96ba3705917b92edc4503b586f337682b4aa5dfa",
+      "original_b64_filename": "A.original.zip.b64",
+      "race_timelines": [
+        {
+          "interleaving": "writer-first",
+          "lock_evidence": [
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 273,
+              "relation": "",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 273,
+              "relation": "",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowExclusiveLock",
+              "pid": 273,
+              "relation": "attack_event_classifications",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowExclusiveLock",
+              "pid": 273,
+              "relation": "h2_classification_heads",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowShareLock",
+              "pid": 273,
+              "relation": "attack_event_classifications",
+              "wait": "Client"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": false,
+              "mode": "AccessExclusiveLock",
+              "pid": 277,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "AccessShareLock",
+              "pid": 277,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 277,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 277,
+              "relation": "",
+              "wait": "Lock"
+            }
+          ],
+          "rollback_result": {
+            "returncode": 3,
+            "sqlstate": "23514",
+            "stderr": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql:46: ERROR:  23514: H2_ROLLBACK_RACING_WRITE\nCONTEXT:  PL/pgSQL function inline_code_block line 7 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+            "stdout": "BEGIN\nSET\n            set_config            \n----------------------------------\n d41d8cd98f00b204e9800998ecf8427e\n(1 row)\n\n set_config \n------------\n none\n(1 row)\n\nDO\nLOCK TABLE\nLOCK TABLE\n"
+          },
+          "writer_committed": true
+        },
+        {
+          "interleaving": "rollback-first",
+          "lock_evidence": [
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 309,
+              "relation": "",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowShareLock",
+              "pid": 309,
+              "relation": "attack_event_classifications",
+              "wait": "Client"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": false,
+              "mode": "AccessExclusiveLock",
+              "pid": 313,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "AccessShareLock",
+              "pid": 313,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 313,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 313,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_WRITER2",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 315,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_WRITER2",
+              "granted": false,
+              "mode": "RowExclusiveLock",
+              "pid": 315,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            }
+          ],
+          "post_truth": {
+            "head_rows": null,
+            "history_count": 0,
+            "history_md5": "d41d8cd98f00b204e9800998ecf8427e"
+          },
+          "rollback": {
+            "returncode": 0,
+            "sqlstate": "00000",
+            "stderr": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql:68: WARNING:  01006: no privileges could be revoked for \"public\"\nLOCATION:  restrict_and_check_grant, aclchk.c:365\npsql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql:69: WARNING:  01006: no privileges could be revoked for \"public\"\nLOCATION:  restrict_and_check_grant, aclchk.c:365\n",
+            "stdout": "BEGIN\nSET\n            set_config            \n----------------------------------\n d41d8cd98f00b204e9800998ecf8427e\n(1 row)\n\n set_config \n------------\n none\n(1 row)\n\nDO\nLOCK TABLE\nLOCK TABLE\nDO\nALTER FUNCTION\nDO\nDROP TRIGGER\nDROP FUNCTION\nDROP TABLE\nDROP INDEX\nDROP INDEX\nREVOKE\nREVOKE\nREVOKE\nREVOKE\nREVOKE\nREVOKE\nCOMMIT\n"
+          },
+          "writer": {
+            "sqlstate": "42501"
+          }
+        }
+      ],
+      "size_zip": 12337,
+      "totals": {
+        "C": {
+          "executed": 8,
+          "failed": 0,
+          "partial": 0,
+          "passed": 8
+        },
+        "D": {
+          "executed": 4,
+          "failed": 0,
+          "partial": 4,
+          "passed": 0
+        },
+        "H": {
+          "executed": 12,
+          "failed": 0,
+          "partial": 1,
+          "passed": 11
+        },
+        "R": {
+          "executed": 16,
+          "failed": 0,
+          "partial": 1,
+          "passed": 15
+        }
+      },
+      "verdict": "PARTIAL",
+      "zip_sha256": "c46a42ef4b579aad9235b4d5080d24abfa387d9de9746312640ca058d68d0203",
+      "job_name": "pg18 (A)",
+      "h2_copy": "A",
+      "artifact_name": "h2-adversarial-A",
+      "uploaded_artifact_id": 12276507122,
+      "job_log_excerpt_git_blob": "3e31361967c956390d7cc4fe5e9160eb42dd2bb3",
+      "job_log_excerpt_path": "research/h2_security_closure_2026-10-20/provenance_v2/A.job_log_excerpt.txt",
+      "zip_base64_git_blob": "272e832416cb172c7ad69353485b0cf18d03a879",
+      "original_zip_git_path": "research/h2_rollback_adversarial_2026-10-20/frozen_2026-10-20/A.original.zip.b64"
+    },
+    "B": {
+      "artifact_id": 12275672717,
+      "gate_results": {
+        "H2_ACL_RAW_CATALOG_EQUIVALENCE": "PARTIAL",
+        "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED",
+        "H2_FULL_SCHEMA_ACL_OWNERSHIP_ROLLBACK": "PARTIAL",
+        "H2_MIGRATION_INVALID_HISTORY_MATRIX": "PARTIAL",
+        "H2_READONLY_NEON_PREFLIGHT_READINESS": "BLOCKED",
+        "H2_ROLLBACK_CONCURRENT_WRITER_SERIALIZATION": "PASS",
+        "H2_SECURITY_DEFINER_ADVERSARIAL_CLOSURE": "PASS"
+      },
+      "job": 118710199075,
+      "json_bytes": 145320,
+      "json_member": "h2_adversarial_B.json",
+      "json_sha256": "599de47a12b049ccab7eaa871ce08036db163961bac9af4ae3225f5b6908310d",
+      "original_b64_filename": "B.original.zip.b64",
+      "race_timelines": [
+        {
+          "interleaving": "writer-first",
+          "lock_evidence": [
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 256,
+              "relation": "",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 256,
+              "relation": "",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowExclusiveLock",
+              "pid": 256,
+              "relation": "h2_classification_heads",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowExclusiveLock",
+              "pid": 256,
+              "relation": "attack_event_classifications",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowShareLock",
+              "pid": 256,
+              "relation": "attack_event_classifications",
+              "wait": "Client"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": false,
+              "mode": "AccessExclusiveLock",
+              "pid": 260,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "AccessShareLock",
+              "pid": 260,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 260,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 260,
+              "relation": "",
+              "wait": "Lock"
+            }
+          ],
+          "rollback_result": {
+            "returncode": 3,
+            "sqlstate": "23514",
+            "stderr": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql:46: ERROR:  23514: H2_ROLLBACK_RACING_WRITE\nCONTEXT:  PL/pgSQL function inline_code_block line 7 at RAISE\nLOCATION:  exec_stmt_raise, pl_exec.c:3909\n",
+            "stdout": "BEGIN\nSET\n            set_config            \n----------------------------------\n d41d8cd98f00b204e9800998ecf8427e\n(1 row)\n\n set_config \n------------\n none\n(1 row)\n\nDO\nLOCK TABLE\nLOCK TABLE\n"
+          },
+          "writer_committed": true
+        },
+        {
+          "interleaving": "rollback-first",
+          "lock_evidence": [
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 292,
+              "relation": "",
+              "wait": "Client"
+            },
+            {
+              "activity": "idle in transaction",
+              "app": "H2_R03_A",
+              "granted": true,
+              "mode": "RowShareLock",
+              "pid": 292,
+              "relation": "attack_event_classifications",
+              "wait": "Client"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": false,
+              "mode": "AccessExclusiveLock",
+              "pid": 296,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "AccessShareLock",
+              "pid": 296,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 296,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_B",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 296,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_WRITER2",
+              "granted": true,
+              "mode": "ExclusiveLock",
+              "pid": 298,
+              "relation": "",
+              "wait": "Lock"
+            },
+            {
+              "activity": "active",
+              "app": "H2_R03_WRITER2",
+              "granted": false,
+              "mode": "RowExclusiveLock",
+              "pid": 298,
+              "relation": "attack_event_classifications",
+              "wait": "Lock"
+            }
+          ],
+          "post_truth": {
+            "head_rows": null,
+            "history_count": 0,
+            "history_md5": "d41d8cd98f00b204e9800998ecf8427e"
+          },
+          "rollback": {
+            "returncode": 0,
+            "sqlstate": "00000",
+            "stderr": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql:68: WARNING:  01006: no privileges could be revoked for \"public\"\nLOCATION:  restrict_and_check_grant, aclchk.c:365\npsql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql:69: WARNING:  01006: no privileges could be revoked for \"public\"\nLOCATION:  restrict_and_check_grant, aclchk.c:365\n",
+            "stdout": "BEGIN\nSET\n            set_config            \n----------------------------------\n d41d8cd98f00b204e9800998ecf8427e\n(1 row)\n\n set_config \n------------\n none\n(1 row)\n\nDO\nLOCK TABLE\nLOCK TABLE\nDO\nALTER FUNCTION\nDO\nDROP TRIGGER\nDROP FUNCTION\nDROP TABLE\nDROP INDEX\nDROP INDEX\nREVOKE\nREVOKE\nREVOKE\nREVOKE\nREVOKE\nREVOKE\nCOMMIT\n"
+          },
+          "writer": {
+            "sqlstate": "42501"
+          }
+        }
+      ],
+      "size_zip": 12353,
+      "totals": {
+        "C": {
+          "executed": 8,
+          "failed": 0,
+          "partial": 0,
+          "passed": 8
+        },
+        "D": {
+          "executed": 4,
+          "failed": 0,
+          "partial": 4,
+          "passed": 0
+        },
+        "H": {
+          "executed": 12,
+          "failed": 0,
+          "partial": 1,
+          "passed": 11
+        },
+        "R": {
+          "executed": 16,
+          "failed": 0,
+          "partial": 1,
+          "passed": 15
+        }
+      },
+      "verdict": "PARTIAL",
+      "zip_sha256": "865e577087eea0835a66520b70d21c8762eb2fc41add54a1608ff5401a5d4b60",
+      "job_name": "pg18 (B)",
+      "h2_copy": "B",
+      "artifact_name": "h2-adversarial-B",
+      "uploaded_artifact_id": 12275672717,
+      "job_log_excerpt_git_blob": "ca91fce136537500d188549165b46057f6d8a055",
+      "job_log_excerpt_path": "research/h2_security_closure_2026-10-20/provenance_v2/B.job_log_excerpt.txt",
+      "zip_base64_git_blob": "2bd4032bd606b0004b149d4647e123251e4b1f90",
+      "original_zip_git_path": "research/h2_rollback_adversarial_2026-10-20/frozen_2026-10-20/B.original.zip.b64"
+    }
+  },
+  "limitations": [
+    "Git-only integrity is not executable SQL proof",
+    "physical relation ACL residual not accepted",
+    "H11 already-migrated registry contract remains PARTIAL",
+    "R09 inherited privileges require external role hygiene"
+  ],
+  "original_files": [],
+  "reported_verdict": "PARTIAL",
+  "run_id": 39446642675,
+  "scope": "SYNTHETIC_POSTGRES_ONLY",
+  "tested_commit": "142bd18757a432fee57f5c3536e2a40a3ccdb072",
+  "tested_executables": {
+    "research/h2_rollback_adversarial_2026-10-20/acl_residual.py": "ce0fe21e33d236008e9cacc3e1df4ac2f9e00c17",
+    "research/h2_rollback_adversarial_2026-10-20/harness.py": "c6dec433164eedeeb49c35b22f391e0d8e0abefc",
+    "research/h2_rollback_adversarial_2026-10-20/history_matrix.py": "364c0476b667384cb86371b9f142b3e5ea8a1f95",
+    "research/h2_rollback_adversarial_2026-10-20/rollback_matrix.py": "6674515c48854ea04497455b1b82b142359d035f",
+    "research/h2_rollback_adversarial_2026-10-20/run_all.py": "5e6333a37bf033754681002fc7cc8e8d007e8d9c",
+    "research/h2_rollback_adversarial_2026-10-20/security_matrix.py": "c6792551cfef36a5dcfc4ab7072345351fd8c1dd"
+  },
+  "version": "h2-adversarial-original-ab-provenance-correction-v2",
+  "original_manifest_git_blob": "3755d2b81558631fe0869575ea29b472ed02eaf2",
+  "original_manifest_path": "research/h2_rollback_adversarial_2026-10-20/frozen_2026-10-20/manifest.json",
+  "correction": "ONLY original A/B job IDs were reversed in manifest v1; immutable ZIPs, JSON, original verdict PARTIAL and source attestations retained",
+  "verification_scope": "Offline Git-only pinned GitHub Actions job log excerpts, original artifact metadata, immutable ZIP and JSON, not new SQL"
+}

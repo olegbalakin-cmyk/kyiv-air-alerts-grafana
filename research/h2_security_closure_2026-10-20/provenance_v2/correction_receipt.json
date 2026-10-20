@@ -1,0 +1,35 @@
+{
+  "schema": "h2-AB-correction-receipt-v2",
+  "date": "2026-10-20",
+  "source_run": 39446642675,
+  "original_tested_commit": "142bd18757a432fee57f5c3536e2a40a3ccdb072",
+  "original_verdict": "PARTIAL",
+  "original_manifest_git_blob": "3755d2b81558631fe0869575ea29b472ed02eaf2",
+  "defect": {
+    "A_originally_recorded": 118710199075,
+    "A_actual": 118710199384,
+    "B_originally_recorded": 118710199384,
+    "B_actual": 118710199075,
+    "description": "Old archival manifest v1 swapped numeric job IDs. Old wrong_job corruption instead changed json_sha256, so it did not challenge job attribution."
+  },
+  "evidence": {
+    "A": {
+      "job": 118710199384,
+      "job_name": "pg18 (A)",
+      "h2_copy": "A",
+      "artifact": 12276507122,
+      "zip_sha256": "c46a42ef4b579aad9235b4d5080d24abfa387d9de9746312640ca058d68d0203",
+      "original_job_log_excerpt_blob": "3e31361967c956390d7cc4fe5e9160eb42dd2bb3"
+    },
+    "B": {
+      "job": 118710199075,
+      "job_name": "pg18 (B)",
+      "h2_copy": "B",
+      "artifact": 12275672717,
+      "zip_sha256": "865e577087eea0835a66520b70d21c8762eb2fc41add54a1608ff5401a5d4b60",
+      "original_job_log_excerpt_blob": "ca91fce136537500d188549165b46057f6d8a055"
+    }
+  },
+  "controls": "Verifier uses independently pinned job, artifact, original log excerpt Git blob, original manifest blob, original ZIP blobs and original JSON digests; deliberate true wrong-job + swap negatives.",
+  "qualification": "Log excerpts are verbatim selected lines from API-provided full original logs; selected extracts are NOT full log envelopes. External independent job inspection performed at correction time; Git-only verification establishes integrity of selected extracts and bytes."
+}
