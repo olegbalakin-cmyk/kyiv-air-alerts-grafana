@@ -53,6 +53,7 @@ try:
  record("late_three_changes_transaction_abort",sqlstate=="23514" and before==after,{"sqlstate":sqlstate,"staged":staged,"before_equal_after":before==after})
 except Exception as e:
  rep["error"]=repr(e);rep["trace"]=traceback.format_exc()[-1500:]
+ print("ACL_FAILURE",rep["trace"],flush=True)
 finally:
  rep["verdict"]="PARTIAL" if not rep.get("error") else "FAIL"
  Path("/tmp/h2_acl_"+COPY+".json").write_text(json.dumps(rep,indent=2,default=str)+"\n")
