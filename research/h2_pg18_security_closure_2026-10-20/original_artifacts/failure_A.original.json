@@ -1,0 +1,193 @@
+{
+  "cases": [
+    {
+      "id": "setup",
+      "status": "PASS"
+    },
+    {
+      "id": "clean_migration",
+      "status": "PASS"
+    },
+    {
+      "id": "bad_preconditions",
+      "status": "PASS"
+    },
+    {
+      "id": "roles_guard_owner",
+      "status": "FAIL"
+    }
+  ],
+  "checks": [
+    {
+      "detail": null,
+      "id": "server_major_18",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql:5: NOTICE:  schema \"public\" already exists, skipping\n",
+      "id": "psql:observed_partial_schema.sql:h2_a_migration",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:current_view_fixture.sql:h2_a_migration",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "clean_before_objects",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:001_revision_invariants.sql:h2_a_migration",
+      "pass": true
+    },
+    {
+      "detail": "(True, True, True, True, True)",
+      "id": "clean_migration_objects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "clean_migration_rows_immutable",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "clean_backfilled_tip",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql:69: ERROR:  relation \"h2_classification_one_successor_uidx\" already exists\n",
+      "id": "repeat_migration_rejected",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "repeat_kept_objects",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql:5: NOTICE:  schema \"public\" already exists, skipping\n",
+      "id": "psql:observed_partial_schema.sql:h2_a_invalid",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql:64: ERROR:  H2_PREFLIGHT_MULTIPLE_ROOTS_OR_TIPS\nCONTEXT:  PL/pgSQL function inline_code_block line 38 at RAISE\n",
+      "id": "invalid_migration_rejected",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "invalid_schema_rolled_back",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "invalid_historical_rows_identical",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:003_candidate_app_role.sql:h2_a_migration",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:004_candidate_guard_owner.sql:h2_a_migration",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:005_guard_search_path_v2.sql:h2_a_migration",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "writer_has_no_special_role_flags",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "guard_nonlogin",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "guard_is_function_owner",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "guard_temp_explicit",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "writer_can_read_classification",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "writer_can_read_checkpoint_view",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_historical_update",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_historical_delete",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_history_truncate",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_heads_update",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_ddl",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_set_role",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_create",
+      "pass": true
+    }
+  ],
+  "copy": "A",
+  "errors": [
+    {
+      "error": "permission denied for table h2_classification_heads\nCONTEXT:  SQL statement \"UPDATE public.h2_classification_heads\n    SET tip_classification_uid=NEW.classification_uid, changed_at=now()\n    WHERE city_key=NEW.city_key\n      AND historical_episode_id=NEW.historical_episode_id\n      AND alert_start_at=NEW.alert_start_at\n      AND alert_end_at=NEW.alert_end_at\n      AND tip_classification_uid=NEW.supersedes_classification_uid\"\nPL/pgSQL function pub",
+      "id": "roles_guard_owner",
+      "traceback": "igration_pg18.py\", line 42, in mkrow\n    cur.execute(\"\"\"INSERT INTO public.attack_event_classifications(\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/psycopg/cursor.py\", line 97, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.InsufficientPrivilege: permission denied for table h2_classification_heads\nCONTEXT:  SQL statement \"UPDATE public.h2_classification_heads\n    SET tip_classification_uid=NEW.classification_uid, changed_at=now()\n    WHERE city_key=NEW.city_key\n      AND historical_episode_id=NEW.historical_episode_id\n      AND alert_start_at=NEW.alert_start_at\n      AND alert_end_at=NEW.alert_end_at\n      AND tip_classification_uid=NEW.supersedes_classification_uid\"\nPL/pgSQL function public.h2_enforce_revision_head() line 27 at SQL statement\n",
+      "type": "InsufficientPrivilege"
+    }
+  ],
+  "git_commit": "4ae83d14cae6a33956f991cb5af68e81576c7697",
+  "passed": 30,
+  "source_sha256": {
+    "reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql": "2ed89b91feb3c208c8da8c81d47fdc2a1dcd272dc48ed7fdedb746a416f35a74",
+    "reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql": "50b17f219f0340569f65b82567c1741c2a3fc7f78a6426c7e16ef59c30aff49f",
+    "research/h2_neon_contract_role_pg18_2026-10-20/003_candidate_app_role.sql": "5136b283c9dc32bc3d33e4121d0da1da2d58f2ee8aae6fc25e9bdf4c889c1abe",
+    "research/h2_neon_contract_role_pg18_2026-10-20/004_candidate_guard_owner.sql": "4862feea37da52ec01c849e43ee04454a8036daa0b29990ce9be3a81e057f259",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/005_guard_search_path_v2.sql": "feabfdc9b07919fe6ce436b3a6e6bfa951ca6df4ecb35894990aa20de52b8439",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/current_view_fixture.sql": "ee414c4d58811f30fc02a032b5b6c4d3af716b20fd10a77295e188b3dc30fee6"
+  },
+  "total": 30,
+  "verdict": "FAIL"
+}

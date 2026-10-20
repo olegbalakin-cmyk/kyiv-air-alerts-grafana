@@ -1,0 +1,226 @@
+{
+  "cases": [
+    {
+      "id": "setup",
+      "status": "PASS"
+    },
+    {
+      "id": "clean_migration",
+      "status": "PASS"
+    },
+    {
+      "id": "bad_preconditions",
+      "status": "PASS"
+    },
+    {
+      "id": "roles_guard_owner",
+      "status": "PASS"
+    },
+    {
+      "id": "rollback",
+      "status": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "detail": null,
+      "id": "server_major_18",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql:5: NOTICE:  schema \"public\" already exists, skipping\n",
+      "id": "psql:observed_partial_schema.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:current_view_fixture.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "clean_before_objects",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:001_revision_invariants.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "(True, True, True, True, True)",
+      "id": "clean_migration_objects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "clean_migration_rows_immutable",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "clean_backfilled_tip",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql:69: ERROR:  relation \"h2_classification_one_successor_uidx\" already exists\n",
+      "id": "repeat_migration_rejected",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "repeat_kept_objects",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql:5: NOTICE:  schema \"public\" already exists, skipping\n",
+      "id": "psql:observed_partial_schema.sql:h2_b_invalid",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql:64: ERROR:  H2_PREFLIGHT_MULTIPLE_ROOTS_OR_TIPS\nCONTEXT:  PL/pgSQL function inline_code_block line 38 at RAISE\n",
+      "id": "invalid_migration_rejected",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "invalid_schema_rolled_back",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "invalid_historical_rows_identical",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:003_candidate_app_role.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:004_candidate_guard_owner.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:005_guard_search_path_v2.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "writer_has_no_special_role_flags",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "guard_nonlogin",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "guard_is_function_owner",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "guard_temp_explicit",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "writer_can_read_classification",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "writer_can_read_checkpoint_view",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_historical_update",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_historical_delete",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_history_truncate",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_heads_update",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_ddl",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_set_role",
+      "pass": true
+    },
+    {
+      "detail": "42501",
+      "id": "deny_create",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "legitimate_writer_triggers_cas",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "writer_no_owner_membership",
+      "pass": true
+    },
+    {
+      "detail": "psql:/home/runner/work/kyiv-air-alerts-grafana/kyiv-air-alerts-grafana/research/h2_pg18_migration_role_rollback_2026-10-20/rollback_revision_v2.sql:44: ERROR:  H2_ROLLBACK_INCONSISTENT_HEAD\nCONTEXT:  PL/pgSQL function inline_code_block line 23 at RAISE\n",
+      "id": "rollback_refuses_inconsistent_head",
+      "pass": true
+    },
+    {
+      "detail": "",
+      "id": "psql:rollback_revision_v2.sql:h2_b_migration",
+      "pass": true
+    },
+    {
+      "detail": "(False, False, False, False, False)",
+      "id": "rollback_removed_all_revision_objects",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "rollback_preserved_history",
+      "pass": true
+    },
+    {
+      "detail": null,
+      "id": "rollback_did_not_restore_acl",
+      "pass": true
+    }
+  ],
+  "copy": "B",
+  "errors": [],
+  "git_commit": "6e53ae59115199499910a29916ebd0c501c60ff1",
+  "passed": 37,
+  "source_sha256": {
+    "reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/001_revision_invariants.sql": "2ed89b91feb3c208c8da8c81d47fdc2a1dcd272dc48ed7fdedb746a416f35a74",
+    "reference/research/h2_pg18_revision_invariant_hardening_2026-10-19/observed_partial_schema.sql": "50b17f219f0340569f65b82567c1741c2a3fc7f78a6426c7e16ef59c30aff49f",
+    "research/h2_neon_contract_role_pg18_2026-10-20/003_candidate_app_role.sql": "5136b283c9dc32bc3d33e4121d0da1da2d58f2ee8aae6fc25e9bdf4c889c1abe",
+    "research/h2_neon_contract_role_pg18_2026-10-20/004_candidate_guard_owner.sql": "4862feea37da52ec01c849e43ee04454a8036daa0b29990ce9be3a81e057f259",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/005_guard_search_path_v2.sql": "f163f010a70d8c0fb70cc1339b86f735ad4ce079b88f3c0705fed4dcf6198967",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/current_view_fixture.sql": "ee414c4d58811f30fc02a032b5b6c4d3af716b20fd10a77295e188b3dc30fee6",
+    "research/h2_pg18_migration_role_rollback_2026-10-20/rollback_revision_v2.sql": "aa88074c6ffec1c6388635331ad9f0b0bf78bb3ae5b59ea0d03f46a788093053"
+  },
+  "total": 37,
+  "verdict": "PASS"
+}
