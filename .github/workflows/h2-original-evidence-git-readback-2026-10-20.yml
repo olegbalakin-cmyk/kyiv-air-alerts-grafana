@@ -1,0 +1,20 @@
+name: H2 isolated original evidence independent Git-only verification
+on:
+  push:
+    branches: [research-h2-pg18-security-closure-2026-10-20]
+    paths:
+      - 'research/h2_pg18_security_closure_2026-10-20/original_artifacts/**'
+      - 'research/h2_pg18_security_closure_2026-10-20/verify_original_ab.py'
+      - '.github/workflows/h2-original-evidence-git-readback-2026-10-20.yml'
+permissions:
+  contents: read
+jobs:
+  git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Independently verify persisted original bytes
+        run: python research/h2_pg18_security_closure_2026-10-20/verify_original_ab.py
