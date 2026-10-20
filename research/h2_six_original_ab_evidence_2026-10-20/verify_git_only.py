@@ -81,7 +81,9 @@ def negatives(m):
  print("PASS NEGATIVES 8/8")
 def main():
  demand(git("hash-object",str(P/"manifest.json"))==PINNED_MANIFEST_GIT_BLOB,"MANIFEST_BLOB_PIN")
- manifest=json.loads((P/"manifest.json").read_bytes())
+ raw_manifest=(P/"manifest.json").read_bytes()
+ print("MANIFEST_SHA256",sha(raw_manifest),"MANIFEST_GIT_BLOB",PINNED_MANIFEST_GIT_BLOB)
+ manifest=json.loads(raw_manifest)
  check(manifest)
  negatives(manifest)
  print("PASS GIT_ONLY 6/6 ZIP JSON SOURCE AND 8/8 NEGATIVE CONTROLS")
