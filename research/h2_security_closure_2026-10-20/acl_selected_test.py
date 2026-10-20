@@ -8,7 +8,7 @@ rep={"copy":COPY,"commit":os.environ.get("GITHUB_SHA"),"version":query("postgres
 assert rep["version"].startswith("18.6")
 ns.roles()
 def dump(db):
- p=subprocess.run(["pg_dump","-h","127.0.0.1","-U","h2_local","--schema-only","--no-owner","-d",db],env={**os.environ,"PGPASSWORD":"synthetic_only"},capture_output=True,timeout=40)
+ p=subprocess.run(["docker","run","--rm","--network","host","-e","PGPASSWORD=synthetic_only","postgres:18.6","pg_dump","-h","127.0.0.1","-U","h2_local","--schema-only","--no-owner","-d",db],env={**os.environ,"PGPASSWORD":"synthetic_only"},capture_output=True,timeout=40)
  if p.returncode:raise RuntimeError(p.stderr.decode()[-700:])
  return {"sha256":hashlib.sha256(p.stdout).hexdigest(),"bytes":len(p.stdout),"text":p.stdout.decode()}
 def record(case,valid,details):
