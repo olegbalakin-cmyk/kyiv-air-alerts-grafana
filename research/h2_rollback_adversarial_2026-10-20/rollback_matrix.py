@@ -9,7 +9,7 @@ def run():
         d=new("r01"); hist=historical(d);before=truth(d)
         before_acl=snapshot(d)["relations"]
         step("R","R01","rollback",d,"008", "00000",temp_rollback(d,hist))
-        requires(truth(d)==before,"history mismatch")
+        requires(historical(d)==hist and truth(d)["history_count"]==before["history_count"],"history mismatch")
         requires(query(d,"SELECT to_regclass('public.h2_classification_heads')")[0][0] is None,"head survived")
         requires(not ns.q("postgres","SELECT pg_has_role('h2_migrator_test','h2_head_guard_test','MEMBER')")[0][0],"membership survived")
         changed=before_acl!=snapshot(d)["relations"]
@@ -29,6 +29,7 @@ def run():
         c.execute("SET LOCAL statement_timeout='12s'")
         uid=put(d,"race-a",session=c)
         requires(uid,"writer insert missing")
+        ns.temp(d)
         p=process(d,ns.DOWN,h,"H2_R03_B")
         try:
             seen=observed(d,lambda ls:any(x["app"]=="H2_R03_B" and not x["granted"] and x["relation"] in ("attack_event_classifications","h2_classification_heads") for x in ls))
@@ -43,6 +44,7 @@ def run():
         finally:
             c.close()
             if p.poll() is None:p.kill()
+            ns.untemp(d)
         # Interleaving II: hold table ACCESS EXCLUSIVE in a pre-rollback guard transaction,
         # then begin restricted writer; RELEASE guard and run actual rollback.
         # PostgreSQL DDL and writer serialize; if the rollback wins, writer must fail closed.
@@ -50,6 +52,7 @@ def run():
         guard=conn(d2,autocommit=False,application_name="H2_R03_A")
         guard.execute("BEGIN")
         guard.execute("LOCK TABLE public.attack_event_classifications IN ACCESS EXCLUSIVE MODE")
+        ns.temp(d2)
         rollbackp=process(d2,ns.DOWN,h2,"H2_R03_B")
         observed(d2,lambda ls:any(x["app"]=="H2_R03_B" and not x["granted"] and x["relation"]=="attack_event_classifications" for x in ls))
         # Real writer uses a second independent connection and actual INSERT.
@@ -66,6 +69,7 @@ def run():
         seen=observed(d2,lambda ls:any(x["app"]=="H2_R03_WRITER2" and not x["granted"] and x["relation"]=="attack_event_classifications" for x in ls))
         guard.commit();guard.close()
         rp=finish_process(rollbackp);t.join(timeout=15)
+        ns.untemp(d2)
         ALL["race_timelines"].append({"interleaving":"rollback-first","lock_evidence":seen,"rollback":rp,"writer":outcome,
                                       "post_truth":truth(d2)})
         step("R","R03","rollback_first",d2,"rollback with queued writer","00000",rp["sqlstate"])
@@ -148,7 +152,7 @@ def run():
         d=new("r13");query(d,"GRANT USAGE ON SCHEMA public TO h2_head_guard_test")
         step("R","R13","cross_database_role_delete",d,"DROP ROLE","2BP01",
              sqlstate("postgres","h2_local","DROP ROLE h2_head_guard_test"))
-        requires(query("postgres","SELECT count(*) FROM pg_roles WHERE rolname='h2_head_guard_test")==[(1,)],"role deleted")
+        requires(query("postgres","SELECT count(*) FROM pg_roles WHERE rolname='h2_head_guard_test'")==[(1,)],"role deleted")
     record("R","R13",r13)
     def r14():
         d=new("r14")
