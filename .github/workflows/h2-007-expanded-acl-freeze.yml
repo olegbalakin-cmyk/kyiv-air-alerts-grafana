@@ -1,0 +1,30 @@
+name: H2 007 expanded ACL original A B freeze
+on:
+  push:
+    branches: [research-h2-full-cas-007-acl-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-007-expanded-acl-freeze.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download and preserve original expanded ACL A B partial results
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python research/h2_full_cas_007_2026-10-20/freeze_acl_ab.py
+      - name: Freeze research-only originals
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/h2_full_cas_007_2026-10-20/expanded_acl_original_ab/
+          git diff --cached --check
+          git diff --cached --quiet && exit 1
+          git commit -m 'research(h2): retain exact original expanded ACL partial A B evidence'
+          git push origin HEAD:research-h2-full-cas-007-acl-2026-10-20-gpt6
