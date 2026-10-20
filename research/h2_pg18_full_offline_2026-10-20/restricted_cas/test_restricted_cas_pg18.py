@@ -60,7 +60,10 @@ def apply(db, path):
 original_new_database=baseline.new_database
 def restricted_database(label):
     db=original_new_database("restricted_"+label)
-    # The accepted reduced schema omits the reconstructed 18-column view.\n    # Install the previously tested exact synthetic view fixture before v3 grants.\n    apply(db,REPO/"research/h2_pg18_migration_role_rollback_2026-10-20/current_view_fixture.sql")\n    apply(db,REPO/"research/h2_pg18_security_closure_2026-10-20/003_candidate_app_role_v3_atomic.sql")
+    # The accepted reduced schema omits the reconstructed 18-column view.
+    # Restore the tested fixture before running unchanged v3 SQL.
+    apply(db,REPO/"research/h2_pg18_migration_role_rollback_2026-10-20/current_view_fixture.sql")
+    apply(db,REPO/"research/h2_pg18_security_closure_2026-10-20/003_candidate_app_role_v3_atomic.sql")
     apply(db,REPO/"research/h2_neon_contract_role_pg18_2026-10-20/004_candidate_guard_owner.sql")
     apply(db,REPO/"research/h2_pg18_migration_role_rollback_2026-10-20/005_guard_search_path_v2.sql")
     return db
