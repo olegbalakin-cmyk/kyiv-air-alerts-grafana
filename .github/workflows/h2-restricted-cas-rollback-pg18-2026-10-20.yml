@@ -59,6 +59,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: h2-restricted-cas-${{ matrix.copy }}
-          path: /tmp/h2_restricted_cas_${{ matrix.copy }}.json
+          path: |
+            /tmp/h2_restricted_cas_${{ matrix.copy }}.json
+            /tmp/h2_full_rollback_${{ matrix.copy }}.json
           if-no-files-found: warn
           retention-days: 30
