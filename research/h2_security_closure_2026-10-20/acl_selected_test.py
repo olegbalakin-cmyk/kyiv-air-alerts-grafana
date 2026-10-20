@@ -43,6 +43,7 @@ try:
    "rolled_normalized":hashlib.sha256(stable_rolled.encode()).hexdigest(),
    "normalized_equal":stable_control==stable_rolled,
    "normalized_diff_lines":semantic_diff[:120]}
+ print(json.dumps({"pg_dump_comparison":rep["pg_dump_comparison"]},default=str),flush=True)
  record("pg_dump_repeat_normalization",stable_control==stable_control_again,
         {"original_raw_same":original_dump["sha256"]==control_again["sha256"],
          "original_normalized_same":stable_control==stable_control_again})
