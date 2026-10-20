@@ -1,0 +1,26 @@
+name: H2 007 expanded ACL independent Git-only
+on:
+  push:
+    branches: [research-h2-full-cas-007-acl-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-007-expanded-acl-git-only.yml'
+      - 'research/h2_full_cas_007_2026-10-20/verify_acl_originals.py'
+      - 'research/h2_full_cas_007_2026-10-20/expanded_acl_original_ab/**'
+permissions:
+  contents: read
+jobs:
+  independent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Original bytes, raw residual, role attribution and deliberate tampering
+        run: python research/h2_full_cas_007_2026-10-20/verify_acl_originals.py
+      - name: Verify expanded SQL harness equals actually tested commit
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:research/h2_full_cas_007_2026-10-20/test_expanded_acl_pg18.py)" = "$(git rev-parse 884ae6bfe91f271dfcb355ee8c5b25cdd0dfb18f:research/h2_full_cas_007_2026-10-20/test_expanded_acl_pg18.py)"
+          echo ACL_EXECUTED_SOURCE_BLOB_UNCHANGED=PASS
