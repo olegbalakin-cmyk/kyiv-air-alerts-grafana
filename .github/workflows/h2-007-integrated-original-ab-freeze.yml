@@ -1,0 +1,30 @@
+name: H2 integrated 007 original AB archive
+on:
+  push:
+    branches: [research-h2-full-cas-007-acl-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-007-integrated-original-ab-freeze.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  original-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Freeze original tested PG18.6 A and B ZIP envelopes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python research/h2_full_cas_007_2026-10-20/freeze_integrated_ab.py
+      - name: Commit only original proof in isolated research branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/h2_full_cas_007_2026-10-20/integrated_original_ab/
+          git diff --cached --check
+          git diff --cached --quiet && exit 1
+          git commit -m 'research(h2): freeze byte-exact original integrated CAS 007 PG18 AB'
+          git push origin HEAD:research-h2-full-cas-007-acl-2026-10-20-gpt6
