@@ -18,12 +18,12 @@ SCRIPT,REPORT["sources"]=generate()
 REPORT["sql_sha256"]=hashlib.sha256(SCRIPT.encode()).hexdigest()
 BASE=Path("/tmp/h2_integrated_"+COPY+".sql")
 BASE.write_text(SCRIPT)
-def exec_gate(db,lock="3s",hold=0):
+def exec_gate(db,lock="3s",hold=0,fault="none"):
     text,_=generate(hold_seconds=hold,lock_timeout=lock)
     path=Path("/tmp/h2_integrated_"+COPY+"_"+str(os.getpid())+".sql")
     path.write_text(text)
     c=subprocess.run(["psql","-X","-v","ON_ERROR_STOP=1","-v","VERBOSITY=verbose",
-      "-v","fault=none","-h","127.0.0.1","-U","h2_migrator_test","-d",db,
+      "-v","fault="+fault,"-h","127.0.0.1","-U","h2_migrator_test","-d",db,
       "-f",str(path)],capture_output=True,text=True,timeout=50,
       env={**os.environ,"PGPASSWORD":"synthetic_migrator_only",
       "PGAPPNAME":"H2_INTEGRATED_MIGRATION_"+COPY})
@@ -31,12 +31,12 @@ def exec_gate(db,lock="3s",hold=0):
     m=re.search(r"ERROR:\s+([0-9A-Z]{5}):",c.stderr)
     return (m.group(1) if m else ("00000" if c.returncode==0 else "UNKNOWN"),
        c.stderr[-800:],c.returncode)
-def case(name,mutator=None,expected="23514",prepare=None,lock="3s",hold=0):
+def case(name,mutator=None,expected="23514",prepare=None,lock="3s",hold=0,fault="none"):
     db=new("integ"+name)
     if prepare:prepare(db)
     if mutator:mutator(db)
     before=fingerprint(db);hist=truth(db)
-    result=exec_gate(db,lock,hold)
+    result=exec_gate(db,lock,hold,fault=fault)
     after=fingerprint(db);post=truth(db)
     status=result[0]
     good=(status==expected and
@@ -88,6 +88,13 @@ def disconnected(d):
     q(d,"DROP INDEX public.h2_classification_one_root_uidx")
     a,b=chain(d) # inserts fail if trigger removed? chain bypass head but inserts work
     q(d,"UPDATE public.attack_event_classifications SET supersedes_classification_uid=classification_uid WHERE classification_uid=%s",(a,))
+def cycle(d):
+    a,b=chain(d)
+    q(d,"UPDATE public.attack_event_classifications SET supersedes_classification_uid=%s WHERE classification_uid=%s",(b,a))
+def late_007_fault(d):
+    # Existing fixture is valid, so the fault must occur AFTER 007's GRANT,
+    # ALTER FUNCTION configuration and function-owner modifications.
+    chain(d)
 def deny_role(role,opts):
     q("postgres","GRANT "+role+" TO h2_app_ingest_writer_test WITH "+opts)
 def unsafe_owner(d):deny_role("h2_schema_owner_test","INHERIT TRUE, SET TRUE, ADMIN FALSE")
@@ -108,6 +115,8 @@ def main():
     case("duplicate_successor",mutator=duplicate_successor)
     case("duplicate_roots",mutator=duplicate_roots)
     case("invalid_parent",mutator=invalid_parent)
+    case("cycle",mutator=cycle)
+    case("late_007_owner_fault",mutator=late_007_fault,fault="owner")
     # Membership is cluster-global: remove each inherited grant after the case.
     for name,mutate,cleanup in [
      ("owner_inherited",unsafe_owner,"h2_schema_owner_test"),
