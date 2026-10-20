@@ -32,9 +32,10 @@ def exec_gate(db,lock="3s",hold=0,fault="none"):
     return (m.group(1) if m else ("00000" if c.returncode==0 else "UNKNOWN"),
        c.stderr[-800:],c.returncode)
 def case(name,mutator=None,expected="23514",prepare=None,lock="3s",hold=0,fault="none"):
-    db=new("integ"+name)
+    db=new("integ"+name,stage="base")
     if prepare:prepare(db)
     if mutator:mutator(db)
+    ns.temp(db)
     before=fingerprint(db);hist=truth(db)
     result=exec_gate(db,lock,hold,fault=fault)
     after=fingerprint(db);post=truth(db)
@@ -53,6 +54,7 @@ def case(name,mutator=None,expected="23514",prepare=None,lock="3s",hold=0,fault=
           "status":"PASS" if good else "FAIL"}
     REPORT["cases"].append(item)
     print(json.dumps(item),flush=True)
+    ns.untemp(db)
     if not good:raise AssertionError(name)
     return db
 def q(db,s,args=()):return query(db,s,args)
@@ -141,7 +143,8 @@ def main():
             if rows[0][0]:return True
             time.sleep(.035)
         return False
-    db=new("migrationfirst")
+    db=new("migrationfirst",stage="base")
+    ns.temp(db)
     initial=truth(db)
     with ThreadPoolExecutor(max_workers=1) as pool:
         migrating=pool.submit(exec_gate,db,"3s",2)
@@ -157,11 +160,13 @@ def main():
        "expected":"migration 00000, writer 55P03",
        "sqlstate":[migration_result[0],writer_state],"lock_observed":seen,
        "status":"PASS" if consistent else "FAIL"})
+    ns.untemp(db)
     if not consistent:raise AssertionError("migration_first_vs_restricted_writer")
     # Writer owns ROW EXCLUSIVE lock and commits a real valid revision.
     # Migration cannot inspect an out-of-date snapshot while waiting:
     # its subsequent H11 check must see the newly committed history.
-    db=new("writerfirst")
+    db=new("writerfirst",stage="base")
+    ns.temp(db)
     with conn(db,"h2_app_ingest_writer_test","synthetic_only_local_role",autocommit=False) as writer:
         inserted=put(db,"writer_first_"+db,session=writer)
         with ThreadPoolExecutor(max_workers=1) as pool:
@@ -176,9 +181,11 @@ def main():
        "expected":"00000","sqlstate":migration_result[0],
        "writer_visible_after_commit":readback==inserted,"pending_behind_writer":pending,
        "status":"PASS" if good else "FAIL"})
+    ns.untemp(db)
     if not good:raise AssertionError("writer_first_commits_before_migration")
     # Real concurrent restricted writer blocked while gate lock held.
-    db=new("concurrent")
+    db=new("concurrent",stage="base")
+    ns.temp(db)
     before=truth(db)
     with conn(db,autocommit=False) as blocker:
         blocker.execute("LOCK TABLE public.attack_event_classifications, public.h2_classification_heads IN SHARE ROW EXCLUSIVE MODE")
@@ -191,8 +198,10 @@ def main():
         blocker.commit()
     item={"case":"writer_lock_contention","expected":"55P03","sqlstate":st,"status":"PASS"}
     REPORT["cases"].append(item)
+    ns.untemp(db)
     # Migration blocked by another session's writer-owned lock; must roll back.
-    db=new("migrationlock")
+    db=new("migrationlock",stage="base")
+    ns.temp(db)
     before=fingerprint(db)
     with conn(db,autocommit=False) as writer:
         writer.execute("LOCK TABLE public.attack_event_classifications IN ROW EXCLUSIVE MODE")
@@ -201,6 +210,7 @@ def main():
     good=fail[0]=="55P03" and before==fingerprint(db)
     REPORT["cases"].append({"case":"migration_lock_timeout","expected":"55P03",
          "sqlstate":fail[0],"status":"PASS" if good else "FAIL"})
+    ns.untemp(db)
     if not good:raise AssertionError("migration_lock_timeout")
  except Exception as e:
     REPORT["error"]=repr(e)
