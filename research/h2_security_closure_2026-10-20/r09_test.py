@@ -18,10 +18,12 @@ def one(name,setup,expected):
  setup(d)
  before=fingerprint(d)
  actual=risky(d,"h2_app_ingest_writer_test")
+ SQL=Path(__file__).with_name("r09_effective_role_preflight.sql")
+ sql_status=ns.run(d,SQL,role="h2_migrator_test",ok=not expected)
  after=fingerprint(d)
  dangerous=any(actual.values())
- good=(dangerous==expected and before==after)
- item={"id":name,"expected_unsafe":expected,"actual_unsafe":dangerous,"authority":actual,"unchanged_schema":before==after,"status":"PASS" if good else "FAIL"}
+ good=(dangerous==expected and before==after and sql_status==("42501" if expected else "00000"))
+ item={"id":name,"expected_unsafe":expected,"actual_unsafe":dangerous,"authority":actual,"preflight_sqlstate":sql_status,"unchanged_schema":before==after,"status":"PASS" if good else "FAIL"}
  report["cases"].append(item)
  print(json.dumps(item),flush=True)
  if not good:raise AssertionError(name)
