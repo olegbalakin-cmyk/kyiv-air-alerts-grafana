@@ -7,6 +7,7 @@ from harness import *
 SQL=Path(__file__).with_name("h11_head_history_check.sql").read_text()
 report={"copy":COPY,"commit":os.environ.get("GITHUB_SHA"),"postgres":query("postgres","SHOW server_version")[0][0],"cases":[]}
 assert report["postgres"].startswith("18.6")
+ns.roles()
 def check(db):
  with conn(db,autocommit=False) as c:
   c.execute("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY")

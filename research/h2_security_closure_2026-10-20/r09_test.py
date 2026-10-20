@@ -6,6 +6,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"h2_rollback_adversari
 from harness import *
 report={"copy":COPY,"commit":os.environ.get("GITHUB_SHA"),"pg_version":query("postgres","SHOW server_version")[0][0],"cases":[]}
 assert report["pg_version"].startswith("18.6")
+ns.roles()
 # Explicit trusted boundary: h2_local superuser is fixture bootstrap,
 # not an application principal. Target principal is intended restricted login only.
 def risky(db,principal):
