@@ -1,0 +1,30 @@
+name: H2 007 original 31 AB research freeze
+on:
+  push:
+    branches: [research-h2-full-cas-007-acl-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-007-original-31-freeze.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download and hash original GitHub ZIP bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python research/h2_full_cas_007_2026-10-20/freeze_original_31.py
+      - name: Freeze originals exclusively in research branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/h2_full_cas_007_2026-10-20/original_31_artifacts/
+          git diff --cached --check
+          git diff --cached --quiet && exit 1
+          git commit -m 'research(h2): Git freeze original non-superuser 31 AB ZIP JSON'
+          git push origin HEAD:research-h2-full-cas-007-acl-2026-10-20-gpt6
