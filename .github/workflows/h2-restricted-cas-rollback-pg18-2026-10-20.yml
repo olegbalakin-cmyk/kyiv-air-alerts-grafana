@@ -49,11 +49,11 @@ jobs:
           python -m pip install "psycopg[binary]==3.2.12" requests beautifulsoup4
       - name: Verify original v3 A/B archives (Git only)
         run: python research/h2_pg18_full_offline_2026-10-20/v3_original_artifacts/verify_v3_original.py
-      - name: Actual restricted app writer, transaction and main E2E
-        run: python research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_restricted_cas_pg18.py
       - name: Full schema, ACL, role and owner rollback negative and positive tests
-        if: always()
         run: python research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_full_rollback_pg18.py
+      - name: Actual restricted app writer, transaction and main E2E
+        if: always()
+        run: python research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_restricted_cas_pg18.py
       - name: Preserve original execution report on success and failure
         if: always()
         uses: actions/upload-artifact@v4
