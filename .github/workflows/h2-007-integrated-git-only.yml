@@ -1,0 +1,31 @@
+name: H2 007 integrated original independent Git-only
+on:
+  push:
+    branches: [research-h2-full-cas-007-acl-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-007-integrated-git-only.yml'
+      - 'research/h2_full_cas_007_2026-10-20/verify_integrated_originals.py'
+      - 'research/h2_full_cas_007_2026-10-20/integrated_original_ab/**'
+permissions:
+  contents: read
+jobs:
+  independent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify exact A and B original proof and corrosion controls
+        run: python research/h2_full_cas_007_2026-10-20/verify_integrated_originals.py
+      - name: Prove original 77 test harness still byte-identical
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:research/h2_pg18_full_offline_2026-10-20/restricted_cas/test_restricted_cas_pg18.py)" = ce4bbb0d78cb622e9ba6815d78612079af31fbdf
+          test "$(git rev-parse HEAD:research/h2_non_superuser_guard_acl_2026-10-20/007_non_superuser_guard_transfer.sql)" = 8dc20d11f28db2d8c2b6244b5c43e8bd23548abd
+          test "$(git rev-parse HEAD:research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql)" = 59eab59235f8aee14837ce7494649edba674e1ce
+          test "$(git rev-parse HEAD:research/h2_pg18_security_closure_2026-10-20/003_candidate_app_role_v3_atomic.sql)" = c9357a1c920b3ae6c06bb963b7d8ef26229dcf06
+          test "$(git rev-parse 00563b1eb5cb597fe0d3492ad12ae9c0645b2c6e:research/h2_full_cas_007_2026-10-20/test_integrated_007_cas.py)" = "$(git rev-parse HEAD:research/h2_full_cas_007_2026-10-20/test_integrated_007_cas.py)"
+          echo 'EXECUTABLE_BLOBS_UNCHANGED=PASS'
