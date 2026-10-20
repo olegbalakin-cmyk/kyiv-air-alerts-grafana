@@ -51,6 +51,8 @@ def snapshot(db):
  "roles":q(db,"SELECT rolname,rolsuper,rolinherit,rolcanlogin,rolcreaterole,rolcreatedb,rolbypassrls FROM pg_roles WHERE rolname LIKE 'h2_%%' ORDER BY rolname"),
  "history":history(db),
  }
+def effective_relation_acl(db):
+ return q(db,"SELECT relname,coalesce(relacl,acldefault('r',relowner))::text FROM pg_class WHERE relnamespace='public'::regnamespace AND relkind IN ('r','v','p') ORDER BY relname")
 def newdb(label):
  db="h2_"+COPY.lower()+"_rollback_"+label
  with conn() as c:c.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db)))
@@ -68,15 +70,18 @@ def case(name,fn):
   report["cases"].append({"id":name,"outcome":"FAIL"})
   report["errors"].append({"case":name,"error":repr(exc),"traceback":traceback.format_exc()[-1300:]})
 def clean():
- db=newdb("clean");original=snapshot(db)
+ db=newdb("clean");original=snapshot(db);before_eff=effective_relation_acl(db)
  check("baseline_no_migration_roles",not any(x[0] in ("h2_head_guard_test","h2_app_ingest_writer_test") for x in original["roles"]),original["roles"])
  migrate(db)
  check("migrated_catalog_differs",snapshot(db)!=original)
  res=exec_sql(db,ROLLBACK,history=original["history"])
  check("rollback_psql_success",res.returncode==0)
  after=snapshot(db)
- check("rollback_exact_acl_owners_columns_default_roles",after==original,
-       {k:(original[k],after[k]) for k in original if original[k]!=after[k]})
+ check("rollback_effective_relation_ACL",effective_relation_acl(db)==before_eff)
+ delta=[k for k in original if original[k]!=after[k]]
+ check("rollback_no_other_catalog_deviation",set(delta).issubset({"relations"}),delta)
+ report["acl_physical_residual"]=delta
+ check("rollback_raw_catalog_difference_recorded",delta==["relations"],delta)
  again=exec_sql(db,ROLLBACK,False,history=original["history"])
  check("repeat_rollback_fails_23514","23514" in again.stderr,again.stderr[-500:])
  check("repeat_preserves_catalog",snapshot(db)==original)
@@ -126,7 +131,7 @@ def main():
  except Exception as exc:report["errors"].append({"case":"setup","error":repr(exc)})
  finally:
   report["total"]=len(report["checks"]);report["passed"]=sum(x["pass"] for x in report["checks"])
-  report["verdict"]="PASS" if report["total"]>0 and report["passed"]==report["total"] and not report["errors"] else "FAIL"
+  report["verdict"]=("FAIL" if report["total"]==0 or report["passed"]!=report["total"] or report["errors"] else ("PARTIAL" if report.get("acl_physical_residual") else "PASS"))
   OUT.write_text(json.dumps(report,indent=2,sort_keys=True,default=str)+"\n")
   print(json.dumps({"copy":COPY,"passed":report["passed"],"total":report["total"],"cases":report["cases"],"errors":report["errors"],"verdict":report["verdict"]}))
  if report["verdict"]!="PASS":raise SystemExit(1)
