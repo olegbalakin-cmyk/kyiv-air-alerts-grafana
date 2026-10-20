@@ -46,7 +46,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y postgresql-client
           python -m pip install "psycopg[binary]==3.2.12" requests beautifulsoup4
-      - name: Verify original 31 AB freeze Git-only
+      - name: Verify frozen original 31 A/B ZIP and JSON Git-only
         run: python research/h2_full_cas_007_2026-10-20/verify_original_31.py
       - name: Execute complete original CAS regression through real non-superuser 007 migration
         run: python research/h2_full_cas_007_2026-10-20/test_integrated_007_cas.py
