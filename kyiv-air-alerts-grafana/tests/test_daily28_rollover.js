@@ -184,13 +184,23 @@ for(const key of Object.keys(productionCities)) {
 }
 context.productionCities=productionCities;
 assert.equal(evalJS("periodRows(productionCities.kyiv, 'daily28').at(-1).date"),"2026-10-20");
-assert.equal(evalJS("derivedCalendarWeeks(productionCities.kyiv).at(-1).partial_through"),"2026-10-20");
-assert.equal(evalJS("partialPeriodFooter(productionCities.kyiv.daily28.at(-1))"),"Дані станом на 20.10");
+assert.equal(evalJS("derivedCalendarWeeks(productionCities.kyiv).at(-1).partial_through"),"2026-10-20T23:25:39.257068+03:00");
+assert.equal(evalJS("partialPeriodFooter(derivedCalendarWeeks(productionCities.kyiv).at(-1))"),"Дані станом на 23:25");
+assert.equal(evalJS("partialPeriodFooter(productionCities.kyiv.daily28.at(-1))"),"Дані станом на 23:25");
+assert.equal(evalJS("partialPeriodFooter({is_partial_period:true,partial_through:'2026-10-20T20:25:39.257068Z'})"),"Дані станом на 23:25",
+  "UTC representation must be converted to Kyiv local time");
+assert.equal(evalJS("partialPeriodFooter({is_partial_period:true,partial_through:'2026-10-20T23:30:00Z'})"),"Дані станом на 20.10",
+  "wrong Kyiv date must fall back to day-only rather than attaching a misleading clock");
+evalJS("currentLanguage='en'");
+assert.equal(evalJS("partialPeriodFooter(productionCities.kyiv.daily28.at(-1))"),"Data as of 23:25");
+evalJS("currentLanguage='uk'");
 // The user-visible daily28 charts must use real full timestamp payloads too.
 evalJS("currentLanguage='uk';state.data={cities:productionCities,multicity_meta:{weekly_mode:'rolling_7d'}};renderShortHorizon('kyiv')");
 assert.equal(evalJS("state.charts.daily28HoursChart.config.data.labels.at(-1)"),"2026-10-20");
 assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.data.labels.at(-1)"),"2026-10-20");
-assert.match(outputElements.daily28Range.textContent,/Дані станом на 20\.10/);
+assert.match(outputElements.daily28Range.textContent,/Дані станом на 23:25/);
+assert.equal(evalJS("state.charts.daily28HoursChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28HoursChart.config.data.datasets[0],dataIndex:27}])"),"Дані станом на 23:25");
+assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28AlertsDurationChart.config.data.datasets[0],dataIndex:27}])"),"Дані станом на 23:25");
 const mismatch = JSON.parse(JSON.stringify(snapshot.current_day));
 mismatch.cities.kyiv.partial_through = "2026-10-19T23:25:39+03:00";
 const mismatchCities = Object.fromEntries(Object.entries(snapshot.complete_daily28).map(

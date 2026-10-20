@@ -138,3 +138,18 @@ for (const [raw, boundary, expected] of [
 assert.match(code, /picker\.addEventListener\("change",/);
 assert.match(code, /input\.dispatchEvent\(new Event\("change"/);
 console.log("iPhone date keyboard/native picker/ISO normalization/year-only range PASS");
+
+context.exactClockWeek = {
+  weekly: [baseWeek],
+  daily28: [monday, {...tuesday, partial_through:"2026-10-20T23:25:39.257068+03:00"}]
+};
+evaluate("currentLanguage='uk'");
+assert.equal(evaluate("derivedCalendarWeeks(exactClockWeek).at(-1).partial_through"),"2026-10-20T23:25:39.257068+03:00",
+  "current incomplete calendar week must keep precise source instant");
+assert.equal(evaluate("partialPeriodFooter(derivedCalendarWeeks(exactClockWeek).at(-1))"),"Дані станом на 23:25");
+context.preciseWeekRows = evaluate("derivedCalendarWeeks(exactClockWeek)");
+assert.equal(evaluate("chartOptions('h').plugins.tooltip.callbacks.footer([{dataset:{_exportRows:preciseWeekRows},dataIndex:1}])"),"Дані станом на 23:25");
+evaluate("currentLanguage='en'");
+assert.equal(evaluate("partialPeriodFooter(derivedCalendarWeeks(exactClockWeek).at(-1))"),"Data as of 23:25");
+evaluate("currentLanguage='uk'");
+console.log("precision-preserving calendar-week and Kyiv-local time tooltips PASS");

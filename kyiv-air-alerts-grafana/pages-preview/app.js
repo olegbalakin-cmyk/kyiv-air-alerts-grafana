@@ -625,13 +625,29 @@ function isPartialPeriod(row) {
   return Boolean(row?.is_partial_period);
 }
 
+// Show a source-observed clock only for valid timezone-aware ISO timestamps.
+// Legacy date-only markers remain dates; never invent midnight or viewer time.
+function partialThroughKyivClock(through, sourceDay) {
+  if (through === sourceDay || !validPartialThrough(through, sourceDay)) return "";
+  const instant = new Date(through);
+  const dateParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Kyiv", year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(instant);
+  const part = type => dateParts.find(item => item.type === type)?.value;
+  // Do not attach a different Kyiv calendar day's clock to this daily point.
+  if (`${part("year")}-${part("month")}-${part("day")}` !== sourceDay) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Kyiv", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).format(instant);
+}
+
 function partialPeriodFooter(row) {
   if (!isPartialPeriod(row)) return "";
   const through = String(row.partial_through || "");
   const date = through.slice(0, 10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(date) &&
       (through === date || validPartialThrough(through, date))) {
-    const asOf = shortDateLabel(date);
+    const asOf = partialThroughKyivClock(through, date) || shortDateLabel(date);
     return tr("Дані станом на " + asOf, "Data as of " + asOf);
   }
   return tr("Поточний неповний період", "Current incomplete period");
@@ -877,7 +893,11 @@ function derivedCalendarWeeks(city) {
     avg_alert_duration_min: durationWeight ? durationWeighted / durationWeight : null,
     alerts_started: alertsStarted,
     is_partial_period: true,
-    partial_through: latest,
+    // Preserve the actual observation time when the latest day is partial.
+    // A week consisting only of completed days stays date-only.
+    partial_through: isPartialPeriod(latestRow) &&
+      validPartialThrough(latestRow.partial_through, latest)
+      ? latestRow.partial_through : latest,
     interval_mode: "calendar_week"
   });
   return complete;
