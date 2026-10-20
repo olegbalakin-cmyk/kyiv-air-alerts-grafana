@@ -1,0 +1,35 @@
+name: H2 adversarial original AB freeze exact bytes
+on:
+  push:
+    branches: [research-h2-rollback-adversarial-pg18-2026-10-20-gpt6]
+    paths:
+      - '.github/workflows/h2-adversarial-freeze.yml'
+permissions:
+  actions: read
+  contents: write
+jobs:
+  exact-artifact-freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download exact synthetic run ZIP bytes and verify SHA, CRC and JSON
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python research/h2_rollback_adversarial_2026-10-20/freeze_originals.py
+      - name: Commit verified original bytes to isolated branch only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git branch --show-current)" = 'research-h2-rollback-adversarial-pg18-2026-10-20-gpt6'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'github-actions[bot]'
+          git add research/h2_rollback_adversarial_2026-10-20/frozen_2026-10-20/
+          git diff --cached --quiet && { echo NO_NEW_PROOF; exit 1; }
+          git commit -m 'research(h2): freeze verified A/B original artifact bytes and partial verdict'
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)" push origin HEAD:research-h2-rollback-adversarial-pg18-2026-10-20-gpt6
