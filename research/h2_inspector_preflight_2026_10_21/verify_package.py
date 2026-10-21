@@ -24,7 +24,8 @@ def check(m):
     for x in q:
         stmt=x.get("sql","")
         if not re.fullmatch(r"SELECT [^;]+;",stmt,re.I|re.S):reject("non SELECT query")
-        if re.search(r"(?i)\b(?:"+"|".join(BANNED)+r")\b",stmt):reject("unsafe keyword")
+        sql_without_literals=re.sub(r"'(?:''|[^'])*'", "''", stmt)
+        if re.search(r"(?i)\b(?:"+"|".join(BANNED)+r")\b",sql_without_literals):reject("unsafe keyword")
         if re.search(r"(?i)(https?://|postgres(?:ql)?://|password\s*=|secret|token)",stmt):reject("possible secret")
         if re.search(r"(?i)\b(?:pg_sleep|dblink|lo_export|pg_read_file|set_config|pg_advisory_xact_lock)\s*\(",stmt):reject("unsafe invocation")
         if not isinstance(x.get("max_rows"),int) or not (1<=x["max_rows"]<=64) or not isinstance(x.get("max_bytes"),int) or not(1<=x["max_bytes"]<=18000):reject("caps")
