@@ -1,0 +1,120 @@
+name: H2 ACL independent original ZIP Git-only verify
+on:
+  push:
+    branches: [research-h2-acl-evidence-consumers-2026-10-21-gpt6]
+    paths: ['.github/workflows/h2-acl-independent-git-only-2026-10-21.yml']
+permissions:
+  contents: read
+jobs:
+  verify-git-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify two original Git ZIP blobs, enclosed JSON, source and negative cases
+        run: |
+          python3 - <<'PY'
+          import copy,hashlib,io,json,subprocess,zipfile
+          BASE='research/h2_acl_evidence_consumers_2026_10_21/original_ab/'
+          EXPECTED={'A':(119105725015,12330015114,4052,'84ab5cd39497bf43a43121a2b7a5cfaccb1fee73489693b5f3e7a123ad810b7f','550af3e4329aad1436d4ab25ed703cc2d0a226d6f454ee27dc1fd5e047470178',1717617138),
+          'B':(119105724906,12328299979,4058,'10765402c4ef39d8552c3346e0aa702e26a401b9c6ec8d1de3bffeb960721ca1','b33a9f1eb0590489535e1f72dd3c185505f9f9107adf74f16c4320894e7964d9',1617684917)}
+          TESTED='0d156bcea786d015a307f7d0f4c8b49c5a3b5e63';RUN=39565210464
+          ALLOWED={'alert_episodes','ingestion_runs','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events'}
+          OWNER='{h2_schema_owner_test=arwdDxtm/h2_schema_owner_test}'
+          sha=lambda b:hashlib.sha256(b).hexdigest()
+          read=lambda p:subprocess.check_output(['git','show','HEAD:'+p])
+          obj=lambda p:subprocess.check_output(['git','rev-parse','HEAD:'+p],text=True).strip()
+          def check(p,msg):
+            if not p:raise ValueError(msg)
+          m=json.loads(read(BASE+'manifest.json'))
+          f={c:read(BASE+c+'.zip') for c in EXPECTED}
+          def validate_report(c,r):
+            check(r['copy']==c and r['source_commit']==TESTED,'source provenance')
+            check(r['original_007_blob']=='8dc20d11f28db2d8c2b6244b5c43e8bd23548abd','007 unchanged')
+            check(r['original_008_blob']=='59eab59235f8aee14837ce7494649edba674e1ce','008 unchanged')
+            check(r['verdict']=='PARTIAL_NO_EXACT_RESTORATION_PROVEN' and r['errors']==[],'partial verdict')
+            check(r['tests_passed']==r['tests_total']==len(r['checks'])==42,'42 checks')
+            check(all(x['pass'] is True for x in r['checks']),'failed check')
+            ids={x['id'] for x in r['checks']}
+            check({'only_seven_raw_catalog_differences','initial_14_principal_rights_and_grant_options','grantor_identity_in_acl','normalized_pg18_6_dump_post_future_ddl','populated_reapply_restores_exact_tips'}.issubset(ids),'missing required check')
+            e=r['evidence'];rest=e['restoration']
+            check(rest['attempted_sequences']==rest['successful_sequences']==43 and rest['null_candidates']==0,'probes/NULL')
+            check(rest['no_candidate_is_not_impossibility_proof'] is True,'restoration overclaim')
+            delta=e['initial_catalog_delta']['relations']
+            check(set(delta)==ALLOWED,'outside seven allowlist')
+            check(all(x['before']==['h2_schema_owner_test',None] and x['after']==['h2_schema_owner_test',OWNER] for x in delta.values()),'raw transition')
+            d=e['normalized_dump']
+            check(d['identical'] is True and d['control_sha256']==d['rolled_sha256'] and d['first_diff'] is None,'normalized dump')
+            check(e['population']['row_count']==3 and e['population']['tip_count']==2,'populated current heads')
+          def validate(man,files):
+            check(man['run']==RUN and man['source']==TESTED,'run attribution')
+            check(man['verdict']=='PARTIAL_NO_EXACT_RESTORATION_PROVEN' and man['option_a']=='NOT_ESTABLISHED' and man['option_b']=='PROPOSAL_ONLY','no decision escalation')
+            check(set(man['allowed'])==ALLOWED and len(man['allowed'])==7,'manifest allowlist')
+            check(set(man['copies'])==set(EXPECTED),'two copies')
+            for c,(job,art,size,zh,jh,crc) in EXPECTED.items():
+              row=man['copies'][c]
+              check(row['job']==job and row['artifact']==art,'job/artifact')
+              data=files[c]
+              check(len(data)==size==row['zip_bytes'] and sha(data)==zh==row['zip_sha256'],'ZIP byte identity')
+              with zipfile.ZipFile(io.BytesIO(data)) as z:
+                check(z.testzip() is None,'ZIP CRC')
+                inf=[x for x in z.infolist() if not x.is_dir()]
+                check(len(inf)==1 and inf[0].filename=='h2_acl_decision_'+c+'.json','single enclosed JSON')
+                raw=z.read(inf[0].filename)
+              check(len(raw)==row['member_bytes']==52122 and sha(raw)==jh==row['member_sha256'],'member SHA/size')
+              check(inf[0].CRC==crc==row['member_crc'],'member CRC')
+              validate_report(c,json.loads(raw))
+          sources={'research/h2_acl_physical_dossier_2026_10_21/test_dossier.py':'16177ba8520f2e2c01c92a295107cd6219473f6a',
+            '.github/workflows/h2-acl-physical-semantic-dossier-2026-10-21.yml':'2f8b36b612fe30d46124ae8732fa5216aef94f1a',
+            'research/h2_non_superuser_guard_acl_2026-10-20/007_non_superuser_guard_transfer.sql':'8dc20d11f28db2d8c2b6244b5c43e8bd23548abd',
+            'research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql':'59eab59235f8aee14837ce7494649edba674e1ce',
+            'research/h2_acl_physical_dossier_2026_10_21/DECISION_DOSSIER.md':'3c8b8c9d6bce945b3c434fb707177d60b4f422fa'}
+          check(m['source_blobs']==sources,'source manifest')
+          for path,v in sources.items():
+            original='8b16053e031fe84f0b303ad531956b0f319ffbc5' if path.endswith('DECISION_DOSSIER.md') else TESTED
+            check(obj(path)==v and subprocess.check_output(['git','rev-parse',original+':'+path],text=True).strip()==v,'source Git blob drift')
+          for c in EXPECTED:
+            b=f[c]; raw_sha1=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\x00'+b).hexdigest()
+            check(obj(BASE+c+'.zip')==raw_sha1,'Git raw object mismatch')
+            print('PASS_ORIGINAL_GIT_OBJECT',c,obj(BASE+c+'.zip'),sha(b))
+          validate(m,f)
+          def bad(label,func):
+            try:func()
+            except (ValueError,KeyError,TypeError,zipfile.BadZipFile,json.JSONDecodeError):
+              print('PASS_REJECTED',label);return
+            raise RuntimeError('NEGATIVE_ACCEPTED_'+label)
+          changes=[
+            ('run',lambda v:v.update(run=1)),
+            ('source',lambda v:v.update(source='0'*40)),
+            ('job',lambda v:v['copies']['A'].update(job=1)),
+            ('artifact',lambda v:v['copies']['B'].update(artifact=1)),
+            ('zip_sha',lambda v:v['copies']['A'].update(zip_sha256='0'*64)),
+            ('zip_length',lambda v:v['copies']['B'].update(zip_bytes=1)),
+            ('member_sha',lambda v:v['copies']['A'].update(member_sha256='0'*64)),
+            ('member_crc',lambda v:v['copies']['B'].update(member_crc=0)),
+            ('extra_relation',lambda v:v['allowed'].append('unauthorized')),
+            ('option_b_activated',lambda v:v.update(option_b='ACCEPTED')),
+            ('verdict_change',lambda v:v.update(verdict='PASS')),
+            ('missing_copy',lambda v:v['copies'].pop('B'))]
+          for name,change in changes:
+            v=copy.deepcopy(m);change(v);bad(name,lambda v=v:validate(v,f))
+          flipped=dict(f);flipped['A']=f['A'][:-1]+bytes([f['A'][-1]^1]);bad('zip_flip',lambda:validate(m,flipped))
+          swapped=dict(f);swapped['A']=f['B'];bad('swapped_original_copy',lambda:validate(m,swapped))
+          report=json.loads(zipfile.ZipFile(io.BytesIO(f['A'])).read('h2_acl_decision_A.json'))
+          manipulations=[
+            ('42_checks_false',lambda r:r.update(tests_passed=41)),
+            ('one_check_failure',lambda r:r['checks'][0].update({'pass':False})),
+            ('NULL_restoration_falsified',lambda r:r['evidence']['restoration'].update(null_candidates=1)),
+            ('eighth_catalog_delta',lambda r:r['evidence']['initial_catalog_delta']['relations'].update({'eighth':{}})),
+            ('owner_acl_privilege_expansion',lambda r:r['evidence']['initial_catalog_delta']['relations']['attack_events']['after'].__setitem__(1,'{PUBLIC=arwdDxtm/h2_schema_owner_test}')),
+            ('future_dump_mismatch',lambda r:r['evidence']['normalized_dump'].update(identical=False)),
+            ('history_tip_mismatch',lambda r:r['evidence']['population'].update(tip_count=99))]
+          for name,change in manipulations:
+            r=copy.deepcopy(report);change(r);bad(name,lambda r=r:validate_report('A',r))
+          print('PASS_NEGATIVES',len(changes)+2+len(manipulations))
+          print('PASS_ORIGINAL_BOTH_ZIPS_MEMBER_CRC_SOURCE_GIT_BLOBS_42_CHECKS_43_PROBES')
+          print('FINAL_VERDICT_PARTIAL_NO_EXACT_RESTORATION_PROVEN_OPTION_B_PROPOSAL_ONLY')
+          PY
