@@ -144,7 +144,7 @@ jobs:
           manifest_raw = (ROOT / "H2_READONLY_QUERY_MANIFEST.json").read_bytes()
           manifest = json.loads(manifest_raw.decode("utf-8"))
           canonical = (json.dumps(manifest, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\n").encode("utf-8")
-          require(hashlib.sha256(canonical).hexdigest() == MANIFEST_SHA256, "canonical manifest SHA256")
+          require(hashlib.sha256(canonical).hexdigest() == MANIFEST_SHA256, "canonical manifest SHA256: computed=" + hashlib.sha256(canonical).hexdigest() + " expected=" + MANIFEST_SHA256)
           require(manifest["source"]["accepted_eligibility_research"] == "576ac42b7734106ccc0edc858173c90f82537d85", "eligibility pin")
           require(manifest["source"]["accepted_coordination"] == "66fbabf20644797bd67d3790893b4103a5dcb8ef", "coordination pin")
           require(manifest["source"]["main_head"] == "b5e9b078f171a15ffcf1cb197b61018cd76ca611", "historical main source pin")
