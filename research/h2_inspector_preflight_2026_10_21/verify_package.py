@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Offline H2 catalog inspector manifest verifier. NO NETWORK OR DATABASE CLIENT."""
-import copy, json, re
+import copy, json, re, hashlib
 from pathlib import Path
 PATH=Path(__file__).resolve().parents[2]/"H2_READONLY_QUERY_MANIFEST.json"
 BANNED=("INSERT","UPDATE","DELETE","CREATE","ALTER","DROP","GRANT","REVOKE","COMMIT","SET ROLE","EXPLAIN","INTO","COPY","DO","CALL","TRUNCATE","VACUUM","LOCK")
@@ -21,8 +21,11 @@ def check(m):
     if s!=["BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;","SET LOCAL statement_timeout = '15s';","SET LOCAL lock_timeout = '5s';","SET LOCAL idle_in_transaction_session_timeout = '30s';","SET LOCAL search_path = pg_catalog;","ROLLBACK;"]:reject("session not fail closed")
     q=m.get("queries",[])
     if len(q)!=13 or [x.get("id") for x in q]!=["Q%02d"%i for i in range(13)]:reject("query count/order")
+    if m.get("query_sha256_algorithm")!="SHA-256 of exact UTF-8 SQL string including terminal semicolon; no newline appended": reject("missing sha policy")
+    if m.get("session_sha256")!=[hashlib.sha256(s.encode("utf-8")).hexdigest() for s in s]:reject("session sha mismatch")
     for x in q:
         stmt=x.get("sql","")
+        if x.get("sql_sha256")!=hashlib.sha256(stmt.encode("utf-8")).hexdigest():reject("SQL sha mismatch")
         if not re.fullmatch(r"SELECT [^;]+;",stmt,re.I|re.S):reject("non SELECT query")
         sql_without_literals=re.sub(r"'(?:''|[^'])*'", "''", stmt)
         if re.search(r"(?i)\b(?:"+"|".join(BANNED)+r")\b",sql_without_literals):reject("unsafe keyword")
@@ -67,14 +70,16 @@ def tests():
     attempt("missing_query",lambda x:x["queries"].pop())
     attempt("forged_source",lambda x:x["provenance"].__setitem__("eligibility_commit","0"*40))
     attempt("removed_acl_physical",lambda x:x["queries"][5].__setitem__("sql",x["queries"][5]["sql"].replace("relacl IS NULL","relacl IS NOT NULL")))
+    attempt("tampered_query_digest",lambda x:x["queries"][0].__setitem__("sql_sha256","0"*64))
+    attempt("tampered_session_digest",lambda x:x["session_sha256"].__setitem__(0,"0"*64))
     attempt("wrong_matrix",lambda x:x["original_matrix"].__setitem__("match",206))
     attempt("membership_override",lambda x:x["inspector"].__setitem__("allow_membership",True))
     attempt("inspector_already_exists",lambda x:x["inspector"].__setitem__("verified_existing",True))
     attempt("live_I_claim",lambda x:x.__setitem__("live_I1_to_I7","PASS"))
-    assert len(neg)==24
+    assert len(neg)==26
     print("OFFLINE_QUERY_ALLOWLIST=13/13")
     print("OFFLINE_I1_TO_I7_DESIGN=PASS_BOUNDED")
-    print("NEGATIVE_CONTROLS=24/24")
+    print("NEGATIVE_CONTROLS=26/26")
     print("LIVE_I1_TO_I7=NOT_RUN")
     print("NEON_CONNECTIONS=0")
     print("NEON_API_CALLS=0")
