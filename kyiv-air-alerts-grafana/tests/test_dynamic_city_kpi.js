@@ -73,5 +73,5 @@ assert.ok(frontend.includes('if (period !== "daily28") return;'));
 assert.ok(frontend.includes('row.dataset.csvKpis = "selected-range"'));
 assert.ok(frontend.includes("state.lastCityKpi"));
 assert.ok(html.includes('id="kpiRangeNote"'));
-assert.match(html,/kpi-range\.js\?v=20261021-(?:kpi|historical-kpi)-test1/);
+assert.match(html,/kpi-range\.js\?v=20261021-(?:kpi|historical-kpi|interval-kpi)-test1/);
 console.log("PASS: live 23-city snapshot, partial current day, date boundaries, monthly/day nonoverlap, weighted duration, missing-data fail-closed, KPI/CSV binding");
