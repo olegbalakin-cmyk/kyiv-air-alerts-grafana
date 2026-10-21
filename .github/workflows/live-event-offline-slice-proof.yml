@@ -1,0 +1,33 @@
+name: Isolated offline live-event minimal cycle proof
+on:
+  push:
+    branches:
+      - research-live-events-minimal-cycle-2026-10-21
+    paths:
+      - "research/live_event_minimal_cycle_2026_10_21/**"
+      - ".github/workflows/live-event-offline-slice-proof.yml"
+permissions:
+  contents: read
+jobs:
+  read_only_synthetic_e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline atomic write and idempotency regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/live_event_minimal_cycle_2026_10_21/offline_cycle.py --test
+      - name: Generate human-readable offline test report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/live_event_minimal_cycle_2026_10_21/offline_cycle.py --output out/live_event_minimal_cycle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offline-live-event-minimal-cycle
+          path: out/live_event_minimal_cycle/
+          if-no-files-found: error
