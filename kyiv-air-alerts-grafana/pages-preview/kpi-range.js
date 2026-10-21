@@ -42,21 +42,42 @@
       Number.isInteger(n) && n >= 0 && Number.isFinite(h) && h >= 0 &&
       (n === 0 || (Number.isFinite(m) && m >= 0));
   }
-  function historicalMax(history, from, to) {
+  function historicalMax(history, from, to, recentRows = []) {
     if (!history || history.status !== "verified" || !validDay(from) || !validDay(to) ||
-        from < history.start || to > history.end || !Array.isArray(history.counts)) return null;
-    const first = spanDays(history.start, from)-1;
-    const last = spanDays(history.start, to)-1;
-    if (!Number.isInteger(first) || !Number.isInteger(last) || first < 0 ||
-        last >= history.counts.length || history.counts.length !== spanDays(history.start, history.end)) return null;
+        from < history.start || from > to || !Array.isArray(history.counts) ||
+        history.counts.length !== spanDays(history.start, history.end)) return null;
+    const newer = new Map();
+    for (const row of recentRows) {
+      if (!validDay(row.date)) continue;
+      const date = row.date;
+      if (newer.has(date)) return null;
+      newer.set(date, row.alerts_started);
+    }
+    // Recent daily source is independently reconciled against the historical
+    // overlap before allowing it to extend the immutable preview snapshot.
+    for (const [day,n] of newer) {
+      if (!Number.isInteger(n) || n < 0) return null;
+      if (day >= history.start && day <= history.end &&
+          n !== history.counts[spanDays(history.start, day)-1]) return null;
+    }
+    const values = [];
+    for (let day = from; day <= to; day = plusDay(day)) {
+      let count;
+      if (day <= history.end) {
+        count = history.counts[spanDays(history.start,day)-1];
+      } else {
+        count = newer.get(day);
+      }
+      if (!Number.isInteger(count) || count < 0) return null;
+      values.push({day,count});
+      if (values.length > 36600) return null;
+    }
     let maximum = null;
     const dates = [];
-    for (let i = first; i <= last; i++) {
-      const n = history.counts[i];
-      if (!Number.isInteger(n) || n < 0) return null;
-      if (maximum === null || n > maximum) {
-        maximum = n; dates.length = 0; dates.push(plusDay(history.start,i));
-      } else if (n === maximum) dates.push(plusDay(history.start,i));
+    for (const {day,count} of values) {
+      if (maximum === null || count > maximum) {
+        maximum = count; dates.length = 0; dates.push(day);
+      } else if (count === maximum) dates.push(day);
     }
     return maximum === null ? null : {max:maximum, dates};
   }

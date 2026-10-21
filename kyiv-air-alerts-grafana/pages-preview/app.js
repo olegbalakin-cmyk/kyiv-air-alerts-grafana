@@ -2079,7 +2079,7 @@ function renderDatasetSummary() {
 function renderSelectedCityKpis(city, key, from, to) {
   const kpi = window.KpiRange.calculate(city, from, to);
   const index = state.historicalDaily?.cities?.[key];
-  const historicMax = kpi.complete ? window.KpiRange.historicalMax(index, from, to) : null;
+  const historicMax = kpi.complete ? window.KpiRange.historicalMax(index, from, to, city.daily28 || []) : null;
   if (historicMax) {
     kpi.maxDay = historicMax.max;
     kpi.maxDayDate = historicMax.dates.join(", ");
