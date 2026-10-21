@@ -140,7 +140,7 @@ function applyStaticLanguage(){
  document.querySelector('meta[name="description"]')?.setAttribute("content",md);document.querySelector('meta[property="og:locale"]')?.setAttribute("content",currentLanguage==="en"?"en_US":"uk_UA");document.querySelector('meta[property="og:site_name"]')?.setAttribute("content",tr("Повітряні тривоги — міста України","Air alerts — Ukrainian cities"));document.querySelector('meta[property="og:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[property="og:description"]')?.setAttribute("content",md);document.querySelector('meta[name="twitter:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[name="twitter:description"]')?.setAttribute("content",md);
  setLocalizedText(".header-copy .eyebrow","Відкриті дані · міста України","Open data · Ukrainian cities");setLocalizedText(".header-copy h1","Повітряні тривоги","Air alerts");setLocalizedText(".header-copy .subtitle","Історичні дані про повітряні тривоги в обласних центрах України. Там, де тривога не оголошується окремо для міста, використовуються дані відповідного адміністративного району — це завжди явно позначено.","Historical air-alert data for Ukrainian regional centres. Where alerts are not issued separately for a city, the corresponding administrative district is used and clearly labelled.");
  setLocalizedAttr("#languageSwitch","aria-label","Мова","Language");$("langUk")?.setAttribute("aria-pressed",currentLanguage==="uk"?"true":"false");$("langEn")?.setAttribute("aria-pressed",currentLanguage==="en"?"true":"false");setLocalizedText("#showTour","Показати тур","Show tour");setLocalizedText("#copyLink","Скопіювати посилання","Copy link");
- setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
+ setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","allTime","За весь час","All time");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  for(const id of ["cityDateFrom","rolling7dDateFrom","shortDateFrom","compareDateFrom","tableDateFrom"])setLocalizedText(`label[for="${id}"]`,"Від","From");
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
  for(const picker of document.querySelectorAll(".date-picker-native")) {
@@ -770,7 +770,7 @@ function mergeCurrentDayDaily28(cities, envelope, todayKyiv = kyivCalendarToday(
 }
 
 function rowTime(row, period) {
-  if (period === "monthly") return row.month || String(row.time || "").slice(0, 7);
+  if (period === "monthly" || period === "allTime") return row.month || String(row.time || "").slice(0, 7);
   if (period === "daily" || period === "daily28") return row.date || String(row.time || "").slice(0, 10);
   if (period === "rolling30" || period === "rolling90" || period === "rolling180") {
     return row.window_end || String(row.time || "").slice(0, 10);
@@ -934,14 +934,16 @@ function derivedRolling180Rows(city) {
 }
 
 function periodRows(city, period) {
+  // "All time" is the whole accessible monthly history, not a rolling window.
+  if (period === "allTime") return city?.monthly || [];
   if (period === "daily28") return derivedDaily28Rows(city);
   if (period === "calendarWeekly") return derivedCalendarWeeks(city);
   if (period === "rolling180") return derivedRolling180Rows(city);
   return city?.[period] || [];
 }
 
-// "Last 28 days" selects a real date window; all other intervals choose
-// chart granularity and use the user's persistent From/To range.
+// "Last 28 days" and "All time" explicitly reset From/To.
+ // Other chart intervals preserve manually selected dates.
 function cityPeriodDateValues(city, period, rows) {
   if (period === "daily28") return (rows || []).map(row => rowTime(row, "daily28"));
   const allHistory = window.KpiRange.bounds(city);
@@ -950,8 +952,8 @@ function cityPeriodDateValues(city, period, rows) {
 function resetCityDisplayRange() {
   const key = $("citySelect")?.value;
   const period = $("cityPeriod")?.value;
-  // Only an explicit selection of this 28-day preset resets both dates.
-  if (period !== "daily28") return;
+  // Only explicit period presets reset the dates; graph granularities do not.
+  if (period !== "daily28" && period !== "allTime") return;
   const city = state.data.cities?.[key];
   const rows = periodRows(city, period);
   const range = syncDateRange("cityDateFrom", "cityDateTo",
@@ -2108,8 +2110,12 @@ function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
   $("kpiMaxDayDate").textContent = kpi.complete && kpi.maxDay != null ? kpi.maxDayDate : "";
   const label = day => window.KpiRange.validDay(day)
     ? day.slice(8, 10) + "." + day.slice(5, 7) + "." + day.slice(0, 4) : day;
+  // Custom edits to an All time preset no longer claim a full-history range.
+  const fullHistory = chartPeriod === "allTime" &&
+    from === $("cityDateFrom")?.min && to === $("cityDateTo")?.max;
   const heading = range.kind === "rolling" ? tr("Останні "+range.days+" днів","Last "+range.days+" days")
     : range.kind === "calendarWeek" ? tr("Останній повний тиждень","Last complete week")
+    : fullHistory ? tr("За весь час","All time")
     : tr("Період","Period");
   const notes = [heading + ": " + label(range.from) + " – " + label(range.to)];
   if (!kpi.complete) {
@@ -3334,17 +3340,22 @@ function renderMethodology(){
  const rolling=rolling7dEnabled(),cw=$("cityWeeklyOption"),pw=$("compareWeeklyOption");
  if(cw)cw.textContent=rolling?tr("Ковзні 7 днів","Rolling 7 days"):tr("Тижні","Weeks");
  if(pw)pw.textContent=rolling?tr("Ковзні 7 днів","Rolling 7 days"):tr("Тижні","Weeks");
- const p=$("periodMethodology");if(p)p.textContent=rolling?tr("KPI обчислюються за датами «Від» і «До» у часовій зоні Europe/Kyiv. Вибір «Останні 28 днів» встановлює межі 28-денного графіка, а інші інтервали зберігають вибрані дати. Поточний неповний день позначається окремо. Ковзні 7-, 30- і 90-денні показники будуються лише тоді, коли для всього вікна вже є дані. Поточний неповний зріз, якщо він показаний, позначається пунктиром.","KPI cards cover the selected From–To dates in Europe/Kyiv time. Last 28 Days sets them to the 28 displayed dates; other intervals preserve them. A current incomplete day is marked separately. Rolling 7-, 30- and 90-day indicators are calculated only when data are available for the full window. A current incomplete period, where shown, is marked with a dashed segment."):tr("KPI обчислюються за датами «Від» і «До» у часовій зоні Europe/Kyiv. Вибір «Останні 28 днів» встановлює межі видимого графіка; інші інтервали зберігають вибрані дати. Неповний день позначається окремо. У графіках з інтервалом «Останні 28 днів» показано 27 завершених днів і поточний неповний день пунктиром. На місячних і тижневих графіках перший неповний період не показується.","KPI cards use selected From–To dates in Europe/Kyiv time. Last 28 Days resets both dates to the visible period; other intervals preserve them. Incomplete days are flagged separately. Charts using the Last 28 days interval show 27 completed days plus the current incomplete day as a dashed point. On monthly and weekly charts, the first incomplete period is not shown.");
+ const p=$("periodMethodology");if(p)p.textContent=rolling?tr("KPI обчислюються за датами «Від» і «До» у часовій зоні Europe/Kyiv. «Останні 28 днів» і «За весь час» встановлюють відповідні межі дат; інші інтервали їх зберігають. «За весь час» показує помісячний графік. Поточний неповний день позначається окремо. Ковзні 7-, 30- і 90-денні показники будуються лише тоді, коли для всього вікна вже є дані. Поточний неповний зріз, якщо він показаний, позначається пунктиром.","KPI cards cover the selected From–To dates in Europe/Kyiv time. Last 28 Days and All time set their respective date bounds; other intervals retain them. All time charts display months. A current incomplete day is marked separately. Rolling 7-, 30- and 90-day indicators are calculated only when data are available for the full window. A current incomplete period, where shown, is marked with a dashed segment."):tr("KPI обчислюються за датами «Від» і «До» у часовій зоні Europe/Kyiv. «Останні 28 днів» і «За весь час» встановлюють відповідні межі дат; інші інтервали їх зберігають. «За весь час» показує помісячний графік. Неповний день позначається окремо. У графіках з інтервалом «Останні 28 днів» показано 27 завершених днів і поточний неповний день пунктиром. На місячних і тижневих графіках перший неповний період не показується.","KPI cards use selected From–To dates in Europe/Kyiv time. Last 28 Days and All time set their respective date bounds; other intervals retain them. All time charts display months. Incomplete days are flagged separately. Charts using the Last 28 days interval show 27 completed days plus the current incomplete day as a dashed point. On monthly and weekly charts, the first incomplete period is not shown.");
 }
 
 function bind() {
-  $("citySelect").addEventListener("change", renderCity);
+  $("citySelect").addEventListener("change", () => {
+    // "All time" means the selected city's complete available history,
+    // which can start on a different date than the previous city's series.
+    if ($("cityPeriod").value === "allTime") resetCityDisplayRange();
+    renderCity();
+  });
   $("burdenYear")?.addEventListener("change", () => { renderAlertBurden($("citySelect").value); updateUrl(); });
   $("heavyDaysExcludeZero")?.addEventListener("change", () => { renderAlertBurden($("citySelect").value); updateUrl(); });
   $("daypartYear")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
   $("daypartMode")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
   $("cityPeriod").addEventListener("change", () => {
-    if ($("cityPeriod").value === "daily28") resetCityDisplayRange();
+    if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();
     renderCity();
   });
   document.querySelectorAll(".time-of-day-range-option").forEach(option => {
@@ -3498,7 +3509,7 @@ async function init() {
   while (defaults.length < 3 && keys[defaults.length]) defaults.push(keys[defaults.length]);
 
   const cityDefault = validParam("city", keys, defaults[0] || keys[0]);
-  const periodDefault = validParam("period", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly"], "monthly");
+  const periodDefault = validParam("period", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly", "allTime"], "monthly");
   const aDefault = validParam("a", keys, defaults[0] || keys[0]);
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");
