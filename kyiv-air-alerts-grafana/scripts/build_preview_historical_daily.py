@@ -33,7 +33,7 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
     sys.path.insert(0, str(scripts))
     # These imports provide the exact alert normalizations used by site-prod.
     import apply_site_rolling_7d as historical
-    from update_data import TZ, round3, daterange, union_daily_seconds
+    from update_data import TZ, round3, daterange, union_daily_seconds, day_counts_and_durations
     source = json.loads((root / "data" / "dashboard_data.json").read_text(encoding="utf-8"))
     cities = source.get("cities", {})
     keys = source.get("multicity_meta", {}).get("production_city_keys")
@@ -80,15 +80,27 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
             if (last_day - first_day).days > 38000:
                 raise ValueError("unexpected historical span")
             counts = day_count(alerts, TZ)
-            # Identical union-of-overlapping-interval seconds method as the producer.
+            # Same overlap-deduplication and complete-episode start attribution
+            # as the existing production generator, never sum raw overlaps.
             duration_seconds = union_daily_seconds(alerts, first_day, last_day)
-            days = []
+            counted, durations_by_start = day_counts_and_durations(alerts, last_day)
+            days, daily_seconds, started_seconds = [], [], []
             current = first_day
             while current <= last_day:
-                days.append(int(counts.get(current, 0)))
+                n = int(counts.get(current, 0))
+                if n != int(counted.get(current, 0)):
+                    raise ValueError("daily start attribution mismatch")
+                elapsed = float(duration_seconds.get(current, 0.0))
+                started = sum(float(v) * 60 for v in durations_by_start.get(current, []))
+                if not (math.isfinite(elapsed) and elapsed >= 0 and
+                        math.isfinite(started) and started >= 0):
+                    raise ValueError("invalid daily seconds")
+                days.append(n)
+                daily_seconds.append(elapsed)
+                started_seconds.append(started)
                 current += timedelta(days=1)
-            if any(value < 0 for value in days):
-                raise ValueError("negative daily count")
+            if not (len(days) == len(daily_seconds) == len(started_seconds)):
+                raise ValueError("daily metric lengths diverged")
             def count_range(start: date, end: date) -> int:
                 left = (start - first_day).days
                 right = (end - first_day).days + 1
@@ -98,6 +110,7 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
             checked_months = 0
             verified_seconds = {}
             seconds_mismatch = []
+            verified_metric_months = []
             for row in city.get("monthly", []):
                 m = row.get("month") or str(row.get("time", ""))[:7]
                 if not isinstance(m, str) or len(m) != 7 or row.get("is_partial_period"):
@@ -119,9 +132,23 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
                     verified_seconds[m] = {"seconds": seconds, "alerts_started": expected}
                 else:
                     seconds_mismatch.append(m)
+                # Both time-under-alert and mean full duration of alerts
+                # started in the month must match the published rounded values.
+                started_total = sum(
+                    started_seconds[(d-first_day).days] for d in daterange(m_start, m_end)
+                )
+                published_duration = row.get("avg_alert_duration_min")
+                duration_ok = (
+                    (actual == 0 and published_duration is None) or
+                    (actual > 0 and isinstance(published_duration, (int, float))
+                     and round3(started_total / actual / 60.0) == float(published_duration))
+                )
+                if m in verified_seconds and duration_ok:
+                    verified_metric_months.append(m)
             # Also match completed 28-day production rows, which overlap the
             # latest history and detect source-version drift at the right edge.
             checked_days = 0
+            verified_metric_days = []
             for row in city.get("daily28", []):
                 d = date.fromisoformat(row["date"])
                 if d < first_day or d > last_day or row.get("is_partial_period"):
@@ -131,12 +158,31 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
                 if actual != expected:
                     raise ValueError(f"daily parity {d.isoformat()} expected={expected}, observed={actual}")
                 checked_days += 1
+                pos = (d-first_day).days
+                published_hours = row.get("total_alert_duration_hours")
+                published_duration = row.get("avg_alert_duration_minutes")
+                duration_ok = (
+                    (expected == 0 and published_duration is None) or
+                    (expected > 0 and isinstance(published_duration, (int, float))
+                     and round3(started_seconds[pos] / expected / 60.0) == float(published_duration))
+                )
+                hours_ok = (
+                    isinstance(published_hours, (int, float)) and
+                    round3(daily_seconds[pos] / 3600.0) == float(published_hours)
+                )
+                if duration_ok and hours_ok:
+                    verified_metric_days.append(d.isoformat())
             if checked_months < 1 or checked_days < 1:
                 raise ValueError(f"insufficient independent aggregate parity {checked_months}/{checked_days}")
             record = {
                 "status": "verified", "source_type": record["source_type"],
                 "start": first_day.isoformat(), "end": last_day.isoformat(),
-                "counts": days, "checked_complete_months": checked_months,
+                "counts": days,
+                "daily_total_alert_duration_seconds": daily_seconds,
+                "daily_started_alert_duration_seconds": started_seconds,
+                "verified_metric_months": verified_metric_months,
+                "verified_metric_days": verified_metric_days,
+                "checked_complete_months": checked_months,
                 "checked_recent_days": checked_days, "total_starts": sum(days),
                 "max": max(days),
                 "monthly_total_alert_duration_seconds": verified_seconds,
@@ -152,6 +198,14 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
     payload["meta"]["verified_count"] = len(verified)
     payload["meta"]["exact_month_seconds_count"] = sum(
         payload["cities"][key].get("monthly_seconds_verified", 0) for key in verified
+    )
+    payload["meta"]["verified_full_metric_months"] = sum(
+        len(payload["cities"][key].get("verified_metric_months", []))
+        for key in verified
+    )
+    payload["meta"]["metric_day_seconds_definition"] = (
+        "daily union of overlap-deduplicated local alert intervals; "
+        "started-duration sum contains full episodes by local start date"
     )
     payload["meta"]["external_source_error"] = external_error
     if "kyiv" not in verified:
