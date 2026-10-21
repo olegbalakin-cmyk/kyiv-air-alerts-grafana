@@ -2113,8 +2113,18 @@ function renderSelectedCityKpis(city, key, from, to) {
     ));
   } else {
     if (kpi.partialThrough) {
-      const clock = partialPeriodFooter({ is_partial_period: true, partial_through: kpi.partialThrough });
-      notes.push(tr("Неповний день", "Incomplete day") + (clock ? " · " + clock : ""));
+      const through = String(kpi.partialThrough);
+      const day = through.slice(0, 10);
+      if (window.KpiRange.validDay(day) &&
+          (through === day || validPartialThrough(through, day))) {
+        const clock = partialThroughKyivClock(through, day);
+        const dated = label(day);
+        notes.push(clock
+          ? tr(`Дані за ${dated} станом на ${clock}`, `Data for ${dated} as of ${clock}`)
+          : tr(`Дані за ${dated} (неповний день)`, `Data for ${dated} (incomplete day)`));
+      } else {
+        notes.push(tr("Неповні дані", "Partial data"));
+      }
     }
     if (kpi.hasMonthly) {
       notes.push(tr("Години ≈: сума округлених помісячних показників.",
@@ -2128,12 +2138,6 @@ function renderSelectedCityKpis(city, key, from, to) {
       notes.push(tr("За період не зафіксовано тривог для розрахунку середньої тривалості.",
         "No alerts in range to calculate average duration."));
     }
-  }
-  if (["weekly", "rolling30", "rolling90", "rolling180"].includes($("cityPeriod")?.value)) {
-    notes.push(tr(
-      "На графіку ковзні вікна; KPI підсумовані за датами «Від»–«До» без повторного підрахунку.",
-      "Chart points are moving windows; KPIs total the selected From–To dates without double-counting."
-    ));
   }
   const note = $("kpiRangeNote");
   if (note) note.textContent = notes.join(" · ");

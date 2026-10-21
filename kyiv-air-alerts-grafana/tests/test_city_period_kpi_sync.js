@@ -56,7 +56,9 @@ const expected28=rows.reduce((s,r)=>s+r.alerts_started,0);
 assert.equal(e("state.lastCityKpi.alerts"),expected28);
 assert.equal(e("state.lastCityKpi.usedDays"),28);
 assert.equal(fields.kpiAlerts.textContent,String(expected28));
-assert.match(fields.kpiRangeNote.textContent,/Неповний день/);
+assert.match(fields.kpiRangeNote.textContent,/Дані за 20\.10\.2026 станом на 23:25/);
+assert.doesNotMatch(fields.kpiRangeNote.textContent,/Неповний день.*Дані станом на/);
+assert.equal(fields.kpiRangeNote.textContent.endsWith(" · "),false);
 // Narrow manually within 28 days => both plot and KPI use the subset.
 fields.cityDateFrom.value="2026-10-01"; fields.cityDateTo.value="2026-10-10";
 const narrowed=e("syncDateRange('cityDateFrom','cityDateTo',cityPeriodDateValues(city,'daily28',periodRows(city,'daily28')))");
@@ -79,7 +81,8 @@ for(const period of ["monthly","calendarWeekly","weekly","rolling30","rolling90"
  e("renderSelectedCityKpis(city,'kyiv','2026-10-01','2026-10-10')");
  assert.equal(fields.kpiAlerts.textContent,String(expected10),period+" KPI");
 }
-assert.match(fields.kpiRangeNote.textContent,/ковзні вікна/);
+assert.doesNotMatch(fields.kpiRangeNote.textContent,/без повторного підрахунку|ковзні вікна/);
+assert.doesNotMatch(code,/KPI підсумовані за датами|KPIs total the selected From.To dates without double-counting/);
 // Deep-link custom subset must be preserved on refresh (without explicit preset click).
 ctx.location.search="?lang=uk&period=daily28&cityfrom=2026-10-03&cityto=2026-10-08";
 e("setDateInputFromParam('cityDateFrom','cityfrom')");
@@ -96,4 +99,29 @@ const available=e("cityPeriodDateValues(completeCity,'daily28',periodRows(comple
 assert.equal(available.length,28);
 assert.equal(available[0],ctx.completeCity.daily28[0].date);
 assert.equal(available.at(-1),ctx.completeCity.daily28.at(-1).date);
-console.log("PASS: 28-day explicit switch, exact KPI and plotted 28 days, manual 10-day subset, week/month/rolling retention, deep links and stale completed data");
+// Time is derived from the source timestamp in the Europe/Kyiv time zone,
+ // not from the viewer's local clock, rendering date+time together.
+ctx.freshCity={daily28:[{
+  date:"2026-10-21",alerts_started:3,total_alert_duration_hours:2,
+  avg_alert_duration_minutes:40,is_partial_period:true,
+  partial_through:"2026-10-21T08:09:41+03:00"
+}],monthly:[]};
+e("currentLanguage='uk'");
+e("renderSelectedCityKpis(freshCity,'kyiv','2026-10-21','2026-10-21')");
+assert.equal(fields.kpiRangeNote.textContent,
+  "Період: 21.10.2026 – 21.10.2026 · Дані за 21.10.2026 станом на 08:09");
+e("currentLanguage='en'");
+e("renderSelectedCityKpis(freshCity,'kyiv','2026-10-21','2026-10-21')");
+assert.equal(fields.kpiRangeNote.textContent,
+  "Period: 21.10.2026 – 21.10.2026 · Data for 21.10.2026 as of 08:09");
+// The exact UTC equivalent must preserve the Kyiv-local 08:09.
+ctx.freshCity.daily28[0].partial_through="2026-10-21T05:09:41Z";
+e("renderSelectedCityKpis(freshCity,'kyiv','2026-10-21','2026-10-21')");
+assert.match(fields.kpiRangeNote.textContent,/Data for 21\.10\.2026 as of 08:09/);
+// A source containing only a calendar date must not invent a time.
+ctx.freshCity.daily28[0].partial_through="2026-10-21";
+e("renderSelectedCityKpis(freshCity,'kyiv','2026-10-21','2026-10-21')");
+assert.match(fields.kpiRangeNote.textContent,/Data for 21\.10\.2026 \(incomplete day\)/);
+assert.doesNotMatch(fields.kpiRangeNote.textContent,/as of/);
+e("currentLanguage='uk'");
+console.log("PASS: 28-day chart/KPIs and copy; dated Kyiv-local as-of in UK/EN and UTC/date-only fallback; no redundant rolling explanation");
