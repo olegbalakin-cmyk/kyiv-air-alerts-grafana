@@ -1,0 +1,85 @@
+name: Isolated real-source event replay research
+on:
+  push:
+    branches:
+      - research-live-events-real-source-ledger-2026-10-21-gpt6
+    paths:
+      - "research/live_event_real_source_2026_10_21/**"
+      - ".github/workflows/live-event-real-source-replay-research.yml"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: isolated-real-source-event-replay-research
+  cancel-in-progress: false
+jobs:
+  real-source-readonly-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout exact isolated research commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Configure Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install only accepted classifier dependencies
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Fail closed on ambient DB credentials
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          keys = ("DATABASE_URL","DIRECT_URL","PGHOST","PGUSER","PGPASSWORD","PGDATABASE","NEON_DATABASE_URL")
+          found = [k for k in os.environ if os.environ[k] and (k in keys or k.startswith(("NEON_","POSTGRES_")))]
+          if found:
+              raise SystemExit("FORBIDDEN_AMBIENT_DATABASE_ENV:" + ",".join(found))
+          print("DATABASE_CREDENTIALS_ABSENT")
+          PY
+      - name: Run local ledger failure and fairness regression
+        run: python research/live_event_real_source_2026_10_21/ledger.py
+      - name: Execute exact authoritative classifier twice on immutable real sources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python -u research/live_event_real_source_2026_10_21/replay.py --output out/live_event_real_source
+      - name: Independently validate bounded research report
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path("out/live_event_real_source/report.json").read_text())
+          assert d["source_type"] == "REAL_ARCHIVED_NEWS_NOT_SYNTHETIC"
+          assert d["full_classifier_cohort_episodes"] == 67
+          assert d["full_classifier_cohort_candidates"] == 105
+          assert d["replay_selected_episodes"] >= 1
+          assert d["replay_selected_candidates"] >= 1
+          assert d["local_acks"] == d["replay_selected_episodes"]
+          assert d["canonical_writes"] == d["neon_writes"] == d["production_writes"] == 0
+          assert d["live_source_coverage_proven"] is False
+          for ep in d["episodes"]:
+              assert ep["acknowledged_local_only"]
+              assert ep["ledger_state"] == "COMPLETED_AND_ACKNOWLEDGED"
+              assert ep["historical_frozen_verdict_preserved"]
+              assert ep["candidate_count"] == len(ep["classifier_evidence"])
+              for candidate in ep["classifier_evidence"]:
+                  assert candidate["source_url"].startswith("https://")
+                  assert candidate["source_text_sha256"]
+                  assert not candidate["classifier_error"]
+          assert Path("out/live_event_real_source/report.html").is_file()
+          print("RESEARCH_REPORT_REAL_EVIDENCE_VERIFIED")
+          PY
+      - name: Upload immutable per-run report and local durable ACK snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-live-event-real-source-replay
+          path: out/live_event_real_source/
+          retention-days: 30
+          if-no-files-found: warn
