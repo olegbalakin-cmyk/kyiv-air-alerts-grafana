@@ -8,6 +8,7 @@ on:
       - "kyiv-air-alerts-grafana/tests/test_daily28_rollover.js"
       - "kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js"
       - "kyiv-air-alerts-grafana/tests/test_historical_max.js"
+      - "kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js"
       - "kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py"
       - ".github/workflows/chart-share-preview.yml"
 permissions:
@@ -30,6 +31,7 @@ jobs:
           node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
           node kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js
           node kyiv-air-alerts-grafana/tests/test_historical_max.js
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
           grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
           test -s kyiv-air-alerts-grafana/pages-preview/brand-mark.svg
           test -s kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg

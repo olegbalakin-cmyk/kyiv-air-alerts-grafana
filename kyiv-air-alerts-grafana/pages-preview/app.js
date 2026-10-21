@@ -124,7 +124,7 @@ function methodologyHtml(){
   <div class="eyebrow">Methodology</div><h2>How to read the data</h2>
   <h3>What does the site show?</h3><p>The site shows the history of air alerts for 23 Ukrainian cities and monthly data on deaths caused by aerial attacks in those cities.</p><p>Kyiv, Kharkiv, Zaporizhzhia and Sevastopol use separate city-level alert series. The other 19 cities use the corresponding administrative district series. This is shown directly in the label, for example, “Lviv (Lviv District)”.</p><p>A district series is not a precise measure of alerts within the city alone: it may include signals that apply to other settlements in the district.</p>
   <h3>Where does the data come from?</h3><p>For Kyiv, the main alert sources are <a href="https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/" target="_blank" rel="noopener noreferrer">Kyiv Open Data Portal</a> and <a href="https://kyiv.digital/storage/air-alert/stats.html" target="_blank" rel="noopener noreferrer">Kyiv Digital</a>. For Kharkiv, Zaporizhzhia and district-level series, the historical base is <a href="https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset" target="_blank" rel="noopener noreferrer">ukrainian-air-raid-sirens-dataset</a>, with newer data supplied by the official <a href="https://api.ukrainealarm.com/api/v3" target="_blank" rel="noopener noreferrer">UkraineAlarm API</a>.</p><p>For Sevastopol, the site uses public city-level alert and all-clear signals posted by the occupation administration’s Telegram channel <a href="https://t.me/s/razvozhaev" target="_blank" rel="noopener noreferrer">@razvozhaev</a>. Naming the source describes data provenance and does not imply recognition of the occupation administration.</p><p>The death series are reconstructed from public reports by official bodies and media. For ongoing monitoring of Kyiv, sources include <a href="https://suspilne.media/kyiv/" target="_blank" rel="noopener noreferrer">Suspilne Kyiv</a>, <a href="https://hromadske.ua/kyyiv" target="_blank" rel="noopener noreferrer">hromadske Kyiv</a> and <a href="https://www.pravda.com.ua/" target="_blank" rel="noopener noreferrer">Ukrainska Pravda</a>.</p>
-  <h3>How are the indicators calculated?</h3><p id="periodMethodology">Calculations use completed calendar days in the Europe/Kyiv time zone. Today appears only when current source data are available; KPIs still cover the last 28 completed days. KPI cards cover the selected dates, with incomplete days clearly marked.</p><ul class="methodology-metrics"><li><strong>Alerts per day</strong> — alerts that started in the selected period divided by calendar days.</li><li><strong>Hours under alert per day</strong> — total time under alert divided by days. Overlapping intervals are not counted twice. If an alert crosses midnight, its duration is split between the relevant calendar days.</li><li><strong>Average full alert duration</strong> — the average full duration of alerts that started in the selected period. If an alert ends in the next period, its full duration remains attributed to the period in which it started.</li></ul><p>City comparisons use only time periods available in all selected series.</p>
+  <h3>How are the indicators calculated?</h3><p id="periodMethodology">Calculations use completed calendar days in the Europe/Kyiv time zone. A current incomplete day appears only when data are available. KPI cards cover selected From–To dates, with Last 28 Days resetting them to the displayed 28-day window.</p><ul class="methodology-metrics"><li><strong>Alerts per day</strong> — alerts that started in the selected period divided by calendar days.</li><li><strong>Hours under alert per day</strong> — total time under alert divided by days. Overlapping intervals are not counted twice. If an alert crosses midnight, its duration is split between the relevant calendar days.</li><li><strong>Average full alert duration</strong> — the average full duration of alerts that started in the selected period. If an alert ends in the next period, its full duration remains attributed to the period in which it started.</li></ul><p>City comparisons use only time periods available in all selected series.</p>
   <h3>How are deaths counted?</h3><p>For all 23 cities, the site shows a reconstructed monthly series of deaths within the city’s administrative boundaries. This remains a city-level measure even where the alert series is district-level.</p><p>The series includes deaths causally linked to missile, drone and other aerial attacks. Ground combat and artillery shelling are excluded. If a person later dies from injuries sustained in an attack, the death is attributed to the month of that attack.</p><p>Unresolved cases that still require review are excluded from confirmed totals. The current month is incomplete and may be updated. Because the historical series is reconstructed from public reporting, it should not be read as a guaranteed complete registry of all deaths.</p>
   <h3>What should be kept in mind?</h3><p>Different series begin on different dates. The start date is shown next to the selected city. The first incomplete period is not shown.</p><p>Donetsk and Luhansk are not yet included: they require a separate methodology, and oblast-level data are not substituted for city-level data.</p>
   <details class="methodology-details"><summary>Series start dates</summary><div class="methodology-detail-grid"><div><strong>City-level data</strong><ul><li>Kyiv — 28.02.2022</li><li>Sevastopol — 25.09.2023</li><li>Kharkiv — 17.02.2025</li><li>Zaporizhzhia — 19.03.2025</li></ul></div><div><strong>District series: date confirmed by the transition to district-level alerts</strong><ul><li>Cherkasy — 10.01.2025</li><li>Zhytomyr — 23.01.2025</li><li>Dnipro — 01.05.2025</li><li>Khmelnytskyi — 07.07.2025</li><li>Poltava — 01.08.2025</li><li>Rivne — 01.08.2025</li><li>Sumy — 06.08.2025</li><li>Vinnytsia — 21.08.2025</li><li>Kropyvnytskyi — 01.09.2025</li><li>Lviv — 01.09.2025</li><li>Chernihiv — 03.09.2025</li><li>Odesa — 04.11.2025</li></ul></div><div><strong>District series: date derived from the appearance of a stable district series</strong><ul><li>Kherson — 30.08.2025</li><li>Mykolaiv — 05.11.2025</li><li>Lutsk — 06.11.2025</li><li>Uzhhorod — 06.11.2025</li><li>Ivano-Frankivsk — 06.11.2025</li><li>Ternopil — 06.11.2025</li><li>Chernivtsi — 06.11.2025</li></ul></div></div></details>
@@ -940,16 +940,22 @@ function periodRows(city, period) {
   return city?.[period] || [];
 }
 
+// "Last 28 days" selects a real date window; all other intervals choose
+// chart granularity and use the user's persistent From/To range.
+function cityPeriodDateValues(city, period, rows) {
+  if (period === "daily28") return (rows || []).map(row => rowTime(row, "daily28"));
+  const allHistory = window.KpiRange.bounds(city);
+  return allHistory.length ? allHistory : (rows || []).map(row => rowTime(row, period));
+}
 function resetCityDisplayRange() {
   const key = $("citySelect")?.value;
   const period = $("cityPeriod")?.value;
+  // Only an explicit selection of this 28-day preset resets both dates.
+  if (period !== "daily28") return;
   const city = state.data.cities?.[key];
   const rows = periodRows(city, period);
-  const range = syncDateRange(
-    "cityDateFrom",
-    "cityDateTo",
-    rows.map(row => rowTime(row, period))
-  );
+  const range = syncDateRange("cityDateFrom", "cityDateTo",
+    cityPeriodDateValues(city, period, rows));
   if (range.min && range.max) {
     setDateRangeValues("cityDateFrom", "cityDateTo", range.min, range.max);
   }
@@ -2123,6 +2129,12 @@ function renderSelectedCityKpis(city, key, from, to) {
         "No alerts in range to calculate average duration."));
     }
   }
+  if (["weekly", "rolling30", "rolling90", "rolling180"].includes($("cityPeriod")?.value)) {
+    notes.push(tr(
+      "На графіку ковзні вікна; KPI підсумовані за датами «Від»–«До» без повторного підрахунку.",
+      "Chart points are moving windows; KPIs total the selected From–To dates without double-counting."
+    ));
+  }
   const note = $("kpiRangeNote");
   if (note) note.textContent = notes.join(" · ");
 }
@@ -2162,10 +2174,10 @@ function renderCity() {
   }
 
   const allRows = periodRows(city, period);
-  // The date filter bounds span the available city data, not the chosen chart granularity.
-  const sourceBounds = window.KpiRange.bounds(city);
+  // Use the same actual days for both chart and KPI in the 28-day mode.
+  // Other intervals continue using historical bounds and selected dates.
   const activeRange = syncDateRange("cityDateFrom", "cityDateTo",
-    sourceBounds.length ? sourceBounds : allRows.map(row => rowTime(row, period)));
+    cityPeriodDateValues(city, period, allRows));
   const rows = allRows.filter(row => period === "calendarWeekly"
     ? calendarWeekOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
@@ -3316,7 +3328,7 @@ function renderMethodology(){
  const rolling=rolling7dEnabled(),cw=$("cityWeeklyOption"),pw=$("compareWeeklyOption");
  if(cw)cw.textContent=rolling?tr("Ковзні 7 днів","Rolling 7 days"):tr("Тижні","Weeks");
  if(pw)pw.textContent=rolling?tr("Ковзні 7 днів","Rolling 7 days"):tr("Тижні","Weeks");
- const p=$("periodMethodology");if(p)p.textContent=rolling?tr("У розрахунках використовуються лише завершені календарні дні за часовою зоною Europe/Kyiv. Сьогоднішній день не враховується. KPI обчислюються за вибраними датами; неповні дні позначені окремо. Ковзні 7-, 30- і 90-денні показники будуються лише тоді, коли для всього вікна вже є дані. Поточний неповний зріз, якщо він показаний, позначається пунктиром.","Calculations use completed calendar days in the Europe/Kyiv time zone. Today is excluded. KPI cards cover the selected dates, with incomplete days clearly marked. Rolling 7-, 30- and 90-day indicators are calculated only when data are available for the full window. A current incomplete period, where shown, is marked with a dashed segment."):tr("Базові показники та KPI використовують завершені календарні дні за часовою зоною Europe/Kyiv. KPI обчислюються за вибраними датами з позначенням неповного дня. У графіках з інтервалом «Останні 28 днів» показано 27 завершених днів і поточний неповний день пунктиром. На місячних і тижневих графіках перший неповний період не показується.","Base metrics and KPI cards use completed calendar days in the Europe/Kyiv time zone. KPI cards cover the selected dates and flag partial observations. Charts using the Last 28 days interval show 27 completed days plus the current incomplete day as a dashed point. On monthly and weekly charts, the first incomplete period is not shown.");
+ const p=$("periodMethodology");if(p)p.textContent=rolling?tr("KPI обчислюються за датами «Від» і «До» у часовій зоні Europe/Kyiv. Вибір «Останні 28 днів» встановлює межі 28-денного графіка, а інші інтервали зберігають вибрані дати. Поточний неповний день позначається окремо. Ковзні 7-, 30- і 90-денні показники будуються лише тоді, коли для всього вікна вже є дані. Поточний неповний зріз, якщо він показаний, позначається пунктиром.","KPI cards cover the selected From–To dates in Europe/Kyiv time. Last 28 Days sets them to the 28 displayed dates; other intervals preserve them. A current incomplete day is marked separately. Rolling 7-, 30- and 90-day indicators are calculated only when data are available for the full window. A current incomplete period, where shown, is marked with a dashed segment."):tr("KPI обчислюються за датами «Від» і «До» у часовій зоні Europe/Kyiv. Вибір «Останні 28 днів» встановлює межі видимого графіка; інші інтервали зберігають вибрані дати. Неповний день позначається окремо. У графіках з інтервалом «Останні 28 днів» показано 27 завершених днів і поточний неповний день пунктиром. На місячних і тижневих графіках перший неповний період не показується.","KPI cards use selected From–To dates in Europe/Kyiv time. Last 28 Days resets both dates to the visible period; other intervals preserve them. Incomplete days are flagged separately. Charts using the Last 28 days interval show 27 completed days plus the current incomplete day as a dashed point. On monthly and weekly charts, the first incomplete period is not shown.");
 }
 
 function bind() {
@@ -3326,7 +3338,7 @@ function bind() {
   $("daypartYear")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
   $("daypartMode")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
   $("cityPeriod").addEventListener("change", () => {
-    // Changing graph granularity does not reset the selected calendar dates.
+    if ($("cityPeriod").value === "daily28") resetCityDisplayRange();
     renderCity();
   });
   document.querySelectorAll(".time-of-day-range-option").forEach(option => {
