@@ -1,0 +1,387 @@
+name: H2 inspector offline Git-only CI verification
+
+on:
+  push:
+    branches:
+      - research-h2-neon-catalog-inspector-package-2026-10-21-gpt6
+
+permissions:
+  contents: read
+
+jobs:
+  offline-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout pinned research commit without stored credentials
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Verify pinned sources and execute offline negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          import datetime
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import re
+          import runpy
+          import shutil
+          import subprocess
+          import tempfile
+          
+          ROOT = pathlib.Path.cwd()
+          EXPECTED_PARENT = "a4f30691d89a4206b910b8dfde5dac44aee0ed99"
+          EXPECTED_BRANCH = "research-h2-neon-catalog-inspector-package-2026-10-21-gpt6"
+          WORKFLOW_PATH = ".github/workflows/h2-inspector-offline-ci-verification.yml"
+          MANIFEST_SHA256 = "82a9e387b15ac1c9ac3afe3e2b36744da3ea9832d5548925855f6d0559a242f3"
+          SOURCE_BLOBS = {
+              "H2_INSPECTOR_TARGET_AND_ROLE.md": "82c4f02f165d1bd26efb0af17d51f6864c6fd2f3",
+              "H2_READONLY_SESSION_PROTOCOL.md": "0c3ce5ecbec6fbb11f3ef30b571323cc0761ab5e",
+              "H2_INSPECTOR_PREFLIGHT_VERIFICATION.md": "b46b3abe3de4ccb8c37f97ea1e87345503ab0851",
+              "H2_READONLY_QUERY_MANIFEST.json": "c4d4f6174699cd64710a0157da3c1bf1c85cae8d",
+              "h2_readonly_offline_verifier.py": "36953f2ce7109a4bd03b64e8a7271bc56288a9ba",
+              "h2_independent_manifest_review.py": "60a7950e661ecb736cae2202a2b883549abdd8ad",
+              "H2_INSPECTOR_NEGATIVE_CONTROLS.json": "b43a535e153876fc76902455ec8c8411ba34151f",
+              "H2_INSPECTOR_INDEPENDENT_REVIEW.json": "e970659e1657d51be028f26ea5b17a420ba456df",
+          }
+          ORIGINAL_BYTE_MATCH_FIVE = {
+              "H2_READONLY_QUERY_MANIFEST.json",
+              "h2_readonly_offline_verifier.py",
+              "h2_independent_manifest_review.py",
+              "H2_INSPECTOR_NEGATIVE_CONTROLS.json",
+              "H2_INSPECTOR_INDEPENDENT_REVIEW.json",
+          }
+          MARKDOWN_NEWLINE_DIFFERENCES = [
+              "H2_INSPECTOR_TARGET_AND_ROLE.md",
+              "H2_READONLY_SESSION_PROTOCOL.md",
+              "H2_INSPECTOR_PREFLIGHT_VERIFICATION.md",
+          ]
+          PINNED_SQL = {
+              "G01": "ce813119fd93e85000ed6fedd426eace5f3427f9b96e0580d4aa1b5e3626e061",
+              "G02": "939aa087f3989273869a0ee8e0d1a4ce97fe090dccb19ef48d237aab1f4ecb80",
+              "G03": "3935fdb92b3e4ec081b68ac204a2bd0af9419fe91ee4d880a64665470ce29e40",
+              "G04": "ed9f526db60557e19d7a6f2b489f1afcd55cc877a57ce3af708082d17452d89a",
+              "G05": "fbc7343ee2d7a011397526517bbaa1f4e401c1a58a6efbb62b1d5610b9d3bf8c",
+              "G06": "a342759e5e4e889da12e96e7270b38421becb7601bb90f82f3db47632c779b4d",
+              "G07": "3f74d91f46d32db0d40d65eba5cbd1c84b7c1fb757c741fd1692c7de1ecd240b",
+              "G08": "01cde324fd932071fd682f1928e78a0dbfd2fd1d76c34ad8e142bb9e4fcd33ce",
+              "G09": "e708c9fa96bc84b7003fd4798a8226c015dbee1b0c2dd7eace7a40c6f6899a38",
+              "G10": "498be7a1b8fe07b87675d4624521e1aff35d965789623393ab00e4d1a05f0a19",
+              "G11": "33a57845c359e82a6ba895a92eb94730756882eb791a270107bc0c2ecc4e0607",
+              "G12": "1baf7cdfeb807ca2682de3ae2a5619db3681ce2c571e690855fae5a10db8e4b8",
+              "G13": "cb4fe8636e72a1fce46a0c36da569061ef186e63ae20edaf3bddbf23ef84d738",
+              "G14": "0d819ea8ce6e3de65b1e13eeeca8bd7d68b2bf33a990a25298a8ba0c1895c932",
+          }
+          HARD_HOLDS = {
+              "H2_READONLY_NEON_PREFLIGHT_READINESS": "BLOCKED/NO-GO",
+              "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED/NO-GO",
+              "NEON_AUTHORITY_ACTIVE": "NO",
+              "PRODUCTION_CUTOVER_EXECUTED": "NO",
+              "WIP_ACTIVATION": "NO-GO",
+              "H2_ACL_OPTION_B": "BLOCKED / PROPOSAL_ONLY",
+          }
+          
+          def require(ok, message):
+              if not ok:
+                  raise RuntimeError("CI ASSERTION FAILED: " + message)
+          
+          def git(*args):
+              return subprocess.run(["git", *args], check=True, text=True, capture_output=True).stdout.strip()
+          
+          head = git("rev-parse", "HEAD")
+          require(head == os.environ["GITHUB_SHA"], "checkout commit does not equal triggering SHA")
+          require(os.environ["GITHUB_REF_NAME"] == EXPECTED_BRANCH, "unexpected triggering branch")
+          require(os.environ["GITHUB_REF"] == "refs/heads/" + EXPECTED_BRANCH, "unexpected triggering ref")
+          require(git("rev-parse", "HEAD^") == EXPECTED_PARENT, "package parent changed")
+          changed = git("diff-tree", "--no-commit-id", "--name-status", "-r", "HEAD").splitlines()
+          require(changed == ["A\t" + WORKFLOW_PATH], "CI commit changed paths beyond the one added workflow: " + repr(changed))
+          require(git("status", "--porcelain", "--untracked-files=no") == "", "dirty source checkout")
+          
+          verified_sources = {}
+          for filename, expected_sha in SOURCE_BLOBS.items():
+              path = ROOT / filename
+              require(path.is_file(), "missing source: " + filename)
+              raw = path.read_bytes()
+              actual_git = git("hash-object", "--", filename)
+              tree = git("ls-tree", "HEAD", "--", filename)
+              require(bool(tree), "Git tree entry missing for " + filename)
+              actual_tree = tree.split()[2]
+              calculated = hashlib.sha1(("blob " + str(len(raw)) + "\0").encode("ascii") + raw).hexdigest()
+              require(actual_git == actual_tree == calculated == expected_sha, "pinned Git blob mismatch: " + filename)
+              verified_sources[filename] = {
+                  "git_blob": actual_git,
+                  "sha256_file_bytes": hashlib.sha256(raw).hexdigest(),
+                  "bytes": len(raw),
+                  "source_identity_verified": True,
+                  "original_package_byte_claim": (
+                      "matches_previously_pinned_original_git_blob" if filename in ORIGINAL_BYTE_MATCH_FIVE
+                      else "text_equal_original_reported; one_terminal_newline_difference; NOT_original_byte_equal"
+                  ),
+              }
+          
+          workflow_blob = git("hash-object", "--", WORKFLOW_PATH)
+          require(git("ls-tree", "HEAD", "--", WORKFLOW_PATH).split()[2] == workflow_blob,
+                  "workflow source-to-Git-tree mapping mismatch")
+          
+          for filename in ["h2_readonly_offline_verifier.py", "h2_independent_manifest_review.py"]:
+              tree = ast.parse((ROOT / filename).read_text(encoding="utf-8"))
+              modules = []
+              for node in ast.walk(tree):
+                  if isinstance(node, ast.Import):
+                      modules.extend(alias.name.split(".")[0] for alias in node.names)
+                  if isinstance(node, ast.ImportFrom):
+                      modules.append((node.module or "").split(".")[0])
+              require(set(modules) <= {"argparse", "copy", "hashlib", "json", "pathlib", "sys", "re"},
+                      "unexpected verifier imports: " + filename + " / " + repr(modules))
+          
+          manifest_raw = (ROOT / "H2_READONLY_QUERY_MANIFEST.json").read_bytes()
+          manifest = json.loads(manifest_raw.decode("utf-8"))
+          canonical = (json.dumps(manifest, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\n").encode("utf-8")
+          require(hashlib.sha256(canonical).hexdigest() == MANIFEST_SHA256, "canonical manifest SHA256")
+          require(manifest["source"]["accepted_eligibility_research"] == "576ac42b7734106ccc0edc858173c90f82537d85", "eligibility pin")
+          require(manifest["source"]["accepted_coordination"] == "66fbabf20644797bd67d3790893b4103a5dcb8ef", "coordination pin")
+          require(manifest["source"]["main_head"] == "b5e9b078f171a15ffcf1cb197b61018cd76ca611", "historical main source pin")
+          require(manifest["authorization_state"] == "NOT_AUTHORIZED_NO_CONNECTION", "authorization status")
+          require(manifest["inspector"]["proposed_role"] == "h2_catalog_inspector_ro", "role name")
+          require(manifest["inspector"]["actual_role_verified"] is False, "role falsely attested")
+          require(manifest["inspector"]["least_privilege_verified"] is False, "privilege falsely attested")
+          require(manifest["target"]["current_endpoint_id"] is None, "current endpoint falsely attested")
+          require(manifest["target"]["endpoint_hostname"] is None, "current hostname falsely attested")
+          require(all(value is None for value in manifest["approval"].values()), "approval falsely attested")
+          require(manifest["unchanged_hard_holds"] == HARD_HOLDS, "hard holds weakened")
+          require(manifest["limits"] == {
+              "connections": 1, "transactions": 1, "unique_selects": 14,
+              "max_catalog_select_executions": 15, "max_sql_statement_executions": 21,
+              "max_result_rows_total": 180, "max_sanitized_bytes_total": 65536,
+              "max_cell_bytes": 8192, "statement_timeout_ms": 15000,
+              "lock_timeout_ms": 5000, "idle_in_transaction_timeout_ms": 30000,
+              "transaction_timeout_ms": 45000, "client_wall_clock_ms": 60000,
+          }, "budget/timeout controls")
+          require(manifest["session_sql_order"] == (
+              ["BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;",
+               "SET LOCAL statement_timeout = '15s';",
+               "SET LOCAL lock_timeout = '5s';",
+               "SET LOCAL idle_in_transaction_session_timeout = '30s';",
+               "SET LOCAL transaction_timeout = '45s';"]
+              + ["G%02d" % i for i in range(1, 15)]
+              + ["G01", "ROLLBACK;"]
+          ), "exact query order, repeat G01 and ROLLBACK")
+          require(manifest["sql_policy"] == {
+              "allow_certain_builtin_pg_catalog_functions_only": True,
+              "allow_user_defined_function_calls": False,
+              "allow_application_row_selects": False,
+              "allow_role_switch": False,
+              "allow_data_modification": False,
+              "allow_connection_fallback": False,
+              "allow_neon_api": False,
+              "capture_secrets_or_dsns": False,
+              "ignore_or_normalize_raw_relacl": False,
+          }, "SQL fail-closed policy")
+          require(len(manifest["queries"]) == 14, "not 14 SQL statements")
+          require([q["id"] for q in manifest["queries"]] == list(PINNED_SQL), "SQL order/IDs")
+          require(sum(q["max_rows"] for q in manifest["queries"]) + 1 <= 180, "aggregate row cap")
+          for q in manifest["queries"]:
+              sql = q["sql"]
+              actual = hashlib.sha256(sql.encode("utf-8")).hexdigest()
+              require(actual == q["sha256"] == PINNED_SQL[q["id"]], "SQL hash differs: " + q["id"])
+              require(sql.startswith("SELECT ") and sql.endswith(";") and sql.count(";") == 1,
+                      "not a single SELECT: " + q["id"])
+              require(q["columns"] and q["contract_ids"] and q["purpose"], "missing result schema/contract")
+              require(0 < q["max_rows"] <= 33 and q["max_cell_bytes"] == 8192, "per-query cap")
+              outside_literals = re.sub(r"'(?:[^']|'')*'", "''", sql)
+              require(not re.search(r"\b(from|join)\s+public\.", outside_literals, re.I),
+                      "application-row extraction candidate")
+              require(not re.search(r"\b(update|insert|delete|truncate|alter|drop|create|grant|revoke|execute|call|copy)\b",
+                                    outside_literals, re.I), "write/execute instruction candidate")
+          require({"raw_relacl_is_null", "raw_relacl_text"} <= set(manifest["queries"][3]["columns"]),
+                  "physical relacl representation removed")
+          
+          recorded_primary = json.loads((ROOT / "H2_INSPECTOR_NEGATIVE_CONTROLS.json").read_text(encoding="utf-8"))
+          recorded_review = json.loads((ROOT / "H2_INSPECTOR_INDEPENDENT_REVIEW.json").read_text(encoding="utf-8"))
+          controls = recorded_primary["negative_controls"]
+          require(recorded_primary["manifest_sha256"] == MANIFEST_SHA256, "primary evidence manifest SHA")
+          require(len(controls) == recorded_primary["negative_count"] == 43, "primary negative count")
+          require([x["case"] for x in controls] == (
+              ["N%02d" % i + "_" + x["case"].split("_", 1)[1] for i, x in enumerate(controls[:20], 1)]
+              + ["R%02d" % i + "_" + x["case"].split("_", 1)[1] for i, x in enumerate(controls[20:], 1)]
+          ), "negative cases ordering N01-N20 / R01-R23")
+          require(all(x["expected"] == x["observed"] == "REJECT" for x in controls),
+                  "published negative was not rejected")
+          require(recorded_review["pinned_queries"] == 14, "published reviewer SQL count")
+          require(recorded_review["rejected_negative_controls"] == 16, "published reviewer controls count")
+          require(len(recorded_review["names"]) == 16
+                  and len(set(recorded_review["names"])) == 16, "independent case IDs")
+          
+          with tempfile.TemporaryDirectory(prefix="h2-inspector-offline-") as temp:
+              copied = pathlib.Path(temp)
+              for filename in SOURCE_BLOBS:
+                  shutil.copyfile(ROOT / filename, copied / filename)
+              # Neither original executable can read CI secrets or external service settings.
+              minimal_env = {
+                  "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+                  "HOME": temp, "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1",
+              }
+              def run_offline(script, args):
+                  result = subprocess.run(["python3", "-I", script] + args,
+                                          cwd=temp, env=minimal_env, text=True,
+                                          capture_output=True, timeout=100)
+                  require(result.returncode == 0, script + " failed: " + result.stderr)
+                  require(result.stderr == "", script + " unexpected stderr")
+                  return result.stdout
+              primary_stdout = run_offline("h2_readonly_offline_verifier.py", ["--verify"])
+              review_stdout = run_offline("h2_independent_manifest_review.py", [])
+              require("PASS OFFLINE: 14 literal catalog queries; 43/43 mutated cases rejected" in primary_stdout,
+                      "primary output assertions")
+              require("MANIFEST_SHA256 " + MANIFEST_SHA256 in primary_stdout, "primary printed manifest SHA")
+              require("PASS INDEPENDENT OFFLINE: 14/14 sealed query hashes; 16/16 mutations rejected; NO NEON"
+                      in review_stdout, "independent output assertions")
+              primary_globals = runpy.run_path(str(copied / "h2_readonly_offline_verifier.py"))
+              verified_primary = primary_globals["execute_checks"](manifest)
+              require(verified_primary == recorded_primary, "primary executed 43 controls disagree with frozen evidence")
+              require(len(primary_globals["negative_cases"](manifest)) == 20, "20 manifest negatives not executed")
+              require(len(primary_globals["receipt_negative_cases"](manifest)) == 23,
+                      "23 receipt negatives not executed")
+              review_globals = runpy.run_path(str(copied / "h2_independent_manifest_review.py"))
+              require(review_globals["review"](manifest), "independent static review failed")
+              verified_independent = review_globals["negatives"](manifest)
+              require(len(verified_independent) == 16 and verified_independent == recorded_review["names"],
+                      "16 reviewer controls are not independently reproducible")
+              require(json.loads((copied / "H2_INSPECTOR_INDEPENDENT_REVIEW.json").read_text())
+                      == recorded_review, "review output does not reproduce published JSON")
+          
+          require(git("status", "--porcelain", "--untracked-files=no") == "", "source files altered by testing")
+          out = ROOT / "ci_evidence"
+          out.mkdir(exist_ok=True)
+          (out / "primary.stdout.txt").write_text(primary_stdout, encoding="utf-8")
+          (out / "independent.stdout.txt").write_text(review_stdout, encoding="utf-8")
+          (out / "source_blobs.txt").write_text("".join(
+              filename + " " + data["git_blob"] + " SHA256 " + data["sha256_file_bytes"] + "\n"
+              for filename, data in verified_sources.items()), encoding="utf-8")
+          receipt = {
+              "kind": "H2_INSPECTOR_INDEPENDENT_GIT_ONLY_CI_RECEIPT",
+              "scope": "OFFLINE_STATIC_AND_SYNTHETIC_ONLY",
+              "verdict": "PASS_BOUNDED_CI_CANDIDATE_PENDING_SEPARATE_COORDINATOR_ACCEPTANCE",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "trigger_ref": os.environ["GITHUB_REF"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "tested_commit": head,
+              "parent_package_commit": EXPECTED_PARENT,
+              "workflow_path": WORKFLOW_PATH,
+              "workflow_git_blob": workflow_blob,
+              "workflow_commit_delta": changed,
+              "verified_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "source_files": verified_sources,
+              "five_recovered_files_match_pinned_original_git_blobs": sorted(ORIGINAL_BYTE_MATCH_FIVE),
+              "three_markdown_files": {
+                  "filenames": MARKDOWN_NEWLINE_DIFFERENCES,
+                  "original_comparison": "reported text-identical with one final newline difference; NOT byte-for-byte identical",
+                  "limitation": "original off-repository ZIP was not introduced into CI; only published Git blobs verified",
+              },
+              "manifest_sha256_canonical": MANIFEST_SHA256,
+              "manifest_sha256_file_bytes": hashlib.sha256(manifest_raw).hexdigest(),
+              "sql_pinned_hashes": PINNED_SQL,
+              "sql_query_order": [q["id"] for q in manifest["queries"]],
+              "select_execution_count": 15,
+              "statement_execution_budget": 21,
+              "primary_checks": {
+                  "sql_hashes": "14/14",
+                  "manifest_negatives_rejected": "20/20",
+                  "synthetic_receipt_negatives_rejected": "23/23",
+                  "total_negatives_rejected": "43/43",
+                  "actual_stdout_file": "primary.stdout.txt",
+              },
+              "independent_checks": {
+                  "independent_query_hashes": "14/14",
+                  "independent_negatives_rejected": "16/16",
+                  "actual_stdout_file": "independent.stdout.txt",
+              },
+              "neon_access_executed": False,
+              "neon_role_provisioning": False,
+              "neon_runtime_i1_to_i7": "UNVERIFIED",
+              "coordinator_acceptance_granted": False,
+              "hard_holds": HARD_HOLDS,
+              "limitations": [
+                  "No actual Neon project/branch/endpoint/DNS/TLS route attested",
+                  "No dedicated inspector role or least-privilege runtime proof",
+                  "No Neon SQL executed, no actual I1-I7 runtime checks, no real receipt",
+                  "No migration, writer authorization, ACL Option B, WIP, site-prod or production deployment",
+                  "Artifact IDs and ZIP SHA256 are external post-upload GitHub metadata; cannot embed a ZIP digest within itself",
+                  "Evidence artifacts are immutable per Actions v4 but subject to GitHub retention policy",
+              ],
+          }
+          (out / "receipt.json").write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+          report = [
+              "# H2 Inspector: independent offline GitHub Actions CI proof",
+              "",
+              "- **Disposition:** PASS BOUNDED CI CANDIDATE — coordinator acceptance separate; Neon remains NO-GO.",
+              "- **Run:** https://github.com/" + os.environ["GITHUB_REPOSITORY"] + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+              "- **Tested commit:** " + head,
+              "- **Workflow Git blob:** " + workflow_blob,
+              "- **Eight source Git blobs:** 8/8 verified against separately pinned identities, clean checkout.",
+              "- **Source change:** only new " + WORKFLOW_PATH + ", parent " + EXPECTED_PARENT + ".",
+              "- **Original five recovered files:** exact pinned Git blob identity maintained.",
+              "- **Original three Markdown files:** text-equivalent per earlier comparison, one terminal newline differs; NOT byte-for-byte equal. Original off-repository ZIP not used in this CI run.",
+              "- **Manifest canonical SHA256:** " + MANIFEST_SHA256,
+              "- **SQL:** 14/14 SHA256 matches exact independent pins; 15 SELECT executions with G01 repeated; 21 statements; bounded catalog only; read-only transaction and mandatory ROLLBACK in specification.",
+              "- **Primary verifier:** 20/20 manifest and 23/23 synthetic receipt negatives rejected (43/43).",
+              "- **Independent reviewer:** 14/14 independently pinned queries; 16/16 mutations rejected.",
+              "- **Executed commands:** python3 h2_readonly_offline_verifier.py --verify; python3 h2_independent_manifest_review.py (isolated temporary copied files, Python -I, scrubbed process environment).",
+              "- **No Neon runtime:** I1-I7 unverified, current target routing/inspector privileges/approval unknown. No Neon queries, roles, APIs, Secrets, production or WIP operations.",
+              "- **Artifact registry:** GitHub Actions upload-artifact v4 IDs and SHA256 digests appear in the post-upload job log and are to be independently reconciled via GitHub REST.",
+              "",
+              "## Hard holds",
+              "",
+          ]
+          report.extend("- " + k + " = " + v for k, v in HARD_HOLDS.items())
+          (out / "report.md").write_text("\n".join(report) + "\n", encoding="utf-8")
+          
+          print("ASSERT_SOURCE_BLOBS=8/8 PASS")
+          print("ASSERT_WORKFLOW_PARENT_AND_DIFF=PASS")
+          print("ASSERT_WORKFLOW_BLOB=" + workflow_blob)
+          print("ASSERT_SQL_HASHES=14/14 PASS")
+          print("ASSERT_MANIFEST_SHA256=" + MANIFEST_SHA256)
+          print("ASSERT_PRIMARY_MANIFEST_NEGATIVES=20/20 PASS")
+          print("ASSERT_PRIMARY_RECEIPT_NEGATIVES=23/23 PASS")
+          print("ASSERT_PRIMARY_NEGATIVES_TOTAL=43/43 PASS")
+          print("ASSERT_INDEPENDENT_SQL_HASHES=14/14 PASS")
+          print("ASSERT_INDEPENDENT_NEGATIVES=16/16 PASS")
+          print("ASSERT_NEON_ACCESS=ZERO; NEON_READONLY_READINESS=BLOCKED/NO-GO")
+          print(primary_stdout, end="")
+          print(review_stdout, end="")
+          PY
+
+      - name: Upload immutable machine-readable receipt
+        id: receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-inspector-offline-ci-receipt
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            ci_evidence/receipt.json
+            ci_evidence/primary.stdout.txt
+            ci_evidence/independent.stdout.txt
+            ci_evidence/source_blobs.txt
+
+      - name: Upload immutable human-readable report
+        id: report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-inspector-offline-ci-report
+          if-no-files-found: error
+          retention-days: 90
+          path: ci_evidence/report.md
+
+      - name: Emit immutable artifact IDs and ZIP SHA-256 digests
+        shell: bash
+        run: |
+          printf '%s\n' "RECEIPT_ARTIFACT_ID=${'${{ steps.receipt.outputs.artifact-id }}'}" "RECEIPT_ARTIFACT_SHA256=${'${{ steps.receipt.outputs.artifact-digest }}'}"
+          printf '%s\n' "REPORT_ARTIFACT_ID=${'${{ steps.report.outputs.artifact-id }}'}" "REPORT_ARTIFACT_SHA256=${'${{ steps.report.outputs.artifact-digest }}'}"
