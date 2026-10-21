@@ -1,0 +1,426 @@
+{
+  "schema_version": 1,
+  "kind": "H2_NEON_CATALOG_INSPECTOR_OFFLINE_PROPOSAL",
+  "authorization_state": "NOT_AUTHORIZED_NO_CONNECTION",
+  "source": {
+    "main_head": "b5e9b078f171a15ffcf1cb197b61018cd76ca611",
+    "accepted_eligibility_research": "576ac42b7734106ccc0edc858173c90f82537d85",
+    "accepted_coordination": "66fbabf20644797bd67d3790893b4103a5dcb8ef",
+    "old_catalog_raw_blob": "e550b35578283b2af4e0e8fba956e98c4bcc0f03",
+    "old_catalog_audit_commit": "380e16f4d8e861a30ba899921a7dbc33d5077bd5",
+    "historical_target_design_commit": "eabdd380694abe045bf2cd15b7b83d7d1bb0d965"
+  },
+  "target": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "historical_endpoint_id": "ep-calm-rice-b5073ypp",
+    "current_endpoint_id": null,
+    "endpoint_hostname": null,
+    "host_branch_mapping_verified": false,
+    "control_plane_evidence_age_hours": null
+  },
+  "inspector": {
+    "proposed_role": "h2_catalog_inspector_ro",
+    "actual_role_verified": false,
+    "least_privilege_verified": false,
+    "role_provisioned_here": false,
+    "owner_role_alternative_approved": false
+  },
+  "approval": {
+    "operator": null,
+    "independent_reviewer": null,
+    "route_scope_approval": null,
+    "explicit_user_access_authorization": null
+  },
+  "limits": {
+    "connections": 1,
+    "transactions": 1,
+    "unique_selects": 14,
+    "max_catalog_select_executions": 15,
+    "max_sql_statement_executions": 21,
+    "max_result_rows_total": 180,
+    "max_sanitized_bytes_total": 65536,
+    "max_cell_bytes": 8192,
+    "statement_timeout_ms": 15000,
+    "lock_timeout_ms": 5000,
+    "idle_in_transaction_timeout_ms": 30000,
+    "transaction_timeout_ms": 45000,
+    "client_wall_clock_ms": 60000
+  },
+  "session_sql_order": [
+    "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;",
+    "SET LOCAL statement_timeout = '15s';",
+    "SET LOCAL lock_timeout = '5s';",
+    "SET LOCAL idle_in_transaction_session_timeout = '30s';",
+    "SET LOCAL transaction_timeout = '45s';",
+    "G01",
+    "G02",
+    "G03",
+    "G04",
+    "G05",
+    "G06",
+    "G07",
+    "G08",
+    "G09",
+    "G10",
+    "G11",
+    "G12",
+    "G13",
+    "G14",
+    "G01",
+    "ROLLBACK;"
+  ],
+  "sql_policy": {
+    "allow_certain_builtin_pg_catalog_functions_only": true,
+    "allow_user_defined_function_calls": false,
+    "allow_application_row_selects": false,
+    "allow_role_switch": false,
+    "allow_data_modification": false,
+    "allow_connection_fallback": false,
+    "allow_neon_api": false,
+    "capture_secrets_or_dsns": false,
+    "ignore_or_normalize_raw_relacl": false
+  },
+  "queries": [
+    {
+      "id": "G01",
+      "sql": "SELECT pg_catalog.current_database() AS database_name,\n  current_user AS current_role, session_user AS session_role,\n  pg_catalog.current_setting('transaction_read_only') AS transaction_read_only,\n  pg_catalog.current_setting('transaction_isolation') AS isolation,\n  pg_catalog.current_setting('statement_timeout') AS statement_timeout,\n  pg_catalog.current_setting('lock_timeout') AS lock_timeout,\n  pg_catalog.current_setting('idle_in_transaction_session_timeout') AS idle_timeout,\n  pg_catalog.current_setting('transaction_timeout') AS transaction_timeout,\n  pg_catalog.current_setting('server_version_num') AS server_version_num,\n  pg_catalog.pg_current_snapshot()::text AS snapshot_token;",
+      "sha256": "ce813119fd93e85000ed6fedd426eace5f3427f9b96e0580d4aa1b5e3626e061",
+      "columns": [
+        "database_name",
+        "current_role",
+        "session_role",
+        "transaction_read_only",
+        "isolation",
+        "statement_timeout",
+        "lock_timeout",
+        "idle_timeout",
+        "transaction_timeout",
+        "server_version_num",
+        "snapshot_token"
+      ],
+      "max_rows": 1,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I1",
+        "I2",
+        "I3",
+        "I6",
+        "211"
+      ],
+      "purpose": "Run exactly twice: after timeout setup and immediately before ROLLBACK; identical snapshot and guard values."
+    },
+    {
+      "id": "G02",
+      "sql": "SELECT r.rolname, r.rolsuper, r.rolinherit, r.rolcreaterole,\n  r.rolcreatedb, r.rolcanlogin, r.rolreplication, r.rolbypassrls\nFROM pg_catalog.pg_roles AS r\nWHERE r.rolname = 'h2_catalog_inspector_ro' LIMIT 2;",
+      "sha256": "939aa087f3989273869a0ee8e0d1a4ce97fe090dccb19ef48d237aab1f4ecb80",
+      "columns": [
+        "rolname",
+        "rolsuper",
+        "rolinherit",
+        "rolcreaterole",
+        "rolcreatedb",
+        "rolcanlogin",
+        "rolreplication",
+        "rolbypassrls"
+      ],
+      "max_rows": 2,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I2",
+        "206",
+        "READ-03"
+      ],
+      "purpose": "Exactly one LOGIN inspector with all elevated flags false; no owner fallback."
+    },
+    {
+      "id": "G03",
+      "sql": "SELECT parent.rolname AS granted_role, member.rolname AS member_role,\n  m.admin_option, m.inherit_option, m.set_option\nFROM pg_catalog.pg_auth_members AS m\nJOIN pg_catalog.pg_roles AS parent ON parent.oid = m.roleid\nJOIN pg_catalog.pg_roles AS member ON member.oid = m.member\nWHERE parent.rolname = 'h2_catalog_inspector_ro' OR member.rolname = 'h2_catalog_inspector_ro'\nORDER BY parent.rolname, member.rolname LIMIT 17;",
+      "sha256": "3935fdb92b3e4ec081b68ac204a2bd0af9419fe91ee4d880a64665470ce29e40",
+      "columns": [
+        "granted_role",
+        "member_role",
+        "admin_option",
+        "inherit_option",
+        "set_option"
+      ],
+      "max_rows": 17,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I2",
+        "206",
+        "READ-03"
+      ],
+      "purpose": "Fail closed on any direct inspector role membership; no SET or inherited authority."
+    },
+    {
+      "id": "G04",
+      "sql": "SELECT n.nspname AS schema_name, c.relname AS object_name,\n  c.relkind, owner.rolname AS owner_name,\n  (c.relacl IS NULL) AS raw_relacl_is_null, c.relacl::text AS raw_relacl_text\nFROM pg_catalog.pg_class AS c\nJOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace\nJOIN pg_catalog.pg_roles AS owner ON owner.oid = c.relowner\nWHERE n.nspname = 'public' AND c.relname IN ('alert_episode_sources', 'alert_episodes', 'attack_event_classifications', 'attack_event_sources', 'attack_events', 'current_ingestion_checkpoints', 'ingestion_checkpoints', 'ingestion_runs')\nORDER BY c.relname LIMIT 9;",
+      "sha256": "ed9f526db60557e19d7a6f2b489f1afcd55cc877a57ce3af708082d17452d89a",
+      "columns": [
+        "schema_name",
+        "object_name",
+        "relkind",
+        "owner_name",
+        "raw_relacl_is_null",
+        "raw_relacl_text"
+      ],
+      "max_rows": 9,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "183",
+        "190",
+        "193",
+        "196",
+        "197",
+        "206",
+        "213",
+        "ACL-01"
+      ],
+      "purpose": "Eight selected canonical relations; preserve literal NULL-versus-explicit ACL, no normalization."
+    },
+    {
+      "id": "G05",
+      "sql": "SELECT n.nspname AS schema_name, owner.rolname AS owner_name,\n  (n.nspacl IS NULL) AS raw_acl_is_null, n.nspacl::text AS raw_acl_text\nFROM pg_catalog.pg_namespace AS n\nJOIN pg_catalog.pg_roles AS owner ON owner.oid = n.nspowner\nWHERE n.nspname = 'public' LIMIT 2;",
+      "sha256": "fbc7343ee2d7a011397526517bbaa1f4e401c1a58a6efbb62b1d5610b9d3bf8c",
+      "columns": [
+        "schema_name",
+        "owner_name",
+        "raw_acl_is_null",
+        "raw_acl_text"
+      ],
+      "max_rows": 2,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I2",
+        "206",
+        "READ-01"
+      ],
+      "purpose": "Raw public schema owner and privileges only."
+    },
+    {
+      "id": "G06",
+      "sql": "SELECT a.attnum AS ordinal, a.attname AS column_name,\n  pg_catalog.format_type(a.atttypid, a.atttypmod) AS data_type,\n  a.attnotnull AS not_null\nFROM pg_catalog.pg_attribute AS a\nJOIN pg_catalog.pg_class AS c ON c.oid = a.attrelid\nJOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace\nWHERE n.nspname = 'public' AND c.relname = 'current_ingestion_checkpoints'\n  AND a.attnum > 0 AND NOT a.attisdropped\nORDER BY a.attnum LIMIT 19;",
+      "sha256": "a342759e5e4e889da12e96e7270b38421becb7601bb90f82f3db47632c779b4d",
+      "columns": [
+        "ordinal",
+        "column_name",
+        "data_type",
+        "not_null"
+      ],
+      "max_rows": 19,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "190"
+      ],
+      "purpose": "18-column checkpoint view contract, 19th row detects drift; no application rows."
+    },
+    {
+      "id": "G07",
+      "sql": "SELECT c.relname AS view_name, pg_catalog.pg_get_viewdef(c.oid, false) AS view_sql\nFROM pg_catalog.pg_class AS c\nJOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace\nWHERE n.nspname = 'public' AND c.relname = 'current_ingestion_checkpoints'\n  AND c.relkind = 'v' LIMIT 2;",
+      "sha256": "3f74d91f46d32db0d40d65eba5cbd1c84b7c1fb757c741fd1692c7de1ecd240b",
+      "columns": [
+        "view_name",
+        "view_sql"
+      ],
+      "max_rows": 2,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "190"
+      ],
+      "purpose": "Catalog view definition of the single named checkpoint view, built-in pg_catalog introspector."
+    },
+    {
+      "id": "G08",
+      "sql": "SELECT t.relname AS table_name, idx.relname AS index_name,\n  i.indisunique AS is_unique, i.indisprimary AS is_primary,\n  i.indisvalid AS is_valid, pg_catalog.pg_get_indexdef(idx.oid) AS index_sql\nFROM pg_catalog.pg_index AS i\nJOIN pg_catalog.pg_class AS t ON t.oid = i.indrelid\nJOIN pg_catalog.pg_class AS idx ON idx.oid = i.indexrelid\nJOIN pg_catalog.pg_namespace AS n ON n.oid = t.relnamespace\nWHERE n.nspname = 'public'\n  AND t.relname IN ('alert_episodes', 'attack_event_classifications')\nORDER BY t.relname, idx.relname LIMIT 33;",
+      "sha256": "01cde324fd932071fd682f1928e78a0dbfd2fd1d76c34ad8e142bb9e4fcd33ce",
+      "columns": [
+        "table_name",
+        "index_name",
+        "is_unique",
+        "is_primary",
+        "is_valid",
+        "index_sql"
+      ],
+      "max_rows": 33,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "183",
+        "193",
+        "197",
+        "213"
+      ],
+      "purpose": "Index metadata only: parent identity, revision successor and tip enforcement."
+    },
+    {
+      "id": "G09",
+      "sql": "SELECT t.relname AS table_name, k.conname AS constraint_name,\n  k.contype AS constraint_type, k.condeferrable AS is_deferrable,\n  k.condeferred AS initially_deferred,\n  pg_catalog.pg_get_constraintdef(k.oid, false) AS constraint_sql\nFROM pg_catalog.pg_constraint AS k\nJOIN pg_catalog.pg_class AS t ON t.oid = k.conrelid\nJOIN pg_catalog.pg_namespace AS n ON n.oid = t.relnamespace\nWHERE n.nspname = 'public'\n  AND t.relname IN ('alert_episodes', 'attack_event_classifications', 'ingestion_checkpoints')\nORDER BY t.relname, k.conname LIMIT 33;",
+      "sha256": "e708c9fa96bc84b7003fd4798a8226c015dbee1b0c2dd7eace7a40c6f6899a38",
+      "columns": [
+        "table_name",
+        "constraint_name",
+        "constraint_type",
+        "is_deferrable",
+        "initially_deferred",
+        "constraint_sql"
+      ],
+      "max_rows": 33,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "183",
+        "193",
+        "197",
+        "211",
+        "213"
+      ],
+      "purpose": "Selected constraint and deferrability metadata."
+    },
+    {
+      "id": "G10",
+      "sql": "SELECT c.relname AS object_name,\n  pg_catalog.has_table_privilege(current_user, c.oid, 'SELECT') AS can_select,\n  pg_catalog.has_table_privilege(current_user, c.oid, 'INSERT') AS can_insert,\n  pg_catalog.has_table_privilege(current_user, c.oid, 'UPDATE') AS can_update,\n  pg_catalog.has_table_privilege(current_user, c.oid, 'DELETE') AS can_delete\nFROM pg_catalog.pg_class AS c\nJOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace\nWHERE n.nspname = 'public' AND c.relname IN ('alert_episode_sources', 'alert_episodes', 'attack_event_classifications', 'attack_event_sources', 'attack_events', 'current_ingestion_checkpoints', 'ingestion_checkpoints', 'ingestion_runs')\nORDER BY c.relname LIMIT 9;",
+      "sha256": "498be7a1b8fe07b87675d4624521e1aff35d965789623393ab00e4d1a05f0a19",
+      "columns": [
+        "object_name",
+        "can_select",
+        "can_insert",
+        "can_update",
+        "can_delete"
+      ],
+      "max_rows": 9,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I2",
+        "206",
+        "READ-03"
+      ],
+      "purpose": "Effective inspector privileges; any application-table access or DML privilege is a stop."
+    },
+    {
+      "id": "G11",
+      "sql": "SELECT owner.rolname AS default_acl_owner,\n  COALESCE(n.nspname, '') AS default_acl_schema,\n  d.defaclobjtype AS object_kind, (d.defaclacl IS NULL) AS raw_acl_is_null,\n  d.defaclacl::text AS raw_acl_text\nFROM pg_catalog.pg_default_acl AS d\nJOIN pg_catalog.pg_roles AS owner ON owner.oid = d.defaclrole\nLEFT JOIN pg_catalog.pg_namespace AS n ON n.oid = d.defaclnamespace\nWHERE n.nspname = 'public' OR (n.oid IS NULL AND owner.rolname = 'neondb_owner')\nORDER BY owner.rolname, n.nspname, d.defaclobjtype LIMIT 13;",
+      "sha256": "33a57845c359e82a6ba895a92eb94730756882eb791a270107bc0c2ecc4e0607",
+      "columns": [
+        "default_acl_owner",
+        "default_acl_schema",
+        "object_kind",
+        "raw_acl_is_null",
+        "raw_acl_text"
+      ],
+      "max_rows": 13,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "206",
+        "ACL-01"
+      ],
+      "purpose": "Public schema/known historical owner default ACL; stop if cap exceeded."
+    },
+    {
+      "id": "G12",
+      "sql": "SELECT n.nspname AS schema_name, p.proname AS function_name,\n  p.oid::pg_catalog.regprocedure::text AS signature,\n  p.provolatile AS volatility, p.prosecdef AS security_definer,\n  pg_catalog.has_function_privilege(current_user, p.oid, 'EXECUTE') AS can_execute\nFROM pg_catalog.pg_proc AS p\nJOIN pg_catalog.pg_namespace AS n ON n.oid = p.pronamespace\nWHERE n.nspname = 'pg_catalog'\n  AND p.proname IN ('pg_advisory_xact_lock', 'hashtextextended', 'gen_random_uuid')\nORDER BY p.proname, p.oid LIMIT 9;",
+      "sha256": "1baf7cdfeb807ca2682de3ae2a5619db3681ce2c571e690855fae5a10db8e4b8",
+      "columns": [
+        "schema_name",
+        "function_name",
+        "signature",
+        "volatility",
+        "security_definer",
+        "can_execute"
+      ],
+      "max_rows": 9,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "210",
+        "212"
+      ],
+      "purpose": "Catalog-only signatures and builtin execute flags; does not invoke target functions."
+    },
+    {
+      "id": "G13",
+      "sql": "SELECT e.extname AS extension_name, e.extversion AS extension_version,\n  n.nspname AS installed_schema\nFROM pg_catalog.pg_extension AS e\nJOIN pg_catalog.pg_namespace AS n ON n.oid = e.extnamespace\nWHERE e.extname = 'plpgsql' LIMIT 2;",
+      "sha256": "cb4fe8636e72a1fce46a0c36da569061ef186e63ae20edaf3bddbf23ef84d738",
+      "columns": [
+        "extension_name",
+        "extension_version",
+        "installed_schema"
+      ],
+      "max_rows": 2,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I4",
+        "212"
+      ],
+      "purpose": "Only historically observed plpgsql extension; other extensions explicitly out of scope."
+    },
+    {
+      "id": "G14",
+      "sql": "SELECT s.name AS setting_name, s.setting AS setting_value,\n  s.unit AS unit, s.source AS source\nFROM pg_catalog.pg_settings AS s\nWHERE s.name IN ('default_transaction_read_only', 'default_transaction_isolation', 'search_path')\nORDER BY s.name LIMIT 4;",
+      "sha256": "0d819ea8ce6e3de65b1e13eeeca8bd7d68b2bf33a990a25298a8ba0c1895c932",
+      "columns": [
+        "setting_name",
+        "setting_value",
+        "unit",
+        "source"
+      ],
+      "max_rows": 4,
+      "max_cell_bytes": 8192,
+      "contract_ids": [
+        "I3",
+        "211",
+        "212"
+      ],
+      "purpose": "Only three relevant session defaults; not the application writer defaults."
+    }
+  ],
+  "receipt_contract": {
+    "required_fields": [
+      "scope_and_authorization",
+      "routing_attestation",
+      "session_guards_before_after",
+      "effective_inspector_role",
+      "query_hashes",
+      "exact_result_column_names",
+      "per_query_row_byte_counts_and_truncation",
+      "sanitized_catalog_rows_and_digests",
+      "raw_relacl_null_bits_and_text",
+      "source_commits_and_old_catalog_digest",
+      "timestamps_and_snapshot",
+      "cancellation_and_rollback_status",
+      "zero_attempted_write_and_api_attestation",
+      "unresolved_and_partial_contracts"
+    ],
+    "disallowed_content": [
+      "DSN",
+      "password",
+      "token",
+      "application_row",
+      "function_body",
+      "external_non_catalog_payload"
+    ],
+    "required_runtime_coverage": [
+      "I1",
+      "I2",
+      "I3",
+      "I4",
+      "I5",
+      "I6",
+      "I7"
+    ],
+    "retention": "owner-approve separately; do not publish raw credentials or connection logs"
+  },
+  "unchanged_hard_holds": {
+    "H2_READONLY_NEON_PREFLIGHT_READINESS": "BLOCKED/NO-GO",
+    "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED/NO-GO",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "WIP_ACTIVATION": "NO-GO",
+    "H2_ACL_OPTION_B": "BLOCKED / PROPOSAL_ONLY"
+  }
+}
