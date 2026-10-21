@@ -2082,10 +2082,13 @@ function renderDatasetSummary() {
   ].map(x=>`<span class="summary-pill">${x}</span>`).join("");
 }
 
-function renderSelectedCityKpis(city, key, from, to) {
-  const kpi = window.KpiRange.calculate(city, from, to);
+function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
+  const range = chartPeriod ? window.KpiRange.periodKpiWindow(chartPeriod,from,to,city)
+    : {from,to,kind:"custom",days:0};
   const index = state.historicalDaily?.cities?.[key];
-  const historicMax = kpi.complete ? window.KpiRange.historicalMax(index, from, to, city.daily28 || []) : null;
+  const kpi = window.KpiRange.preciseHistoricalKpis(city,index,range.from,range.to)
+    || window.KpiRange.calculate(city,range.from,range.to);
+  const historicMax = kpi.complete ? window.KpiRange.historicalMax(index, range.from, range.to, city.daily28 || []) : null;
   if (historicMax) {
     kpi.maxDay = historicMax.max;
     kpi.maxDayDate = historicMax.dates.join(", ");
@@ -2105,7 +2108,10 @@ function renderSelectedCityKpis(city, key, from, to) {
   $("kpiMaxDayDate").textContent = kpi.complete && kpi.maxDay != null ? kpi.maxDayDate : "";
   const label = day => window.KpiRange.validDay(day)
     ? day.slice(8, 10) + "." + day.slice(5, 7) + "." + day.slice(0, 4) : day;
-  const notes = [tr("Період: ", "Period: ") + label(from) + " – " + label(to)];
+  const heading = range.kind === "rolling" ? tr("Останні "+range.days+" днів","Last "+range.days+" days")
+    : range.kind === "calendarWeek" ? tr("Останній повний тиждень","Last complete week")
+    : tr("Період","Period");
+  const notes = [heading + ": " + label(range.from) + " – " + label(range.to)];
   if (!kpi.complete) {
     notes.push(tr(
       "Бракує даних для точного підсумку: оберіть повні календарні місяці або безперервний щоденний ряд.",
@@ -2181,7 +2187,7 @@ function renderCity() {
   const rows = allRows.filter(row => period === "calendarWeekly"
     ? calendarWeekOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
-  renderSelectedCityKpis(city, key, activeRange.from, activeRange.to);
+  renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
   const labels = rows.map(r => periodDisplayLabel(r, period));
   const dashed = type === "raion_proxy";
 

@@ -42,6 +42,65 @@
       Number.isInteger(n) && n >= 0 && Number.isFinite(h) && h >= 0 &&
       (n === 0 || (Number.isFinite(m) && m >= 0));
   }
+  function periodKpiWindow(period, from, to, city) {
+    if (!validDay(from)||!validDay(to)||from>to) return {from:"",to:"",kind:"invalid",days:0};
+    const rolling={weekly:7,rolling30:30,rolling90:90,rolling180:180};
+    if (rolling[period]) return {
+      from:plusDay(to,1-rolling[period]),to,kind:"rolling",days:rolling[period]
+    };
+    if (period==="calendarWeekly") {
+      // Last Sunday completed before / on the chosen end date, never the partial today.
+      const completed=(city?.daily28||[]).filter(r=>validDay(r.date)&&!r.is_partial_period)
+        .map(r=>r.date).sort();
+      if (!completed.length)return {from:"",to:"",kind:"calendarWeek",days:7};
+      const cap=to<completed.at(-1)?to:completed.at(-1);
+      const sunday=plusDay(cap,-new Date(cap+"T00:00:00Z").getUTCDay());
+      return {from:plusDay(sunday,-6),to:sunday,kind:"calendarWeek",days:7};
+    }
+    return {from,to,kind:"custom",days:spanDays(from,to)};
+  }
+  function preciseHistoricalKpis(city,history,from,to) {
+    if(!history||history.status!=="verified"||!validDay(from)||!validDay(to)||
+       from>to||from<history.start||!validDay(history.end))return null;
+    const n=spanDays(history.start,history.end),length=spanDays(from,to);
+    if(n<1||n>36600||length<1||length>36600)return null;
+    const keys=["counts","daily_total_alert_duration_seconds","daily_started_alert_duration_seconds"];
+    if(keys.some(k=>!Array.isArray(history[k])||history[k].length!==n))return null;
+    const verifiedMonths=new Set(history.verified_metric_months||[]);
+    const verifiedDays=new Set(history.verified_metric_days||[]);
+    const recent=new Map();
+    for(const row of city?.daily28||[]) {
+      if(!validDay(row.date))continue;
+      recent.set(row.date,recent.has(row.date)?null:row);
+    }
+    let alerts=0,seconds=0,startedSeconds=0,maxDay=null,partialThrough="";
+    const maxDates=[];let roundedRecent=false;
+    for(let date=from;date<=to;date=plusDay(date)) {
+      let count,time,started;
+      const row=recent.get(date);
+      if(date<=history.end) {
+        if(!verifiedMonths.has(date.slice(0,7))&&!verifiedDays.has(date))return null;
+        const i=spanDays(history.start,date)-1;
+        count=history.counts[i];time=history.daily_total_alert_duration_seconds[i];
+        started=history.daily_started_alert_duration_seconds[i];
+        if(row&&row.alerts_started!==count)return null;
+      }else{
+        if(!dailyValid(row))return null;
+        count=row.alerts_started;time=row.total_alert_duration_hours*3600;
+        started=count*dailyMean(row)*60;roundedRecent=true;
+        if(row.is_partial_period)partialThrough=row.partial_through||"";
+      }
+      if(!Number.isInteger(count)||count<0||!Number.isFinite(time)||time<0||
+         !Number.isFinite(started)||started<0)return null;
+      alerts+=count;seconds+=time;startedSeconds+=started;
+      if(maxDay===null||count>maxDay){maxDay=count;maxDates.length=0;maxDates.push(date);}
+      else if(count===maxDay)maxDates.push(date);
+    }
+    return {from,to,complete:true,alerts,hours:seconds/3600,
+      avgDuration:alerts?startedSeconds/60/alerts:null,maxDay,
+      maxDayDate:maxDates.join(", "),hasMonthly:false,roundedRecent,partialThrough,
+      usedDays:length,precision:"verified_daily_history",reason:""};
+  }
   function historicalMax(history, from, to, recentRows = []) {
     if (!history || history.status !== "verified" || !validDay(from) || !validDay(to) ||
         from < history.start || from > to || !Array.isArray(history.counts) ||
@@ -178,5 +237,5 @@
     }
     return result;
   }
-  return {calculate, bounds, validDay, monthEnd, historicalMax};
+  return {calculate, bounds, validDay, monthEnd, historicalMax,periodKpiWindow,preciseHistoricalKpis};
 });
