@@ -1,0 +1,63 @@
+name: H2 ACL catalog consumers read-only Git audit
+on:
+  push:
+    branches: [research-h2-acl-evidence-consumers-2026-10-21-gpt6]
+    paths: ['.github/workflows/h2-acl-catalog-audit-2026-10-21.yml']
+permissions:
+  contents: read
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Exact Git-tree inventory and catalog-sensitive consumer matches
+        run: |
+          python3 - <<'PY'
+          import subprocess,json,re,pathlib,hashlib
+          REF={'main':'d545840db95774c243add30e5c687de76e2a8072',
+            'operational_wip':'bc87b712b2861621e943f0c05bf6e92afcfe374f',
+            'site_prod':'7c9b81e35325b24f5201018e85b2989728876abd',
+            'integrated_h11_r09':'327caba41942346abc630d7f567d8b0ddc814ae8',
+            'actual_008':'6084ec1dfc6e885ca35e32bec34c1dcfe67d6ad4',
+            'tested_dossier':'0d156bcea786d015a307f7d0f4c8b49c5a3b5e63',
+            'candidate_dossier':'8b16053e031fe84f0b303ad531956b0f319ffbc5'}
+          pattern=re.compile(r'\brelacl\b|\baclexplode\b|\baclitem\b|\bpg_class\b|\bpg_default_acl\b|\bpg_auth_members\b|\bpg_roles\b|\bpg_namespace\b|\bhas_(?:table|column|schema|function|sequence|any_column)_privilege\s*\(|\bpg_has_role\s*\(|(?:acl|privilege|catalog).{0,35}(?:drift|snapshot|diff|reconcil|mismatch)|\b(?:GRANT|REVOKE)\s+(?:ALL|SELECT|INSERT|UPDATE|DELETE|USAGE|EXECUTE|CREATE|ON)\b|\bpg_dump\b|information_schema',re.I)
+          sha=lambda b:hashlib.sha256(b).hexdigest()
+          cache={}; audit={}
+          for name,commit in REF.items():
+            assert subprocess.check_output(['git','rev-parse',commit+'^{commit}'],text=True).strip()==commit
+            entries=subprocess.check_output(['git','ls-tree','-r','-z',commit]).split(b'\x00')
+            inv=[];matches=[];entrypoints=[];workflows=[]
+            for rec in entries:
+              if not rec: continue
+              meta,p=rec.split(b'\t',1); mode,typ,oid=meta.decode().split()
+              if typ!='blob':continue
+              path=p.decode('utf-8','replace'); inv.append([path,oid])
+              suffix=pathlib.Path(path).suffix.lower()
+              if suffix not in ('.py','.sql','.js','.ts','.sh','.yaml','.yml','.ps1','.json','.md','.txt','.toml','.html'):continue
+              if oid not in cache:cache[oid]=subprocess.check_output(['git','cat-file','blob',oid])
+              data=cache[oid]
+              if len(data)>1600000 or b'\x00' in data:continue
+              t=data.decode('utf-8','replace')
+              if path.startswith('.github/workflows/'):
+                workflows.append({'path':path,'oid':oid,'scheduled':'schedule:' in t,'manual':'workflow_dispatch' in t,'disabled':'if: false' in t})
+              if path.startswith('kyiv-air-alerts-grafana/scripts/'):entrypoints.append(path)
+              lines=[[i,line.strip()[:230]] for i,line in enumerate(t.splitlines(),1) if pattern.search(line)]
+              if lines:matches.append({'path':path,'oid':oid,'kind':'documentation' if suffix in ('.md','.txt') else 'research' if path.startswith('research/') else 'test' if '/tests/' in path else 'workflow' if path.startswith('.github/workflows/') else 'candidate_runtime','matches':lines[:100], 'hit_count':len(lines)})
+            audit[name]={'commit':commit,'files':len(inv),'inventory_sha256':sha(json.dumps(sorted(inv),separators=(',',':')).encode()),'workflows':workflows,'entrypoints':sorted(entrypoints),'hits':matches}
+            print('TREE_AUDIT',name,commit,'files',len(inv),'workflow',len(workflows),'files_with_hits',len(matches))
+            for x in matches:
+              if x['kind'] in ('candidate_runtime','workflow'):
+                print('CONSUMER_CANDIDATE',name,x['kind'],x['path'],str(x['matches'][:4])[:900])
+          import os
+          os.makedirs('/tmp/h2_acl_audit',exist_ok=True)
+          with open('/tmp/h2_acl_audit/catalog_consumer_audit.json','w') as f:json.dump({'method':'full Git blob/source inventory','refs':audit},f,sort_keys=True,indent=2)
+          print('READ_ONLY_AUDIT_PASS_NO_SQL_NO_NETWORK')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h2-acl-catalog-source-audit
+          path: /tmp/h2_acl_audit/catalog_consumer_audit.json
