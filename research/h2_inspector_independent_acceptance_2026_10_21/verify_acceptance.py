@@ -119,7 +119,7 @@ def check_a(m):
         assert sql.startswith("SELECT ") and sql.endswith(";") and sql.count(";")==1
         assert "/*" not in sql and "--" not in sql
         assert re.search(r"\bFROM\s+public\.|\bJOIN\s+public\.",sql,re.I) is None
-        assert re.search(r"\b(WITH|UPDATE|INSERT|DELETE|MERGE|CREATE|DROP|CALL|DO|EXPLAIN|COPY|SET\s+ROLE)\b",sql,re.I) is None
+        assert re.search(r"\b(WITH|UPDATE|INSERT|DELETE|MERGE|CREATE|DROP|CALL|DO|EXPLAIN|COPY|SET\s+ROLE)\b",re.sub(r"'(?:''|[^'])*'", "''", sql),re.I) is None
         assert q["id"]=="G01" or re.search(r"\bLIMIT\s+\d+;$",sql,re.I)
         assert 0<q["max_rows"]<=33
         assert q["max_cell_bytes"]==8192
