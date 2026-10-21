@@ -1,0 +1,102 @@
+name: H2 ACL dossier original A B ZIP freeze
+on:
+  push:
+    branches: [research-h2-acl-evidence-consumers-2026-10-21-gpt6]
+    paths:
+      - '.github/workflows/h2-acl-evidence-freeze-2026-10-21.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  freeze-original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Fetch exact originals and check run, job, artifact, source and JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json,hashlib,io,zipfile,urllib.request,urllib.error,subprocess,pathlib
+          REPO='olegbalakin-cmyk/kyiv-air-alerts-grafana'
+          RUN=39565210464;SRC='0d156bcea786d015a307f7d0f4c8b49c5a3b5e63'
+          ROOT=pathlib.Path('research/h2_acl_evidence_consumers_2026_10_21/original_ab')
+          ROOT.mkdir(parents=True,exist_ok=True)
+          SHA=lambda b:hashlib.sha256(b).hexdigest()
+          PIN={'A':[119105725015,12330015114,4052,'84ab5cd39497bf43a43121a2b7a5cfaccb1fee73489693b5f3e7a123ad810b7f','550af3e4329aad1436d4ab25ed703cc2d0a226d6f454ee27dc1fd5e047470178',1717617138],
+               'B':[119105724906,12328299979,4058,'10765402c4ef39d8552c3346e0aa702e26a401b9c6ec8d1de3bffeb960721ca1','b33a9f1eb0590489535e1f72dd3c185505f9f9107adf74f16c4320894e7964d9',1617684917]}
+          BLOBS={'research/h2_acl_physical_dossier_2026_10_21/test_dossier.py':'16177ba8520f2e2c01c92a295107cd6219473f6a',
+              '.github/workflows/h2-acl-physical-semantic-dossier-2026-10-21.yml':'2f8b36b612fe30d46124ae8732fa5216aef94f1a',
+              'research/h2_non_superuser_guard_acl_2026-10-20/007_non_superuser_guard_transfer.sql':'8dc20d11f28db2d8c2b6244b5c43e8bd23548abd',
+              'research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql':'59eab59235f8aee14837ce7494649edba674e1ce',
+              'research/h2_acl_physical_dossier_2026_10_21/DECISION_DOSSIER.md':'3c8b8c9d6bce945b3c434fb707177d60b4f422fa'}
+          for name,sha in BLOBS.items():
+              ref='8b16053e031fe84f0b303ad531956b0f319ffbc5' if name.endswith('DECISION_DOSSIER.md') else SRC
+              for c in ('HEAD',ref):
+                  assert subprocess.check_output(['git','rev-parse',c+':'+name],text=True).strip()==sha,(c,name)
+          def get(path):
+              r=urllib.request.Request('https://api.github.com/repos/'+REPO+'/'+path,
+                  headers={'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],'User-Agent':'h2-original-freeze'})
+              with urllib.request.urlopen(r,timeout=75) as h:return json.load(h)
+          class Stop(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*a,**kw):return None
+          def download(art):
+              r=urllib.request.Request('https://api.github.com/repos/'+REPO+'/actions/artifacts/'+str(art)+'/zip',
+                  headers={'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],'User-Agent':'h2-original-freeze'})
+              try:
+                  with urllib.request.build_opener(Stop()).open(r,timeout=75) as h:return h.read()
+              except urllib.error.HTTPError as ex:
+                  if ex.code not in (301,302,303,307,308):raise
+                  dest=ex.headers['Location']
+                  assert dest.startswith('https://')
+                  with urllib.request.urlopen(urllib.request.Request(dest,headers={'User-Agent':'h2-original-freeze'}),timeout=75) as h:return h.read()
+          run=get('actions/runs/'+str(RUN))
+          assert run['status']=='completed' and run['conclusion']=='success' and run['head_sha']==SRC and run['run_attempt']==1
+          js=get('actions/runs/'+str(RUN)+'/jobs?per_page=100')['jobs']
+          ars=get('actions/runs/'+str(RUN)+'/artifacts?per_page=100')['artifacts']
+          allowed={'alert_episodes','ingestion_runs','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events'}
+          owner='{h2_schema_owner_test=arwdDxtm/h2_schema_owner_test}'
+          man={'run':RUN,'source':SRC,'source_blobs':BLOBS,'copies':{},'verdict':'PARTIAL_NO_EXACT_RESTORATION_PROVEN','option_a':'NOT_ESTABLISHED','option_b':'PROPOSAL_ONLY','allowed':sorted(allowed)}
+          for copy,(jid,aid,size,zsha,jsha,crc) in PIN.items():
+              j,=[x for x in js if x['id']==jid and x['name']=='pg18 ('+copy+')']
+              a,=[x for x in ars if x['id']==aid and x['name']=='h2-acl-decision-'+copy]
+              assert j['conclusion']=='success' and j['head_sha']==SRC
+              assert a['size_in_bytes']==size and a['digest']=='sha256:'+zsha and a['workflow_run']['head_sha']==SRC
+              data=download(aid)
+              assert len(data)==size and SHA(data)==zsha
+              with zipfile.ZipFile(io.BytesIO(data)) as z:
+                  assert z.testzip() is None
+                  members=[i for i in z.infolist() if not i.is_dir()]
+                  assert len(members)==1 and members[0].filename=='h2_acl_decision_'+copy+'.json'
+                  item=members[0]; raw=z.read(item.filename)
+              assert len(raw)==52122 and SHA(raw)==jsha and item.CRC==crc
+              rep=json.loads(raw);e=rep['evidence']
+              assert rep['copy']==copy and rep['source_commit']==SRC and rep['errors']==[]
+              assert rep['verdict']==man['verdict'] and rep['tests_total']==rep['tests_passed']==len(rep['checks'])==42
+              assert all(c['pass'] is True for c in rep['checks'])
+              assert rep['original_007_blob']==BLOBS['research/h2_non_superuser_guard_acl_2026-10-20/007_non_superuser_guard_transfer.sql']
+              assert rep['original_008_blob']==BLOBS['research/h2_non_superuser_guard_acl_2026-10-20/008_non_superuser_acl_rollback.sql']
+              assert e['restoration']['attempted_sequences']==e['restoration']['successful_sequences']==43 and e['restoration']['null_candidates']==0
+              assert set(e['initial_catalog_delta']['relations'])==allowed
+              assert all(v['before']==['h2_schema_owner_test',None] and v['after']==['h2_schema_owner_test',owner] for v in e['initial_catalog_delta']['relations'].values())
+              assert e['normalized_dump']['identical'] is True and e['population']['row_count']==3 and e['population']['tip_count']==2
+              (ROOT/(copy+'.zip')).write_bytes(data)
+              man['copies'][copy]={'job':jid,'artifact':aid,'zip_bytes':size,'zip_sha256':zsha,'member':item.filename,'member_bytes':len(raw),'member_sha256':jsha,'member_crc':crc,'checks':42,'probes':43,'null_candidates':0}
+              print('ORIGINAL_ZIP_PASS',copy,'job',jid,'artifact',aid,'sha256',zsha)
+          (ROOT/'manifest.json').write_text(json.dumps(man,indent=2,sort_keys=True)+'\n')
+          print('ORIGINAL_FREEZE_PASS_2_ZIPS_2_JSON_NO_SQL')
+          PY
+      - name: Commit only isolated research evidence
+        run: |
+          set -eu
+          test "$(git branch --show-current)" = "research-h2-acl-evidence-consumers-2026-10-21-gpt6"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f research/h2_acl_evidence_consumers_2026_10_21/original_ab
+          git diff --cached --quiet && { echo "ALREADY_FROZEN"; exit 0; }
+          git commit -m "research(H2): Git-freeze original ACL dossier A/B ZIP bytes"
+          git push origin HEAD:refs/heads/research-h2-acl-evidence-consumers-2026-10-21-gpt6
