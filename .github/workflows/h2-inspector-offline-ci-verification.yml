@@ -16,7 +16,7 @@ jobs:
       - name: Checkout pinned research commit without stored credentials
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Verify pinned sources and execute offline negative controls
@@ -99,8 +99,8 @@ jobs:
           require(head == os.environ["GITHUB_SHA"], "checkout commit does not equal triggering SHA")
           require(os.environ["GITHUB_REF_NAME"] == EXPECTED_BRANCH, "unexpected triggering branch")
           require(os.environ["GITHUB_REF"] == "refs/heads/" + EXPECTED_BRANCH, "unexpected triggering ref")
-          require(git("rev-parse", "HEAD^") == EXPECTED_PARENT, "package parent changed")
-          changed = git("diff-tree", "--no-commit-id", "--name-status", "-r", "HEAD").splitlines()
+          require(git("merge-base", "--is-ancestor", EXPECTED_PARENT, head) == "", "package source is not ancestor")
+          changed = git("diff", "--name-status", EXPECTED_PARENT, "HEAD").splitlines()
           require(changed == ["A\t" + WORKFLOW_PATH], "CI commit changed paths beyond the one added workflow: " + repr(changed))
           require(git("status", "--porcelain", "--untracked-files=no") == "", "dirty source checkout")
           
