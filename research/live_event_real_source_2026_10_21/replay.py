@@ -11,6 +11,7 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
+import requests
 
 from ledger import initialize, run_batch, load, isolated_regression_test, encoded
 
@@ -32,12 +33,13 @@ def download_inputs(folder):
     if not token:
         raise RuntimeError("ACTIONS_READ_TOKEN_REQUIRED_FOR_ARCHIVED_INPUT")
     for artifact_id,label in SOURCE_IDS:
-        req=urllib.request.Request(
+        response=requests.get(
             f"https://api.github.com/repos/{REPO}/actions/artifacts/{artifact_id}/zip",
             headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json",
-                     "X-GitHub-Api-Version":"2022-11-28"})
-        with urllib.request.urlopen(req,timeout=90) as response:
-            data=response.read()
+                     "X-GitHub-Api-Version":"2022-11-28"},
+            timeout=120)
+        response.raise_for_status()
+        data=response.content
         digest=hashlib.sha256(data).hexdigest()
         out=folder/label
         out.mkdir(parents=True,exist_ok=True)
