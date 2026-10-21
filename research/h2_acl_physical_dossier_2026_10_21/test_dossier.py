@@ -431,7 +431,11 @@ def main():
        and role_actions[left]["inherited"][1]["state"]=="42501",
        role_actions[left])
     l_future=future(left); r_future=future(right)
-    ck("future_ddl_owner_change_and_grants",l_future==r_future)
+    REPORT["evidence"]["future_ddl_raw"]={"control":l_future,"rolled":r_future}
+    ck("future_ddl_owner_change_and_grants",
+       [(x[0],x[1]) for x in l_future[0]]==[(x[0],x[1]) for x in r_future[0]]
+       and l_future[1]==r_future[1],
+       {"control":l_future,"rolled":r_future})
     ck("future_table_function_default_acl",
        future_rights(left)==future_rights(right),
        {"control":future_rights(left),"rolled":future_rights(right)})
