@@ -229,6 +229,7 @@ def main():
     fresh=orig.execute_checks(manifest)
     assert fresh==recorded and fresh["negative_count"]==43
     second=load_module(ROOT/"h2_independent_manifest_review.py","h2_a_independent")
+    print('PRE_SECOND_REVIEW_G04_COLUMNS',repr(manifest['queries'][3]['columns']),flush=True)
     assert second.review(manifest)
     assert len(second.negatives(manifest))==16
     review=json.loads((ROOT/"H2_INSPECTOR_INDEPENDENT_REVIEW.json").read_text())
