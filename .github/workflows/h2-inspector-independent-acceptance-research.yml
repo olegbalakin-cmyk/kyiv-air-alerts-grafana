@@ -1,0 +1,21 @@
+name: H2 independent inspector offline acceptance research
+on:
+  push:
+    branches:
+      - research-h2-inspector-independent-acceptance-2026-10-21-gpt6
+    paths:
+      - "research/h2_inspector_independent_acceptance_2026_10_21/**"
+      - "_candidate_b_readonly/**"
+      - ".github/workflows/h2-inspector-independent-acceptance-research.yml"
+permissions:
+  contents: read
+jobs:
+  independent_offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Independently verify immutable originals and adversarial bypasses (NO NEON)
+        run: python3 research/h2_inspector_independent_acceptance_2026_10_21/verify_acceptance.py
