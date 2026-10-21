@@ -2126,10 +2126,6 @@ function renderSelectedCityKpis(city, key, from, to) {
         notes.push(tr("Неповні дані", "Partial data"));
       }
     }
-    if (kpi.hasMonthly) {
-      notes.push(tr("Години ≈: сума округлених помісячних показників.",
-        "Hours ≈: sum of rounded monthly estimates."));
-    }
     if (kpi.maxDay === null) {
       notes.push(tr("Максимум за день недоступний без повного щоденного ряду.",
         "Daily maximum unavailable without full daily coverage."));
