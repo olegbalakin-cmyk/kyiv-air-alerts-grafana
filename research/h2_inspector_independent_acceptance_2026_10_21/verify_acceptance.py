@@ -226,10 +226,10 @@ def main():
     orig=load_module(ROOT/"h2_readonly_offline_verifier.py","h2_a_verifier")
     assert orig.validate_manifest(manifest)
     recorded=json.loads((ROOT/"H2_INSPECTOR_NEGATIVE_CONTROLS.json").read_text())
-    fresh=orig.execute_checks(manifest)
+    fresh=orig.execute_checks(copy.deepcopy(manifest))
     assert fresh==recorded and fresh["negative_count"]==43
     second=load_module(ROOT/"h2_independent_manifest_review.py","h2_a_independent")
-    print('PRE_SECOND_REVIEW_G04_COLUMNS',repr(manifest['queries'][3]['columns']),flush=True)
+    assert 'raw_relacl_text' in manifest['queries'][3]['columns']
     assert second.review(manifest)
     assert len(second.negatives(manifest))==16
     review=json.loads((ROOT/"H2_INSPECTOR_INDEPENDENT_REVIEW.json").read_text())
