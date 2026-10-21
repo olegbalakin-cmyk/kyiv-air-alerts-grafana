@@ -1,0 +1,561 @@
+{
+  "schema": "H2_INSPECTOR_OFFLINE_V1",
+  "authorization": "NO_NEON_ACCESS",
+  "provenance": {
+    "eligibility_commit": "576ac42b7734106ccc0edc858173c90f82537d85",
+    "coordination_commit": "66fbabf20644797bd67d3790893b4103a5dcb8ef",
+    "baseline_main": "b5e9b078f171a15ffcf1cb197b61018cd76ca611",
+    "old_catalog_commit": "380e16f4d8e861a30ba899921a7dbc33d5077bd5",
+    "old_catalog_raw_blob": "e550b35578283b2af4e0e8fba956e98c4bcc0f03"
+  },
+  "target": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "historical_read_only_endpoint": "ep-calm-rice-b5073ypp",
+    "forbidden_default": "br-wandering-sunset-b5835alw",
+    "forbidden_writer_endpoint": "ep-still-violet-b5bg6mhp",
+    "current_endpoint_route_verified": false,
+    "full_tls_hostname": null
+  },
+  "inspector": {
+    "proposed_role": "h2_catalog_inspector_ro",
+    "verified_existing": false,
+    "allow_neondb_owner": false,
+    "allow_membership": false
+  },
+  "limits": {
+    "connections": 1,
+    "wall_seconds": 90,
+    "statement_seconds": 15,
+    "lock_seconds": 5,
+    "idle_seconds": 30,
+    "total_rows": 240,
+    "total_bytes": 96000,
+    "queries": 13
+  },
+  "session": [
+    "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;",
+    "SET LOCAL statement_timeout = '15s';",
+    "SET LOCAL lock_timeout = '5s';",
+    "SET LOCAL idle_in_transaction_session_timeout = '30s';",
+    "SET LOCAL search_path = pg_catalog;",
+    "ROLLBACK;"
+  ],
+  "queries": [
+    {
+      "id": "Q00",
+      "contracts": [
+        "I1",
+        "I2",
+        "I3",
+        "OFF-02",
+        "OFF-03"
+      ],
+      "purpose": "identity",
+      "sql": "SELECT pg_catalog.current_database() AS db, current_user AS actor, session_user AS login, pg_catalog.current_setting('transaction_read_only') AS ro, pg_catalog.current_setting('transaction_isolation') AS isolation, pg_catalog.current_setting('statement_timeout') AS statement_timeout, pg_catalog.current_setting('lock_timeout') AS lock_timeout, pg_catalog.current_setting('search_path') AS search_path LIMIT 1;",
+      "max_rows": 1,
+      "max_bytes": 2048,
+      "sql_sha256": "9d2e0217bb8aad9680339fd0535f55ab7107d5c4384ccf7048e5047b4b518e21",
+      "expected_columns": [
+        "db",
+        "actor",
+        "login",
+        "ro",
+        "isolation",
+        "statement_timeout",
+        "lock_timeout",
+        "search_path"
+      ]
+    },
+    {
+      "id": "Q01",
+      "contracts": [
+        "I2",
+        "READ-03",
+        "206"
+      ],
+      "purpose": "inspector role flags",
+      "sql": "SELECT rolname, rolcanlogin, rolsuper, rolcreatedb, rolcreaterole, rolreplication, rolbypassrls, rolinherit FROM pg_catalog.pg_roles WHERE rolname='h2_catalog_inspector_ro' LIMIT 2;",
+      "max_rows": 2,
+      "max_bytes": 1024,
+      "sql_sha256": "f242d03d9c2ca1add301f1b25124c96229f4c1bdb079d32185b9030d2cdc07e3",
+      "expected_columns": [
+        "rolname",
+        "rolcanlogin",
+        "rolsuper",
+        "rolcreatedb",
+        "rolcreaterole",
+        "rolreplication",
+        "rolbypassrls",
+        "rolinherit"
+      ]
+    },
+    {
+      "id": "Q02",
+      "contracts": [
+        "I2",
+        "READ-03",
+        "206"
+      ],
+      "purpose": "inspector direct memberships",
+      "sql": "SELECT m.rolname AS member_role, p.rolname AS granted_role, a.admin_option, a.inherit_option, a.set_option FROM pg_catalog.pg_auth_members a JOIN pg_catalog.pg_roles m ON m.oid=a.member JOIN pg_catalog.pg_roles p ON p.oid=a.roleid WHERE m.rolname='h2_catalog_inspector_ro' LIMIT 2;",
+      "max_rows": 2,
+      "max_bytes": 1024,
+      "sql_sha256": "ee620143e471adedb03dbe520f402b193f1b19aabc543ee04fc1cf3ffebf5ecb",
+      "expected_columns": [
+        "member_role",
+        "granted_role",
+        "admin_option",
+        "inherit_option",
+        "set_option"
+      ]
+    },
+    {
+      "id": "Q03",
+      "contracts": [
+        "I2",
+        "READ-03",
+        "206"
+      ],
+      "purpose": "schema/db writable authority",
+      "sql": "SELECT pg_catalog.has_schema_privilege(current_user,'public','CREATE') AS schema_create, pg_catalog.has_database_privilege(current_user,pg_catalog.current_database(),'CREATE') AS database_create, pg_catalog.has_database_privilege(current_user,pg_catalog.current_database(),'TEMP') AS temp_create LIMIT 1;",
+      "max_rows": 1,
+      "max_bytes": 1024,
+      "sql_sha256": "58d8f4467dc84958661daafde205e6b556c365515a460af352436c7db63d8f23",
+      "expected_columns": [
+        "schema_create",
+        "database_create",
+        "temp_create"
+      ]
+    },
+    {
+      "id": "Q04",
+      "contracts": [
+        "I2",
+        "READ-03",
+        "196",
+        "206"
+      ],
+      "purpose": "aggregate table write capability",
+      "sql": "SELECT count(*) AS relation_count, count(*) FILTER (WHERE pg_catalog.has_table_privilege(c.oid,'INSERT') OR pg_catalog.has_table_privilege(c.oid,'UPDATE') OR pg_catalog.has_table_privilege(c.oid,'DELETE') OR pg_catalog.has_table_privilege(c.oid,'TRUNCATE') OR pg_catalog.has_table_privilege(c.oid,'TRIGGER') OR pg_catalog.has_table_privilege(c.oid,'MAINTAIN')) AS writable_count FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p','m','f') LIMIT 1;",
+      "max_rows": 1,
+      "max_bytes": 1024,
+      "sql_sha256": "20396ba45e315b625d8d5f005490e0bc31dedd9dae9c8d1a92f478f9602a29b0",
+      "expected_columns": [
+        "relation_count",
+        "writable_count"
+      ]
+    },
+    {
+      "id": "Q05",
+      "contracts": [
+        "I4",
+        "READ-01",
+        "ACL-01",
+        "206"
+      ],
+      "purpose": "eight raw relation ACLs with NULL retained",
+      "sql": "SELECT c.relname, c.relkind, c.relowner::pg_catalog.regrole::text AS owner_role, (c.relacl IS NULL) AS raw_acl_is_null, c.relacl::text AS raw_acl FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('alert_episodes','alert_episode_sources','attack_event_classifications','attack_event_sources','attack_events','ingestion_checkpoints','ingestion_runs','current_ingestion_checkpoints') ORDER BY c.relname LIMIT 9;",
+      "max_rows": 9,
+      "max_bytes": 8192,
+      "sql_sha256": "e20c15aa5257f7b6b6e51b085f9abfab4c950d8e60c5279825ee3a8fccb470e8",
+      "expected_columns": [
+        "relname",
+        "relkind",
+        "owner_role",
+        "raw_acl_is_null",
+        "raw_acl"
+      ]
+    },
+    {
+      "id": "Q06",
+      "contracts": [
+        "I4",
+        "183",
+        "193",
+        "197",
+        "213"
+      ],
+      "purpose": "bounded index metadata",
+      "sql": "SELECT c.relname, i.indisunique, i.indisprimary, i.indisvalid, pg_catalog.pg_get_indexdef(i.indexrelid) AS ddl FROM pg_catalog.pg_index i JOIN pg_catalog.pg_class c ON c.oid=i.indrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('alert_episodes','attack_event_classifications','attack_event_sources','attack_events') ORDER BY c.relname,i.indexrelid LIMIT 48;",
+      "max_rows": 48,
+      "max_bytes": 18000,
+      "sql_sha256": "7e179683808d20e038c8f408726864c379bd922600e06462446870d0eda399ea",
+      "expected_columns": [
+        "relname",
+        "indisunique",
+        "indisprimary",
+        "indisvalid",
+        "ddl"
+      ]
+    },
+    {
+      "id": "Q07",
+      "contracts": [
+        "I4",
+        "183",
+        "211"
+      ],
+      "purpose": "constraints and deferrability",
+      "sql": "SELECT c.relname,k.conname,k.contype,k.condeferrable,k.condeferred,pg_catalog.pg_get_constraintdef(k.oid) AS ddl FROM pg_catalog.pg_constraint k JOIN pg_catalog.pg_class c ON c.oid=k.conrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('alert_episodes','attack_event_classifications','attack_event_sources','attack_events') ORDER BY c.relname,k.conname LIMIT 48;",
+      "max_rows": 48,
+      "max_bytes": 18000,
+      "sql_sha256": "640b21611197aabb89cc0b767abc160b157762942fe3350057bae26251d5ac74",
+      "expected_columns": [
+        "relname",
+        "conname",
+        "contype",
+        "condeferrable",
+        "condeferred",
+        "ddl"
+      ]
+    },
+    {
+      "id": "Q08",
+      "contracts": [
+        "I4",
+        "190"
+      ],
+      "purpose": "view definition only, not invocation",
+      "sql": "SELECT c.relname,c.relkind,pg_catalog.pg_get_viewdef(c.oid,true) AS definition FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='current_ingestion_checkpoints' AND c.relkind='v' LIMIT 1;",
+      "max_rows": 1,
+      "max_bytes": 10000,
+      "sql_sha256": "27f28c6a6dfc6acc435e6482349d56e075356524291a59583831d3effd59461f",
+      "expected_columns": [
+        "relname",
+        "relkind",
+        "definition"
+      ]
+    },
+    {
+      "id": "Q09",
+      "contracts": [
+        "I4",
+        "190"
+      ],
+      "purpose": "view columns",
+      "sql": "SELECT a.attnum,a.attname,a.atttypid::pg_catalog.regtype::text AS type_name FROM pg_catalog.pg_attribute a JOIN pg_catalog.pg_class c ON c.oid=a.attrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='current_ingestion_checkpoints' AND a.attnum>0 AND NOT a.attisdropped ORDER BY a.attnum LIMIT 20;",
+      "max_rows": 20,
+      "max_bytes": 4000,
+      "sql_sha256": "d58e9d3225899ff737883e3c7b63d0cb0cd43ce07084704041420d6fec17917e",
+      "expected_columns": [
+        "attnum",
+        "attname",
+        "type_name"
+      ]
+    },
+    {
+      "id": "Q10",
+      "contracts": [
+        "I4",
+        "210",
+        "212"
+      ],
+      "purpose": "built-in function signature catalog only",
+      "sql": "SELECT p.proname,n.nspname,pg_catalog.pg_get_function_identity_arguments(p.oid) AS args,pg_catalog.pg_get_function_result(p.oid) AS return_type,p.prosecdef FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pg_catalog' AND p.proname IN ('pg_advisory_xact_lock','hashtextextended','gen_random_uuid') ORDER BY p.proname,p.oid LIMIT 12;",
+      "max_rows": 12,
+      "max_bytes": 4000,
+      "sql_sha256": "87c383776fb5b880502b6e0c60f5a9941ae6e6f59f229b790f0bb0b31532c255",
+      "expected_columns": [
+        "proname",
+        "nspname",
+        "args",
+        "return_type",
+        "prosecdef"
+      ]
+    },
+    {
+      "id": "Q11",
+      "contracts": [
+        "I4",
+        "212"
+      ],
+      "purpose": "extensions metadata only",
+      "sql": "SELECT extname,extversion FROM pg_catalog.pg_extension WHERE extname IN ('pgcrypto','plpgsql') ORDER BY extname LIMIT 3;",
+      "max_rows": 3,
+      "max_bytes": 1024,
+      "sql_sha256": "ee84c59b38de2ac23fdece1a42a8eb92539a3b5c7caa94395fef3c0ddba99ed3",
+      "expected_columns": [
+        "extname",
+        "extversion"
+      ]
+    },
+    {
+      "id": "Q12",
+      "contracts": [
+        "I4",
+        "206",
+        "ACL-01"
+      ],
+      "purpose": "default grants",
+      "sql": "SELECT r.rolname,d.defaclobjtype,d.defaclacl::text AS acl FROM pg_catalog.pg_default_acl d JOIN pg_catalog.pg_roles r ON r.oid=d.defaclrole WHERE r.rolname IN ('neondb_owner','h2_catalog_inspector_ro') LIMIT 16;",
+      "max_rows": 16,
+      "max_bytes": 4096,
+      "sql_sha256": "35e45e032d86874ab98b05b444686445d3d2c8e66b46a60cb755879177565100",
+      "expected_columns": [
+        "rolname",
+        "defaclobjtype",
+        "acl"
+      ]
+    }
+  ],
+  "gates": {
+    "H2_READONLY_NEON_PREFLIGHT_READINESS": "BLOCKED/NO-GO",
+    "H2_DISPOSABLE_NEON_TEST_READINESS": "BLOCKED/NO-GO",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "WIP_ACTIVATION": "NO-GO",
+    "H2_ACL_OPTION_B": "BLOCKED / PROPOSAL_ONLY"
+  },
+  "original_matrix": {
+    "match": 203,
+    "mismatch": [
+      193,
+      196,
+      197
+    ],
+    "unverified": [
+      183,
+      190,
+      206,
+      210,
+      211,
+      212,
+      213
+    ],
+    "unbound": 25
+  },
+  "live_I1_to_I7": "NOT_RUN",
+  "current_access_authorized": false,
+  "query_sha256_algorithm": "SHA-256 of exact UTF-8 SQL string including terminal semicolon; no newline appended",
+  "session_sha256": [
+    "258464043e850b208f1c7713afa209580606fea183c48db69dfb4428ee4af84e",
+    "1828d2c7199cb412d5914154be524ae72928fa1896fc55b979fd90502a40cfb5",
+    "3ce149457cd03a99d1e63b7212e3e46b16bda947eb47e632390f69ee859dd5b4",
+    "12f45edb65a874cf91f1c06254a965eb3836486805b0213805bd3fd6d8b2ad59",
+    "4e9aa26a8daa0cac1751c07f67800efafd82485e7c1d88ad111961367371f364",
+    "9be868b5fc7744c6a5fa794bedc41fd4f93c13f4ccbc84805546b17682d2505c"
+  ],
+  "receipt_template": {
+    "kind": "H2_FUTURE_INSPECTOR_CATALOG_RECEIPT",
+    "stage": "NOT_EXECUTED",
+    "target_route_attested": false,
+    "role_verified": false,
+    "server_read_only_verified": false,
+    "rollback_ack": false,
+    "query_results": [
+      {
+        "id": "Q00",
+        "sql_sha256": "9d2e0217bb8aad9680339fd0535f55ab7107d5c4384ccf7048e5047b4b518e21",
+        "columns": [
+          "db",
+          "actor",
+          "login",
+          "ro",
+          "isolation",
+          "statement_timeout",
+          "lock_timeout",
+          "search_path"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q01",
+        "sql_sha256": "f242d03d9c2ca1add301f1b25124c96229f4c1bdb079d32185b9030d2cdc07e3",
+        "columns": [
+          "rolname",
+          "rolcanlogin",
+          "rolsuper",
+          "rolcreatedb",
+          "rolcreaterole",
+          "rolreplication",
+          "rolbypassrls",
+          "rolinherit"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q02",
+        "sql_sha256": "ee620143e471adedb03dbe520f402b193f1b19aabc543ee04fc1cf3ffebf5ecb",
+        "columns": [
+          "member_role",
+          "granted_role",
+          "admin_option",
+          "inherit_option",
+          "set_option"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q03",
+        "sql_sha256": "58d8f4467dc84958661daafde205e6b556c365515a460af352436c7db63d8f23",
+        "columns": [
+          "schema_create",
+          "database_create",
+          "temp_create"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q04",
+        "sql_sha256": "20396ba45e315b625d8d5f005490e0bc31dedd9dae9c8d1a92f478f9602a29b0",
+        "columns": [
+          "relation_count",
+          "writable_count"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q05",
+        "sql_sha256": "e20c15aa5257f7b6b6e51b085f9abfab4c950d8e60c5279825ee3a8fccb470e8",
+        "columns": [
+          "relname",
+          "relkind",
+          "owner_role",
+          "raw_acl_is_null",
+          "raw_acl"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q06",
+        "sql_sha256": "7e179683808d20e038c8f408726864c379bd922600e06462446870d0eda399ea",
+        "columns": [
+          "relname",
+          "indisunique",
+          "indisprimary",
+          "indisvalid",
+          "ddl"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q07",
+        "sql_sha256": "640b21611197aabb89cc0b767abc160b157762942fe3350057bae26251d5ac74",
+        "columns": [
+          "relname",
+          "conname",
+          "contype",
+          "condeferrable",
+          "condeferred",
+          "ddl"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q08",
+        "sql_sha256": "27f28c6a6dfc6acc435e6482349d56e075356524291a59583831d3effd59461f",
+        "columns": [
+          "relname",
+          "relkind",
+          "definition"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q09",
+        "sql_sha256": "d58e9d3225899ff737883e3c7b63d0cb0cd43ce07084704041420d6fec17917e",
+        "columns": [
+          "attnum",
+          "attname",
+          "type_name"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q10",
+        "sql_sha256": "87c383776fb5b880502b6e0c60f5a9941ae6e6f59f229b790f0bb0b31532c255",
+        "columns": [
+          "proname",
+          "nspname",
+          "args",
+          "return_type",
+          "prosecdef"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q11",
+        "sql_sha256": "ee84c59b38de2ac23fdece1a42a8eb92539a3b5c7caa94395fef3c0ddba99ed3",
+        "columns": [
+          "extname",
+          "extversion"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      },
+      {
+        "id": "Q12",
+        "sql_sha256": "35e45e032d86874ab98b05b444686445d3d2c8e66b46a60cb755879177565100",
+        "columns": [
+          "rolname",
+          "defaclobjtype",
+          "acl"
+        ],
+        "rows": null,
+        "bytes": null,
+        "sha256": null,
+        "status": "NOT_EXECUTED",
+        "truncated": null
+      }
+    ],
+    "client_mutations": {
+      "dml": 0,
+      "ddl": 0,
+      "role_switch": 0,
+      "neon_api": 0
+    },
+    "secrets_exposed": false,
+    "application_data_exported": false,
+    "I1_I7": "NOT_RUN",
+    "decision": "NO_GO"
+  }
+}
