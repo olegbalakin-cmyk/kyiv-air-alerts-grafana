@@ -387,7 +387,7 @@ jobs:
           print("ASSERT_WORKFLOW_PARENT_AND_DIFF=PASS")
           print("ASSERT_WORKFLOW_BLOB=" + workflow_blob)
           print("ASSERT_SQL_HASHES=14/14 PASS")
-          print("ASSERT_MANIFEST_SHA256=" + MANIFEST_SHA256)
+          print("ASSERT_POST_MUTATION_EVIDENCE_SHA256=" + MANIFEST_SHA256)
           print("ASSERT_PRIMARY_MANIFEST_NEGATIVES=20/20 PASS")
           print("ASSERT_PRIMARY_RECEIPT_NEGATIVES=23/23 PASS")
           print("ASSERT_PRIMARY_NEGATIVES_TOTAL=43/43 REPORTED; INDEPENDENT INTEGRITY=PARTIAL")
@@ -426,5 +426,5 @@ jobs:
       - name: Emit immutable artifact IDs and ZIP SHA-256 digests
         shell: bash
         run: |
-          printf '%s\n' "RECEIPT_ARTIFACT_ID=${'${{ steps.receipt.outputs.artifact-id }}'}" "RECEIPT_ARTIFACT_SHA256=${'${{ steps.receipt.outputs.artifact-digest }}'}"
-          printf '%s\n' "REPORT_ARTIFACT_ID=${'${{ steps.report.outputs.artifact-id }}'}" "REPORT_ARTIFACT_SHA256=${'${{ steps.report.outputs.artifact-digest }}'}"
+          printf '%s\n' "RECEIPT_ARTIFACT_ID=${{ steps.receipt.outputs.artifact-id }}" "RECEIPT_ARTIFACT_SHA256=${{ steps.receipt.outputs.artifact-digest }}"
+          printf '%s\n' "REPORT_ARTIFACT_ID=${{ steps.report.outputs.artifact-id }}" "REPORT_ARTIFACT_SHA256=${{ steps.report.outputs.artifact-digest }}"
