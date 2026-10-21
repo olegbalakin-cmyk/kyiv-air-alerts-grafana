@@ -11,6 +11,7 @@ import argparse
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -32,7 +33,7 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
     sys.path.insert(0, str(scripts))
     # These imports provide the exact alert normalizations used by site-prod.
     import apply_site_rolling_7d as historical
-    from update_data import TZ
+    from update_data import TZ, round3, daterange, union_daily_seconds
     source = json.loads((root / "data" / "dashboard_data.json").read_text(encoding="utf-8"))
     cities = source.get("cities", {})
     keys = source.get("multicity_meta", {}).get("production_city_keys")
@@ -79,6 +80,8 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
             if (last_day - first_day).days > 38000:
                 raise ValueError("unexpected historical span")
             counts = day_count(alerts, TZ)
+            # Identical union-of-overlapping-interval seconds method as the producer.
+            duration_seconds = union_daily_seconds(alerts, first_day, last_day)
             days = []
             current = first_day
             while current <= last_day:
@@ -93,6 +96,8 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
             # Match every published complete calendar month for which the new
             # daily series claims FULL coverage. Never check partial months as whole.
             checked_months = 0
+            verified_seconds = {}
+            seconds_mismatch = []
             for row in city.get("monthly", []):
                 m = row.get("month") or str(row.get("time", ""))[:7]
                 if not isinstance(m, str) or len(m) != 7 or row.get("is_partial_period"):
@@ -106,6 +111,14 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
                 if actual != expected:
                     raise ValueError(f"monthly parity {m} expected={expected}, observed={actual}")
                 checked_months += 1
+                seconds = sum(duration_seconds.get(d, 0.0) for d in daterange(m_start, m_end))
+                source_average = row.get("avg_daily_alert_hours")
+                if (math.isfinite(seconds) and seconds >= 0 and
+                    isinstance(source_average, (float, int)) and
+                    round3(seconds / (m_end.day * 3600.0)) == float(source_average)):
+                    verified_seconds[m] = {"seconds": seconds, "alerts_started": expected}
+                else:
+                    seconds_mismatch.append(m)
             # Also match completed 28-day production rows, which overlap the
             # latest history and detect source-version drift at the right edge.
             checked_days = 0
@@ -125,7 +138,11 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
                 "start": first_day.isoformat(), "end": last_day.isoformat(),
                 "counts": days, "checked_complete_months": checked_months,
                 "checked_recent_days": checked_days, "total_starts": sum(days),
-                "max": max(days), "reason": None
+                "max": max(days),
+                "monthly_total_alert_duration_seconds": verified_seconds,
+                "monthly_seconds_verified": len(verified_seconds),
+                "monthly_seconds_unmatched": seconds_mismatch,
+                "reason": None
             }
         except Exception as exc:
             record["reason"] = f"{type(exc).__name__}: {str(exc)[:160]}"
@@ -133,6 +150,9 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
     verified = [key for key, row in payload["cities"].items() if row["status"] == "verified"]
     payload["meta"]["verified_cities"] = verified
     payload["meta"]["verified_count"] = len(verified)
+    payload["meta"]["exact_month_seconds_count"] = sum(
+        payload["cities"][key].get("monthly_seconds_verified", 0) for key in verified
+    )
     payload["meta"]["external_source_error"] = external_error
     if "kyiv" not in verified:
         raise RuntimeError("Fail closed: verified Kyiv daily index was not produced")

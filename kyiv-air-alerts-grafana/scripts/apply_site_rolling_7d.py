@@ -161,6 +161,7 @@ def period_summary(alerts: list[Alert], start_day: date, end_day: date) -> dict:
         "days": len(days),
         "alerts_started": starts,
         "alert_hours": round3(seconds / 3600.0),
+        "alert_seconds": seconds,
         "avg_alert_duration_min": round3(
             mean(event_durations) if event_durations else None
         ),
@@ -272,6 +273,7 @@ def add_partial_month(city: dict, alerts: list[Alert], first_day: date, end_day:
         "month": month_start.strftime("%Y-%m"),
         "alerts_per_day": round3(summary["alerts_started"]/float(elapsed)),
         "avg_daily_alert_hours": round3(summary["alert_hours"]/float(elapsed)),
+        "total_alert_duration_seconds": summary["alert_seconds"],
         "avg_alert_duration_min": summary["avg_alert_duration_min"],
         "alerts_started": summary["alerts_started"],
         "is_partial_period": True,
