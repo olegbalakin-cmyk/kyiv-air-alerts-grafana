@@ -67,7 +67,7 @@ assert.equal(api.validDay("2026-02-30"),false);
 assert.equal(api.monthEnd("2026-02"),"2026-02-28");
 const frontend=fs.readFileSync(path.join(__dirname,"../pages-preview/app.js"),"utf8");
 const html=fs.readFileSync(path.join(__dirname,"../pages-preview/index.html"),"utf8");
-assert.ok(frontend.includes("renderSelectedCityKpis(city, key, activeRange.from, activeRange.to)"));
+assert.ok(frontend.includes("renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period)"));
 assert.ok(frontend.includes('if ($("cityPeriod").value === "daily28") resetCityDisplayRange();'));
 assert.ok(frontend.includes('if (period !== "daily28") return;'));
 assert.ok(frontend.includes('row.dataset.csvKpis = "selected-range"'));
