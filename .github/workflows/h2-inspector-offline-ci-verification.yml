@@ -158,6 +158,11 @@ jobs:
                   print("DIAGNOSTIC_EXECUTION", script, "EXIT", p.returncode,
                         "STDOUT", repr(p.stdout), "STDERR", repr(p.stderr), flush=True)
           independently_canonical = runpy.run_path(str(ROOT / "h2_readonly_offline_verifier.py"))["canonical_bytes"](manifest)
+          diagnostic_module = runpy.run_path(str(ROOT / "h2_readonly_offline_verifier.py"))
+          canonical_expected_obj = diagnostic_module["canonical_manifest"]()
+          print("DIAGNOSTIC_MANIFEST_MATCH", canonical_expected_obj == manifest,
+                hashlib.sha256(diagnostic_module["canonical_bytes"](canonical_expected_obj)).hexdigest(),
+                hashlib.sha256(diagnostic_module["canonical_bytes"](manifest)).hexdigest(), flush=True)
           print("DIAGNOSTIC_CANONICAL_COMPARE", len(canonical), len(independently_canonical), canonical == independently_canonical,
                 repr(canonical[-24:]), repr(independently_canonical[-24:]),
                 hashlib.sha256(canonical).hexdigest(), hashlib.sha256(independently_canonical).hexdigest(), flush=True)
