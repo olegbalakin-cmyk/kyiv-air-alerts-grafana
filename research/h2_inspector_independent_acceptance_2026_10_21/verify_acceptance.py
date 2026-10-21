@@ -123,7 +123,7 @@ def check_a(m):
         assert q["id"]=="G01" or re.search(r"\bLIMIT\s+\d+;$",sql,re.I)
         assert 0<q["max_rows"]<=33
         assert q["max_cell_bytes"]==8192
-        assert isinstance(q["columns"],list) and len(q["columns"])==len(set(q["columns"]))
+        assert isinstance(q["columns"],list) and len(q["columns"])>0 and len(q["columns"])==len(set(q["columns"]))
         assert q["contract_ids"] and q["purpose"]
     g4=qs[3]["sql"]
     list_section=re.search(r"c\.relname IN \((.*?)\)\s*ORDER BY",g4,re.S)
