@@ -1,0 +1,7 @@
+# H2 inspector package verification (offline proof; no Neon)
+
+Read `H2_READONLY_QUERY_MANIFEST.json` and run `python3 research/h2_inspector_preflight_2026_10_21/verify_package.py`. The verifier is Python stdlib only, no Neon client, no connection path. Validates I1–I7 *offline contract shape*, session command sequence, allowlisted 13 catalog-only SELECTs, exactly declared role/branch, per-query/total caps, no unsafe SQL or secret/DSN strings, unchanged NO-GO flags; synthetic negative mutations must fail.
+
+**Independent evidence boundary:** offline success proves only this package is internally consistent; it does NOT prove PostgreSQL access, present role/endpoint availability, live I1–I7, runtime grants, rollback effectiveness or authorization. Older catalog snapshot `380e16f4d8e8` and Actions `39273063710` recorded selected facts with `neondb_owner` and READ COMMITTED; never promote it to inspector proof. Original matrix: 203 MATCH, 3 MISMATCH (193/196/197), 7 UNVERIFIED (183/190/206/210/211/212/213), 25 UNBOUND. ACL physical restoration unproven; Option B blocked.
+
+**Unresolved prerequisites:** OFF-01 current source/owner scope signoff; OFF-02 control-plane endpoint→branch/hostname pin, inspector existence or separately authorized provisioning, exact nonsecret role binding; OFF-03 future operator tool enforcement/retention/budget and **new explicit user authorization**. READ-01/03 require later authorized SQL; disposable and cutover are different scopes. main, WIP, site-prod, R6, casualty, history/backfill and Neon unchanged.

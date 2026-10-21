@@ -1,0 +1,24 @@
+name: H2 offline catalog inspector package verification
+on:
+  push:
+    branches:
+      - research-h2-inspector-offline-package-alt-2026-10-21-gpt6
+    paths:
+      - 'H2_INSPECTOR_TARGET_AND_ROLE.md'
+      - 'H2_READONLY_QUERY_MANIFEST.json'
+      - 'H2_READONLY_SESSION_PROTOCOL.md'
+      - 'H2_INSPECTOR_PREFLIGHT_VERIFICATION.md'
+      - 'research/h2_inspector_preflight_2026_10_21/**'
+      - '.github/workflows/h2-inspector-offline-verifier.yml'
+permissions:
+  contents: read
+jobs:
+  offline_only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify query manifest and 24 negative controls without Neon
+        run: python3 research/h2_inspector_preflight_2026_10_21/verify_package.py
