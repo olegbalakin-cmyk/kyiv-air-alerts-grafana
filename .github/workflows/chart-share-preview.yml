@@ -7,6 +7,8 @@ on:
       - "kyiv-air-alerts-grafana/tests/test_chart_share.js"
       - "kyiv-air-alerts-grafana/tests/test_daily28_rollover.js"
       - "kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js"
+      - "kyiv-air-alerts-grafana/tests/test_historical_max.js"
+      - "kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py"
       - ".github/workflows/chart-share-preview.yml"
 permissions:
   contents: read
@@ -27,6 +29,7 @@ jobs:
           node kyiv-air-alerts-grafana/tests/test_calendar_week.js
           node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
           node kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js
+          node kyiv-air-alerts-grafana/tests/test_historical_max.js
           grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
           test -s kyiv-air-alerts-grafana/pages-preview/brand-mark.svg
           test -s kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg
@@ -34,10 +37,24 @@ jobs:
           test -s kyiv-air-alerts-grafana/pages-preview/favicon.svg
           test -s kyiv-air-alerts-grafana/pages-preview/favicon-32.png
           grep -q 'brand-mark.svg' kyiv-air-alerts-grafana/pages-preview/chart-share.js
+      - name: Checkout immutable production data snapshot into a separate read-only directory
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: _source
+          persist-credentials: false
+      - name: Compute a verified daily-index from production's own event collectors
+        run: |
+          python -m pip install -r _source/kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py \
+            --production-root _source/kyiv-air-alerts-grafana \
+            --source-sha "$(git -C _source rev-parse HEAD)" \
+            --output historical-daily-kpi.json
       - name: Assemble preview
         run: |
           mkdir -p _preview
           cp kyiv-air-alerts-grafana/pages-preview/{index.html,app.js,kpi-range.js,chart-share.js,styles.css,features.json,brand-mark.svg,brand-horizontal-uk-dark.svg,brand-horizontal-en-dark.svg,favicon.svg,favicon-32.png} _preview/
+          cp historical-daily-kpi.json _preview/
       - name: Deploy draft only, never production
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

@@ -42,6 +42,24 @@
       Number.isInteger(n) && n >= 0 && Number.isFinite(h) && h >= 0 &&
       (n === 0 || (Number.isFinite(m) && m >= 0));
   }
+  function historicalMax(history, from, to) {
+    if (!history || history.status !== "verified" || !validDay(from) || !validDay(to) ||
+        from < history.start || to > history.end || !Array.isArray(history.counts)) return null;
+    const first = spanDays(history.start, from)-1;
+    const last = spanDays(history.start, to)-1;
+    if (!Number.isInteger(first) || !Number.isInteger(last) || first < 0 ||
+        last >= history.counts.length || history.counts.length !== spanDays(history.start, history.end)) return null;
+    let maximum = null;
+    const dates = [];
+    for (let i = first; i <= last; i++) {
+      const n = history.counts[i];
+      if (!Number.isInteger(n) || n < 0) return null;
+      if (maximum === null || n > maximum) {
+        maximum = n; dates.length = 0; dates.push(plusDay(history.start,i));
+      } else if (n === maximum) dates.push(plusDay(history.start,i));
+    }
+    return maximum === null ? null : {max:maximum, dates};
+  }
   function bounds(city) {
     const days = (city?.daily28 || []).filter(row => validDay(row.date));
     const latest = days.map(row => row.date).sort().at(-1) || "";
@@ -139,5 +157,5 @@
     }
     return result;
   }
-  return {calculate, bounds, validDay, monthEnd};
+  return {calculate, bounds, validDay, monthEnd, historicalMax};
 });

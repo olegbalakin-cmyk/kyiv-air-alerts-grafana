@@ -2078,6 +2078,12 @@ function renderDatasetSummary() {
 
 function renderSelectedCityKpis(city, key, from, to) {
   const kpi = window.KpiRange.calculate(city, from, to);
+  const index = state.historicalDaily?.cities?.[key];
+  const historicMax = kpi.complete ? window.KpiRange.historicalMax(index, from, to) : null;
+  if (historicMax) {
+    kpi.maxDay = historicMax.max;
+    kpi.maxDayDate = historicMax.dates.join(", ");
+  }
   state.lastCityKpi = { ...kpi, city: key };
   setKpiLabel("kpiAlerts", "Кількість тривог", "Alerts started");
   setKpiLabel("kpiHours", "Час під тривогою", "Time under alert");
@@ -3414,6 +3420,18 @@ async function init() {
   const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
+  state.historicalDaily = null;
+  try {
+    const historyResponse = await fetch("historical-daily-kpi.json?v=" + Date.now(), {cache:"no-store"});
+    if (historyResponse.ok) {
+      const index = await historyResponse.json();
+      if (index?.schema === "verified-historical-daily-start-counts-v1" &&
+          index?.meta?.source_ref === "site-prod" &&
+          index?.meta?.expected_cities === 23) state.historicalDaily = index;
+    }
+  } catch (error) {
+    console.warn("Historical index unavailable; existing short-day coverage remains in use", error);
+  }
 
   try {
     const derivedResponse = await fetch(`${DERIVED_DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
