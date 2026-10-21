@@ -1,4 +1,4 @@
-name: H2 inspector offline Git-only CI verification
+name: H2 inspector offline Git-only CI verification (PARTIAL evidence)
 
 on:
   push:
@@ -144,29 +144,10 @@ jobs:
           manifest_raw = (ROOT / "H2_READONLY_QUERY_MANIFEST.json").read_bytes()
           manifest = json.loads(manifest_raw.decode("utf-8"))
           canonical = (json.dumps(manifest, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\n").encode("ascii")
-          with tempfile.TemporaryDirectory(prefix="h2-inspector-diagnostic-") as temp:
-              copied = pathlib.Path(temp)
-              for filename in SOURCE_BLOBS:
-                  shutil.copyfile(ROOT / filename, copied / filename)
-              minimal_env = {"PATH": "/usr/bin:/bin", "HOME": temp, "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1"}
-              for script, args in [
-                  ("h2_readonly_offline_verifier.py", ["--verify"]),
-                  ("h2_independent_manifest_review.py", []),
-              ]:
-                  p = subprocess.run(["python3", "-I", script] + args, cwd=temp, env=minimal_env,
-                                     text=True, capture_output=True, timeout=60)
-                  print("DIAGNOSTIC_EXECUTION", script, "EXIT", p.returncode,
-                        "STDOUT", repr(p.stdout), "STDERR", repr(p.stderr), flush=True)
-          independently_canonical = runpy.run_path(str(ROOT / "h2_readonly_offline_verifier.py"))["canonical_bytes"](manifest)
-          diagnostic_module = runpy.run_path(str(ROOT / "h2_readonly_offline_verifier.py"))
-          canonical_expected_obj = diagnostic_module["canonical_manifest"]()
-          print("DIAGNOSTIC_MANIFEST_MATCH", canonical_expected_obj == manifest,
-                hashlib.sha256(diagnostic_module["canonical_bytes"](canonical_expected_obj)).hexdigest(),
-                hashlib.sha256(diagnostic_module["canonical_bytes"](manifest)).hexdigest(), flush=True)
-          print("DIAGNOSTIC_CANONICAL_COMPARE", len(canonical), len(independently_canonical), canonical == independently_canonical,
-                repr(canonical[-24:]), repr(independently_canonical[-24:]),
-                hashlib.sha256(canonical).hexdigest(), hashlib.sha256(independently_canonical).hexdigest(), flush=True)
-          require(hashlib.sha256(canonical).hexdigest() == MANIFEST_SHA256, "canonical manifest SHA256: computed=" + hashlib.sha256(canonical).hexdigest() + " expected=" + MANIFEST_SHA256)
+          SOURCE_CANONICAL_SHA256 = "53577d42b0cf2717df9ed9c3daa083867e8bf6e9e3397b2f1ce5e19d21f0c70e"
+          source_digest = hashlib.sha256(canonical).hexdigest()
+          require(source_digest == SOURCE_CANONICAL_SHA256, "unexpected original source canonical SHA256")
+          require(source_digest != MANIFEST_SHA256, "expected frozen published evidence discrepancy no longer reproduced")
           require(manifest["source"]["accepted_eligibility_research"] == "576ac42b7734106ccc0edc858173c90f82537d85", "eligibility pin")
           require(manifest["source"]["accepted_coordination"] == "66fbabf20644797bd67d3790893b4103a5dcb8ef", "coordination pin")
           require(manifest["source"]["main_head"] == "b5e9b078f171a15ffcf1cb197b61018cd76ca611", "historical main source pin")
@@ -229,6 +210,8 @@ jobs:
           recorded_review = json.loads((ROOT / "H2_INSPECTOR_INDEPENDENT_REVIEW.json").read_text(encoding="utf-8"))
           controls = recorded_primary["negative_controls"]
           require(recorded_primary["manifest_sha256"] == MANIFEST_SHA256, "primary evidence manifest SHA")
+          require(recorded_primary["manifest_sha256"] != source_digest, "published evidence claims pristine manifest hash")
+
           require(len(controls) == recorded_primary["negative_count"] == 43, "primary negative count")
           require([x["case"] for x in controls] == (
               ["N%02d" % i + "_" + x["case"].split("_", 1)[1] for i, x in enumerate(controls[:20], 1)]
@@ -264,12 +247,31 @@ jobs:
               require("MANIFEST_SHA256 " + MANIFEST_SHA256 in primary_stdout, "primary printed manifest SHA")
               require("PASS INDEPENDENT OFFLINE: 14/14 sealed query hashes; 16/16 mutations rejected; NO NEON"
                       in review_stdout, "independent output assertions")
+              import copy
               primary_globals = runpy.run_path(str(copied / "h2_readonly_offline_verifier.py"))
-              verified_primary = primary_globals["execute_checks"](manifest)
-              require(verified_primary == recorded_primary, "primary executed 43 controls disagree with frozen evidence")
-              require(len(primary_globals["negative_cases"](manifest)) == 20, "20 manifest negatives not executed")
-              require(len(primary_globals["receipt_negative_cases"](manifest)) == 23,
-                      "23 receipt negatives not executed")
+              witness_doc = copy.deepcopy(manifest)
+              pristine_sha = hashlib.sha256(primary_globals["canonical_bytes"](witness_doc)).hexdigest()
+              verified_primary = primary_globals["execute_checks"](witness_doc)
+              mutated_sha = hashlib.sha256(primary_globals["canonical_bytes"](witness_doc)).hexdigest()
+              require(verified_primary == recorded_primary, "primary executable receipt differs from preserved output")
+              require(pristine_sha == SOURCE_CANONICAL_SHA256, "pristine manifest SHA is wrong")
+              require(mutated_sha == MANIFEST_SHA256, "published evidence SHA is not post-mutation digest")
+              require("raw_relacl_text" in manifest["queries"][3]["columns"], "pristine source columns altered")
+              require("raw_relacl_text" not in witness_doc["queries"][3]["columns"],
+                      "synthetic negative did not mutate manifest through shared columns alias")
+              try:
+                  primary_globals["validate_manifest"](witness_doc)
+              except ValueError:
+                  pass
+              else:
+                  raise AssertionError("mutated manifest unexpectedly accepted")
+              require(len(primary_globals["negative_cases"](copy.deepcopy(manifest))) == 20,
+                      "20 manifest negatives not enumerated")
+              receipt_witness = copy.deepcopy(manifest)
+              require(len(primary_globals["receipt_negative_cases"](receipt_witness)) == 23,
+                      "23 receipt negatives not enumerated")
+              require(receipt_witness["queries"][3]["columns"] != manifest["queries"][3]["columns"],
+                      "independent receipt negatives unexpectedly preserve input")
               review_globals = runpy.run_path(str(copied / "h2_independent_manifest_review.py"))
               require(review_globals["review"](manifest), "independent static review failed")
               verified_independent = review_globals["negatives"](manifest)
@@ -289,7 +291,7 @@ jobs:
           receipt = {
               "kind": "H2_INSPECTOR_INDEPENDENT_GIT_ONLY_CI_RECEIPT",
               "scope": "OFFLINE_STATIC_AND_SYNTHETIC_ONLY",
-              "verdict": "PASS_BOUNDED_CI_CANDIDATE_PENDING_SEPARATE_COORDINATOR_ACCEPTANCE",
+              "verdict": "PARTIAL_REPRODUCIBLE_SOURCE_VERIFIER_MANIFEST_MUTATION",
               "repository": os.environ["GITHUB_REPOSITORY"],
               "trigger_ref": os.environ["GITHUB_REF"],
               "run_id": os.environ["GITHUB_RUN_ID"],
@@ -307,7 +309,19 @@ jobs:
                   "original_comparison": "reported text-identical with one final newline difference; NOT byte-for-byte identical",
                   "limitation": "original off-repository ZIP was not introduced into CI; only published Git blobs verified",
               },
-              "manifest_sha256_canonical": MANIFEST_SHA256,
+              "manifest_sha256_canonical_pristine": source_digest,
+              "manifest_sha256_published_post_mutation": MANIFEST_SHA256,
+              "source_verifier_aliasing_fault": {
+                  "type": "SYNTHETIC_RECEIPT_SHARED_COLUMNS_MUTATION",
+                  "entry_point": "synthetic_receipt results.columns = q.columns (by reference)",
+                  "trigger": "R11_column_schema removes raw_relacl_text from shared G04 columns",
+                  "pristine_manifest_sha256": pristine_sha,
+                  "manifest_sha256_after_execute_checks": mutated_sha,
+                  "raw_relacl_text_removed_from_in_memory_manifest": True,
+                  "source_file_mutated_on_disk": False,
+                  "negative_count_reported": "43/43",
+                  "independently_acceptable_primary_negative_control_integrity": False
+              },
               "manifest_sha256_file_bytes": hashlib.sha256(manifest_raw).hexdigest(),
               "sql_pinned_hashes": PINNED_SQL,
               "sql_query_order": [q["id"] for q in manifest["queries"]],
@@ -315,6 +329,7 @@ jobs:
               "statement_execution_budget": 21,
               "primary_checks": {
                   "sql_hashes": "14/14",
+                  "negative_control_integrity": "PARTIAL - input aliasing contamination",
                   "manifest_negatives_rejected": "20/20",
                   "synthetic_receipt_negatives_rejected": "23/23",
                   "total_negatives_rejected": "43/43",
@@ -331,6 +346,7 @@ jobs:
               "coordinator_acceptance_granted": False,
               "hard_holds": HARD_HOLDS,
               "limitations": [
+                  "Original primary negative-control suite mutates input manifest in-memory and publishes mutated digest; 43/43 printed is not cleanly isolated",
                   "No actual Neon project/branch/endpoint/DNS/TLS route attested",
                   "No dedicated inspector role or least-privilege runtime proof",
                   "No Neon SQL executed, no actual I1-I7 runtime checks, no real receipt",
@@ -343,7 +359,7 @@ jobs:
           report = [
               "# H2 Inspector: independent offline GitHub Actions CI proof",
               "",
-              "- **Disposition:** PASS BOUNDED CI CANDIDATE — coordinator acceptance separate; Neon remains NO-GO.",
+              "- **Disposition:** PARTIAL — independently detected primary negative-control input mutation; coordinator acceptance separate; Neon remains NO-GO.",
               "- **Run:** https://github.com/" + os.environ["GITHUB_REPOSITORY"] + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
               "- **Tested commit:** " + head,
               "- **Workflow Git blob:** " + workflow_blob,
@@ -351,9 +367,11 @@ jobs:
               "- **Source change:** only new " + WORKFLOW_PATH + ", parent " + EXPECTED_PARENT + ".",
               "- **Original five recovered files:** exact pinned Git blob identity maintained.",
               "- **Original three Markdown files:** text-equivalent per earlier comparison, one terminal newline differs; NOT byte-for-byte equal. Original off-repository ZIP not used in this CI run.",
-              "- **Manifest canonical SHA256:** " + MANIFEST_SHA256,
+              "- **Pristine manifest canonical SHA256:** " + source_digest,
+              "- **Published post-mutation evidence SHA256:** " + MANIFEST_SHA256,
+              "- **Integrity finding:** primary synthetic receipt shares G04 columns by reference; R11 removes raw_relacl_text from in-memory manifest. Original file unchanged. Reported 43/43 negatives cannot be accepted as isolated fail-closed controls.",
               "- **SQL:** 14/14 SHA256 matches exact independent pins; 15 SELECT executions with G01 repeated; 21 statements; bounded catalog only; read-only transaction and mandatory ROLLBACK in specification.",
-              "- **Primary verifier:** 20/20 manifest and 23/23 synthetic receipt negatives rejected (43/43).",
+              "- **Primary verifier:** observed 20/20 and 23/23 (43/43) printed, but test-state contamination means overall PRIMARY INTEGRITY PARTIAL.",
               "- **Independent reviewer:** 14/14 independently pinned queries; 16/16 mutations rejected.",
               "- **Executed commands:** python3 h2_readonly_offline_verifier.py --verify; python3 h2_independent_manifest_review.py (isolated temporary copied files, Python -I, scrubbed process environment).",
               "- **No Neon runtime:** I1-I7 unverified, current target routing/inspector privileges/approval unknown. No Neon queries, roles, APIs, Secrets, production or WIP operations.",
@@ -372,9 +390,12 @@ jobs:
           print("ASSERT_MANIFEST_SHA256=" + MANIFEST_SHA256)
           print("ASSERT_PRIMARY_MANIFEST_NEGATIVES=20/20 PASS")
           print("ASSERT_PRIMARY_RECEIPT_NEGATIVES=23/23 PASS")
-          print("ASSERT_PRIMARY_NEGATIVES_TOTAL=43/43 PASS")
+          print("ASSERT_PRIMARY_NEGATIVES_TOTAL=43/43 REPORTED; INDEPENDENT INTEGRITY=PARTIAL")
           print("ASSERT_INDEPENDENT_SQL_HASHES=14/14 PASS")
           print("ASSERT_INDEPENDENT_NEGATIVES=16/16 PASS")
+          print("ASSERT_SOURCE_VERIFIER_MANIFEST_MUTATION=REPRODUCED; CI_COORDINATOR_RESULT=PARTIAL")
+          print("ASSERT_PRISTINE_MANIFEST_SHA256=" + source_digest)
+          print("ASSERT_RECORDED_POST_MUTATION_SHA256=" + MANIFEST_SHA256)
           print("ASSERT_NEON_ACCESS=ZERO; NEON_READONLY_READINESS=BLOCKED/NO-GO")
           print(primary_stdout, end="")
           print(review_stdout, end="")
