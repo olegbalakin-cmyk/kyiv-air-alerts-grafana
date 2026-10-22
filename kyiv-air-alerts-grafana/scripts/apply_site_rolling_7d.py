@@ -447,6 +447,27 @@ def main() -> None:
     meta["time_of_day_profile_version"] = "production-v1"
     meta["all_cities_table_version"] = "production-v1"
 
+    # Additive same-run historical KPI data; no new fetch, workflow, external
+    # sink, or Netlify deployment. This field is refreshed when the ordinary
+    # production updater commits dashboard_data.json.
+    try:
+        from build_preview_historical_daily import produce as build_historical_index
+        index = build_historical_index(
+            ROOT, None,
+            generated_at=data.get("meta", {}).get("generated_at"),
+            source_override=data, sources_override=alerts_by_city,
+        )
+        data["historical_daily_kpi"] = index
+        print("Historical daily KPI index verified:",
+              index["meta"]["verified_count"], "of", len(keys),
+              "source generation", index["meta"]["source_dashboard_generated_at"])
+    except Exception as exc:
+        # Never block the existing protected data updater merely because
+        # optional history verification fails; never publish a stale index.
+        data.pop("historical_daily_kpi", None)
+        print("WARNING: historical KPI index unavailable, preserving normal data:",
+              type(exc).__name__, str(exc)[:180])
+
     DATA_FILE.write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

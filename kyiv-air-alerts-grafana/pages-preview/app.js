@@ -3449,17 +3449,29 @@ async function init() {
   const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
-  state.historicalDaily = null;
-  try {
-    const historyResponse = await fetch("historical-daily-kpi.json?v=" + Date.now(), {cache:"no-store"});
-    if (historyResponse.ok) {
-      const index = await historyResponse.json();
-      if (index?.schema === "verified-historical-daily-start-counts-v1" &&
-          index?.meta?.source_ref === "site-prod" &&
-          index?.meta?.expected_cities === 23) state.historicalDaily = index;
+  // Production data are refreshed independently of frontend deployments.
+  // Prefer the index generated atomically with dashboard_data.json; only
+  // fall back to the verified static release snapshot for older data.
+  const embeddedHistory = state.data?.historical_daily_kpi;
+  const sourceGeneratedAt = state.data?.meta?.generated_at;
+  const validIndex = index => index?.schema === "verified-historical-daily-start-counts-v1" &&
+    index?.meta?.source_ref === "site-prod" && index?.meta?.expected_cities === 23;
+  state.historicalDaily = validIndex(embeddedHistory) &&
+    typeof sourceGeneratedAt === "string" &&
+    embeddedHistory.meta.source_dashboard_generated_at === sourceGeneratedAt
+    ? embeddedHistory : null;
+  if (!state.historicalDaily) {
+    try {
+      const historyResponse = await fetch("historical-daily-kpi.json?v=" + Date.now(), {cache:"no-store"});
+      if (historyResponse.ok) {
+        const index = await historyResponse.json();
+        if (validIndex(index) && index?.meta?.verified_count > 0) {
+          state.historicalDaily = index;
+        }
+      }
+    } catch (error) {
+      console.warn("Historical KPI index unavailable; 28-day fallback retained", error);
     }
-  } catch (error) {
-    console.warn("Historical index unavailable; existing short-day coverage remains in use", error);
   }
 
   try {

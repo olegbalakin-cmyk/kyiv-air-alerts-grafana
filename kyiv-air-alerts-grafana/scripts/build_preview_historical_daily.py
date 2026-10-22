@@ -28,13 +28,18 @@ def day_count(alerts: list, local_tz) -> Counter:
     return Counter(a.start.astimezone(local_tz).date() for a in alerts)
 
 
-def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
+def produce(root: Path, site_sha: str | None,
+            generated_at: str | None = None,
+            *, source_override: dict | None = None,
+            sources_override: dict | None = None) -> dict:
     scripts = root / "scripts"
     sys.path.insert(0, str(scripts))
     # These imports provide the exact alert normalizations used by site-prod.
     import apply_site_rolling_7d as historical
     from update_data import TZ, round3, daterange, union_daily_seconds, day_counts_and_durations
-    source = json.loads((root / "data" / "dashboard_data.json").read_text(encoding="utf-8"))
+    source = source_override if source_override is not None else json.loads(
+        (root / "data" / "dashboard_data.json").read_text(encoding="utf-8")
+    )
     cities = source.get("cities", {})
     keys = source.get("multicity_meta", {}).get("production_city_keys")
     if not isinstance(keys, list) or len(keys) != 23 or len(set(keys)) != 23:
@@ -45,23 +50,30 @@ def produce(root: Path, site_sha: str, generated_at: str | None = None) -> dict:
     payload = {
         "schema": "verified-historical-daily-start-counts-v1",
         "meta": {"source_ref": "site-prod", "source_commit": site_sha,
-                 "generated_at": generated_at, "timezone": "Europe/Kyiv",
+                 "generated_at": generated_at,
+                 "source_dashboard_generated_at": source.get("meta", {}).get("generated_at"),
+                 "timezone": "Europe/Kyiv",
                  "meaning": "alerts started on each Kyiv-local calendar date",
                  "expected_cities": 23},
         "cities": {}
     }
     sources: dict[str, list] = {}
     external_error = None
-    try:
-        sources = historical.build_alert_map(source)
-    except Exception as exc:
-        # A public mirror failure cannot justify silently inventing 21 proxy histories.
-        external_error = f"{type(exc).__name__}: {str(exc)[:160]}"
-        print("PREVIEW_PUBLIC_SOURCE_LIMITATION: " + external_error, file=sys.stderr)
-        sources = {
-            "kyiv": historical.load_kyiv_alerts(),
-            "sevastopol": historical.load_sevastopol_alerts()
-        }
+    if sources_override is not None:
+        # The production updater already fetched and normalized these exact
+        # records. Reuse them: no second fetch, API call or double derivation.
+        sources = sources_override
+    else:
+        try:
+            sources = historical.build_alert_map(source)
+        except Exception as exc:
+            # A public mirror failure cannot justify inventing proxy histories.
+            external_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+            print("PREVIEW_PUBLIC_SOURCE_LIMITATION: " + external_error, file=sys.stderr)
+            sources = {
+                "kyiv": historical.load_kyiv_alerts(),
+                "sevastopol": historical.load_sevastopol_alerts()
+            }
     for key in keys:
         city = cities[key]
         record = {"status": "unverified", "source_type": city.get("meta", {}).get("source_type"),

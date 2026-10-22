@@ -1,0 +1,11 @@
+const assert=require("node:assert/strict"),fs=require("node:fs");
+const app=fs.readFileSync("kyiv-air-alerts-grafana/pages-preview/app.js","utf8");
+const rolling=fs.readFileSync("kyiv-air-alerts-grafana/scripts/apply_site_rolling_7d.py","utf8");
+const builder=fs.readFileSync("kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py","utf8");
+assert.ok(app.includes("state.data?.historical_daily_kpi"));
+assert.ok(app.includes("embeddedHistory.meta.source_dashboard_generated_at === sourceGeneratedAt"));
+assert.ok(rolling.includes('data["historical_daily_kpi"] = index'));
+assert.ok(builder.includes("sources_override=undefined")===false);
+assert.ok(builder.includes("source_override: dict | None = None"));
+assert.ok(builder.includes("sources_override: dict | None = None"));
+console.log("PASS live-index binding preserves source-generation synchronization and static fallback");
