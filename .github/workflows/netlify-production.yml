@@ -13,6 +13,7 @@ on:
       - "kyiv-air-alerts-grafana/tests/test_kpi_interval_windows.js"
       - "kyiv-air-alerts-grafana/tests/test_all_time_period.js"
       - "kyiv-air-alerts-grafana/tests/test_live_history_binding.js"
+      - "netlify.toml"
       - ".github/workflows/netlify-production.yml"
       - "netlify.toml"
 
@@ -97,6 +98,26 @@ jobs:
             --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
             --auth="$NETLIFY_AUTH_TOKEN" \
             --json | tee netlify-production-deploy.json
+
+      - name: Verify production HTTP KPI assets after publication
+        run: |
+          set -euo pipefail
+          SITE="https://ukraine-air-alerts.netlify.app"
+          for asset in kpi-range.js historical-daily-kpi.json app.js; do
+            curl --fail --show-error --silent --location --retry 10 --retry-delay 3 \
+              --retry-all-errors "$SITE/$asset?v=20261022-hotfix" -o "/tmp/production-$asset"
+          done
+          cmp kyiv-air-alerts-grafana/pages-preview/kpi-range.js /tmp/production-kpi-range.js
+          cmp kyiv-air-alerts-grafana/pages-preview/app.js /tmp/production-app.js
+          python - <<'PY'
+          import json
+          with open("/tmp/production-historical-daily-kpi.json", encoding="utf-8") as f:
+              h=json.load(f)
+          assert h["meta"]["verified_count"] == 23, h["meta"]
+          assert len(h["cities"]) == 23
+          assert all(row["status"]=="verified" for row in h["cities"].values())
+          print("PASS: served production KPI JS and historical index, HTTP 200, 23/23 cities")
+          PY
 
       - name: Upload deploy metadata
         uses: actions/upload-artifact@v4
