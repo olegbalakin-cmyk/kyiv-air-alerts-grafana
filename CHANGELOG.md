@@ -2,6 +2,15 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-22
+
+### City KPI and All Time — user-authorized production frontend deployment; automated PASS
+
+- Preview `293e3f4d6c6a84dee87e52ff52e3f3bc321eb738` passed [CI 39745104866](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39745104866). Production-shaped isolated release `39ca4310c07557cc62a4d841cdbc2e137d808560` passed [preflight 39745715223](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39745715223) with 23/23 source/index checks, frontend tests and validated production bundle (no deployment).
+- Deployed 15 release paths to `site-prod@428fd7302e9306c9063aae8300c389fa453f612c` from `619e009f73b37c252f08d2027bbacebaefeb2d35`, without touching the protected data files. Production [Actions 39745920407](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39745920407) job `119714211269` SUCCESS; independently verified Netlify deployment `6ad9c56e4e4d123872e097ff` READY, `context=production`, published 2026-10-22 08:12 UTC.
+- Scope: dropdown **За весь час / All time**, synchronized four-card KPIs for 28d, latest completed calendar week, rolling 7/30/90/180 days and full date range; historic daily maxima and dated partial-day notes; added raw monthly duration seconds to the existing data generator (backward compatible). A certified 23-city static history index boots the site, while the *existing* production updater will generate a refreshed `historical_daily_kpi` within `dashboard_data.json` from its already fetched source episodes; no separate data workflow or static redeploy needed for routine updates. Embedded post-release updater execution remains to be observed, not independently proven by this frontend release.
+- Hard separation unchanged: no Neon/H2, operational WIP, R6, casualty-process, historical/backfill, or other production-sink changes. Next: independently verify the next scheduled production data updater's continuity and embedded-index generation/version alignment. The UI release alone is not an H2/Neon or WIP checkpoint.
+
 ## 2026-10-21
 
 ### 2026-10-21 — H2 independent inspector package: Candidate A OFFLINE PASS BOUNDED ACCEPTED; B rejected; actual Neon NO-GO
