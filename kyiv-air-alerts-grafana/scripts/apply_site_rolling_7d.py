@@ -161,6 +161,7 @@ def period_summary(alerts: list[Alert], start_day: date, end_day: date) -> dict:
         "days": len(days),
         "alerts_started": starts,
         "alert_hours": round3(seconds / 3600.0),
+        "alert_seconds": seconds,
         "avg_alert_duration_min": round3(
             mean(event_durations) if event_durations else None
         ),
@@ -272,6 +273,7 @@ def add_partial_month(city: dict, alerts: list[Alert], first_day: date, end_day:
         "month": month_start.strftime("%Y-%m"),
         "alerts_per_day": round3(summary["alerts_started"]/float(elapsed)),
         "avg_daily_alert_hours": round3(summary["alert_hours"]/float(elapsed)),
+        "total_alert_duration_seconds": summary["alert_seconds"],
         "avg_alert_duration_min": summary["avg_alert_duration_min"],
         "alerts_started": summary["alerts_started"],
         "is_partial_period": True,
@@ -444,6 +446,27 @@ def main() -> None:
     meta["rolling_window_periods"] = ["weekly", "rolling30", "rolling90"]
     meta["time_of_day_profile_version"] = "production-v1"
     meta["all_cities_table_version"] = "production-v1"
+
+    # Additive same-run historical KPI data; no new fetch, workflow, external
+    # sink, or Netlify deployment. This field is refreshed when the ordinary
+    # production updater commits dashboard_data.json.
+    try:
+        from build_preview_historical_daily import produce as build_historical_index
+        index = build_historical_index(
+            ROOT, None,
+            generated_at=data.get("meta", {}).get("generated_at"),
+            source_override=data, sources_override=alerts_by_city,
+        )
+        data["historical_daily_kpi"] = index
+        print("Historical daily KPI index verified:",
+              index["meta"]["verified_count"], "of", len(keys),
+              "source generation", index["meta"]["source_dashboard_generated_at"])
+    except Exception as exc:
+        # Never block the existing protected data updater merely because
+        # optional history verification fails; never publish a stale index.
+        data.pop("historical_daily_kpi", None)
+        print("WARNING: historical KPI index unavailable, preserving normal data:",
+              type(exc).__name__, str(exc)[:180])
 
     DATA_FILE.write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n",
