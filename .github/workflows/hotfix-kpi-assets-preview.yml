@@ -1,0 +1,77 @@
+name: Isolated proof for missing Netlify KPI assets
+on:
+  push:
+    branches: [hotfix-kpi-netlify-assets-2026-10-22]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare verified historical KPI file
+        run: |
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py \
+            --production-root kyiv-air-alerts-grafana \
+            --source-sha "$(git rev-parse HEAD)" \
+            --output historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          x=json.load(open("historical-daily-kpi.json"))
+          assert x["meta"]["verified_count"]==23
+          print("PASS 23-city index")
+          PY
+      - name: Build exact netlify.toml manifest
+        run: |
+          set -euo pipefail
+          BUILD_COMMAND="$(python - <<'PY'
+          import tomllib
+          with open("netlify.toml","rb") as f:
+              print(tomllib.load(f)["build"]["command"])
+          PY
+          )"
+          bash -e -c "$BUILD_COMMAND"
+          for f in index.html app.js kpi-range.js historical-daily-kpi.json data.json; do
+            test -s "_site/$f" || { echo "::error::Missing $f"; exit 1; }
+          done
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13
+          cmp kyiv-air-alerts-grafana/pages-preview/kpi-range.js _site/kpi-range.js
+          cmp historical-daily-kpi.json _site/historical-daily-kpi.json
+          echo "PASS 13-file production-shaped package"
+      - name: Deploy isolated Netlify alias (never --prod)
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy \
+            --dir=_site --alias=hotfix-kpi-assets-20261022 \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json > hotfix-preview.json
+          python - <<'PY'
+          import json
+          x=json.load(open("hotfix-preview.json"))
+          print("Isolated deploy",x.get("deploy_id"),x.get("deploy_url"))
+          assert "hotfix-kpi-assets-20261022" in x.get("deploy_url","")
+          PY
+      - name: Assert live HTTP 200 and byte-exact KPI assets
+        run: |
+          set -euo pipefail
+          URL="https://hotfix-kpi-assets-20261022--ukraine-air-alerts.netlify.app"
+          for asset in kpi-range.js historical-daily-kpi.json app.js; do
+            curl --fail --location --silent --show-error --retry 8 \
+              --retry-delay 3 --retry-all-errors \
+              "$URL/$asset?v=20261022-hotfix-proof" -o "/tmp/$asset"
+          done
+          cmp kyiv-air-alerts-grafana/pages-preview/kpi-range.js /tmp/kpi-range.js
+          cmp kyiv-air-alerts-grafana/pages-preview/app.js /tmp/app.js
+          cmp historical-daily-kpi.json /tmp/historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          x=json.load(open("/tmp/historical-daily-kpi.json"))
+          assert x["meta"]["verified_count"]==23
+          assert all(v["status"]=="verified" for v in x["cities"].values())
+          print("PASS served KPI JS and 23-city history through HTTPS")
+          PY
