@@ -47,7 +47,7 @@
   .insight-chart{height:330px}
 }
 
-/* Per-chart sharing actions sit beside CSV export. */
+/* Chart links are intentionally preview-only; share actions sit beside CSV export. */
 .chart-export-row{gap:8px;flex-wrap:wrap}
 .chart-image-button{color:#c4e6fa}
 .chart-image-button:hover{border-color:#82c1fa}
@@ -55,7 +55,7 @@
 .shared-chart-target{outline:2px solid #427eb0;outline-offset:3px;scroll-margin-top:24px}
 
 
-/* Single-chart iframe view keeps the source graph live and interactive. */
+/* Single-chart iframe view — test-preview only. Keep the source graph live and interactive. */
 body.embed-mode{margin:0;min-width:0;min-height:0;background:#0b0f14}
 body.embed-mode > header,
 body.embed-mode > footer,
@@ -97,7 +97,7 @@ body.embed-mode .embed-unavailable{padding:32px 12px;color:#e7edf3}
  body.embed-mode .embed-heading h2{font-size:16px}
 }
 
-/* Shared identity for chart embeds: linked brand mark + source domain. */
+/* Shared identity for test-only chart embeds: linked brand mark + source domain. */
 body.embed-mode .embed-footer{align-items:center;padding-top:12px;border-top:1px solid #253747}
 body.embed-mode .embed-brand-link{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:100%;color:#e7edf3;text-decoration:none}
 body.embed-mode .embed-brand-icon{display:block;flex:0 0 40px;width:40px;height:40px;border-radius:10px}
@@ -127,7 +127,7 @@ body.embed-mode .embed-footer{flex-wrap:wrap;gap:10px}
 body.embed-mode .embed-brand-link{flex:1 1 180px;min-width:0}
 body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wrap:anywhere}
 
-/* Touch-friendly native calendar picker alongside editable date fields. */
+/* Preview only: explicit, touch-friendly native picker alongside freely editable dates. */
 .date-entry-wrap{position:relative;width:100%}
 .date-entry-wrap>.date-entry{padding-right:47px}
 .date-picker-access{position:absolute;top:2px;bottom:2px;right:2px;width:40px;display:flex;align-items:center;justify-content:center;color:#b7c9d8;border-left:1px solid #33404c;border-radius:0 6px 6px 0}
@@ -135,3 +135,6 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 .date-picker-native{position:absolute;inset:0;width:100%;height:100%;opacity:.01;cursor:pointer;z-index:1;border:0;margin:0;padding:0}
 .date-picker-access:focus-within{outline:2px solid #8dbfff;outline-offset:1px}
 @media (min-width:701px){.date-control{min-width:183px;width:183px;flex:0 0 183px}}
+
+/* Selected-range KPI provenance and coverage note. */
+.kpi-range-note{margin:-8px 0 18px;color:#9cb0c1;font-size:12px;line-height:1.6}

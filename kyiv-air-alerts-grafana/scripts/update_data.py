@@ -338,6 +338,7 @@ def build_outputs(alerts: list[Alert], now_local: datetime, meta: dict) -> dict:
                 "month": m.strftime("%Y-%m"),
                 "alerts_per_day": round3(starts / ndays),
                 "avg_daily_alert_hours": round3(sec / ndays / 3600.0),
+                "total_alert_duration_seconds": sec,  # before legacy rounding
                 "avg_alert_duration_min": round3(mean(event_durs) if event_durs else None),
                 "alerts_started": starts,
             }
@@ -488,7 +489,7 @@ def main() -> None:
     )
     write_csv(
         DATA_DIR / "monthly.csv",
-        output["monthly"],
+        [{k: v for k, v in row.items() if k != "total_alert_duration_seconds"} for row in output["monthly"]],
         [
             "time",
             "month",
