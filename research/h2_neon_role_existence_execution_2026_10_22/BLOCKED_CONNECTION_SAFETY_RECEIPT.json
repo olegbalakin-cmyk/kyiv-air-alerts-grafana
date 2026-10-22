@@ -1,0 +1,79 @@
+{
+  "decision": "BLOCKED — CONNECTION SAFETY UNVERIFIED",
+  "role_existence": "UNVERIFIED",
+  "preflight": {
+    "main_sha": "93ac839bdd500a9bbd9adc57ef3013828e2c2b07",
+    "project_state_blob": "ba9947985396b0ab4b9784dad08784b1aab0dd83",
+    "changelog_blob": "38792fc9968062fd70a6f9dd0b8b9b50fc8c8761",
+    "research_commit": "2f650243f2569f20050da0eb590cff0c82957eb8",
+    "sql_blob": "dd3595f7402cdc6e44d3fce6c5632dd9cfb88052",
+    "candidate_a": "a4f30691d89a4206b910b8dfde5dac44aee0ed99",
+    "offline_independent_ci": "39613681469 SUCCESS",
+    "supplemental_ci": "39620712464 PARTIAL",
+    "newer_accepted_H2_checkpoint": false
+  },
+  "neon_api": {
+    "observed_start_utc": "2026-10-22T14:25:02.731Z",
+    "observed_end_utc": "2026-10-22T14:25:03.798Z",
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "branch_name": "lviv-phase1-production-shadow-2026-09-28",
+    "database_intended": "neondb",
+    "endpoint": "ep-calm-rice-b5073ypp",
+    "endpoint_type": "read_only",
+    "hostname": "ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech",
+    "pooler_enabled": false,
+    "postgres_major_project_metadata": 18,
+    "compute_current_state": "idle",
+    "project_branch_endpoint_association_confirmed": true
+  },
+  "connection": {
+    "direct_postgres_connection_established": false,
+    "physical_connections_attempted": 0,
+    "hostname_TLS_verification": "NOT_PERFORMED",
+    "sslmode_required": "verify-full",
+    "sslmode_verified": false,
+    "endpoint_port_verified": false,
+    "provider_default_port": "5432 (not tested for this session)",
+    "principal": "not authenticated",
+    "operator": "ChatGPT — metadata-only preflight; no database operator session",
+    "independent_reviewer": "not identified",
+    "reason": "No compliant direct PostgreSQL client or pre-configured DB credentials. Connector cannot prove actual compute routing, TLS verify-full or explicit controlled rollback. Connector SQL not used."
+  },
+  "sql": {
+    "executed": false,
+    "statements_issued": 0,
+    "selects_issued": 0,
+    "transactions_started": 0,
+    "sanitized_result_row": null,
+    "result_byte_count": null,
+    "result_sha256": null,
+    "read_only_guard": "UNVERIFIED",
+    "transaction_isolation_guard": "UNVERIFIED",
+    "identity_guards": "UNVERIFIED",
+    "rollback": "NOT_APPLICABLE — NO TRANSACTION STARTED",
+    "attempted_sql_writes": 0
+  },
+  "authorization": {
+    "authorized_by_user": true,
+    "single_use_status": "UNUSED",
+    "consumed": false
+  },
+  "review": {
+    "independent_review": "NOT_PERFORMED",
+    "coordinator_acceptance": "NOT_REQUESTED",
+    "receipt_scope": "Unreviewed blocked preflight, NOT an accepted checkpoint"
+  },
+  "remaining_unverified": [
+    "Role existence",
+    "Actual TLS and endpoint routing",
+    "Endpoint-specific port",
+    "Authorized session principal",
+    "Session/transaction guards",
+    "Sanitized SQL result and digest",
+    "Successful explicit rollback",
+    "Candidate A I1-I7 runtime compliance"
+  ],
+  "hard_holds_unchanged": true,
+  "next": "Establish separately evidenced compliant direct TLS-verified client path and named reviewer, then obtain fresh authorization before a new SQL attempt; never provision role under this authorization."
+}
