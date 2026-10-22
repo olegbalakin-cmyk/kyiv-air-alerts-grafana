@@ -93,7 +93,7 @@ const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "180d", "year", "all"];
 const TIME_OF_DAY_BIN_MINUTES = [15, 30, 60];
-const TABLE_RANGES = ["7d", "30d", "90d", "year", "common", "custom"];
+const TABLE_RANGES = ["7d", "30d", "90d", "180d", "year", "common", "custom"];
 const TABLE_SORT_COLUMNS = [
   { key:"label", labelUk:"Місто / ряд", labelEn:"City / series", defaultDirection:"asc" },
   { key:"alerts", labelUk:"Тривог", labelEn:"Alerts", defaultDirection:"desc" },
@@ -155,7 +155,7 @@ function applyStaticLanguage(){
  setSectionHeading("casualtySection","","","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.","Deaths occurring later from attack-related injuries are attributed to the month of the attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="casualtyInterval"]',"Інтервал","Interval");setOptionText("casualtyInterval","monthly","Місяці","Months");setOptionText("casualtyInterval","yearly","Роки","Years");setLocalizedAttr("#casualtyInterval","aria-label","Інтервал для графіка загиблих","Interval for the deaths chart");setLocalizedText('label[for="casualtyYear"]',"Рік","Year");setLocalizedAttr("#casualtyYear","aria-label","Рік для графіка загиблих","Year for the deaths chart");
  setSectionHeading("comparisonSection","Порівняння","Comparison","Порівняння обраних міст","Compare selected cities","Для коректності графіки показують лише періоди, які одночасно є в усіх обраних рядах.","Charts use only periods that are available in all selected series.");for(const [id,u,e] of [["compareA","Місто A","City A"],["compareB","Місто B","City B"],["compareC","Місто C (необов’язково)","City C (optional)"],["comparePeriod","Інтервал","Interval"]])setLocalizedText(`label[for="${id}"]`,u,e);setOptionText("comparePeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("comparePeriod","monthly","Місяці","Months");setOptionText("comparePeriod","calendarWeekly","Тижні","Weeks");setOptionText("comparePeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("comparePeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("comparePeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  setCardCopy("compareAlertsChart","Середня кількість тривог на день","Average alerts per day","Кількість тривог, що почалися в обраному періоді ÷ кількість календарних днів.","Alerts that started in the selected period ÷ calendar days.");setCardCopy("compareHoursChart","Середній час під тривогою на добу","Average time under alert per day","Сумарний час під тривогою в обраному періоді ÷ кількість календарних днів.","Total time under alert in the selected period ÷ calendar days.");setCardCopy("compareDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.","Average duration of alerts that started in the selected period; duration is attributed to the period in which the alert started.");setCardCopy("compareCumulativeHoursChart","Накопичений час під тривогою","Cumulative time under alert","Сумарні години під тривогою накопичуються помісячно від нуля за обраний діапазон дат. Лише спільні завершені місяці.","Total alert hours accumulate month by month from zero over the selected date range. Only shared complete months.");setLocalizedAttr("#compareCumulativeHoursChart","aria-label","Накопичений час під тривогою за місяцями для вибраних міст","Cumulative alert hours by month for selected cities");setCardCopy("compareTimeOfDayChart","Добовий профіль тривог","Time-of-day alert profile","Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найактивніший інтервал = 100%.","Comparison of the daily pattern. Each city/district is normalized separately: its own most active interval = 100%.");setLocalizedText('label[for="compareTimeOfDayRange"]',"Діапазон","Range");setLocalizedAttr("#compareTimeOfDayRange","aria-label","Діапазон добового профілю для порівняння","Time-of-day comparison range");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]])setOptionText("compareTimeOfDayRange",v,u,e);setLocalizedText('label[for="compareTimeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#compareTimeOfDayBin","aria-label","Інтервал добового профілю для порівняння","Time-of-day comparison interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("compareTimeOfDayBin",v,u,e);setCardCopy("compareExplosionsChart","Частка тривог із повідомленнями про вибухи","Share of alerts with reported explosions","Ковзне 90-денне вікно з кроком відображення 7 днів. Strict-метрика: підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою.","Rolling 90-day window, displayed every 7 days. Strict metric: a confirmed report specifically of explosions in the city, matched to a particular alert.");setCardCopy("compareCasualtiesChart","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Підтверджені смерті за місяцем атаки. Наземні бої та артилерійські обстріли не включені.","Confirmed deaths by month of attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="compareCasualtyInterval"]',"Інтервал","Interval");setOptionText("compareCasualtyInterval","monthly","Місяці","Months");setOptionText("compareCasualtyInterval","yearly","Роки","Years");setLocalizedAttr("#compareCasualtyInterval","aria-label","Інтервал для порівняння загиблих","Interval for death comparison");setLocalizedText('label[for="compareCasualtyYear"]',"Рік","Year");setLocalizedAttr("#compareCasualtyYear","aria-label","Рік для порівняння загиблих","Year for death comparison");
- setSectionHeading("allCitiesSection","Огляд","Overview","Усі міста","All cities","Порівняння ключових показників за спільний часовий діапазон.","Comparison of key indicators over a common time range.");setLocalizedText('label[for="allCitiesRange"]',"Швидкий вибір","Quick range");setLocalizedAttr("#allCitiesRange","aria-label","Швидкий вибір діапазону для таблиці всіх міст","Quick range for the all-cities table");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["year","Рік","Year"],["common","Від початку спільних даних","From start of common data"],["custom","Довільно","Custom"]])setOptionText("allCitiesRange",v,u,e);
+ setSectionHeading("allCitiesSection","Огляд","Overview","Усі міста","All cities","Порівняння ключових показників за спільний часовий діапазон.","Comparison of key indicators over a common time range.");setLocalizedText('label[for="allCitiesRange"]',"Швидкий вибір","Quick range");setLocalizedAttr("#allCitiesRange","aria-label","Швидкий вибір діапазону для таблиці всіх міст","Quick range for the all-cities table");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["common","Від початку спільних даних","From start of common data"],["custom","Довільно","Custom"]])setOptionText("allCitiesRange",v,u,e);
  const meth=$("methodologySection")||document.querySelector(".methodology");if(meth&&currentLanguage==="en")meth.innerHTML=methodologyHtml();
  const fs=document.querySelectorAll("footer span");if(fs[0])fs[0].innerHTML=tr('Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>','Data and code: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>');if(fs[1])fs[1].textContent=tr("Зауваження до даних: @olbalakin у Telegram","Data corrections: @olbalakin on Telegram");setLocalizedAttr("#tourClose","aria-label","Закрити тур","Close tour");setLocalizedText("#tourPrev","Назад","Back");setLocalizedText("#tourSkip","Пропустити","Skip");setLocalizedText("#tourNext","Далі","Next");
 }
@@ -3105,6 +3105,7 @@ function renderAllCitiesTable() {
     "7d":tr("7 днів","7 days"),
     "30d":tr("30 днів","30 days"),
     "90d":tr("90 днів","90 days"),
+    "180d":tr("180 днів","180 days"),
     "year":tr("Рік","Year"),
     "common":tr("Від початку спільних даних","From start of common data"),
     "custom":tr("Довільний період","Custom period")
@@ -3112,6 +3113,18 @@ function renderAllCitiesTable() {
   const root = state.data.all_cities_table_test;
   const cities = root?.cities || {};
   const commonBounds = commonMonthlyDateBounds();
+  // The producer has not yet published a table 180d period. Derive this
+  // preview-only option from its verified daily history, never 28d KPIs.
+  // Anchor all cities to the producer's shared completed calendar day.
+  const sharedEnd = cities?.[cityKeys()[0]]?.periods?.["90d"]?.range_end || "";
+  const shared180Start = window.KpiRange.validDay(sharedEnd) ? addIsoDays(sharedEnd, -179) : "";
+  const shared180Covered = Boolean(shared180Start && cityKeys().every(key =>
+    cities?.[key]?.periods?.["90d"]?.range_end === sharedEnd &&
+    state.historicalDaily?.cities?.[key]?.status === "verified" &&
+    state.historicalDaily.cities[key].start <= shared180Start &&
+    (state.historicalDaily.cities[key].end >= sharedEnd ||
+      (state.data.cities[key]?.daily28 || []).some(row => row.date === sharedEnd))
+  ));
 
   let customFrom = $("tableDateFrom")?.value || "";
   let customTo = $("tableDateTo")?.value || "";
@@ -3136,6 +3149,22 @@ function renderAllCitiesTable() {
       };
     }
 
+    if (range === "180d") {
+      const city = state.data.cities[key];
+      const daily = state.historicalDaily?.cities?.[key];
+      const computed = shared180Covered && city && daily
+        ? window.KpiRange.preciseHistoricalKpis(city, daily, shared180Start, sharedEnd)
+        : null;
+      return {
+        key, label: labelFor(key),
+        alerts: computed?.complete ? computed.alerts : null,
+        hours: computed?.complete ? computed.hours : null,
+        duration: computed?.complete ? computed.avgDuration : null,
+        coverage: coverageStart(key),
+        rangeStart: shared180Start || null,
+        rangeEnd: sharedEnd || null
+      };
+    }
     const period = cities?.[key]?.periods?.[range];
     const fallback = state.data.cities[key]?.kpis?.[0] || {};
     return {
@@ -3185,9 +3214,10 @@ function renderAllCitiesTable() {
     } else {
       const sample = rows.find(r => r.rangeStart && r.rangeEnd);
       const dates = sample ? `${sample.rangeStart} — ${sample.rangeEnd}` : "—";
+      const hasMissing180 = range === "180d" && rows.some(r => r.alerts == null);
       note.textContent = tr(
-        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.`,
-        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.`
+        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.${hasMissing180 ? " Недостатньо перевірених денних даних для окремих показників (—)." : ""}`,
+        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.${hasMissing180 ? " Some values lack verified daily coverage (—)." : ""}`
       );
     }
   }
