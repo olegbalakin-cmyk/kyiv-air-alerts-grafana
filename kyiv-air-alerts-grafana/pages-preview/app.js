@@ -867,10 +867,12 @@ function derivedCalendarWeeks(city) {
   let durationWeight = 0;
   for (const row of partialDays) {
     const n = Number(row.alerts_started) || 0;
-    // Partial calendar weeks keep their established start-attributed
-    // full-alert methodology; only daily28 uses midnight-clipped segments.
-    const raw = row.avg_alert_duration_minutes;
-    const avg = typeof raw === "number" && Number.isFinite(raw) ? raw : null;
+    // Partial calendar weeks keep the existing start-attributed mean.
+    // Legacy synthetic daily fixtures may only carry the segment mean.
+    const full = row.avg_alert_duration_minutes;
+    const segment = row.avg_active_alert_duration_minutes;
+    const avg = typeof full === "number" && Number.isFinite(full) ? full
+      : (typeof segment === "number" && Number.isFinite(segment) ? segment : null);
     if (n > 0 && avg !== null) {
       durationWeighted += n * avg;
       durationWeight += n;
