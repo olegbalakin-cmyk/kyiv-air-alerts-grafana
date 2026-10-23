@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-23
 
+### H2 owner Windows prompt no-echo — BOUNDED OBSERVATION, live NO-GO
+
+- Owner ran the existing real-client `-ManualConsole` loopback test on Windows with real EDB PostgreSQL 18.6 client (SHA-256 `fde952534f520909c02db04675588ecb1da8d618b6e5c93e106f42a752daf720`) and confirmed a visible `Password:` prompt with no characters shown while typing test input. This is owner testimony, not instrumented independent console proof. Probe output: local `127.0.0.1:54610`, connection refused as intended, exit nonzero after 5348 ms, one attempt, no timeout or stderr fallback captured, no SQL/Neon use. No new code or tests required; research `bf9898728df86dc15c8004ec4445df0d503ed716` unchanged.
+- `PASSWORD_PROMPT_VERIFIED=YES_BOUNDED_OWNER_OBSERVED`; full password fallback/security, TLS/CA, direct RO target and reviewer unverified. `H2_WINDOWS_PSQL_KIT_READY=NO`, `H2_ROLE_EXISTENCE=UNVERIFIED`; keep Neon authority, production, WIP and all other hard gates unchanged. Next stage is independent nonsecret route/CA/port and reviewer preparation, not a Neon connection.
+
 ### Production release sequencing rule — DOCUMENTED / NO WORKFLOW CHANGE
 
 - **Standing coordinator rule accepted after 23 October collision:** queued/running data updates take precedence over `site-prod` releases. Before every deploy, inspect real `Update Ukraine air-alert production data` runs and the schedule (including potential GitHub delays). If an update is active or may overlap, **queue the deploy** until its terminal success and verified data/checkpoint publication; refresh the release against the new `site-prod` HEAD, preserve data, rerun relevant verification, and use a guarded fast-forward promotion. A failed or uncertain updater blocks release pending investigation. Do not cancel or bypass data collection merely to deploy.
