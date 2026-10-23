@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-23
 
+### Production release sequencing rule — DOCUMENTED / NO WORKFLOW CHANGE
+
+- **Standing coordinator rule accepted after 23 October collision:** queued/running data updates take precedence over `site-prod` releases. Before every deploy, inspect real `Update Ukraine air-alert production data` runs and the schedule (including potential GitHub delays). If an update is active or may overlap, **queue the deploy** until its terminal success and verified data/checkpoint publication; refresh the release against the new `site-prod` HEAD, preserve data, rerun relevant verification, and use a guarded fast-forward promotion. A failed or uncertain updater blocks release pending investigation. Do not cancel or bypass data collection merely to deploy.
+- **Evidence:** [Actions `39960968742`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39960968742) failed at `Persist verified UkraineAlarm bridge checkpoint`: approved `site-prod` promotion `fd1c2aa1 → 95165340` occurred during the running updater; its old-base push received `non-fast-forward`, so subsequent data publication was skipped. Last published data generation remained `2026-10-23T07:47:16+03:00`. Per owner direction, **wait for the next planned update** rather than initiating a manual run now.
+- **Documentation-only acceptance:** `PROJECT_STATE.md` is the binding coordination policy; this entry records the transition. No automatic release queue has been built, no operational workflow/site/data branch or Netlify deployment changed. A future technical queue/lock is a separate, tested and authorized task.
+
+
 ### H2 Windows psql 18 — real executable verified offline; interactive password still UNVERIFIED
 
 - **Bounded new acceptance:** existing H2 Windows kit research HEAD [`bf9898728df86dc15c8004ec4445df0d503ed716`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/bf9898728df86dc15c8004ec4445df0d503ed716) is two commits ahead of accepted `314149c216d3175e9c2569d4567fcb4ae31d19d3`; exactly three added files, no edits/deletions of existing paths. Git blob readback: `Test-H2Psql18RealClientOffline.ps1` `74797b42424e2725166021ddb1927e70c4c292d8`; new real-client workflow `d466a4c7d891a470909902941999095ba3fc3321`; evidence record `743318b56a117c339b8ae16e4e1cf383214f7296`. Exact pinned SQL `dd3595f7402cdc6e44d3fce6c5632dd9cfb88052` and route `0ea2e8688c5b5a5e3934704a29b2ad51195584b4` unchanged.
