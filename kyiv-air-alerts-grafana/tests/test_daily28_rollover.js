@@ -134,12 +134,12 @@ assert.deepEqual(Array.from(hours.options.plugins.partialPeriodBar.datasetIndice
 assert.deepEqual(Array.from(alert.options.plugins.partialPeriodBar.datasetIndices),[0]);
 assert.equal(typeof hours.plugins[0].afterDatasetsDraw,"function");
 assert.equal(typeof alert.plugins[0].afterDatasetsDraw,"function");
-assert.equal(hours.options.plugins.tooltip.callbacks.footer([
+assert.deepEqual(Array.from(hours.options.plugins.tooltip.callbacks.footer([
   {dataset:hours.data.datasets[0],dataIndex:27}
-]),"Дані станом на 20.10");
-assert.equal(alert.options.plugins.tooltip.callbacks.footer([
+])),["Почалося тривог: 3","Активних відрізків: —","Час під тривогою: —","Дані станом на 20.10"]);
+assert.deepEqual(Array.from(alert.options.plugins.tooltip.callbacks.footer([
   {dataset:alert.data.datasets[0],dataIndex:27}
-]),"Дані станом на 20.10");
+])),["Почалося тривог: 3","Активних відрізків: —","Час під тривогою: —","Дані станом на 20.10"]);
 assert.match(outputElements.daily28Range.textContent,/Останній доступний день \(20\.10\) неповний/);
 assert.match(outputElements.daily28Range.textContent,/Дані станом на 20\.10/);
 assert.ok(!outputElements.daily28Range.textContent.includes("Сьогоднішній день"));
