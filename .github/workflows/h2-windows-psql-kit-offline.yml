@@ -1,0 +1,42 @@
+name: H2 Windows psql kit synthetic offline verification
+on:
+  push:
+    branches:
+      - research-h2-role-existence-windows-psql-kit-2026-10-22-gpt6
+    paths:
+      - 'research/h2_role_existence_windows_psql_2026_10_22/**'
+      - '.github/workflows/h2-windows-psql-kit-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-mock-only:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      H2_NO_NEON: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check runner and offline evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $p = 'research/h2_role_existence_windows_psql_2026_10_22'
+          $sql = Join-Path $p 'ROLE_EXISTENCE_PINNED.sql'
+          $route = Join-Path $p 'ROUTE_ATTESTATION_TEMPLATE.json'
+          $bytes = [IO.File]::ReadAllBytes($sql)
+          $prefix = [Text.Encoding]::ASCII.GetBytes('blob ' + $bytes.Length + [char]0)
+          $hash = [Convert]::ToHexString([Security.Cryptography.SHA1]::HashData([byte[]]($prefix + $bytes))).ToLowerInvariant()
+          if ($hash -ne 'dd3595f7402cdc6e44d3fce6c5632dd9cfb88052') { throw 'SQL blob mismatch' }
+          $bytes = [IO.File]::ReadAllBytes($route)
+          $prefix = [Text.Encoding]::ASCII.GetBytes('blob ' + $bytes.Length + [char]0)
+          $hash = [Convert]::ToHexString([Security.Cryptography.SHA1]::HashData([byte[]]($prefix + $bytes))).ToLowerInvariant()
+          if ($hash -ne '0ea2e8688c5b5a5e3934704a29b2ad51195584b4') { throw 'route blob mismatch' }
+          pwsh -NoProfile -File (Join-Path $p 'test_windows.ps1')
+          if ($LASTEXITCODE -ne 0) { throw 'Windows offline mock tests failed' }
+          Write-Host 'PASS_OFFLINE_MOCK_ONLY; TLS_HANDSHAKE_NOT_TESTED; NO_NEON_CONNECTION'
