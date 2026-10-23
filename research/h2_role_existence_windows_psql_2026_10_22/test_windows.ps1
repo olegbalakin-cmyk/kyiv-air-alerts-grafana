@@ -10,8 +10,13 @@ try {
     foreach($case in ($good+$bad)) {
         $receipt=Join-Path ([IO.Path]::GetTempPath()) ("h2-synthetic-"+[guid]::NewGuid().ToString('N')+'.json')
         try {
-            & (Join-Path $PSScriptRoot 'Invoke-H2RoleExistence.ps1') -OfflineSelfTest -MockScenario $case -ReceiptPath $receipt 2>&1 | Out-Null
+            # These process messages are synthetic-only and contain no real credentials.
+            $syntheticOutput = @(& (Join-Path $PSScriptRoot 'Invoke-H2RoleExistence.ps1') -OfflineSelfTest -MockScenario $case -ReceiptPath $receipt 2>&1)
             $exitCode=$LASTEXITCODE
+            if ($good -contains $case -and ($exitCode -ne 0 -or -not (Test-Path $receipt))) {
+                Write-Host "SYNTHETIC_POSITIVE_DIAGNOSTIC case=$case exit=$exitCode receipt=$([bool](Test-Path $receipt))"
+                foreach ($line in $syntheticOutput) { Write-Host "MOCK_ONLY: $line" }
+            }
             if ($good -contains $case) {
                 if ($exitCode -ne 0 -or -not (Test-Path $receipt)) { throw "positive $case did not produce receipt" }
                 python (Join-Path $PSScriptRoot 'verify_receipt.py') $receipt --synthetic-only
