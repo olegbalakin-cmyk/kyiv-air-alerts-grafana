@@ -22,6 +22,43 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Diagnose raw checkout hashes and Git EOL settings
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Write-Host ("CHECKED_OUT_SHA={0}" -f (git rev-parse HEAD))
+          foreach ($key in @('core.autocrlf','core.eol','core.safecrlf')) {
+            $value = git config --show-origin --get $key
+            if ($LASTEXITCODE -eq 0) { Write-Host "GIT_CONFIG $key $value" }
+            else { Write-Host "GIT_CONFIG $key UNSET" }
+          }
+          foreach ($path in @('research/h2_role_existence_windows_psql_2026_10_22/ROLE_EXISTENCE_PINNED.sql',
+                              'research/h2_role_existence_windows_psql_2026_10_22/ROUTE_ATTESTATION_TEMPLATE.json')) {
+            $bytes = [IO.File]::ReadAllBytes($path)
+            $lf = 0
+            $crlf = 0
+            for ($i = 0; $i -lt $bytes.Length; $i++) {
+              if ($bytes[$i] -eq 10) {
+                $lf++
+                if ($i -gt 0 -and $bytes[$i-1] -eq 13) { $crlf++ }
+              }
+            }
+            $prefix = [Text.Encoding]::ASCII.GetBytes('blob ' + $bytes.Length + [char]0)
+            $pwshBlob = [Convert]::ToHexString([Security.Cryptography.SHA1]::HashData(
+              [byte[]]($prefix + $bytes))).ToLowerInvariant()
+            $pwshSha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData(
+              $bytes)).ToLowerInvariant()
+            $gitSource = (git rev-parse "HEAD:$path").Trim()
+            $gitRaw = (git hash-object --no-filters -- $path).Trim()
+            $gitFiltered = (git hash-object -- $path).Trim()
+            $nativeSha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            $fileEol = (git ls-files --eol -- $path)
+            $attrs = (git check-attr text eol -- $path) -join '; '
+            Write-Host "PATH=$path GIT_SOURCE_BLOB=$gitSource WORKTREE_BYTES=$($bytes.Length) LF=$lf CRLF=$crlf PS_GIT_BLOB=$pwshBlob GIT_RAW_BLOB=$gitRaw GIT_FILTERED_BLOB=$gitFiltered PS_SHA256=$pwshSha256 NATIVE_SHA256=$nativeSha256 EOL=$fileEol ATTRIBUTES=$attrs"
+            if ($pwshBlob -cne $gitRaw -or $pwshSha256 -cne $nativeSha256) {
+              throw "PowerShell hash calculation disagrees with independent Git/Windows hash: $path"
+            }
+          }
       - name: Check runner and offline evidence
         shell: pwsh
         run: |
