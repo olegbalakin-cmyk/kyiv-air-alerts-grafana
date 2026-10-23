@@ -69,6 +69,31 @@ jobs:
           Write-Host "REAL_PSQL_PATH=$exe"
           Write-Host "REAL_PSQL_SHA256=$exeSha"
           Write-Host "REAL_PSQL_AUTHENTICODE_STATUS=$sig"
+      - name: Validate approved executable paths and fail-closed rejection offline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $script = 'research/h2_role_existence_windows_psql_2026_10_22/Invoke-H2RoleExistence.ps1'
+          $edb = Join-Path $env:ProgramFiles 'PostgreSQL\18\bin\psql.exe'
+          $portableBin = Join-Path $HOME 'h2-psql18\pgsql\bin'
+          if (Test-Path -LiteralPath $portableBin) { throw 'PORTABLE_TEST_DIR_ALREADY_EXISTS' }
+          New-Item -ItemType Directory -Path $portableBin -Force | Out-Null
+          Copy-Item -LiteralPath (Join-Path (Split-Path $edb -Parent) '*') -Destination $portableBin -Force -Recurse
+          $portable = Join-Path $portableBin 'psql.exe'
+          $approved = @($edb, $portable)
+          foreach ($path in $approved) {
+            & pwsh -NoProfile -File $script -ClientPathPreflight -PsqlPath $path
+            if ($LASTEXITCODE -ne 0) { throw "APPROVED_PSQL_PATH_REJECTED $path" }
+          }
+          $outside = Join-Path $env:RUNNER_TEMP 'h2-unapproved-psql.exe'
+          Copy-Item -LiteralPath $edb -Destination $outside
+          foreach ($path in @($outside, 'psql.exe', (Join-Path $portableBin 'missing.exe'))) {
+            & pwsh -NoProfile -File $script -ClientPathPreflight -PsqlPath $path 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) { throw "UNAPPROVED_PSQL_PATH_ACCEPTED $path" }
+          }
+          & pwsh -NoProfile -File $script -ClientPathPreflight -PsqlPath $portable -ReceiptPath (Join-Path $env:RUNNER_TEMP 'forbidden-receipt.json') 2>&1 | Out-Null
+          if ($LASTEXITCODE -eq 0) { throw 'PREFLIGHT_ACCEPTED_RECEIPT_INPUT' }
+          Write-Host 'APPROVED_PSQL_PATHS=2 PASS; REJECTED_PATHS=3 PASS; PREFLIGHT_NO_EXECUTION=PASS; NO SQL; NO NEON'
       - name: Actual psql --version plus bounded loopback-only noninteractive probe
         shell: pwsh
         run: |
