@@ -139,7 +139,9 @@ try {
     if ($OfflineSelfTest) {
         if ($AttestationPath -ne '' -or $OperatorName -ne '') { throw 'OfflineSelfTest forbids attestation/operator inputs' }
         $hostValue = 'synthetic.invalid'
-        $python = (Get-Command python -CommandType Application -ErrorAction Stop).Source
+        $pythonCandidates = @(Get-Command python -CommandType Application -All -ErrorAction Stop)
+        $python = @($pythonCandidates | ForEach-Object { $_.Path } | Where-Object { $_ -and [IO.File]::Exists($_) })[0]
+        if (-not $python) { throw 'MOCK_PYTHON_NOT_FOUND' }
         $executable = $python
         $preArgs = @((Join-Path $PSScriptRoot 'mock_psql.py'), '--scenario', $MockScenario, '--')
         $version = 'psql (PostgreSQL) 18.6'
