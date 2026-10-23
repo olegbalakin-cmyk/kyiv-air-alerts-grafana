@@ -10,8 +10,10 @@ p.add_argument("--scenario",required=True)
 p.add_argument("rest",nargs=argparse.REMAINDER)
 a=p.parse_args()
 if os.environ.get("H2_MOCK_ONLY")!="1": sys.exit(90)
-required=["-X","ON_ERROR_STOP=1","ON_ERROR_ROLLBACK=off","-W","synthetic.invalid","ROLE_EXISTENCE_PINNED.sql"]
+required=["-X","ON_ERROR_STOP=1","ON_ERROR_ROLLBACK=off","-W","synthetic.invalid"]
 if any(x not in a.rest for x in required): sys.exit(91)
+if "-f" not in a.rest or a.rest.index("-f")+1 >= len(a.rest): sys.exit(91)
+if os.path.basename(a.rest[a.rest.index("-f")+1]) != "ROLE_EXISTENCE_PINNED.sql": sys.exit(91)
 if any("neon.tech" in x for x in a.rest): sys.exit(92)
 header="database_name|session_role|current_role|server_version_num|transaction_read_only|transaction_isolation|inspector_exists"
 role="neondb_owner"
