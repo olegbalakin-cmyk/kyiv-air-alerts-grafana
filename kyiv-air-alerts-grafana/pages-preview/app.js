@@ -93,7 +93,7 @@ const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "180d", "year", "all"];
 const TIME_OF_DAY_BIN_MINUTES = [15, 30, 60];
-const TABLE_RANGES = ["7d", "30d", "90d", "year", "common", "custom"];
+const TABLE_RANGES = ["7d", "30d", "90d", "180d", "year", "common", "custom"];
 const TABLE_SORT_COLUMNS = [
   { key:"label", labelUk:"Місто / ряд", labelEn:"City / series", defaultDirection:"asc" },
   { key:"alerts", labelUk:"Тривог", labelEn:"Alerts", defaultDirection:"desc" },
@@ -151,7 +151,7 @@ function applyStaticLanguage(){
  setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
  setSectionHeading("timeOfDaySection","Час доби","Time of day","Як тривоги розподіляються протягом доби","How alerts are distributed through the day","Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.","Two complementary views: a detailed normalized profile and the actual distribution of all alert time across parts of the day.");setSectionHeading("alertBurdenSection","Структура навантаження","Burden structure","Тривалість і навантаження","Duration and burden","Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.","How days were distributed by time under alert and how the longest episodes changed.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText('label[for="timeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#timeOfDayBin","aria-label","Інтервал добового профілю","Time-of-day profile interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("timeOfDayBin",v,u,e);setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");setLocalizedText('label[for="burdenYear"]',"Період","Period");setLocalizedAttr("#burdenYear","aria-label","Період графіків структури навантаження","Period for burden charts");setLocalizedText('label[for="daypartMode"]',"Розподіл","Grouping");setLocalizedAttr("#daypartMode","aria-label","Спосіб розподілу часу під тривогою","Alert time grouping");setOptionText("daypartMode","four","4 частини доби","Four time bands");setOptionText("daypartMode","daynight","День / вечір і ніч","Day / evening & night");setLocalizedText('label[for="daypartYear"]',"Рік","Year");setLocalizedText("#heavyDaysExcludeZeroLabel","Не враховувати дні без тривог","Exclude days without alerts");setCardCopy("heavyDaysChart","Розподіл днів за часом під тривогою","Distribution of days by time under alert","100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.","Each month is normalized to 100% and split by days with no alert, under 1 hour, 1–3, 3–6, 6–12, and 12+ hours under alert.");setCardCopy("extremesChart","Найдовша тривога і найдовша тиша","Longest alert and longest quiet spell","Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.","Left axis: the longest alert that started in the month. Right axis: the longest continuous alert-free spell within the month.");setCardCopy("daypartChart","Розподіл часу під тривогою за частинами доби","Distribution of alert time by part of day","100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.","100% of actual alert time in each month is split into 00–06, 06–12, 12–18 and 18–24 in Europe/Kyiv time.");setLocalizedText("#timeOfDaySection .daypart-note","На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.","Unlike the profile above, this shows the share of all actual alert time that fell in each part of the day.");
  setSectionHeading("rolling7dSection","Ковзні 7 днів","Rolling 7 days","Динаміка за 7-денним вікном","7-day rolling trend","Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.","Each point covers 7 completed calendar days and is dated by the window’s final day; adjacent points overlap by 6 days. The current calendar year is shown by default.");setLocalizedText('label[for="rolling7dYear"]',"Швидкий вибір","Quick range");setLocalizedAttr("#rolling7dYear","aria-label","Швидкий вибір періоду для 7-денного вікна","Quick range for the 7-day window");setCardCopy("rolling7dIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.","Bars: average hours under alert per day across 7 days. Line: average alerts per day across the same 7 days.");setCardCopy("rolling7dDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися у відповідному 7-денному вікні.","Average duration of alerts that started within the corresponding 7-day window.");
- setSectionHeading("shortHorizonSection","Короткий горизонт","Short horizon","Щоденний розріз","Daily view","Доступні останні 28 завершених днів для обраного міста. Поточний неповний день включено лише за наявності підтверджених даних; KPI розраховуються за вибраний діапазон дат.","The last 28 completed days are available for the selected city. Today is excluded.");setCardCopy("daily28HoursChart","Сумарний час під тривогою за день","Total time under alert per day","Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.","Hours of each calendar day spent under air alert. Overlapping intervals are not counted twice; an alert crossing midnight is split between the relevant days.");setCardCopy("daily28AlertsDurationChart","Кількість тривог і середня тривалість за день","Alert count and average duration per day","Стовпчики — кількість тривог, що почалися цього дня. Лінія — середня тривалість тривог, що почалися цього дня.","Bars show alerts that started that day. The line shows the average duration of alerts that started that day.");
+ setSectionHeading("shortHorizonSection","Короткий горизонт","Short horizon","Щоденний розріз","Daily view","Доступні останні 28 завершених днів для обраного міста. Поточний неповний день включено лише за наявності підтверджених даних; KPI розраховуються за вибраний діапазон дат.","The last 28 completed days are available for the selected city. Today is excluded.");setCardCopy("daily28HoursChart","Сумарний час під тривогою за день","Total time under alert per day","Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.","Hours of each calendar day spent under air alert. Overlapping intervals are not counted twice; an alert crossing midnight is split between the relevant days.");setCardCopy("daily28AlertsDurationChart","Кількість тривог і середня тривалість за день","Alert count and average duration per day","Стовпчики — нові тривоги за день; лінія — середня тривалість. У підказці — час під тривогою і кількість активних відрізків.","Bars show alerts started that day; the line shows average duration. Hover for time under alert and number of active segments.");
  setSectionHeading("casualtySection","","","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.","Deaths occurring later from attack-related injuries are attributed to the month of the attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="casualtyInterval"]',"Інтервал","Interval");setOptionText("casualtyInterval","monthly","Місяці","Months");setOptionText("casualtyInterval","yearly","Роки","Years");setLocalizedAttr("#casualtyInterval","aria-label","Інтервал для графіка загиблих","Interval for the deaths chart");setLocalizedText('label[for="casualtyYear"]',"Рік","Year");setLocalizedAttr("#casualtyYear","aria-label","Рік для графіка загиблих","Year for the deaths chart");
  setSectionHeading("comparisonSection","Порівняння","Comparison","Порівняння обраних міст","Compare selected cities","Для коректності графіки показують лише періоди, які одночасно є в усіх обраних рядах.","Charts use only periods that are available in all selected series.");for(const [id,u,e] of [["compareA","Місто A","City A"],["compareB","Місто B","City B"],["compareC","Місто C (необов’язково)","City C (optional)"],["comparePeriod","Інтервал","Interval"]])setLocalizedText(`label[for="${id}"]`,u,e);setOptionText("comparePeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("comparePeriod","monthly","Місяці","Months");setOptionText("comparePeriod","calendarWeekly","Тижні","Weeks");setOptionText("comparePeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("comparePeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("comparePeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  setCardCopy("compareAlertsChart","Середня кількість тривог на день","Average alerts per day","Кількість тривог, що почалися в обраному періоді ÷ кількість календарних днів.","Alerts that started in the selected period ÷ calendar days.");setCardCopy("compareHoursChart","Середній час під тривогою на добу","Average time under alert per day","Сумарний час під тривогою в обраному періоді ÷ кількість календарних днів.","Total time under alert in the selected period ÷ calendar days.");setCardCopy("compareDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.","Average duration of alerts that started in the selected period; duration is attributed to the period in which the alert started.");setCardCopy("compareCumulativeHoursChart","Накопичений час під тривогою","Cumulative time under alert","Сумарні години під тривогою накопичуються помісячно від нуля за обраний діапазон дат. Лише спільні завершені місяці.","Total alert hours accumulate month by month from zero over the selected date range. Only shared complete months.");setLocalizedAttr("#compareCumulativeHoursChart","aria-label","Накопичений час під тривогою за місяцями для вибраних міст","Cumulative alert hours by month for selected cities");setCardCopy("compareTimeOfDayChart","Добовий профіль тривог","Time-of-day alert profile","Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найактивніший інтервал = 100%.","Comparison of the daily pattern. Each city/district is normalized separately: its own most active interval = 100%.");setLocalizedText('label[for="compareTimeOfDayRange"]',"Діапазон","Range");setLocalizedAttr("#compareTimeOfDayRange","aria-label","Діапазон добового профілю для порівняння","Time-of-day comparison range");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]])setOptionText("compareTimeOfDayRange",v,u,e);setLocalizedText('label[for="compareTimeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#compareTimeOfDayBin","aria-label","Інтервал добового профілю для порівняння","Time-of-day comparison interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("compareTimeOfDayBin",v,u,e);setCardCopy("compareExplosionsChart","Частка тривог із повідомленнями про вибухи","Share of alerts with reported explosions","Ковзне 90-денне вікно з кроком відображення 7 днів. Strict-метрика: підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою.","Rolling 90-day window, displayed every 7 days. Strict metric: a confirmed report specifically of explosions in the city, matched to a particular alert.");setCardCopy("compareCasualtiesChart","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Підтверджені смерті за місяцем атаки. Наземні бої та артилерійські обстріли не включені.","Confirmed deaths by month of attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="compareCasualtyInterval"]',"Інтервал","Interval");setOptionText("compareCasualtyInterval","monthly","Місяці","Months");setOptionText("compareCasualtyInterval","yearly","Роки","Years");setLocalizedAttr("#compareCasualtyInterval","aria-label","Інтервал для порівняння загиблих","Interval for death comparison");setLocalizedText('label[for="compareCasualtyYear"]',"Рік","Year");setLocalizedAttr("#compareCasualtyYear","aria-label","Рік для порівняння загиблих","Year for death comparison");
@@ -182,7 +182,35 @@ function formatDurationHours(value) {
   const n = Number(value);
   return Number.isFinite(n) ? formatDurationMinutes(n * 60) : "—";
 }
-function setDurationChart(id, labels, datasets, unit = "minutes") {
+// Duration data are stored as fractional minutes, so daily explanations can
+// retain seconds without changing the chart axis or other periods.
+function formatDailyDurationSeconds(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return "—";
+  const seconds = Math.round(value * 60);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainder = seconds % 60;
+  return (hours ? `${hours} ${tr("год","hr")} ` : "") +
+    `${minutes} ${tr("хв","min")} ${String(remainder).padStart(2, "0")} ${tr("с","sec")}`;
+}
+function dailyAlertTooltipLabel(row) {
+  return tr("Середня тривалість","Average duration") + ": " +
+    formatDailyDurationSeconds(row?.avg_active_alert_duration_minutes);
+}
+function dailyAlertTooltipFooter(row) {
+  if (!row) return "";
+  const count = value => Number.isSafeInteger(value) && value >= 0 ? String(value) : "—";
+  const lines = [
+    tr("Почалося тривог","Alerts started") + ": " + count(row.alerts_started),
+    tr("Активних відрізків","Active segments") + ": " + count(row.active_alerts),
+    tr("Час під тривогою","Time under alert") + ": " +
+      formatDailyDurationSeconds(row.total_alert_duration_minutes)
+  ];
+  const partial = partialPeriodFooter(row);
+  if (partial) lines.push(partial);
+  return lines;
+}
+function setDurationChart(id, labels, datasets, unit = "minutes", dailyRows = null) {
   if (state.charts[id]) state.charts[id].destroy();
   const formatter = unit === "hours" ? formatDurationHours : formatDurationMinutes;
   const yTitle = tr("Тривалість","Duration");
@@ -191,8 +219,13 @@ function setDurationChart(id, labels, datasets, unit = "minutes") {
   options.plugins.tooltip.callbacks = {
     ...options.plugins.tooltip.callbacks,
     label(context) {
+      if (dailyRows) return dailyAlertTooltipLabel(dailyRows[context.dataIndex]);
       const prefix = context.dataset.label ? `${context.dataset.label}: ` : "";
       return prefix + formatter(context.parsed.y);
+    },
+    footer(items) {
+      if (dailyRows) return dailyAlertTooltipFooter(dailyRows[items?.[0]?.dataIndex]);
+      return chartPartialFooter(items);
     }
   };
   state.charts[id] = new Chart($(id), {
@@ -833,13 +866,11 @@ function derivedDaily28Rows(city) {
     alerts_per_day: Number(row.alerts_started) || 0,
     avg_daily_alert_hours: Number(row.total_alert_duration_hours) || 0,
     avg_alert_duration_min: (() => {
-      const exact = Number(row.avg_active_alert_duration_minutes);
-      if (Number.isFinite(exact)) return exact;
-      const active = Number(row.active_alerts);
-      const total = Number(row.total_alert_duration_minutes);
-      if (active > 0 && Number.isFinite(total)) return total / active;
-      const legacy = Number(row.avg_alert_duration_minutes);
-      return Number.isFinite(legacy) ? legacy : null;
+      const exact = row.avg_active_alert_duration_minutes;
+      // Do not silently show a start-date full-episode mean for a
+      // within-day chart. null (including a no-alert day) means no point.
+      return typeof exact === "number" && Number.isFinite(exact) && exact >= 0
+        ? exact : null;
     })()
   }));
 }
@@ -869,8 +900,13 @@ function derivedCalendarWeeks(city) {
   let durationWeight = 0;
   for (const row of partialDays) {
     const n = Number(row.alerts_started) || 0;
-    const avg = Number(row.avg_alert_duration_min);
-    if (n > 0 && Number.isFinite(avg)) {
+    // Partial calendar weeks keep the existing start-attributed mean.
+    // Legacy synthetic daily fixtures may only carry the segment mean.
+    const full = row.avg_alert_duration_minutes;
+    const segment = row.avg_active_alert_duration_minutes;
+    const avg = typeof full === "number" && Number.isFinite(full) ? full
+      : (typeof segment === "number" && Number.isFinite(segment) ? segment : null);
+    if (n > 0 && avg !== null) {
       durationWeighted += n * avg;
       durationWeight += n;
     }
@@ -2287,7 +2323,8 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              return partialPeriodFooter(rows[i]);
+              return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
+                : partialPeriodFooter(rows[i]);
             }
           }
         },
@@ -2318,12 +2355,12 @@ function renderCity() {
   const durationSubtitle = durationCard?.querySelector(".chart-subtitle");
   if (period === "daily28") {
     if (durationTitle) durationTitle.textContent = tr(
-      "Середня тривалість тривоги в межах доби",
-      "Average within-day alert duration"
+      "Середня тривалість",
+      "Average duration"
     );
     if (durationSubtitle) durationSubtitle.textContent = tr(
-      "Для кожного календарного дня тривоги розрізаються на межі опівночі. Показано середню тривалість відрізків тривог, що припали на цей день. Кількість тривог при цьому й далі рахується лише в день початку. Останній пунктирний день — поточний неповний.",
-      "For each calendar day, alerts are split at midnight. The chart shows the average duration of alert segments that fall within that day. Alert counts still belong only to the day on which the alert started. The final dashed day is the current incomplete day."
+      "Середня за день = час під тривогою ÷ кількість активних відрізків. Нові тривоги рахуємо за днем початку. Числа можна переглянути в підказці.",
+      "Daily average = time under alert ÷ active segments. New alerts are counted on their start day. Hover to see the breakdown."
     );
   } else {
     if (durationTitle) durationTitle.textContent = tr(
@@ -2336,7 +2373,7 @@ function renderCity() {
     );
   }
 
-  setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes");
+  setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes", period === "daily28" ? rows : null);
 
   renderAlertBurden(key);
   renderTimeOfDay(key);
@@ -2519,7 +2556,9 @@ function renderShortHorizon(key) {
       layout: { padding: { right: 70 } },
       plugins: {
         legend: { display: false },
-        tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } },
+        tooltip: { mode: "index", intersect: false, callbacks: {
+          footer(items) { return dailyAlertTooltipFooter(rows[items?.[0]?.dataIndex]); }
+        } },
         partialPeriodBar: { rows, datasetIndices: [0] }
       },
       scales: {
@@ -2592,7 +2631,7 @@ function renderShortHorizon(key) {
         {
           type: "line",
           label: tr("Середня тривалість, хв","Average duration, min"),
-          data: rows.map(r => r.avg_alert_duration_minutes),
+          data: rows.map(r => (typeof r.avg_active_alert_duration_minutes === "number" && Number.isFinite(r.avg_active_alert_duration_minutes)) ? r.avg_active_alert_duration_minutes : null),
           yAxisID: "yDuration",
           borderColor: COLORS[2],
           backgroundColor: COLORS[2] + "22",
@@ -2614,7 +2653,14 @@ function renderShortHorizon(key) {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
-        tooltip: { mode: "index", intersect: false, callbacks: { footer: chartPartialFooter } },
+        tooltip: { mode: "index", intersect: false, callbacks: {
+          label(context) {
+            if (context.dataset.yAxisID === "yDuration")
+              return dailyAlertTooltipLabel(rows[context.dataIndex]);
+            return `${context.dataset.label}: ${fmt(context.parsed.y, 0)}`;
+          },
+          footer(items) { return dailyAlertTooltipFooter(rows[items?.[0]?.dataIndex]); }
+        } },
         partialPeriodBar: { rows, datasetIndices: alertBarDatasets.map((_dataset, index) => index) }
       },
       scales: {
@@ -3105,6 +3151,7 @@ function renderAllCitiesTable() {
     "7d":tr("7 днів","7 days"),
     "30d":tr("30 днів","30 days"),
     "90d":tr("90 днів","90 days"),
+    "180d":tr("180 днів","180 days"),
     "year":tr("Рік","Year"),
     "common":tr("Від початку спільних даних","From start of common data"),
     "custom":tr("Довільний період","Custom period")
@@ -3112,6 +3159,17 @@ function renderAllCitiesTable() {
   const root = state.data.all_cities_table_test;
   const cities = root?.cities || {};
   const commonBounds = commonMonthlyDateBounds();
+  // The producer does not supply an all-cities 180d aggregate. Derive it
+  // from the verified per-day history, with one shared complete end date.
+  const sharedEnd = cities?.[cityKeys()[0]]?.periods?.["90d"]?.range_end || "";
+  const shared180Start = window.KpiRange.validDay(sharedEnd) ? addIsoDays(sharedEnd, -179) : "";
+  const shared180Covered = Boolean(shared180Start && cityKeys().every(key =>
+    cities?.[key]?.periods?.["90d"]?.range_end === sharedEnd &&
+    state.historicalDaily?.cities?.[key]?.status === "verified" &&
+    state.historicalDaily.cities[key].start <= shared180Start &&
+    (state.historicalDaily.cities[key].end >= sharedEnd ||
+      (state.data.cities[key]?.daily28 || []).some(row => row.date === sharedEnd))
+  ));
 
   let customFrom = $("tableDateFrom")?.value || "";
   let customTo = $("tableDateTo")?.value || "";
@@ -3136,6 +3194,22 @@ function renderAllCitiesTable() {
       };
     }
 
+    if (range === "180d") {
+      const city = state.data.cities[key];
+      const daily = state.historicalDaily?.cities?.[key];
+      const computed = shared180Covered && city && daily
+        ? window.KpiRange.preciseHistoricalKpis(city, daily, shared180Start, sharedEnd)
+        : null;
+      return {
+        key, label: labelFor(key),
+        alerts: computed?.complete ? computed.alerts : null,
+        hours: computed?.complete ? computed.hours : null,
+        duration: computed?.complete ? computed.avgDuration : null,
+        coverage: coverageStart(key),
+        rangeStart: shared180Start || null,
+        rangeEnd: sharedEnd || null
+      };
+    }
     const period = cities?.[key]?.periods?.[range];
     const fallback = state.data.cities[key]?.kpis?.[0] || {};
     return {
@@ -3185,9 +3259,10 @@ function renderAllCitiesTable() {
     } else {
       const sample = rows.find(r => r.rangeStart && r.rangeEnd);
       const dates = sample ? `${sample.rangeStart} — ${sample.rangeEnd}` : "—";
+      const hasMissing180 = range === "180d" && rows.some(r => r.alerts == null);
       note.textContent = tr(
-        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.`,
-        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.`
+        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.${hasMissing180 ? " Недостатньо перевірених денних даних для окремих показників (—)." : ""}`,
+        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.${hasMissing180 ? " Some values lack verified daily coverage (—)." : ""}`
       );
     }
   }

@@ -7,7 +7,7 @@ const marker = "\napplyStaticLanguage();\n\ninit().catch(err=>{";
 assert.ok(code.includes(marker));
 assert.ok(code.includes('if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();'));
 assert.match(code,/const activeRange = syncDateRange\("cityDateFrom", "cityDateTo",\s*cityPeriodDateValues\(city, period, allRows\)\);/);
-assert.ok(html.includes("app.js?v=20261021-alltime-kpi-test1"));
+assert.ok(html.includes("app.js?v=20261023-daily28-allcities180-prod1"));
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname,"fixtures/daily28_20261020_live.json"),"utf8"));
 assert.equal(Object.keys(fixture.complete_daily28).length,23);
 const rows = [...fixture.complete_daily28.kyiv.slice(-27),fixture.current_day.cities.kyiv];
