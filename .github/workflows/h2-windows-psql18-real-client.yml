@@ -94,6 +94,7 @@ jobs:
           & pwsh -NoProfile -File $script -ClientPathPreflight -PsqlPath $portable -ReceiptPath (Join-Path $env:RUNNER_TEMP 'forbidden-receipt.json') 2>&1 | Out-Null
           if ($LASTEXITCODE -eq 0) { throw 'PREFLIGHT_ACCEPTED_RECEIPT_INPUT' }
           Write-Host 'APPROVED_PSQL_PATHS=2 PASS; REJECTED_PATHS=3 PASS; PREFLIGHT_NO_EXECUTION=PASS; NO SQL; NO NEON'
+          exit 0
       - name: Actual psql --version plus bounded loopback-only noninteractive probe
         shell: pwsh
         run: |
