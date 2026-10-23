@@ -1,0 +1,204 @@
+name: Release proof - 23-city daily means and all-cities 180d (isolated)
+on:
+  push:
+    branches: [release-site-daily28-180d-2026-10-23]
+    paths:
+      - '.github/workflows/release-daily28-180d-proof.yml'
+      - 'kyiv-air-alerts-grafana/pages-preview/**'
+      - 'kyiv-air-alerts-grafana/scripts/update_data.py'
+      - 'kyiv-air-alerts-grafana/tests/test_daily28_midnight_average.py'
+permissions:
+  contents: write
+concurrency:
+  group: isolated-daily28-180d-release-proof
+  cancel-in-progress: true
+jobs:
+  full-23-city-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install production Python dependencies
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Check exact frontend bundle and regressions
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          node --check kyiv-air-alerts-grafana/pages-preview/kpi-range.js
+          python kyiv-air-alerts-grafana/tests/test_daily28_midnight_average.py
+          python kyiv-air-alerts-grafana/tests/test_monthly_seconds.py
+          for f in test_chart_share.js test_calendar_week.js test_daily28_rollover.js test_dynamic_city_kpi.js test_historical_max.js test_city_period_kpi_sync.js test_kpi_interval_windows.js test_all_time_period.js test_live_history_binding.js; do
+            node "kyiv-air-alerts-grafana/tests/$f"
+          done
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('kyiv-air-alerts-grafana/pages-preview/index.html').read_text()
+          app=Path('kyiv-air-alerts-grafana/pages-preview/app.js').read_text()
+          control=html.split('<select id="allCitiesRange"',1)[1].split('</select>',1)[0]
+          assert '<option value="180d">180 днів</option>' in control
+          assert 'app.js?v=20261023-daily28-allcities180-prod1' in html
+          assert '"180d":tr("180 днів","180 days")' in app
+          assert 'const TABLE_RANGES = ["7d", "30d", "90d", "180d", "year", "common", "custom"]' in app
+          assert 'window.KpiRange.preciseHistoricalKpis(city, daily, shared180Start, sharedEnd)' in app
+          assert 'dailyAlertTooltipFooter' in app and 'avg_active_alert_duration_minutes' in app
+          print('BUNDLE_REGRESSION_PASS')
+          PY
+      - name: Cross-verify and enrich all 23 city daily rows from production sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv, copy, hashlib, json, os, sys
+          from datetime import date, timedelta, datetime, timezone
+          from pathlib import Path
+          root=Path('kyiv-air-alerts-grafana')
+          sys.path.insert(0,str(root/'scripts'))
+          import apply_site_rolling_7d as src
+          import build_preview_historical_daily as verify
+          from update_data import TZ, day_counts_and_durations, union_daily_seconds, union_daily_segment_counts, round3
+          data_path=root/'data/dashboard_data.json'
+          derived_path=root/'data/site_derived.json'
+          csv_path=root/'data/short_28d.csv'
+          payload=json.loads(data_path.read_text(encoding='utf-8'))
+          before=copy.deepcopy(payload)
+          derived=json.loads(derived_path.read_text(encoding='utf-8'))
+          source_sha=os.environ['GITHUB_SHA']
+          keys=payload.get('multicity_meta',{}).get('production_city_keys',[])
+          assert len(keys)==23 and len(set(keys))==23 and 'kyiv' in keys
+          assert set(keys)==set(payload['cities'])
+          assert derived.get('meta',{}).get('generated_at') == payload.get('meta',{}).get('generated_at'), 'Derived data and base data have different generations'
+          sources=src.build_alert_map(payload)
+          assert set(keys)==set(sources) and all(sources.get(k) for k in keys)
+          check_rows=0
+          evidence={}
+          for key in keys:
+              city=payload['cities'][key]
+              rows=city['daily28']
+              assert len(rows)==28,(key,len(rows))
+              d0=date.fromisoformat(rows[0]['date'])
+              d1=date.fromisoformat(rows[-1]['date'])
+              assert (d1-d0).days==27,key
+              assert not any(row.get('is_partial_period') for row in rows),key
+              counts,_=day_counts_and_durations(sources[key],d1)
+              seconds=union_daily_seconds(sources[key],d0,d1)
+              pieces=union_daily_segment_counts(sources[key],d0,d1)
+              nonempty=0
+              for i,row in enumerate(rows):
+                  d=d0+timedelta(days=i)
+                  assert row['date']==d.isoformat(),(key,i)
+                  observed_seconds=seconds.get(d,0.)
+                  assert int(row['alerts_started'])==int(counts.get(d,0)),(key,d,'start_count')
+                  assert abs(observed_seconds/60-float(row['total_alert_duration_minutes']))<=0.003,(key,d,'daily_minute_parity')
+                  assert abs(observed_seconds/3600-float(row['total_alert_duration_hours']))<=0.003,(key,d,'daily_hour_parity')
+                  n=pieces[d]
+                  assert (n==0)==(observed_seconds==0),(key,d,'active_segment_count')
+                  new_avg=round3(observed_seconds/60/n) if n else None
+                  assert new_avg is None or abs(new_avg*n-observed_seconds/60)<0.03,(key,d,'duration_math')
+                  if n: nonempty+=1
+                  row['active_alerts']=n
+                  row['avg_active_alert_duration_minutes']=new_avg
+                  check_rows+=1
+              evidence[key]={'first_day':d0.isoformat(),'last_day':d1.isoformat(),'days':28,'active_days':nonempty,'episodes':len(sources[key])}
+          # Prove this adds only the two new daily fields and does not change any legacy KPI, alerts or history.
+          baseline=copy.deepcopy(payload)
+          for key in keys:
+              for row in baseline['cities'][key]['daily28']:
+                  row.pop('active_alerts',None)
+                  row.pop('avg_active_alert_duration_minutes',None)
+          legacy=copy.deepcopy(before)
+          for key in keys:
+              for row in legacy['cities'][key]['daily28']:
+                  row.pop('active_alerts',None)
+                  row.pop('avg_active_alert_duration_minutes',None)
+          assert baseline==legacy,'Unexpected mutation outside 2 daily fields'
+          oct5=next(row for row in payload['cities']['kyiv']['daily28'] if row['date']=='2026-10-05')
+          assert oct5['alerts_started']==1 and oct5['active_alerts']==2 and oct5['avg_active_alert_duration_minutes']==22.15
+          # The existing short CSV is a second public Kyiv data entrypoint.
+          with csv_path.open(encoding='utf-8-sig',newline='') as f:
+              reader=csv.DictReader(f)
+              columns=list(reader.fieldnames or [])
+              csv_rows=list(reader)
+          assert len(csv_rows)==28
+          required=['date','alerts_started','total_alert_duration_minutes','total_alert_duration_hours','avg_alert_duration_minutes']
+          assert all(k in columns for k in required)
+          by_date={row['date']:row for row in payload['cities']['kyiv']['daily28']}
+          for row in csv_rows:
+              exact=by_date[row['date']]
+              assert int(row['alerts_started'])==exact['alerts_started']
+              assert abs(float(row['total_alert_duration_minutes'])-exact['total_alert_duration_minutes'])<0.004
+              row['active_alerts']=str(exact['active_alerts'])
+              row['avg_active_alert_duration_minutes']='' if exact['avg_active_alert_duration_minutes'] is None else str(exact['avg_active_alert_duration_minutes'])
+          for field in ['active_alerts','avg_active_alert_duration_minutes']:
+              if field not in columns: columns.append(field)
+          with csv_path.open('w',encoding='utf-8-sig',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=columns)
+              w.writeheader()
+              w.writerows(csv_rows)
+          # Verify full source/aggregate parity using existing historical index contract, not just 28 recent days.
+          data_path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          historical=verify.produce(root.resolve(),source_sha,sources_override=sources)
+          assert historical['meta']['verified_count']==23 and len(historical['cities'])==23,historical['meta']
+          assert all(historical['cities'][key]['status']=='verified' for key in keys)
+          # The 180-day quick range must use a common completed end and certified coverage at all 23 cities.
+          table=derived['all_cities_table_test']['cities']
+          assert set(table)==set(keys)
+          shared_end=table['kyiv']['periods']['90d']['range_end']
+          start=(date.fromisoformat(shared_end)-timedelta(days=179)).isoformat()
+          for key in keys:
+              h=historical['cities'][key]
+              assert table[key]['periods']['90d']['range_end']==shared_end,(key,'shared_end')
+              assert h['start']<=start,(key,'180_start',h['start'],start)
+              assert h['end']>=shared_end or any(r['date']==shared_end for r in payload['cities'][key]['daily28']),(key,'180_end')
+          proof={
+              'schema':'daily28-allcities-180d-production-preflight-v1',
+              'code_proof_commit':source_sha,
+              'source_site_prod_base':'fd1c2aa1ab3fe93e9f7656343a5e65ad14cca790',
+              'data_generated_at':payload['meta']['generated_at'],
+              'cities_verified':23,
+              'daily_rows_verified':check_rows,
+              'no_unrelated_payload_changes':True,
+              'old_full_episode_average_preserved':True,
+              'kyiv_2026_10_05':{'alerts_started':1,'active_alerts':2,'average_minutes':22.15},
+              'historical_verified_cities':historical['meta']['verified_count'],
+              'all_cities_180d_start':start,'all_cities_180d_end':shared_end,
+              'all_cities_180d_verified_cities':23,
+              'per_city':evidence,
+              'dashboard_sha256':hashlib.sha256(data_path.read_bytes()).hexdigest(),
+              'short_csv_sha256':hashlib.sha256(csv_path.read_bytes()).hexdigest()
+          }
+          proof_path=Path('research/site_release_daily28_180d_20261023_proof.json')
+          proof_path.parent.mkdir(exist_ok=True)
+          proof_path.write_text(json.dumps(proof,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('ALL_23_DAILY_PARITY_PASS',check_rows,'daily rows; zero loss of old metrics')
+          print('ALL_23_180D_COVERAGE_PASS',start,'through',shared_end)
+          print('OCT5_KYIV_DURATION_PASS',oct5['avg_active_alert_duration_minutes'])
+          print('PREPARED_DATA_SHA256',proof['dashboard_sha256'])
+          PY
+      - name: Freeze validated site data and proof on release branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          EXPECTED="fd1c2aa1ab3fe93e9f7656343a5e65ad14cca790"
+          CURRENT="$(git ls-remote origin refs/heads/site-prod | cut -f1)"
+          test "$CURRENT" = "$EXPECTED" || { echo "FAIL CLOSED: site-prod changed since release base"; exit 1; }
+          git add kyiv-air-alerts-grafana/data/dashboard_data.json kyiv-air-alerts-grafana/data/short_28d.csv research/site_release_daily28_180d_20261023_proof.json
+          git diff --cached --name-only
+          test "$(git diff --cached --name-only | wc -l)" -eq 3
+          git commit -m 'Freeze 23-city proven daily averages and 180d coverage for controlled release'
+          git push origin HEAD:refs/heads/release-site-daily28-180d-2026-10-23
+          echo 'RELEASE_BRANCH_PROOF_FROZEN: no production files or Netlify deploy changed'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isolated-daily28-180d-release-proof
+          path: research/site_release_daily28_180d_20261023_proof.json
+          if-no-files-found: warn
+          retention-days: 30

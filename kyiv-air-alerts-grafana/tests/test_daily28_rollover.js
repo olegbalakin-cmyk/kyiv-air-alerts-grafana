@@ -134,12 +134,12 @@ assert.deepEqual(Array.from(hours.options.plugins.partialPeriodBar.datasetIndice
 assert.deepEqual(Array.from(alert.options.plugins.partialPeriodBar.datasetIndices),[0]);
 assert.equal(typeof hours.plugins[0].afterDatasetsDraw,"function");
 assert.equal(typeof alert.plugins[0].afterDatasetsDraw,"function");
-assert.equal(hours.options.plugins.tooltip.callbacks.footer([
+assert.deepEqual(Array.from(hours.options.plugins.tooltip.callbacks.footer([
   {dataset:hours.data.datasets[0],dataIndex:27}
-]),"Дані станом на 20.10");
-assert.equal(alert.options.plugins.tooltip.callbacks.footer([
+])),["Почалося тривог: 3","Активних відрізків: —","Час під тривогою: —","Дані станом на 20.10"]);
+assert.deepEqual(Array.from(alert.options.plugins.tooltip.callbacks.footer([
   {dataset:alert.data.datasets[0],dataIndex:27}
-]),"Дані станом на 20.10");
+])),["Почалося тривог: 3","Активних відрізків: —","Час під тривогою: —","Дані станом на 20.10"]);
 assert.match(outputElements.daily28Range.textContent,/Останній доступний день \(20\.10\) неповний/);
 assert.match(outputElements.daily28Range.textContent,/Дані станом на 20\.10/);
 assert.ok(!outputElements.daily28Range.textContent.includes("Сьогоднішній день"));
@@ -199,8 +199,8 @@ evalJS("currentLanguage='uk';state.data={cities:productionCities,multicity_meta:
 assert.equal(evalJS("state.charts.daily28HoursChart.config.data.labels.at(-1)"),"2026-10-20");
 assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.data.labels.at(-1)"),"2026-10-20");
 assert.match(outputElements.daily28Range.textContent,/Дані станом на 23:25/);
-assert.equal(evalJS("state.charts.daily28HoursChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28HoursChart.config.data.datasets[0],dataIndex:27}])"),"Дані станом на 23:25");
-assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28AlertsDurationChart.config.data.datasets[0],dataIndex:27}])"),"Дані станом на 23:25");
+assert.deepEqual(Array.from(evalJS("state.charts.daily28HoursChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28HoursChart.config.data.datasets[0],dataIndex:27}])")),["Почалося тривог: 7","Активних відрізків: 7","Час під тривогою: 10 год 8 хв 00 с","Дані станом на 23:25"]);
+assert.deepEqual(Array.from(evalJS("state.charts.daily28AlertsDurationChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28AlertsDurationChart.config.data.datasets[0],dataIndex:27}])")),["Почалося тривог: 7","Активних відрізків: 7","Час під тривогою: 10 год 8 хв 00 с","Дані станом на 23:25"]);
 const mismatch = JSON.parse(JSON.stringify(snapshot.current_day));
 mismatch.cities.kyiv.partial_through = "2026-10-19T23:25:39+03:00";
 const mismatchCities = Object.fromEntries(Object.entries(snapshot.complete_daily28).map(

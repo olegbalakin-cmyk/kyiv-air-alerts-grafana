@@ -296,6 +296,44 @@ def union_daily_seconds(alerts: list[Alert], start_day: date, end_day: date) -> 
     return out
 
 
+def union_daily_segment_counts(alerts: list[Alert], start_day: date, end_day: date) -> dict[date, int]:
+    """Count non-overlapping alert segments clipped to local civil days.
+
+    The merge and local-midnight boundaries match union_daily_seconds: overlapping
+    source intervals do not create duplicate active segments, while a genuine
+    midnight-crossing alert contributes to both of its calendar days.
+    """
+    buckets: dict[date, list[tuple[datetime, datetime]]] = defaultdict(list)
+    start_bound = iso_local_midnight(start_day).astimezone(UTC)
+    end_bound = iso_local_midnight(end_day + timedelta(days=1)).astimezone(UTC)
+
+    for alert in alerts:
+        a0 = alert.start.astimezone(UTC)
+        a1 = alert.end.astimezone(UTC)
+        if a1 <= start_bound or a0 >= end_bound:
+            continue
+        first = max(start_day, alert.start.astimezone(TZ).date())
+        last = min(end_day, alert.end.astimezone(TZ).date())
+        for d in daterange(first, last):
+            d0 = iso_local_midnight(d).astimezone(UTC)
+            d1 = iso_local_midnight(d + timedelta(days=1)).astimezone(UTC)
+            s = max(a0, d0)
+            e = min(a1, d1)
+            if e > s:
+                buckets[d].append((s, e))
+
+    out: dict[date, int] = {}
+    for d in daterange(start_day, end_day):
+        merged: list[list[datetime]] = []
+        for s, e in sorted(buckets.get(d, []), key=lambda item: item[0]):
+            if not merged or s > merged[-1][1]:
+                merged.append([s, e])
+            elif e > merged[-1][1]:
+                merged[-1][1] = e
+        out[d] = len(merged)
+    return out
+
+
 def day_counts_and_durations(alerts: list[Alert], end_day: date) -> tuple[dict[date, int], dict[date, list[float]]]:
     counts: dict[date, int] = defaultdict(int)
     durations: dict[date, list[float]] = defaultdict(list)
@@ -369,17 +407,21 @@ def build_outputs(alerts: list[Alert], now_local: datetime, meta: dict) -> dict:
     # Short horizon: exactly 28 completed calendar days.
     short_start = end_day - timedelta(days=27)
     daily_seconds_short = union_daily_seconds(alerts, short_start, end_day)
+    daily_segment_counts = union_daily_segment_counts(alerts, short_start, end_day)
     daily28 = []
     for d in daterange(short_start, end_day):
         durs = durations_by_start.get(d, [])
+        segments = daily_segment_counts[d]
         daily28.append(
             {
                 "time": datetime.combine(d, time.min, tzinfo=TZ).isoformat(),
                 "date": d.isoformat(),
                 "alerts_started": counts.get(d, 0),
+                "active_alerts": segments,
                 "total_alert_duration_minutes": round3(daily_seconds_short.get(d, 0.0) / 60.0),
                 "total_alert_duration_hours": round3(daily_seconds_short.get(d, 0.0) / 3600.0),
                 "avg_alert_duration_minutes": round3(mean(durs) if durs else None),
+                "avg_active_alert_duration_minutes": round3(daily_seconds_short.get(d, 0.0) / (60.0 * segments)) if segments else None,
             }
         )
 
@@ -485,6 +527,8 @@ def main() -> None:
             "total_alert_duration_minutes",
             "total_alert_duration_hours",
             "avg_alert_duration_minutes",
+            "active_alerts",
+            "avg_active_alert_duration_minutes",
         ],
     )
     write_csv(
