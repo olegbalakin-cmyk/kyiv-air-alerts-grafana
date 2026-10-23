@@ -8,6 +8,8 @@ The SQL and route template are immutable Git-pinned inputs.
 param(
     [switch]$ExecuteOneRead,
     [switch]$OfflineSelfTest,
+    [switch]$ClientPathPreflight,
+    [string]$PsqlPath = '',
     [ValidateSet('absent','exists','missing_rollback','extra_statement','sql_error','timeout','wrong_role','wrong_database','wrong_guard','multiple_rows','malformed_header','exit_failure','stderr_noise')]
     [string]$MockScenario = 'absent',
     [string]$AttestationPath = '',
@@ -20,6 +22,7 @@ $ErrorActionPreference = 'Stop'
 $SqlBlob = 'dd3595f7402cdc6e44d3fce6c5632dd9cfb88052'
 $SqlSha256 = '3e8a8d62440ec30245f64da21a263d84793e7e77a8cf45806f60a656ba6a31ee'
 $RouteBlob = '0ea2e8688c5b5a5e3934704a29b2ad51195584b4'
+$PsqlExeSha256 = 'fde952534f520909c02db04675588ecb1da8d618b6e5c93e106f42a752daf720'
 $HostPin = 'ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech'
 $UserPin = 'neondb_owner'
 $SqlPath = Join-Path $PSScriptRoot 'ROLE_EXISTENCE_PINNED.sql'
@@ -69,6 +72,31 @@ function Assert-Attestation([object]$route, [object]$record, [string]$operator) 
     $hours = ([DateTimeOffset]::UtcNow - $at).TotalHours
     if ($hours -lt 0 -or $hours -gt 72) { throw 'Route observation expired or in future' }
 }
+function Assert-ApprovedPsqlClient([string]$requestedPath) {
+    if (-not $IsWindows) { throw 'CLIENT_PATH_WINDOWS_ONLY' }
+    $defaultPath = Join-Path $env:ProgramFiles 'PostgreSQL\18\bin\psql.exe'
+    $ownerPath = Join-Path $HOME 'h2-psql18\pgsql\bin\psql.exe'
+    $candidate = if ([string]::IsNullOrWhiteSpace($requestedPath)) { $defaultPath } else { $requestedPath }
+    if (-not [IO.Path]::IsPathFullyQualified($candidate)) { throw 'CLIENT_PATH_MUST_BE_ABSOLUTE' }
+    $full = [IO.Path]::GetFullPath($candidate)
+    $allowed = @([IO.Path]::GetFullPath($defaultPath), [IO.Path]::GetFullPath($ownerPath))
+    if (-not @($allowed | Where-Object { [string]::Equals($_, $full, [StringComparison]::OrdinalIgnoreCase) }).Count) {
+        throw 'CLIENT_PATH_NOT_ALLOWLISTED'
+    }
+    if (-not [IO.File]::Exists($full)) { throw 'CLIENT_EXECUTABLE_MISSING' }
+    $entry = Get-Item -LiteralPath $full -Force
+    if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'CLIENT_PATH_REPARSE_POINT' }
+    $parent = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($full))
+    while ($null -ne $parent) {
+        if (($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'CLIENT_PATH_REPARSE_POINT' }
+        $parent = $parent.Parent
+    }
+    $hash = (Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($hash -cne $PsqlExeSha256) { throw 'CLIENT_EXECUTABLE_SHA256_MISMATCH' }
+    $version = (& $full --version | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or $version -cnotmatch '^psql \(PostgreSQL\) 18\.\d+(?:\.\d+)?$') { throw 'CLIENT_MUST_BE_PG18' }
+    return @{ path = $full; version = $version }
+}
 function Invoke-BoundedChild([string]$file, [string[]]$arguments, [bool]$synthetic) {
     $si = [Diagnostics.ProcessStartInfo]::new()
     $si.FileName = $file
@@ -116,7 +144,17 @@ function Invoke-BoundedChild([string]$file, [string[]]$arguments, [bool]$synthet
 }
 
 try {
-    if ($OfflineSelfTest -eq $ExecuteOneRead) { throw 'Choose exactly one mode: OfflineSelfTest OR ExecuteOneRead' }
+    if (([int]$OfflineSelfTest.IsPresent + [int]$ExecuteOneRead.IsPresent + [int]$ClientPathPreflight.IsPresent) -ne 1) {
+        throw 'Choose exactly one mode: OfflineSelfTest, ClientPathPreflight OR ExecuteOneRead'
+    }
+    if ($ClientPathPreflight) {
+        if ($AttestationPath -ne '' -or $OperatorName -ne '' -or $ReceiptPath -ne '' -or
+            $MockScenario -ne 'absent') { throw 'CLIENT_PREFLIGHT_FORBIDS_EXECUTION_INPUTS' }
+        $client = Assert-ApprovedPsqlClient $PsqlPath
+        Write-Host "CLIENT_PATH_PREFLIGHT_PASS version=$($client.version); no SQL, no network, no Neon"
+        exit 0
+    }
+    if ($OfflineSelfTest -and $PsqlPath -ne '') { throw 'OFFLINE_MOCK_FORBIDS_REAL_CLIENT_PATH' }
     if ([string]::IsNullOrWhiteSpace($ReceiptPath)) { throw 'ReceiptPath required (OUTSIDE repository)' }
     $destination = [IO.Path]::GetFullPath($ReceiptPath)
     $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
@@ -156,11 +194,9 @@ try {
         $observedAt = $attestation.observed_at_utc
         $reviewer = $attestation.reviewed_by
         $actor = $OperatorName
-        if (-not $IsWindows) { throw 'LIVE_WINDOWS_ONLY' }
-        $executable = Join-Path $env:ProgramFiles 'PostgreSQL\18\bin\psql.exe'
-        if (-not [IO.File]::Exists($executable)) { throw 'PostgreSQL 18 psql not at pinned install path' }
-        $version = (& $executable --version | Out-String).Trim()
-        if ($LASTEXITCODE -ne 0 -or $version -cnotmatch '^psql \(PostgreSQL\) 18\.\d+(?:\.\d+)?$') { throw 'CLIENT_MUST_BE_PG18' }
+        $client = Assert-ApprovedPsqlClient $PsqlPath
+        $executable = $client.path
+        $version = $client.version
         $preArgs = @()
         Write-Host 'One local psql password prompt will follow. Do not paste credentials into chat, CI or files.'
     }
