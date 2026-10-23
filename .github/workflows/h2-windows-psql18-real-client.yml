@@ -1,0 +1,80 @@
+name: H2 PostgreSQL 18 real Windows client offline check
+on:
+  push:
+    branches:
+      - research-h2-role-existence-windows-psql-kit-2026-10-22-gpt6
+    paths:
+      - '.github/workflows/h2-windows-psql18-real-client.yml'
+      - 'research/h2_role_existence_windows_psql_2026_10_22/Test-H2Psql18RealClientOffline.ps1'
+      - 'research/h2_role_existence_windows_psql_2026_10_22/Invoke-H2RoleExistence.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-windows-psql18-loopback-only:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    env:
+      H2_NO_NEON: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Acquire vendor-checksummed PostgreSQL 18.6 Windows x64 binaries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+          Write-Host ("CHECKED_OUT_SHA={0}" -f (git rev-parse HEAD))
+          $url = 'https://get.enterprisedb.com/postgresql/postgresql-18.6-5-windows-x64-binaries.zip'
+          $expected = 'e2246ba91d22345bc3d017586c09ede52d9df180b1eeb480f050445f1cad84e2'
+          # EDB staff public checksum: https://github.com/EnterpriseDB/edb-installers/issues/746
+          $archive = Join-Path $env:RUNNER_TEMP 'postgresql-18.6-5-windows-x64-binaries.zip'
+          Invoke-WebRequest -Uri $url -OutFile $archive -MaximumRedirection 3
+          $bytes = (Get-Item -LiteralPath $archive).Length
+          $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -cne $expected) { throw 'EDB_VENDOR_ARCHIVE_SHA256_MISMATCH' }
+          Write-Host "EDB_ARCHIVE_SOURCE=$url"
+          Write-Host "EDB_PACKAGE_VERSION=18.6-5"
+          Write-Host "EDB_ARCHIVE_BYTES=$bytes"
+          Write-Host "EDB_ARCHIVE_SHA256=$actual"
+          $dest = Join-Path $env:ProgramFiles 'PostgreSQL\18\bin'
+          if (Test-Path -LiteralPath $dest) { throw 'REFUSE_OVERWRITE_EXISTING_PG18_INSTALL' }
+          [void](New-Item -Path $dest -ItemType Directory -Force)
+          Add-Type -AssemblyName System.IO.Compression
+          $zip = [IO.Compression.ZipFile]::OpenRead($archive)
+          $count = 0
+          try {
+            foreach ($entry in $zip.Entries) {
+              if (-not $entry.FullName.StartsWith('pgsql/bin/', [StringComparison]::OrdinalIgnoreCase)) { continue }
+              if ($entry.FullName.EndsWith('/')) { continue }
+              $relative = $entry.FullName.Substring('pgsql/bin/'.Length).Replace('/', '\')
+              $target = [IO.Path]::GetFullPath((Join-Path $dest $relative))
+              if (-not $target.StartsWith($dest + '\', [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'ZIP_PATH_TRAVERSAL'
+              }
+              $parent = [IO.Path]::GetDirectoryName($target)
+              [void](New-Item -Path $parent -ItemType Directory -Force)
+              [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $target)
+              $count++
+            }
+          } finally { $zip.Dispose() }
+          $exe = Join-Path $dest 'psql.exe'
+          if (-not [IO.File]::Exists($exe) -or $count -lt 10) {
+            throw 'EDB_BINARIES_NOT_EXTRACTED'
+          }
+          $exeSha = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $sig = (Get-AuthenticodeSignature -LiteralPath $exe).Status
+          Write-Host "EDB_BIN_FILES_EXTRACTED=$count"
+          Write-Host "REAL_PSQL_PATH=$exe"
+          Write-Host "REAL_PSQL_SHA256=$exeSha"
+          Write-Host "REAL_PSQL_AUTHENTICODE_STATUS=$sig"
+      - name: Actual psql --version plus bounded loopback-only noninteractive probe
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Join-Path $env:ProgramFiles 'PostgreSQL\18\bin\psql.exe'
+          $test = 'research/h2_role_existence_windows_psql_2026_10_22/Test-H2Psql18RealClientOffline.ps1'
+          & pwsh -NoProfile -File $test -PsqlPath $exe
+          if ($LASTEXITCODE -ne 0) { throw 'REAL_PSQL18_PROBE_FAILED' }
+          Write-Host 'OFFLINE_REAL_CLIENT_ONLY; INTERACTIVE_PROMPT_NOT_ATTESTED; NO_NEON_CONNECTION'
