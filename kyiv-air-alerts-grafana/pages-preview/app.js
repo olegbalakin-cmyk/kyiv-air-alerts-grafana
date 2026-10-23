@@ -93,7 +93,7 @@ const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "180d", "year", "all"];
 const TIME_OF_DAY_BIN_MINUTES = [15, 30, 60];
-const TABLE_RANGES = ["7d", "30d", "90d", "year", "common", "custom"];
+const TABLE_RANGES = ["7d", "30d", "90d", "180d", "year", "common", "custom"];
 const TABLE_SORT_COLUMNS = [
   { key:"label", labelUk:"Місто / ряд", labelEn:"City / series", defaultDirection:"asc" },
   { key:"alerts", labelUk:"Тривог", labelEn:"Alerts", defaultDirection:"desc" },
@@ -3151,6 +3151,7 @@ function renderAllCitiesTable() {
     "7d":tr("7 днів","7 days"),
     "30d":tr("30 днів","30 days"),
     "90d":tr("90 днів","90 days"),
+    "180d":tr("180 днів","180 days"),
     "year":tr("Рік","Year"),
     "common":tr("Від початку спільних даних","From start of common data"),
     "custom":tr("Довільний період","Custom period")
@@ -3158,6 +3159,17 @@ function renderAllCitiesTable() {
   const root = state.data.all_cities_table_test;
   const cities = root?.cities || {};
   const commonBounds = commonMonthlyDateBounds();
+  // The producer does not supply an all-cities 180d aggregate. Derive it
+  // from the verified per-day history, with one shared complete end date.
+  const sharedEnd = cities?.[cityKeys()[0]]?.periods?.["90d"]?.range_end || "";
+  const shared180Start = window.KpiRange.validDay(sharedEnd) ? addIsoDays(sharedEnd, -179) : "";
+  const shared180Covered = Boolean(shared180Start && cityKeys().every(key =>
+    cities?.[key]?.periods?.["90d"]?.range_end === sharedEnd &&
+    state.historicalDaily?.cities?.[key]?.status === "verified" &&
+    state.historicalDaily.cities[key].start <= shared180Start &&
+    (state.historicalDaily.cities[key].end >= sharedEnd ||
+      (state.data.cities[key]?.daily28 || []).some(row => row.date === sharedEnd))
+  ));
 
   let customFrom = $("tableDateFrom")?.value || "";
   let customTo = $("tableDateTo")?.value || "";
@@ -3182,6 +3194,22 @@ function renderAllCitiesTable() {
       };
     }
 
+    if (range === "180d") {
+      const city = state.data.cities[key];
+      const daily = state.historicalDaily?.cities?.[key];
+      const computed = shared180Covered && city && daily
+        ? window.KpiRange.preciseHistoricalKpis(city, daily, shared180Start, sharedEnd)
+        : null;
+      return {
+        key, label: labelFor(key),
+        alerts: computed?.complete ? computed.alerts : null,
+        hours: computed?.complete ? computed.hours : null,
+        duration: computed?.complete ? computed.avgDuration : null,
+        coverage: coverageStart(key),
+        rangeStart: shared180Start || null,
+        rangeEnd: sharedEnd || null
+      };
+    }
     const period = cities?.[key]?.periods?.[range];
     const fallback = state.data.cities[key]?.kpis?.[0] || {};
     return {
@@ -3231,9 +3259,10 @@ function renderAllCitiesTable() {
     } else {
       const sample = rows.find(r => r.rangeStart && r.rangeEnd);
       const dates = sample ? `${sample.rangeStart} — ${sample.rangeEnd}` : "—";
+      const hasMissing180 = range === "180d" && rows.some(r => r.alerts == null);
       note.textContent = tr(
-        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.`,
-        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.`
+        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.${hasMissing180 ? " Недостатньо перевірених денних даних для окремих показників (—)." : ""}`,
+        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.${hasMissing180 ? " Some values lack verified daily coverage (—)." : ""}`
       );
     }
   }
