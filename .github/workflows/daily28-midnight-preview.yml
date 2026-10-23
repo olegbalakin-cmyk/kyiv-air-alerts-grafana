@@ -1,0 +1,117 @@
+name: Isolated daily28 midnight proof and Netlify preview
+on:
+  push:
+    branches: [research-daily28-midnight-average-2026-10-23]
+    paths:
+      - 'kyiv-air-alerts-grafana/scripts/update_data.py'
+      - 'kyiv-air-alerts-grafana/pages-preview/app.js'
+      - 'kyiv-air-alerts-grafana/tests/test_daily28_midnight_average.py'
+      - '.github/workflows/daily28-midnight-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: isolated-daily28-midnight-preview
+  cancel-in-progress: true
+jobs:
+  proof-and-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout read-only production data snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: _source
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Run new regression and frontend regressions
+        run: |
+          python kyiv-air-alerts-grafana/tests/test_daily28_midnight_average.py
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          for test in kyiv-air-alerts-grafana/tests/test_{calendar_week,daily28_rollover,dynamic_city_kpi,historical_max,city_period_kpi_sync,kpi_interval_windows,all_time_period,live_history_binding,chart_share}.js; do
+            node "$test"
+          done
+          python kyiv-air-alerts-grafana/tests/test_monthly_seconds.py
+      - name: Prepare immutable-source Kyiv preview fixture, fail closed on source drift
+        run: |
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          root=Path('kyiv-air-alerts-grafana')
+          sys.path.insert(0,str(root/'scripts'))
+          from update_data import parse_committed_alerts,union_daily_seconds,union_daily_segment_counts,round3,TZ
+          from datetime import date,timedelta
+          source=Path('_source/kyiv-air-alerts-grafana/data')
+          data=json.loads((source/'dashboard_data.json').read_text())
+          alerts=parse_committed_alerts(json.loads((source/'alerts_combined.json').read_text()))
+          cities=data['cities']; keys=data['multicity_meta']['production_city_keys']
+          assert len(keys)==23 and 'kyiv' in keys
+          for key in keys:
+            for row in cities[key]['daily28']:
+              row.pop('active_alerts',None)
+              row.pop('avg_active_alert_duration_minutes',None)
+          rows=cities['kyiv']['daily28']
+          lo=date.fromisoformat(rows[0]['date']);hi=date.fromisoformat(rows[-1]['date'])
+          secs=union_daily_seconds(alerts,lo,hi)
+          counts=union_daily_segment_counts(alerts,lo,hi)
+          verified=0
+          for row in rows:
+            d=date.fromisoformat(row['date']);n=counts[d];seconds=secs[d]
+            assert abs(seconds/60.0-float(row['total_alert_duration_minutes']))<0.003,(d,seconds,row)
+            row['active_alerts']=n
+            row['avg_active_alert_duration_minutes']=round3(seconds/60.0/n) if n else None
+            verified+=1
+          oct5=next(row for row in rows if row['date']=='2026-10-05')
+          assert oct5['alerts_started']==1 and oct5['active_alerts']==2
+          assert oct5['avg_active_alert_duration_minutes']==22.15
+          out=Path('_preview');out.mkdir(exist_ok=True)
+          (out/'dashboard_data.json').write_text(json.dumps(data,ensure_ascii=False))
+          print('PREVIEW Kyiv daily28 source parity',verified,'/28; Oct5=22.15; remaining cities deliberately blank rather than legacy-fallback')
+          PY
+      - name: Assemble branch-isolated preview using local snapshot URLs
+        run: |
+          cp kyiv-air-alerts-grafana/pages-preview/{index.html,app.js,kpi-range.js,chart-share.js,styles.css,features.json,brand-mark.svg,brand-horizontal-uk-dark.svg,brand-horizontal-en-dark.svg,favicon.svg,favicon-32.png} _preview/
+          cp _source/kyiv-air-alerts-grafana/data/{site_derived.json,kyiv_threat_mix.json} _preview/
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('_preview/app.js')
+          js=p.read_text()
+          original='const RAW_DATA_BASE = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/";'
+          assert js.count(original)==1
+          js=js.replace(original,'const RAW_DATA_BASE = "./";')
+          p.write_text(js)
+          html=Path('_preview/index.html')
+          content=html.read_text()
+          content=content.replace('</body>','<div style="position:fixed;bottom:0;right:0;z-index:100000;background:#222;color:#fff;padding:6px 12px;font:12px Arial">TEST ONLY · Kyiv daily28 verified · other cities pending full-source validation</div></body>')
+          html.write_text(content)
+          PY
+          node --check _preview/app.js
+          test -s _preview/kpi-range.js
+          test -s _preview/dashboard_data.json
+      - name: Deploy draft alias only; NEVER production
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_preview --alias=daily28-midnight-20261023 --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json > midnight-preview-deploy.json
+          python - <<'PY'
+          import json
+          d=json.load(open('midnight-preview-deploy.json'))
+          assert d.get('deploy_url') and d.get('deploy_url')!= 'https://ukraine-air-alerts.netlify.app'
+          print('DRAFT URL',d['deploy_url'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daily28-midnight-preview-proof
+          path: |
+            midnight-preview-deploy.json
+          if-no-files-found: warn
