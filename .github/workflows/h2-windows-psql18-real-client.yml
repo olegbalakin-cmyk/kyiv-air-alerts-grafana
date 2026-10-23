@@ -78,7 +78,7 @@ jobs:
           $portableBin = Join-Path $HOME 'h2-psql18\pgsql\bin'
           if (Test-Path -LiteralPath $portableBin) { throw 'PORTABLE_TEST_DIR_ALREADY_EXISTS' }
           New-Item -ItemType Directory -Path $portableBin -Force | Out-Null
-          Copy-Item -LiteralPath (Join-Path (Split-Path $edb -Parent) '*') -Destination $portableBin -Force -Recurse
+          Copy-Item -Path (Join-Path (Split-Path $edb -Parent) '*') -Destination $portableBin -Force -Recurse
           $portable = Join-Path $portableBin 'psql.exe'
           $approved = @($edb, $portable)
           foreach ($path in $approved) {
