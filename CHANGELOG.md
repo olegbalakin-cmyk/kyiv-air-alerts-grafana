@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-23
 
+### Daily28 midnight averages + All-cities 180d — PRODUCTION DEPLOYED, CI/HTTP PASS
+
+- Owner approved the two combined preview features. Isolated [proof Actions `39962028347`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39962028347) SUCCESS; frozen release research `c3cc927657d3f3c1b825c4481ac5e3bbddc821bb` verified 23 city event sources, 644 recent daily rows, 23 certified histories, common 180d 2026-04-26 through 2026-10-22, Kyiv 5 Oct `active_alerts=2`, `avg_active_alert_duration_minutes=22.15`. Source metrics unchanged outside two added daily fields; matched short_28d CSV appended two columns.
+- Atomic production [`site-prod@951653400fbc41a0ad39dbcf04ba8c7ecc10709f`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/951653400fbc41a0ad39dbcf04ba8c7ecc10709f) after `fd1c2aa1`, eight approved code/test/data paths. [Production run `39962304223`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39962304223) SUCCESS and Netlify deploy `6adb629bc3ebc570117d82e1` current/READY; live HTTP exact JS/KPI assets PASS and verified history 23/23. Existing updater/main schedule untouched; WIP, H2/Neon, historical/backfill/casualty isolated.
+- Next scheduled production data refresh still needs independent post-release check for preserving 23-city daily average fields and no-redeploy data update. This release proves source, data and static site publication only, not later scheduler behavior.
+
+
 ### H2 Windows psql kit source published; first Windows CI failed before tests (limited checkpoint)
 
 - Independent review accepts Git source publication on existing `research-h2-role-existence-windows-psql-kit-2026-10-22-gpt6` at [`3aab2461db9455932fb6d00824e563fcfc895fbb`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3aab2461db9455932fb6d00824e563fcfc895fbb), eight commits beyond `30e06ee`, exactly seven new files + one README-only correction; 10/10 Git blobs read back. Accepted SQL `dd3595f7402cdc6e44d3fce6c5632dd9cfb88052` and route template `0ea2e8688c5b5a5e3934704a29b2ad51195584b4` unchanged. Published launcher, offline verifier, mock, Python fixture suite, Windows harness, UA guide and workflow have NOT yet passed independently replayed tests.
