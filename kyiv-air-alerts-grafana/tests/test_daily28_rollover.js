@@ -199,8 +199,8 @@ evalJS("currentLanguage='uk';state.data={cities:productionCities,multicity_meta:
 assert.equal(evalJS("state.charts.daily28HoursChart.config.data.labels.at(-1)"),"2026-10-20");
 assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.data.labels.at(-1)"),"2026-10-20");
 assert.match(outputElements.daily28Range.textContent,/Дані станом на 23:25/);
-assert.equal(evalJS("state.charts.daily28HoursChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28HoursChart.config.data.datasets[0],dataIndex:27}])"),"Дані станом на 23:25");
-assert.equal(evalJS("state.charts.daily28AlertsDurationChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28AlertsDurationChart.config.data.datasets[0],dataIndex:27}])"),"Дані станом на 23:25");
+assert.deepEqual(Array.from(evalJS("state.charts.daily28HoursChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28HoursChart.config.data.datasets[0],dataIndex:27}])")),["Почалося тривог: 7","Активних відрізків: 7","Час під тривогою: 10 год 8 хв 00 с","Дані станом на 23:25"]);
+assert.deepEqual(Array.from(evalJS("state.charts.daily28AlertsDurationChart.config.options.plugins.tooltip.callbacks.footer([{dataset:state.charts.daily28AlertsDurationChart.config.data.datasets[0],dataIndex:27}])")),["Почалося тривог: 7","Активних відрізків: 7","Час під тривогою: 10 год 8 хв 00 с","Дані станом на 23:25"]);
 const mismatch = JSON.parse(JSON.stringify(snapshot.current_day));
 mismatch.cities.kyiv.partial_through = "2026-10-19T23:25:39+03:00";
 const mismatchCities = Object.fromEntries(Object.entries(snapshot.complete_daily28).map(
