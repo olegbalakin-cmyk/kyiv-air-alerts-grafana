@@ -31,6 +31,13 @@ jobs:
           ref: multicity-wip-2026-09-16
           fetch-depth: 0
 
+      - name: Verify independently tested cached-consumer implementation
+        run: |
+          # Reject mixed main/workflow vs WIP/script revisions.
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "368b4bb8fe616e74238fa98455a1aaee60efd89d"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/validate_cached_production_alerts.py)" = "5258eaca400b82c7907f291dbc15737794d5f7aa"
+          git rev-parse HEAD
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -45,13 +52,17 @@ jobs:
       - name: Get latest production alert inputs
         run: |
           git fetch origin site-prod
-          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
-          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/prod-kyiv-alerts.json
-          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/prod-sevastopol-events.json
-          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/prod-ukrainealarm-bridge.json
+          prod_sha="$(git rev-parse origin/site-prod)"
+          test "$(printf '%s' "$prod_sha" | wc -c)" -eq 40
+          echo "PRODUCTION_ALERT_SOURCE_COMMIT=$prod_sha" >> "$GITHUB_ENV"
+          echo "PINNED_PRODUCTION_ALERT_COMMIT=$prod_sha"
+          git show "$prod_sha":kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
+          git show "$prod_sha":kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/prod-kyiv-alerts.json
+          git show "$prod_sha":kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/prod-sevastopol-events.json
+          git show "$prod_sha":kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/prod-ukrainealarm-bridge.json
           mkdir -p /tmp/canonical-parent-contract
-          git show origin/site-prod:kyiv-air-alerts-grafana/scripts/db_phase1_core.py > /tmp/canonical-parent-contract/db_phase1_core.py
-          git show origin/site-prod:kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py > /tmp/canonical-parent-contract/db_phase1_persistence.py
+          git show "$prod_sha":kyiv-air-alerts-grafana/scripts/db_phase1_core.py > /tmp/canonical-parent-contract/db_phase1_core.py
+          git show "$prod_sha":kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py > /tmp/canonical-parent-contract/db_phase1_persistence.py
           python - <<'PY'
           import json
           from pathlib import Path
@@ -71,6 +82,16 @@ jobs:
           )
           PY
 
+      - name: Fail-closed source integrity and 12-hour freshness gate
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python scripts/validate_cached_production_alerts.py \
+            --bridge-file /tmp/prod-ukrainealarm-bridge.json \
+            --kyiv-alerts-file /tmp/prod-kyiv-alerts.json \
+            --sevastopol-events-file /tmp/prod-sevastopol-events.json \
+            --source-commit-sha "$PRODUCTION_ALERT_SOURCE_COMMIT" \
+            --output /tmp/cached-production-validation.json
+
       - name: Sync newly audited cities into the automatic baseline
         working-directory: kyiv-air-alerts-grafana
         run: |
@@ -87,13 +108,14 @@ jobs:
       - name: Poll new completed alerts and discover explosion candidates
         working-directory: kyiv-air-alerts-grafana
         env:
-          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+          PRODUCTION_ALERT_SOURCE_COMMIT: ${{ env.PRODUCTION_ALERT_SOURCE_COMMIT }}
           ATTACK_EVENT_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
           CANONICAL_PARENT_CONTRACT_DIR: /tmp/canonical-parent-contract
           CANONICAL_PARENT_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
           ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
         run: |
           python scripts/monitor_explosion_candidates.py \
+            --local-only \
             --bridge-file /tmp/prod-ukrainealarm-bridge.json \
             --kyiv-alerts-file /tmp/prod-kyiv-alerts.json \
             --sevastopol-events-file /tmp/prod-sevastopol-events.json
@@ -127,7 +149,11 @@ jobs:
           assert state["schema_version"] == 1
           assert isinstance(queue, list)
           assert report["city_count"] == len(baseline["cities"])
-          assert report["mode"] == "network"
+          assert report["mode"] == "cached_bridge"
+          assert report["ukrainealarm_http_requests"] == 0
+          assert report["cached_source_validation"]["valid_regions"] == 21
+          assert report["cached_source_regression"]["unexpected_identity_regressions"] == 0
+          assert report["cached_source_validation"]["source_commit_sha"] == __import__("os").environ["PRODUCTION_ALERT_SOURCE_COMMIT"]
           assert dashboard["explosion_metric_test"]["meta"]["city_count"] == len(baseline["cities"])
           assert set(dashboard["explosion_metric_test"]["cities"]) == set(baseline["cities"])
 
