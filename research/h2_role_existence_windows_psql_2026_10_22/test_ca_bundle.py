@@ -18,6 +18,6 @@ expected = ("96bcec06264976f37460779acf28c5a7cfe8a3c0aae11a8ffcee05c0bddf08c6",
 for block, fp in zip(blocks, expected):
     assert hashlib.sha256(base64.b64decode(block)).hexdigest() == fp, "ROOT_FINGERPRINT_MISMATCH"
 # The *original* PEM corpus must be the only trust input; simulated substitutions fail.
-for altered in (data+b"x", data[:-1], data.replace(b"ISRG", b"BAD!", 1), b""):
+for altered in (data+b"x", data[:-1], data.replace(b"MIIF", b"BAD!", 1), b""):
     assert hashlib.sha256(altered).hexdigest() != "0cd98d2dd7a71afe5e2e93673933f15254c5a41a9be4682f27ec582e72c52ce0"
 print("PINNED_ISRG_CA_OFFLINE_PASS count=2 der_fingerprints=2 tamper_negatives=4 / NO_TLS_HANDSHAKE")
