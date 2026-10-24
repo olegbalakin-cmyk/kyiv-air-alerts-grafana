@@ -19,7 +19,7 @@ def fixture():
     endpoint='SYNTHETIC_ONLY',fqdn='synthetic.invalid',database='neondb',port=5432,
     expected_role='neondb_owner',operator='MOCK_OPERATOR',reviewed_by='MOCK_NOT_REVIEWED',
     route_attestation_sha256=None,route_source_sha256=None,route_observed_at_utc=None,
-    client_version='psql (PostgreSQL) 18.6',pg_sslmode='verify-full',pg_sslrootcert='system',
+    client_version='psql (PostgreSQL) 18.6',pg_sslmode='verify-full',pg_sslrootcert='ISRG_ROOTS_PINNED.pem',
     pg_gssencmode='disable',connect_timeout_seconds=5,wall_budget_seconds=20,elapsed_ms=2,
     client_exit_code=0,attempt_count=1,sql_statement_count_expected=7,select_count_expected=1,
     stderr_status='EMPTY',psql_arguments=ARGS,transcript=lines,
@@ -56,6 +56,8 @@ def run():
     case("timeout",lambda r:r.__setitem__("elapsed_ms",20001))
     case("extra_attempt",lambda r:r.__setitem__("attempt_count",2))
     case("relaxed_tls",lambda r:r.__setitem__("pg_sslmode","require"))
+    case("untrusted_ca_fallback",lambda r:r.__setitem__("pg_sslrootcert","system"))
+    case("wrong_ca_file",lambda r:r.__setitem__("pg_sslrootcert","pgAdmin/cacert.pem"))
     case("wrong_host",lambda r:r.__setitem__("fqdn","some.neon.tech"))
     case("rollback_only_wrong_case",lambda r:r["transcript"].__setitem__(7,"rollback"))
     case("wrong_hash",lambda r:r.__setitem__("sql_git_blob","0"*40))

@@ -34,7 +34,7 @@ def verify(receipt, synthetic_only=False):
         "route_template_git_blob":ROUTE_BLOB,"project":"green-cake-44216048",
         "branch":"br-bold-mode-b5rub8pq","database":"neondb",
         "port":5432,"expected_role":"neondb_owner","pg_sslmode":"verify-full",
-        "pg_sslrootcert":"system","pg_gssencmode":"disable","connect_timeout_seconds":5,
+        "pg_sslrootcert":"ISRG_ROOTS_PINNED.pem","pg_gssencmode":"disable","connect_timeout_seconds":5,
         "wall_budget_seconds":20,"client_exit_code":0,"attempt_count":1,
         "sql_statement_count_expected":7,"select_count_expected":1,
         "tls_handshake_independently_proven":False,

@@ -4,6 +4,8 @@ Push-Location $PSScriptRoot
 try {
     python (Join-Path $PSScriptRoot 'test_offline.py')
     if ($LASTEXITCODE -ne 0) { throw 'Python negative tests failed' }
+    python (Join-Path $PSScriptRoot 'test_ca_bundle.py')
+    if ($LASTEXITCODE -ne 0) { throw 'Pinned CA offline tests failed' }
     $good=@('absent','exists')
     $bad=@('missing_rollback','extra_statement','sql_error','timeout','wrong_role','wrong_database','wrong_guard','multiple_rows','malformed_header','exit_failure','stderr_noise')
     $count=0

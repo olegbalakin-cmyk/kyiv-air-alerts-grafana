@@ -27,6 +27,8 @@ $HostPin = 'ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech'
 $UserPin = 'neondb_owner'
 $SqlPath = Join-Path $PSScriptRoot 'ROLE_EXISTENCE_PINNED.sql'
 $RoutePath = Join-Path $PSScriptRoot 'ROUTE_ATTESTATION_TEMPLATE.json'
+$CaPath = Join-Path $PSScriptRoot 'ISRG_ROOTS_PINNED.pem'
+$CaSha256 = '0cd98d2dd7a71afe5e2e93673933f15254c5a41a9be4682f27ec582e72c52ce0'
 
 function Get-Hashes([string]$Path) {
     $bytes = [IO.File]::ReadAllBytes($Path)
@@ -72,6 +74,20 @@ function Assert-Attestation([object]$route, [object]$record, [string]$operator) 
     $hours = ([DateTimeOffset]::UtcNow - $at).TotalHours
     if ($hours -lt 0 -or $hours -gt 72) { throw 'Route observation expired or in future' }
 }
+function Assert-PinnedCA {
+    # Offline-only; do not substitute CA from caller environment, downloads or pgAdmin.
+    if (-not [IO.File]::Exists($CaPath)) { throw 'PINNED_CA_MISSING' }
+    $file = Get-Item -LiteralPath $CaPath -Force
+    if (($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'PINNED_CA_REPARSE_POINT' }
+    $parent = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($CaPath))
+    while ($null -ne $parent) {
+        if (($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'PINNED_CA_REPARSE_POINT' }
+        $parent = $parent.Parent
+    }
+    $hash = (Get-FileHash -LiteralPath $CaPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($hash -cne $CaSha256) { throw 'PINNED_CA_SHA256_MISMATCH' }
+    return $CaPath
+}
 function Assert-ApprovedPsqlClient([string]$requestedPath) {
     if (-not $IsWindows) { throw 'CLIENT_PATH_WINDOWS_ONLY' }
     $defaultPath = Join-Path $env:ProgramFiles 'PostgreSQL\18\bin\psql.exe'
@@ -116,7 +132,7 @@ function Invoke-BoundedChild([string]$file, [string[]]$arguments, [bool]$synthet
         if ($null -ne $value) { $si.Environment[$name] = $value }
     }
     $si.Environment['PGSSLMODE'] = 'verify-full'
-    $si.Environment['PGSSLROOTCERT'] = 'system'
+    $si.Environment['PGSSLROOTCERT'] = $script:CaPath
     $si.Environment['PGGSSENCMODE'] = 'disable'
     $si.Environment['PGCONNECT_TIMEOUT'] = '5'
     $si.Environment['PGCLIENTENCODING'] = 'UTF8'
@@ -150,6 +166,7 @@ try {
     if ($ClientPathPreflight) {
         if ($AttestationPath -ne '' -or $OperatorName -ne '' -or $ReceiptPath -ne '' -or
             $MockScenario -ne 'absent') { throw 'CLIENT_PREFLIGHT_FORBIDS_EXECUTION_INPUTS' }
+        $ca = Assert-PinnedCA
         $client = Assert-ApprovedPsqlClient $PsqlPath
         Write-Host "CLIENT_PATH_PREFLIGHT_PASS version=$($client.version); no SQL, no network, no Neon"
         exit 0
@@ -163,6 +180,7 @@ try {
     }
     if ([IO.File]::Exists($destination)) { throw 'Receipt exists: refusing overwrite' }
 
+    $ca = Assert-PinnedCA
     $sqlHashes = Get-Hashes $SqlPath
     $routeHashes = Get-Hashes $RoutePath
     if ($sqlHashes.git -cne $SqlBlob -or $sqlHashes.sha256 -cne $SqlSha256) { throw 'PINNED_SQL_MISMATCH' }
@@ -254,7 +272,7 @@ try {
         route_observed_at_utc = $observedAt
         client_version = $version
         pg_sslmode = 'verify-full'
-        pg_sslrootcert = 'system'
+        pg_sslrootcert = 'ISRG_ROOTS_PINNED.pem'
         pg_gssencmode = 'disable'
         connect_timeout_seconds = 5
         wall_budget_seconds = 20

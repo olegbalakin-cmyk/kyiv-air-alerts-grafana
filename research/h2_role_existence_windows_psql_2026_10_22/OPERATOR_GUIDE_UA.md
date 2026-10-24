@@ -1,5 +1,9 @@
 # H2 Windows psql — інструкція оператора (не дозвіл на запуск)
 
+**Статус: CA/TLS offline fix candidate, потребує незалежного CI та прийняття. Реальний TLS не перевірено. Реальну перевірку ролі не запускати.**
+
+**Джерело довіри:** файл `ISRG_ROOTS_PINNED.pem` містить лише ISRG Root X1 і X2. SHA-256 файлу `0cd98d2dd7a71afe5e2e93673933f15254c5a41a9be4682f27ec582e72c52ce0`. SHA-256 DER кожного кореня: `96bcec06264976f37460779acf28c5a7cfe8a3c0aae11a8ffcee05c0bddf08c6`, `69729b8e15a86efc177a57afb7171dfc64add28c2fca8cf1507e34453ccb1470`. Джерело публікації — https://letsencrypt.org/certificates/ (офіційні відбитки); контрольний PEM звірено зі статично опублікованим корпусом у composer/windows-setup. Не додавати сторонні корені, не замінювати pgAdmin/certifi. Реальна придатність CA до конкретного Neon серверу може підтвердитися лише окремо дозволеним TLS-handshake з `verify-full`. Пошук через `sslrootcert=ISRG_ROOTS_PINNED.pem` замінено на точний pinned файл. Не змінювати/послаблювати `sslmode`.
+
 **Статус: реалізація для незалежного тестування. H2_ROLE_EXISTENCE=UNVERIFIED. LIVE NO-GO.** Цей пакет не підтверджує маршрут, TLS, існування ролі чи право виконати SQL.
 
 1. Використайте вже перевірений **EDB PostgreSQL 18.6 для Windows** (SHA-256 `fde952534f520909c02db04675588ecb1da8d618b6e5c93e106f42a752daf720`) у `$HOME\h2-psql18\pgsql\bin\psql.exe` або `C:\Program Files\PostgreSQL\18\bin\psql.exe`, PowerShell 7.4+ і Python 3. Launcher дозволяє тільки ці два точні шляхи й перевіряє SHA-256 та версію; не встановлює ПЗ.

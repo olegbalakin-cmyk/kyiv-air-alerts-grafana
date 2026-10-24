@@ -1,5 +1,6 @@
 # Windows psql H2 role-existence kit — research implementation
 
+CA/TLS offline correction candidate: bundled ISRG_ROOTS_PINNED.pem SHA-256 0cd98d2dd7a71afe5e2e93673933f15254c5a41a9be4682f27ec582e72c52ce0, comprising only ISRG Root X1/X2; fail-closed preflight hash, explicit PGSSLROOTCERT; no Neon or live TLS proof. CI and independent acceptance required. Never install arbitrary pgAdmin CA roots.
 STATUS: **IMPLEMENTATION PUBLISHED FOR OFFLINE VALIDATION; NOT KIT READY; DO NOT EXECUTE LIVE.** H2_ROLE_EXISTENCE=UNVERIFIED; authorization for one future read remains UNUSED according to the bounded prior operator receipt.
 
 Immutable source `ROLE_EXISTENCE_PINNED.sql`: Git blob `dd3595f7402cdc6e44d3fce6c5632dd9cfb88052`, SHA-256 `3e8a8d62440ec30245f64da21a263d84793e7e77a8cf45806f60a656ba6a31ee`. Immutable `ROUTE_ATTESTATION_TEMPLATE.json` blob `0ea2e8688c5b5a5e3934704a29b2ad51195584b4`: independently verified port and reviewer **remain false/unpopulated**.
