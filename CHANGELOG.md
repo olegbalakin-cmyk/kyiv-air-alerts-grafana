@@ -2,6 +2,13 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-24
+
+### H2 local EDB Windows archive and four runtime files — OWNER-OBSERVED HASH MATCH; trust store UNVERIFIED
+
+- Owner's offline PowerShell transcript reports SHA-256 of original vendor EDB PostgreSQL 18.6-5 binaries ZIP matched pinned archive hash `e2246ba91d22345bc3d017586c09ede52d9df180b1eeb480f050445f1cad84e2`; `pgsql/bin/psql.exe`, `libpq.dll`, `libssl-3-x64.dll`, `libcrypto-3-x64.dll` each independently hashed against ZIP member: **4/4 `MatchesVendorArchive=True`**. Prior local hashes preserved in new `PROJECT_STATE.md` entry. `openssl.exe` absent (`OPENSSL_CLI_NOT_BUNDLED`) is not by itself an error; existing Python/pgAdmin `cacert.pem` files do not establish `libpq` trust roots. This is owner-observed file-integrity evidence, not an independently instrumented runtime/DLL search-path or CA chain proof.
+- `CA_CONFIGURATION_REVIEW=UNVERIFIED`, `LIVE_TLS_VERIFIED=NO`, `PORT_5432_ATTESTED=UNVERIFIED`, `INDEPENDENT_REVIEWER_IDENTIFIED=NO`, **`H2_WINDOWS_PSQL_KIT_READY=NO`, `H2_ROLE_EXISTENCE=UNVERIFIED`**. Next step offline CA-source/runtime evidence; no network, SQL, provider mutation or production change.
+
 ## 2026-10-23
 
 ### H2 owner-authorized one-time Neon metadata-only check — exact RO branch/compute/host matched; port/CA NO-GO
