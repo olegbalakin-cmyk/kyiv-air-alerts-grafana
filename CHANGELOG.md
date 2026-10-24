@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-24
 
+### H2 owner Windows OpenSSL CA defaults missing — CA readiness blocked, offline only
+
+- Owner's corrected native-code PowerShell probe explicitly loaded the pinned portable EDB 18.6 `libcrypto-3-x64.dll` and obtained OpenSSL default CA paths: `C:\Program Files\Common Files\SSL\cert.pem` (file absent) and `C:\Program Files\Common Files\SSL\certs` (directory absent). This identifies missing default file/directory paths, **not** a completed or failed live TLS handshake and not a proof that all trust mechanisms are unavailable. A prior by-name `DllImport` error was a probe-loading problem; later PowerShell `finally` error arose from pasting it separately and requires only local handle cleanup or terminal exit, not a security/DB change.
+- Published launcher remains `verify-full` + `sslrootcert=system` and removes parent `SSL_CERT_FILE`, `SSL_CERT_DIR`, `OPENSSL_CONF`, so an ad-hoc environment override is not a valid readiness fix. Next independently reviewed **offline proposal**: trustworthy, source/pinned explicit CA bundle and narrowly tested launcher support, or documented vendor-supported default trust paths. No live or code authorization follows from this observation. `CA_CONFIGURATION_REVIEW=UNVERIFIED`, `LIVE_TLS_VERIFIED=NO`, `H2_WINDOWS_PSQL_KIT_READY=NO`, `H2_ROLE_EXISTENCE=UNVERIFIED` and port/reviewer/other hard holds unchanged. Docs only; no Neon access or deployed changes.
+
 ### H2 local EDB Windows archive and four runtime files — OWNER-OBSERVED HASH MATCH; trust store UNVERIFIED
 
 - Owner's offline PowerShell transcript reports SHA-256 of original vendor EDB PostgreSQL 18.6-5 binaries ZIP matched pinned archive hash `e2246ba91d22345bc3d017586c09ede52d9df180b1eeb480f050445f1cad84e2`; `pgsql/bin/psql.exe`, `libpq.dll`, `libssl-3-x64.dll`, `libcrypto-3-x64.dll` each independently hashed against ZIP member: **4/4 `MatchesVendorArchive=True`**. Prior local hashes preserved in new `PROJECT_STATE.md` entry. `openssl.exe` absent (`OPENSSL_CLI_NOT_BUNDLED`) is not by itself an error; existing Python/pgAdmin `cacert.pem` files do not establish `libpq` trust roots. This is owner-observed file-integrity evidence, not an independently instrumented runtime/DLL search-path or CA chain proof.
