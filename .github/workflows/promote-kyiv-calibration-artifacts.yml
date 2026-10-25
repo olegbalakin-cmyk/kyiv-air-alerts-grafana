@@ -1,0 +1,63 @@
+name: Promote completed Kyiv calibration artifacts
+
+on:
+  push:
+    branches: [kyiv-historical-discovery-calibration-pilot-2026-10-08]
+    paths:
+      - ".github/workflows/promote-kyiv-calibration-artifacts.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kyiv-historical-discovery-calibration-pilot-2026-10-08
+          fetch-depth: 0
+      - name: Download exact completed blind artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/${GITHUB_REPOSITORY}/actions/artifacts/11568385860/zip > /tmp/pilot.zip
+          test "$(sha256sum /tmp/pilot.zip | awk '{print $1}')" = "ea51ab4de8ecc625e68c249f77427b392e502618e6b0f7b589ed3bf67ae0f977"
+          mkdir -p /tmp/pilot
+          unzip -q /tmp/pilot.zip -d /tmp/pilot
+          install -m 0644 /tmp/pilot/kyiv_historical_discovery_calibration_split_2026-10-08.json research/kyiv_historical_discovery_calibration_split_2026-10-08.json
+          install -m 0644 /tmp/pilot/kyiv_historical_discovery_frozen_strategy_2026-10-08.json research/kyiv_historical_discovery_frozen_strategy_2026-10-08.json
+          install -m 0644 /tmp/pilot/kyiv_historical_discovery_blind_pilot_2026-10-08.json research/kyiv_historical_discovery_blind_pilot_2026-10-08.json
+      - name: Verify provenance and commit only three artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          paths = [
+            Path("research/kyiv_historical_discovery_calibration_split_2026-10-08.json"),
+            Path("research/kyiv_historical_discovery_frozen_strategy_2026-10-08.json"),
+            Path("research/kyiv_historical_discovery_blind_pilot_2026-10-08.json"),
+          ]
+          docs=[json.loads(p.read_text(encoding="utf-8")) for p in paths]
+          assert str(docs[0]["workflow_run_id"]) == "37817332083"
+          assert str(docs[1]["workflow_run_id"]) == "37817332083"
+          assert str(docs[2]["workflow_run_id"]) == "37817332083"
+          assert docs[2]["verdict"] == "KYIV HISTORICAL DISCOVERY BLIND PILOT = NO-GO"
+          assert docs[2]["mutation_confirmation"]["Neon_writes"] == 0
+          assert docs[2]["mutation_confirmation"]["production_mutations"] == 0
+          assert docs[2]["mutation_confirmation"]["historical_backfill_started"] is False
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/kyiv_historical_discovery_calibration_split_2026-10-08.json \
+                  research/kyiv_historical_discovery_frozen_strategy_2026-10-08.json \
+                  research/kyiv_historical_discovery_blind_pilot_2026-10-08.json
+          test "$(git diff --cached --name-only | wc -l)" -eq 3
+          git commit -m "Record completed Kyiv historical discovery blind pilot"
+          git push origin HEAD:kyiv-historical-discovery-calibration-pilot-2026-10-08
