@@ -1,0 +1,31 @@
+name: H2 G03 creator ADMIN narrow exception (offline)
+on:
+  push:
+    branches:
+      - research-h2-g03-creator-admin-2026-10-26-gpt6
+    paths:
+      - "research/h2_g03_creator_admin_2026_10_26/**"
+      - ".github/workflows/h2-g03-creator-admin-offline.yml"
+      - "H2_READONLY_QUERY_MANIFEST.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-g03-and-original-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate strict G03 row interpretation and negative controls (NO NEON)
+        run: python3 research/h2_g03_creator_admin_2026_10_26/verify_g03_creator_admin.py --evidence-file g03-negative-evidence.json
+      - name: Reverify source-exact independently accepted Candidate A (UNCHANGED)
+        run: python3 research/h2_inspector_independent_acceptance_2026_10_21/verify_acceptance.py
+      - name: Upload offline-only G03 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: g03-creator-admin-offline-negative-evidence
+          path: g03-negative-evidence.json
+          if-no-files-found: error
+          retention-days: 14
