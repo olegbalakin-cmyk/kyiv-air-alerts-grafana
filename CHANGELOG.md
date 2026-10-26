@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-26
 
+### H2 inspector creation consent and real read-only preflight — TEMP/PUBLIC blockers, no creation
+
+- Owner expressly consented to narrowly defined SQL-only `CREATE ROLE h2_catalog_inspector_ro` with `PASSWORD NULL`; no privileges, credentials or app ACL changes authorized. Live Neon control-plane metadata pinned original shadow branch, writable primary and distinct RO compute; primary-connection `neondb_owner` PG18.6 read-only transaction returned inspector `ABSENT`, expected session identity and `pg_is_in_recovery=false`. One preliminary read-only ACL query had a type-resolution error; corrected query passed. No role-creation SQL executed.
+- PUBLIC grant scan found `CONNECT` and `TEMPORARY` on `neondb`, `USAGE` but not `CREATE` on `public`, one PUBLIC-`EXECUTE` routine `show_db_tree()` (invoker, volatile), and no examined PUBLIC application relation/sequence grants. Eight named application relations/views had unchanged catalog `relacl IS NULL` at observation. No app rows accessed. TEMP and function risks remain unaccepted before-create constraints, and original Candidate A G03 zero-edge assertion remains unchanged. `H2_OWNER_CREATE_ROLE_CONSENT=YES_BOUNDED`, `H2_ROLE_PROVISIONING_EXECUTION=NOT_ATTEMPTED_BLOCKED`, `H2_G03_REVISED_PROTOCOL_ACCEPTED=NO`, `H2_PUBLIC_PRIVILEGE_RISK=OBSERVED_UNRESOLVED`, live H2 `NO-GO`. Docs-only checkpoint; all unrelated tracks untouched.
+
 ### H2 G03 creator-ADMIN policy clarification — agreed in principle, no SQL or protocol changes
 
 - Owner answered `ок` to a proposal to permit only the PG18-generated SQL creator membership in `h2_catalog_inspector_ro`: verified creator (expected `neondb_owner`), `ADMIN TRUE / INHERIT FALSE / SET FALSE`, no other incoming/outgoing membership or escalation. This resolves the **policy choice only**; it does not automatically modify Candidate A, whose Git-pinned G03 expects zero rows. Existing source, manifest, receipt interpretation and CI remain unchanged, and prior offline proof is not proof of revised acceptance. Next narrowly scope/pin/review amended G03 interpretation before any revised-runtime acceptance.
