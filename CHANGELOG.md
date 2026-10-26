@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-26
 
+### H2 inspector role created by owner and catalog-verified — creation PASS, runtime still NO-GO
+
+- Owner reports Neon SQL Editor executed previously approved `CREATE ROLE h2_catalog_inspector_ro ... PASSWORD NULL` successfully. Independent Neon read-only SQL on pinned H2 shadow primary observed exactly one inspector role with requested `LOGIN`, `NOINHERIT`, `CONNECTION LIMIT 1` and no superuser/CREATEDB/CREATEROLE/replication/BYPASSRLS flags. Exactly **one** direct `pg_auth_members` creator edge was observed: `h2_catalog_inspector_ro` granted to `neondb_owner` with `ADMIN TRUE, INHERIT FALSE, SET FALSE`; none in the other direction.
+- Separate effective privilege readback: application table/view/sequence access **0**; non-system schema CREATE **0**; object ownership **0**. Retained owner-approved PUBLIC rights on database CONNECT/TEMPORARY, schema public USAGE and `show_db_tree()` EXECUTE. Eight sampled `public` app object relacls still NULL. No additional role GRANT, password, login, use of read-only endpoint as inspector or production change. Old Candidate A G03 still expects **zero** membership edges and must be updated with a narrow accepted exception before runtime testing; other H2 gates and seven raw physical ACL differences remain separate. `H2_ROLE_CATALOG_VERIFIED=PASS_BOUNDED`; `H2_G03_REVISED_PROTOCOL_ACCEPTED=NO`; `H2_LIVE_RUNTIME_GATE=NO-GO`. Previous entries describe historical pre-creation checkpoints; they are not current role-state claims.
+
 ### H2 RO-only PUBLIC exception and function source checked; no CREATE ROLE
 
 - Owner approved keeping existing `PUBLIC` CONNECT/TEMPORARY/USAGE and `show_db_tree()` EXECUTE while restricting future inspector sessions to the separate Neon read-only compute, with no new GRANT, REVOKE or credentials. Static `pg_get_functiondef` inspection confirmed `public.show_db_tree()` contains SELECTs from four `pg_catalog` views only; function never invoked. Direct, nonpooled RO compute `ep-calm-rice-b5073ypp` returned `transaction_read_only=on`, `pg_is_in_recovery=true`, PG18.6, and role still absent, via a bounded Neon connector read-only query.
