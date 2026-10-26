@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-26
 
+### H2 RO-only PUBLIC exception and function source checked; no CREATE ROLE
+
+- Owner approved keeping existing `PUBLIC` CONNECT/TEMPORARY/USAGE and `show_db_tree()` EXECUTE while restricting future inspector sessions to the separate Neon read-only compute, with no new GRANT, REVOKE or credentials. Static `pg_get_functiondef` inspection confirmed `public.show_db_tree()` contains SELECTs from four `pg_catalog` views only; function never invoked. Direct, nonpooled RO compute `ep-calm-rice-b5073ypp` returned `transaction_read_only=on`, `pg_is_in_recovery=true`, PG18.6, and role still absent, via a bounded Neon connector read-only query.
+- SQL role creation was **not attempted**. Under the current accepted provisioning plan, the revised G03 test (original Candidate A still zero-row), independent reviewer, and direct TLS/port execution evidence remain outstanding; current owner agreement covers PUBLIC/RO residual risks only. `H2_PUBLIC_RISK_APPROVED_RO_ONLY=YES_BOUNDED`, `H2_ROLE_PROVISIONING_EXECUTION=NOT_ATTEMPTED_BLOCKED`, `H2_G03_REVISED_PROTOCOL_ACCEPTED=NO`. Docs-only H2 checkpoint, unrelated tracks unchanged.
+
 ### H2 inspector creation consent and real read-only preflight — TEMP/PUBLIC blockers, no creation
 
 - Owner expressly consented to narrowly defined SQL-only `CREATE ROLE h2_catalog_inspector_ro` with `PASSWORD NULL`; no privileges, credentials or app ACL changes authorized. Live Neon control-plane metadata pinned original shadow branch, writable primary and distinct RO compute; primary-connection `neondb_owner` PG18.6 read-only transaction returned inspector `ABSENT`, expected session identity and `pg_is_in_recovery=false`. One preliminary read-only ACL query had a type-resolution error; corrected query passed. No role-creation SQL executed.
