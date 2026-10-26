@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-26
 
+### H2 G03 narrow creator-ADMIN overlay — independent offline CI PASS, original Candidate A unchanged
+
+- Research branch `research-h2-g03-creator-admin-2026-10-26-gpt6` at `a669dd3cf90cfaf2e7e5c68b6f13ad8de80683c5` adds standalone rowset policy, validator, README and offline CI workflow; does not edit original Candidate A SQL, immutable manifest or other checks. Exact result contract accepts **one** incoming `h2_catalog_inspector_ro -> neondb_owner` creator edge with `ADMIN TRUE / INHERIT FALSE / SET FALSE`, rejects all others. CI run `40394926989` SUCCESS at exact SHA: 22/22 new negatives PASS and original independent Candidate A offline checks PASS. Artifact ID `12686730197`, digest `sha256:044178e1524a1a6417352c193277e07c64b0a019fdcf7a801442a6a54e8be29a`.
+- Scope: accepted as **bounded offline research evidence**, not an accepted revised runtime verifier or I1–I7 Neon session. Original Candidate A zero-edge test remains intact and cannot be claimed to pass the newly created role; future integration must explicitly adopt revised rowset contract. `H2_G03_EXCEPTION_OFFLINE_CI=PASS_BOUNDED`, `H2_G03_REVISED_RUNTIME_VERIFIER_ACCEPTED=NO`, `H2_LIVE_RUNTIME_GATE=NO-GO`; no new Neon access/credential, production or other track change.
+
 ### H2 inspector role created by owner and catalog-verified — creation PASS, runtime still NO-GO
 
 - Owner reports Neon SQL Editor executed previously approved `CREATE ROLE h2_catalog_inspector_ro ... PASSWORD NULL` successfully. Independent Neon read-only SQL on pinned H2 shadow primary observed exactly one inspector role with requested `LOGIN`, `NOINHERIT`, `CONNECTION LIMIT 1` and no superuser/CREATEDB/CREATEROLE/replication/BYPASSRLS flags. Exactly **one** direct `pg_auth_members` creator edge was observed: `h2_catalog_inspector_ro` granted to `neondb_owner` with `ADMIN TRUE, INHERIT FALSE, SET FALSE`; none in the other direction.
