@@ -2,6 +2,13 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-26
+
+### H2 SQL Editor owner-observed role absence — SELECT returned `f`; provisioning not authorized
+
+- User supplied Neon SQL Editor screenshot on 2026-10-26: selected project `kyiv-air-alerts-phase1-pilot`, shadow branch `lviv-phase1-production-shadow-2026-09-28`, DB `neondb`, selector `Primary`, actual `SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'h2_catalog_inspector_ro')` result `inspector_exists=f` (1 row, 308ms, `Connected (1 query)`). Earlier same-branch Roles GUI listed only `neondb_owner`. Accept **role absence as owner-observed actual catalog evidence for this branch at time of query**, not as the originally proposed pinned RO-endpoint multi-statement protocol, and not as a fresh independently signed role/port/TLS attestation. `H2_ROLE_EXISTENCE_OWNER_SQL_EDITOR=ABSENT_OBSERVED_BOUNDED`; `H2_ROLE_EXISTENCE_FORMAL_PINNED_RO_PROTOCOL=NOT_EXECUTED`.
+- The practical one-SELECT question is answered; no further Windows kit or CI is needed merely to answer existence. **Creation remains NO-GO**: re-evaluate necessity and original Candidate A G03 creator-ADMIN edge / PUBLIC privilege risks using accepted `2f650243...` conditional plan; if creation is justified, use separately authorized, least-privilege SQL-only path on verified writable compute, never Console `Add role` (`neon_superuser`). No automatic grant, provisioning, credentials, changes to H2 I1-I7 or any production/development/historical/backfill/casualty track. Docs only; no assistant Neon SQL/API.
+
 ## 2026-10-24
 
 ### H2 Windows explicitly pinned ISRG CA bundle — source-exact offline Windows CI PASS, live NO-GO
