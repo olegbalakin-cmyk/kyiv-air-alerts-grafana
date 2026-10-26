@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-26
 
+### H2 G03 creator-ADMIN policy clarification — agreed in principle, no SQL or protocol changes
+
+- Owner answered `ок` to a proposal to permit only the PG18-generated SQL creator membership in `h2_catalog_inspector_ro`: verified creator (expected `neondb_owner`), `ADMIN TRUE / INHERIT FALSE / SET FALSE`, no other incoming/outgoing membership or escalation. This resolves the **policy choice only**; it does not automatically modify Candidate A, whose Git-pinned G03 expects zero rows. Existing source, manifest, receipt interpretation and CI remain unchanged, and prior offline proof is not proof of revised acceptance. Next narrowly scope/pin/review amended G03 interpretation before any revised-runtime acceptance.
+- Owner did **not** authorize `CREATE ROLE`, any Neon operation, SQL privileges or credentials. `H2_G03_EXCEPTION_OWNER_AGREED_IN_PRINCIPLE=YES`, `H2_G03_REVISED_PROTOCOL_ACCEPTED=NO`, `H2_ROLE_PROVISIONING_AUTHORIZED=NO`; live H2 `NO-GO`. Docs only; all other tracks untouched.
+
 ### H2 SQL Editor owner-observed role absence — SELECT returned `f`; provisioning not authorized
 
 - User supplied Neon SQL Editor screenshot on 2026-10-26: selected project `kyiv-air-alerts-phase1-pilot`, shadow branch `lviv-phase1-production-shadow-2026-09-28`, DB `neondb`, selector `Primary`, actual `SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'h2_catalog_inspector_ro')` result `inspector_exists=f` (1 row, 308ms, `Connected (1 query)`). Earlier same-branch Roles GUI listed only `neondb_owner`. Accept **role absence as owner-observed actual catalog evidence for this branch at time of query**, not as the originally proposed pinned RO-endpoint multi-statement protocol, and not as a fresh independently signed role/port/TLS attestation. `H2_ROLE_EXISTENCE_OWNER_SQL_EDITOR=ABSENT_OBSERVED_BOUNDED`; `H2_ROLE_EXISTENCE_FORMAL_PINNED_RO_PROTOCOL=NOT_EXECUTED`.
