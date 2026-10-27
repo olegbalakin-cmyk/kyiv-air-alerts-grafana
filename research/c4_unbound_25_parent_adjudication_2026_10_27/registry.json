@@ -62,7 +62,7 @@
     "canonical_parent_uuid_proven": 0,
     "parent_binding_approved": 0,
     "individual_not_proven": 25,
-    "source_time_precision_mismatch_in_snapshot_projection": 0,
+    "source_time_precision_mismatch_in_snapshot_projection": 3,
     "affirmative_contradictions": 0,
     "auto_bindings_allowed": 0,
     "c4": "NOT_PROVEN",
@@ -89,7 +89,7 @@
       "original_alert_start_at": "2026-09-13T02:32:14.172141Z",
       "original_alert_end_at": "2026-09-13T06:11:11.976953Z",
       "historical_episode_id_basis": "DIRECT_SOURCE_EPISODE_ID",
-      "source_vs_snapshot_clock": "MILLISECOND_REPRESENTATION_AGREES",
+      "source_vs_snapshot_clock": "SUBMILLISECOND_SOURCE_PRECISION_NOT_IN_SNAPSHOT_PROJECTION",
       "original_historical_episode": "PROVEN_EXACT_GIT",
       "original_deterministic_episode_id": "TO_BE_INDEPENDENTLY_VERIFIED",
       "historical_parent_row_uuid": null,
@@ -100,9 +100,9 @@
       "permanent_historical_unbound_exception": "NOT_ACCEPTED",
       "contradiction": "NOT_ESTABLISHED",
       "individual_decision": "NOT_PROVEN",
-      "reason": "Original accepted canonical episode ID is present, but no matching materialized canonical parent row/UID was proven in the accepted Neon snapshot.",
+      "reason": "Original Git boundaries carry microseconds absent from the accepted snapshot projection; no exact canonical parent row/UID proven; never round or fuzzy-bind.",
       "missing_evidence": "An independently verified exact single public.alert_episodes row (UID, city, AIR, closed, canonicalization v1, exact full-precision UTC start/end and matching historical ID), plus accepted parent-ingestion lineage; none in the frozen read-only snapshot.",
-      "next_action": "REVIEW_EXACT_PARENT_MATERIALIZATION"
+      "next_action": "REVIEW_ORIGINAL_MICROSECOND_PRECISION_AND_EXACT_PARENT_MATERIALIZATION"
     },
     {
       "ordinal": 2,
@@ -123,7 +123,7 @@
       "original_alert_start_at": "2026-09-15T16:44:13.025549Z",
       "original_alert_end_at": "2026-09-15T17:08:51.287249Z",
       "historical_episode_id_basis": "DIRECT_SOURCE_EPISODE_ID",
-      "source_vs_snapshot_clock": "MILLISECOND_REPRESENTATION_AGREES",
+      "source_vs_snapshot_clock": "SUBMILLISECOND_SOURCE_PRECISION_NOT_IN_SNAPSHOT_PROJECTION",
       "original_historical_episode": "PROVEN_EXACT_GIT",
       "original_deterministic_episode_id": "TO_BE_INDEPENDENTLY_VERIFIED",
       "historical_parent_row_uuid": null,
@@ -134,9 +134,9 @@
       "permanent_historical_unbound_exception": "NOT_ACCEPTED",
       "contradiction": "NOT_ESTABLISHED",
       "individual_decision": "NOT_PROVEN",
-      "reason": "Original accepted canonical episode ID is present, but no matching materialized canonical parent row/UID was proven in the accepted Neon snapshot.",
+      "reason": "Original Git boundaries carry microseconds absent from the accepted snapshot projection; no exact canonical parent row/UID proven; never round or fuzzy-bind.",
       "missing_evidence": "An independently verified exact single public.alert_episodes row (UID, city, AIR, closed, canonicalization v1, exact full-precision UTC start/end and matching historical ID), plus accepted parent-ingestion lineage; none in the frozen read-only snapshot.",
-      "next_action": "REVIEW_EXACT_PARENT_MATERIALIZATION"
+      "next_action": "REVIEW_ORIGINAL_MICROSECOND_PRECISION_AND_EXACT_PARENT_MATERIALIZATION"
     },
     {
       "ordinal": 3,
@@ -157,7 +157,7 @@
       "original_alert_start_at": "2026-09-12T22:00:05.398348Z",
       "original_alert_end_at": "2026-09-12T22:14:23.315771Z",
       "historical_episode_id_basis": "DIRECT_SOURCE_EPISODE_ID",
-      "source_vs_snapshot_clock": "MILLISECOND_REPRESENTATION_AGREES",
+      "source_vs_snapshot_clock": "SUBMILLISECOND_SOURCE_PRECISION_NOT_IN_SNAPSHOT_PROJECTION",
       "original_historical_episode": "PROVEN_EXACT_GIT",
       "original_deterministic_episode_id": "TO_BE_INDEPENDENTLY_VERIFIED",
       "historical_parent_row_uuid": null,
@@ -168,9 +168,9 @@
       "permanent_historical_unbound_exception": "NOT_ACCEPTED",
       "contradiction": "NOT_ESTABLISHED",
       "individual_decision": "NOT_PROVEN",
-      "reason": "Original accepted canonical episode ID is present, but no matching materialized canonical parent row/UID was proven in the accepted Neon snapshot.",
+      "reason": "Original Git boundaries carry microseconds absent from the accepted snapshot projection; no exact canonical parent row/UID proven; never round or fuzzy-bind.",
       "missing_evidence": "An independently verified exact single public.alert_episodes row (UID, city, AIR, closed, canonicalization v1, exact full-precision UTC start/end and matching historical ID), plus accepted parent-ingestion lineage; none in the frozen read-only snapshot.",
-      "next_action": "REVIEW_EXACT_PARENT_MATERIALIZATION"
+      "next_action": "REVIEW_ORIGINAL_MICROSECOND_PRECISION_AND_EXACT_PARENT_MATERIALIZATION"
     },
     {
       "ordinal": 4,
