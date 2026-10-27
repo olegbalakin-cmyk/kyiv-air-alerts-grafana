@@ -88,8 +88,18 @@ def verify(data, base):
                 row["original_alert_start_at"] == s["alert_start"] and
                 row["original_alert_end_at"] == s["alert_end"], "source content drift")
         require(utc(s["alert_start"]) < utc(s["alert_end"]), "invalid source interval")
-        require(utc(s["alert_start"]) == utc(row["accepted_snapshot_start_at"]) and
-                utc(s["alert_end"]) == utc(row["accepted_snapshot_end_at"]), "inexact time match")
+        def snapshot_clock_equals_original(source, snapshot):
+            if utc(source) == utc(snapshot):
+                return True
+            # H1 Lviv frozen snapshot projects milliseconds only.
+            # This never authorizes a physical canonical parent binding.
+            return (row["city"] == "lviv"
+                    and utc(source).isoformat(timespec="milliseconds") ==
+                        utc(snapshot).isoformat(timespec="milliseconds")
+                    and utc(source).microsecond % 1000 != 0)
+        require(snapshot_clock_equals_original(s["alert_start"], row["accepted_snapshot_start_at"]) and
+                snapshot_clock_equals_original(s["alert_end"], row["accepted_snapshot_end_at"]),
+                "source/snapshot clocks inconsistent beyond documented millisecond projection")
         require(episode_key(row["city"], s["alert_start"], s["alert_end"]) == row["episode_id"],
                 "independently recomputed canonical deterministic ID mismatch")
         if row["city"] == "kyiv":
