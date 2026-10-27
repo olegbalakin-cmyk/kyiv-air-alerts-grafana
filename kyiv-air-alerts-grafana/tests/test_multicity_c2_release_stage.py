@@ -177,7 +177,8 @@ class ReleaseStage(unittest.TestCase):
         from db_phase1_core import canonical_json
         from verify_c2_release_dataset import verify
         import hashlib
-        rows = corpus(0, 23)
+        rows = [{**r, "start_at": r["start_at"].isoformat(),
+                 "end_at": r["end_at"].isoformat()} for r in corpus(0, 23)]
         self.assertEqual(write_process(0, 23)["status"], "persisted")
         keys = [r["city_key"] for r in rows]
         # Canonical ordering is exact; one source episode per city.
