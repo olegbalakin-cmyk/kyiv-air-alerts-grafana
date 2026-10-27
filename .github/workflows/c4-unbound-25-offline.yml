@@ -1,0 +1,38 @@
+name: C4 exact 25 UNBOUND historical parent research (offline)
+on:
+  push:
+    branches:
+      - research-c4-25-unbound-parent-adjudication-2026-10-27-gpt6
+    paths:
+      - 'research/c4_unbound_25_parent_adjudication_2026_10_27/**'
+      - '.github/workflows/c4-unbound-25-offline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-exact-git-history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact frozen source/proof commits (not databases)
+        run: |
+          git fetch --no-tags origin \
+            3d10cb3c3509c6945f9c9f3cdf02d8cfae46d143 \
+            312262dfa268476a24716bbe08e8c7d19334a9d3 \
+            e460bc30524deb8abc37923276d78f6dab1450a4 \
+            0800a7382bcea65e6c6ca9683d6eb5a0d5895d87
+      - name: Verify 25 exact immutable identities, source Git objects, deterministic keys and negative controls
+        run: |
+          python3 research/c4_unbound_25_parent_adjudication_2026_10_27/verify_independent.py --negative-tests | tee c4-25-offline-receipt.json
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: c4-25-unbound-source-exact-offline-receipt
+          path: c4-25-offline-receipt.json
+          retention-days: 30
