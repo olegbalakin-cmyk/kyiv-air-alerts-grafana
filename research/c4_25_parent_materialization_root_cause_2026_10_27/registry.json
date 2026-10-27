@@ -1,0 +1,1472 @@
+{
+  "schema_version": "c4-25-parent-materialization-root-cause-v1",
+  "created_for": "2026-10-27 independent offline C4 historical writer lineage; no Neon access",
+  "source_main_base": "461514b75a2bba660ed9c73c650cbef636c2786a",
+  "original_registry_immutable": true,
+  "original_25_source_verification_not_reexecuted": true,
+  "historical_writer_contract": {
+    "phase1": {
+      "first_permanent_shadow_workflow_run": 36470761961,
+      "city": "lviv",
+      "local_coverage_start": "2025-09-01",
+      "local_historical_end_exclusive": "2026-09-18",
+      "first_lviv_rows": 126,
+      "legacy_id_rule": "sha256(city|UTC start|UTC end)[:24]"
+    },
+    "multicity": {
+      "branch_id": "br-bold-mode-b5rub8pq",
+      "bootstrap_run": 36918355446,
+      "bootstrap_utc": "2026-10-01T19:59:55Z",
+      "bootstrap_rows": 27966,
+      "bootstrap_inserted": 27840,
+      "bootstrap_existing": 126,
+      "first_enabled_run": 36918554947,
+      "first_enabled_rows": 27981,
+      "first_enabled_inserted": 15,
+      "first_enabled_existing": 27966,
+      "first_enabled_output_commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "first_enabled_output_kyiv_rows": 2563,
+      "first_natural_schedule_run": 36922008009,
+      "cities": 23,
+      "canonicalization_version": "alert-canonicalization-v1",
+      "accepted_types": [
+        "AIR"
+      ],
+      "accepted_states": [
+        "closed"
+      ],
+      "positive_interval": true,
+      "full_timezone_aware_precision": true,
+      "canonical_id_algorithm": "sha256(city + '|' + UTC_isoformat_Z(start) + '|' + UTC_isoformat_Z(end))[:24]",
+      "physical_uid": "PostgreSQL gen_random_uuid(), independent of deterministic ID"
+    },
+    "historical_total_window_limits": "Production coverage starts differ by city; writer run timestamp and 23-city count never by themselves prove an individual episode admission."
+  },
+  "sources": {
+    "accepted_registry": {
+      "commit": "d1c0e55830f0cdf89bb38140321567f997405719",
+      "path": "research/c4_unbound_25_parent_adjudication_2026_10_27/registry.json",
+      "blob": "6eebca55479ee2e104dfa9c4c0f3bec3609782d9"
+    },
+    "frozen_cohort": {
+      "commit": "3d10cb3c3509c6945f9c9f3cdf02d8cfae46d143",
+      "path": "research/neon_frozen_h1_h2_semantic_unbound_reconciliation_2026-10-11.json",
+      "blob": "9676e3d559a22ef8989c43604dce85dab95fa38b"
+    },
+    "phase1_migration": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql",
+      "blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0"
+    },
+    "canonical_core": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_core.py",
+      "blob": "dda23c268e08f74367f33b189a8bafc1358aadd2"
+    },
+    "multicity_payload": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/scripts/multicity_shadow_payload.py",
+      "blob": "2628fe674f0984ca7b369252c5958d28e3ded2e9"
+    },
+    "multicity_writer": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/scripts/multicity_canonical_postgres.py",
+      "blob": "c1c0085372b23ae19f4b1edbc6c814f9d6d51a21"
+    },
+    "kyiv_producer": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/scripts/update_data.py",
+      "blob": "92a2984868bdd4096208e4b02776d0d49b415d66"
+    },
+    "kyiv_producer_output": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "blob": "28293dbe592b9e992374d0673ea3b5896929e796"
+    },
+    "multicity_source": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/scripts/expand_multicity_production.py",
+      "blob": "61c2d3cea37469de800fa242625a0d6db4884b1e"
+    },
+    "phase1_lviv": {
+      "commit": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_lviv_canonical.py",
+      "blob": "2437cce7d434f34574b19dbd857ee9625de0e0b4"
+    },
+    "lviv_pre_repair_readback": {
+      "commit": "85a50f55e162d83be0751c556c34c4b538bb4890",
+      "path": "research/multicity_canonical_alerts_neon_persistence_proof_2026-09-30.json",
+      "blob": "8238bf754bafd4552579bdecbaa3e32879722d4c"
+    },
+    "lviv_repair_plan": {
+      "commit": "299bb5dd2101facae9f70dc7c885851575505212",
+      "path": "research/lviv_canonical_boundary_repair_proof_2026-10-01.json",
+      "blob": "32dec6e175c90075092c134a506c39053668a58a"
+    },
+    "permanent_lviv_repair": {
+      "commit": "24cd9548a98af10591cbda5e281d9e4b800ef137",
+      "path": "research/multicity_scheduled_production_shadow_enablement_proof_2026-10-01.json",
+      "blob": "af67ff7422442d88ce7c1c83769535cd2c1c808e"
+    },
+    "permanent_multicity": {
+      "commit": "43d7bb04f7858b5f39d48f016cbfb077b150bc73",
+      "path": "research/multicity_scheduled_production_shadow_enablement_resume_2026-10-01.json",
+      "blob": "baacb7084ba9656ac9c77c6dac23ca54909f0f4d"
+    }
+  },
+  "actions": [
+    {
+      "purpose": "LVIV_PERMANENT_BOUNDARY_REPAIR",
+      "id": 36874200599,
+      "head_sha": "ea913b8b0f47f94ee27452c404481b570e4865c6",
+      "job_id": 110409322308,
+      "conclusion": "success"
+    },
+    {
+      "purpose": "PERMANENT_BOOTSTRAP",
+      "id": 36918355446,
+      "head_sha": "7c54a9e40c7d40073085aafee3d8d840569dae2c",
+      "job_id": 110557881700,
+      "conclusion": "success"
+    },
+    {
+      "purpose": "FIRST_ENABLED_MULTICITY",
+      "id": 36918554947,
+      "head_sha": "3d0404c240b9a83e846ab25424d8ebbd82f2805c",
+      "job_id": 110558535536,
+      "conclusion": "success"
+    },
+    {
+      "purpose": "FIRST_SCHEDULED_MULTICITY",
+      "id": 36922008009,
+      "head_sha": "3d0404c240b9a83e846ab25424d8ebbd82f2805c",
+      "job_id": 110570094790,
+      "conclusion": "success"
+    },
+    {
+      "purpose": "ACCEPTED_SOURCE_25",
+      "id": 40486738707,
+      "head_sha": "d1c0e55830f0cdf89bb38140321567f997405719",
+      "job_id": 122130295854,
+      "conclusion": "success"
+    }
+  ],
+  "source_discrepancy": {
+    "id": "Lviv-repair-report-old-ID-shortening",
+    "ordinal": 3,
+    "repair_plan_reported_old_id": "b3df9090f7264dd726e113",
+    "correct_original_id": "b3df9090f7264ddbd726e113",
+    "verified_against": [
+      "accepted_registry",
+      "lviv_pre_repair_readback"
+    ],
+    "runtime_actions_job_id": 110409322308,
+    "disposition": "REPORT_ONLY_TYPO_NOT_ACCEPTED_AS_PARENT_ID"
+  },
+  "summary": {
+    "total": 25,
+    "original_h1": 5,
+    "original_h2": 20,
+    "proven_specific_historical_nonmatch_mechanism": 21,
+    "kyiv_exact_writer_input_identity_mismatch": 18,
+    "lviv_historical_materialization_and_supersession": 3,
+    "proven_historical_physical_parent_uuid": 3,
+    "cause_not_proven": 4,
+    "current_eligible_original_parent_uuid": 0,
+    "approved_bindings": 0,
+    "permanent_unbound_exceptions": 0,
+    "parent_admissions_unresolved": 25,
+    "c4": "NOT_PROVEN",
+    "neon_sql_executed": false,
+    "production_modified": false
+  },
+  "records": [
+    {
+      "ordinal": 1,
+      "cohort": "H1",
+      "city": "lviv",
+      "classification_uid": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+      "classification_key": "b48f334e1b07715f6a72a1cfe127fcea02b149b7068ab90c94dbcc0da1179d82",
+      "historical_source_id": "202d8d1527183a6282ccf1e2",
+      "deterministic_original_id": "202d8d1527183a6282ccf1e2",
+      "original_start_at": "2026-09-13T02:32:14.172141Z",
+      "original_end_at": "2026-09-13T06:11:11.976953Z",
+      "source_witness": {
+        "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+        "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+        "index": 122
+      },
+      "source_snapshot_precision": "SUBMILLISECOND_SOURCE_PRECISION_NOT_IN_SNAPSHOT_PROJECTION",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "lviv_pre_repair_readback",
+        "lviv_repair_plan",
+        "permanent_lviv_repair",
+        "phase1_lviv"
+      ],
+      "phase1_interval_scope": "WITHIN_LVIV_2025_09_01_TO_2026_09_18",
+      "writer_exact_old_identity": "PROVEN_IN_HISTORICAL_PARENT_READBACK",
+      "historical_parent_repair": {
+        "old_id": "202d8d1527183a6282ccf1e2",
+        "old_start_at": "2026-09-13T02:32:14.172141Z",
+        "old_end_at": "2026-09-13T06:11:11.976953Z",
+        "new_id": "c2cd9a96768756d84c250735",
+        "new_start_at": "2026-09-13T02:32:14Z",
+        "new_end_at": "2026-09-13T06:11:11.976953Z",
+        "uuid_preserved": true,
+        "permanent_branch_id": "br-bold-mode-b5rub8pq",
+        "original_repair_report_old_id": "202d8d1527183a6282ccf1e2",
+        "report_old_id_consistent": true
+      },
+      "cause": "HISTORICAL_PARENT_MATERIALIZED_THEN_IDENTITY_SUPERSEDED",
+      "cause_proven": true,
+      "caveat": "Historical UUID is not a currently eligible exact-ID binding. Lviv repair report for ordinal 3 contains a 22-character old-ID typo; previous Git readback and independent historical Actions log contain full 24-character original ID."
+    },
+    {
+      "ordinal": 2,
+      "cohort": "H1",
+      "city": "lviv",
+      "classification_uid": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+      "classification_key": "b8b87072309ec212cb3f1fdf6b1012d8499c699cb128cf3061f00612536efda8",
+      "historical_source_id": "b24ba103214a22f4d5e65ce4",
+      "deterministic_original_id": "b24ba103214a22f4d5e65ce4",
+      "original_start_at": "2026-09-15T16:44:13.025549Z",
+      "original_end_at": "2026-09-15T17:08:51.287249Z",
+      "source_witness": {
+        "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+        "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+        "index": 123
+      },
+      "source_snapshot_precision": "SUBMILLISECOND_SOURCE_PRECISION_NOT_IN_SNAPSHOT_PROJECTION",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "lviv_pre_repair_readback",
+        "lviv_repair_plan",
+        "permanent_lviv_repair",
+        "phase1_lviv"
+      ],
+      "phase1_interval_scope": "WITHIN_LVIV_2025_09_01_TO_2026_09_18",
+      "writer_exact_old_identity": "PROVEN_IN_HISTORICAL_PARENT_READBACK",
+      "historical_parent_repair": {
+        "old_id": "b24ba103214a22f4d5e65ce4",
+        "old_start_at": "2026-09-15T16:44:13.025549Z",
+        "old_end_at": "2026-09-15T17:08:51.287249Z",
+        "new_id": "94ce779cf047984e881bfdd5",
+        "new_start_at": "2026-09-15T16:44:13Z",
+        "new_end_at": "2026-09-15T17:09:02Z",
+        "uuid_preserved": true,
+        "permanent_branch_id": "br-bold-mode-b5rub8pq",
+        "original_repair_report_old_id": "b24ba103214a22f4d5e65ce4",
+        "report_old_id_consistent": true
+      },
+      "cause": "HISTORICAL_PARENT_MATERIALIZED_THEN_IDENTITY_SUPERSEDED",
+      "cause_proven": true,
+      "caveat": "Historical UUID is not a currently eligible exact-ID binding. Lviv repair report for ordinal 3 contains a 22-character old-ID typo; previous Git readback and independent historical Actions log contain full 24-character original ID."
+    },
+    {
+      "ordinal": 3,
+      "cohort": "H1",
+      "city": "lviv",
+      "classification_uid": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+      "classification_key": "f648fc829b0bdc09f74153ca53a4e66d57078e5a1affdfb0c122aa2c49db8524",
+      "historical_source_id": "b3df9090f7264ddbd726e113",
+      "deterministic_original_id": "b3df9090f7264ddbd726e113",
+      "original_start_at": "2026-09-12T22:00:05.398348Z",
+      "original_end_at": "2026-09-12T22:14:23.315771Z",
+      "source_witness": {
+        "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+        "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+        "index": 121
+      },
+      "source_snapshot_precision": "SUBMILLISECOND_SOURCE_PRECISION_NOT_IN_SNAPSHOT_PROJECTION",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "lviv_pre_repair_readback",
+        "lviv_repair_plan",
+        "permanent_lviv_repair",
+        "phase1_lviv"
+      ],
+      "phase1_interval_scope": "WITHIN_LVIV_2025_09_01_TO_2026_09_18",
+      "writer_exact_old_identity": "PROVEN_IN_HISTORICAL_PARENT_READBACK",
+      "historical_parent_repair": {
+        "old_id": "b3df9090f7264ddbd726e113",
+        "old_start_at": "2026-09-12T22:00:05.398348Z",
+        "old_end_at": "2026-09-12T22:14:23.315771Z",
+        "new_id": "7dd411c2a2587efc740a1a66",
+        "new_start_at": "2026-09-12T22:00:05.398348Z",
+        "new_end_at": "2026-09-12T22:14:27Z",
+        "uuid_preserved": true,
+        "permanent_branch_id": "br-bold-mode-b5rub8pq",
+        "original_repair_report_old_id": "b3df9090f7264dd726e113",
+        "report_old_id_consistent": false
+      },
+      "cause": "HISTORICAL_PARENT_MATERIALIZED_THEN_IDENTITY_SUPERSEDED",
+      "cause_proven": true,
+      "caveat": "Historical UUID is not a currently eligible exact-ID binding. Lviv repair report for ordinal 3 contains a 22-character old-ID typo; previous Git readback and independent historical Actions log contain full 24-character original ID."
+    },
+    {
+      "ordinal": 4,
+      "cohort": "H1",
+      "city": "sumy",
+      "classification_uid": "0a40106c-7ee9-40c4-b268-504954f3be19",
+      "classification_key": "86ca8ac7e7e6f198d64ca45db321df6ca5746388258b93b58e8573f4a779ca0c",
+      "historical_source_id": "d1d8f1e454e15cb6ed6b306c",
+      "deterministic_original_id": "d1d8f1e454e15cb6ed6b306c",
+      "original_start_at": "2026-09-17T17:12:24Z",
+      "original_end_at": "2026-09-17T20:56:00Z",
+      "source_witness": {
+        "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4c_alerts.json",
+        "blob": "70a6b1cb003a4a805e6fe30dc060283ace3042cf",
+        "index": 190
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "multicity_payload",
+        "multicity_source"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "NOT_PROVEN",
+      "cause": "NOT_PROVEN",
+      "cause_proven": false,
+      "caveat": "Overall successful 23-city ingestion is not a per-episode exact original-ID commit receipt. The original interval's inclusion and a physical UID remain unproven."
+    },
+    {
+      "ordinal": 5,
+      "cohort": "H1",
+      "city": "zaporizhzhia",
+      "classification_uid": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+      "classification_key": "94225058153489b4498fed1423938edd5c072888df94c27c92f620776530fe38",
+      "historical_source_id": "c138680a6beb87a4aa8be6fc",
+      "deterministic_original_id": "c138680a6beb87a4aa8be6fc",
+      "original_start_at": "2026-09-17T19:33:49Z",
+      "original_end_at": "2026-09-17T21:54:45Z",
+      "source_witness": {
+        "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json",
+        "blob": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+        "index": 193
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "multicity_payload",
+        "multicity_source"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "NOT_PROVEN",
+      "cause": "NOT_PROVEN",
+      "cause_proven": false,
+      "caveat": "Overall successful 23-city ingestion is not a per-episode exact original-ID commit receipt. The original interval's inclusion and a physical UID remain unproven."
+    },
+    {
+      "ordinal": 6,
+      "cohort": "H2",
+      "city": "kharkiv",
+      "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+      "classification_key": "a2db2590f3858a4696abe9bc37252876bfaa79d626e1f1b7a3f54d5b5a7681e2",
+      "historical_source_id": "0fc4be61b3b03eb9027c2536",
+      "deterministic_original_id": "0fc4be61b3b03eb9027c2536",
+      "original_start_at": "2025-03-05T19:08:24Z",
+      "original_end_at": "2025-03-06T03:03:45Z",
+      "source_witness": {
+        "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-historical-recovery_alerts.json",
+        "blob": "419d3bdf57517f455951968cdaffd926020fffc7",
+        "index": 86
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "multicity_payload",
+        "multicity_source"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "NOT_PROVEN",
+      "cause": "NOT_PROVEN",
+      "cause_proven": false,
+      "caveat": "Overall successful 23-city ingestion is not a per-episode exact original-ID commit receipt. The original interval's inclusion and a physical UID remain unproven."
+    },
+    {
+      "ordinal": 7,
+      "cohort": "H2",
+      "city": "kharkiv",
+      "classification_uid": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+      "classification_key": "49516b028c9b8cdf4da280f3ddf73e161ffd2e75663c3fca9771070de75e99fe",
+      "historical_source_id": "fc1226778d0125bc91aa669c",
+      "deterministic_original_id": "fc1226778d0125bc91aa669c",
+      "original_start_at": "2026-09-17T17:41:38Z",
+      "original_end_at": "2026-09-17T20:55:54Z",
+      "source_witness": {
+        "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6c_alerts.json",
+        "blob": "d22744d845503c559c85337f012026e2e7064eaa",
+        "index": 195
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "multicity_payload",
+        "multicity_source"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "NOT_PROVEN",
+      "cause": "NOT_PROVEN",
+      "cause_proven": false,
+      "caveat": "Overall successful 23-city ingestion is not a per-episode exact original-ID commit receipt. The original interval's inclusion and a physical UID remain unproven."
+    },
+    {
+      "ordinal": 8,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+      "classification_key": "24dd26e5ef310c6d6ff97125aa4c06c79478b7a8ee0caa65a278149f6fdc866f",
+      "historical_source_id": "kyiv-202609170203000300-202609170254000300",
+      "deterministic_original_id": "1a603e438745d4a3d6408639",
+      "original_start_at": "2026-09-17T02:03:00+03:00",
+      "original_end_at": "2026-09-17T02:54:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 237
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2447,
+        "producer_start_at": "2026-09-17T02:03:21+03:00",
+        "producer_end_at": "2026-09-17T02:54:04+03:00",
+        "start_delta_seconds": 21,
+        "end_delta_seconds": 4,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 9,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+      "classification_key": "ee01ad9ef3888702c3f1bb9eef63c167f64fad0557b3f18007a47b822b3296c4",
+      "historical_source_id": "kyiv-202609171140000300-202609171155000300",
+      "deterministic_original_id": "1a8900b3e09048b0a61db83c",
+      "original_start_at": "2026-09-17T11:40:00+03:00",
+      "original_end_at": "2026-09-17T11:55:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 241
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2451,
+        "producer_start_at": "2026-09-17T11:40:05+03:00",
+        "producer_end_at": "2026-09-17T11:55:26+03:00",
+        "start_delta_seconds": 5,
+        "end_delta_seconds": 26,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 10,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "7617c848-89be-4d2e-8910-207f25fcd678",
+      "classification_key": "c5618a7e2f9929121c44d216778ccc6b5b705cacecc3cf487785f8d1a877c286",
+      "historical_source_id": "kyiv-202609151507000300-202609151620000300",
+      "deterministic_original_id": "5ecf681dfd050d9e65c9d03c",
+      "original_start_at": "2026-09-15T15:07:00+03:00",
+      "original_end_at": "2026-09-15T16:20:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 228
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2438,
+        "producer_start_at": "2026-09-15T15:07:14+03:00",
+        "producer_end_at": "2026-09-15T16:20:16+03:00",
+        "start_delta_seconds": 14,
+        "end_delta_seconds": 16,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 11,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "7f6741fb-915d-4152-8e74-b023f05f470e",
+      "classification_key": "e60c9af9c8e59b6212a4255adf4f42ab6b3fee63eedcc2bbf7cba0e3ec2d5c34",
+      "historical_source_id": "kyiv-202609170901000300-202609170903000300",
+      "deterministic_original_id": "659fa411a4626d02df3c16b6",
+      "original_start_at": "2026-09-17T09:01:00+03:00",
+      "original_end_at": "2026-09-17T09:03:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 239
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2449,
+        "producer_start_at": "2026-09-17T09:01:54+03:00",
+        "producer_end_at": "2026-09-17T09:03:32+03:00",
+        "start_delta_seconds": 54,
+        "end_delta_seconds": 32,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 12,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+      "classification_key": "9f3c0cfa7da59f1793d798169ea10e89036607f54d22aecb2245e9c1def48a34",
+      "historical_source_id": "kyiv-202609170930000300-202609171002000300",
+      "deterministic_original_id": "73184793018bc20346494560",
+      "original_start_at": "2026-09-17T09:30:00+03:00",
+      "original_end_at": "2026-09-17T10:02:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 240
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2450,
+        "producer_start_at": "2026-09-17T09:30:08+03:00",
+        "producer_end_at": "2026-09-17T10:02:04+03:00",
+        "start_delta_seconds": 8,
+        "end_delta_seconds": 4,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 13,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "457dba20-311a-4531-86a4-8d3f92efd1db",
+      "classification_key": "fb8b45298abc067053d657cabce66555be41b04ff2050558c8b567a38c55ee1e",
+      "historical_source_id": "kyiv-202609151944000300-202609152009000300",
+      "deterministic_original_id": "82984c3ddb21c5c68d737e8c",
+      "original_start_at": "2026-09-15T19:44:00+03:00",
+      "original_end_at": "2026-09-15T20:09:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 229
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2439,
+        "producer_start_at": "2026-09-15T19:44:41+03:00",
+        "producer_end_at": "2026-09-15T20:09:20+03:00",
+        "start_delta_seconds": 41,
+        "end_delta_seconds": 20,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 14,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+      "classification_key": "71b208cb487e8d57c0a53631edf7fbb75fb027583382032bce9ed2b698e378ad",
+      "historical_source_id": "kyiv-202609172156000300-202609172210000300",
+      "deterministic_original_id": "874b0acd3bce44540edb93a9",
+      "original_start_at": "2026-09-17T21:56:00+03:00",
+      "original_end_at": "2026-09-17T22:10:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 245
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2455,
+        "producer_start_at": "2026-09-17T21:56:22+03:00",
+        "producer_end_at": "2026-09-17T22:10:07+03:00",
+        "start_delta_seconds": 22,
+        "end_delta_seconds": 7,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 15,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+      "classification_key": "729f058e66ade174d82cd5b8a75c1cc8fb299d58f28dde980c1b288de3a4639a",
+      "historical_source_id": "kyiv-202609161723000300-202609161808000300",
+      "deterministic_original_id": "8ea7bc150c61e8de2929ab25",
+      "original_start_at": "2026-09-16T17:23:00+03:00",
+      "original_end_at": "2026-09-16T18:08:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 233
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2443,
+        "producer_start_at": "2026-09-16T17:23:12+03:00",
+        "producer_end_at": "2026-09-16T18:08:52+03:00",
+        "start_delta_seconds": 12,
+        "end_delta_seconds": 52,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 16,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+      "classification_key": "e1961679b534078344b1c2b81e01017730e0d8327b30db2a5e966ec5bb303929",
+      "historical_source_id": "kyiv-202609171322000300-202609171342000300",
+      "deterministic_original_id": "8fdc1d511a3ff6d0e5061c91",
+      "original_start_at": "2026-09-17T13:22:00+03:00",
+      "original_end_at": "2026-09-17T13:42:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 242
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2452,
+        "producer_start_at": "2026-09-17T13:22:10+03:00",
+        "producer_end_at": "2026-09-17T13:42:46+03:00",
+        "start_delta_seconds": 10,
+        "end_delta_seconds": 46,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 17,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+      "classification_key": "d4c1d964404c77cfc6d770cf859ea5899013210caf85e8203adda7ffc9529633",
+      "historical_source_id": "kyiv-202609160910000300-202609160931000300",
+      "deterministic_original_id": "9f4dbbf90ee53e405d3f0bdb",
+      "original_start_at": "2026-09-16T09:10:00+03:00",
+      "original_end_at": "2026-09-16T09:31:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 232
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2442,
+        "producer_start_at": "2026-09-16T09:10:36+03:00",
+        "producer_end_at": "2026-09-16T09:31:25+03:00",
+        "start_delta_seconds": 36,
+        "end_delta_seconds": 25,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 18,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "92096abc-07aa-42b8-89b5-f249650340fc",
+      "classification_key": "5d04ee4ba051db3f3388dd313a0b61a40a46133d320dbead64de507a4508b39f",
+      "historical_source_id": "kyiv-202609170433000300-202609170718000300",
+      "deterministic_original_id": "a018066fae8d383f5351c7cc",
+      "original_start_at": "2026-09-17T04:33:00+03:00",
+      "original_end_at": "2026-09-17T07:18:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 238
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2448,
+        "producer_start_at": "2026-09-17T04:33:37+03:00",
+        "producer_end_at": "2026-09-17T07:18:25+03:00",
+        "start_delta_seconds": 37,
+        "end_delta_seconds": 25,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 19,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "0fef7097-990b-405c-b687-3c52a1360deb",
+      "classification_key": "5b742c25ac8b80f952bb45e4b4b60fac41b9bba2349ef8e162d4fcb1d2b4ce52",
+      "historical_source_id": "kyiv-202609161959000300-202609162013000300",
+      "deterministic_original_id": "a141391372695315ed5f73f7",
+      "original_start_at": "2026-09-16T19:59:00+03:00",
+      "original_end_at": "2026-09-16T20:13:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 234
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2444,
+        "producer_start_at": "2026-09-16T19:59:29+03:00",
+        "producer_end_at": "2026-09-16T20:13:56+03:00",
+        "start_delta_seconds": 29,
+        "end_delta_seconds": 56,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 20,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+      "classification_key": "08bada689018c60ebbbbeae277f870b7860f821146d826ebf9ac07614fe76fe1",
+      "historical_source_id": "kyiv-202609172040000300-202609172045000300",
+      "deterministic_original_id": "ba16519469117045b3c662e7",
+      "original_start_at": "2026-09-17T20:40:00+03:00",
+      "original_end_at": "2026-09-17T20:45:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 244
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2454,
+        "producer_start_at": "2026-09-17T20:40:35+03:00",
+        "producer_end_at": "2026-09-17T20:45:01+03:00",
+        "start_delta_seconds": 35,
+        "end_delta_seconds": 1,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 21,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+      "classification_key": "19a1b4a7fdc73f2a698a544d6830de661ca32c16ec8970fa6e2db886397e7960",
+      "historical_source_id": "kyiv-202609171631000300-202609171657000300",
+      "deterministic_original_id": "baaa05dfc347eee6e22e2eb5",
+      "original_start_at": "2026-09-17T16:31:00+03:00",
+      "original_end_at": "2026-09-17T16:57:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 243
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2453,
+        "producer_start_at": "2026-09-17T16:31:52+03:00",
+        "producer_end_at": "2026-09-17T16:57:29+03:00",
+        "start_delta_seconds": 52,
+        "end_delta_seconds": 29,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 22,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+      "classification_key": "73b3dcc600c6237da87ea82b4a6e0946aa3516186acd6abca7af43c1e33e717c",
+      "historical_source_id": "kyiv-202609170021000300-202609170133000300",
+      "deterministic_original_id": "cce2ce6afe7dca47f7c21d4b",
+      "original_start_at": "2026-09-17T00:21:00+03:00",
+      "original_end_at": "2026-09-17T01:33:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 236
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2446,
+        "producer_start_at": "2026-09-17T00:21:34+03:00",
+        "producer_end_at": "2026-09-17T01:33:09+03:00",
+        "start_delta_seconds": 34,
+        "end_delta_seconds": 9,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 23,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+      "classification_key": "17b2e11bf04b2714f31b3999d68f9ef27d0f11279da5f827f987a1fbeccedd0d",
+      "historical_source_id": "kyiv-202609160505000300-202609160509000300",
+      "deterministic_original_id": "db5d4ace535298a36b0ceadc",
+      "original_start_at": "2026-09-16T05:05:00+03:00",
+      "original_end_at": "2026-09-16T05:09:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 230
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2440,
+        "producer_start_at": "2026-09-16T05:05:23+03:00",
+        "producer_end_at": "2026-09-16T05:09:13+03:00",
+        "start_delta_seconds": 23,
+        "end_delta_seconds": 13,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 24,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "b644517c-e393-4078-8fde-d53799ea4071",
+      "classification_key": "8374515afa060059ff82f7a02a71619af0ad4d95438497e9614c5defe4137321",
+      "historical_source_id": "kyiv-202609162120000300-202609162131000300",
+      "deterministic_original_id": "ed5c27624d6bef47b04b5050",
+      "original_start_at": "2026-09-16T21:20:00+03:00",
+      "original_end_at": "2026-09-16T21:31:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 235
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2445,
+        "producer_start_at": "2026-09-16T21:20:57+03:00",
+        "producer_end_at": "2026-09-16T21:31:58+03:00",
+        "start_delta_seconds": 57,
+        "end_delta_seconds": 58,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    },
+    {
+      "ordinal": 25,
+      "cohort": "H2",
+      "city": "kyiv",
+      "classification_uid": "583be6d4-adb1-4938-8186-d97d9012c2be",
+      "classification_key": "674b1d8c36ed29aa4ad6295f087ec94657b778934790cff6ce859bf17a2f3c1d",
+      "historical_source_id": "kyiv-202609160653000300-202609160736000300",
+      "deterministic_original_id": "ef14e0c9d07f731fa667653f",
+      "original_start_at": "2026-09-16T06:53:00+03:00",
+      "original_end_at": "2026-09-16T07:36:00+03:00",
+      "source_witness": {
+        "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+        "index": 231
+      },
+      "source_snapshot_precision": "MILLISECOND_REPRESENTATION_AGREES",
+      "case_end_before_permanent_bootstrap": true,
+      "multicity_city_in_23city_scope": true,
+      "required_parent_contract": {
+        "alert_type": "AIR",
+        "episode_state": "closed",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "exact_original_interval": true
+      },
+      "historical_physical_parent_uid": null,
+      "current_eligible_exact_original_parent_uid": null,
+      "parent_binding_approved": false,
+      "permanent_unbound_exception_accepted": false,
+      "corroborating_evidence": [
+        "accepted_registry",
+        "canonical_core",
+        "multicity_writer",
+        "permanent_multicity",
+        "kyiv_producer",
+        "kyiv_producer_output",
+        "multicity_payload"
+      ],
+      "phase1_interval_scope": "EXCLUDED_CITY_NOT_LVIV",
+      "writer_exact_old_identity": "ABSENT_FROM_PROVEN_OCT1_PRODUCER_OUTPUT",
+      "same_minute_diagnostic_only": {
+        "producer_row_index": 2441,
+        "producer_start_at": "2026-09-16T06:53:48+03:00",
+        "producer_end_at": "2026-09-16T07:36:40+03:00",
+        "start_delta_seconds": 48,
+        "end_delta_seconds": 40,
+        "cannot_bind_or_infer_equivalence": true
+      },
+      "cause": "CONFIRMED_ORIGINAL_VS_WRITER_TIMESTAMP_IDENTITY_MISMATCH",
+      "cause_proven": true,
+      "caveat": "Evidence establishes no exact original interval in the successful Oct1 Kyiv writer input; same-minute comparison is diagnostics only. Existence/nonexistence of a physical parent for the producer row is not proven per UUID."
+    }
+  ],
+  "limitations": [
+    "Historical permanent repair proves old Lviv row materialization and replacement identity, not current eligibility for old classification binding.",
+    "18 Kyiv mismatches prove Oct1 writer input identity mismatch, not durable absence in all historical parent-writer paths.",
+    "Same-minute pair matches for Kyiv must never be used as parent bindings, even if unique.",
+    "A successful workflow or city-wide aggregate does not prove individual row COMMIT.",
+    "Four residual source episodes require a dedicated historical candidate/commit artifact or separately authorized bounded Neon read-only query.",
+    "No irreversible historical UNBOUND exception, classifier rerun, materialization fix or Neon migration is authorized."
+  ]
+}
