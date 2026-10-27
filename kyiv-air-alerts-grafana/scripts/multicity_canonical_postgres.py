@@ -16,6 +16,7 @@ from typing import Any
 from db_phase1_core import CANONICALIZATION_VERSION, legacy_episode_id
 from db_phase1_persistence import (
     SCHEMA_VERSION,
+    acquire_stream_lock,
     finalize_ingestion_run,
     insert_ingestion_run,
     persist_episode,
@@ -308,6 +309,10 @@ def persist_canonical_episodes(
     existing_count = 0
     try:
         cursor.execute("/* MULTICITY:BEGIN */ BEGIN")
+        # Serialize competing multicity parent batches before the first read.
+        # A transaction-level lock expires on COMMIT/ROLLBACK, including exceptions.
+        # Never rely only on the unique index for a concurrent idempotent retry.
+        acquire_stream_lock(cursor, "multicity_canonical_shadow", "all_cities", "parents_v1")
         classification = classify_candidates(rows, _read_existing(cursor))
         if _has_conflicts(classification):
             raise MulticityPersistenceConflict(_conflict_summary(classification))
