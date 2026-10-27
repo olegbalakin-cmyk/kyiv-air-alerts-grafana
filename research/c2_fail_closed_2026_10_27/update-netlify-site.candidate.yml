@@ -396,6 +396,8 @@ jobs:
               --diagnostic "${RUNNER_TEMP}/ukrainealarm_bridge_fetch.json"
           }
 
+          # Capture all validated publication output bytes, not only checkpoint.
+          python kyiv-air-alerts-grafana/scripts/verify_c2_publication_snapshot.py capture --root kyiv-air-alerts-grafana --manifest "${RUNNER_TEMP}/c2-publication-snapshot.json"
           # Bridge and derived data are published together, only after
           # canonical DB commit receipt AND 23-city QA (no early Git push).
           git fetch origin site-prod
@@ -408,8 +410,9 @@ jobs:
             for attempt in 1 2 3; do
               git fetch origin site-prod
               if git rebase origin/site-prod; then
-                # Re-check the checkpoint after each rebase; reject upstream drift.
+                # Re-check checkpoint and every verified output after rebase.
                 verify_remote_bridge
+                python kyiv-air-alerts-grafana/scripts/verify_c2_publication_snapshot.py verify --root kyiv-air-alerts-grafana --manifest "${RUNNER_TEMP}/c2-publication-snapshot.json"
                 if git push origin HEAD:site-prod; then
                   break
                 fi
