@@ -377,6 +377,7 @@ def persist_canonical_episodes(
                         episode_state, canonicalization_version,
                         created_by_run_id, updated_by_run_id
                     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT DO NOTHING
                     """,
                     [
                         (
@@ -393,7 +394,40 @@ def persist_canonical_episodes(
                         for row in missing
                     ],
                 )
-                inserted_count = len(missing)
+                # An uncooperative Phase-1 writer may commit after our
+                # preflight read. The unique indexes are the final arbiter.
+                # Count only rows created by this run; never claim a skipped
+                # conflicting INSERT as persisted.
+                cursor.execute(
+                    "SELECT count(*) FROM alert_episodes WHERE created_by_run_id = %s",
+                    (run_id,),
+                )
+                inserted_count = int(cursor.fetchone()[0])
+                post_write = classify_candidates(rows, _read_existing(cursor))
+                if (
+                    _has_conflicts(post_write)
+                    or post_write["missing_to_insert"]
+                    or post_write["exact_existing"] != len(rows)
+                ):
+                    raise MulticityPersistenceConflict(
+                        "post-write canonical parent identity or semantic mismatch"
+                    )
+                existing_count = len(rows) - inserted_count
+                if inserted_count == 0:
+                    # Another writer committed all rows; do not leave an
+                    # unnecessary ingestion_run or a false inserted receipt.
+                    connection.rollback()
+                    return {
+                        "status": "already_persisted",
+                        "run_id": None,
+                        "episodes_inserted": 0,
+                        "episodes_existing": len(rows),
+                        "episodes_updated": 0,
+                        "source_observations_inserted": 0,
+                        "checkpoint_changes": 0,
+                        "writes": 0,
+                        "preflight": classification,
+                    }
 
         finished_at = datetime.now(tz=UTC)
         stats = {
