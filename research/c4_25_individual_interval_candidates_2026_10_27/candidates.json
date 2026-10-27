@@ -1,0 +1,1757 @@
+{
+  "schema_version": "c4-25-individual-interval-neon-candidates-v1",
+  "status": "PARTIAL_NOT_READY",
+  "read_only_target": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "compute": "ep-calm-rice-b5073ypp",
+    "type": "read_only",
+    "replication_snapshot_lsn": null
+  },
+  "main_preflight": "fb50b7db9c317ea8f823c4cb652ff17d9e564f28",
+  "production_ref": "e3fc98eeaa7bce5f7a5fe941c886624a0af24df4",
+  "source_access_limits": [
+    "Vadimkin official_data_uk.csv >4 MiB external fetch limit; no complete independently pinned CSV snapshot",
+    "No complete independently parsed Kyiv municipal source snapshot for relevant intervals",
+    "Original Git backfill slices are derived, not independent verification of Neon candidates"
+  ],
+  "summary": {
+    "total": 25,
+    "ready_for_owner_review": 0,
+    "boundary_unverified": 25,
+    "verified_source_complete": 0,
+    "neon_candidates_with_both_sides": 25,
+    "overlapping_candidate_windows": 19
+  },
+  "overlapping_candidate_windows": [
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      8,
+      18
+    ],
+    [
+      8,
+      22
+    ],
+    [
+      9,
+      12
+    ],
+    [
+      9,
+      16
+    ],
+    [
+      10,
+      13
+    ],
+    [
+      11,
+      12
+    ],
+    [
+      11,
+      18
+    ],
+    [
+      13,
+      23
+    ],
+    [
+      14,
+      20
+    ],
+    [
+      15,
+      17
+    ],
+    [
+      15,
+      19
+    ],
+    [
+      16,
+      21
+    ],
+    [
+      17,
+      25
+    ],
+    [
+      19,
+      24
+    ],
+    [
+      20,
+      21
+    ],
+    [
+      22,
+      24
+    ],
+    [
+      23,
+      25
+    ]
+  ],
+  "records": [
+    {
+      "ordinal": 1,
+      "city": "lviv",
+      "classification_uid": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+      "classification_key": "b48f334e1b07715f6a72a1cfe127fcea02b149b7068ab90c94dbcc0da1179d82",
+      "original": {
+        "episode_id": "202d8d1527183a6282ccf1e2",
+        "start_at": "2026-09-13T02:32:14.172141Z",
+        "end_at": "2026-09-13T06:11:11.976953Z",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 122
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+        "legacy_episode_id": "7dd411c2a2587efc740a1a66",
+        "start_at": "2026-09-12T22:00:05.398Z",
+        "end_at": "2026-09-12T22:14:27.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+        "legacy_episode_id": "94ce779cf047984e881bfdd5",
+        "start_at": "2026-09-15T16:44:13.000Z",
+        "end_at": "2026-09-15T17:09:02.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+        "physical_uid_supersession_id": "c2cd9a96768756d84c250735"
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 122
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "575f370c-6e99-4623-8219-f8fbdfd6c978",
+          "451c8a2c-248a-41e5-b49e-31af3f44631f"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 2,
+      "city": "lviv",
+      "classification_uid": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+      "classification_key": "b8b87072309ec212cb3f1fdf6b1012d8499c699cb128cf3061f00612536efda8",
+      "original": {
+        "episode_id": "b24ba103214a22f4d5e65ce4",
+        "start_at": "2026-09-15T16:44:13.025549Z",
+        "end_at": "2026-09-15T17:08:51.287249Z",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 123
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+        "legacy_episode_id": "c2cd9a96768756d84c250735",
+        "start_at": "2026-09-13T02:32:14.000Z",
+        "end_at": "2026-09-13T06:11:11.976Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "5690af09-524a-4c98-ad30-21a13c81c021",
+        "legacy_episode_id": "bd3952a3bc7796023b7f7358",
+        "start_at": "2026-09-16T23:05:54.464Z",
+        "end_at": "2026-09-16T23:25:51.608Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+        "physical_uid_supersession_id": "94ce779cf047984e881bfdd5"
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 123
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "c90e7b05-1982-461f-945f-53d8130c627b",
+          "5690af09-524a-4c98-ad30-21a13c81c021"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 3,
+      "city": "lviv",
+      "classification_uid": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+      "classification_key": "f648fc829b0bdc09f74153ca53a4e66d57078e5a1affdfb0c122aa2c49db8524",
+      "original": {
+        "episode_id": "b3df9090f7264ddbd726e113",
+        "start_at": "2026-09-12T22:00:05.398348Z",
+        "end_at": "2026-09-12T22:14:23.315771Z",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 121
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "6c3e9abd-a46d-4bd4-b5ac-bb0118c1eeea",
+        "legacy_episode_id": "56d59bf102df184eda42379a",
+        "start_at": "2026-09-01T21:49:49.559Z",
+        "end_at": "2026-09-01T21:57:16.737Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+        "legacy_episode_id": "c2cd9a96768756d84c250735",
+        "start_at": "2026-09-13T02:32:14.000Z",
+        "end_at": "2026-09-13T06:11:11.976Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+        "physical_uid_supersession_id": "7dd411c2a2587efc740a1a66"
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 121
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "6c3e9abd-a46d-4bd4-b5ac-bb0118c1eeea",
+          "c90e7b05-1982-461f-945f-53d8130c627b"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 4,
+      "city": "sumy",
+      "classification_uid": "0a40106c-7ee9-40c4-b268-504954f3be19",
+      "classification_key": "86ca8ac7e7e6f198d64ca45db321df6ca5746388258b93b58e8573f4a779ca0c",
+      "original": {
+        "episode_id": "d1d8f1e454e15cb6ed6b306c",
+        "start_at": "2026-09-17T17:12:24Z",
+        "end_at": "2026-09-17T20:56:00Z",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4c_alerts.json",
+          "blob": "70a6b1cb003a4a805e6fe30dc060283ace3042cf",
+          "index": 190
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "d572b2f5-2e4b-4e3b-bcba-2c6d26feecd7",
+        "legacy_episode_id": "fc216bb6d313036eaec731ca",
+        "start_at": "2026-09-17T14:51:31.410Z",
+        "end_at": "2026-09-17T16:33:00.349Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "eaf9b1a0-6842-4bd6-a281-58bcdcedb8f8",
+        "legacy_episode_id": "e91f86a722a27599206a4ca5",
+        "start_at": "2026-09-17T22:42:45.354Z",
+        "end_at": "2026-09-18T01:19:20.090Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4c_alerts.json",
+          "blob": "70a6b1cb003a4a805e6fe30dc060283ace3042cf",
+          "index": 190
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "0a40106c-7ee9-40c4-b268-504954f3be19",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "d572b2f5-2e4b-4e3b-bcba-2c6d26feecd7",
+          "eaf9b1a0-6842-4bd6-a281-58bcdcedb8f8"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 5,
+      "city": "zaporizhzhia",
+      "classification_uid": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+      "classification_key": "94225058153489b4498fed1423938edd5c072888df94c27c92f620776530fe38",
+      "original": {
+        "episode_id": "c138680a6beb87a4aa8be6fc",
+        "start_at": "2026-09-17T19:33:49Z",
+        "end_at": "2026-09-17T21:54:45Z",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json",
+          "blob": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+          "index": 193
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "e8031407-c4cc-4260-ab95-9c5b882fd9d7",
+        "legacy_episode_id": "f75a9301a590bc0dd129a270",
+        "start_at": "2026-09-17T17:10:00.593Z",
+        "end_at": "2026-09-17T18:47:54.192Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "275e1a5c-7b2d-40a6-a2f9-23b4550c1262",
+        "legacy_episode_id": "93cb22f5c0aee193ab8946f6",
+        "start_at": "2026-09-17T22:26:54.816Z",
+        "end_at": "2026-09-18T15:46:20.857Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json",
+          "blob": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+          "index": 193
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "e8031407-c4cc-4260-ab95-9c5b882fd9d7",
+          "275e1a5c-7b2d-40a6-a2f9-23b4550c1262"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 6,
+      "city": "kharkiv",
+      "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+      "classification_key": "a2db2590f3858a4696abe9bc37252876bfaa79d626e1f1b7a3f54d5b5a7681e2",
+      "original": {
+        "episode_id": "0fc4be61b3b03eb9027c2536",
+        "start_at": "2025-03-05T19:08:24Z",
+        "end_at": "2025-03-06T03:03:45Z",
+        "source_witness": {
+          "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-historical-recovery_alerts.json",
+          "blob": "419d3bdf57517f455951968cdaffd926020fffc7",
+          "index": 86
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "41b42c9d-cd24-4a1f-83d0-8c5e2f48030a",
+        "legacy_episode_id": "9f95bd0f8468d38a72062fd6",
+        "start_at": "2025-03-05T18:06:45.000Z",
+        "end_at": "2025-03-05T18:31:03.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "26271206-79e9-406e-af50-496418c5e84f",
+        "legacy_episode_id": "dca187e3bd85404598b1b6f9",
+        "start_at": "2025-03-06T09:12:46.000Z",
+        "end_at": "2025-03-06T09:34:27.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-historical-recovery_alerts.json",
+          "blob": "419d3bdf57517f455951968cdaffd926020fffc7",
+          "index": 86
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "41b42c9d-cd24-4a1f-83d0-8c5e2f48030a",
+          "26271206-79e9-406e-af50-496418c5e84f"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 7,
+      "city": "kharkiv",
+      "classification_uid": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+      "classification_key": "49516b028c9b8cdf4da280f3ddf73e161ffd2e75663c3fca9771070de75e99fe",
+      "original": {
+        "episode_id": "fc1226778d0125bc91aa669c",
+        "start_at": "2026-09-17T17:41:38Z",
+        "end_at": "2026-09-17T20:55:54Z",
+        "source_witness": {
+          "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6c_alerts.json",
+          "blob": "d22744d845503c559c85337f012026e2e7064eaa",
+          "index": 195
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "40e3251f-7758-4125-9634-c5c9f90cbeb8",
+        "legacy_episode_id": "cd7d651dc02329c823b79868",
+        "start_at": "2026-09-17T14:26:33.891Z",
+        "end_at": "2026-09-17T16:15:04.206Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "f5d2406f-ea61-4eb5-b6fd-9d61cd96a2cb",
+        "legacy_episode_id": "b3c4eda038eb9ddf60f1cc22",
+        "start_at": "2026-09-18T03:15:12.066Z",
+        "end_at": "2026-09-18T04:31:13.582Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6c_alerts.json",
+          "blob": "d22744d845503c559c85337f012026e2e7064eaa",
+          "index": 195
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "40e3251f-7758-4125-9634-c5c9f90cbeb8",
+          "f5d2406f-ea61-4eb5-b6fd-9d61cd96a2cb"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 8,
+      "city": "kyiv",
+      "classification_uid": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+      "classification_key": "24dd26e5ef310c6d6ff97125aa4c06c79478b7a8ee0caa65a278149f6fdc866f",
+      "original": {
+        "episode_id": "kyiv-202609170203000300-202609170254000300",
+        "start_at": "2026-09-17T02:03:00+03:00",
+        "end_at": "2026-09-17T02:54:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 237
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "004d44fe-ac09-47a0-8de5-8c0a96c57321",
+        "legacy_episode_id": "7ad2e40c8b1f9a143cdc6522",
+        "start_at": "2026-09-16T21:21:34.000Z",
+        "end_at": "2026-09-16T22:33:09.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "114039f8-585c-4bd6-b16c-750ccd2ed174",
+        "legacy_episode_id": "65b2d23144cf8c4b623a22f0",
+        "start_at": "2026-09-17T01:33:37.000Z",
+        "end_at": "2026-09-17T04:18:25.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 237
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "004d44fe-ac09-47a0-8de5-8c0a96c57321",
+          "114039f8-585c-4bd6-b16c-750ccd2ed174"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 9,
+      "city": "kyiv",
+      "classification_uid": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+      "classification_key": "ee01ad9ef3888702c3f1bb9eef63c167f64fad0557b3f18007a47b822b3296c4",
+      "original": {
+        "episode_id": "kyiv-202609171140000300-202609171155000300",
+        "start_at": "2026-09-17T11:40:00+03:00",
+        "end_at": "2026-09-17T11:55:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 241
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "1ac24cc5-2f26-4f3a-ba1f-07a93b0990ae",
+        "legacy_episode_id": "4d0533cc496f7f27278a8ceb",
+        "start_at": "2026-09-17T06:30:08.000Z",
+        "end_at": "2026-09-17T07:02:04.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "a10742f0-1dfc-4041-b48c-5fe791c94742",
+        "legacy_episode_id": "c443fec2b52048bc3b50cb5b",
+        "start_at": "2026-09-17T10:22:10.000Z",
+        "end_at": "2026-09-17T10:42:46.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 241
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "1ac24cc5-2f26-4f3a-ba1f-07a93b0990ae",
+          "a10742f0-1dfc-4041-b48c-5fe791c94742"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 10,
+      "city": "kyiv",
+      "classification_uid": "7617c848-89be-4d2e-8910-207f25fcd678",
+      "classification_key": "c5618a7e2f9929121c44d216778ccc6b5b705cacecc3cf487785f8d1a877c286",
+      "original": {
+        "episode_id": "kyiv-202609151507000300-202609151620000300",
+        "start_at": "2026-09-15T15:07:00+03:00",
+        "end_at": "2026-09-15T16:20:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 228
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "ed85b7c1-5b8c-40e2-b791-fb000bd227a3",
+        "legacy_episode_id": "6a07bd7c1c4eac776097637c",
+        "start_at": "2026-09-15T06:38:33.000Z",
+        "end_at": "2026-09-15T06:57:47.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "3f6bb8b8-3cf4-4051-8ecb-ee354a2249f1",
+        "legacy_episode_id": "5916c9c46838ea717d658eba",
+        "start_at": "2026-09-15T16:44:41.000Z",
+        "end_at": "2026-09-15T17:09:20.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 228
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "7617c848-89be-4d2e-8910-207f25fcd678",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "ed85b7c1-5b8c-40e2-b791-fb000bd227a3",
+          "3f6bb8b8-3cf4-4051-8ecb-ee354a2249f1"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 11,
+      "city": "kyiv",
+      "classification_uid": "7f6741fb-915d-4152-8e74-b023f05f470e",
+      "classification_key": "e60c9af9c8e59b6212a4255adf4f42ab6b3fee63eedcc2bbf7cba0e3ec2d5c34",
+      "original": {
+        "episode_id": "kyiv-202609170901000300-202609170903000300",
+        "start_at": "2026-09-17T09:01:00+03:00",
+        "end_at": "2026-09-17T09:03:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 239
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "114039f8-585c-4bd6-b16c-750ccd2ed174",
+        "legacy_episode_id": "65b2d23144cf8c4b623a22f0",
+        "start_at": "2026-09-17T01:33:37.000Z",
+        "end_at": "2026-09-17T04:18:25.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "1ac24cc5-2f26-4f3a-ba1f-07a93b0990ae",
+        "legacy_episode_id": "4d0533cc496f7f27278a8ceb",
+        "start_at": "2026-09-17T06:30:08.000Z",
+        "end_at": "2026-09-17T07:02:04.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 239
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "7f6741fb-915d-4152-8e74-b023f05f470e",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "114039f8-585c-4bd6-b16c-750ccd2ed174",
+          "1ac24cc5-2f26-4f3a-ba1f-07a93b0990ae"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 12,
+      "city": "kyiv",
+      "classification_uid": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+      "classification_key": "9f3c0cfa7da59f1793d798169ea10e89036607f54d22aecb2245e9c1def48a34",
+      "original": {
+        "episode_id": "kyiv-202609170930000300-202609171002000300",
+        "start_at": "2026-09-17T09:30:00+03:00",
+        "end_at": "2026-09-17T10:02:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 240
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "444aa3d0-540e-44fa-b2d2-2dda052f85b5",
+        "legacy_episode_id": "f9e39d48477174b2d8ea098c",
+        "start_at": "2026-09-17T06:01:54.000Z",
+        "end_at": "2026-09-17T06:03:32.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "81f481d9-d9fd-4cdb-9e5c-d13be7d14c92",
+        "legacy_episode_id": "dce3e25b74ec9ef20aa7145f",
+        "start_at": "2026-09-17T08:40:05.000Z",
+        "end_at": "2026-09-17T08:55:26.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 240
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "444aa3d0-540e-44fa-b2d2-2dda052f85b5",
+          "81f481d9-d9fd-4cdb-9e5c-d13be7d14c92"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 13,
+      "city": "kyiv",
+      "classification_uid": "457dba20-311a-4531-86a4-8d3f92efd1db",
+      "classification_key": "fb8b45298abc067053d657cabce66555be41b04ff2050558c8b567a38c55ee1e",
+      "original": {
+        "episode_id": "kyiv-202609151944000300-202609152009000300",
+        "start_at": "2026-09-15T19:44:00+03:00",
+        "end_at": "2026-09-15T20:09:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 229
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "1b9a847d-da9b-4e05-8551-e24d80803b47",
+        "legacy_episode_id": "d10be5b1460cb0e70c71c545",
+        "start_at": "2026-09-15T12:07:14.000Z",
+        "end_at": "2026-09-15T13:20:16.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "547148ff-565e-4cf9-890a-2d39a03a16d1",
+        "legacy_episode_id": "319aeba659bd03786f015f95",
+        "start_at": "2026-09-16T02:05:23.000Z",
+        "end_at": "2026-09-16T02:09:13.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 229
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "457dba20-311a-4531-86a4-8d3f92efd1db",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "1b9a847d-da9b-4e05-8551-e24d80803b47",
+          "547148ff-565e-4cf9-890a-2d39a03a16d1"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 14,
+      "city": "kyiv",
+      "classification_uid": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+      "classification_key": "71b208cb487e8d57c0a53631edf7fbb75fb027583382032bce9ed2b698e378ad",
+      "original": {
+        "episode_id": "kyiv-202609172156000300-202609172210000300",
+        "start_at": "2026-09-17T21:56:00+03:00",
+        "end_at": "2026-09-17T22:10:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 245
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "aa4082a9-d2f0-422f-bc80-b40737bb175a",
+        "legacy_episode_id": "e61c130ebcc0829ca57bf98e",
+        "start_at": "2026-09-17T17:40:35.000Z",
+        "end_at": "2026-09-17T17:45:01.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "bc158faf-b941-42d9-9c95-ca01145a007c",
+        "legacy_episode_id": "17c16c2a04d3152276fac052",
+        "start_at": "2026-09-18T12:18:57.000Z",
+        "end_at": "2026-09-18T12:34:13.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 245
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "aa4082a9-d2f0-422f-bc80-b40737bb175a",
+          "bc158faf-b941-42d9-9c95-ca01145a007c"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 15,
+      "city": "kyiv",
+      "classification_uid": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+      "classification_key": "729f058e66ade174d82cd5b8a75c1cc8fb299d58f28dde980c1b288de3a4639a",
+      "original": {
+        "episode_id": "kyiv-202609161723000300-202609161808000300",
+        "start_at": "2026-09-16T17:23:00+03:00",
+        "end_at": "2026-09-16T18:08:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 233
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "a89b6cc3-fac9-44c5-8454-e35ed9e6d6c1",
+        "legacy_episode_id": "002475291323c9bdd0123ad2",
+        "start_at": "2026-09-16T06:10:36.000Z",
+        "end_at": "2026-09-16T06:31:25.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "aa67f705-f488-4cdb-900c-8c1140eb270b",
+        "legacy_episode_id": "007edd73cc06be5f99b9373c",
+        "start_at": "2026-09-16T16:59:29.000Z",
+        "end_at": "2026-09-16T17:13:56.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 233
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "a89b6cc3-fac9-44c5-8454-e35ed9e6d6c1",
+          "aa67f705-f488-4cdb-900c-8c1140eb270b"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 16,
+      "city": "kyiv",
+      "classification_uid": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+      "classification_key": "e1961679b534078344b1c2b81e01017730e0d8327b30db2a5e966ec5bb303929",
+      "original": {
+        "episode_id": "kyiv-202609171322000300-202609171342000300",
+        "start_at": "2026-09-17T13:22:00+03:00",
+        "end_at": "2026-09-17T13:42:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 242
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "81f481d9-d9fd-4cdb-9e5c-d13be7d14c92",
+        "legacy_episode_id": "dce3e25b74ec9ef20aa7145f",
+        "start_at": "2026-09-17T08:40:05.000Z",
+        "end_at": "2026-09-17T08:55:26.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "509e4d59-9c02-4811-9ff4-796b17df9eac",
+        "legacy_episode_id": "22f1649ee8e9499648e7b5b5",
+        "start_at": "2026-09-17T13:31:52.000Z",
+        "end_at": "2026-09-17T13:57:29.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 242
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "81f481d9-d9fd-4cdb-9e5c-d13be7d14c92",
+          "509e4d59-9c02-4811-9ff4-796b17df9eac"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 17,
+      "city": "kyiv",
+      "classification_uid": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+      "classification_key": "d4c1d964404c77cfc6d770cf859ea5899013210caf85e8203adda7ffc9529633",
+      "original": {
+        "episode_id": "kyiv-202609160910000300-202609160931000300",
+        "start_at": "2026-09-16T09:10:00+03:00",
+        "end_at": "2026-09-16T09:31:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 232
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "5f6e672e-6829-4311-95b9-d85c779c877e",
+        "legacy_episode_id": "f27ddc1152189d5ed9653305",
+        "start_at": "2026-09-16T03:53:48.000Z",
+        "end_at": "2026-09-16T04:36:40.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "79544d7b-aa79-447a-8e5d-f9cbab54fe16",
+        "legacy_episode_id": "4d49916349bb847d51abaa0a",
+        "start_at": "2026-09-16T14:23:12.000Z",
+        "end_at": "2026-09-16T15:08:52.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 232
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "5f6e672e-6829-4311-95b9-d85c779c877e",
+          "79544d7b-aa79-447a-8e5d-f9cbab54fe16"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 18,
+      "city": "kyiv",
+      "classification_uid": "92096abc-07aa-42b8-89b5-f249650340fc",
+      "classification_key": "5d04ee4ba051db3f3388dd313a0b61a40a46133d320dbead64de507a4508b39f",
+      "original": {
+        "episode_id": "kyiv-202609170433000300-202609170718000300",
+        "start_at": "2026-09-17T04:33:00+03:00",
+        "end_at": "2026-09-17T07:18:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 238
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "2859e0a1-753e-4474-8557-e98fcec6b0b2",
+        "legacy_episode_id": "febcf53216eae6829a365729",
+        "start_at": "2026-09-16T23:03:21.000Z",
+        "end_at": "2026-09-16T23:54:04.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "444aa3d0-540e-44fa-b2d2-2dda052f85b5",
+        "legacy_episode_id": "f9e39d48477174b2d8ea098c",
+        "start_at": "2026-09-17T06:01:54.000Z",
+        "end_at": "2026-09-17T06:03:32.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 238
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "92096abc-07aa-42b8-89b5-f249650340fc",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "2859e0a1-753e-4474-8557-e98fcec6b0b2",
+          "444aa3d0-540e-44fa-b2d2-2dda052f85b5"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 19,
+      "city": "kyiv",
+      "classification_uid": "0fef7097-990b-405c-b687-3c52a1360deb",
+      "classification_key": "5b742c25ac8b80f952bb45e4b4b60fac41b9bba2349ef8e162d4fcb1d2b4ce52",
+      "original": {
+        "episode_id": "kyiv-202609161959000300-202609162013000300",
+        "start_at": "2026-09-16T19:59:00+03:00",
+        "end_at": "2026-09-16T20:13:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 234
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "79544d7b-aa79-447a-8e5d-f9cbab54fe16",
+        "legacy_episode_id": "4d49916349bb847d51abaa0a",
+        "start_at": "2026-09-16T14:23:12.000Z",
+        "end_at": "2026-09-16T15:08:52.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "8dcdfa1d-2285-4a3a-8bd8-338cd296cae8",
+        "legacy_episode_id": "e3b3426342577b57201130b6",
+        "start_at": "2026-09-16T18:20:57.000Z",
+        "end_at": "2026-09-16T18:31:58.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 234
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "0fef7097-990b-405c-b687-3c52a1360deb",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "79544d7b-aa79-447a-8e5d-f9cbab54fe16",
+          "8dcdfa1d-2285-4a3a-8bd8-338cd296cae8"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 20,
+      "city": "kyiv",
+      "classification_uid": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+      "classification_key": "08bada689018c60ebbbbeae277f870b7860f821146d826ebf9ac07614fe76fe1",
+      "original": {
+        "episode_id": "kyiv-202609172040000300-202609172045000300",
+        "start_at": "2026-09-17T20:40:00+03:00",
+        "end_at": "2026-09-17T20:45:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 244
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "509e4d59-9c02-4811-9ff4-796b17df9eac",
+        "legacy_episode_id": "22f1649ee8e9499648e7b5b5",
+        "start_at": "2026-09-17T13:31:52.000Z",
+        "end_at": "2026-09-17T13:57:29.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "306a5746-8ef5-4953-8866-94891e106576",
+        "legacy_episode_id": "d2f41afe4c3bb8de605d06a8",
+        "start_at": "2026-09-17T18:56:22.000Z",
+        "end_at": "2026-09-17T19:10:07.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 244
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "509e4d59-9c02-4811-9ff4-796b17df9eac",
+          "306a5746-8ef5-4953-8866-94891e106576"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 21,
+      "city": "kyiv",
+      "classification_uid": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+      "classification_key": "19a1b4a7fdc73f2a698a544d6830de661ca32c16ec8970fa6e2db886397e7960",
+      "original": {
+        "episode_id": "kyiv-202609171631000300-202609171657000300",
+        "start_at": "2026-09-17T16:31:00+03:00",
+        "end_at": "2026-09-17T16:57:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 243
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "a10742f0-1dfc-4041-b48c-5fe791c94742",
+        "legacy_episode_id": "c443fec2b52048bc3b50cb5b",
+        "start_at": "2026-09-17T10:22:10.000Z",
+        "end_at": "2026-09-17T10:42:46.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "aa4082a9-d2f0-422f-bc80-b40737bb175a",
+        "legacy_episode_id": "e61c130ebcc0829ca57bf98e",
+        "start_at": "2026-09-17T17:40:35.000Z",
+        "end_at": "2026-09-17T17:45:01.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 243
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "a10742f0-1dfc-4041-b48c-5fe791c94742",
+          "aa4082a9-d2f0-422f-bc80-b40737bb175a"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 22,
+      "city": "kyiv",
+      "classification_uid": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+      "classification_key": "73b3dcc600c6237da87ea82b4a6e0946aa3516186acd6abca7af43c1e33e717c",
+      "original": {
+        "episode_id": "kyiv-202609170021000300-202609170133000300",
+        "start_at": "2026-09-17T00:21:00+03:00",
+        "end_at": "2026-09-17T01:33:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 236
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "8dcdfa1d-2285-4a3a-8bd8-338cd296cae8",
+        "legacy_episode_id": "e3b3426342577b57201130b6",
+        "start_at": "2026-09-16T18:20:57.000Z",
+        "end_at": "2026-09-16T18:31:58.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "2859e0a1-753e-4474-8557-e98fcec6b0b2",
+        "legacy_episode_id": "febcf53216eae6829a365729",
+        "start_at": "2026-09-16T23:03:21.000Z",
+        "end_at": "2026-09-16T23:54:04.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 236
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "8dcdfa1d-2285-4a3a-8bd8-338cd296cae8",
+          "2859e0a1-753e-4474-8557-e98fcec6b0b2"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 23,
+      "city": "kyiv",
+      "classification_uid": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+      "classification_key": "17b2e11bf04b2714f31b3999d68f9ef27d0f11279da5f827f987a1fbeccedd0d",
+      "original": {
+        "episode_id": "kyiv-202609160505000300-202609160509000300",
+        "start_at": "2026-09-16T05:05:00+03:00",
+        "end_at": "2026-09-16T05:09:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 230
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "3f6bb8b8-3cf4-4051-8ecb-ee354a2249f1",
+        "legacy_episode_id": "5916c9c46838ea717d658eba",
+        "start_at": "2026-09-15T16:44:41.000Z",
+        "end_at": "2026-09-15T17:09:20.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "5f6e672e-6829-4311-95b9-d85c779c877e",
+        "legacy_episode_id": "f27ddc1152189d5ed9653305",
+        "start_at": "2026-09-16T03:53:48.000Z",
+        "end_at": "2026-09-16T04:36:40.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 230
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "3f6bb8b8-3cf4-4051-8ecb-ee354a2249f1",
+          "5f6e672e-6829-4311-95b9-d85c779c877e"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 24,
+      "city": "kyiv",
+      "classification_uid": "b644517c-e393-4078-8fde-d53799ea4071",
+      "classification_key": "8374515afa060059ff82f7a02a71619af0ad4d95438497e9614c5defe4137321",
+      "original": {
+        "episode_id": "kyiv-202609162120000300-202609162131000300",
+        "start_at": "2026-09-16T21:20:00+03:00",
+        "end_at": "2026-09-16T21:31:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 235
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "aa67f705-f488-4cdb-900c-8c1140eb270b",
+        "legacy_episode_id": "007edd73cc06be5f99b9373c",
+        "start_at": "2026-09-16T16:59:29.000Z",
+        "end_at": "2026-09-16T17:13:56.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "004d44fe-ac09-47a0-8de5-8c0a96c57321",
+        "legacy_episode_id": "7ad2e40c8b1f9a143cdc6522",
+        "start_at": "2026-09-16T21:21:34.000Z",
+        "end_at": "2026-09-16T22:33:09.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 235
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "b644517c-e393-4078-8fde-d53799ea4071",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "aa67f705-f488-4cdb-900c-8c1140eb270b",
+          "004d44fe-ac09-47a0-8de5-8c0a96c57321"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    },
+    {
+      "ordinal": 25,
+      "city": "kyiv",
+      "classification_uid": "583be6d4-adb1-4938-8186-d97d9012c2be",
+      "classification_key": "674b1d8c36ed29aa4ad6295f087ec94657b778934790cff6ce859bf17a2f3c1d",
+      "original": {
+        "episode_id": "kyiv-202609160653000300-202609160736000300",
+        "start_at": "2026-09-16T06:53:00+03:00",
+        "end_at": "2026-09-16T07:36:00+03:00",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 231
+        }
+      },
+      "a_candidate": {
+        "episode_uid": "547148ff-565e-4cf9-890a-2d39a03a16d1",
+        "legacy_episode_id": "319aeba659bd03786f015f95",
+        "start_at": "2026-09-16T02:05:23.000Z",
+        "end_at": "2026-09-16T02:09:13.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "b_candidate": {
+        "episode_uid": "a89b6cc3-fac9-44c5-8454-e35ed9e6d6c1",
+        "legacy_episode_id": "002475291323c9bdd0123ad2",
+        "start_at": "2026-09-16T06:10:36.000Z",
+        "end_at": "2026-09-16T06:31:25.000Z",
+        "source": "NEON_READ_REPLICA_ONLY",
+        "independent_source_confirmed": false
+      },
+      "neon_original": {
+        "exact_match_status": "NO_EXACT_ID_OR_INTERVAL_PARENT",
+        "exact_parent_uid": null,
+        "historical_physical_uid": null,
+        "physical_uid_supersession_id": null
+      },
+      "json": {
+        "status": "NOT_INTERVAL_RECONCILED",
+        "source_witness": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 231
+        },
+        "production_ref": "site-prod@e3fc98eeaa7bce5f7a5fe941c886624a0af24df4"
+      },
+      "source": {
+        "complete_pinned_independent_dataset": false,
+        "restored_between_boundaries": null
+      },
+      "impact": {
+        "classification_uid": "583be6d4-adb1-4938-8186-d97d9012c2be",
+        "linked_attack_event_sources": "NOT_QUERIED",
+        "linked_attack_events": "NOT_QUERIED",
+        "candidate_parent_ids": [
+          "547148ff-565e-4cf9-890a-2d39a03a16d1",
+          "a89b6cc3-fac9-44c5-8454-e35ed9e6d6c1"
+        ]
+      },
+      "proposed_change": "NONE_UNTIL_VERIFIED_BOUNDARIES_AND_SOURCE_COMPLETE",
+      "status": "BOUNDARY_UNVERIFIED",
+      "blocker": "A/B are adjacent closed AIR parents observed in current Neon only, not independently verified reliable anchors; complete independent primary source and interval reconstruction not established",
+      "ready_for_owner_review": false
+    }
+  ]
+}
