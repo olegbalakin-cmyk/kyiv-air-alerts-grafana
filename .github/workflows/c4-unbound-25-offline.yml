@@ -28,7 +28,9 @@ jobs:
             e460bc30524deb8abc37923276d78f6dab1450a4 \
             0800a7382bcea65e6c6ca9683d6eb5a0d5895d87
       - name: Verify 25 exact immutable identities, source Git objects, deterministic keys and negative controls
+        shell: bash
         run: |
+          set -euo pipefail
           python3 research/c4_unbound_25_parent_adjudication_2026_10_27/verify_independent.py --negative-tests | tee c4-25-offline-receipt.json
       - uses: actions/upload-artifact@v4
         if: success()
