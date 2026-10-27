@@ -46,8 +46,8 @@ def stage(root):
 def bridge():
     now = "2026-10-27T12:00:00+00:00"
     regions = {}
-    for i in range(21):
-        regions[f"city-{i:02}"] = {
+    for city in ["kharkiv", "zaporizhzhia"] + [f"city-{i:02}" for i in range(19)]:
+        regions[city] = {
             "continuous": True, "last_error": None,
             "history_completed_air_count": 1,
             "oldest_history_start": "2026-10-01T00:00:00+00:00",
