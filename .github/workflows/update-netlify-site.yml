@@ -215,50 +215,17 @@ jobs:
             --baseline "${RUNNER_TEMP}/ukrainealarm_bridge_before.json" \
             --diagnostic "${RUNNER_TEMP}/ukrainealarm_bridge_fetch.json"
 
-      - name: Persist verified UkraineAlarm bridge checkpoint
-        working-directory: .
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin site-prod
-          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > "${RUNNER_TEMP}/ukrainealarm_bridge_remote.json"
-
-          python kyiv-air-alerts-grafana/scripts/validate_bridge_checkpoint.py validate \
-            --candidate kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
-            --summary kyiv-air-alerts-grafana/data/dashboard_data.json \
-            --baseline "${RUNNER_TEMP}/ukrainealarm_bridge_before.json" \
-            --remote "${RUNNER_TEMP}/ukrainealarm_bridge_remote.json" \
-            --diagnostic "${RUNNER_TEMP}/ukrainealarm_bridge_fetch.json"
-
-          git add kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json
-          if git diff --cached --quiet; then
-            echo "Verified bridge checkpoint unchanged; no checkpoint commit required"
-          else
-            git commit -m "Persist verified UkraineAlarm bridge checkpoint"
-            if ! git push origin HEAD:site-prod; then
-              echo "Checkpoint push rejected; refusing to overwrite a newer site-prod checkpoint"
-              exit 1
-            fi
-          fi
-
-      - name: Upload UkraineAlarm bridge fetch diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: ukrainealarm-bridge-fetch-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/ukrainealarm_bridge_fetch.json
-          retention-days: 7
-
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
 
       - name: Run multicity canonical DB shadow
+        id: canonical_db
+        continue-on-error: true
         env:
           MULTICITY_CANONICAL_DB_SHADOW: "1"
           MULTICITY_CANONICAL_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
           MULTICITY_CANONICAL_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
-          MULTICITY_CANONICAL_DB_SHADOW_FAILURE_POLICY: fail_open
+          MULTICITY_CANONICAL_DB_SHADOW_FAILURE_POLICY: fail_closed
           MULTICITY_CANONICAL_DB_SHADOW_DIAGNOSTIC: ${{ runner.temp }}/multicity_canonical_db_shadow.json
           MULTICITY_CANONICAL_DASHBOARD_PATH: data/dashboard_data.json
           MULTICITY_CANONICAL_INPUT_REPOSITORY: ${{ github.repository }}
@@ -297,6 +264,102 @@ jobs:
           )}
           print("Multicity canonical DB shadow:", json.dumps(safe, sort_keys=True))
           PY
+
+      - name: Classify canonical persistence before controlled site publication
+        id: canonical_publication
+        shell: bash
+        env:
+          C2_WRITER_OUTCOME: ${{ steps.canonical_db.outcome }}
+          C2_DIAGNOSTIC: ${{ runner.temp }}/multicity_canonical_db_shadow.json
+          C2_STATUS_REPORT: ${{ runner.temp }}/c2_publication_status.json
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from scripts.verify_multicity_canonical_receipt import verify_receipt
+
+          path = Path(os.environ["C2_DIAGNOSTIC"])
+          outcome = os.environ.get("C2_WRITER_OUTCOME")
+          try:
+              diagnostic = json.loads(path.read_text(encoding="utf-8"))
+              if not isinstance(diagnostic, dict):
+                  raise ValueError("canonical diagnostic must be an object")
+              if diagnostic.get("workflow_sha") != os.environ.get("GITHUB_SHA"):
+                  raise ValueError("canonical diagnostic workflow SHA mismatch")
+              if diagnostic.get("input_sha") != os.environ.get("PHASE1_INPUT_SHA"):
+                  raise ValueError("canonical diagnostic input SHA mismatch")
+              if outcome == "success":
+                  verify_receipt(path)
+                  status, error_type = "NEON_SUCCEEDED", None
+              elif outcome == "failure":
+                  # A DB connection/availability failure is not a successful
+                  # canonical write. Preserve the strict DB receipt contract.
+                  if diagnostic.get("status") != "failed" or diagnostic.get("failure_policy") != "fail_closed":
+                      raise ValueError("failure outcome has no explicit failed diagnostic")
+                  if diagnostic.get("production_output_mutation") is not False:
+                      raise ValueError("failed canonical writer modified production output")
+                  if diagnostic.get("run_id") is not None or diagnostic.get("persistence_status") is not None:
+                      raise ValueError("failed canonical writer has a claimed success receipt")
+                  if any(diagnostic.get(key) != 0 for key in (
+                      "episodes_inserted", "episodes_existing", "episodes_updated", "writes"
+                  )):
+                      raise ValueError("failed canonical writer has nonzero success counters")
+                  error_type = diagnostic.get("error_type")
+                  if error_type not in {
+                      "OperationalError", "InterfaceError", "ConnectionFailure",
+                      "ConnectionDoesNotExist", "AdminShutdown", "TooManyConnections",
+                      "CannotConnectNow", "QueryCanceled"
+                  }:
+                      raise ValueError("non-operational canonical failure requires hard stop")
+                  status = "NEON_FAILED"
+              else:
+                  raise ValueError("canonical writer step outcome missing or unexpected")
+          except (OSError, ValueError, TypeError, KeyError) as exc:
+              # Never emit a canonical SUCCESS or allow site publication if
+              # the receipt / failure classification is missing or ambiguous.
+              print(f"::error title=C2 publication blocked::Canonical result cannot be trusted ({type(exc).__name__})")
+              raise SystemExit(1)
+
+          report = {
+              "canonical_persistence_status": status,
+              "canonical_receipt_validated": status == "NEON_SUCCEEDED",
+              "canonical_db_commit": "CONFIRMED" if status == "NEON_SUCCEEDED" else "UNCONFIRMED",
+              "site_publication_allowed_after_independent_qa": True,
+              "error_type": error_type,
+              "workflow_sha": diagnostic["workflow_sha"],
+              "input_sha": diagnostic["input_sha"],
+          }
+          Path(os.environ["C2_STATUS_REPORT"]).write_text(
+              json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+          )
+          output = os.environ.get("GITHUB_OUTPUT")
+          if output:
+              with open(output, "a", encoding="utf-8") as f:
+                  f.write(f"canonical_persistence_status={status}\n")
+          if status == "NEON_FAILED":
+              print("::warning title=Neon FAILED::Canonical DB commit UNCONFIRMED; site publication proceeds only if independent data QA and Git publication pass")
+          else:
+              print("Canonical persistence receipt validated: NEON_SUCCEEDED")
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              with open(summary, "a", encoding="utf-8") as f:
+                  f.write(
+                      f"### C2 canonical persistence: {status}\n"
+                      f"Canonical commit: {report['canonical_db_commit']}. "
+                      "Site publication requires separate 23-city QA and Git verification.\n"
+                  )
+          PY
+
+      - name: Upload C2 canonical publication status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-publication-status-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/c2_publication_status.json
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Build rolling windows, partial periods, time-of-day profile, and shared table ranges
         run: python scripts/apply_site_rolling_7d.py
@@ -403,27 +466,91 @@ jobs:
       - name: Build Kyiv alert-cause JSON without Netlify
         run: python scripts/build_kyiv_threat_mix.py --output data/kyiv_threat_mix.json
 
-      - name: Commit updated production data
+      - name: Commit updated production data and verified UkraineAlarm bridge checkpoint
         working-directory: .
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          verify_remote_bridge() {
+            git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > "${RUNNER_TEMP}/ukrainealarm_bridge_remote.json"
+            python kyiv-air-alerts-grafana/scripts/validate_bridge_checkpoint.py validate \
+              --candidate kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
+              --summary kyiv-air-alerts-grafana/data/dashboard_data.json \
+              --baseline "${RUNNER_TEMP}/ukrainealarm_bridge_before.json" \
+              --remote "${RUNNER_TEMP}/ukrainealarm_bridge_remote.json" \
+              --diagnostic "${RUNNER_TEMP}/ukrainealarm_bridge_fetch.json"
+          }
+
+          verify_expected_output() {
+            python kyiv-air-alerts-grafana/scripts/verify_c2_publication_snapshot.py verify \
+              --root kyiv-air-alerts-grafana \
+              --manifest "${RUNNER_TEMP}/c2-publication-snapshot.json"
+          }
+
+          # Compare the staged, QA-verified bytes with the ACTUAL remote.
+          # This also handles a lost Git push acknowledgment and no-op reruns.
+          remote_matches() {
+            git fetch origin site-prod || return 1
+            verify_expected_output || return 1
+            git diff --cached --quiet origin/site-prod -- \
+              kyiv-air-alerts-grafana/data \
+              kyiv-air-alerts-grafana/grafana/dashboard.json || return 1
+            remote_sha="$(git ls-remote origin refs/heads/site-prod | awk 'NR==1 {print $1}')" || return 1
+            [ -n "$remote_sha" ] && [ "$remote_sha" = "$(git rev-parse origin/site-prod)" ]
+          }
+
+          # Only capture after DB commit receipt and 23-city QA.
+          python kyiv-air-alerts-grafana/scripts/verify_c2_publication_snapshot.py capture \
+            --root kyiv-air-alerts-grafana \
+            --manifest "${RUNNER_TEMP}/c2-publication-snapshot.json"
+          git fetch origin site-prod
+          verify_remote_bridge
           git add kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/grafana/dashboard.json
+
           if git diff --cached --quiet; then
-            echo "No data changes"
+            if remote_matches; then
+              echo "No local changes; exact remote publication verified"
+            else
+              echo "::error::No local changes but remote output is not the QA-verified canonical dataset"
+              exit 1
+            fi
           else
-            git commit -m "Update production air-alert and casualty data"
+            git commit -m "Publish verified canonical data and UkraineAlarm checkpoint"
             for attempt in 1 2 3; do
-              git fetch origin site-prod
-              if git rebase origin/site-prod && git push origin HEAD:site-prod; then
-                break
+              if remote_matches; then
+                echo "Remote already has verified output (retry/lost push ACK)"
+                exit 0
+              fi
+              if git fetch origin site-prod && git rebase origin/site-prod; then
+                verify_remote_bridge
+                verify_expected_output
+                if git push origin HEAD:site-prod; then
+                  if remote_matches; then
+                    echo "Verified output published and confirmed on remote"
+                    exit 0
+                  fi
+                  echo "::error::Push returned success but remote output could not be confirmed"
+                  exit 1
+                fi
               fi
               git rebase --abort || true
               if [ "$attempt" -eq 3 ]; then
-                echo "Push failed after 3 attempts"
+                echo "::error::Git publication not confirmed after 3 attempts"
                 exit 1
               fi
-              echo "Push attempt ${attempt} failed; retrying..."
+              echo "Git publication retry ${attempt}"
               sleep $((attempt * 2))
             done
           fi
+
+      - name: Upload UkraineAlarm bridge fetch diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ukrainealarm-bridge-fetch-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ukrainealarm_bridge_fetch.json
+          if-no-files-found: warn
+          retention-days: 7
