@@ -1,0 +1,43 @@
+name: C4 25 historical source verification (research only)
+on:
+  push:
+    branches:
+      - research-c4-25-individual-boundaries-2026-10-27-gpt6
+    paths:
+      - "research/c4_25_individual_boundaries_2026_10_27/source_verifier.py"
+      - ".github/workflows/c4-25-source-verify.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-public-source-intervals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned production JSON (read-only)
+        uses: actions/checkout@v4
+        with:
+          ref: 634fc6beffbcdf76026d64b9866314fdb53ab0e4
+          path: site-prod-snapshot
+          persist-credentials: false
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run read-only pinned public source checks
+        run: |
+          python research/c4_25_individual_boundaries_2026_10_27/source_verifier.py
+      - name: Archive compact evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c4-25-public-source-intervals
+          path: /tmp/c4_source_result.json
+          if-no-files-found: ignore
+          retention-days: 30
