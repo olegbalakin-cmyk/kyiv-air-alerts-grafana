@@ -165,6 +165,7 @@ class OwnerRelease(unittest.TestCase):
             # Mutate QA-verified output after the DB commit so publication has a real delta.
             (site/"data/dashboard_qa.json").write_text('{"ok":true,"revision":1}')
             def publish_run():
+                (base/"c2-publication-snapshot.json").unlink(missing_ok=True)
                 return cmd("bash","-euo","pipefail","-c",publish,cwd=a,env=env,ok=False)
             first = publish_run()
             self.assertEqual(first.returncode,0,(first.stdout,first.stderr))
@@ -174,7 +175,8 @@ class OwnerRelease(unittest.TestCase):
             # Post-commit lost ACK: same DB and no local changes must verify remote.
             write_and_verify()
             self.assertEqual(json.loads((base/"receipt.json").read_text())["persistence_status"],"already_persisted")
-            self.assertEqual(publish_run().returncode,0)
+            retry = publish_run()
+            self.assertEqual(retry.returncode,0,(retry.stdout,retry.stderr))
             # Simulate a remote divergence with no local changes: fail explicitly.
             b = base/"other"
             cmd("git","clone","-b","site-prod",str(remote),str(b))
