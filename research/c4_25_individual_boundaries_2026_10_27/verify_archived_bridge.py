@@ -15,7 +15,7 @@ payload_path=root/"alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64"
 meta_bytes=meta_path.read_bytes()
 payload=payload_path.read_bytes()
 sha=lambda x: hashlib.sha256(x).hexdigest()
-git_blob=lambda x: hashlib.sha1(("blob "+str(len(x))+"\\0").encode()+x).hexdigest()
+git_blob=lambda x: hashlib.sha1(("blob "+str(len(x))).encode()+b"\x00"+x).hexdigest()
 assert git_blob(payload)=="1ece234379381b4d7c0d10f851a86aa61aa958f6", "unexpected pinned bridge blob"
 assert meta_path.is_file()
 meta=json.loads(meta_bytes)
