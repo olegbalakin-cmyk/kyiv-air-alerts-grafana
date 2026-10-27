@@ -1,7 +1,7 @@
 name: C2 full migration PG18 + process concurrency + isolated Git race
 on:
   push:
-    branches: [research-c2-pg18-concurrency-git-race-2026-10-27-gpt6]
+    branches: [research-c2-pg18-concurrency-git-race-2026-10-27-gpt6, research-c2-final-release-blockers-2026-10-27-gpt6]
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,4 +35,6 @@ jobs:
       - name: Run new exact-DDL concurrency and Git race tests
         env:
           C2_TEST_DATABASE_URL: postgresql://c2_test:c2_test@127.0.0.1:5432/c2_test
-        run: python -m unittest discover -s kyiv-air-alerts-grafana/tests -p test_multicity_c2_release_stage.py -v
+        run: |
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p test_multicity_c2_release_stage.py -v
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p test_multicity_c2_final_blockers.py -v
