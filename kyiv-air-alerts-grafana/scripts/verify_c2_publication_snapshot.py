@@ -21,11 +21,18 @@ FILES = (
 def digest(root):
     base = Path(root).resolve()
     out = {}
-    for name in FILES:
-        f = (base / name).resolve()
-        if not f.is_relative_to(base) or not f.is_file():
-            raise ValueError("required verified output file missing")
+    files = [base / name for name in FILES]
+    files.extend((base / "data").rglob("*"))
+    for f in files:
+        if not f.is_file():
+            continue
+        f = f.resolve()
+        if not f.is_relative_to(base):
+            raise ValueError("output outside root")
+        name = f.relative_to(base).as_posix()
         out[name] = hashlib.sha256(f.read_bytes()).hexdigest()
+    if not set(FILES).issubset(out):
+        raise ValueError("required verified output file missing")
     return out
 
 
