@@ -118,7 +118,7 @@ class OwnerRelease(unittest.TestCase):
         steps = workflow["jobs"]["update-site"]["steps"]
         names = [x["name"] for x in steps if "name" in x]
         seq = ["Update base data", "Run multicity canonical DB shadow",
-               "Gate publication on committed canonical persistence receipt",
+               "Classify canonical persistence before controlled site publication",
                "QA 23-city dataset", "Verify production dataset",
                "Commit updated production data and verified UkraineAlarm bridge checkpoint"]
         self.assertEqual(sorted(names.index(x) for x in seq), [names.index(x) for x in seq])
