@@ -196,5 +196,53 @@ class OwnerRelease(unittest.TestCase):
             self.assertNotEqual(rejected.returncode,0)
             self.assertIn("not confirmed",rejected.stdout+rejected.stderr)
 
+    def test_controlled_neon_failure_and_receipt_integrity(self):
+        workflow = yaml.safe_load(FLOW.read_text())
+        steps = workflow["jobs"]["update-site"]["steps"]
+        writer = next(s for s in steps if s.get("id") == "canonical_db")
+        gate = next(s for s in steps if s.get("id") == "canonical_publication")
+        self.assertIs(writer["continue-on-error"], True)
+        self.assertEqual(writer["env"]["MULTICITY_CANONICAL_DB_SHADOW_FAILURE_POLICY"], "fail_closed")
+        self.assertIn("canonical_persistence_status", gate["run"])
+        with tempfile.TemporaryDirectory(prefix="c2-policy-") as d:
+            root = Path(d)
+            diag = root / "diagnostic.json"
+            out = root / "publication.json"
+            env = dict(os.environ)
+            env.update({"C2_DIAGNOSTIC":str(diag), "C2_STATUS_REPORT":str(out),
+                        "GITHUB_SHA":"b"*40, "PHASE1_INPUT_SHA":"a"*40})
+            base = {"status":"failed","failure_policy":"fail_closed",
+                    "production_output_mutation":False, "workflow_sha":"b"*40,
+                    "input_sha":"a"*40, "run_id":None, "episodes_inserted":0,
+                    "episodes_existing":0,"episodes_updated":0,"writes":0,
+                    "error_type":"OperationalError"}
+            def policy(record, outcome):
+                diag.write_text(json.dumps(record))
+                out.unlink(missing_ok=True)
+                return cmd("bash","-euo","pipefail","-c",gate["run"],cwd=ROOT,env={
+                    **env,"C2_WRITER_OUTCOME":outcome},ok=False)
+            allowed=policy(base,"failure")
+            self.assertEqual(allowed.returncode,0,(allowed.stdout,allowed.stderr))
+            self.assertEqual(json.loads(out.read_text())["canonical_persistence_status"],"NEON_FAILED")
+            self.assertFalse(json.loads(out.read_text())["canonical_receipt_validated"])
+            for case in (
+                {**base, "error_type":"MulticityPersistenceConflict"},
+                {**base, "error_type":"RuntimeError"},
+                {**base, "run_id":"false-success"},
+                {**base, "episodes_inserted":1},
+                {**base, "workflow_sha":"0"*40},
+                {**base, "status":"succeeded"},
+            ):
+                blocked=policy(case,"failure")
+                self.assertNotEqual(blocked.returncode,0,(case,blocked.stdout,blocked.stderr))
+                self.assertFalse(out.exists())
+            blocked=policy(base,"success")
+            self.assertNotEqual(blocked.returncode,0)
+            diag.unlink()
+            missing=cmd("bash","-euo","pipefail","-c",gate["run"],cwd=ROOT,env={
+                **env,"C2_WRITER_OUTCOME":"failure"},ok=False)
+            self.assertNotEqual(missing.returncode,0)
+            self.assertFalse(out.exists())
+
 if __name__ == "__main__":
     unittest.main()
