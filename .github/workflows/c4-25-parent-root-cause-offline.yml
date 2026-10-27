@@ -1,0 +1,28 @@
+name: C4 25 parent materialization root cause (immutable Git offline)
+on:
+  push:
+    branches:
+      - research-c4-25-parent-materialization-root-cause-audit-2026-10-27-gpt6
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact research source and historical Git objects
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify pinned writer records and reject negative mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/c4_25_parent_materialization_root_cause_2026_10_27/verify_independent.py | tee c4-parent-root-cause-receipt.json
+      - name: Upload offline receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: c4-25-parent-root-cause-offline-receipt
+          path: c4-parent-root-cause-receipt.json
+          if-no-files-found: error
