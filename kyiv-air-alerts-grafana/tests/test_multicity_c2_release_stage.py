@@ -149,6 +149,7 @@ class ReleaseStage(unittest.TestCase):
             run("git", "fetch", "origin", "site-prod", cwd=second)
             self.assertEqual(run("git", "show", "origin/site-prod:data/checkpoint", cwd=second).stdout, "1\n")
             # A competing remote checkpoint advance must not be accepted silently.
+            run("git", "reset", "--hard", "origin/site-prod", cwd=second)
             (second/"data/checkpoint").write_text("2\n")
             run("git", "add", ".", cwd=second)
             run("git", "commit", "-m", "remote-checkpoint-drift", cwd=second)
