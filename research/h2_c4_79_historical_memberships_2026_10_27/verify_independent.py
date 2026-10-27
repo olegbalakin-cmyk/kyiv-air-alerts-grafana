@@ -21,7 +21,7 @@ ACCEPTED_PROOF_PATH = "research/neon_h2_19542_field_authority_containment_revali
 ACCEPTED_PROOF_BLOB = "2abd72d10bdac896d3c4ed10c582c38aafb162af"
 ACCEPTED_PROOF_SHA256 = "c3827de8c0574c0305e5da1efe619da678faaa2e8a201150ac8fe5fa7f57bd8c"
 UTC = dt.timezone.utc
-ISO_AWARE = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:Z|[+-]\d\d:\d\d)")
+ISO_AWARE = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)")
 EXPECTED_REASONS = {
     "UNIQUE_EXACT_ORIGINAL_ALERT_START",
     "UNIQUE_CONTAINMENT_ALL_EXPLICIT_EVENT_TIMES",
