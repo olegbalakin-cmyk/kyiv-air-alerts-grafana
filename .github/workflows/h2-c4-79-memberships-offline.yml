@@ -1,0 +1,32 @@
+name: H2 C4 79 Historical Git-only Membership Verification
+on:
+  push:
+    branches:
+      - research-h2-c4-79-historical-memberships-2026-10-27-gpt6
+    paths:
+      - .github/workflows/h2-c4-79-memberships-offline.yml
+      - research/h2_c4_79_historical_memberships_2026_10_27/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-offline-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout immutable original Git history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify original 79 membership evidence and negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/h2_c4_79_historical_memberships_2026_10_27/verify_independent.py --out /tmp/h2-c4-79-receipt.json
+      - name: Upload bounded research evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-c4-79-independent-offline-receipt
+          path: /tmp/h2-c4-79-receipt.json
+          retention-days: 30
