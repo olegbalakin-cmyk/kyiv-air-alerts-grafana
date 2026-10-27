@@ -76,12 +76,12 @@ class FinalBlockers(unittest.TestCase):
         self.assertEqual(self.count(),23)
     def test_03_mixed_writer_conflicting_identity_fails_closed(self):
         rows=corpus()
-        alien={**rows[0],"episode_state":"open","end_at":None,"legacy_episode_id":None}
+        from datetime import timedelta
+        alien={**rows[0],"end_at":rows[0]["end_at"]+timedelta(minutes=1)}
         self.phase1_write([alien])
-        # This checks a different row/interval: a conflict is NOT magically inferred.
-        # Exact canonical closed rows may legitimately coexist with an open episode.
-        self.assertEqual(self.c2_write(rows)["episodes_inserted"],23)
-        self.assertEqual(self.count(),24)
+        with self.assertRaises(MulticityPersistenceConflict):
+            self.c2_write(rows)
+        self.assertEqual(self.count(),1)
     def test_04_publish_gate_rejected_push_is_not_success_and_safe_retry(self):
         with tempfile.TemporaryDirectory() as tmp:
             base=Path(tmp)
