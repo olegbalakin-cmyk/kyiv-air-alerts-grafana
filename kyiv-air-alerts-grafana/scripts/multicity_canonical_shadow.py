@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Fail-open scheduled production shadow for 23-city canonical AIR parents."""
+"""Fail-closed research candidate for 23-city canonical AIR-parent persistence."""
 from __future__ import annotations
 
 import hashlib
 import json
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -111,7 +112,7 @@ def _provenance(*, city_count: int, episode_count: int, corpus_sha256: str) -> d
 
 
 def execute() -> dict[str, Any]:
-    failure_policy = os.environ.get(FAILURE_ENV, "fail_open").strip() or "fail_open"
+    failure_policy = os.environ.get(FAILURE_ENV, "fail_closed").strip() or "fail_closed"
     base = {
         "db_branch": os.environ.get(BRANCH_ENV),
         "workflow_sha": os.environ.get("GITHUB_SHA"),
@@ -136,6 +137,8 @@ def execute() -> dict[str, Any]:
         return diagnostic
 
     try:
+        if failure_policy != "fail_closed":
+            raise RuntimeError("canonical persistence requires fail_closed failure policy")
         episodes, keys, corpus_sha = _load_corpus()
         db_url = os.environ.get(DB_ENV, "").strip()
         db_branch = os.environ.get(BRANCH_ENV, "").strip()
@@ -168,6 +171,26 @@ def execute() -> dict[str, Any]:
         finally:
             connection.close()
 
+        # The writer must finish its commit (or prove an exact existing corpus)
+        # before an application-level success receipt can be emitted.
+        if not isinstance(result, dict) or result.get("status") not in {
+            "persisted", "already_persisted"
+        }:
+            raise RuntimeError("canonical persistence did not acknowledge success")
+        inserted = result.get("episodes_inserted")
+        existing = result.get("episodes_existing")
+        updated = result.get("episodes_updated")
+        writes = result.get("writes")
+        if any(type(value) is not int or value < 0 for value in (inserted, existing, updated, writes)):
+            raise RuntimeError("invalid canonical persistence counters")
+        if inserted + existing != len(episodes) or updated != 0:
+            raise RuntimeError("canonical persistence count mismatch")
+        if result["status"] == "persisted":
+            if not inserted or not result.get("run_id") or writes < inserted + 2:
+                raise RuntimeError("canonical commit receipt is incomplete")
+        elif inserted or existing != len(episodes) or writes or result.get("run_id") is not None:
+            raise RuntimeError("invalid exact-retry persistence receipt")
+
         diagnostic = {
             **base,
             "status": "succeeded",
@@ -199,13 +222,16 @@ def execute() -> dict[str, Any]:
             "sanitized_error_message": _sanitize(exc),
         }
         _write_diag(diagnostic)
-        if failure_policy != "fail_open":
-            raise
-        return diagnostic
+        raise
 
 
 def main() -> int:
-    result = execute()
+    try:
+        result = execute()
+    except Exception as exc:
+        # Avoid leaking raw database connection strings in a runner traceback.
+        print(json.dumps({"status": "failed", "error_type": type(exc).__name__}), file=sys.stderr)
+        return 1
     print(json.dumps({
         key: result.get(key)
         for key in (
@@ -216,7 +242,9 @@ def main() -> int:
         )
         if key in result
     }, sort_keys=True))
-    return 0
+    # Disabled library mode remains available; the workflow's independent
+    # receipt gate refuses to publish when the writer was disabled.
+    return 0 if result.get("status") in {"succeeded", "disabled"} else 1
 
 
 if __name__ == "__main__":
