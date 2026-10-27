@@ -160,5 +160,53 @@ class ReleaseStage(unittest.TestCase):
             print("GIT_RACE: rejected_push=YES; rebase_retry=PASS; remote_drift_detected=YES")
 
 
+    def test_07_publication_snapshot_detects_post_rebase_mutation(self):
+        from verify_c2_publication_snapshot import FILES, digest
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            for name in FILES:
+                p = base / name
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("verified dataset", encoding="utf-8")
+            baseline = digest(base)
+            self.assertEqual(digest(base), baseline)
+            (base / "data/dashboard_data.json").write_text("changed after rebase", encoding="utf-8")
+            self.assertNotEqual(digest(base), baseline)
+
+    def test_08_durable_pg_readback_detects_missing_canonical_parent(self):
+        from db_phase1_core import canonical_json
+        from verify_c2_release_dataset import verify
+        import hashlib
+        rows = corpus(0, 23)
+        self.assertEqual(write_process(0, 23)["status"], "persisted")
+        keys = [r["city_key"] for r in rows]
+        # Canonical ordering is exact; one source episode per city.
+        dashboard = {"multicity_meta": {"production_city_keys": keys}}
+        serial = {
+            "canonicalization_version": CANONICALIZATION_VERSION,
+            "production_city_keys": keys, "episodes": rows,
+        }
+        digest_value = hashlib.sha256(canonical_json(serial).encode()).hexdigest()
+        payload = {
+            "canonicalization_version": CANONICALIZATION_VERSION,
+            "cities": {r["city_key"]: {"episode_count": 1, "episodes": [r]} for r in rows},
+        }
+        receipt = {"status": "succeeded", "canonical_episode_count": 23,
+                   "corpus_sha256": digest_value}
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            for name, value in (("payload", payload), ("dashboard", dashboard),
+                                ("receipt", receipt)):
+                (base / name).write_text(json.dumps(value, default=str), encoding="utf-8")
+            with psycopg.connect(DSN) as c:
+                self.assertEqual(verify(c, base/"payload", base/"dashboard",
+                                        base/"receipt")["canonical_rows"], 23)
+                c.execute("DELETE FROM alert_episodes WHERE legacy_episode_id=%s",
+                          (rows[0]["legacy_episode_id"],))
+                c.commit()
+                with self.assertRaises(ValueError):
+                    verify(c, base/"payload", base/"dashboard", base/"receipt")
+
+
 if __name__ == "__main__":
     unittest.main()
