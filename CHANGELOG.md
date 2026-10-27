@@ -2,6 +2,13 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-27
+
+### C2 fail-closed candidate accepted as bounded offline PG18.6 evidence — production C2 remains FAIL
+
+- Independent coordinator verified exact research HEAD [`924c3c311c22781c415d13edd06b131e1842f1db`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/924c3c311c22781c415d13edd06b131e1842f1db), its three-commit/seven-path delta against `site-prod@056668981b59194d95386eac4c236f569ffffe17`, candidate wrapper, receipt verifier, YAML release blueprint, tests, independent PG18.6 job log and evidence JSON blob `99eea888ed7ead2a9f4ea9d52fa2fd9607b2cdbb`. Actions [`40479977922`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40479977922) SUCCESS at `0e5ab4402f56a42be98432652916e7b7a9adf12e`; final [`40480138800`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40480138800) SUCCESS at exact `924c3c31`, **10/10** tests passed on isolated PostgreSQL 18.6. Validated rollback, fail-closed CLI, post-COMMIT lost ACK/exact retry, false receipt rejection and static no-early-publication workflow ordering. No Neon connection or production execution in these runs; candidate workflow remains a research-only blueprint.
+- **Accepted scope:** `C2_FAIL_CLOSED_OFFLINE_CANDIDATE=PASS_BOUNDED_ACCEPTED`, `C2_CUTOVER_GATE=FAIL`. Production `main` still has `fail_open` and an early `site-prod` bridge push, unchanged by this checkpoint. Distinct Phase-1 `fail_open` unaffected. Real Neon schema/DDL and concurrent commits, dynamic Git rebase/push and publication/QA after rebase, durable Neon readback and recovery are not proven. Candidate research branch diverges substantially from `main`; do **not** merge wholesale. Next separately authorized task: independent production-equivalent staging with concurrency and failure injection, then selective coordinated `main` workflow / `site-prod` script+verifier release plan, queued behind scheduled data collection and verified post-release. Documentation only; no production/site-prod/Neon/H1/H2/C3/WIP/casualty mutation.
+
 ## 2026-10-26
 
 ### H2 G03 narrow creator-ADMIN overlay — independent offline CI PASS, original Candidate A unchanged
