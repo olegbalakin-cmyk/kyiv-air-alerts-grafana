@@ -1,1 +1,737 @@
-# RECONSTRUCTED PLACEHOLDER (not executable; stage-1 research artifact).\n# Exact code diff will replace this text after selective integration and independent Git readback.\n
+# SELECTIVE RESEARCH-ONLY DIFF (WIP base 08c1a0a9cb3d27a73cfd85b48b31a29817c1d20d -> ff93eea396868b62c3cab2c332b551eb16ff5fd7)
+# This patch is an exact stage-code candidate, NOT owner-approved for production promotion.
+diff --git a/kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py b/kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
+--- a/kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
++++ b/kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
+@@ -11,6 +11,7 @@
+ from urllib.parse import urlparse
+ 
+ import psycopg
++from psycopg.pq import TransactionStatus
+ from psycopg.types.json import Jsonb
+ 
+ CLASSIFICATION_KEY_VERSION = "attack-event-classification-key-v2"
+@@ -976,21 +977,31 @@ def _ensure_sources(
+     return inserted_count
+ 
+ 
++_UNGUARDED = object()
++
++
+ def persist_episode_classification(
+     conn,
+     record: dict[str, Any],
+     *,
+     fault_after: str | None = None,
++    expected_tip: str | None | object = _UNGUARDED,
+ ) -> dict[str, Any]:
+     lock_key = (
+         f"{record['city_key']}|{record['historical_episode_id']}|"
+         f"{record['alert_start_utc_microseconds']}|{record['alert_end_utc_microseconds']}"
+     )
++    if conn.info.transaction_status != TransactionStatus.IDLE:
++        raise PersistenceContractError("CLASSIFICATION_REQUIRES_IDLE_TOP_LEVEL_TRANSACTION")
+     with conn.transaction():
+         cur = conn.cursor()
+         cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (lock_key,))
+         parent_uid = _parent_binding(cur, record)
+         current = _current_tip(cur, record)
++        if expected_tip is not _UNGUARDED:
++            observed_tip = current["classification_uid"] if current else None
++            if observed_tip != expected_tip:
++                raise PersistenceContractError("STALE_EXPECTED_CURRENT_CLASSIFICATION_TIP")
+         existing = _existing_classification(cur, record["classification_key"])
+ 
+         if existing is not None:
+@@ -1068,6 +1079,120 @@ def persist_episode_classification(
+         }
+ 
+ 
++
++def independent_post_commit_readback(conn, record: dict[str, Any], persisted: dict[str, Any], expected_tip: str | None) -> dict[str, Any]:
++    """New independent transaction, never an uncommitted insert response."""
++    with conn.cursor() as cur:
++        parent = _parent_binding(cur, record)
++        tip = _current_tip(cur, record)
++        if tip is None or tip["classification_uid"] != persisted["classification_uid"]:
++            raise PersistenceContractError("POST_COMMIT_CURRENT_TIP_UID_MISMATCH")
++        if tip["classification_key"] != record["classification_key"] or tip["verdict"] != record["verdict"]:
++            raise PersistenceContractError("POST_COMMIT_TIP_KEY_OR_VERDICT_MISMATCH")
++        cur.execute("""
++            SELECT alert_episode_uid, supersedes_classification_uid
++            FROM public.attack_event_classifications WHERE classification_uid=%s
++        """, (persisted["classification_uid"],))
++        row = cur.fetchone()
++        if row is None or str(row[0]) != parent:
++            raise PersistenceContractError("POST_COMMIT_PARENT_BINDING_MISMATCH")
++        observed_previous = str(row[1]) if row[1] is not None else None
++        if persisted["classification_inserted"] and observed_previous != expected_tip:
++            raise PersistenceContractError("POST_COMMIT_REVISION_RELATIONSHIP_MISMATCH")
++        for source in record["source_rows"]:
++            cur.execute("""
++                SELECT classification_uid, observation_id, content_sha256
++                FROM public.attack_event_sources WHERE source_link_key=%s
++            """, (source["source_link_key"],))
++            link = cur.fetchone()
++            if link is None or tuple(str(x) for x in link) != (
++                persisted["classification_uid"], source["observation_id"], source["content_sha256"]
++            ):
++                raise PersistenceContractError("POST_COMMIT_SOURCE_LINK_MISMATCH")
++        cur.execute("""
++            SELECT attack_event_key, event_status, current_classification_uid, alert_episode_uid
++            FROM public.attack_events WHERE city_key=%s AND historical_episode_id=%s
++        """, (record["city_key"], record["historical_episode_id"]))
++        event = cur.fetchone()
++        if record["is_event"]:
++            if event is None or str(event[0]) != record["attack_event_key"] or str(event[1]) != "ACTIVE" or str(event[2]) != persisted["classification_uid"] or str(event[3]) != parent:
++                raise PersistenceContractError("POST_COMMIT_POSITIVE_EVENT_MISMATCH")
++        elif event is not None:
++            if str(event[1]) != "WITHDRAWN" or str(event[2]) != persisted["classification_uid"]:
++                raise PersistenceContractError("POST_COMMIT_WITHDRAWN_EVENT_MISMATCH")
++    conn.rollback()
++    return {"verified": True, "classification_uid": persisted["classification_uid"],
++            "classification_key": record["classification_key"], "verdict": record["verdict"],
++            "source_count": len(record["source_rows"]), "parent_uid": parent}
++
++
++def persist_canonical_work(
++    *, state: dict[str, Any], selection: dict[str, Any],
++    candidates: list[dict[str, Any]], dsn: str | None = None, connection=None,
++    at: datetime | None = None,
++) -> dict[str, Any]:
++    """Process only selected obligations, not follow-up due checks."""
++    from live_canonical_queue import (
++        store, relevant_evidence, retry, quarantine, committed_readback, CanonicalQueueError,
++    )
++    result = {"selected": len(selection["selected"]), "committed": 0,
++              "readback_verified": 0, "retryable": 0, "quarantined": 0,
++              "classification_inserts": 0, "classification_revisions": 0, "records": []}
++    if not selection["selected"]:
++        return result
++    if connection is None and not dsn:
++        raise PersistenceContractError("CANONICAL_WORK_REQUIRES_DB_CONNECTION")
++    origin = _origin_context()
++    own_connection = connection is None
++    conn = connection or psycopg.connect(str(dsn), autocommit=False)
++    try:
++        for selected in selection["selected"]:
++            key = selected["work_id"]
++            try:
++                entry = store(state)[key]
++                if not selected.get("coverage_complete"):
++                    raise CanonicalQueueError("SELECTED_WITHOUT_COMPLETE_COVERAGE")
++                evidence = relevant_evidence(entry, candidates)
++                record = build_episode_classification(selected["episode"], evidence, origin=origin)
++                persisted = persist_episode_classification(
++                    conn, record, expected_tip=selected["expected_current_tip"],
++                )
++                # The transaction() block MUST have committed, not released a savepoint.
++                if conn.info.transaction_status != TransactionStatus.IDLE:
++                    raise PersistenceContractError("CLASSIFICATION_NOT_COMMITTED_BEFORE_READBACK")
++                # A fresh independent session cannot see this connection's uncommitted state.
++                verifier_dsn = dsn or os.environ.get("ATTACK_EVENT_DATABASE_URL")
++                if not verifier_dsn:
++                    raise PersistenceContractError("POST_COMMIT_INDEPENDENT_VERIFIER_DSN_REQUIRED")
++                with psycopg.connect(verifier_dsn, autocommit=True) as verifier:
++                    verified = independent_post_commit_readback(
++                        verifier, record, persisted, selected["expected_current_tip"]
++                    )
++                committed_readback(state, key, record["classification_key"], verified["classification_key"])
++                result["committed"] += 1
++                result["readback_verified"] += 1
++                result["classification_inserts"] += int(persisted["classification_inserted"])
++                result["classification_revisions"] += int(persisted["revision_inserted"])
++                result["records"].append({
++                    "work_id": key, "episode_id": selected["episode"]["episode_id"],
++                    "verdict": record["verdict"], "classification_key": record["classification_key"],
++                    "classification_uid": persisted["classification_uid"],
++                })
++            except Exception as exc:
++                try:
++                    conn.rollback()
++                except Exception:
++                    pass
++                # The database might have committed before acknowledgement.
++                # Keep retryable; subsequent DB-tip reconciliation is authoritative.
++                retry(state, key, at or datetime.now(timezone.utc), f"{type(exc).__name__}:{exc}")
++                result["retryable"] += 1
++                result["records"].append({"work_id": key, "error": f"{type(exc).__name__}:{exc}"[:350]})
++    finally:
++        if own_connection:
++            conn.close()
++    return result
++
+ def persist_due_episode_classifications(
+     *,
+     queue: list[dict[str, Any]],
+
+diff --git a/kyiv-air-alerts-grafana/scripts/live_canonical_queue.py b/kyiv-air-alerts-grafana/scripts/live_canonical_queue.py
+--- a/kyiv-air-alerts-grafana/scripts/live_canonical_queue.py
++++ b/kyiv-air-alerts-grafana/scripts/live_canonical_queue.py
+@@ -0,0 +1,413 @@
++#!/usr/bin/env python3
++"""Durable live canonical obligations and bounded, DB-reconciled work selection.
++
++The WIP monitor-state file is an obligation journal, NOT canonical commit authority.
++A database current-tip query is repeated on every run before capacity is charged.
++No discovery/check schedule or classifier semantics are changed here.
++"""
++from __future__ import annotations
++
++import copy
++import hashlib
++import json
++from datetime import datetime, timedelta, timezone
++from typing import Any
++
++SCHEMA_VERSION = 1
++RETRY_DELAY = timedelta(minutes=15)
++LIVE_ORIGIN_KIND = "shared_live_attack_event_canonical_persistence_v1"
++
++
++class CanonicalQueueError(RuntimeError):
++    pass
++
++
++def instant(value: Any) -> datetime:
++    if isinstance(value, datetime):
++        dt = value
++    elif isinstance(value, str):
++        dt = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
++    else:
++        raise CanonicalQueueError("canonical queue requires an aware instant")
++    if dt.tzinfo is None or dt.utcoffset() is None:
++        raise CanonicalQueueError("canonical queue cannot accept naive timestamps")
++    return dt.astimezone(timezone.utc)
++
++
++def precise(value: Any) -> str:
++    return instant(value).isoformat(timespec="microseconds").replace("+00:00", "Z")
++
++
++def identity(episode: dict[str, Any], city_key: str | None = None) -> tuple[str, str, str, str]:
++    city = str(city_key or episode.get("city_key") or "").strip()
++    episode_id = str(episode.get("episode_id") or "").strip()
++    if not city or len(episode_id) != 24 or any(c not in "0123456789abcdef" for c in episode_id):
++        raise CanonicalQueueError("missing/invalid canonical live city and episode ID")
++    start = precise(episode.get("alert_start"))
++    end = precise(episode.get("alert_end"))
++    if instant(end) <= instant(start):
++        raise CanonicalQueueError("invalid canonical live interval")
++    return city, episode_id, start, end
++
++
++def identity_key(values: tuple[str, str, str, str]) -> str:
++    value = json.dumps(list(values), ensure_ascii=False, separators=(",", ":"))
++    return hashlib.sha256(value.encode("utf-8")).hexdigest()
++
++
++def store(state: dict[str, Any]) -> dict[str, Any]:
++    work = state.setdefault("canonical_work", {"schema_version": SCHEMA_VERSION, "entries": {}})
++    if not isinstance(work, dict) or work.get("schema_version") != SCHEMA_VERSION:
++        raise CanonicalQueueError("unrecognized durable canonical work schema")
++    if not isinstance(work.get("entries"), dict):
++        raise CanonicalQueueError("invalid durable canonical work entries")
++    return work["entries"]
++
++
++def register_city(state: dict[str, Any], city_key: str, episodes: list[dict[str, Any]], cutoff: datetime) -> int:
++    """Register before the per-city WIP retention truncation, preserving exact identity."""
++    cutoff = instant(cutoff)
++    entries = store(state)
++    added = 0
++    for episode in episodes:
++        if not episode.get("alert_end") or instant(episode["alert_end"]) < cutoff:
++            continue
++        values = identity(episode, city_key)
++        key = identity_key(values)
++        if key not in entries:
++            entries[key] = {
++                "city_key": values[0],
++                "episode_id": values[1],
++                "alert_start": values[2],
++                "alert_end": values[3],
++                "status": "pending",
++                "attempts": 0,
++                "next_retry_at": None,
++                "expected_current_tip": None,
++                "last_committed_key": None,
++                "quarantine_reason": None,
++                "coverage_checks": {},
++                "evidence_snapshots": {},
++            }
++            added += 1
++        else:
++            saved = entries[key]
++            if tuple(saved.get(field) for field in ("city_key", "episode_id", "alert_start", "alert_end")) != values:
++                raise CanonicalQueueError("durable identity-key collision")
++        # Previously checked legacy work does not acquire a fictitious coverage
++        # certificate. New observations are certified only after source checks.
++        checks = entries[key].setdefault("coverage_checks", {})
++        entries[key].setdefault("evidence_snapshots", {})
++        for check in episode.get("checks") or []:
++            label = str(check.get("label") or "")
++            if not label:
++                continue
++            due = precise(check["due_at"])
++            if label not in checks:
++                checks[label] = {
++                    "due_at": due,
++                    "status": "legacy_unverified" if check.get("checked_at") else "pending",
++                    "completed_at": None,
++                    "reason": "LEGACY_CHECK_WITHOUT_SOURCE_COVERAGE" if check.get("checked_at") else None,
++                }
++            elif checks[label]["due_at"] != due:
++                raise CanonicalQueueError("FOLLOWUP_SCHEDULE_IDENTITY_DRIFT")
++        if episode.get("identity_superseded_by_episode_id"):
++            entries[key]["status"] = "quarantined"
++            entries[key]["quarantine_reason"] = "SUPERSEDED_LOGICAL_IDENTITY"
++    return added
++
++
++def register_state(state: dict[str, Any], cutoff: datetime, city_keys: set[str] | None = None) -> int:
++    count = 0
++    for city, cstate in sorted((state.get("cities") or {}).items()):
++        if city_keys is not None and city not in city_keys:
++            continue
++        count += register_city(state, city, cstate.get("episodes") or [], cutoff)
++    return count
++
++
++def episode_from_entry(entry: dict[str, Any]) -> dict[str, Any]:
++    return {
++        "city_key": entry["city_key"],
++        "episode_id": entry["episode_id"],
++        "alert_start": entry["alert_start"],
++        "alert_end": entry["alert_end"],
++    }
++
++
++def read_current_tips(conn, cutoff: datetime) -> dict[str, dict[str, Any]]:
++    """Read *committed* current tips by exact four-part identity.
++
++    Unrelated historical and pre-cutoff rows cannot match a registered obligation.
++    Multiple current tips fail closed. No writes, advisory locks or transactions.
++    """
++    with conn.cursor() as cur:
++        cur.execute(
++            """
++            SELECT c.city_key, c.historical_episode_id,
++                   c.alert_start_at, c.alert_end_at,
++                   c.classification_uid, c.classification_key,
++                   c.origin_provenance, p.episode_uid
++            FROM public.attack_event_classifications c
++            LEFT JOIN public.alert_episodes p
++              ON p.legacy_episode_id = c.historical_episode_id
++             AND p.city_key = c.city_key
++             AND p.start_at = c.alert_start_at AND p.end_at = c.alert_end_at
++             AND p.alert_type = 'AIR' AND p.episode_state = 'closed'
++             AND p.canonicalization_version = 'alert-canonicalization-v1'
++            WHERE c.alert_end_at >= %s
++              AND NOT EXISTS (
++                  SELECT 1 FROM public.attack_event_classifications n
++                  WHERE n.supersedes_classification_uid = c.classification_uid
++              )
++            ORDER BY c.alert_end_at, c.city_key, c.historical_episode_id
++            """,
++            (instant(cutoff),),
++        )
++        rows = cur.fetchall()
++    output: dict[str, dict[str, Any]] = {}
++    for city, episode_id, start, end, uid, key, origin, parent_uid in rows:
++        i = (str(city), str(episode_id), precise(start), precise(end))
++        digest = identity_key(i)
++        if digest in output:
++            raise CanonicalQueueError("MULTIPLE_CURRENT_CLASSIFICATION_TIPS:" + digest)
++        output[digest] = {
++            "classification_uid": str(uid),
++            "classification_key": str(key),
++            "origin_kind": str((origin or {}).get("kind") or "") if isinstance(origin, dict) else "",
++            "exact_parent": parent_uid is not None,
++        }
++    return output
++
++
++
++def relevant_evidence(entry: dict[str, Any], candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
++    """Recover durable source observations; the current review queue wins for updated reviews.
++
++    A source disappearing from the mutable queue cannot turn an earlier positive
++    or review hold into a spurious negative.
++    """
++    from attack_event_canonical_persistence import _episode_refs
++    city, episode_id = entry["city_key"], entry["episode_id"]
++    retained = entry.get("evidence_snapshots") or {}
++    if not isinstance(retained, dict):
++        raise CanonicalQueueError("EVIDENCE_SNAPSHOT_CORRUPT")
++    merged = {key: copy.deepcopy(value) for key, value in retained.items()}
++    for row in candidates:
++        if not isinstance(row, dict) or str(row.get("city_key") or "") != city:
++            continue
++        if episode_id not in _episode_refs(row):
++            continue
++        cid = str(row.get("candidate_id") or "")
++        if not cid:
++            raise CanonicalQueueError("EPISODE_EVIDENCE_MISSING_CANDIDATE_ID")
++        merged[cid] = row
++    for cid, row in merged.items():
++        if str(row.get("candidate_id")) != cid or str(row.get("city_key")) != city or episode_id not in _episode_refs(row):
++            raise CanonicalQueueError("DURABLE_EPISODE_EVIDENCE_IDENTITY_MISMATCH")
++    return [merged[key] for key in sorted(merged)]
++
++
++def record_coverage(
++    state: dict[str, Any],
++    due: dict[str, list[tuple[dict[str, Any], dict[str, Any]]]],
++    coverage_by_city: dict[str, bool],
++    candidates: list[dict[str, Any]],
++    checked_at: datetime,
++) -> dict[str, int]:
++    """Certify each executed follow-up only after the approved discovery path finishes.
++
++    Missing source coverage stays pending; the monitor must not set checked_at
++    on those checks, allowing the unchanged discovery strategy to retry.
++    """
++    complete = failed = 0
++    entries = store(state)
++    for city, city_due in sorted(due.items()):
++        for episode, check in city_due:
++            key = identity_key(identity(episode, city))
++            entry = entries.get(key)
++            if entry is None:
++                raise CanonicalQueueError("UNREGISTERED_FOLLOWUP_OBLIGATION")
++            label = str(check.get("label") or "")
++            cert = entry.get("coverage_checks", {}).get(label)
++            if cert is None:
++                raise CanonicalQueueError("MISSING_FOLLOWUP_COVERAGE_SCHEDULE")
++            if not coverage_by_city.get(city):
++                cert["status"] = "pending"
++                cert["reason"] = "SOURCE_COVERAGE_INCOMPLETE_RETRY_DUE_CHECK"
++                check["checked_at"] = None
++                failed += 1
++                continue
++            for row in relevant_evidence(entry, candidates):
++                entry["evidence_snapshots"][row["candidate_id"]] = copy.deepcopy(row)
++            cert["status"] = "complete"
++            cert["reason"] = None
++            cert["completed_at"] = precise(checked_at)
++            check["checked_at"] = precise(checked_at)
++            complete += 1
++    return {"checks_complete": complete, "checks_retryable": failed}
++
++
++def evidence_gate(entry: dict[str, Any], now: datetime) -> tuple[bool, str | None]:
++    checks = entry.get("coverage_checks") or {}
++    if not isinstance(checks, dict) or not checks:
++        return False, "NO_DURABLE_FOLLOWUP_COVERAGE_CONTRACT"
++    eligible = [check for check in checks.values() if instant(check["due_at"]) <= instant(now)]
++    if not eligible:
++        return False, "NO_FOLLOWUP_CHECK_DUE_YET"
++    for check in eligible:
++        if check.get("status") != "complete":
++            return False, str(check.get("reason") or "FOLLOWUP_EVIDENCE_NOT_COMPLETE")
++    return True, None
++
++def desired_classification_key(
++    entry: dict[str, Any],
++    candidates: list[dict[str, Any]],
++) -> str:
++    """Pure fingerprint projection of ALREADY reviewed/automatically classified evidence.
++
++    Only called for an existing canonical tip with a proven exact parent.
++    This does not invoke the authoritative source classifier or write a verdict.
++    """
++    from attack_event_canonical_persistence import build_episode_classification
++    origin = {
++        "ref": "OFFLINE_FINGERPRINT_ONLY",
++        "commit": "0" * 40,
++        "monitor_blob": "0" * 40,
++        "run_id": None,
++        "origin_provenance": {"kind": "FINGERPRINT_ONLY"},
++        "origin_provenance_sha256": "0" * 64,
++    }
++    return str(build_episode_classification(episode_from_entry(entry), candidates, origin=origin)["classification_key"])
++
++
++def reconcile_and_select(
++    state: dict[str, Any],
++    *,
++    tips: dict[str, dict[str, Any]],
++    candidates: list[dict[str, Any]],
++    cutoff: datetime,
++    max_episodes: int | None,
++    now: datetime,
++) -> dict[str, Any]:
++    """Oldest unmet obligation first, with deterministic tie-breaks.
++
++    It does not consume the canary slot for identical committed work or for a
++    quarantined item. Old pending work has priority over newly arrived work.
++    """
++    cutoff, now = instant(cutoff), instant(now)
++    if max_episodes is not None and max_episodes < 1:
++        raise CanonicalQueueError("maximum episode batch must be positive")
++    entries = store(state)
++    total = 0
++    pending: list[tuple[tuple[str, str, str, str], str, dict[str, Any], dict[str, Any] | None]] = []
++    committed = quarantined = retry_waiting = blocked_evidence = 0
++    for digest, entry in entries.items():
++        i = identity(episode_from_entry(entry))
++        if identity_key(i) != digest:
++            raise CanonicalQueueError("durable queue record identity mismatch")
++        if instant(i[3]) < cutoff:
++            continue
++        total += 1
++        tip = tips.get(digest)
++        if entry.get("status") == "quarantined":
++            quarantined += 1
++            continue
++        if tip and not tip.get("exact_parent"):
++            entry["status"] = "quarantined"
++            entry["quarantine_reason"] = "CURRENT_TIP_PARENT_NOT_EXACT"
++            quarantined += 1
++            continue
++
++        covered, reason = evidence_gate(entry, now)
++        if not covered:
++            # A committed tip is authoritative even if old WIP discovery metadata
++            # is incomplete. Never fabricate a revision from missing candidates.
++            if tip:
++                entry["status"] = "committed"
++                entry["last_committed_key"] = tip["classification_key"]
++                entry["next_retry_at"] = None
++                committed += 1
++            else:
++                entry["status"] = "blocked_evidence"
++                entry["last_error"] = reason
++                blocked_evidence += 1
++            continue
++
++        try:
++            source_rows = relevant_evidence(entry, candidates)
++            wanted_key = desired_classification_key(entry, source_rows)
++        except (CanonicalQueueError, ValueError, KeyError) as exc:
++            entry["status"] = "blocked_evidence"
++            entry["last_error"] = f"EVIDENCE_RECONSTRUCTION_FAILED:{type(exc).__name__}:{exc}"[:350]
++            blocked_evidence += 1
++            continue
++        if tip and wanted_key == tip["classification_key"]:
++            entry["status"] = "committed"
++            entry["last_committed_key"] = wanted_key
++            entry["next_retry_at"] = None
++            entry["last_error"] = None
++            committed += 1
++            continue
++        if tip and tip.get("origin_kind") != LIVE_ORIGIN_KIND:
++            entry["status"] = "quarantined"
++            entry["quarantine_reason"] = "NONLIVE_ORIGIN_REVISION_FORBIDDEN"
++            quarantined += 1
++            continue
++        if entry.get("status") == "committed" and tip is None:
++            entry["last_committed_key"] = None
++        entry["status"] = "pending"
++        entry["expected_current_tip"] = tip["classification_uid"] if tip else None
++        entry["expected_current_key"] = tip["classification_key"] if tip else None
++        next_retry = entry.get("next_retry_at")
++        if next_retry and instant(next_retry) > now:
++            retry_waiting += 1
++            continue
++        pending.append((i, digest, entry, tip))
++    pending.sort(key=lambda row: (row[0][3], row[0][2], row[0][0], row[0][1]))
++    selected_rows = pending[:max_episodes] if max_episodes is not None else pending
++    return {
++        "total_registered": total,
++        "db_committed_current": committed,
++        "quarantined": quarantined,
++        "retry_waiting": retry_waiting,
++        "blocked_evidence": blocked_evidence,
++        "ready_pending": len(pending),
++        "selected": [
++            {
++                "work_id": digest,
++                "episode": episode_from_entry(entry),
++                "expected_current_tip": tip["classification_uid"] if tip else None,
++                "expected_current_key": tip["classification_key"] if tip else None,
++                "work_kind": "revision" if tip else "initial",
++                "coverage_complete": True,
++            }
++            for _, digest, entry, tip in selected_rows
++        ],
++    }
++
++
++def quarantine(state: dict[str, Any], work_id: str, reason: str) -> None:
++    entry = store(state)[work_id]
++    entry["status"] = "quarantined"
++    entry["quarantine_reason"] = str(reason)
++
++
++def retry(state: dict[str, Any], work_id: str, at: datetime, reason: str) -> None:
++    entry = store(state)[work_id]
++    entry["status"] = "retryable_failure"
++    entry["attempts"] = int(entry.get("attempts") or 0) + 1
++    entry["next_retry_at"] = precise(instant(at) + RETRY_DELAY)
++    entry["last_error"] = str(reason)[:350]
++
++
++def committed_readback(state: dict[str, Any], work_id: str, expected_key: str, actual_key: str) -> None:
++    if expected_key != actual_key:
++        raise CanonicalQueueError("POST_COMMIT_READBACK_KEY_MISMATCH")
++    entry = store(state)[work_id]
++    entry["status"] = "committed"
++    entry["last_committed_key"] = actual_key
++    entry["expected_current_key"] = actual_key
++    entry["next_retry_at"] = None
++    entry["last_error"] = None
+
+diff --git a/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py b/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py
+--- a/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py
++++ b/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py
+@@ -20,6 +20,7 @@
+ 
+ import apply_ukrainealarm_bridge as ua
+ import live_parent_ordering
++import live_canonical_queue
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ DATA_DIR = ROOT / "data"
+@@ -1610,6 +1611,13 @@ def ensure_state() -> dict:
+     return state
+ 
+ 
++def _live_cutoff_for_obligation_registration() -> datetime:
++    cutoff, _ = load_live_persistence_activation(required=False)
++    # If activation does not exist, do not register new canonical work;
++    # preserve existing monitoring and alert discovery behavior.
++    return cutoff or datetime.max.replace(tzinfo=UTC)
++
++
+ def process_events(state: dict, polled: dict[str, list[dict]], errors: dict[str, str], now: datetime) -> int:
+     frozen_end = baseline_ends()
+     new_count = 0
+@@ -1658,6 +1666,12 @@ def process_events(state: dict, polled: dict[str, list[dict]], errors: dict[str,
+             cstate.setdefault("episodes", []).append(episode_row)
+             known.add(ep["episode_id"])
+             new_count += 1
++        # Freeze obligations and check schedules before WIP episode pruning.
++        # A disappearing WIP row cannot delete a canonical persistence obligation.
++        live_canonical_queue.register_city(
++            state, city_key, cstate.get("episodes", []),
++            _live_cutoff_for_obligation_registration(),
++        )
+         cstate["episodes"] = sorted(cstate.get("episodes", []), key=lambda x: x.get("alert_start") or "")[-MAX_EPISODES_PER_CITY:]
+         if rows:
+             latest = rows[-1]
+@@ -5019,6 +5033,10 @@ def main() -> None:
+         )
+         mode = "network"
+     new_episodes = process_events(state, polled, errors, started)
++    # RC1: preserve canonical obligations before discovery state may be pruned.
++    # The journal is never a classification receipt.
++    from live_canonical_queue import register_state
++    # Register below only when DB persistence is configured (cutoff read from durable config).
+ 
+     persistence_enabled = bool(str(os.environ.get("ATTACK_EVENT_DATABASE_URL") or "").strip())
+     canary_cutoff, activation_config = load_live_persistence_activation(
+@@ -5036,16 +5054,10 @@ def main() -> None:
+     if persistence_canary_max is not None and persistence_canary_max < 1:
+         raise RuntimeError("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES must be positive")
+ 
+-    parent_ordering = live_parent_ordering.preclassification_parent_gate(
+-        state,
+-        cutoff=canary_cutoff,
+-        max_episodes=persistence_canary_max,
+-        dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+-    )
+-    parent_ready_keys = {
+-        (str(row.get("city") or ""), str(row.get("episode_id") or ""))
+-        for row in parent_ordering.get("records") or []
+-    }
++    # Canonical work selection is downstream of discovery but upstream of
++    # parent preparation. No slot is charged for already-committed tips.
++    parent_ordering = {"enabled": False, "reason": "CANONICAL_SELECTION_PENDING"}
++    parent_ready_keys = set()
+ 
+     matching_refresh = refresh_queue_matching(queue, state, {"needs_review"})
+     telegram_errors = refresh_telegram_cache(state, started)
+@@ -5104,6 +5116,8 @@ def main() -> None:
+             "google_error": google_error,
+         }
+         for _, check in city_due:
++            # RC1: checked_at remains discovery metadata, NOT proof of a Neon classification.
++            # record_coverage() below clears it if any required source failed.
+             check["checked_at"] = iso(followup_cutoff)
+             check["new_candidates"] = added
+ 
+@@ -5123,18 +5137,66 @@ def main() -> None:
+         for city_key in CITY_CONFIG
+     }
+ 
++    # Legacy follow-up selection remains independent; it no longer drives
++    # canonical persistence. Persist coverage before journal selection.
++    if canary_cutoff is not None and persistence_enabled:
++        live_canonical_queue.register_state(state, canary_cutoff, set(CITY_CONFIG))
++        coverage_result = live_canonical_queue.record_coverage(
++            state, due, persistence_coverage_by_city, queue, followup_cutoff,
++        )
++        import psycopg
++        from attack_event_canonical_persistence import persist_canonical_work
++        with psycopg.connect(os.environ["ATTACK_EVENT_DATABASE_URL"], autocommit=False) as canonical_conn:
++            tips = live_canonical_queue.read_current_tips(canonical_conn, canary_cutoff)
++            canonical_conn.rollback()
++            selection = live_canonical_queue.reconcile_and_select(
++                state, tips=tips, candidates=queue, cutoff=canary_cutoff,
++                max_episodes=min(10, persistence_canary_max or 10), now=followup_cutoff,
++            )
++            parent_selection_state = {
++                "cities": {
++                    city: {"episodes": [row["episode"] for row in selection["selected"]
++                                        if row["episode"]["city_key"] == city]}
++                    for city in CITY_CONFIG
++                }
++            }
++            parent_ordering = live_parent_ordering.preclassification_parent_gate(
++                parent_selection_state, cutoff=canary_cutoff,
++                max_episodes=min(10, persistence_canary_max or 10),
++                connection=canonical_conn,
++            )
++            parent_ready_keys = {
++                (str(row.get("city") or ""), str(row.get("episode_id") or ""))
++                for row in parent_ordering.get("records") or []
++            }
++            selected_ready = {
++                "selected": [row for row in selection["selected"]
++                             if (row["episode"]["city_key"], row["episode"]["episode_id"])
++                             in parent_ready_keys]
++            }
++            canonical_persistence = persist_canonical_work(
++                state=state, selection=selected_ready, candidates=queue,
++                connection=canonical_conn, at=followup_cutoff,
++            )
++            for row in selection["selected"]:
++                pair = (row["episode"]["city_key"], row["episode"]["episode_id"])
++                if pair not in parent_ready_keys:
++                    live_canonical_queue.retry(state, row["work_id"], followup_cutoff, "CANONICAL_PARENT_NOT_READY")
++            canonical_persistence["queue"] = {
++                key: value for key, value in selection.items() if key != "selected"
++            }
++            canonical_persistence["queue"]["selected"] = len(selection["selected"])
++            canonical_persistence["coverage"] = coverage_result
++    else:
++        canonical_persistence = {"enabled": False, "reason": "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"}
++        parent_ordering = {"enabled": False, "reason": "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"}
++
+     persistence_due = select_persistence_due(
+         due,
+         parent_ready_keys,
+         parent_gate_enabled=canary_cutoff is not None,
+     )
+ 
+-    canonical_persistence = persist_due_episode_classifications(
+-        queue=queue,
+-        due=persistence_due,
+-        coverage_by_city=persistence_coverage_by_city,
+-        dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+-    )
+     (
+         due_checks_at_cutoff,
+         checked_due_checks_at_cutoff,

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "verdict": "C3_RC1_PARTIAL",
+  "staged_code_sha": "ff93eea396868b62c3cab2c332b551eb16ff5fd7",
+  "research_branch": "research-c3-rc1-live-queue-2026-10-28-gpt6",
+  "preflight": {
+    "main": "26504ef8fbae5e620a1a4bc531751380b745ca5a",
+    "site_prod": "a2d593c51830a62516d8907b6f55aae1b05e8948",
+    "wip": "08c1a0a9cb3d27a73cfd85b48b31a29817c1d20d"
+  },
+  "postgres": {
+    "version": "16",
+    "isolation": "GitHub Actions disposable service container",
+    "run_id": 40733060266,
+    "job_id": 122974225818,
+    "conclusion": "success",
+    "artifact_id": 12835587047,
+    "artifact_zip_sha256_metadata": "683fd0a91693b49aa92cbbd0be6a62ba0624727b3af30200c09882aecced3e6e",
+    "artifact_payload_rehashed": false,
+    "prior_integrated_regression_470_commits": true,
+    "previous_count": 470,
+    "batches": 47,
+    "cap": 10,
+    "monitor_main_calls": 2,
+    "monitor_main_committed_first": 1,
+    "monitor_main_committed_second": 0,
+    "monitor_source_links": 1,
+    "monitor_cities_configured": 23,
+    "monitor_cities_individually_regressed": 1
+  },
+  "scenario_matrix": {
+    "two_sequential_10_batches": {
+      "status": "PASS_PG16_REFERENCE_SUBSET_NOT_FULL_RC1"
+    },
+    "restart_zero_duplicates": {
+      "status": "PASS_PG16_REFERENCE_SUBSET_NOT_FULL_RC1"
+    },
+    "failure_before_commit_no_ack": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "postcommit_ack_interruption": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "neon_readback_failure_retry": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "dual_worker_locking": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "negative_review_positive_event_and_source": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "missing_parent_identity_source_conflict_stale_tip": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "full_23_city_regression": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    },
+    "independent_unbound_25": {
+      "status": "NOT_PROVEN_IN_RC1_RELEASE_CONTEXT"
+    }
+  },
+  "historical_unbound_25_not_runtime_prerequisite_by_design": true,
+  "historical_unbound_25_independence_test": "NOT_EXECUTED",
+  "operational_hold": {
+    "main_job_if_false": true,
+    "wip_unblocked_manual_dispatch": true,
+    "all_paths_contained": false
+  },
+  "release_ready": false,
+  "neon_writes": 0,
+  "production_changes": 0,
+  "operational_wip_changes": 0
+}
