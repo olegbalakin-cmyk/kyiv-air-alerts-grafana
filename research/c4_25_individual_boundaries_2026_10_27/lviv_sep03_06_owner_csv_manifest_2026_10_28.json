@@ -1,0 +1,93 @@
+{
+  "schema_version": "c4_lviv_sep03_06_owner_csv_readback_v1",
+  "observed_date": "2026-10-28",
+  "input_origin": "Four manually downloaded Alerts.in.ua daily CSV exports attached by owner in conversation, read from mounted original bytes",
+  "input_published_in_repository": false,
+  "input_change": "none",
+  "verification_method": "container Python stdlib csv.DictReader utf-8-sig; exact byte SHA-256; broad case-insensitive Cyrillic 'льв' match in all seven columns; signal-type count",
+  "expected_headers": [
+    "Оголошено о",
+    "Закінчено о",
+    "Район/Громада/Місто",
+    "Регіон",
+    "Країна",
+    "Тип",
+    "Повідомлення"
+  ],
+  "time_precision": "seconds; original CSV carries no explicit time zone",
+  "time_zone_assumption": "Europe/Kyiv per preexisting source/export contract",
+  "days": [
+    {
+      "date": "2026-09-03",
+      "file": "alerts_2026-09-03.csv",
+      "bytes": 98552,
+      "sha256": "2cdea649891c5b77f6f71de0d4a134a5c0543cb704066aa815854f50c03d168b",
+      "rows": 559,
+      "air": 548,
+      "lviv": 0
+    },
+    {
+      "date": "2026-09-04",
+      "file": "alerts_2026-09-04.csv",
+      "bytes": 84239,
+      "sha256": "02ca0cf90a0c536ce976ad198abd952575166e510efc6e4361aaaab1e9711aab",
+      "rows": 479,
+      "air": 468,
+      "lviv": 0
+    },
+    {
+      "date": "2026-09-05",
+      "file": "alerts_2026-09-05.csv",
+      "bytes": 84789,
+      "sha256": "f8401301d2ae31928b160a2e0a52843c216c6db9843f2a8d202378364b82361c",
+      "rows": 482,
+      "air": 472,
+      "lviv": 0
+    },
+    {
+      "date": "2026-09-06",
+      "file": "alerts_2026-09-06.csv",
+      "bytes": 77321,
+      "sha256": "783add34d5b58d042948b9ff63147fc7e20a1b3d162b91292fa8e3abeedffa6d",
+      "rows": 434,
+      "air": 424,
+      "lviv": 0
+    }
+  ],
+  "totals": {
+    "files": 4,
+    "rows": 1954,
+    "air": 1912,
+    "lviv": 0
+  },
+  "scope": "Candidate Lviv #3 original source interval had no retained complete-day export evidence for local 2026-09-03..06",
+  "context_previous": {
+    "previous_2026_09_02_manual_csv_sha256": "2732b99188dea7e4d1e8402c4571497ab95944a43a7139a2b2bc800a59c13820",
+    "archived_2026_09_07_to_16_bridge_run_id": 40594480647,
+    "archived_bridge_decompressed_sha256": "ba48bf85bd62e7f127dd1703bfcb9d38b4b960690adf1243175ce59366ec4d5a",
+    "lviv_case_3_left_A_utc": [
+      "2026-09-01T21:49:49Z",
+      "2026-09-01T21:57:16Z"
+    ],
+    "lviv_case_3_middle_utc": [
+      "2026-09-12T22:00:06Z",
+      "2026-09-12T22:14:27Z"
+    ],
+    "lviv_case_3_right_B_utc": [
+      "2026-09-13T02:32:14Z",
+      "2026-09-13T06:11:11Z"
+    ]
+  },
+  "bounded_result": "Lviv AIR rows in all four owner-provided source exports = 0, so previously missing daily export coverage is now present. Assuming daily exports complete for selected geography, no additional Lviv alert within that four-day slice.",
+  "limitation": "CSV absence is not independent cross-provider proof of no real-world alerts; no per-day global completeness token, source timezone suffix or historical identity DB verification. Archived Sep7-16 bridge is from same provider.",
+  "repair_readiness": "NO",
+  "affected_c4_case": 3,
+  "unresolved": [
+    "Kharkiv #6 short-vs-long source end conflict",
+    "Exact current Neon parent vs old classification identity and source/event dependency closure for 25",
+    "Full Git JSON vs Neon before-after plan",
+    "Owner production/Neon write permission"
+  ],
+  "neon_writes": 0,
+  "production_writes": 0
+}
