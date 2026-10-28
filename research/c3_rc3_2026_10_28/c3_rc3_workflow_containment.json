@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "gate": "C3-RC3",
+  "status": "PARTIAL",
+  "exhaustive": false,
+  "provenance": {
+    "main_at_preflight": "3b43a588f31bf806514ee11cf8c153c039256905",
+    "operational_wip_at_preflight": "6071cd7d2398a5b85bcb0637575038c5faafbc25",
+    "note": "Selected actual workflow files read directly via GitHub content and matching blob. This is not a complete workflow-run/trigger availability/active-run exhaustive attestation."
+  },
+  "entry_points": [
+    {
+      "ref": "main",
+      "path": ".github/workflows/explosion-monitor-wip.yml",
+      "blob_sha": "1bf3385b3438a0ed471375db446ab08132d5bd87",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "push:main:deploy/explosion-monitor-wip-release.txt"
+      ],
+      "job_guard": "if:false",
+      "checkout_ref": "multicity-wip-2026-09-16",
+      "write_target": "multicity-wip-2026-09-16",
+      "effective_execution": "monitor job blocked",
+      "release_risk": "currently contained at main job level"
+    },
+    {
+      "ref": "main",
+      "path": ".github/workflows/update-explosion-wip.yml",
+      "blob_sha": "0d16ea55f89245123d68518691748b601afc37ce",
+      "triggers": [
+        "workflow_dispatch"
+      ],
+      "job_guard": "none",
+      "checkout_ref": "multicity-wip-2026-09-16",
+      "write_target": "multicity-wip-2026-09-16",
+      "effective_execution": "manual dispatch available from default branch",
+      "release_risk": "BLOCKER: unguarded writer"
+    },
+    {
+      "ref": "main",
+      "path": ".github/workflows/live-due-orchestration-readback.yml",
+      "blob_sha": "b7ccf6c9468e70b68fb6d00b5a1c6f422ea23b61",
+      "triggers": [
+        "workflow_run"
+      ],
+      "job_guard": "not fully independently certified",
+      "checkout_ref": "main / not fully audited",
+      "write_target": "main",
+      "effective_execution": "requires workflow_run activation evaluation",
+      "release_risk": "NOT_PROVEN"
+    },
+    {
+      "ref": "main",
+      "path": ".github/workflows/casualty-monitor-wip.yml",
+      "blob_sha": "bc5585b53a88e76df0a53040655cb4ab66ea7f43",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "push:main"
+      ],
+      "job_guard": "not audited in this C3 scope",
+      "checkout_ref": "multicity-wip-2026-09-16",
+      "write_target": "multicity-wip-2026-09-16",
+      "effective_execution": "live run 40771135063 reported success on main",
+      "release_risk": "separate casualty track; not permission to alter"
+    },
+    {
+      "ref": "multicity-wip-2026-09-16",
+      "path": ".github/workflows/explosion-monitor-wip.yml",
+      "blob_sha": "dfb98ce13ecfe76675eb32e204670f835096e1dc",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "push:main"
+      ],
+      "job_guard": "none in branch copy",
+      "checkout_ref": "multicity-wip-2026-09-16",
+      "write_target": "multicity-wip-2026-09-16",
+      "effective_execution": "schedule from nondefault branch not automatically enabled by file existence; availability not proven",
+      "release_risk": "must not infer an active route or global hold from branch file alone"
+    },
+    {
+      "ref": "multicity-wip-2026-09-16",
+      "path": ".github/workflows/test-explosion-monitor-wip.yml",
+      "blob_sha": "5b7f9361444bc0ebddf4c9c3651bdd7de81eec4e",
+      "triggers": [
+        "push:multicity-wip-2026-09-16",
+        "workflow_dispatch"
+      ],
+      "job_guard": "none",
+      "checkout_ref": "multicity-wip-2026-09-16",
+      "write_target": "none declared",
+      "effective_execution": "runs monitor --local-only in read-only smoke mode",
+      "release_risk": "execution path must be reverified before promotion"
+    },
+    {
+      "ref": "multicity-wip-2026-09-16",
+      "path": ".github/workflows/full-site-wip.yml",
+      "blob_sha": "8cf4060913959c527266366fc980f448ebe90df9",
+      "triggers": [
+        "push:multicity-wip-2026-09-16",
+        "workflow_dispatch"
+      ],
+      "job_guard": "none",
+      "checkout_ref": "trigger ref",
+      "write_target": "artifacts only / no push in inspected workflow",
+      "effective_execution": "data processing; operational monitor not directly invoked",
+      "release_risk": "separate data refresh; permission and trigger availability require proof"
+    }
+  ],
+  "unresolved": [
+    "Exhaustive GitHub Actions enabled/disabled state, trigger-ref semantics and all workflow entry paths not captured",
+    "Active and queued workflows not inventoried exhaustively",
+    "Unblocked default-branch update-explosion-wip.yml dispatch is a release blocker",
+    "No owner-authorized containment patch executed"
+  ],
+  "minimal_containment_proposal": "Default-deny C3-capable jobs on every default-branch dispatch/workflow_run entry, including update-explosion-wip.yml, while preserving unaffected production/casualty operations; separately check historical GitHub runs and actual eligible triggers across refs; apply only under owner authorization, then prove hold with actual skip runs.",
+  "changes_applied_to_operational_workflows": 0,
+  "release_gate": "CLOSED"
+}
