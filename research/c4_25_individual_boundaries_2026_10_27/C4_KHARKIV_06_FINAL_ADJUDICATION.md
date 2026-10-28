@@ -1,0 +1,41 @@
+# C4_KHARKIV_06_FINAL_ADJUDICATION — 2026-10-28
+
+**Verdict: BLOCKED_SOURCE_CONFLICT — one unresolved historical signal chronology. Research only; no data changes.**
+
+## Preflight and frozen inputs
+Read current `main:PROJECT_STATE.md` and `main:CHANGELOG.md` (2026-10-28 C4 owner dry-run checkpoint) before acting. This note extends accepted research commit `2a11a637a76ab3f9c862e9a62177848ff0dfafa0` and `research/c4_25_individual_boundaries_2026_10_27/C4_KHARKIV_06_DECISION.md` (blob `5bcb71b6c3c3b1f530e135dd65d72ee1b227189d`). Other frozen evidence: `CSV_OWNER_REVIEW.md`, `csv_owner_manifest.json`, `c4_final_owner_plan.json` (blob `39fed9bf073f03c4f60e754c130edb14b14adc90`), original historical slice at `0800a7382bcea65e6c6ca9683d6eb5a0d5895d87` / blob `419d3bdf57517f455951968cdaffd926020fffc7`. Original owner-exported daily CSVs 2025-03-05 and 2025-03-06 were reported/reviewed at prior accepted checkpoint; **raw attachments were not accessible for independent byte-level reopening in this execution**. Reported manifest: 122 rows, SHA-256 `3113253b860c5678927b40353308ed51b435b07b16a00cb9bcc88529f9417062` (March 5); 131 rows, SHA-256 `b5a4c7a8b64f44dec66a0313b346120e98d154b0c78fb2f99ff5ed1815b96349` (March 6). These are previous analysis attestations, not independently rehashed here. Original Vadimkin upstream `official_data_uk.csv` is named by current production source scripts; an attempted upstream read returned only Git blob metadata, not usable content, so no newly verified original Vadimkin row chronology is claimed.
+
+## Scope and conflict
+Current production source rule (`main:kyiv-air-alerts-grafana/scripts/audit_city_sources.py`): Kharkiv selects `preferred_source_type=exact_city`, `hromada=м. Харків та Харківська територіальна громада`, `known_coverage_start=2025-02-17`. Production dashboard source description likewise specifies only hromada-level Kharkiv records, not a raion/oblast proxy. **This establishes the intended production geographical rule; it does not independently establish the owner CSV row's geometry or prove the two providers encoded the same event.**
+
+| Source / interpretation | Start UTC | End UTC | Length |
+| --- | --- | --- | --- |
+| Historical owner Alerts.in.ua CSV (as previously reviewed) / original historical classifier interval | 2025-03-05T19:08:24Z | 2025-03-06T03:03:45Z | 07:55:21 |
+| Vadimkin-derived/current canonical Neon episode (as previously read) | 2025-03-05T19:08:24Z | 2025-03-05T19:47:55Z | 00:39:31 |
+
+The end disagreement is exactly **07:15:50**. Owner CSV columns are `Оголошено о, Закінчено о, Район/Громада/Місто, Регіон, Країна, Тип, Повідомлення`. Their time cells have seconds precision without timezone marker, interpreted as Europe/Kyiv in the previous research (local March 5 21:08:24 to March 6 05:03:45). No subsecond accuracy is implied.
+
+Nearest previously reported owner CSV AIR anchors were A 2025-03-05T18:06:45Z–18:31:04Z and B 2025-03-06T09:12:46Z–09:34:35Z. They bound a source interval but do not prove absence of intermediate transitions by a second source.
+
+## Four source-adjudication questions
+1. **Same AIR signal/geography? NOT PROVEN.** Both candidates were treated as Kharkiv AIR by earlier research. Current production explicitly selects the Kharkiv *hromada* from Vadimkin. Previous owner CSV review reports a Kharkiv entry, but original CSV geography/type/message fields were not independently read in this execution and the providers' source signal IDs/geographic mapping have not been reconciled. Do not silently equate exact-city, raion and oblast.
+2. **Authoritative all-clear at 19:47:55Z? NOT PROVEN.** Vadimkin-derived closed interval/current canonical readback provides that end as a dataset value. It is *not* an independently verified announcement/cancellation at hromada level. No authoritative hromada all-clear message with the exact time has been authenticated.
+3. **Re-alert, geographic switch, or source merge? NOT PROVEN.** No independently authenticated ordered state-transition trace (AIR ON/OFF, same hromada, source signal identifier) covering 2025-03-05T19:47:55Z through 2025-03-06T03:03:45Z was available. The differing end times alone cannot decide whether an all-clear, re-announcement, propagation delay, geographic switch, or aggregation occurred.
+4. **Independent historical chronology? NOT VERIFIED.** Public web searches for the Kharkiv March 5–6 2025 all-clear/re-alert chronology did not establish a verifiable timestamped **same-hromada** transition sequence. Do not cite generic reports of explosions, oblast alarms, or same-provider visualizations as a second independent chronology.
+
+## Single unresolved fact and exact missing evidence
+**Was `AIR` actually cancelled for `м. Харків та Харківська територіальна громада` at `2025-03-05T19:47:55Z`; if so, what exact same-geography `AIR ON/OFF` transitions occurred up to `2025-03-06T03:03:45Z`?**
+
+The smallest useful additional evidence is **one immutable timestamped primary alert-state transition log for the Kharkiv city territorial community**, spanning 2025-03-05T19:08:24Z–2025-03-06T03:03:45Z, with source geography ID, AIR type, each announcement/cancellation timestamp, and explicit timezone. An archived authenticated official Kharkiv alert-bot/municipal stream or authority-operated signal archive that records ON/OFF for the same geographic identifier would qualify. A third generic daily CSV without unique geography and transition identifiers would not resolve this precise question. Do not request re-upload of seven already submitted owner CSVs merely to repeat this analysis.
+
+## Consequences under mutually exclusive adjudications (NOT authorized changes)
+- **If short end proven and no later continuous AIR:** current canonical `a556ee0d-4a90-40b4-adf1-db55646cd05b` may have correct `19:47:55Z` end; long original historical classification interval then needs lineage/splitting explanation. Historical classification `8c01721e-b4e8-4b63-b789-9801efbd63f8` remains `STRICT_EVENT_POSITIVE/UNBOUND` until separately approved exact source-to-parent association.
+- **If uninterrupted long AIR proven:** the currently stored short canonical end becomes a candidate discrepancy requiring a separately scoped producer/Neon parity investigation and explicit owner-approved correction (not direct retimestamping). Investigate downstream episode counts/identities and constraints first. The historical classifier verdict and its frozen evidence remain unchanged pending distinct binding approval.
+- **If separate AIR episodes or geography transitions proven:** reconstruct each independently verified hromada-level interval and check existing canonical rows/producer union logic before any lineage proposal; never force a one-to-one mapping or insert a duplicate.
+
+Original historical episode identity `0fc4be61b3b03eb9027c2536`; current canonical `a556ee0d-4a90-40b4-adf1-db55646cd05b` / current legacy ID `cb4d84c97db70f7a08cdc74b`; strict classification UID `8c01721e-b4e8-4b63-b789-9801efbd63f8` with `binding_state=UNBOUND`, `alert_episode_uid=NULL`, one original evidence source. No BOUND promotion: existing strict historical identity and exact-time binding contract applies.
+
+**ACTIVE attack event `dc3a63ec-d9f8-412c-b0a1-09dd9398b27b` and its single `attack_event_sources` association: unchanged by this research commit.** This is a Git-only no-write preservation claim based on prior accepted readback; a fresh atomic Neon readback was not executed. No historical classification, canonical episode, production JSON, attack event, source row, SQL, Git operational branch, or Neon data was modified.
+
+## Owner disposition
+`C4_KHARKIV_06=BLOCKED_SOURCE_CONFLICT`; select neither source end without the explicit same-hromada transition evidence. Research-only proposal is `KEEP` all existing rows, not an assertion that the current canonical interval is correct. Maintain separate C4 lineage research for the other **24** non-conflict cases and continue **C3 live persistence** independently. Do not block them for this case. C4/C5 remain NOT PROVEN; Neon authority/cutover remain inactive. No new accepted repair checkpoint or change to project next task is asserted; therefore `main:PROJECT_STATE.md` and `main:CHANGELOG.md` are untouched pending coordinator/owner acceptance.
