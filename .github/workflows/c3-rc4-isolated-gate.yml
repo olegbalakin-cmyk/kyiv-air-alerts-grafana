@@ -1,0 +1,108 @@
+name: C3-RC4 isolated disposable PG16 and current frozen-source proof
+on:
+  push:
+    branches: [research-c3-rc4-fault-containment-2026-10-29-gpt6]
+    paths:
+      - ".github/workflows/c3-rc4-isolated-gate.yml"
+      - "research/c3_rc4_2026_10_29/**"
+permissions:
+  contents: read
+jobs:
+  rc4-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: offline
+          POSTGRES_PASSWORD: offline
+          POSTGRES_DB: offline_acceptance
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U offline -d offline_acceptance"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LOCAL_PROOF_POSTGRES_DSN: "postgresql://offline:offline@localhost:5432/offline_acceptance"
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NEON_DATABASE_URL: ""
+      UKRAINEALARM_API_TOKEN: ""
+      GITHUB_TOKEN: ""
+      ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
+      C3_RC2_FROZEN_DIR: "/tmp/rc4-frozen"
+      C3_RC3_REPORT_DIR: "/tmp/rc4-report"
+      C3_RC4_REPORT_DIR: "/tmp/rc4-report"
+      C3_RC4_MAIN_SHA: "4a97b2c73add677ecc37e28323a59278005cbca4"
+      C3_RC4_WIP_SHA: "6071cd7d2398a5b85bcb0637575038c5faafbc25"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Setup disposable proof and frozen input
+        run: |
+          pip install "psycopg[binary]" requests beautifulsoup4 pyyaml
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          mkdir -p "$C3_RC2_FROZEN_DIR" "$C3_RC4_REPORT_DIR"
+          for ref in c0e3cef6bb4437492cb5933fad5f2f6d5b23e3be 08c1a0a9cb3d27a73cfd85b48b31a29817c1d20d "$C3_RC4_MAIN_SHA" "$C3_RC4_WIP_SHA"; do
+            git fetch --no-tags --depth=1 origin "$ref"
+          done
+          for file in ukrainealarm_bridge.json alerts_combined.json sevastopol_events.json; do
+            git show c0e3cef6bb4437492cb5933fad5f2f6d5b23e3be:kyiv-air-alerts-grafana/data/"$file" > "$C3_RC2_FROZEN_DIR/$file"
+          done
+          cp research/c3_rc4_2026_10_29/sha_manifest.json "$C3_RC2_FROZEN_DIR/sha_manifest.json"
+          sha256sum "$C3_RC2_FROZEN_DIR"/*.json | tee "$C3_RC4_REPORT_DIR/source_sha256_probe.txt"
+      - name: 23 city frozen current-source regression
+        continue-on-error: true
+        run: python research/c3_rc4_2026_10_29/prove_23_city_regression_rc4.py
+      - name: Load disposable canonical PG16 schema
+        run: |
+          PGPASSWORD=offline psql -v ON_ERROR_STOP=1 -h localhost -U offline -d offline_acceptance -f kyiv-air-alerts-grafana/tests/fixtures/pg16_verified_canonical_schema.sql > "$C3_RC4_REPORT_DIR/schema.log"
+      - name: Four new PG16 fault scenarios and RC3 bounded baseline
+        continue-on-error: true
+        run: python research/c3_rc4_2026_10_29/prove_pg16_faults_rc4.py
+      - name: Conservative effective-trigger containment audit
+        continue-on-error: true
+        run: python research/c3_rc4_2026_10_29/prove_workflow_containment_rc4.py
+      - name: Record independently asserted exact-SHA release gate and SHA256 proof
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os,hashlib,pathlib
+          root=pathlib.Path(os.environ["C3_RC4_REPORT_DIR"])
+          def load(name):
+              p=root/name
+              return json.loads(p.read_text()) if p.exists() else {"result":"NOT_PROVEN"}
+          city=load("c3_rc4_23_city_results.json")
+          fault=load("c3_rc4_fault_results.json")
+          contain=load("c3_rc4_workflow_containment.json")
+          goodcity=(city.get("result")=="PASS" and city.get("source_hash_lock")=="PASS" and len(city.get("cities") or [])==23 and all(x.get("status")=="PASS" for x in city.get("cities") or []))
+          goodfault=(fault.get("all_10_fault_pass") is True and all(fault.get("scenarios",{}).get(x,{}).get("status")=="PASS" for x in ("independent_readback_failure","source_identity_conflict","source_failure_retry","event_stage_rollback")))
+          goodcontain=(contain.get("all_entry_containment_pass") is True and contain.get("result")=="PASS" and not contain.get("required_missing") and not contain.get("unguarded_operational_entries"))
+          gate={"gate":"C3-RC4","tested_sha":os.environ["GITHUB_SHA"],"source_pass":goodcity,"all_10_fault_pass":goodfault,"all_entry_containment_pass":goodcontain,"verdict":"C3_RC4_STAGING_PASS_CANDIDATE" if all([goodcity,goodfault,goodcontain]) else "C3_RC4_PARTIAL","release_authorized":False}
+          (root/"c3_rc4_release_gate.json").write_text(json.dumps(gate,indent=2,sort_keys=True)+"\n")
+          (root/"c3_rc4_proof_manifest.json").write_text(json.dumps({"tested_sha":os.environ["GITHUB_SHA"],"workflow_ref":os.environ.get("GITHUB_REF_NAME"),"workflow_run_id":os.environ.get("GITHUB_RUN_ID"),"workflow_attempt":os.environ.get("GITHUB_RUN_ATTEMPT"),"artifacts":"uploaded after this manifest; find id and digest in GitHub Actions API","gate":gate},indent=2,sort_keys=True)+"\n")
+          paths=[p for p in root.iterdir() if p.is_file() and p.name!="sha256_manifest.json"]
+          (root/"sha256_manifest.json").write_text(json.dumps({p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},indent=2,sort_keys=True)+"\n")
+          print("C3_RC4_RELEASE_GATE="+json.dumps(gate,sort_keys=True))
+          PY
+      - name: Upload exact-SHA bounded evidence even on partial
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-rc4-exact-sha-proof
+          path: /tmp/rc4-report/
+          if-no-files-found: error
+      - name: Assert release gate fail closed
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open("/tmp/rc4-report/c3_rc4_release_gate.json"))
+          assert x["verdict"]=="C3_RC4_STAGING_PASS_CANDIDATE", "C3_RC4_PARTIAL_GATE_CLOSED"
+          PY
