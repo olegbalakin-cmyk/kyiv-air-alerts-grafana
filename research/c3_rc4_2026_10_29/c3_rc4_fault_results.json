@@ -1,0 +1,30 @@
+{
+  "gate": "C3-RC4",
+  "kind": "git_static_executed_summary_runtime_sql_receipts_in_actions_artifact",
+  "first_executed_run_id": 40780027105,
+  "first_tested_sha": "12460d3942a98a31336579bf448d89badf43ebc7",
+  "first_artifact_id": 12856951254,
+  "first_artifact_digest": "sha256:f588fbb3d74937becc6943b86c4422ad3e127d63219c63e70a0aa68946c6e661",
+  "postgres_version": "16.15",
+  "accepted_rc3_six_reexecuted": "PASS",
+  "new_scenarios": {
+    "independent_readback_failure": {
+      "verdict": "PASS",
+      "integration": "monitor.main"
+    },
+    "source_identity_conflict": {
+      "verdict": "PASS",
+      "integration": "direct real persistence/queue"
+    },
+    "source_failure_retry": {
+      "verdict": "PASS",
+      "integration": "monitor.main"
+    },
+    "event_stage_rollback": {
+      "verdict": "PASS",
+      "integration": "direct real positive persistence/queue"
+    }
+  },
+  "sql_receipts_location": "runtime artifact; not duplicated into Git",
+  "final_exact_sha_retest": "refer to CI artifact on final branch HEAD"
+}
