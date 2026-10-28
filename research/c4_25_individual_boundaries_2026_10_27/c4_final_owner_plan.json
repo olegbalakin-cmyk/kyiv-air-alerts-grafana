@@ -1,0 +1,1738 @@
+{
+  "version": "c4_owner_review_bounded_v1",
+  "date": "2026-10-28",
+  "research_only": true,
+  "can_execute": false,
+  "main": "de6e67d442999db62b01aa9477af00b015a34a71",
+  "site_prod": "2d9a42a2e7d50c03a4312cda496bccb125cec19a",
+  "neon": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "compute": "ep-calm-rice-b5073ypp",
+    "read_only": true
+  },
+  "summary": {
+    "cases": 25,
+    "canonical_middle_present": 25,
+    "kyiv_json_literal_matches": 18,
+    "unbound_classifications": 25,
+    "active_events": 2,
+    "approved_neon_edits": 0,
+    "approved_json_edits": 0,
+    "approved_relinks": 0,
+    "blocked_source_conflict": 1,
+    "blocked_identity_contract": 24
+  },
+  "limitations": [
+    "No frozen cross-query Neon snapshot",
+    "Non-Kyiv production JSON is not literal episodes",
+    "Unverified end-to-end A/B producer replay",
+    "Four Lviv CSV original bytes not in current runtime; use Git recorded hashes",
+    "No current verified identity-compatible historical lineage admission mechanism",
+    "These are NO WRITE decisions, not proof no eventual corrections required"
+  ],
+  "cases": [
+    {
+      "number": 1,
+      "city": "lviv",
+      "classification_uid": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+      "historical": {
+        "legacy_episode_id": "202d8d1527183a6282ccf1e2",
+        "start_at": "2026-09-13T02:32:14.172Z",
+        "end_at": "2026-09-13T06:11:11.976Z",
+        "original_source_provenance": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 122
+        }
+      },
+      "canonical": {
+        "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+        "legacy_episode_id": "c2cd9a96768756d84c250735",
+        "start_at": "2026-09-13T02:32:14.000Z",
+        "end_at": "2026-09-13T06:11:11.976Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "c90e7b05-1982-461f-945f-53d8130c627b",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-13T02:32:14.000Z",
+            "end_at": "2026-09-13T06:11:11.976Z",
+            "legacy_episode_id": "c2cd9a96768756d84c250735"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Alerts.in.ua 2026-09-07..16 archive and owner CSV",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 2,
+      "city": "lviv",
+      "classification_uid": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+      "historical": {
+        "legacy_episode_id": "b24ba103214a22f4d5e65ce4",
+        "start_at": "2026-09-15T16:44:13.025Z",
+        "end_at": "2026-09-15T17:08:51.287Z",
+        "original_source_provenance": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 123
+        }
+      },
+      "canonical": {
+        "episode_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+        "legacy_episode_id": "94ce779cf047984e881bfdd5",
+        "start_at": "2026-09-15T16:44:13.000Z",
+        "end_at": "2026-09-15T17:09:02.000Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-15T16:44:13.000Z",
+            "end_at": "2026-09-15T17:09:02.000Z",
+            "legacy_episode_id": "94ce779cf047984e881bfdd5"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Alerts.in.ua 2026-09-07..16 archive and owner CSV",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 3,
+      "city": "lviv",
+      "classification_uid": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+      "historical": {
+        "legacy_episode_id": "b3df9090f7264ddbd726e113",
+        "start_at": "2026-09-12T22:00:05.398Z",
+        "end_at": "2026-09-12T22:14:23.315Z",
+        "original_source_provenance": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+          "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4",
+          "index": 121
+        }
+      },
+      "canonical": {
+        "episode_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+        "legacy_episode_id": "7dd411c2a2587efc740a1a66",
+        "start_at": "2026-09-12T22:00:05.398Z",
+        "end_at": "2026-09-12T22:14:27.000Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-12T22:00:05.398Z",
+            "end_at": "2026-09-12T22:14:27.000Z",
+            "legacy_episode_id": "7dd411c2a2587efc740a1a66"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Alerts.in.ua 2026-09-07..16 archive and owner CSV",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 4,
+      "city": "sumy",
+      "classification_uid": "0a40106c-7ee9-40c4-b268-504954f3be19",
+      "historical": {
+        "legacy_episode_id": "d1d8f1e454e15cb6ed6b306c",
+        "start_at": "2026-09-17T17:12:24.000Z",
+        "end_at": "2026-09-17T20:56:00.000Z",
+        "original_source_provenance": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4c_alerts.json",
+          "blob": "70a6b1cb003a4a805e6fe30dc060283ace3042cf",
+          "index": 190
+        }
+      },
+      "canonical": {
+        "episode_uid": "8309abeb-0b67-43f6-b779-9de629cf9f40",
+        "legacy_episode_id": "6b3b1edae024bf043a2f3133",
+        "start_at": "2026-09-17T17:12:23.457Z",
+        "end_at": "2026-09-17T20:56:00.378Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "8309abeb-0b67-43f6-b779-9de629cf9f40",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T17:12:23.457Z",
+            "end_at": "2026-09-17T20:56:00.378Z",
+            "legacy_episode_id": "6b3b1edae024bf043a2f3133"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "0a40106c-7ee9-40c4-b268-504954f3be19",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Owner Alerts.in.ua seconds-precision CSV; relevant geographic scope must be retained",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 5,
+      "city": "zaporizhzhia",
+      "classification_uid": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+      "historical": {
+        "legacy_episode_id": "c138680a6beb87a4aa8be6fc",
+        "start_at": "2026-09-17T19:33:49.000Z",
+        "end_at": "2026-09-17T21:54:45.000Z",
+        "original_source_provenance": {
+          "commit": "312262dfa268476a24716bbe08e8c7d19334a9d3",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json",
+          "blob": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+          "index": 193
+        }
+      },
+      "canonical": {
+        "episode_uid": "cb08e0c9-55bf-4419-a153-7cf37eaf3f07",
+        "legacy_episode_id": "5aade8727ec5bcd9869328e2",
+        "start_at": "2026-09-17T19:33:49.122Z",
+        "end_at": "2026-09-17T21:54:45.478Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "SENSITIVITY_EVENT_POSITIVE",
+        "is_event": true,
+        "source_count": 6
+      },
+      "events": [
+        {
+          "uid": "ef34834b-0513-4351-8839-d866a0e76e99",
+          "status": "ACTIVE"
+        }
+      ],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "cb08e0c9-55bf-4419-a153-7cf37eaf3f07",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T19:33:49.122Z",
+            "end_at": "2026-09-17T21:54:45.478Z",
+            "legacy_episode_id": "5aade8727ec5bcd9869328e2"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Owner Alerts.in.ua seconds-precision CSV; relevant geographic scope must be retained",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 6,
+      "city": "kharkiv",
+      "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+      "historical": {
+        "legacy_episode_id": "0fc4be61b3b03eb9027c2536",
+        "start_at": "2025-03-05T19:08:24.000Z",
+        "end_at": "2025-03-06T03:03:45.000Z",
+        "original_source_provenance": {
+          "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-historical-recovery_alerts.json",
+          "blob": "419d3bdf57517f455951968cdaffd926020fffc7",
+          "index": 86
+        }
+      },
+      "canonical": {
+        "episode_uid": "a556ee0d-4a90-40b4-adf1-db55646cd05b",
+        "legacy_episode_id": "cb4d84c97db70f7a08cdc74b",
+        "start_at": "2025-03-05T19:08:24.000Z",
+        "end_at": "2025-03-05T19:47:55.000Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "STRICT_EVENT_POSITIVE",
+        "is_event": true,
+        "source_count": 1
+      },
+      "events": [
+        {
+          "uid": "dc3a63ec-d9f8-412c-b0a1-09dd9398b27b",
+          "status": "ACTIVE"
+        }
+      ],
+      "status": "BLOCKED_SOURCE_CONFLICT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "a556ee0d-4a90-40b4-adf1-db55646cd05b",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2025-03-05T19:08:24.000Z",
+            "end_at": "2025-03-05T19:47:55.000Z",
+            "legacy_episode_id": "cb4d84c97db70f7a08cdc74b"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Owner Alerts.in.ua seconds-precision CSV; relevant geographic scope must be retained",
+      "blockers": [
+        "7h15m50s source ending conflict",
+        "identity contract"
+      ]
+    },
+    {
+      "number": 7,
+      "city": "kharkiv",
+      "classification_uid": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+      "historical": {
+        "legacy_episode_id": "fc1226778d0125bc91aa669c",
+        "start_at": "2026-09-17T17:41:38.000Z",
+        "end_at": "2026-09-17T20:55:54.000Z",
+        "original_source_provenance": {
+          "commit": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6c_alerts.json",
+          "blob": "d22744d845503c559c85337f012026e2e7064eaa",
+          "index": 195
+        }
+      },
+      "canonical": {
+        "episode_uid": "054dfada-c567-48eb-871b-f1822927025e",
+        "legacy_episode_id": "ed307f8543a971bba77afdd0",
+        "start_at": "2026-09-17T17:41:38.154Z",
+        "end_at": "2026-09-17T20:55:54.658Z"
+      },
+      "production_literal": null,
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "054dfada-c567-48eb-871b-f1822927025e",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T17:41:38.154Z",
+            "end_at": "2026-09-17T20:55:54.658Z",
+            "legacy_episode_id": "ed307f8543a971bba77afdd0"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Owner Alerts.in.ua seconds-precision CSV; relevant geographic scope must be retained",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 8,
+      "city": "kyiv",
+      "classification_uid": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609170203000300-202609170254000300",
+        "start_at": "2026-09-16T23:03:00.000Z",
+        "end_at": "2026-09-16T23:54:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 237
+        }
+      },
+      "canonical": {
+        "episode_uid": "2859e0a1-753e-4474-8557-e98fcec6b0b2",
+        "legacy_episode_id": "febcf53216eae6829a365729",
+        "start_at": "2026-09-16T23:03:21.000Z",
+        "end_at": "2026-09-16T23:54:04.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T23:03:21.000Z",
+          "end_at": "2026-09-16T23:54:04.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "2859e0a1-753e-4474-8557-e98fcec6b0b2",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T23:03:21.000Z",
+            "end_at": "2026-09-16T23:54:04.000Z",
+            "legacy_episode_id": "febcf53216eae6829a365729"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 9,
+      "city": "kyiv",
+      "classification_uid": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609171140000300-202609171155000300",
+        "start_at": "2026-09-17T08:40:00.000Z",
+        "end_at": "2026-09-17T08:55:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 241
+        }
+      },
+      "canonical": {
+        "episode_uid": "81f481d9-d9fd-4cdb-9e5c-d13be7d14c92",
+        "legacy_episode_id": "dce3e25b74ec9ef20aa7145f",
+        "start_at": "2026-09-17T08:40:05.000Z",
+        "end_at": "2026-09-17T08:55:26.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T08:40:05.000Z",
+          "end_at": "2026-09-17T08:55:26.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "81f481d9-d9fd-4cdb-9e5c-d13be7d14c92",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T08:40:05.000Z",
+            "end_at": "2026-09-17T08:55:26.000Z",
+            "legacy_episode_id": "dce3e25b74ec9ef20aa7145f"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 10,
+      "city": "kyiv",
+      "classification_uid": "7617c848-89be-4d2e-8910-207f25fcd678",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609151507000300-202609151620000300",
+        "start_at": "2026-09-15T12:07:00.000Z",
+        "end_at": "2026-09-15T13:20:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 228
+        }
+      },
+      "canonical": {
+        "episode_uid": "1b9a847d-da9b-4e05-8551-e24d80803b47",
+        "legacy_episode_id": "d10be5b1460cb0e70c71c545",
+        "start_at": "2026-09-15T12:07:14.000Z",
+        "end_at": "2026-09-15T13:20:16.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-15T12:07:14.000Z",
+          "end_at": "2026-09-15T13:20:16.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "1b9a847d-da9b-4e05-8551-e24d80803b47",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-15T12:07:14.000Z",
+            "end_at": "2026-09-15T13:20:16.000Z",
+            "legacy_episode_id": "d10be5b1460cb0e70c71c545"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "7617c848-89be-4d2e-8910-207f25fcd678",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 11,
+      "city": "kyiv",
+      "classification_uid": "7f6741fb-915d-4152-8e74-b023f05f470e",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609170901000300-202609170903000300",
+        "start_at": "2026-09-17T06:01:00.000Z",
+        "end_at": "2026-09-17T06:03:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 239
+        }
+      },
+      "canonical": {
+        "episode_uid": "444aa3d0-540e-44fa-b2d2-2dda052f85b5",
+        "legacy_episode_id": "f9e39d48477174b2d8ea098c",
+        "start_at": "2026-09-17T06:01:54.000Z",
+        "end_at": "2026-09-17T06:03:32.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T06:01:54.000Z",
+          "end_at": "2026-09-17T06:03:32.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "444aa3d0-540e-44fa-b2d2-2dda052f85b5",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T06:01:54.000Z",
+            "end_at": "2026-09-17T06:03:32.000Z",
+            "legacy_episode_id": "f9e39d48477174b2d8ea098c"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "7f6741fb-915d-4152-8e74-b023f05f470e",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 12,
+      "city": "kyiv",
+      "classification_uid": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609170930000300-202609171002000300",
+        "start_at": "2026-09-17T06:30:00.000Z",
+        "end_at": "2026-09-17T07:02:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 240
+        }
+      },
+      "canonical": {
+        "episode_uid": "1ac24cc5-2f26-4f3a-ba1f-07a93b0990ae",
+        "legacy_episode_id": "4d0533cc496f7f27278a8ceb",
+        "start_at": "2026-09-17T06:30:08.000Z",
+        "end_at": "2026-09-17T07:02:04.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T06:30:08.000Z",
+          "end_at": "2026-09-17T07:02:04.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "1ac24cc5-2f26-4f3a-ba1f-07a93b0990ae",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T06:30:08.000Z",
+            "end_at": "2026-09-17T07:02:04.000Z",
+            "legacy_episode_id": "4d0533cc496f7f27278a8ceb"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 13,
+      "city": "kyiv",
+      "classification_uid": "457dba20-311a-4531-86a4-8d3f92efd1db",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609151944000300-202609152009000300",
+        "start_at": "2026-09-15T16:44:00.000Z",
+        "end_at": "2026-09-15T17:09:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 229
+        }
+      },
+      "canonical": {
+        "episode_uid": "3f6bb8b8-3cf4-4051-8ecb-ee354a2249f1",
+        "legacy_episode_id": "5916c9c46838ea717d658eba",
+        "start_at": "2026-09-15T16:44:41.000Z",
+        "end_at": "2026-09-15T17:09:20.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-15T16:44:41.000Z",
+          "end_at": "2026-09-15T17:09:20.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "3f6bb8b8-3cf4-4051-8ecb-ee354a2249f1",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-15T16:44:41.000Z",
+            "end_at": "2026-09-15T17:09:20.000Z",
+            "legacy_episode_id": "5916c9c46838ea717d658eba"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "457dba20-311a-4531-86a4-8d3f92efd1db",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 14,
+      "city": "kyiv",
+      "classification_uid": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609172156000300-202609172210000300",
+        "start_at": "2026-09-17T18:56:00.000Z",
+        "end_at": "2026-09-17T19:10:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 245
+        }
+      },
+      "canonical": {
+        "episode_uid": "306a5746-8ef5-4953-8866-94891e106576",
+        "legacy_episode_id": "d2f41afe4c3bb8de605d06a8",
+        "start_at": "2026-09-17T18:56:22.000Z",
+        "end_at": "2026-09-17T19:10:07.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T18:56:22.000Z",
+          "end_at": "2026-09-17T19:10:07.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "306a5746-8ef5-4953-8866-94891e106576",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T18:56:22.000Z",
+            "end_at": "2026-09-17T19:10:07.000Z",
+            "legacy_episode_id": "d2f41afe4c3bb8de605d06a8"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 15,
+      "city": "kyiv",
+      "classification_uid": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609161723000300-202609161808000300",
+        "start_at": "2026-09-16T14:23:00.000Z",
+        "end_at": "2026-09-16T15:08:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 233
+        }
+      },
+      "canonical": {
+        "episode_uid": "79544d7b-aa79-447a-8e5d-f9cbab54fe16",
+        "legacy_episode_id": "4d49916349bb847d51abaa0a",
+        "start_at": "2026-09-16T14:23:12.000Z",
+        "end_at": "2026-09-16T15:08:52.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T14:23:12.000Z",
+          "end_at": "2026-09-16T15:08:52.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "79544d7b-aa79-447a-8e5d-f9cbab54fe16",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T14:23:12.000Z",
+            "end_at": "2026-09-16T15:08:52.000Z",
+            "legacy_episode_id": "4d49916349bb847d51abaa0a"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 16,
+      "city": "kyiv",
+      "classification_uid": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609171322000300-202609171342000300",
+        "start_at": "2026-09-17T10:22:00.000Z",
+        "end_at": "2026-09-17T10:42:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 242
+        }
+      },
+      "canonical": {
+        "episode_uid": "a10742f0-1dfc-4041-b48c-5fe791c94742",
+        "legacy_episode_id": "c443fec2b52048bc3b50cb5b",
+        "start_at": "2026-09-17T10:22:10.000Z",
+        "end_at": "2026-09-17T10:42:46.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T10:22:10.000Z",
+          "end_at": "2026-09-17T10:42:46.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "a10742f0-1dfc-4041-b48c-5fe791c94742",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T10:22:10.000Z",
+            "end_at": "2026-09-17T10:42:46.000Z",
+            "legacy_episode_id": "c443fec2b52048bc3b50cb5b"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 17,
+      "city": "kyiv",
+      "classification_uid": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609160910000300-202609160931000300",
+        "start_at": "2026-09-16T06:10:00.000Z",
+        "end_at": "2026-09-16T06:31:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 232
+        }
+      },
+      "canonical": {
+        "episode_uid": "a89b6cc3-fac9-44c5-8454-e35ed9e6d6c1",
+        "legacy_episode_id": "002475291323c9bdd0123ad2",
+        "start_at": "2026-09-16T06:10:36.000Z",
+        "end_at": "2026-09-16T06:31:25.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T06:10:36.000Z",
+          "end_at": "2026-09-16T06:31:25.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "a89b6cc3-fac9-44c5-8454-e35ed9e6d6c1",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T06:10:36.000Z",
+            "end_at": "2026-09-16T06:31:25.000Z",
+            "legacy_episode_id": "002475291323c9bdd0123ad2"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 18,
+      "city": "kyiv",
+      "classification_uid": "92096abc-07aa-42b8-89b5-f249650340fc",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609170433000300-202609170718000300",
+        "start_at": "2026-09-17T01:33:00.000Z",
+        "end_at": "2026-09-17T04:18:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 238
+        }
+      },
+      "canonical": {
+        "episode_uid": "114039f8-585c-4bd6-b16c-750ccd2ed174",
+        "legacy_episode_id": "65b2d23144cf8c4b623a22f0",
+        "start_at": "2026-09-17T01:33:37.000Z",
+        "end_at": "2026-09-17T04:18:25.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T01:33:37.000Z",
+          "end_at": "2026-09-17T04:18:25.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "114039f8-585c-4bd6-b16c-750ccd2ed174",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T01:33:37.000Z",
+            "end_at": "2026-09-17T04:18:25.000Z",
+            "legacy_episode_id": "65b2d23144cf8c4b623a22f0"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "92096abc-07aa-42b8-89b5-f249650340fc",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 19,
+      "city": "kyiv",
+      "classification_uid": "0fef7097-990b-405c-b687-3c52a1360deb",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609161959000300-202609162013000300",
+        "start_at": "2026-09-16T16:59:00.000Z",
+        "end_at": "2026-09-16T17:13:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 234
+        }
+      },
+      "canonical": {
+        "episode_uid": "aa67f705-f488-4cdb-900c-8c1140eb270b",
+        "legacy_episode_id": "007edd73cc06be5f99b9373c",
+        "start_at": "2026-09-16T16:59:29.000Z",
+        "end_at": "2026-09-16T17:13:56.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T16:59:29.000Z",
+          "end_at": "2026-09-16T17:13:56.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "aa67f705-f488-4cdb-900c-8c1140eb270b",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T16:59:29.000Z",
+            "end_at": "2026-09-16T17:13:56.000Z",
+            "legacy_episode_id": "007edd73cc06be5f99b9373c"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "0fef7097-990b-405c-b687-3c52a1360deb",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 20,
+      "city": "kyiv",
+      "classification_uid": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609172040000300-202609172045000300",
+        "start_at": "2026-09-17T17:40:00.000Z",
+        "end_at": "2026-09-17T17:45:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 244
+        }
+      },
+      "canonical": {
+        "episode_uid": "aa4082a9-d2f0-422f-bc80-b40737bb175a",
+        "legacy_episode_id": "e61c130ebcc0829ca57bf98e",
+        "start_at": "2026-09-17T17:40:35.000Z",
+        "end_at": "2026-09-17T17:45:01.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T17:40:35.000Z",
+          "end_at": "2026-09-17T17:45:01.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "aa4082a9-d2f0-422f-bc80-b40737bb175a",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T17:40:35.000Z",
+            "end_at": "2026-09-17T17:45:01.000Z",
+            "legacy_episode_id": "e61c130ebcc0829ca57bf98e"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 21,
+      "city": "kyiv",
+      "classification_uid": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609171631000300-202609171657000300",
+        "start_at": "2026-09-17T13:31:00.000Z",
+        "end_at": "2026-09-17T13:57:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 243
+        }
+      },
+      "canonical": {
+        "episode_uid": "509e4d59-9c02-4811-9ff4-796b17df9eac",
+        "legacy_episode_id": "22f1649ee8e9499648e7b5b5",
+        "start_at": "2026-09-17T13:31:52.000Z",
+        "end_at": "2026-09-17T13:57:29.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-17T13:31:52.000Z",
+          "end_at": "2026-09-17T13:57:29.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "509e4d59-9c02-4811-9ff4-796b17df9eac",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-17T13:31:52.000Z",
+            "end_at": "2026-09-17T13:57:29.000Z",
+            "legacy_episode_id": "22f1649ee8e9499648e7b5b5"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 22,
+      "city": "kyiv",
+      "classification_uid": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609170021000300-202609170133000300",
+        "start_at": "2026-09-16T21:21:00.000Z",
+        "end_at": "2026-09-16T22:33:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 236
+        }
+      },
+      "canonical": {
+        "episode_uid": "004d44fe-ac09-47a0-8de5-8c0a96c57321",
+        "legacy_episode_id": "7ad2e40c8b1f9a143cdc6522",
+        "start_at": "2026-09-16T21:21:34.000Z",
+        "end_at": "2026-09-16T22:33:09.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T21:21:34.000Z",
+          "end_at": "2026-09-16T22:33:09.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "004d44fe-ac09-47a0-8de5-8c0a96c57321",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T21:21:34.000Z",
+            "end_at": "2026-09-16T22:33:09.000Z",
+            "legacy_episode_id": "7ad2e40c8b1f9a143cdc6522"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 23,
+      "city": "kyiv",
+      "classification_uid": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609160505000300-202609160509000300",
+        "start_at": "2026-09-16T02:05:00.000Z",
+        "end_at": "2026-09-16T02:09:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 230
+        }
+      },
+      "canonical": {
+        "episode_uid": "547148ff-565e-4cf9-890a-2d39a03a16d1",
+        "legacy_episode_id": "319aeba659bd03786f015f95",
+        "start_at": "2026-09-16T02:05:23.000Z",
+        "end_at": "2026-09-16T02:09:13.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T02:05:23.000Z",
+          "end_at": "2026-09-16T02:09:13.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NEEDS_REVIEW",
+        "is_event": false,
+        "source_count": 1
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "547148ff-565e-4cf9-890a-2d39a03a16d1",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T02:05:23.000Z",
+            "end_at": "2026-09-16T02:09:13.000Z",
+            "legacy_episode_id": "319aeba659bd03786f015f95"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 24,
+      "city": "kyiv",
+      "classification_uid": "b644517c-e393-4078-8fde-d53799ea4071",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609162120000300-202609162131000300",
+        "start_at": "2026-09-16T18:20:00.000Z",
+        "end_at": "2026-09-16T18:31:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 235
+        }
+      },
+      "canonical": {
+        "episode_uid": "8dcdfa1d-2285-4a3a-8bd8-338cd296cae8",
+        "legacy_episode_id": "e3b3426342577b57201130b6",
+        "start_at": "2026-09-16T18:20:57.000Z",
+        "end_at": "2026-09-16T18:31:58.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T18:20:57.000Z",
+          "end_at": "2026-09-16T18:31:58.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "8dcdfa1d-2285-4a3a-8bd8-338cd296cae8",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T18:20:57.000Z",
+            "end_at": "2026-09-16T18:31:58.000Z",
+            "legacy_episode_id": "e3b3426342577b57201130b6"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "b644517c-e393-4078-8fde-d53799ea4071",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    },
+    {
+      "number": 25,
+      "city": "kyiv",
+      "classification_uid": "583be6d4-adb1-4938-8186-d97d9012c2be",
+      "historical": {
+        "legacy_episode_id": "kyiv-202609160653000300-202609160736000300",
+        "start_at": "2026-09-16T03:53:00.000Z",
+        "end_at": "2026-09-16T04:36:00.000Z",
+        "original_source_provenance": {
+          "commit": "e460bc30524deb8abc37923276d78f6dab1450a4",
+          "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "index": 231
+        }
+      },
+      "canonical": {
+        "episode_uid": "5f6e672e-6829-4311-95b9-d85c779c877e",
+        "legacy_episode_id": "f27ddc1152189d5ed9653305",
+        "start_at": "2026-09-16T03:53:48.000Z",
+        "end_at": "2026-09-16T04:36:40.000Z"
+      },
+      "production_literal": [
+        {
+          "start_at": "2026-09-16T03:53:48.000Z",
+          "end_at": "2026-09-16T04:36:40.000Z",
+          "source": "official_json"
+        }
+      ],
+      "classification": {
+        "binding_state": "UNBOUND",
+        "bound_uid": null,
+        "verdict": "NO_CONFIRMED_EVENT",
+        "is_event": false,
+        "source_count": 0
+      },
+      "events": [],
+      "status": "BLOCKED_IDENTITY_CONTRACT",
+      "proposed_operations": [
+        {
+          "table": "alert_episodes",
+          "id": "5f6e672e-6829-4311-95b9-d85c779c877e",
+          "operation": "KEEP",
+          "before": {
+            "start_at": "2026-09-16T03:53:48.000Z",
+            "end_at": "2026-09-16T04:36:40.000Z",
+            "legacy_episode_id": "f27ddc1152189d5ed9653305"
+          },
+          "after": "unchanged pending final source reconciliation",
+          "executable": false
+        },
+        {
+          "table": "attack_event_classifications",
+          "id": "583be6d4-adb1-4938-8186-d97d9012c2be",
+          "operation": "HISTORICAL_LINEAGE",
+          "before": {
+            "binding_state": "UNBOUND",
+            "alert_episode_uid": null
+          },
+          "after": null,
+          "executable": false,
+          "blocker": "historical-to-canonical identity contract not approved"
+        }
+      ],
+      "source_evidence": "Kyiv municipal exact-city official_json",
+      "blockers": [
+        "historical identity contract",
+        "full A/B producer consistency not certified"
+      ]
+    }
+  ],
+  "validation_requirements": [
+    "Preserve A/B",
+    "Do not count overlapping same physical row twice",
+    "Preserve verdict and evidence/source digests",
+    "Preserve attack_events and sources",
+    "Verify generator does not revert proposed correction",
+    "Require idempotent repeat zero delta"
+  ]
+}
