@@ -1,48 +1,162 @@
 {
-  "schema_version": "c4-kh06-publication-lag-v1",
-  "verdict": "UNRESOLVED",
-  "archive_read": false,
-  "archive_path": "messages.html",
-  "week_covered": null,
-  "exact_city_alert_messages_extracted": null,
-  "verified_telegram_message_ids": [],
-  "independently_matched_event_pairs": 0,
-  "lag_statistics": {
+  "schema_version": "c4-kh06-publication-lag-v2",
+  "research_status": "UNRESOLVED",
+  "owner_decision": "KEEP_CURRENT_DATA",
+  "baseline_accepted_report_commit": "21c6e0ae666246f0137893e980d342731d549bc2",
+  "newly_verified_source": {
+    "name": "Suspilne Kharkiv Telegram HTML",
+    "source_surface": "owner Library indexed HTML text",
+    "text_index_read": true,
+    "original_html_bytes_materialized": false,
+    "original_html_sha256_verified": false,
+    "total_indexed_lines": 40822,
+    "coverage_window_local": [
+      "2025-03-03",
+      "2025-03-07"
+    ],
+    "missing_week_dates": [
+      "2025-03-08",
+      "2025-03-09"
+    ],
+    "not_full_week": true
+  },
+  "matched_direct_publication_counts": {
+    "city_air_on": 24,
+    "city_air_off": 24,
+    "oblast_air_on": 26,
+    "oblast_air_off": 26,
+    "scope": "messages with exact geographic name as lead strong title and matching AIR ON or OFF; not geography mentioned in notes"
+  },
+  "target_messages": [
+    {
+      "id": "55077",
+      "local": "2025-03-05T20:06:56+02:00",
+      "scope": "kharkiv_city_hromada",
+      "signal": "AIR_ON",
+      "note": "previous separate alert"
+    },
+    {
+      "id": "55078",
+      "local": "2025-03-05T20:31:13+02:00",
+      "scope": "kharkiv_city_hromada",
+      "signal": "AIR_OFF",
+      "note": "previous alert ended before case start"
+    },
+    {
+      "id": "55079",
+      "local": "2025-03-05T20:31:17+02:00",
+      "scope": "kharkiv_oblast",
+      "signal": "AIR_OFF"
+    },
+    {
+      "id": "55081",
+      "local": "2025-03-05T21:08:32+02:00",
+      "scope": "kharkiv_city_hromada",
+      "signal": "AIR_ON"
+    },
+    {
+      "id": "55082",
+      "local": "2025-03-05T21:13:53+02:00",
+      "scope": "kharkiv_oblast",
+      "signal": "AIR_ON"
+    },
+    {
+      "id": "55096",
+      "local": "2025-03-06T05:28:46+02:00",
+      "scope": "kharkiv_oblast",
+      "signal": "AIR_OFF",
+      "note": "body explicitly says city hromada alert continues"
+    },
+    {
+      "id": "55097",
+      "local": "2025-03-06T05:28:53+02:00",
+      "scope": "kharkiv_city_hromada",
+      "signal": "AIR_OFF"
+    }
+  ],
+  "distinct_city_messages_between_55081_and_55097": {
+    "city_air_off_count_between_exclusive": 0,
+    "city_air_on_count_between_exclusive": 0,
+    "meaning": "no intermediate separate city AIR ON/OFF publication in accessible archive; absence does NOT prove official event-state continuity"
+  },
+  "official_event_to_publication_lag": {
+    "status": "NOT_ESTIMABLE",
+    "independently_matched_city_official_event_at_and_publication_pairs": 0,
     "on": {
-      "sample_n": 0,
       "median_seconds": null,
       "p90_seconds": null,
       "max_seconds": null
     },
     "off": {
-      "sample_n": 0,
       "median_seconds": null,
       "p90_seconds": null,
       "max_seconds": null
     }
   },
-  "hypothetical_pairs": [
+  "cross_geography_near_neighbor_publication_gap": {
+    "definition": "For each exact city AIR ON/OFF publication choose nearest oblast publication of same ON/OFF kind within +/-90 seconds (calendar 3-7 March). Clock difference is between two publications, NOT publication lag from official event.",
+    "pair_identity_verified": false,
+    "window_seconds": 90,
+    "on": {
+      "n": 16,
+      "median_abs_seconds": 21.5,
+      "p90_nearest_rank_abs_seconds": 61,
+      "max_abs_seconds": 64
+    },
+    "off": {
+      "n": 21,
+      "median_abs_seconds": 18,
+      "p90_nearest_rank_abs_seconds": 37,
+      "max_abs_seconds": 84
+    },
+    "target_off_gap_seconds": 7,
+    "target_on_city_vs_oblast_seconds": 321,
+    "selection_bias": "Capped 90-second window; these statistics cannot represent all channel events and must not be extrapolated to 25-minute upstream lag."
+  },
+  "conditional_differences": [
     {
-      "event": "ON",
-      "event_time": "2025-03-05T19:08:24Z",
-      "claimed_published_at": "2025-03-05T19:08:32Z",
+      "type": "ON",
+      "reference": "prior Alerts.in.ua/Vadimkin start",
+      "reference_local": "2025-03-05T21:08:24+02:00",
+      "telegram_message_id": "55081",
+      "telegram_local": "2025-03-05T21:08:32+02:00",
       "difference_seconds": 8,
-      "status": "UNVERIFIED_USER_CLOCKS_NOT_IN_SAMPLE"
+      "established_as_publication_lag": false
     },
     {
-      "event": "OFF",
-      "event_time": "2025-03-06T03:03:45Z",
-      "claimed_published_at": "2025-03-06T03:28:53Z",
+      "type": "OFF",
+      "reference": "prior Alerts.in.ua city end",
+      "reference_local": "2025-03-06T05:03:45+02:00",
+      "telegram_message_id": "55097",
+      "telegram_local": "2025-03-06T05:28:53+02:00",
       "difference_seconds": 1508,
-      "status": "UNVERIFIED_NOT_ESTABLISHED_AS_PUBLICATION_LAG"
+      "established_as_publication_lag": false
     }
   ],
-  "mechanism": "UNDETERMINED_TEMPLATE_ALONE_CANNOT_ESTABLISH_AUTOMATION",
-  "missing": [
-    "original Telegram messages.html raw export with message IDs/date stamps",
-    "complete same-hromada official AIR ON/OFF transition chronology",
-    "original Vadimkin source rows and provider ID mapping"
-  ],
-  "no_raw_files_retrieved": true,
-  "other_24_independent": true
+  "ukrainealarm_map": {
+    "march5": "2025-03-05 21:13-00:00 oblast/raion red interval",
+    "march6": "2025-03-06 00:00-05:28 oblast/raion red interval; owner-confirmed screenshot date",
+    "precision": "minute",
+    "independent_city_signal_identifier_present": false,
+    "matching_telegram_oblast_off_minute": "2025-03-06 05:28",
+    "raw_state_event_time_certified": false,
+    "source_provenance": "screenshots and corrected Git research addendum c6389b8c"
+  },
+  "provider_source_and_automation": {
+    "manual_vs_automated": "UNDETERMINED",
+    "geography_distinguished": "YES_IN_TELEGRAM_TEXT",
+    "published_times_are_official_event_times": false
+  },
+  "missing_primary_fact": "Authenticated ordered city-hromada AIR state transitions including presence/absence of OFF at 21:47:55, possible subsequent city ON, and authoritative city OFF near 05:03 or 05:28; territory/source IDs and event_at required.",
+  "conservation": {
+    "parent": "a556ee0d-4a90-40b4-adf1-db55646cd05b",
+    "classification": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+    "classification_verdict": "STRICT_EVENT_POSITIVE",
+    "binding": "UNBOUND",
+    "active_event": "dc3a63ec-d9f8-412c-b0a1-09dd9398b27b",
+    "all_kept_unchanged": true,
+    "neon_writes": false,
+    "production_edits": false,
+    "other_24_independent": true
+  }
 }
