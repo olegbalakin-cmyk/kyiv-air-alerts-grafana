@@ -1,0 +1,79 @@
+{
+  "gate": "C3-RC3",
+  "verdict": "PARTIAL",
+  "proof_run": 40774659926,
+  "proof_sha": "a58dfe807a9337b78edc0dc14d231e2ed356afcf",
+  "pg_version": "PostgreSQL 16 disposable",
+  "actual_monitor_main_calls": 2,
+  "actual_monitor_main_readback": "PASS",
+  "scenario_summary": {
+    "PASS": 6,
+    "NOT_PROVEN": 4,
+    "FAIL": 0
+  },
+  "scenarios": [
+    {
+      "name": "two_concurrent_workers",
+      "status": "PASS",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": null
+    },
+    {
+      "name": "post_commit_pre_ack",
+      "status": "PASS",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": null
+    },
+    {
+      "name": "independent_readback_failure",
+      "status": "NOT_PROVEN",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": "Execute real staged entry point on disposable PG16, inject this specific failure, independently SELECT classification/current_tip/source/event/journal state before, after and retry."
+    },
+    {
+      "name": "classification_conflict",
+      "status": "PASS",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": null
+    },
+    {
+      "name": "source_identity_conflict",
+      "status": "NOT_PROVEN",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": "Execute real staged entry point on disposable PG16, inject this specific failure, independently SELECT classification/current_tip/source/event/journal state before, after and retry."
+    },
+    {
+      "name": "stale_current_tip",
+      "status": "PASS",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": null
+    },
+    {
+      "name": "pruned_state_legacy_checked_at",
+      "status": "PASS",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": null
+    },
+    {
+      "name": "event_stage_rollback",
+      "status": "NOT_PROVEN",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": "Execute real staged entry point on disposable PG16, inject this specific failure, independently SELECT classification/current_tip/source/event/journal state before, after and retry."
+    },
+    {
+      "name": "source_failure_retry",
+      "status": "NOT_PROVEN",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": "Execute real staged entry point on disposable PG16, inject this specific failure, independently SELECT classification/current_tip/source/event/journal state before, after and retry."
+    },
+    {
+      "name": "repeated_normal_execution",
+      "status": "PASS",
+      "independent_sql_snapshots": "Actions artifact 12853982574: c3_rc3_fault_results.json",
+      "next_test": null
+    }
+  ],
+  "no_real_neon_access": true,
+  "canary_max": 10,
+  "source_sha256_manifest": "research/c3_rc3_2026_10_28/sha_manifest.json"
+}
