@@ -4,6 +4,14 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-28
 
+### C6-R1 bounded reader checkpoint — PARTIAL RESEARCH ACCEPTED; nine Kyiv A5 aliases safe as pinned read-only evidence
+
+- Verified research HEAD [`3b30d625`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3b30d6257e8a069a8e72eb7f20f7fd688fdc3b45) and five exclusively research-only files (SQL `c4a7edfe`, crosswalk `4066301d`, parity JSON `e21c0ab1`, tests `14dd8004`, review `9848dda9`); final SHA has **no Actions/check run** and original offline Python tests were **not run independently**. No production runtime or workflows promoted.
+- Proven bootstrap [`36918355446`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/36918355446) SUCCESS: log confirms ingestion run `ec4682d9-1d06-48e5-a560-9caf6afb2e1e` and `site-prod@95398870`; exact original input JSON has **181 official_json + 9 kyiv_digital_live** minute intervals. A5 [`38079407732`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38079407732) SUCCESS. Independent RO Neon SELECTs confirm 9/9 minute-floor alias→precise mappings, all 9 A5 BOUND FK links, no events.
+- Independently compared real pinned `site-prod@a2d593c5` JSON to read-only Neon: Kyiv local September 2026 190/190 exact start/end interval parity after excluding the 9 mapped alias UIDs; 199 raw vs 190 projected, 0 missing/extra, 872,727 published/projected seconds, 90,120 duplicate alias seconds excluded. Direct execution of exact prototype SQL CTE as read-only aggregate reports mapping gate true and projected Kyiv 190. Historical 25 UNBOUND/NULL + 14 sources + 2 ACTIVE events retained; raw event×source 7 vs 2 distinct, inner-parent join 0. Rest of C6 remains uncertified.
+- **New required guard:** current SQL on mapping failure yields empty `projected_physical` for all cities with **no explicit error**, dangerous if consumed as valid zero; hard-fail and publication inhibition must be proved before any reader release, plus unknown-new-alias drift tests and consumer inventory. No Python/CI run at final research SHA; other city/month counts do not prove row-level parity. Next **C6-R2** bounded read-only/isolated regression and hard-error proof, not a rewrite or production cutover.
+- Status `C6_R1=PARTIAL_RESEARCH_ACCEPTED`, `C6=PARTIAL`, `NEON_AUTHORITY_ACTIVE=NO`, `PRODUCTION_CUTOVER_EXECUTED=NO`. This docs-only acceptance preserves separate C2/C3/C4, casualty, WIP and Unit A semantics. No DB/site-prod/production changes.
+
 ### Neon migration coordination consolidation — C3/C4 partial evidence and C6 Kyiv A5 aliases (NO CUTOVER)
 
 - Coordinator read `main:PROJECT_STATE.md`/`CHANGELOG.md`, pinned `main@26504ef8`, `site-prod@a2d593c5`, WIP `08c1a0a9`; reviewed exact frozen C4 criterion. **Accepted bounded evidence only**, not owner acceptance of 24 waivers, release, SQL mutation or cutover.
