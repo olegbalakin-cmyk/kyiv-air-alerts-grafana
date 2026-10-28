@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
           fetch-depth: 0
       - name: Independently examine actual main commit
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           AUDITED_MAIN: 44de39a01db51a9514393fed769cc28cd21c8dce
           AUDITED_BLOB: c43cb4f85cb328871981369af75625b9b0067262
         run: |
