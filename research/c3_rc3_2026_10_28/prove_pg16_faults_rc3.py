@@ -65,6 +65,177 @@ try:
             result["scenarios"]["repeated_normal_execution"]={"status":"PASS","SQL_before":before,"SQL_after":after,"receipt":receipt}
     else:
         result["baseline_monitor_main"]={"status":"FAIL","returncode":run.returncode,"receipt_count":len(rows)}
+
+    # Real SQL fault injections; never mock the persistence entry points.
+    from concurrent.futures import ThreadPoolExecutor
+    from datetime import datetime, timedelta, timezone
+    import copy
+    import importlib
+    import time
+    sys.path.insert(0,str(ROOT/"kyiv-air-alerts-grafana/scripts"))
+    sys.path.insert(0,str(ROOT/"kyiv-air-alerts-grafana/tests/fixtures/parent_contract"))
+    os.environ["CANONICAL_PARENT_CONTRACT_DIR"]=str(ROOT/"kyiv-air-alerts-grafana/tests/fixtures/parent_contract")
+    os.environ["CANONICAL_PARENT_DB_BRANCH"]="offline-disposable-postgres-16"
+    os.environ["ATTACK_EVENT_ORIGIN_COMMIT_SHA"]=os.environ.get("GITHUB_SHA","0"*40)
+    import db_phase1_core as core
+    import attack_event_canonical_persistence as p
+    import live_parent_ordering as ordering
+    import live_canonical_queue as queue
+    UTC=timezone.utc
+    cutoff=datetime(2026,10,7,19,5,tzinfo=UTC)
+    now=datetime(2026,10,28,20,tzinfo=UTC)
+    def ep(i):
+        start=datetime(2026,10,17,tzinfo=UTC)+timedelta(minutes=40*i)
+        end=start+timedelta(minutes=15)
+        return {"city_key":"kyiv","episode_id":core.legacy_episode_id("kyiv",start,end),
+                "alert_start":start.isoformat(),"alert_end":end.isoformat(),
+                "checks":[{"label":"immediate","due_at":end.isoformat(),"checked_at":None}]}
+    def parent(e):
+        with psycopg.connect(DSN,autocommit=False) as c:
+            ordering.ensure_canonical_parent(c,e)
+    def rec(e):
+        return p.build_episode_classification(e,[],origin=p._origin_context())
+    def persist(e,expected=None):
+        with psycopg.connect(DSN,autocommit=False) as c:
+            return p.persist_episode_classification(c,rec(e),expected_tip=expected)
+
+    # Actual two concurrent connections: advisory xact lock, exactly one CAS admission.
+    case="two_concurrent_workers"
+    try:
+        e=ep(200)
+        parent(e)
+        initial=snapshot(case+"_before")
+        def worker(_):
+            try:
+                return {"ok":True,"saved":persist(e,None)}
+            except Exception as exc:
+                return {"ok":False,"error":type(exc).__name__+":"+str(exc)}
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            workers=list(pool.map(worker,[0,1]))
+        final=snapshot(case+"_after")
+        accepted=[r for r in workers if r["ok"]]
+        rejected=[r for r in workers if not r["ok"]]
+        check=(len(accepted)==1 and len(rejected)==1
+               and "STALE_EXPECTED_CURRENT_CLASSIFICATION_TIP" in rejected[0]["error"]
+               and final["attack_event_classifications"]==initial["attack_event_classifications"]+1
+               and final["duplicate_classification_keys"]==0)
+        result["scenarios"][case]={"status":"PASS" if check else "FAIL","before":initial,"after":final,"worker_outcomes":workers}
+    except Exception as exc:
+        result["scenarios"][case]={"status":"FAIL","error":str(exc)}
+
+    # Stale expected current tip is a real on-database compare-and-swap rejection.
+    case="stale_current_tip"
+    try:
+        e=ep(200)
+        initial=snapshot(case+"_before")
+        try:
+            persist(e,"00000000-0000-0000-0000-000000000000")
+            rejected=None
+        except Exception as exc:
+            rejected=type(exc).__name__+":"+str(exc)
+        final=snapshot(case+"_after")
+        ok=bool(rejected and "STALE_EXPECTED_CURRENT_CLASSIFICATION_TIP" in rejected and final==initial)
+        result["scenarios"][case]={"status":"PASS" if ok else "FAIL","before":initial,"after":final,"exception":rejected}
+    except Exception as exc:
+        result["scenarios"][case]={"status":"FAIL","error":str(exc)}
+
+    # Existing classification key cannot silently change the old verdict.
+    case="classification_conflict"
+    try:
+        e=ep(201)
+        parent(e)
+        saved=persist(e,None)
+        initial=snapshot(case+"_before")
+        distorted=rec(e)
+        distorted["verdict"]="NEEDS_REVIEW"
+        try:
+            with psycopg.connect(DSN,autocommit=False) as c:
+                p.persist_episode_classification(c,distorted,expected_tip=saved["classification_uid"])
+            rejected=None
+        except Exception as exc:
+            rejected=type(exc).__name__+":"+str(exc)
+        final=snapshot(case+"_after")
+        ok=bool(rejected and final==initial and "conflict" in rejected.lower())
+        result["scenarios"][case]={"status":"PASS" if ok else "FAIL","before":initial,"after":final,"exception":rejected}
+    except Exception as exc:
+        result["scenarios"][case]={"status":"FAIL","error":str(exc)}
+
+    # Simulate a process dying after a genuine SQL COMMIT but before journal ACK.
+    case="post_commit_pre_ack"
+    try:
+        e=ep(202)
+        parent(e)
+        state={"cities":{"kyiv":{"episodes":[e]}}}
+        queue.register_city(state,"kyiv",[e],cutoff)
+        entries=queue.store(state)
+        assert len(entries)==1
+        work_id=next(iter(entries))
+        for x in entries[work_id]["coverage_checks"].values():
+            x.update({"status":"complete","completed_at":now.isoformat(),"reason":None})
+        initial=snapshot(case+"_before")
+        saved=persist(e,None)
+        assert entries[work_id]["status"]=="pending"
+        persisted=json.loads(json.dumps(state))
+        with psycopg.connect(DSN,autocommit=False) as c:
+            tips=queue.read_current_tips(c,cutoff)
+            c.rollback()
+        selection=queue.reconcile_and_select(persisted,tips=tips,candidates=[],cutoff=cutoff,max_episodes=10,now=now)
+        final=snapshot(case+"_after")
+        ok=(saved["classification_inserted"] and final["attack_event_classifications"]==initial["attack_event_classifications"]+1
+            and len(selection["selected"])==0 and selection["db_committed_current"]==1
+            and queue.store(persisted)[work_id]["status"]=="committed"
+            and final["duplicate_classification_keys"]==0)
+        result["scenarios"][case]={"status":"PASS" if ok else "FAIL","before":initial,"after":final,
+                                   "pre_crash_status":entries[work_id]["status"],"retry_status":queue.store(persisted)[work_id]["status"]}
+    except Exception as exc:
+        result["scenarios"][case]={"status":"FAIL","error":str(exc)}
+
+    # A legacy checked_at and missing WIP row cannot falsify a source certificate.
+    case="pruned_state_legacy_checked_at"
+    try:
+        e=ep(203)
+        e["checks"][0]["checked_at"]=now.isoformat()
+        state={"cities":{"kyiv":{"episodes":[e]}}}
+        queue.register_state(state,cutoff)
+        key=next(iter(queue.store(state)))
+        before_state=queue.store(state)[key]["coverage_checks"]["immediate"]
+        state["cities"]["kyiv"]["episodes"]=[]
+        restored=json.loads(json.dumps(state))
+        selection=queue.reconcile_and_select(restored,tips={},candidates=[],cutoff=cutoff,max_episodes=10,now=now)
+        after_state=queue.store(restored)[key]
+        initial=snapshot(case+"_before")
+        final=snapshot(case+"_after")
+        ok=(before_state["status"]=="legacy_unverified" and
+            after_state["status"]=="blocked_evidence" and selection["blocked_evidence"]==1
+            and selection["total_registered"]==1 and selection["selected"]==[]
+            and final==initial)
+        result["scenarios"][case]={"status":"PASS" if ok else "FAIL","before":initial,"after":final,
+                                   "journal_remaining":selection["total_registered"],"state":after_state["status"]}
+    except Exception as exc:
+        result["scenarios"][case]={"status":"FAIL","error":str(exc)}
+
+    # Actual SQL exception after event stage, though no modeled positive event:
+    # may prove atomic rollback, but not a positive attack-event rollback.
+    case="event_stage_rollback"
+    try:
+        e=ep(204)
+        parent(e)
+        initial=snapshot(case+"_before")
+        try:
+            with psycopg.connect(DSN,autocommit=False) as c:
+                p.persist_episode_classification(c,rec(e),expected_tip=None,fault_after="event")
+            rejected=None
+        except Exception as exc:
+            rejected=type(exc).__name__+":"+str(exc)
+        final=snapshot(case+"_after")
+        proven=bool(rejected and "FORCED_PERSISTENCE_FAILURE_AFTER_EVENT" in rejected and final==initial)
+        result["scenarios"][case]={"status":"NOT_PROVEN" if proven else "FAIL",
+                                   "bounded_sql_rollback":proven,
+                                   "reason":"Negative event-stage fault not positive attack_event insertion; positive-event rollback still required",
+                                   "before":initial,"after":final,"exception":rejected}
+    except Exception as exc:
+        result["scenarios"][case]={"status":"FAIL","error":str(exc)}
+
 except Exception as exc:
     result["errors"]=[str(exc)]
 finally:
