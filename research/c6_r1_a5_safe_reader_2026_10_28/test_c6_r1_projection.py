@@ -57,6 +57,30 @@ class ReaderProjectionProof(unittest.TestCase):
         self.assertEqual(s["alias_a5_bound_classifications"], 9)
         self.assertEqual(s["alias_linked_events"], 0)
 
+    def test_full_nine_crosswalk_exact_utc_boundaries_and_attribution(self):
+        x = json.loads((BASE / "exact_nine_uuid_crosswalk.json").read_text(encoding="utf-8"))
+        rows = x["rows"]
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(len(set(r["a5_classification_uid"] for r in rows)), 9)
+        alias = {r["alias_uid"]: {"city": "kyiv", "start": r["alias_start_utc"],
+                                  "end": r["alias_end_utc"]} for r in rows}
+        precise = {r["canonical_uid"]: {"city": "kyiv", "start": r["canonical_start"],
+                                       "end": r["canonical_end"]} for r in rows}
+        # Deterministic keyed comparison; no reliance on an unordered SQL result.
+        for row in rows:
+            self.assertEqual(floor_minute(row["canonical_start"]),
+                             dt(row["alias_start_utc"]))
+            self.assertEqual(floor_minute(row["canonical_end"]),
+                             dt(row["alias_end_utc"]))
+            self.assertEqual(dt(row["canonical_start"]).astimezone(KYIV).strftime("%Y-%m-%d"),
+                             row["canonical_start_local_day"])
+            self.assertEqual(dt(row["canonical_start"]).astimezone(KYIV).strftime("%Y-%m"),
+                             row["canonical_start_local_month"])
+        self.assertEqual(sum(r["alias_duration_seconds"] for r in rows), 90120)
+        self.assertEqual(sum(r["canonical_duration_seconds"] for r in rows), 90087)
+        self.assertEqual({r["alias_uid"] for r in rows},
+                         {r["alias_uid"] for r in self.report["nine_exact_pairs"]})
+
     def test_local_day_month_and_midnight_use_precise_parent(self):
         records = [
             ("2026-09-29T23:38:11+03:00", "2026-09-30T12:22:15+03:00"),
