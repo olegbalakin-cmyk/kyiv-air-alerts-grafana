@@ -1,0 +1,151 @@
+{
+  "schema_version": "c6-r1-parity-research-v1",
+  "date": "2026-10-28",
+  "decision": "BOUNDED_PROJECTION_PARITY_PROVEN_C6_NOT_PROVEN",
+  "research_only": true,
+  "main_base": "539f75d4dbb8c8043ae460432133c7b55ca6f69d",
+  "site_prod_sha": "a2d593c51830a62516d8907b6f55aae1b05e8948",
+  "site_alerts_blob": "3a50f76fe12b2ef769eb9f104fdfb6d75bd0b37a",
+  "neon": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "ro_compute": "ep-calm-rice-b5073ypp",
+    "transaction_read_only": "on",
+    "pg_is_in_recovery": true
+  },
+  "lineage": {
+    "bootstrap_run_id": "36918355446",
+    "bootstrap_workflow_sha": "7c54a9e40c7d40073085aafee3d8d840569dae2c",
+    "input_site_prod_sha": "9539887094c3196c482ffed4fa510bfb6b3150b3",
+    "created_by_ingestion_run": "ec4682d9-1d06-48e5-a560-9caf6afb2e1e",
+    "original_kyiv_last_nine_source": "kyiv_digital_live",
+    "original_precision": "minute",
+    "current_source": "official_json",
+    "current_precision": "second",
+    "unit_a_a5_actions_run": "38079407732"
+  },
+  "kyiv_september": {
+    "pinned_site_rows": 190,
+    "neon_raw_rows": 199,
+    "neon_exact_site_rows": 190,
+    "neon_extra_alias_rows": 9,
+    "projected_rows": 190,
+    "exact_pair_uniqueness": "9/9",
+    "site_duration_seconds": 872727,
+    "raw_neon_duration_seconds": 962847,
+    "excluded_alias_duration_seconds": 90120,
+    "projected_duration_seconds": 872727,
+    "alias_a5_bound_classifications": 9,
+    "alias_linked_events": 0,
+    "all_nine_start_end_match_utc_minute_floor": true,
+    "duration_delta_canonical_minus_alias_seconds": -33
+  },
+  "historical_unbound": {
+    "classification_uids": 25,
+    "unbound_null": 25,
+    "source_memberships": 14,
+    "active_events": 2,
+    "strict_active_uid": "dc3a63ec-d9f8-412c-b0a1-09dd9398b27b",
+    "sensitivity_active_uid": "ef34834b-0513-4351-8839-d866a0e76e99",
+    "raw_event_join_source_fanout_rows": 7,
+    "correct_distinct_event_uids": 2,
+    "inner_parent_event_rows": 0
+  },
+  "monthly_counts": [
+    [
+      "kyiv",
+      "2025-03",
+      35,
+      35
+    ],
+    [
+      "kyiv",
+      "2026-09",
+      190,
+      190
+    ],
+    [
+      "kharkiv",
+      "2025-03",
+      147,
+      147
+    ],
+    [
+      "kharkiv",
+      "2026-09",
+      257,
+      257
+    ],
+    [
+      "lviv",
+      "2026-09",
+      6,
+      6
+    ],
+    [
+      "sumy",
+      "2026-09",
+      236,
+      236
+    ],
+    [
+      "zaporizhzhia",
+      "2026-09",
+      152,
+      152
+    ]
+  ],
+  "nine_exact_pairs": [
+    {
+      "alias_uid": "0a72deb0-42c3-4807-aaa2-14641e4bc775",
+      "canonical_uid": "f6cf2b5b-fc5d-4584-8cbd-cb242a41850d"
+    },
+    {
+      "alias_uid": "3520172f-6cfb-438d-a72f-311cf57aa467",
+      "canonical_uid": "933404bd-bd22-4f9e-8aa9-3ce873dd1848"
+    },
+    {
+      "alias_uid": "0fd9d070-10df-43ef-8c88-4236506b8452",
+      "canonical_uid": "155a160b-ae27-49bc-948d-a308ca438224"
+    },
+    {
+      "alias_uid": "d5b44d9b-502d-4380-bb88-c96ed2e35c67",
+      "canonical_uid": "7fd8fe7d-ab74-4463-8c39-9d245aea92e3"
+    },
+    {
+      "alias_uid": "2fc3c7fd-e339-4790-b0c1-4a6940fb642d",
+      "canonical_uid": "06d8398a-d7d3-44ef-b784-ac7d82fb1617"
+    },
+    {
+      "alias_uid": "41f46049-f9b4-4cea-9cdc-1ae787023b1b",
+      "canonical_uid": "f9ba3120-8d44-4344-989d-a8d59ca5ce9a"
+    },
+    {
+      "alias_uid": "06ed7f0e-cb7c-41e5-9c11-058275fc662e",
+      "canonical_uid": "eaa8488c-b738-4ee7-b5ef-f62f6f9a11fa"
+    },
+    {
+      "alias_uid": "ac4d60e9-01c5-4bd2-a675-a7b6483a2223",
+      "canonical_uid": "0ce0a9c2-c29c-46c7-aa0a-c37847c80639"
+    },
+    {
+      "alias_uid": "e0ed7957-1f8e-4d2a-b817-be94fcaf4103",
+      "canonical_uid": "e16f3671-48a4-4c15-9a3d-9cf59a466db8"
+    }
+  ],
+  "parity_scope": {
+    "kyiv_september": "EXACT_ROW_INTERVAL_AND_DURATION_PARITY",
+    "other_city_months": "AGGREGATE_COUNT_EQUAL_ONLY_NOT_ROW_LEVEL_CERTIFIED",
+    "classification_verdict_source_event_outputs": "NOT_EXPOSED_BY_SITE_PROD_JSON",
+    "cutover": "NOT_AUTHORIZED"
+  },
+  "c6_remaining": [
+    "No authenticated production consumer switch or audit of all actual canonical attack-event readers",
+    "No comprehensive cross-city row-level JSON to Neon comparison where city JSON only exposes aggregates",
+    "No continuous/scheduled reader parity or drift policy for new minute aliases",
+    "C3 live full eligible due-cohort and C4 frozen required-field semantic parity still open",
+    "No owner-approved C4 binding-only exceptions (0/25)",
+    "No C1/C5/C7-C9 migration closure or production cutover authorization"
+  ]
+}
