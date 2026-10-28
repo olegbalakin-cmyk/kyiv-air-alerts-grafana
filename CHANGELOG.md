@@ -2,6 +2,16 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-29
+
+### C4-KH-06 indexed Telegram chronology — new bounded evidence accepted, source conflict remains
+
+- Verified research [`5a260eac`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/5a260eac9ac687708173ea42c2bd45bb4e2a7b5d) as seven research-only commits after accepted `21c6e0ae`; revised report, official-map date addendum, temporal CSV, lag JSON. No code or production change.
+- Independently re-read Library indexed «Суспільне Харків» HTML: city prior OFF `55078` 05 Mar 20:31:13, new city ON `55081` 21:08:32, oblast OFF `55096` 06 Mar 05:28:46 explicitly still showing city active, city OFF `55097` 05:28:53. No intermediate exact-title city AIR ON/OFF publication found between `55081` and `55097`. Observed publication sequence is not primary official city-event chronology.
+- Independently reproduced Mar 3–7 sample: city AIR 24 ON / 24 OFF, oblast 26 ON / 26 OFF; closest same-kind cross-geography post pairs within ±90 sec: ON n=16 median=21.5s P90=61s, OFF n=21 median=18s P90=37s. Selection-biased publication separations do not estimate upstream lag. Raw HTML materialization failed; `INDEXED_TEXT_VERIFIED/RAW_BYTES_NOT_REHASHED`. `PUBLICATION_LAG=NOT_ESTIMABLE`.
+- Owner-corrected UkraineAlarm daily screenshot is Mar 6, with preceding Mar 5 night clip; observed area is oblast/raion, not authenticated city territory. No original map screenshot byte review in this coordination step. Actual city OFF at 21:47:55, 05:03 or 05:28 remains source-conflicted.
+- **Disposition:** `C4_KH_06_INDEXED_TELEGRAM_READBACK=ACCEPTED_BOUNDED`, `C4_KH_06=UNRESOLVED/BLOCKED_SOURCE_CONFLICT`, `KEEP_CURRENT_DATA`; canonical parent, UNBOUND historical positive classification, ACTIVE event and all associations unchanged. Next only authenticated exact city-hromada AIR ON/OFF transition journal with territory and source IDs. Other 24 UNBOUND / C4-E4 independent; zero approved exceptions, C4 PARTIAL, no Neon write or production/cutover.
+
 ## 2026-10-28
 
 ### C3-RC3 executed bounded acceptance — frozen 23/23 PASS, PG16 6/10 PASS, release blocked
