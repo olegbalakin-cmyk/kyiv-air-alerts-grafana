@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-28
 
+### C3-RC2 research gap inventory accepted — PARTIAL; 23-city/PG16/operational hold NOT PROVEN
+
+- Verified RC2 [`fff27c0485a7`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/fff27c0485a77a7299cf7015997d01d89a58b425) and its three newly added **research-only** files: review blob `2a95d891`, explicit unexecuted matrix `4a7c33bd`, 23-city harness `e5153d5f`. Exact three staged runtime Git blobs match `ff93eea`, `fd3b91b`, and RC2. Previous [RC1 Actions `40733060266`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40733060266) and [470/47 Actions `38127425160`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38127425160) remain SUCCESS; **0 Actions runs** at RC2 HEAD, **0 new executed PG16 fault/23-city proofs**. `STAGING_PASS_CANDIDATE=NO`, no release.
+- Verified `main` guard `if:false` at `explosion-monitor-wip.yml`; `main:update-explosion-wip.yml` remains an unguarded manual `workflow_dispatch` WIP writer, and the WIP branch's own monitor workflow lacks the main guard. All-ref operational hold NOT PROVEN. Existing RC2 harness reads SHA manifest without validating file digests and does not enforce positive post-cutoff eligible coverage, so may falsely green an old/empty cohort. RC2 research branch is divergent from main, not an acceptable whole-branch merge.
+- **Next:** C3-RC3 must **run**, not just plan, 23-city post-`2026-10-07T19:05:00Z` source-hash-verified cached regression, actual integrated disposable PG16 concurrency/fault/ACK/restart readbacks, all-ref workflow-trigger inventory and exact-SHA Actions proof. Only narrow runtime fix if failure proven; 10-episode canary cap, operational holds, no Neon/production/WIP/credentials changes. `C3_RC2=RESEARCH_PARTIAL_ACCEPTED_ARTIFACTS_ONLY`; `C3=PARTIAL`, cutover NO.
+
 ### C6-R1 bounded reader checkpoint — PARTIAL RESEARCH ACCEPTED; nine Kyiv A5 aliases safe as pinned read-only evidence
 
 - Verified research HEAD [`3b30d625`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3b30d6257e8a069a8e72eb7f20f7fd688fdc3b45) and five exclusively research-only files (SQL `c4a7edfe`, crosswalk `4066301d`, parity JSON `e21c0ab1`, tests `14dd8004`, review `9848dda9`); final SHA has **no Actions/check run** and original offline Python tests were **not run independently**. No production runtime or workflows promoted.
