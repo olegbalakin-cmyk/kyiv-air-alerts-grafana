@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "gate": "C3-RC2",
+  "verdict": "PARTIAL",
+  "baseline": {
+    "staged_sha": "ff93eea396868b62c3cab2c332b551eb16ff5fd7",
+    "owner_review_sha": "fd3b91b34150906fa35ce38e53315860675f3b98",
+    "prior_pg16_run": 40733060266,
+    "prior_queue_run": 38127425160
+  },
+  "counts_are_not_claimed_without_run": true,
+  "checks": [
+    {
+      "scenario": "23_city_cached_actual",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "23 cities must run actual adapters and parity against frozen WIP"
+    },
+    {
+      "scenario": "exact_city_and_sevastopol",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "Kyiv dedicated exact city and Sevastopol pairs"
+    },
+    {
+      "scenario": "raion_proxy_union",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "19 proxy cities checked per city, denominators source-backed"
+    },
+    {
+      "scenario": "due_cutoff_and_coverage",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "source errors never negative acknowledgement"
+    },
+    {
+      "scenario": "two_concurrent_workers",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "PG16 staging main and independent readback"
+    },
+    {
+      "scenario": "post_commit_pre_ack",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "committed row persists and retry no duplicate"
+    },
+    {
+      "scenario": "readback_failure",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "no false ACK; reconcile after restart"
+    },
+    {
+      "scenario": "classification_source_identity_conflict",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "fail closed and no missing due"
+    },
+    {
+      "scenario": "stale_current_tip",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "CAS prevents stale revision"
+    },
+    {
+      "scenario": "pruned_state_legacy_checked_at",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "no lost due or false ACK"
+    },
+    {
+      "scenario": "event_stage_rollback",
+      "status": "NOT_EXECUTED",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "zero partial committed writes"
+    },
+    {
+      "scenario": "operational_hold_all_entries",
+      "status": "FAIL_STATIC_CONTAINMENT",
+      "required_observations": [
+        "committed_rows",
+        "current_tips",
+        "source_links",
+        "queue_checkpoint",
+        "retry_idempotency"
+      ],
+      "detail": "main disabled monitor but unguarded manual updater and WIP monitor"
+    }
+  ],
+  "selective_scope": [
+    "kyiv-air-alerts-grafana/scripts/live_canonical_queue.py",
+    "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py",
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+  ],
+  "no_unauthorized_operations": true
+}
