@@ -1,0 +1,110 @@
+name: C3-RC3 isolated 23-city and PG16 gate proof
+on:
+  push:
+    branches: [research-c3-rc3-executed-gate-2026-10-28-gpt6]
+    paths:
+      - ".github/workflows/c3-rc3-isolated-gate.yml"
+      - "research/c3_rc3_2026_10_28/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  c3-rc3-disposable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: offline
+          POSTGRES_PASSWORD: offline
+          POSTGRES_DB: offline_acceptance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U offline -d offline_acceptance"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LOCAL_PROOF_POSTGRES_DSN: "postgresql://offline:offline@localhost:5432/offline_acceptance"
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NEON_DATABASE_URL: ""
+      UKRAINEALARM_API_TOKEN: ""
+      GITHUB_TOKEN: ""
+      ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
+      C3_RC2_FROZEN_DIR: "/tmp/c3-rc3-frozen"
+      C3_RC3_REPORT_DIR: "/tmp/c3-rc3-proof"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare isolated test environment
+        run: |
+          pip install psycopg[binary] requests beautifulsoup4
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          mkdir -p "$C3_RC2_FROZEN_DIR" "$C3_RC3_REPORT_DIR"
+          git fetch --no-tags --depth=1 origin a2d593c51830a62516d8907b6f55aae1b05e8948
+          git fetch --no-tags --depth=1 origin 08c1a0a9cb3d27a73cfd85b48b31a29817c1d20d
+          for f in ukrainealarm_bridge.json alerts_combined.json sevastopol_events.json; do
+            git show a2d593c51830a62516d8907b6f55aae1b05e8948:kyiv-air-alerts-grafana/data/$f > "$C3_RC2_FROZEN_DIR/$f"
+          done
+          sha256sum "$C3_RC2_FROZEN_DIR"/*
+      - name: Execute source-exact 23-city regression and hash/freshness gate
+        id: city
+        continue-on-error: true
+        run: python research/c3_rc3_2026_10_28/prove_23_city_regression_rc3.py
+      - name: Apply frozen canonical schema to disposable PG16
+        run: |
+          PGPASSWORD=offline psql -v ON_ERROR_STOP=1 -h localhost -U offline -d offline_acceptance -f kyiv-air-alerts-grafana/tests/fixtures/pg16_verified_canonical_schema.sql > /tmp/c3-rc3-proof/pg16-schema.log
+      - name: Execute integrated monitor-main and independent PG16 fault receipts
+        id: faults
+        continue-on-error: true
+        run: python research/c3_rc3_2026_10_28/prove_pg16_faults_rc3.py
+      - name: Final machine-readable release gate
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os,hashlib,pathlib
+          out=pathlib.Path(os.environ["C3_RC3_REPORT_DIR"])
+          def load(name):
+              path=out/name
+              return json.loads(path.read_text()) if path.exists() else {"result":"NOT_EXECUTED","errors":["missing proof file"]}
+          city=load("c3_rc3_23_city_results.json")
+          fault=load("c3_rc3_fault_results.json")
+          scenarios=fault.get("scenarios") or {}
+          all_city=(city.get("result")=="PASS" and len(city.get("cities") or [])==23
+                   and all(x["status"]=="PASS" for x in city["cities"]))
+          all_fault=(len(scenarios)==10 and all(x["status"]=="PASS" for x in scenarios.values()))
+          # Workflow containment is a separate release hard gate, never inferred.
+          safe=False
+          final={"gate":"C3-RC3","tested_sha":os.environ["GITHUB_SHA"],
+                 "city_pass":all_city,"fault_pass":all_fault,
+                 "all_entry_containment_pass":safe,
+                 "verdict":"PARTIAL","production_release_authorized":False}
+          (out/"c3_rc3_proof_manifest.json").write_text(json.dumps(final,indent=2)+"\n")
+          paths=[p for p in out.iterdir() if p.is_file()]
+          hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+          (out/"sha256_manifest.json").write_text(json.dumps(hashes,indent=2)+"\n")
+          print(json.dumps(final,sort_keys=True))
+          PY
+      - name: Upload source and PG16 proof even for PARTIAL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-rc3-exact-sha-gate-artifact
+          path: /tmp/c3-rc3-proof/
+          if-no-files-found: warn
+      - name: Keep release gate closed unless all assertions hold
+        if: always()
+        run: |
+          python - <<'PY'
+          import os,json,pathlib
+          p=pathlib.Path(os.environ["C3_RC3_REPORT_DIR"])/"c3_rc3_proof_manifest.json"
+          x=json.loads(p.read_text())
+          assert x["city_pass"] and x["fault_pass"] and x["all_entry_containment_pass"], "C3_RC3_PARTIAL_RELEASE_GATE_CLOSED"
+          PY
