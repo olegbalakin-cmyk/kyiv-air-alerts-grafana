@@ -53,7 +53,8 @@ jobs:
           for f in ukrainealarm_bridge.json alerts_combined.json sevastopol_events.json; do
             git show a2d593c51830a62516d8907b6f55aae1b05e8948:kyiv-air-alerts-grafana/data/$f > "$C3_RC2_FROZEN_DIR/$f"
           done
-          sha256sum "$C3_RC2_FROZEN_DIR"/*
+          cp research/c3_rc3_2026_10_28/sha_manifest.json "$C3_RC2_FROZEN_DIR/sha_manifest.json"
+          sha256sum "$C3_RC2_FROZEN_DIR"/*.json
       - name: Execute source-exact 23-city regression and hash/freshness gate
         id: city
         continue-on-error: true
