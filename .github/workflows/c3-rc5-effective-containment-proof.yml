@@ -1,0 +1,38 @@
+name: C3-RC5 exact-main containment readback
+on:
+  push:
+    branches: [research-c3-rc5-effective-containment-2026-10-29-gpt6]
+    paths:
+      - ".github/workflows/c3-rc5-effective-containment-proof.yml"
+      - "research/c3_rc5_2026_10_29/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Independently examine actual main commit
+        env:
+          AUDITED_MAIN: 44de39a01db51a9514393fed769cc28cd21c8dce
+          AUDITED_BLOB: c43cb4f85cb328871981369af75625b9b0067262
+        run: |
+          git fetch origin main site-prod multicity-wip-2026-09-16
+          python research/c3_rc5_2026_10_29/verify.py
+      - name: Publish bounded proof even on partial gate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-rc5-main-containment
+          path: |
+            c3_rc5_pre_push_impact.json
+            c3_rc5_effective_containment.json
+            c3_rc5_release_gate.json
+            sha256_manifest.json
+          if-no-files-found: error
