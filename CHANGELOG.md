@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-28
 
+### C4-E3 unexecuted verifier checkpoint — PARTIAL research accepted, C4 remains unclosed
+
+- Verified [research `6794ee1a`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/6794ee1ab3a4a744af8208a636942d4632fe7a86), four artifacts (review `142489e8`, JSON `c7f4a9bd`, placeholder CSV `12fc6343`, verifier `4b1a438f`); **zero Actions/check runs on final SHA** and no complete bidirectional required-field diff. Prior 26,405 / 3,769 / 1,080 structural counts, H1/H2 accepted subsets unchanged; all 25 parent exceptions await owner acceptance. `C4_E3=PARTIAL_RESEARCH_ACCEPTED_ARTIFACTS_ONLY`, `C4=PARTIAL`.
+- Independent latest RO Neon SELECT on existing physical replica confirmed 26,405 unique historical classification keys, 25 UNBOUND/NULL, 3,769 historical source memberships and 1,080 modeled event rows; replay LSN `0/11766EF0` is **not** a shared cross-export snapshot.
+- Verifier `verify_c4_e3.py` trusts user-declared snapshot flags and nonempty `_frozen_git_blob` rather than verifying single-transaction file lineage and reconstructed Git source bytes; H1/H2 authority includes `NOT_OBSERVABLE` / `REPLAY_DERIVED_ONLY` fields. Cannot turn that missing historical authority into zero mismatches. Next **C4-E4** must actually build independent frozen expected exports, proven one-transaction RO Neon exports and execute a hardened directional verifier with precise not-provable states and exact SHA proof. No Neon writes, production/cutover, A5 or historical exception approvals.
+
+
 ### C3-RC2 research gap inventory accepted — PARTIAL; 23-city/PG16/operational hold NOT PROVEN
 
 - Verified RC2 [`fff27c0485a7`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/fff27c0485a77a7299cf7015997d01d89a58b425) and its three newly added **research-only** files: review blob `2a95d891`, explicit unexecuted matrix `4a7c33bd`, 23-city harness `e5153d5f`. Exact three staged runtime Git blobs match `ff93eea`, `fd3b91b`, and RC2. Previous [RC1 Actions `40733060266`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40733060266) and [470/47 Actions `38127425160`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38127425160) remain SUCCESS; **0 Actions runs** at RC2 HEAD, **0 new executed PG16 fault/23-city proofs**. `STAGING_PASS_CANDIDATE=NO`, no release.
