@@ -2,6 +2,14 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-28
+
+### C4 7 owner-exported Alerts.in.ua CSV — bounded source result accepted; no repair
+
+- Reviewed [research `7974e17ae8bfc55158b715b2a88158c1ea73a24f`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/7974e17ae8bfc55158b715b2a88158c1ea73a24f): `CSV_OWNER_REVIEW.md` blob `c8c7d27afc05857ad8e69b95dd11b8c0a203fa16`, `csv_owner_manifest.json` blob `7b2d80fe02b7f9a689bc8d6094f757d5d59a5ded`; 7 manual Alerts.in.ua daily CSVs reported with 7 SHA-256, which coordinator **could not independently rehash** without original owner-upload bytes. Raw CSVs not newly added to repo. Research supports seven source witnesses; all 25 have **time-corresponding current Neon middle episode candidates**, but **0 original exact ID/interval parents** and 25 original classifications remain `UNBOUND`. This is not proof that all 25 original physical rows existed in Neon.
+- Verified source workflow [`40578725925`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40578725925) SUCCESS at `53949dc6` and archived Lviv bridge [`40594480647`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40594480647) SUCCESS at `e294b6b6`, **not** final `7974e17`. Lviv #1/#2 source gaps bridged by existing Sep 7–16 same-provider archive; Lviv #3 still lacks Sep **3–6, 2026** complete source days. Kharkiv #6 source conflict: long historical end `2025-03-06T03:03:45Z` versus Vadimkin/current Neon end `2025-03-05T19:47:55Z`; do not choose a winner yet. ACTIVE event dependencies for Zaporizhzhia #5 / Kharkiv #6 remain unmodified.
+- **Next:** owner supplies four separate Alerts.in.ua CSV dates **2026-09-03/04/05/06** local Kyiv time; executor independently checks them and completes local dry-run/dependency plan. Re-pin current `site-prod` (observed `270f6af9f74db97aa21dbc9ec7f83ce54b90019f`), no writes. `C4_READY_FOR_REPAIR=0/25`, `C4/C5=NOT_PROVEN`, Neon authority/cutover inactive; other tracks unaffected.
+
 ## 2026-10-27
 
 ### C4 individual A/B candidate inspection — intermediate research accepted, no correction authorized
