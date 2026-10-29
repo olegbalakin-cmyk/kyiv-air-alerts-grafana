@@ -10,6 +10,7 @@ from pathlib import Path
 from statistics import mean
 
 from update_data import Alert, TZ, build_outputs, daterange, http_session, round3, union_daily_seconds
+from owner_air_corrections import apply_owner_accepted_air_corrections
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
@@ -131,6 +132,7 @@ def fetch_city_alerts() -> dict[str, list[Alert]]:
         alerts.sort(key=lambda a: a.start)
         if not alerts:
             raise RuntimeError(f"No city-level alerts found for {CITY_LABELS[key]}")
+    apply_owner_accepted_air_corrections(found)
     return found
 
 
