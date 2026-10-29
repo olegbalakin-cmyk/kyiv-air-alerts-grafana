@@ -64,14 +64,14 @@ def apply_owner_accepted_air_corrections(
     idx = indexes[0]
     current = city_alerts[idx]
     current_end = current.end.astimezone(timezone.utc)
-    if current_end == new_end:
-        return 0
-    if current_end != old_end:
+    if current_end not in (old_end, new_end):
         raise ValueError("Historical correction upstream source ended at an unexpected timestamp")
     for i, other in enumerate(city_alerts):
         if i == idx:
             continue
         if other.start.astimezone(timezone.utc) < new_end and other.end.astimezone(timezone.utc) > start:
             raise ValueError("Historical correction overlaps another original city alert; review before merge")
+    if current_end == new_end:
+        return 0
     city_alerts[idx] = replace(current, end=new_end)
     return 1
