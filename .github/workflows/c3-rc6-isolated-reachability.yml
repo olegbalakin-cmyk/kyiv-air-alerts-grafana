@@ -1,0 +1,45 @@
+name: C3-RC6 isolated ref and rerun reachability proof
+
+on:
+  push:
+    branches: [research-c3-rc6-reachability-2026-10-29-gpt6]
+    paths:
+      - ".github/workflows/c3-rc6-isolated-reachability.yml"
+      - "research/c3_rc6_ci.py.gz.b64"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install YAML parser
+        run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.2
+      - name: Decode pinned read-only verifier
+        run: |
+          python3 - <<'PY'
+          import base64, gzip, hashlib
+          from pathlib import Path
+          src = Path("research/c3_rc6_ci.py.gz.b64")
+          decoded = gzip.decompress(base64.b64decode(src.read_text().strip()))
+          expected = "a339315385c278d7830b91f99da5d03bb7d9b85cb2537d6cef926065717f37c3"
+          assert hashlib.sha256(decoded).hexdigest() == expected
+          Path("research/c3_rc6_ci.py").write_bytes(decoded)
+          PY
+      - name: Run bounded read-only proof
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 research/c3_rc6_ci.py
+      - name: Upload proof outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-rc6-reachability-${{ github.sha }}
+          path: research/c3-rc6-ci-artifacts/
+          if-no-files-found: error
