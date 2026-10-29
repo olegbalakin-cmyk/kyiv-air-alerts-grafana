@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-29
 
+### C4-E4 bounded structural acceptance — one-snapshot aggregate counts, field parity not certified
+
+- Coordinator independently reread `main@86e84231` docs, rechecked `site-prod@552de9cf` and WIP `d834aad2`, inspected accepted C4-E2/E3 contracts. Two C4-E4 research branches exist but point at older coordination commits only; original local C4-E4 review/aggregated-hash files not available for independent hashing and no executed exact-SHA E4 CI proof.
+- Independently executed **one actual `REPEATABLE READ READ ONLY` transaction** on existing physical Neon read-only compute `ep-calm-rice-b5073ypp` (`pg_is_in_recovery=true`), `pg_current_snapshot()=429056:429056:`, replay LSN `0/117CE058`, 2026-10-29 11:31:03Z. Six aggregate SELECTs established H1 6,863 / 2,340 / 119 (5 UNBOUND) and H2 19,542 / 1,429 / 961 (20 UNBOUND) classifications/sources/events, each with unique UIDs and keys. Aggregate single-snapshot proof only: **no full six JSONL exports** and no independent Git↔Neon required-field equality.
+- **Disposition:** `C4_E4=EXECUTED_STRUCTURAL_PARTIAL_ACCEPTED_BOUNDED`, `C4=PARTIAL`; global missing/extra/field mismatches `NOT_CERTIFIED`, 25 parent exceptions 0 accepted, 18 Kyiv dual-IDs/76 H2 replay-only uncertainty preserved. Next C4-E5 must build complete independently sourced Git expected JSONL, six full same-snapshot read-only Neon exports, execute strict field verifier and negative tests with exact-SHA CI. No Neon writes, production release or reader cutover.
+
 ### C6-R2 October 184 minute-boundary candidate anomaly — bounded data proof accepted; reader release blocked
 
 - Coordinator verified current refs `main@f5794810`, `site-prod@552de9cf`, WIP `d834aad2`; research [`b308b398`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/b308b398949419b1e7164a3d57b69d5933abe4ef) pins **only** exact 9-case C6-R1 crosswalk (same Git blob `4066301d`). No research-SHA CI runs/statuses. The stated local 16/16 synthetic tests, wrapper, local ZIP and consumer inventory were not available for independent artifact review. No executed PostgreSQL negative tests or wrapper readback.
