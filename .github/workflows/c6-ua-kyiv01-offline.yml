@@ -1,0 +1,43 @@
+name: C6-UA-KYIV-01 isolated offline proof
+on:
+  push:
+    branches:
+      - research-c6-ua-kyiv01-feasibility-2026-10-29
+    paths:
+      - 'research/c6_ua_kyiv01_feasibility_2026_10_29/**'
+      - '.github/workflows/c6-ua-kyiv01-offline.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-offline:
+    if: github.ref == 'refs/heads/research-c6-ua-kyiv01-feasibility-2026-10-29'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Execute isolated tests, no credentials or external API
+        working-directory: research/c6_ua_kyiv01_feasibility_2026_10_29
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest -v test_ua_kyiv_research_adapter 2>&1 | tee test_execution.log
+          python -m compileall -q ua_kyiv_research_adapter.py test_ua_kyiv_research_adapter.py
+          sha256sum ua_kyiv_research_adapter.py test_ua_kyiv_research_adapter.py test_execution.log > executed_sha256.txt
+          printf '%s\n' "$GITHUB_SHA" > tested_commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: c6-ua-kyiv01-offline-proof
+          path: |
+            research/c6_ua_kyiv01_feasibility_2026_10_29/test_execution.log
+            research/c6_ua_kyiv01_feasibility_2026_10_29/executed_sha256.txt
+            research/c6_ua_kyiv01_feasibility_2026_10_29/tested_commit.txt
+          if-no-files-found: warn
+          retention-days: 30
