@@ -91,7 +91,7 @@ class R4FaultTests(unittest.TestCase):
     def test_mismatched_source_intervals(self):
         mutate=json.loads(json.dumps(self.expected))
         mutate[0]["end"]="2026-09-29T16:31:25+03:00"
-        mutate[0]["duration_minutes"]=round(106.783333333/1,3)
+        mutate[0]["duration_minutes"]=round((datetime.fromisoformat(mutate[0]["end"])-datetime.fromisoformat(mutate[0]["start"])).total_seconds()/60,3)
         self.rejected("HARD_FAIL_SEPTEMBER_ROW_PARITY",expected_intervals=mutate)
     def test_source_duration_drift(self):
         mutate=json.loads(json.dumps(self.expected));mutate[0]["duration_minutes"]=0
