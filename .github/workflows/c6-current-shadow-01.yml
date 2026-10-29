@@ -1,0 +1,56 @@
+name: C6 current source-to-Neon shadow 01
+
+on:
+  push:
+    branches:
+      - research-c6-runner02-isolated-2026-10-29
+    paths:
+      - .github/workflows/c6-current-shadow-01.yml
+      - research/c6_current_shadow_2026_10_30/current_shadow.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: c6-current-shadow-01-one-shot
+  cancel-in-progress: false
+
+jobs:
+  current-b2-research-only:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-c6-runner02-isolated-2026-10-29'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: c6-runner02-research
+    steps:
+      - name: Checkout pinned current research code
+        uses: actions/checkout@v4
+        with:
+          path: b2
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout immutable current site-prod snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: 7dca163219b7c6b9208a9445ed9ee9fbffdbd998
+          path: siteprod
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install existing Python/psycopg and production parser requirements
+        run: python -m pip install --disable-pip-version-check 'psycopg[binary]>=3.2,<4' 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: One-shot true source HTTP capture and physical Neon read-only current B2 projection
+        env:
+          C6_B1_READONLY_DATABASE_URL: ${{ secrets.C6_B1_READONLY_DATABASE_URL }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: python b2/research/c6_current_shadow_2026_10_30/current_shadow.py
+      - name: Preserve machine proof with true raw publisher bytes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-current-shadow-01-${{ github.run_id }}
+          path: c6_current_shadow_01_proof/
+          if-no-files-found: error
+          retention-days: 30
