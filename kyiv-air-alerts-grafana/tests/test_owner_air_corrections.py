@@ -45,6 +45,15 @@ class AcceptedHistoricalCorrectionTests(unittest.TestCase):
         src = {'kharkiv': [Alert(START,OLD_END), Alert(datetime.fromisoformat('2025-03-06T04:15:00+02:00'), datetime.fromisoformat('2025-03-06T04:30:00+02:00'))]}
         with self.assertRaisesRegex(ValueError, 'overlaps'):
             apply_owner_accepted_air_corrections(src, PROOF)
+    def test_already_corrected_interval_with_overlap_fails_closed(self):
+        src = {'kharkiv': [
+            Alert(START, NEW_END),
+            Alert(datetime.fromisoformat('2025-03-06T04:15:00+02:00'),
+                  datetime.fromisoformat('2025-03-06T04:30:00+02:00')),
+        ]}
+        with self.assertRaisesRegex(ValueError, 'overlaps'):
+            apply_owner_accepted_air_corrections(src, PROOF)
+
     def test_provenance_mismatch_fails_closed(self):
         obj=json.loads(PROOF.read_text())
         obj['source']['air_off_message_id']=1
