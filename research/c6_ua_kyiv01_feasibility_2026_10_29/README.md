@@ -1,3 +1,9 @@
+## 2026-10-29: superseding protected LIVE CHECKPOINT — PASS_BOUNDED
+
+The initial offline/access-blocked assessment below was superseded by **four real HTTP 200 UkraineAlarm GETs** on protected GitHub Actions run [40944518015](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40944518015) at exact code SHA `dc1c1408`. Artifact [12929106409](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40944518015/artifacts/12929106409) ZIP SHA-256 `71f37f6fd86bf071337304567f67e4ce8f1d565cba0f8905f7346216a383602b`. **See `LIVE_REPORT.md` and updated `machine_verdict.ini`; the earlier `LIVE_API_ACCESS_BLOCKED=YES` below was historical and is no longer current.** This research run cannot be promoted to production without separate owner approval.
+
+---
+
 # C6-UA-KYIV-01 — research-only audit (2026-10-29)
 
 ## Scope / actual evidence
