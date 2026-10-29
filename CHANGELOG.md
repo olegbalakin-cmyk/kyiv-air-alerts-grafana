@@ -2,6 +2,14 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-30
+
+### C6-RUNNER-02 first real Python/psycopg to Neon read-only replica — CONNECTION PASS, B2 inputs open
+
+- **First genuine Python-to-Neon success**: [research workflow run 40964233881](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40964233881) / job `123764505199` on exact Git SHA `615ee491b4a1e433de5da9205e92c438d08bf6d0` (sole research workflow file, blob `30420e3f`, YAML SHA-256 `d1e563b4`). Completed SUCCESS on first `push` attempt, Python 3.13 `psycopg.connect()` actually executed with environment-injected existing secrets; control-plane target MATCH for `ep-calm-rice-b5073ypp` `read_only`. **Connection PASS, Python exit 0**.
+- Artifact `12937285932`: independently downloaded and checked GitHub ZIP SHA-256 `0d441e6b5cc18561f851d5040066c364753087fef8e9d25ab67f53b3408f2f5e`, 2/2 inner file hashes + YAML SHA match. Actual `REPEATABLE READ READ ONLY` on Neon `neondb` PG18.6, `pg_is_in_recovery=true`, snapshot `436224:436224:`, replay `0/118DE780`, bounded October raw **385 parents, 55 classifications, 223 source links**. Previous frozen **382** physical parents are now three fewer than current; not certified as a B2 site parity snapshot.
+- Accepted `C6_RUNNER02_CONNECTION_PASS_B2_INPUT_BLOCKED` only. The exact `404f1d29` B2 reader was **not run** and no display 198/pinned comparison performed: owner-approved provenance, live publisher capture, municipal/A5/identity receipts and appropriate snapshot are not independently verified. `C3_RC7=PARTIAL`, `C6=PARTIAL`; production/WIP, casualty, historical, Neon writes, deployment, authority and cutover unchanged. Next: complete approved input provenance and 385↔382 scope before a separately authorized B2 research-run. This checkpoint does not authorize any production reader switch.
+
 ## 2026-10-29
 
 ### C6-RUNNER-01 access blocked by C3 safety; bounded research-trigger review accepted
