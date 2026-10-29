@@ -1,9 +1,41 @@
-# C6-OCT184-B1 bounded research proof
+# C6-OCT184-B1: freshness-aware Kyiv Neon display reader
 
-Research branch only; no production or Neon writes. Frozen source Git blob: `e39dfc6fdbdb90863b5bfb595e12cadf8c20b068`; upstream pinned at site-prod `e08cc7da8cf29fc8603f199c85f0964610a850a7`. Original lineages at `0bb0371fecad4f0cd84b3d82f0e539a8860da02e`.
+Research-only. This code DOES NOT activate publication, change any parent, modify
+Neon, certify physical identity for October 184, or rebind classifications.
 
-The committed `frozen_october_382_198_bundle.json` is the exact verified 382-parent / 184 view-only candidate / 14 unique live dataset and 55-classification / 223-source provenance package. October physical identities are NOT_PROVEN, 0 approved merges. 28 classifications are attached to suppressed minute-side parents and MUST NOT be re-bound to official counterparts. This is selection in a view, not identity adjudication.
+The reader requires immutable source-row provenance (Git commit + blob), and a
+separate bounded OWNER-approved **view-only** override for each of 184 frozen
+minute/precise source candidates. No inferred `alert_episodes.source` column and
+no minute-floor identity merge. All 55 classifications and 223 sources are raw
+relationships; 28 minute-parent classifications remain unresolved for enriched
+view consumers. Fresh verified completed Kyiv Digital rows are selected even
+when they start before the final official `start` watermark. Unknown overlaps are
+explicitly unresolved and not certified for publication.
 
-Executed: Python 17/17 local offline fixtures PASS; physical Neon SQL one statement read-only, `pg_is_in_recovery=true`, snapshot `434176:434176:`, `read committed`. The code, unit tests, SQL and machine verdict are available as the accompanying local deliverable ZIP, but are not yet copied into this research branch. Local Python fixture execution is not PostgreSQL16 fixture certification. No Python connection to live Neon occurred. No Actions workflow was started because C3-RC7 indirect trigger safety is not fully established.
+Run standalone synthetic tests:
 
-Next gate: commit exact tested code and test files on research branch, run disposable PG16 fixtures and protected Python REPEATABLE READ READ ONLY Neon execution, recheck source-version drift and relationship hash, and get coordinator acceptance before any promotion. `C6=PARTIAL`, production reader switch NO.
+    python -m unittest -v test_source_priority_reader
+
+Run against an approved RO compute only after injecting an approved secure
+`C6_B1_READONLY_DATABASE_URL` (not via Git, stdout, or artifacts):
+
+    python source_priority_reader.py --bundle frozen_october_382_198_bundle.json \
+      --git-json alerts_combined.pinned.json --result executed.json
+
+`--git-json` must contain the exact bytes of Git blob
+`e39dfc6fdbdb90863b5bfb595e12cadf8c20b068`.
+
+`physical_readonly_snapshot` uses one `REPEATABLE READ READ ONLY` transaction and
+checks `pg_is_in_recovery`; the GitHub connector SQL audit is strictly weaker:
+a **single SELECT** at `READ COMMITTED`, not a verified Python connection.
+
+The source's legacy `merge_sources` cutoff `max(historical.start)` is insufficient
+under incomplete, retrocorrected or late historical data: it silently drops
+completed live rows within gaps. Selection must use exact pinned row authority
+and explicit view-only overrides, with source-version monotonicity guarded.
+
+Caveats / remaining gate: independent disposable PostgreSQL 16 SQL-backed
+fixtures, full Python live Neon execution, and historical update/correction
+proof are NOT EXECUTED in this environment. SQL physical readbacks and local
+pure-Python fixtures are not equivalent to either. No GitHub Actions run was
+started: C3-RC7 containment for indirect listener triggers remains open.
