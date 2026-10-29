@@ -1,0 +1,41 @@
+name: C6-R3 research PG16 fail-closed proof
+on:
+  push:
+    branches:
+      - research-c6-r3-october-lineage-reader-2026-10-29
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pg16:
+    if: github.ref == 'refs/heads/research-c6-r3-october-lineage-reader-2026-10-29'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_USER: testuser
+          POSTGRES_DB: c6test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d c6test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PostgreSQL driver
+        run: pip install 'psycopg[binary]>=3.2,<4'
+      - name: Execute SQL backed fault tests
+        env:
+          PG_TEST_DATABASE_URL: postgresql://testuser:test-only@localhost:5432/c6test
+        run: |
+          cd research/c6_r3_october_lineage_reader_2026_10_29
+          python -m unittest -v test_c6_r3_reader.py

@@ -1,0 +1,27 @@
+{
+  "schema_version": "c6-r3-consumer-inventory-v1",
+  "status": "PARTIAL",
+  "paths": [
+    {
+      "consumer": "production updater / Netlify",
+      "entry_point": ".github/workflows/update-netlify-site.yml",
+      "current_source": "site-prod and JSON inputs",
+      "neon_equivalent": "alert_episodes",
+      "parity": "NOT_CERTIFIED"
+    },
+    {
+      "consumer": "Grafana exports",
+      "entry_point": "kyiv-air-alerts-grafana/scripts/deploy_grafana.py",
+      "current_source": "site-prod JSON/CSV",
+      "neon_equivalent": "alert_episodes + classifications",
+      "parity": "NOT_CERTIFIED"
+    },
+    {
+      "consumer": "attack-event outputs",
+      "entry_point": "NOT_VERIFIED",
+      "current_source": "NOT_VERIFIED",
+      "neon_equivalent": "attack_events + attack_event_classifications + attack_event_sources",
+      "parity": "NOT_CERTIFIED"
+    }
+  ]
+}
