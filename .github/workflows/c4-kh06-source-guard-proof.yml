@@ -1,0 +1,69 @@
+name: C4-KH-06 exact-SHA source guard proof (research only)
+
+on:
+  push:
+    branches: [research-c4-kh06-idempotent-overlap-2026-10-29]
+    paths:
+      - ".github/workflows/c4-kh06-source-guard-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/owner_air_corrections.py"
+      - "kyiv-air-alerts-grafana/tests/test_owner_air_corrections.py"
+      - "kyiv-air-alerts-grafana/data/owner_accepted_air_corrections.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact ref and source/test/manifest blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p proof
+          python - <<'PY'
+          import json, os, subprocess
+          paths = ["kyiv-air-alerts-grafana/scripts/owner_air_corrections.py", "kyiv-air-alerts-grafana/tests/test_owner_air_corrections.py", "kyiv-air-alerts-grafana/data/owner_accepted_air_corrections.json"]
+          sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          blobs = {p: subprocess.check_output(["git", "rev-parse", f"HEAD:{p}"], text=True).strip() for p in paths}
+          expected = {"kyiv-air-alerts-grafana/scripts/owner_air_corrections.py": "90594c8566b7215b498d1612d8c1586000905158",
+                      "kyiv-air-alerts-grafana/tests/test_owner_air_corrections.py": "1039e78331603fbd9a97bb6d300f542b13799d17",
+                      "kyiv-air-alerts-grafana/data/owner_accepted_air_corrections.json": "c6c371d9c8eb18b866cda59bcc05424e184945aa"}
+          if blobs != expected: raise SystemExit(f"FAIL CLOSED: unexpected source blobs: {blobs!r}")
+          with open("proof/source_blobs.json", "w") as f: json.dump({"tested_sha": sha, "blobs": blobs, "branch": os.environ.get("GITHUB_REF_NAME")}, f, sort_keys=True, indent=2)
+          PY
+      - name: Execute all seven source correction tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_owner_air_corrections.py' -v 2>&1 | tee proof/test.log
+      - name: Write reproducible bounded gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,hashlib,os,pathlib
+          logs=pathlib.Path("proof/test.log").read_text()
+          if "Ran 7 tests" not in logs or "\nOK\n" not in logs: raise SystemExit("FAIL CLOSED: tests incomplete")
+          result={"tested_sha":os.environ["GITHUB_SHA"],"source_guard":"PASS","test_count":7,"source_level_only":True,"production_json_corrected":False,"neon_corrected":False,"replay_proven":False,"status":"C4_KH_06_RESEARCH_SOURCE_GUARD_PASS_ONLY"}
+          pathlib.Path("proof/gate.json").write_text(json.dumps(result,sort_keys=True,indent=2)+"\n")
+          hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in pathlib.Path("proof").glob("*") if p.name != "sha256_manifest.json"}
+          pathlib.Path("proof/sha256_manifest.json").write_text(json.dumps({"files":hashes},sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload exact-SHA proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c4-kh06-exact-source-guard
+          path: proof/
+          if-no-files-found: warn
+          retention-days: 30
