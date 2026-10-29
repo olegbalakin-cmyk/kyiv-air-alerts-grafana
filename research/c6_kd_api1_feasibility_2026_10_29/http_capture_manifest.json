@@ -1,0 +1,55 @@
+{
+  "task": "C6-KD-API1",
+  "date_utc": "2026-10-29",
+  "direct_attempts": [
+    {
+      "channel": "container requests",
+      "url": "https://kyiv.digital/open-api/docs/air-alert.html",
+      "result": "DNS_RESOLUTION_BLOCKED",
+      "status": null,
+      "response_headers": null,
+      "raw_sha256": null,
+      "bytes": null
+    },
+    {
+      "channel": "web retrieval",
+      "url": "https://kyiv.digital/open-api/air-alert/history",
+      "result": "TOOL_REJECTED_APPLICATION_XML",
+      "origin_status": null,
+      "response_headers": null,
+      "raw_sha256": null,
+      "bytes": null,
+      "comment": "Tool does not allow setting Accept: application/json; 400 is a retrieval-layer error, not an origin status"
+    },
+    {
+      "channel": "web retrieval",
+      "url": "https://kyiv.digital/open-api/air-alert/state",
+      "result": "TOOL_REJECTED_APPLICATION_XML",
+      "origin_status": null,
+      "response_headers": null,
+      "raw_sha256": null,
+      "bytes": null,
+      "comment": "Tool does not allow setting Accept: application/json; origin status unknown"
+    }
+  ],
+  "current_origin_raw_http_captures": 0,
+  "raw_publisher_headers_verified": false,
+  "token_used": false,
+  "rate_limited_retries": 0,
+  "archival_secondary_evidence": {
+    "title": "Kyiv Digital public-history snapshot stored by independent repository on 2026-10-15",
+    "upstream_original_url": "https://kyiv.digital/open-api/air-alert/history",
+    "pinned_copy": "https://raw.githubusercontent.com/Oleksandr-Hlushchenko/KSE-AI-Agentic-School-Stage2/f2b81a7410078d0c919b1b9013dadf954b6f9a6f/data/raw/kyiv_digital/history_2026-10-15.json",
+    "archived_git_blob": "5375dd7919e58c06cdf8ea1b7ef047d2c40efa59",
+    "bytes": 319775,
+    "events": 5384,
+    "sha256": "417e4024d258163c9ead52f80542d2566da0ea0a700bba70d933bbd616df1b3d",
+    "sha256_independently_recomputed": true,
+    "publisher_http_status_captured_in_this_task": false,
+    "publisher_response_headers": null
+  },
+  "operational_changes": 0,
+  "neon_reads": 0,
+  "neon_writes": 0,
+  "credentials_disclosed": false
+}
