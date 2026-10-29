@@ -190,7 +190,7 @@ class HistoryTests(unittest.TestCase):
         ]}
         got = compare_exact(history_air(p, CITY), [
             {"start": "2026-10-01T00:00:03Z", "end": "2026-10-01T00:07:15Z"},
-            {"start": "2026-10-01T00:00:00Z", "end": "2026-10-01T00:07:00Z"},
+            {"start": "2026-10-01T00:00:04Z", "end": "2026-10-01T00:07:00Z"},
         ])
         self.assertEqual(got["matched"], 1)
         self.assertEqual(got["missing_or_mismatched_in_window"], 1)
