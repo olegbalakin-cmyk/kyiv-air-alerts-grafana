@@ -1,0 +1,70 @@
+name: C6-UA-KYIV-01 protected live read-only UkraineAlarm proof
+on:
+  push:
+    branches:
+      - research-c6-ua-kyiv01-feasibility-2026-10-29
+    paths:
+      - 'research/c6_ua_kyiv01_feasibility_2026_10_29/LIVE_RUN_MARKER.txt'
+
+# Exact production concurrency group, research never cancels production.
+concurrency:
+  group: update-netlify-site
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  protected-readonly:
+    if: github.ref == 'refs/heads/research-c6-ua-kyiv01-feasibility-2026-10-29'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - name: Checkout exact research source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned production request policy + Kyiv JSON (read only)
+        uses: actions/checkout@v4
+        with:
+          ref: e08cc7da8cf29fc8603f199c85f0964610a850a7
+          path: site_prod_pinned
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install production policy dependency
+        shell: bash
+        run: python -m pip install 'requests==2.32.5'
+      - name: Execute bounded GETs under production concurrency and 70-second policy
+        shell: bash
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          C6_SITE_PROD_SHA: e08cc7da8cf29fc8603f199c85f0964610a850a7
+          C6_PINNED_PRODUCTION_SCRIPTS: ${{ github.workspace }}/site_prod_pinned/kyiv-air-alerts-grafana/scripts
+          C6_PINNED_KYIV_JSON: ${{ github.workspace }}/site_prod_pinned/kyiv-air-alerts-grafana/data/alerts_combined.json
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -euo pipefail
+          python research/c6_ua_kyiv01_feasibility_2026_10_29/capture_live_ukrainealarm.py
+      - name: Save immutable evidence hashes and test commit
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="research/c6_ua_kyiv01_feasibility_2026_10_29/live_proof"
+          mkdir -p "$d"
+          printf '%s\n' "$GITHUB_SHA" > "$d/research_commit.txt"
+          sha256sum research/c6_ua_kyiv01_feasibility_2026_10_29/capture_live_ukrainealarm.py > "$d/executed_code_sha256.txt"
+          sha256sum site_prod_pinned/kyiv-air-alerts-grafana/scripts/ukrainealarm_request_policy.py > "$d/production_policy_sha256.txt"
+          sha256sum site_prod_pinned/kyiv-air-alerts-grafana/data/alerts_combined.json > "$d/production_kyiv_json_sha256.txt"
+      - name: Upload sanitized receipts and raw response bytes (no request headers/tokens)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-ua-kyiv01-live-readonly-proof
+          path: research/c6_ua_kyiv01_feasibility_2026_10_29/live_proof/
+          if-no-files-found: warn
+          retention-days: 14
