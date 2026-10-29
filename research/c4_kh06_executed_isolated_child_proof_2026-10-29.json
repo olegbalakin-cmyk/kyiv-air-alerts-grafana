@@ -1,0 +1,76 @@
+{
+  "schema": "c4-kh06-executed-isolated-proof-v1",
+  "date": "2026-10-29",
+  "research_commit": "4fcd939d414f5c4a56c5974eaa4a299065dde59d",
+  "research_actions": {
+    "run_id": 40921217446,
+    "job_id": 123614629066,
+    "artifact_id": 12918252270,
+    "tests_executed": 7,
+    "tests_passed": 7,
+    "conclusion": "success",
+    "artifact_sha256_from_github": "682468fbeb2e385736f928f2786f90da113d74f9bf7a378060ee2d6db94ebe1f"
+  },
+  "upstream_at_preflight": {
+    "main": "896c7c8598bc2a8a44c8793385af4e8858f22844",
+    "site_prod": "e08cc7da8cf29fc8603f199c85f0964610a850a7",
+    "operational_wip": "92011e2cd6a0ce515cd048a4c298c0f0a7bfdf98"
+  },
+  "owner_factual_source": "ACCEPTED",
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "live_shadow_branch": "br-bold-mode-b5rub8pq",
+    "live_ro_endpoint": "ep-calm-rice-b5073ypp",
+    "isolated_test_branch": "br-misty-darkness-b5wkoiyk",
+    "child_parent_id": "br-bold-mode-b5rub8pq",
+    "child_parent_lsn": "0/1188F638",
+    "database": "neondb",
+    "case_episode_uid": "a556ee0d-4a90-40b4-adf1-db55646cd05b",
+    "before": {
+      "start_at": "2025-03-05T19:08:24Z",
+      "end_at": "2025-03-05T19:47:55Z",
+      "legacy_episode_id": "cb4d84c97db70f7a08cdc74b"
+    },
+    "isolated_after": {
+      "start_at": "2025-03-05T19:08:24Z",
+      "end_at": "2025-03-06T03:28:47Z",
+      "legacy_episode_id": "3c31f8d6a15a5db8eb31a35b",
+      "duration_seconds": 30023,
+      "episode_uid_preserved": true,
+      "old_legacy_rows": 0,
+      "new_legacy_rows": 1,
+      "same_start_rows": 1
+    },
+    "rollback_fault_injected": true,
+    "rollback_readback_confirmed": true,
+    "live_shadow_after": "UNCHANGED_OLD_END",
+    "historical_classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+    "classification_state": "UNBOUND_ORIGINAL_UNCHANGED_IN_CHILD",
+    "active_event_uid": "dc3a63ec-d9f8-412c-b0a1-09dd9398b27b",
+    "active_tip": "UNCHANGED_IN_CHILD",
+    "historical_source_memberships": "1_IN_CHILD",
+    "full_append_only_revision": "NOT_EXECUTED",
+    "normal_canonical_updater_replay": "NOT_EXECUTED"
+  },
+  "production_json": "NOT_CORRECTED",
+  "netlify_publication": "NOT_VERIFIED",
+  "json_neon_exact_parity": "NOT_PROVEN",
+  "other_cities_live": "UNMODIFIED_BY_THIS_EXECUTION",
+  "blockers": [
+    "Source hook remains old overlap-bypass version on site-prod",
+    "Real production regenerated JSON and cross-city KPI diff not executed",
+    "Child transaction did not create historical classification revision or event tip supersession; provenance not fully reconciled",
+    "No actual canonical updater replay, concurrency and event tip conflict fault suite for child",
+    "Live Neon write unsafe before writer-replay and historical lineage proof",
+    "Publication and public Netlify proof absent"
+  ],
+  "verdict": "C4_KH_06_REMEDIATION_PARTIAL_RESEARCH_CHILD_ONLY",
+  "guardrails": {
+    "production_release": false,
+    "production_cutover": false,
+    "live_neon_dml": false,
+    "operational_wip_changed": false,
+    "casualty_changed": false,
+    "backfill_changed": false
+  }
+}
