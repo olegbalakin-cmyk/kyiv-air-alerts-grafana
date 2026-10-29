@@ -1,0 +1,81 @@
+{
+  "case_id": "C6-SECURE-EXEC-01",
+  "observed_at_utc": "2026-10-29T19:38:39.745952Z",
+  "source_refs": {
+    "main": "b5e094b391ecad699580239f40549368f34b4120",
+    "site_prod": "e08cc7da8cf29fc8603f199c85f0964610a850a7",
+    "operational_wip": "92011e2cd6a0ce515cd048a4c298c0f0a7bfdf98",
+    "r4_research": "48a9523a31ddfe2956a104d3a36372aa3aad368d",
+    "kd_api1_research": "26342dbb91d2e2e2ff2a678e7a50b0e26a5e7b94",
+    "r4_wrapper_git_blob": "69589b191cb058a999f9cd0ac5b9b6aa1a0e06fd",
+    "r4_pinned_site_prod_input_blob": "e39dfc6fdbdb90863b5bfb595e12cadf8c20b068",
+    "r4_expected_crosswalk_blob": "4066301d37a4fe41c6bf34570786afaf573cf027"
+  },
+  "verdict": "UNAVAILABLE",
+  "runner_kind": "AVAILABLE_CONTAINER_NOT_NETWORK_CAPABLE_OR_PROTECTED",
+  "runner_tested": "container runtime only; no separately addressable protected runner exposed",
+  "python_version": "3.13.5",
+  "psycopg": "ABSENT",
+  "executables": {
+    "git": true,
+    "github_cli": false,
+    "curl": true
+  },
+  "environment_present": {
+    "C6_R4_READONLY_DATABASE_URL": false,
+    "NEON_API_KEY": false,
+    "GITHUB_TOKEN": false,
+    "GH_TOKEN": false,
+    "DATABASE_URL": false,
+    "HTTPS_PROXY": false,
+    "HTTP_PROXY": false,
+    "ALL_PROXY": false
+  },
+  "network": {
+    "dns_github_com": "FAILED_GAIERROR",
+    "dns_api_github_com": "FAILED_GAIERROR",
+    "dns_kyiv_digital": "FAILED_GAIERROR",
+    "github_curl_head_http_code": "000",
+    "origin_connection_attempts_for_kyiv_api": 0
+  },
+  "connector_access": {
+    "github_api": "AVAILABLE_SEPARATE_CONNECTOR",
+    "neon_control_plane": "AVAILABLE_SEPARATE_CONNECTOR",
+    "neon_postgres_via_python": "NOT_TESTED"
+  },
+  "neon_control_plane_observed": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "compute_id": "ep-calm-rice-b5073ypp",
+    "compute_type": "read_only",
+    "state": "idle",
+    "identity_confirmed_by_connector": true,
+    "identity_confirmed_by_python_wrapper": false
+  },
+  "github_actions_trigger_audit": {
+    "base_ref": "b5e094b391ecad699580239f40549368f34b4120",
+    "workflow_count_checked": 17,
+    "research_push_matched_workflows": 0,
+    "main_push_filters": "branches [main] for all main push-triggered workflows",
+    "create_event_workflows": 0,
+    "workflow_run_listener": "Monitor explosion metric WIP (completed) only",
+    "c3_rc7_effective_account_containment": "SEPARATE_GATE_NOT_REPROVEN"
+  },
+  "preexisting_pg16": {
+    "run_id": 40881999530,
+    "job_id": 123475659286,
+    "artifact_id": 12900303237,
+    "artifact_digest": "sha256:920be256bca11fc05f24914b9eb0ebf0dd81db82acabeea04f47fe16fb6da58e",
+    "status": "success",
+    "executions": 42,
+    "classification": "LAB_ONLY_NOT_A_LIVE_PYTHON_PROOF"
+  },
+  "blockers": [
+    "NO_NETWORK_CAPABLE_PROTECTED_PYTHON_RUNNER_EXPOSED",
+    "C6_R4_READONLY_DATABASE_URL_NOT_INJECTED",
+    "NEON_API_KEY_NOT_INJECTED",
+    "PSYCOPG_NOT_INSTALLED",
+    "DNS_BLOCKS_GITHUB_CHECKOUT_AND_KYIV_DIGITAL_ORIGIN",
+    "NO_PINNED_GIT_CHECKOUT_ON_A_NETWORK_CAPABLE_RUNNER"
+  ]
+}
