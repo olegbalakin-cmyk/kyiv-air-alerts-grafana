@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import Counter, defaultdict
+from urllib.parse import urlsplit
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -21,6 +22,13 @@ GIT_INPUT_PATH = "kyiv-air-alerts-grafana/data/alerts_combined.json"
 PINNED_COMMIT = "e08cc7da8cf29fc8603f199c85f0964610a850a7"
 PINNED_BLOB = "e39dfc6fdbdb90863b5bfb595e12cadf8c20b068"
 FROZEN_184_SOURCE_MANIFEST = "0bb0371fecad4f0cd84b3d82f0e539a8860da02e"
+APPROVED_B1_BUNDLE_BLOB = "fbad2b5318818b9c4bc9940e691de5f32fcdf283"
+APPROVED_NEON_IDENTITY = {
+    "project": "green-cake-44216048", "branch": "br-bold-mode-b5rub8pq",
+    "compute": "ep-calm-rice-b5073ypp", "database": "neondb",
+}
+# A source-priority decision is not an identity adjudication.
+APPROVED_VIEW_SCOPE = "OWNER_SOURCE_VIEW_PRIORITY_WITH_FRESH_FALLBACK"
 
 
 class ReaderGateError(RuntimeError):
@@ -118,26 +126,191 @@ def classify_live_sequence(events):
             "faults": sorted(set(faults))}
 
 
-def verify_source_versions(previous, current, authorized_corrections=()):
-    """Guard against incomplete, disappearing or retro-corrected official JSON.
+def _canonical_source_fields(row):
+    """Anything but capture provenance is material until explicitly adjudicated."""
+    ignore = {"origin_git_blob", "origin_git_commit", "ingested_at", "verified_at"}
+    return {k: v for k, v in row.items() if k not in ignore}
 
-    Explicitly authorized correction: (old_uid, new_uid) tuple. Source versions
-    must each already have Git blob provenance. No raw row is deleted.
+
+def _source_fingerprint(row):
+    return sha256_canonical(_canonical_source_fields(row))
+
+
+def verify_source_versions(previous, current, authorized_corrections=()):
+    """Fail closed on same-UID start/end/duration changes, removals and UID revisions.
+
+    Retained UIDs changing canonical fields need a fingerprint-bound approval
+    containing old_uid, new_uid, old_sha256, new_sha256, and decision_scope.
+    Legacy two-element tuples remain valid ONLY for old->new UID replacements
+    (historical B1 compatibility); CLI never accepts unsigned tuples.
+    Every material change requires an advanced origin Git blob AND commit.
     """
-    prev = {r["uid"]: r for r in previous}
-    nxt = {r["uid"]: r for r in current}
-    corrections = dict(authorized_corrections)
-    require(len(corrections) == len(list(authorized_corrections)), "DUPLICATE_CORRECTION")
-    missing = set(prev) - set(nxt)
-    unapproved = sorted(uid for uid in missing if uid not in corrections)
-    require(not unapproved, "UNVERIFIED_MUNICIPAL_CONTRACTION", unapproved[:5])
-    for old_uid in missing:
-        target = corrections[old_uid]
-        require(target in nxt and prev[old_uid]["source_kind"] == "official_json" and
-                nxt[target]["source_kind"] == "official_json", "BAD_SOURCE_CORRECTION", old_uid)
-        require(prev[old_uid].get("origin_git_blob") != nxt[target].get("origin_git_blob"),
-                "MISSING_NEW_OFFICIAL_SOURCE_VERSION", old_uid)
-    return {"added": len(set(nxt) - set(prev)), "corrections": len(missing), "status": "PASS"}
+    prev_rows = list(previous)
+    next_rows = list(current)
+    prev = {str(r["uid"]): r for r in prev_rows}
+    nxt = {str(r["uid"]): r for r in next_rows}
+    require(len(prev) == len(prev_rows) and len(nxt) == len(next_rows),
+            "DUPLICATE_MUNICIPAL_UID")
+    require(all(r.get("source_kind") == "official_json" for r in prev_rows + next_rows),
+            "NON_MUNICIPAL_VERSION_ROW")
+    approvals = {}
+    for item in authorized_corrections:
+        if isinstance(item, dict):
+            require(item.get("decision_scope") == "HISTORICAL_CORRECTION_ONLY" and
+                    item.get("authority") == "OWNER_APPROVED_SOURCE_CORRECTION" and
+                    bool(item.get("old_sha256")) and bool(item.get("new_sha256")),
+                    "UNAPPROVED_SOURCE_CORRECTION")
+            old_uid, new_uid = str(item["old_uid"]), str(item["new_uid"])
+        else:
+            require(isinstance(item, (list, tuple)) and len(item) == 2,
+                    "BAD_LEGACY_CORRECTION")
+            old_uid, new_uid = map(str, item)
+            require(old_uid != new_uid, "SAME_UID_REQUIRES_FINGERPRINT_APPROVAL")
+        require(old_uid not in approvals, "DUPLICATE_CORRECTION")
+        approvals[old_uid] = (new_uid, item)
+    removed = set(prev) - set(nxt)
+    same_uid_drift = {uid for uid in set(prev) & set(nxt)
+                      if _source_fingerprint(prev[uid]) != _source_fingerprint(nxt[uid])}
+    require(not (removed - approvals.keys()), "UNVERIFIED_MUNICIPAL_CONTRACTION",
+            sorted(removed - approvals.keys())[:5])
+    require(not (same_uid_drift - approvals.keys()), "UNAPPROVED_SAME_UID_CORRECTION",
+            sorted(same_uid_drift - approvals.keys())[:5])
+    changed = removed | same_uid_drift
+    require(not (approvals.keys() - changed), "UNUSED_SOURCE_CORRECTION_APPROVAL",
+            sorted(approvals.keys() - changed)[:5])
+    targets = set()
+    for uid in sorted(changed):
+        target, item = approvals[uid]
+        require(target in nxt and target not in targets, "BAD_SOURCE_CORRECTION", uid)
+        require(target == uid if uid in same_uid_drift else target != uid,
+                "BAD_CORRECTION_UID_TARGET", uid)
+        require(prev[uid].get("origin_git_blob") and nxt[target].get("origin_git_blob") and
+                prev[uid]["origin_git_blob"] != nxt[target]["origin_git_blob"],
+                "MISSING_NEW_OFFICIAL_SOURCE_VERSION", uid)
+        if isinstance(item, dict):
+            require(item["old_sha256"] == _source_fingerprint(prev[uid]) and
+                    item["new_sha256"] == _source_fingerprint(nxt[target]),
+                    "CORRECTION_FINGERPRINT_MISMATCH", uid)
+            require(item.get("old_source_blob") == prev[uid]["origin_git_blob"] and
+                    item.get("new_source_blob") == nxt[target]["origin_git_blob"],
+                    "CORRECTION_SOURCE_BLOB_MISMATCH", uid)
+            require(prev[uid].get("origin_git_commit") != nxt[target].get("origin_git_commit"),
+                    "MISSING_NEW_OFFICIAL_SOURCE_COMMIT", uid)
+        targets.add(target)
+    return {"added": len(set(nxt) - set(prev)), "corrections": len(changed),
+            "retained_uid_changes": len(same_uid_drift), "status": "PASS"}
+
+
+def verify_approved_frozen_bundle(bundle_bytes, approved_bytes, expected_blob=APPROVED_B1_BUNDLE_BLOB):
+    """Trust external accepted Git blob pin, never source authority inside candidate JSON."""
+    require(expected_blob == APPROVED_B1_BUNDLE_BLOB, "UNAPPROVED_BUNDLE_PIN_OVERRIDE")
+    require(git_blob_sha(approved_bytes) == APPROVED_B1_BUNDLE_BLOB,
+            "UNAPPROVED_FROZEN_MANIFEST_BLOB")
+    require(bundle_bytes == approved_bytes, "FROZEN_SELECTION_MANIFEST_DRIFT")
+    bundle = json.loads(bundle_bytes)
+    authority = bundle.get("source_authority", {})
+    require(authority.get("repository") == GIT_REPO and
+            authority.get("site_prod_sha") == PINNED_COMMIT and
+            authority.get("alerts_combined_git_blob") == PINNED_BLOB and
+            authority.get("lineage_git_commit") == FROZEN_184_SOURCE_MANIFEST and
+            authority.get("policy") == APPROVED_VIEW_SCOPE and
+            authority.get("physical_identity") == "NOT_PROVEN_184_PAIRS",
+            "UNAPPROVED_SOURCE_AUTHORITY")
+    require(len(bundle.get("display_overrides", [])) == 184 and
+            all(r.get("authority") == "OWNER_C6_OCT184_B_184_FROZEN_VIEW" for r in
+                bundle["display_overrides"]), "FROZEN_VIEW_SCOPE_MISMATCH")
+    return bundle
+
+
+def verify_git_provenance(bundle, source_receipt, git_json_bytes):
+    """Require independent byte pins and provenance receipt; no self-asserted Git lineage."""
+    auth = bundle.get("source_authority", {})
+    require(source_receipt.get("git_commit") == PINNED_COMMIT and
+            source_receipt.get("git_blob") == PINNED_BLOB and
+            source_receipt.get("lineage_git_commit") == FROZEN_184_SOURCE_MANIFEST and
+            source_receipt.get("lineage_git_blob") == auth.get("lineage_git_blob") and
+            source_receipt.get("classification_matrix_git_blob") ==
+            auth.get("classification_matrix_git_blob") and
+            source_receipt.get("frozen_bundle_git_blob") == APPROVED_B1_BUNDLE_BLOB,
+            "INDEPENDENT_SOURCE_RECEIPT_MISMATCH")
+    require(git_blob_sha(git_json_bytes) == PINNED_BLOB,
+            "SOURCE_GIT_BLOB_MISMATCH")
+    require(len(bundle.get("source_rows", [])) == 382 and
+            len(bundle.get("combined", [])) == 198,
+            "FROZEN_SOURCE_COUNTS_CHANGED")
+    require(all(isinstance(r.get("origin_git_blob"), str) and
+                len(r.get("origin_git_blob")) == 40 and
+                isinstance(r.get("origin_git_commit"), str) and
+                len(r.get("origin_git_commit")) == 40 for r in bundle["source_rows"]),
+            "INVALID_SOURCE_ROW_GIT_PIN")
+    return "PASS_PINNED_GIT_BYTES_AND_APPROVED_MANIFEST"
+
+
+def fetch_live_neon_endpoint(api_key, *, timeout_seconds=12):
+    """Actual authenticated GET on pinned control plane, no resource mutation."""
+    require(bool(api_key), "NEON_CONTROL_PLANE_API_CREDENTIAL_UNAVAILABLE")
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError, URLError
+    url = ("https://console.neon.tech/api/v2/projects/" +
+           APPROVED_NEON_IDENTITY["project"] + "/endpoints/" +
+           APPROVED_NEON_IDENTITY["compute"])
+    request = Request(url, headers={"Accept":"application/json",
+                                    "Authorization":"Bearer " + api_key}, method="GET")
+    try:
+        with urlopen(request, timeout=timeout_seconds) as response:
+            require(response.status == 200, "NEON_CONTROL_PLANE_HTTP_NOT_200")
+            document = json.loads(response.read(50000))
+    except (HTTPError, URLError, TimeoutError, ValueError) as ex:
+        # Do not embed request headers/credentials or error body in receipts.
+        raise ReaderGateError("NEON_CONTROL_PLANE_GET_UNAVAILABLE") from ex
+    endpoint = document.get("endpoint")
+    require(isinstance(endpoint, dict), "NEON_CONTROL_PLANE_MISSING_ENDPOINT")
+    return endpoint
+
+
+def verify_neon_control_plane(endpoint, dsn, prior_pin=None):
+    """Compare authenticated live API endpoint metadata to expected independent pin."""
+    require(endpoint.get("id") == APPROVED_NEON_IDENTITY["compute"] and
+            endpoint.get("project_id") == APPROVED_NEON_IDENTITY["project"] and
+            endpoint.get("branch_id") == APPROVED_NEON_IDENTITY["branch"] and
+            endpoint.get("type") == "read_only", "WRONG_NEON_PROJECT_BRANCH_COMPUTE")
+    host = endpoint.get("host")
+    require(isinstance(host,str) and host.startswith(APPROVED_NEON_IDENTITY["compute"] + "."),
+            "NEON_CONTROL_PLANE_HOST_MISMATCH")
+    if prior_pin is not None:
+        require(all(prior_pin.get(k) == v for k, v in APPROVED_NEON_IDENTITY.items()) and
+                prior_pin.get("endpoint_host") == host,
+                "INDEPENDENT_ENDPOINT_PIN_MISMATCH")
+    try:
+        dsn_host = urlsplit(dsn).hostname
+    except ValueError as ex:
+        raise ReaderGateError("INVALID_NEON_DSN") from ex
+    require(dsn_host == host and "-pooler" not in host,
+            "NEON_DSN_COMPUTE_MISMATCH")
+    return "LIVE_AUTHENTICATED_NEON_CONTROL_PLANE_READ_ONLY_MATCHED"
+
+
+def verify_live_capture(source_capture, live_rows, as_of_utc, max_age_hours=8):
+    """Require complete captured transitions and sufficiently fresh publication metadata."""
+    require(source_capture.get("source_kind") == "kyiv_digital_live" and
+            source_capture.get("publisher_http_status") == 200 and
+            source_capture.get("publisher") == "kyiv_digital" and
+            source_capture.get("capture_git_blob") and
+            source_capture.get("capture_git_commit") and
+            isinstance(source_capture.get("transitions"), list),
+            "LIVE_CAPTURE_PROVENANCE_REQUIRED")
+    asof = datetime.fromisoformat(iso_utc(as_of_utc).replace("Z", "+00:00"))
+    fetched = datetime.fromisoformat(iso_utc(source_capture["captured_at_utc"]).replace("Z", "+00:00"))
+    age = (asof - fetched).total_seconds()
+    require(0 <= age <= max_age_hours * 3600, "STALE_OR_FUTURE_KYIV_DIGITAL_CAPTURE")
+    seq = classify_live_sequence(source_capture["transitions"])
+    require(seq["status"] == "VALID_COMPLETE", "LIVE_SEQUENCE_INCOMPLETE", seq["faults"])
+    actual = Counter(seq["completed_intervals"])
+    expected = Counter(interval(r["start"], r["end"]) for r in live_rows)
+    require(actual == expected, "LIVE_SEQUENCE_NOT_EQUAL_TO_PINNED_COMPLETED_TAIL",
+            {"observed": sum(actual.values()), "expected": sum(expected.values())})
+    return {"status": "VALID_COMPLETE", "completed": sum(actual.values()),
+            "capture_age_seconds": int(age)}
 
 
 def project_display(raw_episodes, source_rows, combined, display_overrides,
@@ -353,7 +526,7 @@ EVENTS_SQL = """SELECT attack_event_uid::text AS uid,
     ORDER BY attack_event_uid"""
 
 
-def physical_readonly_snapshot(conn, start_utc, end_utc):
+def physical_readonly_snapshot(conn, start_utc, end_utc, *, lab_pg16=False):
     """One REPEATABLE READ READ ONLY Neon transaction. Never publish from here."""
     from psycopg.rows import dict_row  # imported only in protected physical runner
     with conn.transaction():
@@ -367,8 +540,14 @@ def physical_readonly_snapshot(conn, start_utc, end_utc):
             meta = cur.fetchone()
             require(meta["isolation"] == "repeatable read" and meta["ro"] == "on",
                     "TRANSACTION_MUST_BE_REPEATABLE_READ_READ_ONLY")
-            require(meta["recovery"] is True and meta["db"] == "neondb",
-                    "NEON_READ_REPLICA_IDENTITY_REQUIRED")
+            if lab_pg16:
+                cur.execute("SHOW server_version_num")
+                require(160000 <= int(cur.fetchone()["server_version_num"]) < 170000 and
+                        meta["recovery"] is False,
+                        "DISPOSABLE_PG16_REQUIRED")
+            else:
+                require(meta["recovery"] is True and meta["db"] == "neondb",
+                        "NEON_READ_REPLICA_IDENTITY_REQUIRED")
             cur.execute(EPISODES_SQL, (start_utc, end_utc))
             episodes = cur.fetchall()
             uids = [r["uid"] for r in episodes]
@@ -391,6 +570,7 @@ def load_bundle(path):
 
 
 def run_bundle(bundle, snapshot):
+    require(len(snapshot.get("episodes", [])) == 382, "FROZEN_PHYSICAL_PARENT_COUNT_CHANGED")
     return project_display(snapshot["episodes"], bundle["source_rows"], bundle["combined"],
                            bundle["display_overrides"], snapshot.get("classifications", []),
                            snapshot.get("source_links", []), snapshot.get("events", []),
@@ -423,56 +603,134 @@ def verify_september_a5_untouched(raw_rows, combined_official, crosswalk):
     return {"raw":199, "display":190, "aliases":9, "exact_parity":"190/190", "changed":0}
 
 
-def main():
-    import argparse
+def execute_cli(args, *, after_guards=None):
+    """Fail before any consumer/result callback. Lab mode is NOT production evidence."""
     import os
-    p = argparse.ArgumentParser(description="READ ONLY C6-OCT184-B1 research reader")
-    p.add_argument("--bundle", type=Path, required=True)
-    p.add_argument("--git-json", type=Path, required=True,
-                   help="exact bytes of pinned Git alerts_combined.json")
-    p.add_argument("--expected-git-blob", default=PINNED_BLOB)
-    p.add_argument("--start-utc", default="2026-09-30T21:00:00Z")
-    p.add_argument("--end-utc", default="2026-10-31T22:00:00Z")
-    p.add_argument("--fixture-snapshot", type=Path,
-                   help="offline fixture; without this flag a protected real Neon URL is mandatory")
-    p.add_argument("--result", type=Path, required=True)
-    args = p.parse_args()
+    require(not args.result.exists(), "RESULT_PATH_ALREADY_EXISTS_PREVENT_STALE_PUBLICATION")
+    bundle_bytes = args.bundle.read_bytes()
     bundle = load_bundle(args.bundle)
-    pinned_json = parse_pinned_combined(args.git_json.read_bytes(), args.expected_git_blob,
-                                      fallback=True)
-    month = [r for r in pinned_json if r["start"][:7] == "2026-10"]
+    if args.lab_mode:
+        require(bool(args.fixture_snapshot) != bool(args.lab_pg16_url),
+                "LAB_REQUIRES_EXACTLY_ONE_PHYSICAL_OR_JSON_FIXTURE")
+        require(args.approved_bundle is None, "LAB_CANNOT_ASSERT_APPROVED_BUNDLE")
+    else:
+        require(args.approved_bundle is not None and args.provenance_receipt is not None,
+                "APPROVED_SOURCE_MANIFEST_REQUIRED")
+        bundle = verify_approved_frozen_bundle(bundle_bytes, args.approved_bundle.read_bytes())
+    git_bytes = args.git_json.read_bytes()
+    pinned_json = parse_pinned_combined(
+        git_bytes, git_blob_sha(git_bytes) if args.lab_mode else PINNED_BLOB, fallback=True)
+    if not args.lab_mode:
+        verify_git_provenance(bundle,
+                              json.loads(args.provenance_receipt.read_text(encoding="utf-8")),
+                              git_bytes)
+    month = [r for r in pinned_json if iso_utc(r["start"]) >= "2026-09-30T21:00:00.000000Z"
+             and iso_utc(r["start"]) < "2026-10-31T22:00:00.000000Z"]
+    # Current frozen baseline only: dynamic municipal revisions must obtain a NEW
+    # approved pin before this lab/reader can certify consumer output.
     require(Counter((iso_utc(r["start"]), iso_utc(r["end"]), r["source"]) for r in month)
             == Counter((iso_utc(r["start"]), iso_utc(r["end"]), r["source"])
                        for r in bundle["combined"]), "PINNED_COMBINED_SCOPE_DRIFT")
+    require(args.previous_municipal is not None and args.september_guard is not None and
+            args.live_capture is not None and args.as_of_utc is not None,
+            "CLI_MANDATORY_GUARDS_MISSING")
+    previous = json.loads(args.previous_municipal.read_text(encoding="utf-8"))
+    current = [r for r in bundle["source_rows"] if r["source_kind"] == "official_json"]
+    approvals = (json.loads(args.correction_approvals.read_text(encoding="utf-8"))
+                 if args.correction_approvals else [])
+    require(all(isinstance(c, dict) for c in approvals), "SIGNED_CORRECTION_APPROVAL_REQUIRED")
+    source_change_result = verify_source_versions(previous, current, approvals)
+    a5 = json.loads(args.september_guard.read_text(encoding="utf-8"))
+    a5_result = verify_september_a5_untouched(
+        a5["raw_rows"], a5["combined_official"], a5["crosswalk"])
+    live_capture = json.loads(args.live_capture.read_text(encoding="utf-8"))
+    # Require exactly one source-native captured live parent per pinned fresh
+    # combined interval. Frozen minute-side alternative parents are NOT tail.
+    live_expected = {(iso_utc(g["start"]), iso_utc(g["end"]))
+                     for g in bundle["combined"] if g["source"] == "kyiv_digital_live"}
+    tail = [r for r in bundle["source_rows"]
+            if r["source_kind"] == "kyiv_digital_live" and
+            interval(r["start"], r["end"]) in live_expected]
+    require(len(tail) == len(live_expected) and len(live_expected) == 14,
+            "FRESH_TAIL_SOURCE_MAPPING_INCOMPLETE")
+    live_result = verify_live_capture(live_capture, tail, args.as_of_utc)
     if args.fixture_snapshot:
         snapshot = json.loads(args.fixture_snapshot.read_text(encoding="utf-8"))
-        execution_mode = "OFFLINE_FIXTURE_NOT_NEON"
+        mode = "OFFLINE_FIXTURE_NOT_PG16_OR_NEON"
     else:
-        url = os.environ.get("C6_B1_READONLY_DATABASE_URL")
-        require(bool(url), "ACCESS_BLOCKED_NO_PROTECTED_NEON_URL")
         try:
             import psycopg
         except ImportError as ex:
-            raise ReaderGateError("ACCESS_BLOCKED_PSYCOPG_UNAVAILABLE") from ex
-        # A READ ONLY replica with a verified recovery flag is mandatory.
-        with psycopg.connect(url, autocommit=False, connect_timeout=15) as conn:
-            snapshot = physical_readonly_snapshot(conn, args.start_utc, args.end_utc)
-        execution_mode = "LIVE_PYTHON_NEON_REPEATABLE_READ_RO"
+            raise ReaderGateError("PSYCOPG_UNAVAILABLE") from ex
+        if args.lab_mode:
+            dsn = args.lab_pg16_url
+            parsed = urlsplit(dsn)
+            require(parsed.hostname in ("127.0.0.1", "localhost", "::1"),
+                    "LAB_PG16_MUST_BE_LOOPBACK")
+        else:
+            dsn = os.environ.get("C6_B1_READONLY_DATABASE_URL")
+            require(dsn, "ACCESS_BLOCKED_NO_PROTECTED_NEON_URL")
+            require(args.neon_identity is not None, "NEON_CONTROL_PLANE_RECEIPT_REQUIRED")
+            endpoint = fetch_live_neon_endpoint(os.environ.get("NEON_API_KEY"))
+            verify_neon_control_plane(endpoint, dsn,
+                                      json.loads(args.neon_identity.read_text()))
+        with psycopg.connect(dsn, autocommit=False, connect_timeout=15) as conn:
+            snapshot = physical_readonly_snapshot(conn, args.start_utc, args.end_utc,
+                                                  lab_pg16=args.lab_mode)
+        mode = "DISPOSABLE_PG16_RO" if args.lab_mode else "LIVE_PYTHON_NEON_REPEATABLE_READ_RO"
     result = run_bundle(bundle, snapshot)
-    report = {"execution_mode": execution_mode, "status": result["status"],
+    require(result["status"] == "PASS_ALERTS_ONLY", "UNRESOLVED_DISPLAY_NOT_PUBLISHABLE")
+    require(result["enrichment"]["rebinds"] == 0 and
+            result["counts"]["classifications"] == 55 and
+            result["counts"]["source_links"] == 223,
+            "RELATIONSHIP_PRESERVATION_FAILED")
+    require(result["counts"]["display"] == 198 and
+            result["counts"]["official_display"] == 184 and
+            result["counts"]["live_display"] == 14 and
+            result["counts"]["suppressed_view_only"] == 184,
+            "FROZEN_VIEW_COUNT_FAILED")
+    require(result["counts"]["unresolved"] == 0, "UNRESOLVED_ASSOCIATIONS_BLOCK_PUBLICATION")
+    # Only the lab receipt may be written; no publication/consumer API is present.
+    report = {"execution_mode": mode, "status": result["status"],
               "counts": result["counts"], "watermark": result["watermark"],
-              "unresolved_associations": result["unresolved_associations"],
-              "view_only_suppressed": len(result["view_only_suppressed"]),
-              "enrichment": result["enrichment"],
-              "display_intervals_sha256": sha256_canonical(result["display_alerts"]),
+              "source_change_guard": source_change_result, "september_a5": a5_result,
+              "live_source_guard": live_result,
               "relationship_sha256": sha256_canonical(result["classification_relationships"]),
-              "database_writes": 0, "reader_switch": False, "publication_callbacks": 0}
+              "display_intervals_sha256": sha256_canonical(result["display_alerts"]),
+              "database_writes": 0, "production_changes": 0,
+              "reader_switch": False, "publication_callbacks": 0,
+              "source_approval": "LAB_SYNTHETIC_ONLY" if args.lab_mode else "APPROVED_FROZEN_GIT_PIN"}
+    if after_guards is not None:
+        # A test-only hook: execute after every guard and before *research receipt*.
+        after_guards(report)
     args.result.parent.mkdir(parents=True, exist_ok=True)
     args.result.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)+"\n")
-    print(json.dumps({k:report[k] for k in ("execution_mode", "status", "counts", "watermark")},
+    return report
+
+
+def main():
+    import argparse
+    p = argparse.ArgumentParser(description="READ-ONLY C6-OCT184-B2 research, all guards mandatory")
+    p.add_argument("--bundle", type=Path, required=True)
+    p.add_argument("--approved-bundle", type=Path)
+    p.add_argument("--provenance-receipt", type=Path)
+    p.add_argument("--git-json", type=Path, required=True)
+    p.add_argument("--previous-municipal", type=Path)
+    p.add_argument("--correction-approvals", type=Path)
+    p.add_argument("--september-guard", type=Path)
+    p.add_argument("--live-capture", type=Path)
+    p.add_argument("--as-of-utc")
+    p.add_argument("--neon-identity", type=Path)
+    p.add_argument("--start-utc", default="2026-09-30T21:00:00Z")
+    p.add_argument("--end-utc", default="2026-10-31T22:00:00Z")
+    p.add_argument("--fixture-snapshot", type=Path)
+    p.add_argument("--lab-pg16-url", help="isolated loopback PG16 only; no Neon")
+    p.add_argument("--lab-mode", action="store_true", help="synthetic fixture, never approved source")
+    p.add_argument("--result", type=Path, required=True)
+    args = p.parse_args()
+    report = execute_cli(args)
+    print(json.dumps({k: report[k] for k in ("execution_mode", "status", "counts")},
                      ensure_ascii=False))
-    # Unresolved alerts-only output is research-inspectable, never certified for publication.
-    require(result["status"] == "PASS_ALERTS_ONLY", "UNRESOLVED_DISPLAY_NOT_PUBLISHABLE")
 
 
 if __name__ == "__main__":
