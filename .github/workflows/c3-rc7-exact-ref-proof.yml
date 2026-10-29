@@ -1,0 +1,122 @@
+name: C3-RC7 exact-ref research-only hold preflight
+
+on:
+  push:
+    branches: [research-c3-rc7-prepush-holds-2026-10-29-gpt6]
+    paths:
+      - ".github/workflows/c3-rc7-exact-ref-proof.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install YAML validator
+        run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.3
+      - name: Read-only all-ref source and safety verification
+        run: |
+          python3 - <<'PY'
+          import fnmatch, hashlib, json, re, subprocess, pathlib, sys, yaml
+          root=pathlib.Path("research/c3_rc7_ci_artifacts")
+          root.mkdir(parents=True, exist_ok=True)
+          pins={"main":"a470fb66550a47c01578bad19d7633105b8b85cd","site-prod":"552de9cfc8ee7fff7e169caf0a928f4e17ca9cb2","multicity-wip-2026-09-16":"d834aad2a175c71217da9cab102ffd54bda3b3bc"}
+          expect={("main","explosion-monitor-wip.yml"):"1bf3385b3438a0ed471375db446ab08132d5bd87",("main","update-explosion-wip.yml"):"c43cb4f85cb328871981369af75625b9b0067262",("main","live-due-orchestration-readback.yml"):"b7ccf6c9468e70b68fb6d00b5a1c6f422ea23b61",("main","update-netlify-site.yml"):"11ee8930c48ce28862e7cc5f01d326aaac7f90b7",("main","casualty-monitor-wip.yml"):"bc5585b53a88e76df0a53040655cb4ab66ea7f43",("main","casualty-review-operator.yml"):"3771a501c038122033a1ae9e6d33b3b8064dad18",("multicity-wip-2026-09-16","explosion-monitor-wip.yml"):"dfb98ce13ecfe76675eb32e204670f835096e1dc",("multicity-wip-2026-09-16","deploy-casualty-fast.yml"):"822f4a1000666deb19b5089374d0ea63cf72883d",("multicity-wip-2026-09-16","deploy-casualty-wip.yml"):"8a8c20f3e3daaf6166881bb0ff29e75f005a4444"}
+          old="2c16b69dd3261a16cb08c9cf825a4f150cf76d11"
+          report={"CI_READ_ONLY":True,"C3_RELEASE_AUTHORIZED":False,"NEON_AUTHORITY_ACTIVE":False,"PRODUCTION_CUTOVER_EXECUTED":False,"ALL_ENTRY_CONTAINMENT_PASS":False,"errors":[],"pins":pins,"refs":{},"blobs":{},"holds":{},"push_matching":[],"synthetic":{}}
+          def cmd(*a): return subprocess.check_output(a,stderr=subprocess.PIPE).decode()
+          def src(ref,file): return cmd("git","show",ref+":.github/workflows/"+file)
+          def blob(s):
+           b=s.encode()
+           return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
+          def data(s): return yaml.load(s,Loader=yaml.BaseLoader)
+          def ishold(x): return bool(re.match(r"^\$\{\{\s*false(?:\s*\}\}|\s*&&)",str(x or "").strip()))
+          def paths(ref):
+           return [a for a in cmd("git","ls-tree","-r","--name-only",ref,".github/workflows").splitlines() if a.endswith((".yml",".yaml"))]
+          def matches(t,branch,target):
+           on=data(t).get("on") or {}
+           if isinstance(on,list): return "push" in on
+           if isinstance(on,str): return on=="push"
+           if not isinstance(on,dict) or "push" not in on: return False
+           push=on["push"]
+           if not isinstance(push,dict):return True
+           bs=push.get("branches")
+           if bs and not any(fnmatch.fnmatchcase(branch,v) for v in bs):return False
+           if push.get("branches-ignore") and any(fnmatch.fnmatchcase(branch,v) for v in push["branches-ignore"]):return False
+           allow=push.get("paths")
+           if allow and not any(fnmatch.fnmatchcase(target,v) for v in allow if not v.startswith("!")):return False
+           if allow and any(fnmatch.fnmatchcase(target,v[1:]) for v in allow if v.startswith("!")):return False
+           if any(fnmatch.fnmatchcase(target,v) for v in push.get("paths-ignore",[])):return False
+           return True
+          try:
+           raw=cmd("git","ls-remote","origin",*["refs/heads/"+x for x in pins])
+           report["refs"]={a.rsplit("/",1)[-1]:b for b,a in (v.split("\t") for v in raw.splitlines())}
+           assert report["refs"]==pins, "STALE_HEAD_PIN_HARD_FAIL"
+           for branch in pins:
+            cmd("git","fetch","--no-tags","origin","refs/heads/"+branch+":refs/remotes/origin/"+branch)
+            assert cmd("git","rev-parse","refs/remotes/origin/"+branch).strip()==pins[branch], "DRIFT_AFTER_FETCH"
+           for (branch,f),sha in expect.items():
+            h=blob(src(pins[branch],f))
+            report["blobs"][branch+":"+f]={"expected":sha,"actual":h,"matches":h==sha}
+            assert h==sha, "WORKFLOW_GIT_BLOB_DRIFT "+branch+":"+f
+           main=data(src(pins["main"],"explosion-monitor-wip.yml"))
+           fallback=data(src(pins["main"],"update-explosion-wip.yml"))
+           wipt=src(pins["multicity-wip-2026-09-16"],"explosion-monitor-wip.yml")
+           lis=src(pins["main"],"live-due-orchestration-readback.yml")
+           guard=data(lis)["jobs"]["prove"].get("if")
+           wip_guard=data(wipt)["jobs"]["monitor"].get("if")
+           report["holds"]={"main_monitor":ishold(main["jobs"]["monitor"].get("if")),"main_fallback":ishold(fallback["jobs"]["update"].get("if")),"WIP_MONITOR_HOLD_EFFECTIVE":ishold(wip_guard),"MAIN_LISTENER_HOLD_EFFECTIVE":ishold(guard),"old_SHA_predicate_preserved":old in guard and "conclusion" in guard}
+           assert report["holds"]["main_monitor"] and report["holds"]["main_fallback"],"ACCEPTED_HOLD_MISSING"
+           assert not report["holds"]["WIP_MONITOR_HOLD_EFFECTIVE"] and not report["holds"]["MAIN_LISTENER_HOLD_EFFECTIVE"],"UNEXPECTED_HOLD_STATE"
+           wipneedle="jobs:\n  monitor:\n"
+           wipnew="jobs:\n  monitor:\n    # C3 release hold: owner authorization required to reactivate.\n    if: "+"$"+"{{ false }}\n"
+           lisneedle="    if: github.event.workflow_run.head_sha == '"+old+"' && github.event.workflow_run.conclusion == 'success'"
+           lisnew="    # C3 historical listener hold: owner authorization required to reactivate.\n    if: "+"$"+"{{ false && github.event.workflow_run.head_sha == '"+old+"' && github.event.workflow_run.conclusion == 'success' }}"
+           assert wipt.count(wipneedle)==1 and lis.count(lisneedle)==1,"PROPOSED_PATCH_NOT_UNIQUE"
+           proposed_wip=wipt.replace(wipneedle,wipnew,1)
+           proposed_lis=lis.replace(lisneedle,lisnew,1)
+           assert blob(proposed_wip)=="42175087e421b08a52259b1a65fe709660a44579","WIP_NEW_BLOB_MISMATCH"
+           assert blob(proposed_lis)=="39b9ce14edbaae4c9b7f1489ee2942aace745743","LISTENER_NEW_BLOB_MISMATCH"
+           assert ishold(data(proposed_wip)["jobs"]["monitor"]["if"]) and ishold(data(proposed_lis)["jobs"]["prove"]["if"]),"PROPOSED_GUARD_MISMATCH"
+           report["proposed_blobs"]={"wip":"42175087e421b08a52259b1a65fe709660a44579","listener":"39b9ce14edbaae4c9b7f1489ee2942aace745743"}
+           report["synthetic"]={"current_correct_old_success":old in guard and "false" not in guard,"proposed_correct_old_success":False,"proposed_wrong_old_success":False,"type":"static boolean model; GitHub sentinel skip jobs verify engine"}
+           for branch,target,num in [("main",".github/workflows/live-due-orchestration-readback.yml",17),("multicity-wip-2026-09-16",".github/workflows/explosion-monitor-wip.yml",54)]:
+            fl=paths(pins[branch])
+            assert len(fl)==num,"INVENTORY_COUNT_DRIFT "+branch
+            for f in fl:
+             if matches(cmd("git","show",pins[branch]+":"+f),branch,target):
+              report["push_matching"].append([branch,f,target])
+           assert report["push_matching"]==[],"UNEXPECTED_DIRECT_PUSH"
+           report["verdict"]="C3_RC7_PARTIAL_READONLY_EXACT_REF_PROOF"
+          except Exception as e:
+           report["errors"].append(type(e).__name__+":"+str(e))
+           report["verdict"]="C3_RC7_CI_FAIL_CLOSED"
+          result=json.dumps(report,sort_keys=True,indent=2)+"\n"
+          (root/"c3_rc7_ci_result.json").write_text(result)
+          (root/"sha256_manifest.json").write_text(json.dumps({"c3_rc7_ci_result.json":hashlib.sha256(result.encode()).hexdigest()},indent=2)+"\n")
+          print(json.dumps({"verdict":report["verdict"],"errors":report["errors"],"holds":report["holds"],"direct_push_matches":report["push_matching"]}))
+          sys.exit(bool(report["errors"]))
+          PY
+      - name: Upload exact-SHA verification artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-rc7-prepush-exact-ref-proof
+          path: research/c3_rc7_ci_artifacts/
+          if-no-files-found: error
+  synthetic-correct-old-source-held:
+    if: ${{ false && '2c16b69dd3261a16cb08c9cf825a4f150cf76d11' == '2c16b69dd3261a16cb08c9cf825a4f150cf76d11' && 'success' == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 90
+  synthetic-wrong-old-source-held:
+    if: ${{ false && 'WRONG' == '2c16b69dd3261a16cb08c9cf825a4f150cf76d11' && 'success' == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 91
