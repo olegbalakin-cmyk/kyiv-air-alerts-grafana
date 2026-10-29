@@ -1,0 +1,52 @@
+{
+  "case_id": "C4-KH-06",
+  "decision": "OWNER_ACCEPTED_AS_FACTUAL_PRIMARY_SOURCE",
+  "accepted_at_date": "2026-10-29",
+  "owner_source": "Telegram HTML export «Повітряна Тривога» (owner supplied)",
+  "source_file_sha256": "dd70213acb7561d0e2cb0e7083f3bd57fcac8d835d20059cc456679942de4b23",
+  "territory": "м. Харків та Харківська територіальна громада",
+  "city_key": "kharkiv",
+  "alert_type": "AIR",
+  "start_at": "2025-03-05T19:08:24Z",
+  "end_at": "2025-03-06T03:28:47Z",
+  "timezone": "Europe/Kyiv",
+  "duration_seconds": 30023,
+  "source_messages": {
+    "air_on": 131515,
+    "air_off": 131583,
+    "threat_only_off_old_parent": 131532,
+    "threat_only_off_old_historical": 131575
+  },
+  "old_parent": {
+    "episode_uid": "a556ee0d-4a90-40b4-adf1-db55646cd05b",
+    "legacy_episode_id": "cb4d84c97db70f7a08cdc74b",
+    "start_at": "2025-03-05T19:08:24Z",
+    "end_at": "2025-03-05T19:47:55Z"
+  },
+  "old_historical": {
+    "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+    "attack_event_uid": "dc3a63ec-d9f8-412c-b0a1-09dd9398b27b",
+    "historical_episode_id": "0fc4be61b3b03eb9027c2536",
+    "old_end_at": "2025-03-06T03:03:45Z",
+    "binding_state": "UNBOUND",
+    "event_status": "ACTIVE"
+  },
+  "scope": "exactly one Kharkiv CITY AIR event; no wholesale C4/Neon authority cutover",
+  "required_destinations": [
+    "Neon canonical parent with deterministic derived ID/ingestion lineage and preserved revisions",
+    "append-only historical classification/event correction provenance and relationship reconciliation",
+    "site-prod multicity source and derived JSON aggregates with replay-safe override"
+  ],
+  "execution_status": {
+    "owner_authority": "ACCEPTED",
+    "github_site_prod": "NOT_EXECUTED",
+    "neon_database_write": "NOT_EXECUTED",
+    "production_derived_json": "NOT_EXECUTED"
+  },
+  "safety": {
+    "no_unreviewed_retimestamp": true,
+    "no_kyiv_combined_json_change": true,
+    "no_update_other_24_unbound": true,
+    "no_casualty_or_live_changes": true
+  }
+}

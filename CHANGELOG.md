@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-29
 
+### C4-KH-06 — owner adopts bot source as factual and orders JSON + Neon correction; execution OPEN
+
+- Owner **explicitly accepted** 2025-03-05 21:08:24+02 → 2025-03-06 05:28:47+02 as the canonical factual city AIR interval (8h20m23s); Telegram message IDs **131515 (AIR ON)** / **131583 (AIR OFF)**, source HTML SHA `dd70213acb7561d0e2cb0e7083f3bd57fcac8d835d20059cc456679942de4b23`. Old 21:47:55 and 05:03:45 ends were subtype drone-threat OFFs. No additional source adjudication required for owner's decision.
+- Fresh readback: `site-prod@617fc464` / operational WIP `92011e2c` advanced due to unrelated data commits. site-prod `dashboard_data.json` is a derived multi-city aggregate, `alerts_combined.json` belongs only to Kyiv. Neon `br-bold-mode-b5rub8pq` is a **non-default shadow branch** and holds old parent `a556ee0d` (21:47:55) + UNBOUND historical classification `8c01721e` / ACTIVE event `dc3a63ec` (05:03:45). Neon project's default `br-wandering-sunset-b5835alw` lacks historical child tables. Writer must reconcile deterministic identities, history, event tips and source links; naive single-row retimestamp/whole-JSON rewrite is unsafe.
+- Committed a scoped factual override/implementation manifest. `C4_KH_06_OWNER_FACTUAL_SOURCE=ACCEPTED`; **`JSON_CORRECTED=NO`, `NEON_CORRECTED=NO`**, remediation explicitly authorized but **not executed**; owner task remains open. Next isolated replay-safe producer fix and Neon writer/side-effect proof, then bounded exact-ref promotion and bidirectional parity readback. C4 PARTIAL; C3, C6, casualty and migration/cutover separate.
+
 ### C4-KH-06 official provider-bot Telegram export — explicit subtype OFFs explain both historical endpoints
 
 - Coordinator independently parsed owner-uploaded `messages(3).html` (SHA-256 `dd70213acb7561d0e2cb0e7083f3bd57fcac8d835d20059cc456679942de4b23`, 573312 bytes): 354 message posts on 2025-03-05..06, contiguous Telegram message IDs 131376..131729; source title `Повітряна Тривога`. Owner says provider confirmed by email that its Telegram bot contains all alerts; email bytes and exact bot/channel handle are **not independently verified**. Raw HTML is **not** committed to public Git.
