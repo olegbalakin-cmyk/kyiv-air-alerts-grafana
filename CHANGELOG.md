@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-29
 
+### C4-KH-06 research guard CI and isolated Neon parent — executed bounded acceptance
+
+- Verified research [`4fcd939d`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/4fcd939d414f5c4a56c5974eaa4a299065dde59d), [Actions `40921217446`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40921217446) job `123614629066` **SUCCESS / 7 of 7 source-guard tests PASS**; artifact `12918252270` ZIP SHA-256 `682468fbeb2e385736f928f2786f90da113d74f9bf7a378060ee2d6db94ebe1f` independently matched GitHub and 3/3 internal manifest entries. Proven guard exists only on research branch; `site-prod@e08cc7da` retains original overlap-bypass code.
+- Independently read back isolated Neon child `br-misty-darkness-b5wkoiyk` of `br-bold-mode-b5rub8pq`: same canonical UID, corrected end `2025-03-06T03:28:47Z`, new legacy ID `3c31f8d6a15a5db8eb31a35b`, old/new legacy counts 0/1 and same-start count 1. Live shadow read-only still old end `2025-03-05T19:47:55Z`; child historical classification/ACTIVE event remain prior UNBOUND end `03:03:45Z`. [Research report `aa090666`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/aa090666dca5850af5b5808cd4a8034097c72416) asserts rollback injection; not independently proven by CI artifact.
+- **Accepted bounded:** `C4_KH06_RESEARCH_SOURCE_GUARD_CI=PASS`, `C4_KH06_CHILD_PARENT_READBACK=PASS`; historical append-only revision, normal writer replay, production JSON, live Neon write, Netlify publication and exact JSON↔Neon parity **OPEN**. `C4_KH_06_REMEDIATION=PARTIAL`; `C4=PARTIAL`; no cutover or release. Next `C4-KH-07` isolated real writer replay and historical lineage proof before separate scoped production promotion. Other tracks untouched.
+
 ### C4-KH-06 site-prod correction hook present; no output/Neon proof yet
 
 - After owner-accepted source checkpoint `main@4b4c7e9d`, verified moving operational refs `site-prod@e08cc7da` (after `617fc464`) and WIP `92011e2c`. [Exact commit `e08cc7da`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/e08cc7da8cf29fc8603f199c85f0964610a850a7) contains four changes only: exact scoped correction JSON, fail-closed idempotent Python correction helper, six unexecuted-on-CI unit test methods, and the builder import/call before aggregation. Exact SHA has **0 workflow runs, 0 check runs, 0 statuses** as observed. This is `SOURCE_HOOK_PRESENT_UNVERIFIED`, not executed historical data output.
