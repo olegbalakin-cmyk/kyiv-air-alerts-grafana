@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-29
 
+### C4-KH-06 site-prod correction hook present; no output/Neon proof yet
+
+- After owner-accepted source checkpoint `main@4b4c7e9d`, verified moving operational refs `site-prod@e08cc7da` (after `617fc464`) and WIP `92011e2c`. [Exact commit `e08cc7da`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/e08cc7da8cf29fc8603f199c85f0964610a850a7) contains four changes only: exact scoped correction JSON, fail-closed idempotent Python correction helper, six unexecuted-on-CI unit test methods, and the builder import/call before aggregation. Exact SHA has **0 workflow runs, 0 check runs, 0 statuses** as observed. This is `SOURCE_HOOK_PRESENT_UNVERIFIED`, not executed historical data output.
+- Site-prod derived `dashboard_data.json` / `site_derived.json` were **not changed in that commit**, and latest independent RO Neon SELECT still returns old parent end `2025-03-05T19:47:55Z` on non-default shadow `br-bold-mode-b5rub8pq`. `JSON_CORRECTED=NO`; `NEON_CORRECTED=NO`; site deployment/parity NOT_PROVEN. Owner still requires exact city AIR interval 2025-03-05 21:08:24+02 to 2025-03-06 05:28:47+02.
+- Next: executed pinned Python tests, validated real regeneration with unaffected-city and rolling KPI checks, scoped publication, separately authorized shadow/prod-identity-safe Neon correction with classification/ACTIVE event/provenance preservation and readback parity. No global cutover/other track changes.
+
 ### C4-KH-06 — owner adopts bot source as factual and orders JSON + Neon correction; execution OPEN
 
 - Owner **explicitly accepted** 2025-03-05 21:08:24+02 → 2025-03-06 05:28:47+02 as the canonical factual city AIR interval (8h20m23s); Telegram message IDs **131515 (AIR ON)** / **131583 (AIR OFF)**, source HTML SHA `dd70213acb7561d0e2cb0e7083f3bd57fcac8d835d20059cc456679942de4b23`. Old 21:47:55 and 05:03:45 ends were subtype drone-threat OFFs. No additional source adjudication required for owner's decision.
