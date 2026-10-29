@@ -1,0 +1,58 @@
+{
+  "schema_version": "c6-oct184-source-mechanism-v1",
+  "scope": "independent bounded Git+Neon READ ONLY research",
+  "producer_paths": {
+    "minute": "kyiv-air-alerts-grafana/scripts/update_data.py:parse_live_history -> multicity_shadow_payload.record_city_alerts; bootstrap uses export_multicity_canonical.py to parse site-prod alerts_combined.json",
+    "precise": "kyiv-air-alerts-grafana/scripts/update_data.py:parse_official -> multicity_shadow_payload.record_city_alerts -> multicity_canonical_shadow.py",
+    "bootstrap": "github workflow multicity-permanent-bootstrap-resume.yml and export_multicity_canonical.py; pinned bootstrap run 36918355446 workflow 7c54a9e40c7d40073085aafee3d8d840569dae2c",
+    "shadow": "github workflow update-netlify-site.yml: checkout site-prod; run update_data; build same-run canonical payload; run multicity_canonical_shadow.py; run 37284284054 workflow edd9aae8ce0cda7dfc9dc62b206e5ffbf3965405"
+  },
+  "source_paths": {
+    "minute_upstream": "https://kyiv.digital/storage/air-alert/stats.html",
+    "precise_upstream": "https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download",
+    "derived_input": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+    "ephemeral_same_run": "${RUNNER_TEMP}/multicity_canonical_payload.json; not a durable original raw source record"
+  },
+  "mechanism": {
+    "minute": "Kyiv Digital HTML text parser regex (?P<hm>\\d{2}:\\d{2}) captures minute only; datetime.strptime format %H:%M %d.%m.%y yields 0 seconds. The parser does not floor official seconds; it parses an independent minute-resolution presented source.",
+    "precise": "Official municipal JSON dateTimeStart/dateTimeEnd passed to datetime.fromisoformat without minute truncation, preserving seconds when present.",
+    "legacy_id": "db_phase1_core.legacy_episode_id SHA256(city|UTC start|UTC end)[:24], so two representations legitimately have different legacy IDs.",
+    "same_upstream_raw_identity": "NOT_PROVEN",
+    "original_http_body_hashes": "NOT_AVAILABLE",
+    "source_native_event_ids": "NOT_AVAILABLE",
+    "source_episode_equality": "NOT_PROVEN",
+    "evidence_strength": "Source-kind differentiation verified for 184 records via four retained minute snapshots plus current precise snapshot; physical equivalence cannot be derived from temporal minute floor alone."
+  },
+  "source_snapshots": {
+    "minute": [
+      {
+        "ref": "9c06040d65a3baf9dc75a3ed799c7e28e3af993e",
+        "blob": "40c1b91c1acff33e06665bda9880b67ecd553ce0",
+        "matched": 42
+      },
+      {
+        "ref": "54353510251d9b3f82779dbd747a7d296b12eb8c",
+        "blob": "8c894d02450b69f73cfb212ef90681ccd74a72b0",
+        "matched": 47
+      },
+      {
+        "ref": "92afb8869232119c4adeb91347e38d388c48151b",
+        "blob": "f3e5272e31f314f99512e5524c6c7d2d85544c36",
+        "matched": 47
+      },
+      {
+        "ref": "f7bc55dd4cec5640704ba8e8af58c8b27b2972b2",
+        "blob": "bc24a8d6a0a4e0ad2e201481d99a6d956d5774e3",
+        "matched": 48
+      }
+    ],
+    "precise": {
+      "ref": "e08cc7da8cf29fc8603f199c85f0964610a850a7",
+      "blob": "e39dfc6fdbdb90863b5bfb595e12cadf8c20b068",
+      "matched": 184
+    }
+  },
+  "independent_same_raw_record_test": "NOT_EXECUTED_RAW_INPUTS_UNAVAILABLE",
+  "per_pair_source_kind_and_timestamp_test": "PASS_184_OF_184",
+  "no_mapping_authorized": true
+}
