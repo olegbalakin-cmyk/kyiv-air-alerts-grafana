@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-30
 
+### C6-RUNNER-02 385 vs 382 delta independently reconciled — BOUNDED ACCEPTED
+
+- Reviewed accepted [C6-RUNNER-02 run 40964233881](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40964233881) / job `123764505199` and current documents. The genuine Python/psycopg read-only connection PASS remains accepted; exact B2 reader still NOT_EXECUTED.
+- Independently read current Neon **385** `kyiv/AIR/closed` October parents from `ep-calm-rice-b5073ypp` and compared exact physical UID/UTC start+end against 382 frozen `source_rows` in Git blob `fbad2b53`: **382/382 same, 0 missing, 0 changed**. Three new Oct29 physical parents started **18:32, 19:09, 20:01 UTC**, after frozen last row ended **08:14 UTC**. No 184-pair identity certification or current display-source endorsement implied.
+- Additional single SELECT-only bounded `2026-09-30T21:00Z <= start_at < 2026-10-29T09:00Z` returned **382 parents, 55 classifications, 223 links**, ro=on. This is a later physical read and a bounded frozen-replay scope, **not** the same October 29 Git/Neon historical transaction snapshot and **not** B2 Python parity. **`C6_RUNNER02_385_DELTA=RECONCILED_BOUNDED_ACCEPTED`**. Next prioritise approved B2 provenance/municipal/A5/live-capture inputs and then a bounded frozen shadow reader run. No Actions/Neon writes, production changes or cutover.
+
 ### C6-RUNNER-02 first real Python/psycopg to Neon read-only replica — CONNECTION PASS, B2 inputs open
 
 - **First genuine Python-to-Neon success**: [research workflow run 40964233881](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40964233881) / job `123764505199` on exact Git SHA `615ee491b4a1e433de5da9205e92c438d08bf6d0` (sole research workflow file, blob `30420e3f`, YAML SHA-256 `d1e563b4`). Completed SUCCESS on first `push` attempt, Python 3.13 `psycopg.connect()` actually executed with environment-injected existing secrets; control-plane target MATCH for `ep-calm-rice-b5073ypp` `read_only`. **Connection PASS, Python exit 0**.
