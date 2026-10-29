@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-30
 
+### C6-B2-SHADOW-01 actual frozen physical B2 core on Neon — BOUNDED ACCEPTED
+
+- [Actions 40966272021](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40966272021), job `123771478769` SUCCESS, isolated research SHA `c1c857178fb47cce47fd98e18a94366d34d0a458`; exact reader Git blob `890769995627aa15e43743ef7cd5b24d54b1c59c`, frozen bundle `fbad2b5318818b9c4bc9940e691de5f32fcdf283`, pinned production reference JSON `e39dfc6fdbdb90863b5bfb595e12cadf8c20b068`. Artifact `12937493110`, GitHub ZIP digest `bb522b84edc99333458dfa8a05561e4e25ea7ee8c961d3aff502ee448c9150c8`.
+- Executed **existing** B2 `verify_approved_frozen_bundle` → physical `psycopg` `REPEATABLE READ READ ONLY` Neon snapshot `436224:436224:` → existing `run_bundle` in one frozen cutoff `2026-09-30T21:00Z <= start_at < 2026-10-29T09:00Z`. Machine `B2_CORE_PHYSICAL_FROZEN_PASS`: 382 real parents, 55 classifications, 223 source links, 0 events → 198 display (184 official + 14 live) + 184 suppressed view-only; 0 unapproved rebindings / unresolved associations.
+- Machine `FROZEN_198_EXACT_PARITY_PASS`: all 198 exact UTC start/end/source-kind triplets matched historical pinned Git JSON, no automatic minute-floor normalization. Execution produced redacted machine diff/output, physical receipt and hash manifest in Actions artifact; job/artifact metadata independently checked. Three later Oct29 parent rows out of cutoff. **`B2_FULL_CLI_INPUT_BLOCKED`**: no independently verified historical Oct29 publisher capture / full provenance and previous municipal/A5 guard inputs. Core-only is not full guarded CLI, release or current production parity; C6 PARTIAL, C3 PARTIAL, no DML/DDL, site-prod/WIP or operational changes, production switch or cutover. Next obtain independent guards for full CLI and plan research-only shadow reading; PG16 remains separate.
+
+
 ### C6-RUNNER-02 385 vs 382 delta independently reconciled — BOUNDED ACCEPTED
 
 - Reviewed accepted [C6-RUNNER-02 run 40964233881](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40964233881) / job `123764505199` and current documents. The genuine Python/psycopg read-only connection PASS remains accepted; exact B2 reader still NOT_EXECUTED.
