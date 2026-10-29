@@ -1,0 +1,331 @@
+name: C6 B2 physical frozen shadow 01
+
+on:
+  push:
+    branches:
+      - research-c6-runner02-isolated-2026-10-29
+    paths:
+      - .github/workflows/c6-b2-shadow-01.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: c6-b2-shadow-01-single-run
+  cancel-in-progress: false
+
+jobs:
+  physical-b2-frozen-core:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-c6-runner02-isolated-2026-10-29'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: c6-runner02-research
+    steps:
+      - name: Checkout research workflow SHA and exact B2 bytes
+        uses: actions/checkout@v4
+        with:
+          path: b2
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Checkout immutable site-prod frozen reference
+        uses: actions/checkout@v4
+        with:
+          ref: e08cc7da8cf29fc8603f199c85f0964610a850a7
+          path: pinned-site
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install existing B2 psycopg dependency
+        run: python -m pip install --disable-pip-version-check 'psycopg[binary]>=3.2,<4'
+
+      - name: Exact pinned inputs to physical B2 core and Git comparison
+        env:
+          C6_B1_READONLY_DATABASE_URL: ${{ secrets.C6_B1_READONLY_DATABASE_URL }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import sys
+          from collections import Counter
+          from pathlib import Path
+
+          import psycopg
+          from psycopg.conninfo import conninfo_to_dict
+
+          WORKFLOW = Path("b2/.github/workflows/c6-b2-shadow-01.yml")
+          CODE = Path("b2/research/c6_oct184_b1_source_priority_2026_10_29/source_priority_reader.py")
+          BUNDLE = Path("b2/research/c6_oct184_b1_source_priority_2026_10_29/frozen_october_382_198_bundle.json")
+          FROZEN = Path("pinned-site/kyiv-air-alerts-grafana/data/alerts_combined.json")
+          OUT = Path("c6_b2_shadow_01_proof")
+          OUT.mkdir(exist_ok=True)
+          START = "2026-09-30T21:00:00Z"
+          END = "2026-10-29T09:00:00Z"
+          EXPECTED_BLOBS = {
+              "reader": "890769995627aa15e43743ef7cd5b24d54b1c59c",
+              "bundle": "fbad2b5318818b9c4bc9940e691de5f32fcdf283",
+              "git_json": "e39dfc6fdbdb90863b5bfb595e12cadf8c20b068",
+          }
+          state = {
+              "task": "C6-B2-SHADOW-01", "mode": "RESEARCH_ONLY_PHYSICAL_NEON_B2_CORE",
+              "workflow_sha": os.environ.get("GITHUB_SHA"),
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+              "physical_b2_core": "B2_CORE_NOT_EXECUTED",
+              "full_guarded_cli": "B2_FULL_CLI_INPUT_BLOCKED",
+              "frozen_display_comparison": "FROZEN_198_NOT_EXECUTED",
+              "database_writes": 0, "production_deploys": 0,
+              "physical_rebindings": 0, "publication_callbacks": 0,
+              "full_cli_execution": False,
+              "transaction": None, "counts": None,
+          }
+          inputs = {
+              "bundle": {"path": str(BUNDLE), "git_ref": "404f1d29675ec53ce323838af3294bbda9c1f071", "status": "NOT_PROVEN"},
+              "approved_bundle": {"path": str(BUNDLE), "git_blob": EXPECTED_BLOBS["bundle"], "status": "NOT_PROVEN"},
+              "git_json": {"path": str(FROZEN), "git_ref": "e08cc7da8cf29fc8603f199c85f0964610a850a7", "status": "NOT_PROVEN"},
+              "provenance_receipt": {"path": None, "status": "NOT_PROVEN", "reason": "independently_valid_complete_receipt_unavailable"},
+              "previous_municipal": {"path": None, "status": "NOT_PROVEN"},
+              "september_guard": {"path": None, "status": "NOT_PROVEN"},
+              "live_capture": {"path": None, "status": "NOT_PROVEN", "reason": "genuine_2026_10_29_14_completed_publisher_capture_unavailable"},
+              "as_of_utc": {"path": None, "status": "NOT_PROVEN", "reason": "cannot_anchor_without_true_historical_capture"},
+              "neon_identity": {"project": "green-cake-44216048", "branch": "br-bold-mode-b5rub8pq",
+                                "compute": "ep-calm-rice-b5073ypp", "database": "neondb", "status": "NOT_PROVEN"},
+          }
+          proof = {}
+          diff = {"status": "NOT_EXECUTED", "missing_intervals": [], "extra_intervals": [],
+                  "source_label_mismatches": [], "timestamp_rebindings": []}
+          stage = "initialization"
+
+          def write_json(name, data):
+              (OUT / name).write_text(json.dumps(data, ensure_ascii=False, sort_keys=True,
+                                              indent=2, default=str) + "\n", encoding="utf-8")
+
+          def git_value(cwd, *args):
+              return subprocess.check_output(["git", "-C", str(cwd), *args],
+                                             text=True, stderr=subprocess.DEVNULL).strip()
+
+          def checked_bytes(key, path):
+              data = path.read_bytes()
+              git_sha = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+              assert git_sha == EXPECTED_BLOBS[key], "GIT_BLOB_PIN_MISMATCH_" + key
+              inputs["bundle" if key == "bundle" else key].update({
+                  "git_blob": git_sha, "sha256": hashlib.sha256(data).hexdigest(),
+                  "bytes": len(data), "status": "VERIFIED",
+                  "origin": "immutable_checkout_and_independent_git_blob_pin",
+              })
+              return data
+
+          try:
+              stage = "immutable_input_verification"
+              assert git_value("b2", "rev-parse", "HEAD") == os.environ["GITHUB_SHA"], "RESEARCH_SHA_NOT_CHECKED_OUT"
+              assert git_value("pinned-site", "rev-parse", "HEAD") == "e08cc7da8cf29fc8603f199c85f0964610a850a7", "WRONG_PINNED_SITE_COMMIT"
+              assert CODE.is_file() and WORKFLOW.is_file(), "EXACT_READER_OR_WORKFLOW_MISSING"
+              code_bytes = CODE.read_bytes()
+              code_blob = hashlib.sha1(b"blob " + str(len(code_bytes)).encode() + b"\0" + code_bytes).hexdigest()
+              assert code_blob == EXPECTED_BLOBS["reader"], "EXACT_B2_READER_SHA_DRIFT"
+              assert WORKFLOW.read_bytes().startswith(b"name: C6 B2 physical frozen shadow 01\n"), "WORKFLOW_PATH_DRIFT"
+              bundle_bytes = checked_bytes("bundle", BUNDLE)
+              approved_bytes = checked_bytes("bundle", BUNDLE)
+              inputs["approved_bundle"] = dict(inputs["bundle"], status="VERIFIED",
+                                                 origin="identical_approved_bundle_bytes_same_immutable_git_blob")
+              git_bytes = checked_bytes("git_json", FROZEN)
+              proof["git"] = {
+                  "research_sha": os.environ["GITHUB_SHA"],
+                  "reader_git_blob": code_blob,
+                  "reader_sha256": hashlib.sha256(code_bytes).hexdigest(),
+                  "frozen_bundle_git_blob": EXPECTED_BLOBS["bundle"],
+                  "pinned_site_prod_sha": "e08cc7da8cf29fc8603f199c85f0964610a850a7",
+                  "pinned_git_json_blob": EXPECTED_BLOBS["git_json"],
+              }
+
+              stage = "existing_b2_import_and_approved_bundle_guard"
+              sys.path.insert(0, str(CODE.parent.resolve()))
+              import source_priority_reader as reader
+              assert Path(reader.__file__).resolve() == CODE.resolve(), "IMPORTED_OTHER_READER"
+              bundle = reader.verify_approved_frozen_bundle(bundle_bytes, approved_bytes)
+              assert reader.APPROVED_B1_BUNDLE_BLOB == EXPECTED_BLOBS["bundle"], "DIFFERENT_APPROVED_BLOB"
+              pinned_rows = reader.parse_pinned_combined(git_bytes, EXPECTED_BLOBS["git_json"])
+              assert len(bundle["source_rows"]) == 382 and len(bundle["combined"]) == 198, "UNEXPECTED_FROZEN_BUNDLE_SIZE"
+              expected_rows = [
+                  r for r in pinned_rows if START <= reader.iso_utc(r["start"]) < END
+              ]
+              assert len(expected_rows) == 198, "PINNED_SITE_FROZEN_198_NOT_FOUND"
+
+              stage = "existing_read_only_endpoint_identity"
+              dsn = os.environ.get("C6_B1_READONLY_DATABASE_URL", "")
+              key = os.environ.get("NEON_API_KEY", "")
+              assert dsn and key, "PROTECTED_RUNNER_SECRETS_NOT_INJECTED"
+              parsed = conninfo_to_dict(dsn)
+              assert parsed.get("host") == "ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech", "DSN_HOST_NOT_APPROVED"
+              assert parsed.get("dbname") == "neondb" and not parsed.get("hostaddr"), "DSN_DATABASE_OR_HOSTADDR_MISMATCH"
+              assert parsed.get("sslmode") in ("require", "verify-ca", "verify-full"), "TLS_NOT_REQUIRED"
+              endpoint = reader.fetch_live_neon_endpoint(key)
+              attestation = reader.verify_neon_control_plane(endpoint, dsn)
+              inputs["neon_identity"]["status"] = "VERIFIED"
+              inputs["neon_identity"]["provenance"] = "authenticated_Neon_control_plane_GET_plus_DSN_match"
+              proof["control_plane_attestation"] = attestation
+              state["physical_b2_core"] = "B2_CORE_PHYSICAL_FAIL"
+
+              stage = "physical_readonly_snapshot"
+              with psycopg.connect(dsn, autocommit=False, connect_timeout=20) as connection:
+                  snap = reader.physical_readonly_snapshot(connection, START, END)
+              state["transaction"] = dict(snap["meta"], start_utc=START, end_utc=END)
+              state["counts"] = {
+                  "physical_parents": len(snap["episodes"]),
+                  "classifications": len(snap["classifications"]),
+                  "source_links": len(snap["source_links"]),
+                  "events": len(snap["events"]),
+              }
+              proof["physical_parent_snapshot"] = {
+                  "uid_start_end": sorted([
+                      {"uid": str(r["uid"]), "start_utc": reader.iso_utc(r["start_at"]),
+                       "end_utc": reader.iso_utc(r["end_at"])} for r in snap["episodes"]
+                  ], key=lambda r: r["uid"])
+              }
+              expected_parents = {
+                  str(r["uid"]): (reader.iso_utc(r["start"]), reader.iso_utc(r["end"]))
+                  for r in bundle["source_rows"]
+              }
+              actual_parents = {
+                  str(r["uid"]): (reader.iso_utc(r["start_at"]), reader.iso_utc(r["end_at"]))
+                  for r in snap["episodes"]
+              }
+              parent_diff = {
+                  "missing_uids": sorted(set(expected_parents) - set(actual_parents)),
+                  "extra_uids": sorted(set(actual_parents) - set(expected_parents)),
+                  "timestamp_mismatches": [
+                      {"uid": uid, "expected": expected_parents[uid], "observed": actual_parents[uid]}
+                      for uid in sorted(set(actual_parents) & set(expected_parents))
+                      if actual_parents[uid] != expected_parents[uid]
+                  ],
+              }
+              proof["physical_parent_diff"] = parent_diff
+              diff["timestamp_rebindings"] = parent_diff["timestamp_mismatches"]
+              assert not any(parent_diff.values()), "FROZEN_PARENT_UID_OR_TIMESTAMP_DRIFT"
+
+              stage = "execute_existing_b2_run_bundle"
+              result = reader.run_bundle(bundle, snap)
+              proof["display_projection"] = result["display_alerts"]
+              proof["suppressed_view_only"] = result["view_only_suppressed"]
+              proof["relationship_manifest"] = {
+                  "sha256": reader.sha256_canonical(result["classification_relationships"]),
+                  "classifications": len(result["classification_relationships"]["classifications"]),
+                  "source_links": len(result["classification_relationships"]["source_links"]),
+                  "events": len(result["classification_relationships"]["events"]),
+                  "classification_uids": sorted(str(r["uid"]) for r in snap["classifications"]),
+                  "source_link_uids": sorted(str(r["uid"]) for r in snap["source_links"]),
+              }
+              state["b2_projection_status"] = result["status"]
+              state["b2_enrichment_status"] = result["enrichment"]["status"]
+              state["b2_counts"] = result["counts"]
+              state["unresolved_associations"] = result["unresolved_associations"]
+              assert result["status"] == "PASS_ALERTS_ONLY", "B2_UNRESOLVED_DISPLAY"
+              assert not result["unresolved_associations"], "B2_UNRESOLVED_ASSOCIATIONS"
+              assert (len(snap["episodes"]), len(snap["classifications"]), len(snap["source_links"])) == (382, 55, 223), "FROZEN_PHYSICAL_COUNTS_MISMATCH"
+              assert (result["counts"]["display"], result["counts"]["official_display"],
+                      result["counts"]["live_display"], result["counts"]["suppressed_view_only"]) == (198, 184, 14, 184), "B2_DISPLAY_COUNTS_MISMATCH"
+              assert result["enrichment"]["rebinds"] == 0, "UNAUTHORIZED_PHYSICAL_REBIND"
+              state["physical_b2_core"] = "B2_CORE_PHYSICAL_FROZEN_PASS"
+
+              stage = "exact_198_pinned_git_comparison"
+              expected = Counter(
+                  (reader.iso_utc(r["start"]), reader.iso_utc(r["end"]), r["source"])
+                  for r in expected_rows
+              )
+              actual = Counter(
+                  (r["start_utc"], r["end_utc"], r["source_kind"])
+                  for r in result["display_alerts"]
+              )
+              missing = list((expected - actual).elements())
+              extra = list((actual - expected).elements())
+              actual_uid_by_triplet = {
+                  (r["start_utc"], r["end_utc"], r["source_kind"]): r["uid"]
+                  for r in result["display_alerts"]
+              }
+              expected_sources = {}
+              for s, e, source in expected:
+                  expected_sources.setdefault((s, e), set()).add(source)
+              label_mismatches = [
+                  {"uid": actual_uid_by_triplet.get((s, e, kind)),
+                   "start_utc": s, "end_utc": e,
+                   "observed_source": kind,
+                   "expected_source_kinds_for_same_interval": sorted(expected_sources[(s, e)])}
+                  for s, e, kind in extra
+                  if (s, e) in expected_sources and kind not in expected_sources[(s, e)]
+              ]
+              diff = {
+                  "status": "EXACT_PARITY_PASS" if not (missing or extra or label_mismatches) else "EXACT_PARITY_FAIL",
+                  "comparison": "exact_microsecond_UTC_start_end_and_source_kind_no_minute_floor",
+                  "expected_count": sum(expected.values()), "actual_count": sum(actual.values()),
+                  "missing_intervals": [{"start_utc": s, "end_utc": e, "source_kind": kind}
+                                        for s, e, kind in missing],
+                  "extra_intervals": [{"uid": actual_uid_by_triplet.get((s, e, kind)),
+                                       "start_utc": s, "end_utc": e, "source_kind": kind}
+                                      for s, e, kind in extra],
+                  "source_label_mismatches": label_mismatches,
+                  "timestamp_rebindings": parent_diff["timestamp_mismatches"],
+                  "physical_parent_missing_uids": parent_diff["missing_uids"],
+                  "physical_parent_extra_uids": parent_diff["extra_uids"],
+              }
+              state["frozen_display_comparison"] = (
+                  "FROZEN_198_EXACT_PARITY_PASS" if diff["status"] == "EXACT_PARITY_PASS"
+                  else "FROZEN_198_EXACT_PARITY_FAIL"
+              )
+          except Exception as exc:
+              state["failure"] = {
+                  "stage": stage, "exception_type": type(exc).__name__,
+                  "error_code": str(getattr(exc, "code", "")) or (
+                      str(exc) if isinstance(exc, AssertionError) else "EXECUTION_ERROR"
+                  ),
+              }
+          finally:
+              write_json("machine_verdict.json", state)
+              write_json("input_inventory.json", inputs)
+              write_json("transaction_receipt.json", state["transaction"])
+              write_json("frozen_198_exact_diff.json", diff)
+              write_json("readback_proof.json", proof)
+              for key in ("display_projection", "suppressed_view_only", "physical_parent_snapshot",
+                          "relationship_manifest", "physical_parent_diff"):
+                  if key in proof:
+                      write_json(key + ".json", proof[key])
+              paths = sorted(p for p in OUT.iterdir() if p.is_file())
+              manifest = {
+                  "task": "C6-B2-SHADOW-01",
+                  "workflow_git_sha": os.environ.get("GITHUB_SHA"),
+                  "workflow_sha256": hashlib.sha256(WORKFLOW.read_bytes()).hexdigest()
+                      if WORKFLOW.is_file() else None,
+                  "files": {p.name: {"sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+                                     "bytes": p.stat().st_size} for p in paths},
+              }
+              write_json("sha256_manifest.json", manifest)
+              print(json.dumps({
+                  "physical_b2_core": state["physical_b2_core"],
+                  "full_guarded_cli": state["full_guarded_cli"],
+                  "frozen_display_comparison": state["frozen_display_comparison"],
+                  "physical_counts": state["counts"],
+                  "display_counts": state.get("b2_counts"),
+                  "snapshot": state["transaction"]["snapshot"] if state["transaction"] else None,
+                  "failure": state.get("failure"),
+              }, sort_keys=True))
+          if (state["physical_b2_core"] != "B2_CORE_PHYSICAL_FROZEN_PASS" or
+              state["frozen_display_comparison"] != "FROZEN_198_EXACT_PARITY_PASS"):
+              sys.exit(1)
+          PY
+
+      - name: Upload protected redacted physical reader evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-b2-shadow-01-${{ github.run_id }}
+          path: c6_b2_shadow_01_proof/
+          if-no-files-found: error
+          retention-days: 30
