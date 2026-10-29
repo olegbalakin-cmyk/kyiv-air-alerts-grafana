@@ -12,6 +12,7 @@ import psycopg
 class R4FaultTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        ReaderTests.setUpClass()
         import os
         cls.url=os.environ["PG_TEST_DATABASE_URL"]
         cls.cw=json.loads(Path(__file__).with_name("exact_nine_uuid_crosswalk.json").read_text())
