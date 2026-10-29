@@ -1,0 +1,62 @@
+{
+  "scope": "STATIC_GIT_CODE_REVIEW",
+  "entries": [
+    {
+      "consumer": "update-netlify-site.yml",
+      "source": "site-prod checkout plus scripts/update_data.py",
+      "neon_equivalent": "research C6 reader only, no production integration",
+      "required_fields": [
+        "alerts_combined.json",
+        "dashboard_data.json",
+        "short_28d.csv",
+        "monthly.csv",
+        "weekly.csv"
+      ],
+      "failure_policy": "production source updater separately; no C6 live path",
+      "release_dependency": "C6 reader gate and separate owner promotion"
+    },
+    {
+      "consumer": "dashboard metrics",
+      "source": "site-prod dashboard_data.json",
+      "neon_equivalent": "candidate alert_episodes physical projection",
+      "required_fields": [
+        "city",
+        "start",
+        "end",
+        "duration",
+        "month",
+        "week"
+      ],
+      "failure_policy": "C6 hard-fail should never reach publisher",
+      "release_dependency": "row+metric parity"
+    },
+    {
+      "consumer": "Grafana JSON/CSV",
+      "source": "site-prod generated json and csv files",
+      "neon_equivalent": "none active",
+      "required_fields": [
+        "time ranges",
+        "counts",
+        "durations"
+      ],
+      "failure_policy": "retain Git source",
+      "release_dependency": "separate approval"
+    },
+    {
+      "consumer": "attack_event classifications, sources and events",
+      "source": "Neon internal persistence/readback + dedicated workflows",
+      "neon_equivalent": "Neon linked classifications, sources, current tips",
+      "required_fields": [
+        "classification_uid",
+        "persisted parent uid",
+        "binding_state",
+        "source membership",
+        "event tip"
+      ],
+      "failure_policy": "no auto dedupe/mapping for October",
+      "release_dependency": "complete relationship preservation"
+    }
+  ],
+  "no_publication_on_research_negative": "DESIGNED_NOT_LIVE_PROVEN",
+  "inventory_complete": "PARTIAL_STATIC"
+}

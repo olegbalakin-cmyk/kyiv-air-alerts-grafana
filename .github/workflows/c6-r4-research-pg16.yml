@@ -1,0 +1,113 @@
+name: C6-R4 research PG16 exact-SHA proof
+on:
+  push:
+    branches: [research-c6-r4-live-reader-faults-2026-10-29]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pg16:
+    if: github.ref == 'refs/heads/research-c6-r4-live-reader-faults-2026-10-29'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_USER: testuser
+          POSTGRES_DB: c6test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U testuser -d c6test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install 'psycopg[binary]>=3.2,<4'
+      - name: Verify actual pinned Git source objects
+        run: |
+          python - <<'PY'
+          import pathlib,sys,json
+          sys.path.insert(0,'research/c6_r4_live_reader_2026_10_29')
+          from c6_r4_reader_wrapper import verify_git_authority
+          r=verify_git_authority(pathlib.Path.cwd(),require_current=False)
+          assert r['source_blob']=='69d0c1d906fca6a81445e102fa4fce8b102d4073'
+          print(json.dumps({'object_authority':'PASS','frozen_source_blob':r['source_blob'],'crosswalk_blob':r['crosswalk_blob']}))
+          PY
+      - name: Executed PG16 regression and post-test proof
+        id: tests
+        env:
+          PG_TEST_DATABASE_URL: postgresql://testuser:test-only@localhost:5432/c6test
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p proof
+          python - <<'PY' > proof/runtime_identity.json
+          import json,os,subprocess
+          from datetime import datetime,timezone
+          print(json.dumps({'tested_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+                            'github_sha':os.environ['GITHUB_SHA'],
+                            'run_id':os.environ['GITHUB_RUN_ID'],
+                            'job':'pg16','scope':'SYNTHETIC_PG16_ONLY',
+                            'generated_utc':datetime.now(timezone.utc).isoformat()},sort_keys=True))
+          PY
+          python - <<'PY' > proof/pg16_server.json
+          import psycopg,json,os
+          with psycopg.connect(os.environ['PG_TEST_DATABASE_URL']) as c:
+              x=c.execute('SELECT version()').fetchone()[0]
+          assert 'PostgreSQL 16.' in x, x
+          print(json.dumps({'server_version':x,'postgres16':True},sort_keys=True))
+          PY
+          set +e
+          (cd research/c6_r4_live_reader_2026_10_29 &&
+            python -m unittest -v test_c6_r4_reader.py test_c6_r3_reader.py) > proof/unittest.log 2>&1
+          test_exit=$?
+          set -e
+          cat proof/unittest.log
+          python - "$test_exit" <<'PY'
+          import os,re,json,sys,hashlib,pathlib
+          base=pathlib.Path('proof')
+          log=(base/'unittest.log').read_text()
+          match=re.search(r'Ran (\d+) tests? in',log)
+          executed=int(match.group(1)) if match else 0
+          failures=len(re.findall(r'^FAIL: ',log,re.M))
+          errors=len(re.findall(r'^ERROR: ',log,re.M))
+          good=sys.argv[1]=='0' and bool(re.search(r'^OK\s*$',log,re.M)) and executed>=30
+          identity=json.loads((base/'runtime_identity.json').read_text())
+          result={'kind':'ACTUAL_PG16_EXECUTION','executed_tests':executed,
+                  'failure_count':failures,'error_count':errors,'passed':good,
+                  'tested_sha':identity['tested_sha'],'github_sha':identity['github_sha'],
+                  'neon_live_wrapper_executed':False,'september_live_parity':'NOT_PROVEN',
+                  'october_live_hardfail':'NOT_PROVEN','release_verdict':'C6_R4_PARTIAL'}
+          (base/'c6_r4_pg16_fault_coverage.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+          (base/'c6_r4_release_gate.json').write_text(json.dumps({
+             'verdict':'C6_R4_PARTIAL','exact_sha_ci_pg16_regression_pass':good,
+             'live_september':'NOT_PROVEN','live_october':'NOT_PROVEN',
+             'reader_switch_authorized':False,'neon_authority_active':False,
+             'production_cutover_executed':False,'tested_sha':identity['tested_sha']
+          },indent=2,sort_keys=True)+'\n')
+          manifest={}
+          for f in sorted(base.iterdir()):
+            if f.is_file() and f.name!='sha256_manifest.json':
+              manifest[f.name]=hashlib.sha256(f.read_bytes()).hexdigest()
+          (base/'sha256_manifest.json').write_text(json.dumps({
+            'tested_sha':identity['tested_sha'],'files':manifest},indent=2,sort_keys=True)+'\n')
+          print(json.dumps(result,sort_keys=True))
+          if not good:sys.exit(1)
+          PY
+      - name: Upload exact-SHA proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-r4-pg16-proof-${{ github.sha }}
+          path: proof/
+          if-no-files-found: error
+          retention-days: 30
