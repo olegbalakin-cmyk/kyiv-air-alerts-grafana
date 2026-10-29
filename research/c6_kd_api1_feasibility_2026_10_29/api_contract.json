@@ -1,0 +1,76 @@
+{
+  "task": "C6-KD-API1",
+  "inspected_on": "2026-10-29",
+  "official_documentation": "https://kyiv.digital/open-api/docs/air-alert.html",
+  "pinned_public_schema_copy": "https://github.com/Oleksandr-Hlushchenko/KSE-AI-Agentic-School-Stage2/blob/f2b81a7410078d0c919b1b9013dadf954b6f9a6f/data/raw/kyiv_digital/api_schema.yaml",
+  "pinned_schema_git_blob": "e863ddfd36550cf4dd215bd91e06b7739f3c2372",
+  "specification_server_field": "ABSENT; no server/base URL in the archived OpenAPI YAML",
+  "observed_base_url": "https://kyiv.digital/open-api",
+  "base_url_evidence": "Verified example source URLs from pinned public code: src/air_alerts/config.py (Oleksandr-Hlushchenko/KSE-AI-Agentic-School-Stage2) and worker/index.ts (sergiiiavt/air-stat). Not guessed.",
+  "endpoints": {
+    "history": {
+      "method": "GET",
+      "path": "/air-alert/history",
+      "url": "https://kyiv.digital/open-api/air-alert/history",
+      "operation_id": "getAirAlertsHistory",
+      "response_schema": "{items:[{state:0|1,causes:string[],created_at:string}]}",
+      "documented_query_parameters": [],
+      "authentication": "no security requirement in pinned OpenAPI"
+    },
+    "state": {
+      "method": "GET",
+      "path": "/air-alert/state",
+      "url": "https://kyiv.digital/open-api/air-alert/state",
+      "operation_id": "getAirAlertState",
+      "response_schema": "{current:{state,causes,created_at,last_cause},stats:{total_alerts,total_lasts_for}}",
+      "documented_query_parameters": [],
+      "authentication": "no security requirement in pinned OpenAPI"
+    }
+  },
+  "required_accept": "application/json OR application/xml",
+  "authentication": {
+    "read_only_gets": "No bearerAuth stanza documented; unauthenticated public consumption supported by pinned third-party consumers, direct current GET not captured",
+    "webhooks": "Bearer token issued by Kyiv Digital required only for webhook registration/list/delete"
+  },
+  "pagination": {
+    "documented": false,
+    "parameters": [],
+    "archival_observation": "A single archived response contains 5384 state transitions (2022-02-25 to 2026-10-15)"
+  },
+  "rate_limits": {
+    "numeric_limits_documented": false,
+    "status_code_429": true,
+    "retry_after": "not documented"
+  },
+  "http_codes": [
+    200,
+    401,
+    403,
+    404,
+    422,
+    429,
+    500,
+    503
+  ],
+  "history_semantics": {
+    "state_0": "General AIR clear",
+    "state_1": "General AIR alert active",
+    "causes": "Threat annotations, not additional general AIR on-events",
+    "created_at": "YYYY-MM-DD HH:MM:SS without timezone suffix",
+    "timestamp_precision": "seconds observed in frozen API snapshot; not milliseconds",
+    "native_event_id": "Not in OpenAPI schema or 5384 archived records"
+  },
+  "state_semantics": {
+    "last_cause": "Last announced threat still active, may be null",
+    "causes": "zero or more simultaneous threats"
+  },
+  "timezone": {
+    "schema_offset": "None",
+    "observed_october_2026_01_to_15": "Europe/Kyiv +03:00 exact parity to municipal seconds",
+    "other_intervals": "Unproven; require DST ambiguity guard"
+  },
+  "separate_sources": {
+    "historical_airAlerts_json": "Municipal resource updated every Monday",
+    "history_state": "Kyiv Digital API resources, distinct from weekly JSON"
+  }
+}
