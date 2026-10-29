@@ -1,0 +1,72 @@
+name: C4 E5 offline verifier gate (research only)
+on:
+  push:
+    branches:
+      - research-c4-e5-field-verifier-2026-10-29-gpt6
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Assert research ref and committed scope
+        shell: bash
+        run: |
+          test "${GITHUB_REF_NAME}" = "research-c4-e5-field-verifier-2026-10-29-gpt6"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          python3 -m py_compile research/c4_e5_field_verifier_2026_10_29/c4_e5_verifier.py
+      - name: Run offline negative tests
+        shell: bash
+        run: |
+          cd research/c4_e5_field_verifier_2026_10_29
+          python3 -m unittest -v test_c4_e5_negative 2>&1 | tee /tmp/c4-e5-negative-test.log
+      - name: Verify fail-closed real-input gate and machine artifacts
+        shell: bash
+        run: |
+          d=research/c4_e5_field_verifier_2026_10_29
+          set +e
+          python3 "$d/c4_e5_verifier.py" --repo . --inputs "$d" --out /tmp/c4-e5-output > /tmp/c4-e5-verifier.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 2
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/c4-e5-output/c4_e5_release_gate.json')
+          r=json.loads(p.read_text())
+          assert r['verdict']=='C4_E5_PARTIAL'
+          assert r['global_counters']['missing_in_neon'] is None
+          assert not r['complete_six_exports']
+          assert r['C4_PRODUCTION_RELEASE_AUTHORIZED']=='NO'
+          PY
+      - name: Build offline proof artifact with SHA-256 manifest
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/c4-e5-artifact
+          cp /tmp/c4-e5-negative-test.log /tmp/c4-e5-artifact/ 2>/dev/null || true
+          cp /tmp/c4-e5-verifier.log /tmp/c4-e5-artifact/ 2>/dev/null || true
+          cp /tmp/c4-e5-output/* /tmp/c4-e5-artifact/ 2>/dev/null || true
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib,os
+          p=Path('/tmp/c4-e5-artifact')
+          manifest={'tested_sha':os.environ['GITHUB_SHA'],'offline_only':True,
+                    'files':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(p.iterdir()) if f.is_file()}}
+          (p/'ci_sha256_manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          PY
+      - name: Upload redacted offline proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c4-e5-offline-gate
+          path: /tmp/c4-e5-artifact/
+          retention-days: 14
