@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""C6-23CITY-INTEGRATED-SHADOW-01: pinned read-only research adapter/orchestrator.
+"""C6-23CITY-INTEGRATED-SHADOW-02: pinned read-only research adapter/orchestrator.
 
 Reuses site-prod's existing build_outputs, enrich_weekly, rolling, historical
 and derived functions. This is NOT the separately accepted 22-city adapter,
@@ -25,7 +25,7 @@ from zoneinfo import ZoneInfo
 
 UTC = timezone.utc
 TZ = ZoneInfo("Europe/Kyiv")
-TASK = "C6-23CITY-INTEGRATED-SHADOW-01"
+TASK = "C6-23CITY-INTEGRATED-SHADOW-02"
 SITE_SHA = "09192a36dae49bd71e1042942481384a5e763086"
 RESEARCH_BASE_SHA = "7738d959231d0534b527798a37ba9997f0083c5f"
 CUTOFF = "2026-10-30T06:11:07.648388Z"
@@ -33,7 +33,9 @@ FROZEN_START = "2026-09-30T21:00:00Z"
 FROZEN_END = "2026-10-29T09:00:00Z"
 EXPECTED_HOST = "ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech"
 EXPECTED_DB = "neondb"
-OUT = Path("c6_23city_integrated_shadow01_proof")
+OUT = Path("c6_23city_integrated_shadow02_proof")
+APPROVED_DIR = OUT / "accepted-22city"
+APPROVED_SHA256 = "f6dda060a0ed48b01b4726625b36c33b472955f687be6877aef918fc3c8bddf2"
 OUTPUTS = OUT / "site-consumer-research-only"
 REPO = Path("research-src")
 SITE = Path("pinned-site") / "kyiv-air-alerts-grafana"
@@ -329,14 +331,40 @@ def build_site_candidate(physical_rows, frozen_snapshot, unknown_rows):
     raw_by_city = collections.defaultdict(list)
     for row in physical_rows:
         raw_by_city[row["city_key"]].append(row)
+    # Adapter output must come from its own physical psycopg transaction on the same cutoff.
+    receipt_path = APPROVED_DIR / "machine_verdict.json"
+    archive_proof = APPROVED_DIR / "approved_adapter_archive.sha256"
+    assert receipt_path.is_file() and archive_proof.is_file(), "APPROVED_ADAPTER_EXECUTION_RECEIPT_MISSING"
+    assert archive_proof.read_text().strip() == APPROVED_SHA256, "APPROVED_ZIP_SHA256_NOT_VERIFIED"
+    accepted_verdict = json.loads(receipt_path.read_text(encoding="utf-8"))
+    accepted_receipt = accepted_verdict.get("receipt", {})
+    db = accepted_receipt.get("database", {})
+    assert accepted_receipt.get("physical_origin") == "ACTUAL_NEON_PSYCOG_READONLY", "APPROVED_ADAPTER_NOT_PHYSICALLY_RUN"
+    assert db.get("read_only") == "on" and db.get("recovery") is True, "APPROVED_ADAPTER_NOT_RECOVERY_REPLICA"
+    assert db.get("cities") == 22 and db.get("row_count") == 28951, "APPROVED_ADAPTER_WRONG_CUTOFF_COUNTS"
+    assert utc(db.get("asof_utc")) == utc(CUTOFF), "APPROVED_ADAPTER_CUTOFF_DRIFT"
+    assert sum(len(v) for k,v in raw_by_city.items() if k!="kyiv") == db["row_count"], "REPEATABLE_READ_ASOF_COUNTS_DIFFER"
+    approved_projection = json.loads((APPROVED_DIR/"22city_neon_projection.json").read_text(encoding="utf-8"))
+    adapter_folder = Path(os.environ.get("C6_APPROVED_22CITY_DIR",""))
+    assert adapter_folder.is_dir() and (adapter_folder/"contract.py").is_file(), "APPROVED_PACKAGE_NOT_IN_RUNNER"
+    sys.path.insert(0,str(adapter_folder.resolve()))
+    from contract import CITY_KEYS, union_utc
+    assert set(CITY_KEYS)==set(raw_by_city)-{"kyiv"}, "APPROVED_ADAPTER_CITY_SET_MISMATCH"
     alerts_by_city = {"kyiv": update.parse_committed_alerts(candidate_kyiv)}
-    for city, items in raw_by_city.items():
-        if city == "kyiv":
-            continue
-        alerts_by_city[city] = [update.Alert(start=x["start_at"].astimezone(TZ),
-                                        end=x["end_at"].astimezone(TZ),
-                                        source="neon_physical_primary_source_unverified") for x in items]
-    base = json.loads((SITE/"data/dashboard_data.json").read_text(encoding="utf-8"))
+    for city in CITY_KEYS:
+        unioned=union_utc([(r["start_at"],r["end_at"]) for r in raw_by_city[city]])
+        alerts_by_city[city]=[update.Alert(start=a.astimezone(TZ),
+            end=b.astimezone(TZ),source="neon_approved_22city_utc_union") for a,b in unioned]
+    base = approved_projection
+    evidence["approved_adapter"]={
+        "zip_sha256":APPROVED_SHA256,"physical_psycopg_readonly":True,"cutoff":CUTOFF,
+        "received_rows":db["row_count"],"snapshot":db.get("snapshot"),
+        "adapter_verdict":accepted_verdict.get("verdict"),
+        "adapter_numeric_diff":accepted_verdict.get("blocking_differences"),
+        "adapter_derived_diff":accepted_verdict.get("derived_explorations_full_comparison"),
+        "adapter_exit_code":(APPROVED_DIR/"adapter_exit_code.txt").read_text().strip()}
+    evidence["gates"]["accepted_22city_adapter_executed"]=True
+    event("APPROVED_ADAPTER_VERIFIED: archive SHA, protected Neon read-only readback, 22 city projection")
     keys = base["multicity_meta"]["production_city_keys"]
     assert len(keys) == 23 and set(keys) == set(alerts_by_city)
     now_local = utc(CUTOFF).astimezone(TZ)
@@ -344,6 +372,9 @@ def build_site_candidate(physical_rows, frozen_snapshot, unknown_rows):
     assert len(proxy_cfg) == 19 and set(proxy_cfg) == set(keys)-EXACT_22-{"kyiv"}
     city_outputs = {}
     for city in keys:
+        if city != "kyiv":
+            city_outputs[city] = approved_projection["cities"][city]
+            continue
         old = base["cities"][city]
         meta = dict(old["meta"])
         if city == "kyiv":
@@ -406,6 +437,10 @@ def build_site_candidate(physical_rows, frozen_snapshot, unknown_rows):
             start=common_start if requested is None else max(common_start,common_end-timedelta(days=requested-1))
             spans[period]=rolling.period_summary(alerts_by_city[city],start,common_end)
         table_cities[city]={"periods":spans}
+    for city in keys:
+        if city != "kyiv":
+            profile_cities[city] = approved_projection["time_of_day_profile"]["cities"][city]
+            table_cities[city] = approved_projection["all_cities_table"]["cities"][city]
     base["time_of_day_profile"]={
         "meta":{"slot_minutes":rolling.SLOT_MINUTES,"timezone":"Europe/Kyiv",
                 "city_count":23,"periods":list(rolling.PROFILE_PERIODS),
@@ -432,7 +467,14 @@ def build_site_candidate(physical_rows, frozen_snapshot, unknown_rows):
     shutil.copyfile(SITE/"data/kyiv_threat_mix.json",OUTPUTS/"kyiv_threat_mix.json")
     evidence["source_dependencies"]["sevastopol_events.json"]="PINNED_LEGACY_METADATA_AND_TELEGRAM_IDS_NOT_NEON_GENERATED"
     evidence["source_dependencies"]["kyiv_threat_mix.json"]="PINNED_KYIV_DIGITAL_CAUSES_NOT_NEON_GENERATED"
-    event("SITE_CANDIDATE 23 city builder functions executed (not accepted 22-city adapter)")
+    evidence["source_dependencies"].update({
+        "alerts_combined.json:historical_pre_B2":"PINNED_SITE_PROD_GIT_JSON_NOT_NEON_GENERATED",
+        "ukrainealarm_bridge.json:derived":"PINNED_SITE_PROD_GIT_INPUT",
+        "pages-preview/features.json":"SITE_PROD_GIT_FEATURE_CONFIG",
+        "pages-preview/historical-daily-kpi.json":"SITE_PROD_STATIC_FALLBACK",
+        "pages-preview/explosions_test.json":"OPERATIONAL_WIP_GIT_FEATURE_FLAG_FALSE",
+        "casualty_presentation":"SEPARATE_SITE_PROD_GIT_CASUALTY_TRACK"})
+    event("SITE_CANDIDATE approved 22-city projection plus Kyiv B2 selection")
     evidence["gates"]["candidate_full_23_city_rolling_builders"]=True
     return base,original_kyiv
 
@@ -478,7 +520,7 @@ def check_contracts_and_diff(base,original_kyiv):
     evidence["gates"]["no_known_dst_uncorrected"]=False
     evidence["gates"]["nine_kyiv_uid_source_provenance_resolved"]=False
     evidence["gates"]["suppressed_parent_enrichment_resolved"]=False
-    evidence["gates"]["accepted_22city_adapter_executed"]=False
+    evidence["gates"]["accepted_22city_adapter_executed"]=bool(evidence.get("approved_adapter",{}).get("physical_psycopg_readonly"))
     evidence["gates"]["browser_csv_export_physically_exercised"]=False
     try:
         qa=importlib.import_module("postprocess_compact_dashboard_qa")
@@ -519,6 +561,17 @@ def build_derived_if_possible():
                  "time_of_day_heatmap_test":derived["time_of_day_heatmap_test"],
                  "all_cities_table_test":derived["all_cities_table_test"],
                  "explorations":expl}
+        approved_derived_path=APPROVED_DIR/"site_derived_22city_projection.json"
+        assert approved_derived_path.is_file(), "APPROVED_ADAPTER_DERIVED_PROJECTION_MISSING"
+        approved_derived=json.loads(approved_derived_path.read_text(encoding="utf-8"))
+        for sec in ("time_of_day_heatmap_test","all_cities_table_test","explorations"):
+            for city,row in approved_derived[sec]["cities"].items():
+                if city!="kyiv":
+                    payload[sec]["cities"][city]=row
+        for city,row in approved_derived["explorations"].get("daily28_current",{}).get("cities",{}).items():
+            if city!="kyiv":
+                payload["explorations"].setdefault("daily28_current",{}).setdefault("cities",{})[city]=row
+        payload["meta"]["source"]="C6_RESEARCH_ONLY_APPROVED_22CITY_PLUS_KYIV_B2"
         write_json(OUTPUTS/"site_derived.json",payload)
         published=json.loads((SITE/"data/site_derived.json").read_text(encoding="utf-8"))
         for field in ("time_of_day_heatmap_test","all_cities_table_test","explorations"):
@@ -540,7 +593,7 @@ def finish():
     evidence["blockers_total"]=len(blockers)
     if evidence["gates"].get("real_python_psycopg_neon_read_only") and evidence["gates"].get("candidate_full_23_city_rolling_builders"):
         evidence["status"]="PARTIAL"
-        evidence["reason"]="accepted_22city_adapter_unavailable_plus_provenance_dst_and_consumer_gates_open"
+        evidence["reason"]="approved_22city_executed_but_dst_lineage_and_consumer_gates_open"
     else:
         evidence["status"]="BLOCKED"
         evidence["reason"]=evidence.get("failure_reason","physical_full_generation_not_completed")
@@ -550,9 +603,9 @@ def finish():
     write_json(OUT/"blockers.json",blockers)
     (OUT/"redacted_execution.log").write_text("\n".join(log)+"\n",encoding="utf-8")
     (OUT/"README.md").write_text(
-        "# C6-23CITY-INTEGRATED-SHADOW-01\n\n"
+        "# C6-23CITY-INTEGRATED-SHADOW-02\n\n"
         "This is research only. Never copy site-consumer outputs into site-prod. "
-        "Full PASS prohibited without accepted 22-city adapter, verified source lineage, "
+        "Full PASS prohibited without verified source lineage, "
         "DST correction acceptance, complete consumer and browser export gates. "
         "All pinned old/legacy-derived files are marked under machine_verdict.source_dependencies. "
         "No Neon DML/DDL, Git promotion, or Netlify deployment.\n",encoding="utf-8")
