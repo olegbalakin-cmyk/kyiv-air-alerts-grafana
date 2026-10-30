@@ -1,0 +1,63 @@
+{
+  "checkpoint": "C6-PREVIEW-ROLLBACK-01",
+  "status": "PASS_BOUNDED_FROZEN_RESEARCH_PREVIEW_AND_SOURCE_ROLLBACK",
+  "execution": "GitHub Actions runner local loopback Chrome; no hosted deployment",
+  "run_id": 41139538902,
+  "artifact_id": 13018841540,
+  "artifact_sha256": "cdea8d22e13cbc32bde67fab8f2d93fceae5719a4b934d0ac60ec2e1731e6485",
+  "code_commit": "9c006f84d1b647d717e2ba27db0ceed5fbccd9c1",
+  "candidate_commit": "741f277f73d1dde1325069d25fa00b44a42d6f03",
+  "site_reference": "0ecbb291e8f443f7ab366bc4ac033d096f2c44f4",
+  "cutoff_utc": "2026-10-30T15:27:55.138400Z",
+  "cities_passed": 23,
+  "exact_city": 4,
+  "raion_proxy": 19,
+  "city_periods": [
+    "daily28",
+    "weekly",
+    "rolling30",
+    "rolling90",
+    "rolling180",
+    "calendarWeekly",
+    "monthly",
+    "allTime"
+  ],
+  "comparison_periods": [
+    "daily28",
+    "weekly",
+    "rolling30",
+    "rolling90",
+    "rolling180",
+    "calendarWeekly",
+    "monthly"
+  ],
+  "csv_downloads_content_verified": 45,
+  "historical_kpi_control": "September 2026 counts and seconds independently summed for all 23 cities",
+  "visible_load_error_cases": 4,
+  "page_errors": 0,
+  "cross_origin_requests": 0,
+  "source_selection_survives_reload": true,
+  "rollback": {
+    "verdict": "PASS_SOURCE_ONLY_FROZEN_ROLLBACK",
+    "legacy_cities": 23,
+    "changed_files": [
+      "preview-config.js"
+    ],
+    "frontend_unchanged": true,
+    "data_files_unchanged": true,
+    "kharkiv_october_candidate_alerts": 313,
+    "kharkiv_october_legacy_alerts": 312
+  },
+  "dst_simulation": true,
+  "physical_DST_cases_still_open": 4,
+  "continuous_freshness_proven": false,
+  "production_cutover_allowed": false,
+  "neon_mutations": 0,
+  "production_mutations": 0,
+  "remaining_release_gates": [
+    "Four physical DST repairs remain unexecuted",
+    "Live writer durability, fail-closed activation and ongoing freshness not proven by frozen preview",
+    "Kyiv current selection/provenance and real HTTP-to-Neon UUID/readback gate remain open",
+    "Production generator source switch and operational rollback remain separate from preview-only configuration"
+  ]
+}

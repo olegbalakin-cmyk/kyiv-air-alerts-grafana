@@ -1,0 +1,43 @@
+{
+  "initial_run": 41138360643,
+  "initial_commit": "cc185512aa63ea679aba7625f5e9238fb6950b12",
+  "initial_artifact": 13018235164,
+  "initial_status": "HARNESS_FAILED_AFTER_SITE_LOAD",
+  "causes": [
+    "CSV selector matched share and embed controls",
+    "DevTools inspector cache evicted large response bodies"
+  ],
+  "fix": "Specific CSV control selector; browser-native SHA-256 of actual response clone; reuse immutable package",
+  "second_run": {
+    "id": 41138694160,
+    "commit": "8e8256fc1aaf382b425d156dacb2f169a76b53cc",
+    "artifact": 13018400664,
+    "cities_passed": 23,
+    "csv_passed": 44,
+    "status": "HARNESS_EXPECTATION_FAILED_ON_LEGITIMATE_EMPTY_CUMULATIVE_VIEW",
+    "fix": "Allow empty cumulative series only with explicit no-complete-shared-months note"
+  },
+  "third_run": {
+    "id": 41138989463,
+    "commit": "54fdfac6e75007b47260733bcee98b9f7e313bb1",
+    "cities_passed": 23,
+    "status": "HARNESS_FAULT_INJECTION_CALLBACK_ERROR",
+    "fix": "One-argument route handler avoids Playwright request argument overwriting HTTP status"
+  },
+  "fourth_run": {
+    "id": 41139255648,
+    "commit": "47fe1106dd515a3ed690de7c2368fe166c88c3f5",
+    "artifact": 13017592239,
+    "status": "PASS_BOUNDED_BROWSER_AND_SOURCE_ROLLBACK",
+    "cities": 23,
+    "csv": 45,
+    "legacy_cities": 23,
+    "followup": "Preserve preview_source in existing frontend URL updates and add reload assertion"
+  },
+  "final_run": {
+    "id": 41139538902,
+    "commit": "9c006f84d1b647d717e2ba27db0ceed5fbccd9c1",
+    "artifact": 13018841540,
+    "status": "PASS_BOUNDED_FROZEN_RESEARCH_PREVIEW_AND_SOURCE_ROLLBACK"
+  }
+}

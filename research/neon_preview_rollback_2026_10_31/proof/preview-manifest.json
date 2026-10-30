@@ -1,0 +1,61 @@
+{
+  "schema": "isolated-frozen-consumer-preview-v1",
+  "candidate_commit": "741f277f73d1dde1325069d25fa00b44a42d6f03",
+  "site_reference": "0ecbb291e8f443f7ab366bc4ac033d096f2c44f4",
+  "cutoff_utc": "2026-10-30T15:27:55.138400Z",
+  "dst_simulation": true,
+  "continuous_freshness_proven": false,
+  "production_cutover_allowed": false,
+  "data_files": {
+    "data/neon/dashboard_data.json": {
+      "sha256": "debd0fe6083fd4a2c290c1d2aa372552af9463486fc575c5a6c6295b39ee81d2",
+      "origin": "accepted_neon_candidate"
+    },
+    "data/neon/site_derived.json": {
+      "sha256": "00b8fc84620b0011563721a733ccb03ca5df57c3b623de574661351facdab5f3",
+      "origin": "accepted_neon_candidate"
+    },
+    "data/neon/alerts_combined.json": {
+      "sha256": "12445af89f15925fd01687c13282ff93fa7e501b469ce3ae29b9d32ea936ba7c",
+      "origin": "accepted_neon_candidate"
+    },
+    "data/neon/kyiv_threat_mix.json": {
+      "sha256": "ebb8c5eb3ed236828ed7a7f7d7ab153ade16555120a8180c25bf9d82e29094a1",
+      "origin": "pinned_git_auxiliary"
+    },
+    "data/neon/historical-daily-kpi.json": {
+      "sha256": "e8eea0070839b456dc0f3e23f6d629789ef6d3f3f113224bb8c7653845b7fc24",
+      "origin": "same_dashboard_embedded_index"
+    },
+    "data/legacy/dashboard_data.json": {
+      "sha256": "846fb95558a2a012637f0ee2357466cdf652c2009169b157b6c2bcd1ef59d11a",
+      "origin": "pinned_legacy_git"
+    },
+    "data/legacy/site_derived.json": {
+      "sha256": "c4db701b7fad826921a3cf2890d3bc4e15276e2c6a2fa9da14bd386fc33dd56e",
+      "origin": "pinned_legacy_git"
+    },
+    "data/legacy/alerts_combined.json": {
+      "sha256": "298567bc0c894ae13c51fd4d031df4d5e64a96d4e7515e2d2942b8a8ef15ba0a",
+      "origin": "pinned_legacy_git"
+    },
+    "data/legacy/kyiv_threat_mix.json": {
+      "sha256": "ebb8c5eb3ed236828ed7a7f7d7ab153ade16555120a8180c25bf9d82e29094a1",
+      "origin": "pinned_legacy_git"
+    },
+    "data/legacy/historical-daily-kpi.json": {
+      "sha256": "a3da01b3e1bf4a28d83eb01c9c671fe534feca7f116bdc6fe17d5fcd15dba57e",
+      "origin": "same_dashboard_embedded_index"
+    }
+  },
+  "chart_js_version": "4.4.7",
+  "chart_js_sha256": "206b6e8bb00fc7bba2c7ee80ca41db3e9e05ba7be0aa35abeba9cfd5357f5d0e",
+  "attack_events": "disabled by pinned features.json; no WIP request",
+  "remaining_git_inputs": [
+    "historical Kyiv display selection",
+    "kyiv_threat_mix.json",
+    "casualty track",
+    "Sevastopol metadata"
+  ],
+  "historical_index_note": "Source-specific fallback is the exact same candidate embedded index. Timestamp metadata rejects embedded candidate at frontend init; no legacy fallback is used."
+}
