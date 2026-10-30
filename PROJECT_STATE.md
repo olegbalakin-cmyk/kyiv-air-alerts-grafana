@@ -1,6 +1,6 @@
 # Project State — active coordination snapshot
 
-**Date:** 2026-10-30. **Release decision:** NO-GO. **Purpose:** concise, authoritative coordination state for the Neon cutover. This is not a replacement for the underlying proofs. The complete prior PROJECT_STATE.md is preserved byte-for-byte in [the historical archive](docs/coordination-archive/PROJECT_STATE_full_before_compaction_2026-10-30.md).
+**Date:** 2026-10-31. **Release decision:** NO-GO. **Purpose:** concise, authoritative coordination state for the Neon cutover. This is not a replacement for the underlying proofs. The complete prior PROJECT_STATE.md is preserved byte-for-byte in [the historical archive](docs/coordination-archive/PROJECT_STATE_full_before_compaction_2026-10-30.md).
 
 ## Instructions for Work, agents and reviewers
 
@@ -20,11 +20,12 @@
 - **Provenance:** accepted C6-PROVENANCE-03-LITE PG17 local crash-safe receipt proof is bounded LOCAL, not a live Neon proof. Latest accepted C6-PROVENANCE-04B attempt [Actions 41120424463](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41120424463) failed before running any steps; no HTTP-to-Neon physical UUID/readback was proven there.
 - **C3 cutover:** minimal legacy|neon source switch and reliable source-only rollback have not been physically rehearsed. Writer durability/freshness and fail-closed activation still need the relevant release gate. Current active alerts, frontend/CSV downloads, derived fields, cutoff alignment and partly Git-backed auxiliary files must be checked as a coherent consumer package.
 
-## Later observed research work — not an accepted cutover checkpoint
+## RECOVERY-RESEARCH-COMMITS-01 — verified saved; parity/cutover not accepted (2026-10-31)
 
-- The isolated research branch **research-neon-cutover-work-2026-10-30** was verified at **b3ceeeceedbd0475cbd059e32020bed3d321da26**. [Actions run 41123467415](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41123467415) completed SUCCESS with an executed network/parser step and artifact **13009048201** (GitHub artifact digest SHA-256 **58eec9d0dc8349e19a07fbcfb0407ac06ee6ea8fc61b8435b66eb8cce0e071f4**). It did **not** execute a physical Neon UUID transaction/readback. Original receipt contents still require independent examination before accepting any source claim.
-- A subsequently interrupted Work session **reported**, but did not yet preserve in the remote research branch, replay changes: zero direct JSON differences for 22 non-Kyiv cities after partial-month rule alignment; a 23-city replay against the newer site-prod; a DST simulation; and 14 later Kyiv matches to a captured HTTP response. These are **unaccepted Work reports** until code, test inputs, machine diffs, and independent proof are recovered and verified.
-- That Work session also reported **two local commits not yet pushed**. Their SHA values and availability are unverified. **Recover/preserve them first**, if the previous workspace exists; do not force-push or overwrite the research branch.
+- **Recovered original commit chain, independently confirmed on GitHub:** `b3ceeeceedbd0475cbd059e32020bed3d321da26` → `e8a1717afc6d2f7c574479aa8f369b8c82b4f3f2` → `e153495537ac4cf002c6ec9aaa58ddb03c0e88ba`. The remote `research-neon-cutover-work-2026-10-30` head is now **e153495537ac4cf002c6ec9aaa58ddb03c0e88ba**; GitHub compare from b3ceeece reports **ahead 2, behind 0**, original SHA and parent links intact. Owner's ordinary, non-force Windows push was independently corroborated by the GitHub ref and commits.
+- **Saved research artifacts:** commit e153495 includes replay code (`research/neon_cutover_work_2026_10_30/replay.py`), frozen input archive and unpacker, browser smoke script, derived patch, DST projection plan, machine diffs, release patch proposals and `proof/recovery/{machine_verdict,recovery_checkpoint,recovery_sha256_manifest}.json`. Research-only files, not deployed. The archived GitHub Actions [41123467415](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41123467415) / artifact **13009048201** proved the bounded no-secret HTTP/parser run, not a real Neon UUID transaction/readback.
+- **Recovered reported results are not yet independently re-executed:** saved `machine_verdict.json` says **PARTIAL_RESEARCH**, `production_cutover_allowed=false`, `31,935` physical rows at pinned cutoff `2026-10-30T15:27:55.138400Z`, `31,939` projected after DST simulation, **1,354** JSON-path differences, **2,552** uniquely matched historical Kyiv intervals and **14** current Kyiv source-corroborated intervals. Its companion `recovery_checkpoint.json` explicitly categorizes the parity/replay counts as `recovered_not_yet_reexecuted`; treat them as recoverable claims pending verification, not accepted release proof. `difference_accounting` groups **1,304 DST + 49 cutoff metadata + 1 research marker**; the scope categories do not causally certify source integrity. A saved direct 22-city diff count differs from the prior chat claim of zero: investigate rather than asserting parity.
+- **Decision:** `RESEARCH_COMMITS_RECOVERED=PASS`; `PINNED_NEW_PARITY_PHYSICAL_REEXECUTION=OPEN`; `GLOBAL_CUTOVER=NO`; `C6=PARTIAL`; `C3=PARTIAL`. Neither this recovery nor research replay constitutes production deployment. No main application code, site-prod, WIP, Neon or Netlify changes by this recovery acceptance.
 
 ## Verified refs at documentation compaction (not release pins)
 
@@ -34,7 +35,7 @@
 
 ## Shortest safe next path
 
-1. **Preserve interrupted Work:** recover the reported two local commits, push without force if safe, and save reproducible parity patch, machine diff, tests and immutable inputs. If workspace is missing, mark it missing rather than inventing proof.
+1. **Re-execute and verify saved research inputs:** start from the recovered head `e1534955`, verify archive/manifest, pinned 23-city replay, 22-city direct diff, DST simulation and actual machine output. Record precise remaining consumer differences; do not repeat a broad Neon audit.
 2. **Finish bounded 23-city consumer candidate:** verify current pinned cutoff/partial-month/derived rules; integrate researched DST fix in isolated tests; resolve Kyiv current reader/provenance exceptions; test frontend and CSV locally or on an explicitly authorized preview. Document legacy Git inputs that remain.
 3. **Run production-like rehearsal:** prove ongoing update freshness, real safe writer path, full consumer contract, controlled legacy|neon switch and rollback. Only then request/execute separately approved production promotion.
 
