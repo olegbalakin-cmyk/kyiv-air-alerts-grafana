@@ -236,11 +236,19 @@ def main():
             page.evaluate("state.charts.cityIntensityChart.setDatasetVisibility(1,false);state.charts.cityIntensityChart.update('none')")
             csv_download('cityIntensityChart', 'neon-visible-series-only')
             page.evaluate("state.charts.cityIntensityChart.setDatasetVisibility(1,true);state.charts.cityIntensityChart.update('none')")
+            report['comparison_periods'] = {}
             for period in page.locator('#comparePeriod option').evaluate_all('els=>els.map(e=>e.value)'):
                 page.locator('#comparePeriod').select_option(period)
                 dates('compare', '', '')
+                results = {}
                 for cid in compare:
-                    valid_chart(cid)
+                    chart = valid_chart(cid, allow_empty=cid == 'compareCumulativeHoursChart')
+                    results[cid] = len(chart['labels'])
+                    if cid == 'compareCumulativeHoursChart' and not chart['labels']:
+                        note = page.locator('#compareCumulativeNote').inner_text().lower()
+                        assert 'немає' in note or 'no shared' in note, (period, note)
+                        results['cumulative_empty_note'] = note
+                report['comparison_periods'][period] = results
             for value in page.locator('#allCitiesRange option').evaluate_all('els=>els.map(e=>e.value)'):
                 if value == 'custom':
                     continue
