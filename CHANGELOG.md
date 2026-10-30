@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-30
 
+### C6-22CITY-READER-01 bounded structure and consumer-contract review — PARTIAL / ADAPTER ZIP NOT INSPECTED
+
+- Reported adapter ZIP and `22/22` offline tests were **not provided as an actual attachment**, so they are owner-reported and **unverified**; full Python→Neon→complete-site-output execution and real production machine diff remain NOT EXECUTED. Independent read-only `pg_is_in_recovery=true`, `transaction_read_only=on` Neon query verified **22 non-Kyiv cities, 28,951 closed AIR rows, zero `end_at <= start_at`**. DST and source provenance correctness cannot be inferred.
+- Pinned `site-prod@09192a36` QA specifies four exact-city (Kyiv, Kharkiv, Zaporizhzhia, Sevastopol) and nineteen raion-proxy. Pinned `app.js` creates chart and table CSV exports in browser from JSON/chart series; `apply_site_rolling_7d.py` depends on Kyiv and Sevastopol input files as well as dashboard JSON. Do not accept a single 28-day aggregate or sample rows as full consumer parity. `C6_22CITY_READER01_STRUCTURAL_22_OF_22=VERIFIED_READ_ONLY`; `ADAPTER_TESTS=NOT_VERIFIED`; `FULL_CONSUMER_PARITY=NOT_EXECUTED`; `C6=PARTIAL`; `C3=PARTIAL`; `GLOBAL_CUTOVER=NO`.
+- Next inspect the actual ZIP, then perform one bounded full pinned research-only Neon-to-site run/diff for 22 cities, retaining explicit DST/proxy/Sevastopol/partial-period distinctions; combine with independently accepted Kyiv result later. No GitHub workflow dispatch, Neon writes, site-prod, WIP or production changes.
+
 ### C6-DST-UTC-01 source-only DST repair — BOUNDED RESEARCH ACCEPTED / FULL 23-CITY E2E OPEN
 
 - Independently validated research ZIP `bf4ac5152b12e14fe6032d22a4d28b1a159dc7a378c954c2eb9b4895d3333939` (CRC + **15/15 internal hashes**), report bytes, pinned `site-prod@09192a36` code/source blobs, re-ran **21/21** local tests and independently replayed actual **5,699** UkraineAlarm input events across **21** cities: old **5,297** vs UTC **5,301** episodes, **+4**, duration **−9,059.359958 sec**. Source-only differences exclusively Kharkiv, Poltava, Zhytomyr (three bad merges), Cherkasy (one missing interval). Independently rehashed seven proposed new legacy IDs (**7/7 PASS**). Three wrong physical Neon UUIDs independently read back on replica; **0/7** corrected IDs currently exist, valid Cherkasy earlier record preserved; limited relationship checks zero, not proof of no external dependencies.
