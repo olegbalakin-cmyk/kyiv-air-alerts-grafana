@@ -1,0 +1,82 @@
+name: Isolated Neon frozen preview and source rollback
+on:
+  push:
+    branches: [research-neon-preview-rollback-2026-10-31]
+    paths:
+      - research/neon_preview_rollback_2026_10_31/**
+      - .github/workflows/neon-preview-rollback.yml
+permissions:
+  contents: read
+concurrency:
+  group: isolated-neon-preview-rollback
+  cancel-in-progress: false
+jobs:
+  offline-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            research/neon_cutover_work_2026_10_30
+            research/neon_preview_rollback_2026_10_31
+            research/c6_oct184_b1_source_priority_2026_10_29
+            research/c6_23city_integrated_shadow_2026_10_30
+      - uses: actions/checkout@v4
+        with:
+          ref: 0ecbb291e8f443f7ab366bc4ac033d096f2c44f4
+          path: pinned-site
+          sparse-checkout: kyiv-air-alerts-grafana
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser automation client
+        run: python -m pip install playwright==1.64.1 requests==2.34.2 beautifulsoup4==4.15.0
+      - name: Assemble accepted candidate once from frozen inputs (no new parity audit)
+        run: |
+          python research/neon_cutover_work_2026_10_30/unpack_inputs.py
+          python research/neon_cutover_work_2026_10_30/verify_parity.py --_replay-child \
+            --site "$GITHUB_WORKSPACE/pinned-site/kyiv-air-alerts-grafana" \
+            --reference-sha 0ecbb291e8f443f7ab366bc4ac033d096f2c44f4 \
+            --accepted-adapter "$GITHUB_WORKSPACE/inputs/adapter/C6-22CITY-READER-01" \
+            --research "$GITHUB_WORKSPACE/research" \
+            --rows inputs/current-physical-rows.json --receipt inputs/current-physical-receipt.json \
+            --classifications inputs/class-snapshot.json --cutoff 2026-10-30T15:27:55.138400Z \
+            --corroborating-http inputs/http/entity_bytes.bin --http-evidence inputs/http_evidence.json \
+            --dst-plan inputs/dst_plan.json --output "$GITHUB_WORKSPACE/candidate"
+          curl -fsSL --max-time 30 https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js -o chart.umd.min.js
+          python research/neon_preview_rollback_2026_10_31/build_preview.py \
+            --site pinned-site/kyiv-air-alerts-grafana --candidate candidate/site \
+            --manifest research/neon_cutover_work_2026_10_30/proof/verification/replayed_output_manifest.json \
+            --chart-js chart.umd.min.js --output preview
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          m=json.loads(Path('preview/preview-manifest.json').read_text())
+          for p,v in m['data_files'].items():
+              assert hashlib.sha256((Path('preview')/p).read_bytes()).hexdigest()==v['sha256'],p
+          expected=json.loads(Path('research/neon_preview_rollback_2026_10_31/expected-package-manifest.json').read_text())
+          assert m==expected
+          PY
+      - name: Browser QA and source-only rollback on runner loopback
+        run: |
+          python research/neon_preview_rollback_2026_10_31/browser_qa.py --preview preview --out browser-proof --chrome /usr/bin/google-chrome
+      - name: Pack reusable self-contained preview
+        if: always()
+        run: |
+          python - <<'PY'
+          import shutil
+          from pathlib import Path
+          if Path('preview').exists():shutil.make_archive('preview-package','zip','preview')
+          PY
+      - name: Save browser proof even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-preview-browser-and-rollback
+          path: |
+            browser-proof/
+            preview/preview-manifest.json
+            preview/preview-config.js
+            preview-package.zip
+          retention-days: 30
