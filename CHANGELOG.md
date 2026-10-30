@@ -2,6 +2,14 @@
 
 Accepted coordination transitions, newest first. **This root file is intentionally small.** The complete prior changelog, with every original accepted checkpoint, remains byte-for-byte intact at [docs/coordination-archive/CHANGELOG_full_before_compaction_2026-10-30.md](docs/coordination-archive/CHANGELOG_full_before_compaction_2026-10-30.md). Historical technical detail and older judgments can be read in targeted ranges from that archive. Read the root [PROJECT_STATE.md](PROJECT_STATE.md) for the authoritative *current* coordination state.
 
+## 2026-10-31
+
+### RECOVERY-RESEARCH-COMMITS-01 — two original Work commits saved and remotely verified
+
+- Owner recovered an original Git bundle and performed an ordinary **non-force fast-forward push**. Independently verified remote `research-neon-cutover-work-2026-10-30@e153495537ac4cf002c6ec9aaa58ddb03c0e88ba`; GitHub commit parents **b3ceeece → e8a1717afc6d2f7c574479aa8f369b8c82b4f3f2 → e153495537ac4cf002c6ec9aaa58ddb03c0e88ba**, compare ahead 2 / behind 0.
+- Recovered research source, pinned inputs, JSON machine diffs, DST simulation account, smoke script, cutover patch proposals and SHA-256 manifest exist in `research/neon_cutover_work_2026_10_30/`. Source artifacts are **research-only, not promoted or re-executed** as an accepted cutover proof. Saved machine verdict **PARTIAL_RESEARCH**, **1,354** difference paths; replay numbers are marked `recovered_not_yet_reexecuted` in the saved checkpoint.
+- **Accepted scope:** Git preservation recovered; physical latest parity, writer/readback, frontend browser/CSV, rollback and production release remain open. `RESEARCH_COMMITS_RECOVERED=PASS`, `C6=PARTIAL`, `C3=PARTIAL`, `GLOBAL_CUTOVER=NO`. Next: verify/re-execute preserved 23-city candidate and difference accounting, then fix only critical release blockers. This transition updates documentation only.
+
 ## 2026-10-30
 
 ### DOC-CONTEXT-COMPACTION-01 — coordination documentation compacted; historical evidence retained
