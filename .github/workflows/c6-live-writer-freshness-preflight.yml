@@ -1,0 +1,47 @@
+name: C6 isolated live writer and freshness preflight (HTTP only)
+on:
+  push:
+    branches: [research-neon-live-writer-freshness-2026-10-31]
+    paths:
+      - ".github/workflows/c6-live-writer-freshness-preflight.yml"
+permissions:
+  contents: read
+concurrency:
+  group: c6-live-writer-freshness-http-only-research
+  cancel-in-progress: false
+jobs:
+  http-and-freshness-logic:
+    if: github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout research code without write credentials
+        uses: actions/checkout@v4
+        with:
+          path: research-repo
+          persist-credentials: false
+      - name: Checkout immutable site-prod parser (not deployment)
+        uses: actions/checkout@v4
+        with:
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          ref: c6636e838cc5ca1da3f250091bb1c5c0ff08229e
+          path: site
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install only the parser dependencies
+        run: python -m pip install --disable-pip-version-check 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Test freshness fail-closed with synthetic timestamps (no DB)
+        run: python research-repo/research/neon_live_writer_freshness_2026_10_31/freshness_gate.py
+      - name: One real HTTP capture and canonical identity (no Neon access)
+        run: python research-repo/research/neon_live_writer_freshness_2026_10_31/capture_source.py
+      - name: Persist HTTP proof regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-live-writer-freshness-http-only
+          path: research-repo/research/neon_live_writer_freshness_2026_10_31/proof/
+          if-no-files-found: warn
+          retention-days: 30
