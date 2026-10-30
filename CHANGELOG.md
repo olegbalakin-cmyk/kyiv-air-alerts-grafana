@@ -4,6 +4,12 @@ Accepted coordination transitions, newest first. **This root file is intentional
 
 ## 2026-10-31
 
+### C6-RECOVERED-PARITY-VERIFICATION-02 — frozen replay reproduced; difference causes verified
+
+- Physically executed pinned offline replay: **31,935 → 31,939** rows after DST simulation, **23 cities**, original reports byte-identical. First saved replay checkpoint `9ea0693fa5b8d24959d88c1ba55981d059c5fc23`; final verified research commit [`741f277f`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03). Direct 22-city differences **0 without / 366 with DST projection**.
+- Corrected accounting of **1,354** exact JSON paths: **847 DST + 457 legacy derived omission of accepted C4-KH-06 + 49 cutoff timestamps + 1 research marker; unexplained 0**. Single-interval Kharkiv counterfactual reproduces published derived fields exactly. Minimal loader correction passes isolated real-loader regression checks; candidate already uses the accepted long interval. No deployed generator or Neon modification.
+- All seven DST proposal tuples match pinned source events. Four physical DST cases remain open. Reproducible harness, complete classified diff, tests, patch, source witnesses and hashes saved under `research/neon_cutover_work_2026_10_30/`; candidate ready for bounded research preview with DST simulation. Fresh database/primary receipt, complete upstream CSV, browser/CSV, freshness and switch/rollback are outside this proof. **C6/C3 PARTIAL; GLOBAL_CUTOVER=NO**. Next: authorized preview consumer and rollback rehearsal.
+
 ### RECOVERY-RESEARCH-COMMITS-01 — two original Work commits saved and remotely verified
 
 - Owner recovered an original Git bundle and performed an ordinary **non-force fast-forward push**. Independently verified remote `research-neon-cutover-work-2026-10-30@e153495537ac4cf002c6ec9aaa58ddb03c0e88ba`; GitHub commit parents **b3ceeece → e8a1717afc6d2f7c574479aa8f369b8c82b4f3f2 → e153495537ac4cf002c6ec9aaa58ddb03c0e88ba**, compare ahead 2 / behind 0.
