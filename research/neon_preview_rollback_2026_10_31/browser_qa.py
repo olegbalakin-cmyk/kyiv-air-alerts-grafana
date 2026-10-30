@@ -184,6 +184,7 @@ def main():
             load()
             assert page.evaluate('PREVIEW_CONFIG.source') == 'neon'
             assert 'DST SIMULATION' in page.locator('#researchNotice').inner_text()
+            page.screenshot(path=str(out / 'neon-preview-header.png'))
             keys = page.locator('#citySelect option').evaluate_all('els=>els.map(e=>e.value)')
             types = payloads['neon']['multicity_meta']['cities']
             periods = page.locator('#cityPeriod option').evaluate_all('els=>els.map(e=>e.value)')
@@ -213,6 +214,7 @@ def main():
                 report['city_results'].append(result)
                 if key in ['kyiv', 'kharkiv', 'poltava', 'zhytomyr', 'cherkasy', 'sevastopol']:
                     page.locator('#cityPeriod').select_option('monthly')
+                    page.locator('#researchNotice').scroll_into_view_if_needed()
                     page.screenshot(path=str(out / (key + '-candidate.png')), full_page=False)
                 print(json.dumps({'city': key, 'verdict': 'PASS'}), flush=True)
             assert sum(r['source_type'] == 'exact_city' for r in report['city_results']) == 4
@@ -276,7 +278,9 @@ def main():
                                               ('site_derived.json', 503, 'unavailable', False),
                                               ('kyiv_threat_mix.json', 503, 'unavailable', False)]:
                 pattern = '**/data/neon/' + name + '*'
-                page.route(pattern, lambda r, status=status, body=body: r.fulfill(status=status, body=body, content_type='application/json'))
+                def fault_response(route):
+                    route.fulfill(status=status, body=body, content_type='application/json')
+                page.route(pattern, fault_response)
                 page.goto(base, wait_until='networkidle')
                 if fatal:
                     assert page.locator('#freshnessBanner').is_visible()
@@ -310,6 +314,7 @@ def main():
             select_city('kharkiv')
             verify_monthly('kharkiv', 'legacy')
             csv_download('cityIntensityChart', 'legacy-rollback-kharkiv')
+            page.locator('#researchNotice').scroll_into_view_if_needed()
             page.screenshot(path=str(out / 'legacy-rollback-browser.png'))
             legacy_marker = next(r for r in payloads['legacy']['cities']['kharkiv']['monthly'] if r['month'] == '2026-10')
             assert candidate_marker != legacy_marker, 'Rollback witness must differ between sources'
