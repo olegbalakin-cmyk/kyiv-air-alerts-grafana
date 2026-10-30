@@ -4,6 +4,11 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-30
 
+### C6-PROVENANCE-02-PG17 isolated physical UUID binding — BOUNDED LOCAL ACCEPTED
+
+- User-executed disposable Windows/Docker PostgreSQL 17 harness v3 against exact pinned site-prod modules and SHA-256-verified C6-PROVENANCE-02 patch. Independent readback of the submitted ZIP `c05bf07f93503a7b4a0a31e32ef767a3b55aab4caf527afc6f261a3efd4b58f0` confirms CRC, physical JSON SHA-256 `7abe723c693bf480b0370d8ff10cd77bdf3d776aa0c4a4156df4062464020c1f`, `27/27` contract tests and `6/6` physically executed PASS scenarios (new UUID via separate post-COMMIT read-only connection, idempotence, rollback, semantic conflict, batch insertion order independence and competing-writer conflict). Crosschecked 5 receipt rows / 4 distinct UIDs, with 5/5 deterministic legacy IDs. Seventh fault confirmed `COMMIT then receipt upload failure = DURABILITY_GAP`.
+- Acceptance is **isolated local only**, not a durable or independent live-Neon proof: the disposable schema was dropped; no publisher response→actual Neon episode UID chain, live writer activation, production switch, or C3 closure. `ISOLATED_PG_UUID_BINDING=PROVEN_BOUNDED_LOCAL`, `DURABLE_PROVENANCE=GAP`, `C6=PARTIAL`, `C3=PARTIAL`, `GLOBAL_CUTOVER=NO`. Next tackle a durable source-byte/outbox crash-recovery receipt contract under a separately authorized research gate. Documentation-only transition; multicity/DST and casualty work remain separate.
+
 ### C6-LINEAGE-FRESHNESS-01 new scheduled writer evidence — 2/2 late episodes now persisted (bounded accepted)
 
 - Independently verified prior [production updater 40954898510](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/40954898510) and read-only Neon: three Oct29 physical UIDs all belong to `ingestion_runs.run_id=d4ea03c1-6fd3-44fc-909a-1a30987ff99e` / commit `2026-10-29T21:31:58Z`, 27 new parents total, `source_observations_inserted=0`; deterministic legacy IDs **3/3 recomputed**, but no durable primary publisher response-to-UUID evidence. In actual pinned writer code PostgreSQL uses `gen_random_uuid()` to assign physical UID; source obs are out of current multicity canonical bootstrap scope.
