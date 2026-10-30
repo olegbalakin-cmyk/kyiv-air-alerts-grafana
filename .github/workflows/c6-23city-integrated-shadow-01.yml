@@ -71,7 +71,7 @@ jobs:
         run: |
           set -uo pipefail
           target="c6_23city_integrated_shadow02_proof/accepted-22city"
-          python /tmp/c6-22city-approved/C6-22CITY-READER-01/adapter.py --repo-root "$PWD/pinned-site/kyiv-air-alerts-grafana" --output-dir "$target" > "$target/adapter_execution.log" 2>&1
+          python research-src/research/c6_23city_integrated_shadow_2026_10_30/run_approved_adapter_pinned.py > "$target/adapter_execution.log" 2>&1
           code=$?
           printf '%s\n' "$code" > "$target/adapter_exit_code.txt"
           tail -n 50 "$target/adapter_execution.log"
