@@ -1,0 +1,12 @@
+--- a/.github/workflows/live-due-orchestration-readback.yml
++++ b/.github/workflows/live-due-orchestration-readback.yml
+@@ -10,7 +10,8 @@
+ 
+ jobs:
+   prove:
+-    if: github.event.workflow_run.head_sha == '2c16b69dd3261a16cb08c9cf825a4f150cf76d11' && github.event.workflow_run.conclusion == 'success'
++    # C3 historical listener hold: owner authorization required to reactivate.
++    if: ${{ false && github.event.workflow_run.head_sha == '2c16b69dd3261a16cb08c9cf825a4f150cf76d11' && github.event.workflow_run.conclusion == 'success' }}
+     runs-on: ubuntu-latest
+     timeout-minutes: 10
+     steps:
