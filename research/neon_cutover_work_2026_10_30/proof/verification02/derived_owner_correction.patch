@@ -1,0 +1,18 @@
+--- a/kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py
++++ b/kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py
+@@ -15,6 +15,7 @@
+ import expand_multicity_production as base
+ import extend_remaining_proxies as extended
+ from update_data import Alert, TZ, http_session
++from owner_air_corrections import apply_owner_accepted_air_corrections
+ 
+ UTC = timezone.utc
+ SLOT_MINUTES = 15
+@@ -111,6 +112,7 @@
+         key: [Alert(start=a.start, end=a.end, source=a.source) for a in base.union_alerts(intervals)]
+         for key, intervals in proxy_intervals.items()
+     }
++    apply_owner_accepted_air_corrections(exact)
+     return exact, proxy, proxy_cfg
+ 
+ 
