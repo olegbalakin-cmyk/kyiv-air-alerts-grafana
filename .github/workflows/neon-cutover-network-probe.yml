@@ -1,0 +1,269 @@
+name: Neon cutover Work no-secret one-request HTTP probe
+
+on:
+  push:
+    branches:
+      - research-neon-cutover-work-2026-10-30
+    paths:
+      - .github/workflows/neon-cutover-network-probe.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-cutover-work-network-probe
+  cancel-in-progress: false
+
+jobs:
+  real-one-response-gate:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-neon-cutover-work-2026-10-30'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout isolated research commit
+        uses: actions/checkout@v4
+        with:
+          path: research
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Checkout immutable site-prod parser
+        uses: actions/checkout@v4
+        with:
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          ref: 09192a36dae49bd71e1042942481384a5e763086
+          path: site
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install only pinned parser dependencies
+        run: python -m pip install --disable-pip-version-check 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5' 'psycopg[binary]>=3.2,<4'
+
+      - name: Exactly one real HTTP request, existing parser, evidence manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+          import traceback
+          from datetime import datetime, timezone
+          from pathlib import Path
+          
+          import requests
+          
+          UTC = timezone.utc
+          PROOF = Path("c6_provenance04b_proof")
+          PROOF.mkdir(exist_ok=True)
+          HTTP = PROOF / "http"
+          HTTP.mkdir(exist_ok=True)
+          SITE = Path("site") / "kyiv-air-alerts-grafana"
+          SOURCE = SITE / "scripts" / "update_data.py"
+          CORE = SITE / "scripts" / "db_phase1_core.py"
+          PERSISTENCE = SITE / "scripts" / "db_phase1_persistence.py"
+          MIGRATION = SITE / "db" / "migrations" / "001_phase1_core.sql"
+          ENDPOINT = "https://kyiv.digital/storage/air-alert/stats.html"
+          PINS = {
+              str(SOURCE): "cebc2b455fb08ee16e03b9e4fcdb17aa2d9d6833",
+              str(CORE): "dda23c268e08f74367f33b189a8bafc1358aadd2",
+              str(PERSISTENCE): "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+              str(MIGRATION): "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+          }
+          SOURCE_KEY = "kyiv_digital_live_http_prospective"
+          PARSER_VERSION = "kyiv-digital-html-parse-live-history-v1"
+          SOURCE_RECORD_VERSION = "c6-kyiv-digital-html-observation-v1"
+          PARSER_BLOB = PINS[str(SOURCE)]
+          CONTRACT = "c6-provenance-03-lite-v1"
+          
+          def now():
+              return datetime.now(UTC)
+          
+          def when(t):
+              return t.astimezone(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
+          
+          def output(name, body):
+              (PROOF / name).write_text(json.dumps(body, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          
+          def git_blob(p):
+              b = p.read_bytes()
+              return hashlib.sha1(b"blob " + str(len(b)).encode() + b"\0" + b).hexdigest()
+          
+          def canonical(o):
+              return json.dumps(o, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+          
+          def sha(b):
+              return hashlib.sha256(b).hexdigest()
+          
+          result = {
+              "task": "C6-PROVENANCE-04B-ISOLATED-RUNNER",
+              "scope": "research_only_network_preflight",
+              "run_id": os.getenv("GITHUB_RUN_ID"),
+              "run_attempt": os.getenv("GITHUB_RUN_ATTEMPT"),
+              "git_sha": os.getenv("GITHUB_SHA"),
+              "site_prod_pin": "09192a36dae49bd71e1042942481384a5e763086",
+              "parser_blob": PARSER_BLOB,
+              "parser_version": PARSER_VERSION,
+              "source_identity_contract": CONTRACT,
+              "http_capture": "NOT_EXECUTED",
+              "usable_real_episode": False,
+              "neon_child_created": False,
+              "neon_transaction": "NOT_EXECUTED",
+              "independent_readback": "NOT_EXECUTED",
+              "idempotency": "NOT_EXECUTED",
+              "neon_cleanup": "NOT_APPLICABLE_NO_CHILD",
+              "global_cutover": "NO",
+              "verdict": "BLOCKED",
+              "gates": [],
+          }
+          evidence = {"endpoint": ENDPOINT, "method": "GET", "http_status": None,
+                      "requested_at_utc": None, "received_at_utc": None, "final_url": None,
+                      "content_type": None, "entity_bytes": None, "entity_sha256": None,
+                      "entity_file": None, "server_date": None, "content_encoding": None,
+                      "capture_error_type": None, "capture_error_stage": None}
+          episode = {"selected_record": None, "parsed_completed": 0, "usable_completed": 0,
+                     "source_record_key": None, "legacy_episode_id": None,
+                     "capture_key": None, "source_native_id": None}
+          stage = "pins"
+          try:
+              actual_sha = __import__("subprocess").check_output(["git", "-C", "research", "rev-parse", "HEAD"], text=True).strip()
+              if actual_sha != os.getenv("GITHUB_SHA"):
+                  raise RuntimeError("RESEARCH_COMMIT_PIN_MISMATCH")
+              for name, expected in PINS.items():
+                  if git_blob(Path(name)) != expected:
+                      raise RuntimeError("SITE_PROD_GIT_BLOB_MISMATCH:" + name)
+              result["all_four_site_prod_git_blobs_verified"] = True
+              stage = "http"
+              evidence["requested_at_utc"] = when(now())
+              session = requests.Session()
+              session.mount("https://", requests.adapters.HTTPAdapter(max_retries=0))
+              with session.get(
+                  ENDPOINT,
+                  headers={"Accept": "text/html", "Accept-Encoding": "identity",
+                           "User-Agent": "kyiv-air-alerts-grafana/C6-provenance04b-one-shot"},
+                  allow_redirects=False,
+                  timeout=(10, 25),
+                  stream=True,
+              ) as r:
+                  evidence["http_status"] = r.status_code
+                  evidence["final_url"] = r.url
+                  evidence["server_date"] = r.headers.get("Date")
+                  evidence["content_type"] = r.headers.get("Content-Type")
+                  evidence["content_encoding"] = r.headers.get("Content-Encoding")
+                  body = r.raw.read(8 * 1024 * 1024 + 1, decode_content=True)
+                  evidence["received_at_utc"] = when(now())
+                  if len(body) > 8 * 1024 * 1024:
+                      raise RuntimeError("HTTP_ENTITY_GT_8MIB")
+                  (HTTP / "entity_bytes.bin").write_bytes(body)
+                  evidence["entity_bytes"] = len(body)
+                  evidence["entity_sha256"] = sha(body)
+                  evidence["entity_file"] = "http/entity_bytes.bin"
+                  evidence["entity_semantics"] = "HTTP_client_decoded_entity_bytes_not_wire_frames"
+              if evidence["http_status"] != 200:
+                  raise RuntimeError("HTTP_STATUS_NOT_200")
+              if not evidence["content_type"] or "html" not in evidence["content_type"].lower():
+                  raise RuntimeError("NOT_HTML_CONTENT_TYPE")
+              if not body:
+                  raise RuntimeError("EMPTY_HTTP_ENTITY")
+              result["http_capture"] = "PASS"
+              stage = "parser"
+              sys.path.insert(0, str((SITE / "scripts").resolve()))
+              from update_data import parse_live_history
+              from db_phase1_core import legacy_episode_id
+              data = body.decode("utf-8", errors="strict")
+              alerts, _events = parse_live_history(data)
+              def u(t):
+                  if t.tzinfo is None:
+                      raise RuntimeError("PARSER_NAIVE_TIMESTAMP")
+                  return t.astimezone(UTC)
+              records = sorted(alerts, key=lambda a: (u(a.start), u(a.end)))
+              episode["parsed_completed"] = len(records)
+              captured = datetime.fromisoformat(evidence["received_at_utc"].replace("Z", "+00:00"))
+              usable = [(index, a) for index, a in enumerate(records)
+                        if u(a.start) < u(a.end) <= captured]
+              episode["usable_completed"] = len(usable)
+              if not usable:
+                  raise RuntimeError("NO_USABLE_REAL_COMPLETED_EPISODE")
+              pos, chosen = usable[-1]
+              start, end = u(chosen.start), u(chosen.end)
+              sr = {"version": SOURCE_RECORD_VERSION, "source_key": SOURCE_KEY,
+                    "city_key": "kyiv", "alert_type": "AIR", "source_native_id": None,
+                    "source_start_at": when(start), "source_end_at": when(end)}
+              capture_contract = {"contract": CONTRACT, "source_key": SOURCE_KEY,
+                                  "endpoint_key": "kyiv_digital_html", "captured_at": evidence["received_at_utc"],
+                                  "content_type": evidence["content_type"],
+                                  "raw_sha256": evidence["entity_sha256"],
+                                  "parser_version": PARSER_VERSION, "parser_blob_sha": PARSER_BLOB}
+              episode["selected_record"] = {"position": pos, "city_key": "kyiv",
+                                            "alert_type": "AIR", "start_utc": when(start),
+                                            "end_utc": when(end), "source_precision": "minute"}
+              episode["source_record_key"] = sha(canonical(sr))
+              episode["legacy_episode_id"] = legacy_episode_id("kyiv", start, end)
+              episode["capture_key"] = sha(canonical(capture_contract))
+              result["usable_real_episode"] = True
+              result["verdict"] = "PARTIAL"
+              result["gates"] = [
+                  "HTTP_AND_PROSPECTIVE_SOURCE_IDENTITY_PASS",
+                  "EXACT_ACCEPTED_RECEIPT_SOURCE_NOT_STAGED_IN_PROTECTED_RUNNER",
+                  "NEON_DISPOSABLE_CHILD_WRITE_NOT_EXECUTED",
+                  "PHYSICAL_NEON_UUID_AND_RECEIPT_NOT_PROVEN",
+                  "READBACK_IDEMPOTENCY_AND_DELETION_NOT_EXECUTED",
+              ]
+          except Exception as e:
+              result["failure_stage"] = stage
+              result["error_class"] = type(e).__name__
+              evidence["capture_error_type"] = type(e).__name__ if stage == "http" else None
+              evidence["capture_error_stage"] = stage if stage == "http" else None
+              result["verdict"] = "BLOCKED"
+              result["gates"] = ["FAILED_GATE:" + stage, "NEON_NOT_CREATED_OR_TOUCHED"]
+              # Only a closed set of safe static diagnostic reason codes; no URL credentials or exception strings.
+              if isinstance(e, RuntimeError) and str(e).split(":")[0] in {
+                  "RESEARCH_COMMIT_PIN_MISMATCH", "SITE_PROD_GIT_BLOB_MISMATCH",
+                  "HTTP_ENTITY_GT_8MIB", "HTTP_STATUS_NOT_200", "NOT_HTML_CONTENT_TYPE",
+                  "EMPTY_HTTP_ENTITY", "PARSER_NAIVE_TIMESTAMP",
+                  "NO_USABLE_REAL_COMPLETED_EPISODE"
+              }:
+                  result["error_code"] = str(e).split(":")[0]
+          finally:
+              output("http_evidence.json", evidence)
+              output("parsed_episode.json", episode)
+              output("machine_verdict.json", result)
+              (PROOF / "sanitized_execution.log").write_text(
+                  "task=C6-PROVENANCE-04B-ISOLATED-RUNNER\n"
+                  + "run_id=" + str(result["run_id"]) + "\n"
+                  + "git_sha=" + str(result["git_sha"]) + "\n"
+                  + "http_capture=" + str(result["http_capture"]) + "\n"
+                  + "stage=" + stage + "\n"
+                  + "verdict=" + result["verdict"] + "\n"
+                  + "error_class=" + str(result.get("error_class")) + "\n", encoding="utf-8")
+              manifest = {"schema": "c6_provenance04b_sha256_manifest_v1",
+                          "git_sha": result["git_sha"],
+                          "files": {}}
+              for path in sorted(PROOF.rglob("*")):
+                  if path.is_file() and path.name != "sha256_manifest.json":
+                      relative = path.relative_to(PROOF).as_posix()
+                      file_bytes = path.read_bytes()
+                      manifest["files"][relative] = {"bytes": len(file_bytes), "sha256": sha(file_bytes)}
+              output("sha256_manifest.json", manifest)
+              print(json.dumps({"verdict": result["verdict"], "stage": stage,
+                                "http_status": evidence["http_status"],
+                                "usable_completed": episode["usable_completed"],
+                                "neon_child_created": False, "neon_transaction": "NOT_EXECUTED"},
+                               sort_keys=True))
+          sys.exit(0 if result["verdict"] == "PARTIAL" else 2)
+          
+          PY
+
+      - name: Preserve original entity bytes and machine verdict on all outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-provenance-04b-http-${{ github.run_id }}
+          path: c6_provenance04b_proof/
+          if-no-files-found: error
+          retention-days: 30
