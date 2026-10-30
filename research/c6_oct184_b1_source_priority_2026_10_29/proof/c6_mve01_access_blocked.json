@@ -1,0 +1,78 @@
+{
+  "schema": "c6-mve01-execution-receipt-v1",
+  "date_utc": "2026-10-29",
+  "verdict": "C6_MVE01_ACCESS_BLOCKED",
+  "scope": "research-only evidence of control-plane identity and actual MCP SQL read; NOT Python reader execution",
+  "input_pins": {
+    "main": "fb0d66a634cbbc1d74bfa11c9aa6e912753d929c",
+    "site_prod": "e08cc7da8cf29fc8603f199c85f0964610a850a7",
+    "operational_wip": "92011e2cd6a0ce515cd048a4c298c0f0a7bfdf98",
+    "reader_git_commit": "404f1d29675ec53ce323838af3294bbda9c1f071",
+    "reader_git_blob": "890769995627aa15e43743ef7cd5b24d54b1c59c",
+    "b1_base": "a3f296ff7a1b273aad6faf33928904e574775d35",
+    "site_prod_historical_json_blob": "e39dfc6fdbdb90863b5bfb595e12cadf8c20b068"
+  },
+  "target": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "compute_id": "ep-calm-rice-b5073ypp",
+    "compute_type": "read_only",
+    "database": "neondb",
+    "control_plane_verified": true
+  },
+  "newly_executed": {
+    "scope": "Neon MCP SQL transaction, NOT Python->Neon",
+    "sql_statements": [
+      "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY",
+      "WITH e AS MATERIALIZED (SELECT episode_uid::text AS uid FROM public.alert_episodes WHERE city_key='kyiv' AND alert_type='AIR' AND episode_state='closed' AND (start_at AT TIME ZONE 'Europe/Kyiv') >= timestamp '2026-10-01' AND (start_at AT TIME ZONE 'Europe/Kyiv') < timestamp '2026-11-01'), c AS MATERIALIZED (SELECT classification_uid::text AS uid FROM public.attack_event_classifications WHERE alert_episode_uid::text IN (SELECT uid FROM e)), s AS MATERIALIZED (SELECT attack_event_source_uid::text AS uid FROM public.attack_event_sources WHERE classification_uid::text IN (SELECT uid FROM c)) SELECT current_database(), current_setting('transaction_read_only'), current_setting('transaction_isolation'), pg_is_in_recovery(), txid_current_snapshot()::text, pg_last_wal_replay_lsn()::text, current_setting('server_version_num'), (SELECT count(*) FROM e), (SELECT count(*) FROM c), (SELECT count(*) FROM s)"
+    ],
+    "observed": {
+      "database_name": "neondb",
+      "read_only": "on",
+      "isolation": "repeatable read",
+      "pg_is_in_recovery": true,
+      "snapshot": "434176:434176:",
+      "replay_lsn": "0/1188F638",
+      "postgres_version_num": "180006",
+      "parent_episodes": 382,
+      "classifications": 55,
+      "source_links": 223
+    },
+    "verdict": "PASS",
+    "limits": "Raw table counts only. Does not execute B2, construct view 198, compare pinned JSON or validate September A5."
+  },
+  "runtime_preflight": {
+    "python_version": "3.13.5",
+    "psycopg_installed": false,
+    "postgresql16_server_installed": false,
+    "psql_installed": false,
+    "container_engine_installed": false,
+    "authorized_db_url_injected": false,
+    "neon_api_key_injected": false,
+    "external_dns_neon_resolves": false,
+    "external_dns_github_resolves": false,
+    "machine_verdict": "BLOCKED_NO_PROTECTED_PYTHON_DB_RUNTIME"
+  },
+  "required_steps": {
+    "disposable_pg16_integration": "NOT_EXECUTED",
+    "b2_python_to_neon": "BLOCKED",
+    "b2_python_exit_code": null,
+    "b2_python_snapshot": null,
+    "b2_shadow_json": "NOT_GENERATED",
+    "pinned_october_382_198_view_diff": "NOT_EXECUTED",
+    "september_a5_b2_regression": "NOT_EXECUTED",
+    "provenance_git_object_sha256_enforcement": "OPEN",
+    "new_october_identity_mappings": 0,
+    "parent_id_rebindings": 0,
+    "github_actions_run_created": false,
+    "release": "NOT_AUTHORIZED",
+    "production_cutover": "NO"
+  },
+  "blocker": "No reachable already-authorized secure Python runtime with psycopg, DNS/network to the specified read-only Neon endpoint and injected existing C6_B1_READONLY_DATABASE_URL; separately no disposable PostgreSQL 16 is present here.",
+  "minimal_remediation": "Provide access to one existing approved protected executor with Python+psycopg+exact Git checkout, authorized existing read-only secret and network reachability, with an isolated disposable PG16 installation for integration. Do not create new Neon infrastructure or credentials. C3-RC7 must be cleared before any new GitHub Actions run.",
+  "push_safety": "All 17 inherited workflows inspected: their push filters select main, or they are non-push/manual/scheduled; listener is workflow_run of Monitor explosion metric WIP. This proof-only commit is on research branch with no workflow activation requested.",
+  "no_neon_dml_ddl": true,
+  "no_site_prod_changes": true,
+  "no_operational_wip_changes": true,
+  "no_main_docs_change": true
+}
