@@ -85,6 +85,9 @@ def main():
     js = js.replace(wip, 'RAW_DATA_BASE + "explosions_test.json"')
     assert js.count('fetch("historical-daily-kpi.json?v="') == 1
     js = js.replace('fetch("historical-daily-kpi.json?v="', 'fetch(RAW_DATA_BASE + "historical-daily-kpi.json?v="')
+    switch_anchor = 'function updateUrl() {\n  const params = new URLSearchParams();'
+    assert js.count(switch_anchor) == 1
+    js = js.replace(switch_anchor, switch_anchor + '\n  params.set("preview_source", window.PREVIEW_CONFIG.source);')
     (root / 'app.js').write_text(js)
     html = (root / 'index.html').read_text()
     html = html.replace('<meta name="robots" content="index,follow,max-snippet:-1">', '<meta name="robots" content="noindex,nofollow">')

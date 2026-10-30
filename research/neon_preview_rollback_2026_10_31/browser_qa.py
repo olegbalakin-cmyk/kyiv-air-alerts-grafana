@@ -295,8 +295,13 @@ def main():
             # Exercise visible source control both directions before the config-only rollback.
             page.locator('#previewSource').select_option('legacy')
             page.wait_for_function('window.PREVIEW_CONFIG.source === "legacy" && state.charts.cityIntensityChart')
+            assert 'preview_source=legacy' in page.url
+            page.reload(wait_until='networkidle')
+            page.wait_for_function('window.PREVIEW_CONFIG.source === "legacy" && state.charts.cityIntensityChart')
             page.locator('#previewSource').select_option('neon')
             page.wait_for_function('window.PREVIEW_CONFIG.source === "neon" && state.charts.cityIntensityChart')
+            assert 'preview_source=neon' in page.url
+            report['source_selection_survives_reload'] = True
             load(base)  # Remove preview_source override for source-only config rehearsal.
             candidate_marker = next(r for r in payloads['neon']['cities']['kharkiv']['monthly'] if r['month'] == '2026-10')
             frontend_before = {n: sha(root / n) for n in ['app.js', 'index.html', 'preview-bootstrap.js']}

@@ -43,6 +43,11 @@ jobs:
           with zipfile.ZipFile('assembled-artifact/preview-package.zip') as z:
               assert not z.testzip()
               z.extractall('preview')
+          app=Path('preview/app.js')
+          anchor='function updateUrl() {\n  const params = new URLSearchParams();'
+          source=app.read_text()
+          assert source.count(anchor)==1
+          app.write_text(source.replace(anchor,anchor+'\n  params.set("preview_source", window.PREVIEW_CONFIG.source);'))
           m=json.loads(Path('preview/preview-manifest.json').read_text())
           for p,v in m['data_files'].items():
               assert hashlib.sha256((Path('preview')/p).read_bytes()).hexdigest()==v['sha256'],p
