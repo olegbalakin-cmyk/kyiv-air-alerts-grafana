@@ -59,7 +59,22 @@ def main():
             browser = pw.chromium.launch(executable_path=chrome, headless=True, args=['--no-sandbox'])
             report['browser_version'] = browser.version
             context = browser.new_context(viewport={'width': 1440, 'height': 1080}, accept_downloads=True)
-            context.add_init_script("localStorage.setItem('air-alerts-intro-tour-v5','done')")
+            context.add_init_script("""
+                localStorage.setItem('air-alerts-intro-tour-v5','done');
+                window.__qaResponses = [];
+                window.__qaPending = 0;
+                const qaFetch = window.fetch.bind(window);
+                window.fetch = async (...args) => {
+                    const response = await qaFetch(...args);
+                    const clone = response.clone();
+                    window.__qaPending++;
+                    clone.arrayBuffer().then(bytes => crypto.subtle.digest('SHA-256', bytes))
+                      .then(hash => window.__qaResponses.push({url:response.url,status:response.status,
+                        sha256:[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')}))
+                      .finally(()=>window.__qaPending--);
+                    return response;
+                };
+            """)
             def route(request_route):
                 if not request_route.request.url.startswith(base):
                     report['external_requests'].append(request_route.request.url)
@@ -73,13 +88,15 @@ def main():
             def response_received(response):
                 path = urlparse(response.url).path.lstrip('/')
                 network.append({'url': response.url, 'status': response.status})
-                if path.startswith('data/') and response.status == 200:
-                    digest = hashlib.sha256(response.body()).hexdigest()
-                    if digest == sha(root / path):
-                        report['response_hashes'].append({'path': path, 'sha256': digest, 'exact_package_match': True})
-                    else:
-                        assert path.endswith('dashboard_data.json'), path
             page.on('response', response_received)
+
+            def collect_response_hashes():
+                page.wait_for_function('(window.__qaPending || 0) === 0')
+                for response in page.evaluate('window.__qaResponses || []'):
+                    path = urlparse(response['url']).path.lstrip('/')
+                    if path.startswith('data/') and response['status'] == 200:
+                        assert response['sha256'] == sha(root / path), path
+                        report['response_hashes'].append({'path': path, 'sha256': response['sha256'], 'exact_package_match': True, 'digest_location': 'browser_crypto_subtle_over_actual_response_clone'})
 
             def load(url=base):
                 page.goto(url, wait_until='networkidle')
@@ -87,6 +104,7 @@ def main():
                 if page.locator('#tourSkip').is_visible():
                     page.locator('#tourSkip').click()
                 assert page.locator('#citySelect option').count() == 23
+                collect_response_hashes()
 
             def select_city(key):
                 page.locator('#citySelect').select_option(key)
@@ -114,7 +132,7 @@ def main():
             def csv_download(chart_id, tag):
                 c = valid_chart(chart_id)
                 with page.expect_download(timeout=15000) as event:
-                    page.locator(f'[data-csv-chart="{chart_id}"] button').click()
+                    page.locator(f'[data-csv-chart="{chart_id}"] button.csv-export-button:not(.chart-image-button):not(.chart-embed-button)').click()
                 download = event.value
                 target = out / 'csv' / (tag + '__' + download.suggested_filename)
                 target.parent.mkdir(exist_ok=True)
@@ -206,8 +224,10 @@ def main():
             # Download all currently offered charts, including auxiliary tracks;
             # contents are checked as rendered, not presented as Neon-generated auxiliaries.
             for cid in page.evaluate('Object.keys(CSV_CHART_CONFIG)'):
-                if page.locator(f'[data-csv-chart="{cid}"] button').is_visible() and snapshot(cid) and snapshot(cid)['labels']:
+                if page.locator(f'[data-csv-chart="{cid}"] button.csv-export-button:not(.chart-image-button):not(.chart-embed-button)').is_visible() and snapshot(cid) and snapshot(cid)['labels']:
                     csv_download(cid, 'neon-chart-' + cid)
+            for section in ['timeOfDaySection', 'alertBurdenSection', 'comparisonSection', 'allCitiesSection']:
+                page.locator('#' + section).screenshot(path=str(out / (section + '-candidate.png')))
             for period in ('daily28', 'weekly', 'rolling30', 'rolling90', 'rolling180', 'calendarWeekly'):
                 page.locator('#cityPeriod').select_option(period)
                 dates('city', '', '')
