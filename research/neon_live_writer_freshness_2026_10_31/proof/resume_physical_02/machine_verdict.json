@@ -1,0 +1,80 @@
+{
+  "C3": "PARTIAL",
+  "C6": "PARTIAL",
+  "GLOBAL_CUTOVER": "NO",
+  "PG17_frozen_parity_browser_rollback_repeated": false,
+  "SQL_statements_executed": 0,
+  "SQL_writes_executed": 0,
+  "branch_limit": 10,
+  "branch_slots_after": 10,
+  "branch_slots_before": 9,
+  "checkpoint": "C6-LIVE-WRITER-PHYSICAL-02",
+  "checks": {
+    "capacity": "PASS_9_OF_10_BEFORE_CREATE",
+    "child_connection_url": "OBTAINED_IN_MEMORY_HOST_VERIFIED_NOT_LOGGED",
+    "crash_exit_86": "NOT_EXECUTED",
+    "first_commit": "NOT_EXECUTED",
+    "independent_branch_identity_parent_hostname": "PASS",
+    "independent_database_UUID_source_readback": "NOT_EXECUTED",
+    "local_psycopg": "MISSING",
+    "local_python_network": "BLOCKED_DNS_GAIERROR_ERRNO_MINUS_3",
+    "new_child_only_role_scope": "NOT_ATTESTED",
+    "original_actions_and_artifact_metadata": "PASS_VERIFIED_NO_RERUN",
+    "original_runner_and_gate_git_blobs": "PASS_UNCHANGED",
+    "other_physical_fail_closed_scenarios": "NOT_EXECUTED",
+    "owner_authorization": "CURRENT_EXPLICIT_REQUEST",
+    "post_commit_site_JSON": "NOT_EXECUTED",
+    "real_saved_source_fail_closed": "PASS_BOUNDED_STALE_SOURCE_CAPTURE",
+    "retry_idempotency": "NOT_EXECUTED",
+    "saved_input_hashes_and_canonical_identity": "PASS",
+    "secure_actions_child_credential_injection": "NOT_AVAILABLE_THROUGH_EXPOSED_CONNECTOR",
+    "ttl_under_24_hours": "PASS"
+  },
+  "child_branch_id": "br-crimson-star-b59u7ge3",
+  "credentials_persisted": false,
+  "evaluated_at_utc": "2026-10-31T12:31:58.144331+00:00",
+  "exact_input_refs": [
+    {
+      "ref": "refs/heads/main",
+      "sha": "30b40a2d9ca04bd131689da855d3491681f3d445"
+    },
+    {
+      "ref": "refs/heads/multicity-wip-2026-09-16",
+      "sha": "f769fbc5bdc0eba9ae15174eb14f8d26fbbff417"
+    },
+    {
+      "ref": "refs/heads/research-neon-live-writer-freshness-2026-10-31",
+      "sha": "0f0d7181e04cb053b773fb5c0ecf284bb82bc66a"
+    },
+    {
+      "ref": "refs/heads/site-prod",
+      "sha": "33f2a1f85d8de41ada7eed165f7846b7b9047789"
+    }
+  ],
+  "expires_at": "2026-11-01T12:20:00Z",
+  "freshness_threshold_seconds": 21600,
+  "manual_deletions": 0,
+  "parent_branch_id": "br-bold-mode-b5rub8pq",
+  "production_cutover_allowed": false,
+  "production_writer_ready": false,
+  "project_id": "green-cake-44216048",
+  "proof_commit": "0f0d7181e04cb053b773fb5c0ecf284bb82bc66a",
+  "protected_targets_changed": {
+    "netlify": false,
+    "operational_WIP": false,
+    "parent_neon_data": false,
+    "production_neon": false,
+    "production_writer": false,
+    "site-prod": false
+  },
+  "ready_for_next_production_preflight": false,
+  "required_next_step": "Use the existing child before expiry on a network-capable runner with verified child-scoped credentials; execute original Phase-1 two-process crash/retry/readback. Keep original source time; obtain separate authority for a current observation before freshness can PASS.",
+  "schema": "c6-live-writer-physical-02-v1",
+  "source_age_seconds_at_gate": 48881.814751,
+  "source_captured_at_utc": "2026-10-30T22:56:24.503909Z",
+  "source_http_recaptured": false,
+  "source_timestamp_modified": false,
+  "successful_child_creations": 1,
+  "synthetic_freshness_repeated": false,
+  "verdict": "BLOCKED_RUNTIME_AND_STALE_SOURCE"
+}

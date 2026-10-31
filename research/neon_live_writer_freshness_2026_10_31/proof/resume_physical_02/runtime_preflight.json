@@ -1,0 +1,21 @@
+{
+  "executed_at_utc": "2026-10-31T12:30:44.748Z",
+  "command": "Python socket.getaddrinfo(child_direct_host,5432) then socket.create_connection(...,timeout=8); importlib.util.find_spec('psycopg')",
+  "result": {
+    "error": "[Errno -3] Temporary failure in name resolution",
+    "error_type": "gaierror",
+    "host": "ep-wild-dust-b5efhza1.c-7.us-east-2.aws.neon.tech",
+    "psycopg_installed": false
+  },
+  "database_credentials_supplied_to_runtime": false,
+  "sql_executed": false,
+  "github_bridge": {
+    "credentials_in_runtime": false,
+    "secret_management_tool_exposed": false,
+    "workflow_dispatch_tool_exposed": false,
+    "known_prepared_workflow": "HTTP-only; no Neon secret",
+    "existing_canary_secret_target": "PHASE1_PROD_SHADOW_DATABASE_URL belongs to existing shadow; not reused",
+    "result": "NO_PROVEN_SECURE_CHILD_CREDENTIAL_INJECTION_PATH"
+  },
+  "absence_of_reusable_child_secret_in_actions": "UNKNOWN; secret APIs are not exposed, not claimed absent"
+}
