@@ -361,42 +361,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      # Disabled by default. This shadow never replaces production data or publishes.
-      # A failed C2 receipt does NOT qualify for a Neon readback.
-      - name: Check out pinned shadow reader from workflow commit
-        if: ${{ vars.NEON_JSON_SHADOW_ENABLED == '1' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          path: neon-shadow-source
-          persist-credentials: false
-
-      - name: Generate non-publishing C2-to-Neon JSON shadow
-        id: neon_json_shadow
-        if: ${{ vars.NEON_JSON_SHADOW_ENABLED == '1' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
-        continue-on-error: true
-        env:
-          NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python ../neon-shadow-source/scripts/neon_json_shadow.py \
-            --site . \
-            --receipt "${RUNNER_TEMP}/multicity_canonical_db_shadow.json" \
-            --status "${RUNNER_TEMP}/c2_publication_status.json" \
-            --payload "${MULTICITY_CANONICAL_PAYLOAD_PATH}" \
-            --dashboard data/dashboard_data.json \
-            --output "${RUNNER_TEMP}/neon-json-shadow"
-
-      - name: Upload non-publishing Neon JSON shadow
-        if: ${{ always() && vars.NEON_JSON_SHADOW_ENABLED == '1' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: neon-json-shadow-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/neon-json-shadow/
-          if-no-files-found: warn
-          retention-days: 7
-
       - name: Build rolling windows, partial periods, time-of-day profile, and shared table ranges
         run: python scripts/apply_site_rolling_7d.py
 
@@ -501,6 +465,47 @@ jobs:
 
       - name: Build Kyiv alert-cause JSON without Netlify
         run: python scripts/build_kyiv_threat_mix.py --output data/kyiv_threat_mix.json
+
+      # Disabled by default: NEON_JSON_SHADOW_ENABLED is exactly "true" to enable.
+      # Runs after all production JSON/auxiliary builders finish, but NEVER
+      # publishes shadow files. Non-success shadow cannot alter Git publication.
+      # C2 failure skips the readback, and the absence of the flag means OFF.
+      # A failed C2 receipt does NOT qualify for a Neon readback.
+      - name: Check out pinned shadow reader from workflow commit
+        if: ${{ vars.NEON_JSON_SHADOW_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: neon-shadow-source
+          persist-credentials: false
+
+      - name: Generate non-publishing six-file Neon frontend JSON shadow
+        id: neon_json_shadow
+        if: ${{ vars.NEON_JSON_SHADOW_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
+        continue-on-error: true
+        env:
+          NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
+          MULTICITY_CANONICAL_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          MULTICITY_CANONICAL_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python ../neon-shadow-source/scripts/neon_json_shadow.py \
+            --site . \
+            --receipt "${RUNNER_TEMP}/multicity_canonical_db_shadow.json" \
+            --status "${RUNNER_TEMP}/c2_publication_status.json" \
+            --payload "${MULTICITY_CANONICAL_PAYLOAD_PATH}" \
+            --dashboard data/dashboard_data.json \
+            --output "${RUNNER_TEMP}/neon-json-shadow"
+
+      - name: Upload non-publishing Neon JSON shadow
+        if: ${{ always() && vars.NEON_JSON_SHADOW_ENABLED == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-json-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/neon-json-shadow/
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Commit updated production data and verified UkraineAlarm bridge checkpoint
         working-directory: .

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Opt-in, non-publishing C2 -> Neon read-only canonical JSON shadow.
 
-Only the AIR episode intervals are Neon-derived. This is NOT the accepted C6
-frontend projection: B2 Kyiv selection, derived views and current status remain
-separate release gates. The script deliberately never creates dashboard_data.json.
+Reuses the accepted C6 frontend projection, with explicit unchanged Git
+non-AIR auxiliaries, read-only C2-corpus binding and non-publishing gates.
 """
 from __future__ import annotations
 
@@ -149,51 +148,136 @@ def validated_neon_rows(episodes: list[dict], keys: list[str], rows: list[dict])
             for key in keys}
 
 
+
 def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: Path,
             dashboard_path: Path, output: Path, database_url: str,
-            verifier=None, reader=None) -> dict:
+            verifier=None, reader=None, workflow_sha=None, input_sha=None,
+            writer_database_url=None, expected_branch=None) -> dict:
+    """One branch-bound C2 Neon snapshot, then isolated six-file frontend candidate.
+
+    The previously accepted canonical verifier remains the authority for C2.
+    No candidate is ever a publication input. A failed generator retains only
+    a machine-readable BLOCKED verdict and no successful candidate directory.
+    """
     site = site.resolve()
     output = output.resolve()
-    require(not output.is_relative_to(site) and not site.is_relative_to(output), "OUTPUT_MUST_BE_ISOLATED")
+    require(not output.is_relative_to(site) and not site.is_relative_to(output),
+            "OUTPUT_MUST_BE_ISOLATED")
     require(not output.exists(), "OUTPUT_ALREADY_EXISTS")
     output.mkdir(parents=True)
-    verdict = {"status": "BLOCKED", "publication_allowed": False, "neon_writes": 0,
-               "upstream_http_gets": 0, "production_file_writes": 0,
-               "frontend_compatible": False, "source_current_certified": False,
-               "dst_repair_certified": False, "kyiv_current_provenance_certified": False}
+    verdict = {
+        "status": "BLOCKED", "publication_allowed": False,
+        "neon_writes": 0, "upstream_http_gets": 0,
+        "production_file_writes": 0, "frontend_compatible": False,
+        "source_current_certified": False, "dst_repair_certified": False,
+        "kyiv_current_provenance_certified": False,
+        "candidate_files": {},
+    }
     try:
+        from urllib.parse import urlparse
+        import importlib.util
+        require(bool(workflow_sha) and bool(input_sha) and bool(expected_branch),
+                "WORKFLOW_INPUT_BRANCH_BINDING_MISSING")
+        require(bool(database_url) and bool(writer_database_url),
+                "NEON_ENDPOINT_BRANCH_BINDING_MISSING")
         receipt, keys, episodes = verified_inputs(
             site=site, receipt_path=receipt_path, status_path=status_path,
             payload_path=payload_path, dashboard_path=dashboard_path, verifier=verifier)
-        reader = reader or neon_readback
-        rows, snapshot = reader(database_url, [r["legacy_episode_id"] for r in episodes])
-        cities = validated_neon_rows(episodes, keys, rows)
-        # All validation precedes artifact creation. Never write in site/data/.
-        with tempfile.TemporaryDirectory(prefix="shadow-stage-", dir=output) as tmp:
-            staged = Path(tmp)
-            write(staged / "neon_canonical_air.json", {
-                "format": "neon-canonical-readback-23city-v1", "city_keys": keys,
-                "city_count": 23, "episode_count": len(episodes), "cities": cities,
-                "c2_corpus_sha256": receipt["corpus_sha256"],
-                "read_only_snapshot": snapshot,
-                "publication_allowed": False,
-                "consumer_status": "RAW_CANONICAL_ONLY_NOT_FRONTEND_JSON",
-            })
-            auxiliaries = {}
-            for name in AUXILIARIES:
-                source = site / "data" / name
-                require(source.is_file(), "MISSING_GIT_AUXILIARY")
-                shutil.copyfile(source, staged / name)
-                auxiliaries[name] = digest(staged / name)
-            files = {p.name: digest(p) for p in sorted(staged.iterdir())}
-            os.replace(staged, output / "candidate")
-        verdict.update(status="PARTIAL", reason="READBACK_VERIFIED_FRONTEND_GENERATOR_NOT_WIRED",
-                       neon_readback_verified=True, city_count=23, episode_count=len(episodes),
-                       candidate_files=files, git_auxiliaries=auxiliaries)
+        require(receipt.get("workflow_sha") == workflow_sha, "WORKFLOW_SHA_MISMATCH")
+        require(receipt.get("input_sha") == input_sha, "INPUT_SHA_MISMATCH")
+        require(receipt.get("db_branch") == expected_branch, "NEON_BRANCH_RECEIPT_MISMATCH")
+        read_host = urlparse(database_url).hostname
+        writer_host = urlparse(writer_database_url).hostname
+        require(bool(read_host) and bool(writer_host) and
+                read_host.lower().replace("-pooler.", ".") ==
+                writer_host.lower().replace("-pooler.", "."),
+                "NEON_ENDPOINT_BRANCH_MISMATCH")
+
+        path = Path(__file__).with_name("neon_json_shadow_generator.py")
+        spec = importlib.util.spec_from_file_location("neon_json_shadow_generator", path)
+        require(spec is not None and spec.loader is not None,
+                "BLOCKED_GENERATOR_INPUT:ADAPTER_MODULE_MISSING")
+        generator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(generator)
+
+        from types import SimpleNamespace
+        args = SimpleNamespace(site=site, branch_id=expected_branch, input_sha=input_sha)
+        with tempfile.TemporaryDirectory(prefix="neon-shadow-stage-", dir=output) as staging:
+            work = Path(staging)
+            try:
+                adapter, b2, bundle = generator.prepare(args, work)
+            except Exception as exc:
+                raise ShadowBlocked("BLOCKED_GENERATOR_INPUT:ACCEPTED_C6_ASSETS_OR_BUILDERS") from exc
+            # Reader can be injected by offline tests; no HTTP, no Neon writes.
+            if reader is None:
+                snap = generator.snapshot(database_url, b2, bundle,
+                                          expected_host=writer_host)
+            else:
+                snap = reader(database_url, b2, bundle, expected_host=writer_host)
+
+            require(snap.get("meta", {}).get("read_only") == "on" and
+                    snap["meta"].get("isolation") == "repeatable read",
+                    "READ_ONLY_SNAPSHOT_NOT_PROVEN")
+            run_ids = {str(row["run_id"]): row for row in snap["runs"]}
+            require(all(row.get("db_branch") == expected_branch for row in snap["runs"]
+                        if row.get("db_branch") is not None),
+                    "NEON_INGESTION_BRANCH_MISMATCH")
+            # The accepted original C2 writer's success run, if present, must
+            # belong to the same branch and commit in the snapshot.
+            if receipt.get("run_id"):
+                run = run_ids.get(str(receipt["run_id"]))
+                require(run is not None and run.get("db_branch") == expected_branch and
+                        run.get("status") == "succeeded",
+                        "C2_RUN_NOT_IN_READONLY_SNAPSHOT")
+                provenance = run.get("parameters") or {}
+                require(provenance.get("corpus_sha256") == receipt["corpus_sha256"],
+                        "C2_RUN_CORPUS_MISMATCH")
+            rows = [
+                {**row, "episode_uid": row["uid"]}
+                for row in snap["episodes"]
+                if row.get("legacy_episode_id") in
+                {episode["legacy_episode_id"] for episode in episodes}
+            ]
+            validated_neon_rows(episodes, keys, rows)
+            closed, active = generator.verify_snapshot(snap, adapter)
+            reference = load(dashboard_path)
+            require(reference["multicity_meta"]["production_city_keys"] == keys,
+                    "FRONTEND_CITY_BOUNDARY_CHANGED")
+            cities = generator.source_report(snap, keys, reference)
+            try:
+                result = generator.generate(args, work, adapter, b2, bundle,
+                                            snap, closed, active, cities)
+            except Exception as exc:
+                raise ShadowBlocked("BLOCKED_GENERATOR_INPUT:FRONTEND_OR_PROVENANCE_CONTRACT") from exc
+            names = {
+                "dashboard_data.json", "site_derived.json", "alerts_combined.json",
+                "historical-daily-kpi.json", "kyiv_threat_mix.json",
+                "sevastopol_events.json",
+            }
+            candidate = work / "candidate"
+            require(candidate.is_dir() and
+                    {p.name for p in candidate.iterdir()} == names,
+                    "BLOCKED_GENERATOR_INPUT:SIX_FILE_CONTRACT")
+            hashes = {p.name: digest(p) for p in candidate.iterdir()}
+            require(hashes == result.get("candidate_sha256"),
+                    "FRONTEND_FILE_SHA256_MISMATCH")
+            require(all(cities[k]["source_capture_verified"] is False for k in keys),
+                    "UNPROVEN_SOURCE_FRESHNESS")
+            shutil.copytree(candidate, output / "candidate")
+            write(output / "source_gates.json", cities)
+            verdict.update(status="PASS", frontend_compatible=True,
+                           neon_readback_verified=True, city_count=23,
+                           episode_count=len(episodes),
+                           c2_corpus_sha256=receipt["corpus_sha256"],
+                           neon_branch=expected_branch, read_only_snapshot=str(snap["meta"]["snapshot"]),
+                           candidate_files=hashes, git_auxiliaries={
+                               name: hashes[name] for name in AUXILIARIES},
+                           **{"reason": "FRONTEND_SHADOW_READY_NOT_CURRENT_OR_PUBLISHABLE"})
     except Exception as exc:
-        verdict.update(error_type=type(exc).__name__, reason=(str(exc) if isinstance(exc, ShadowBlocked)
-                                                              else "RECEIPT_READBACK_OR_FILE_ERROR"),
-                       candidate_files={})
+        verdict.update(error_type=type(exc).__name__,
+                       reason=str(exc) if isinstance(exc, ShadowBlocked) else
+                       "RECEIPT_READBACK_OR_GENERATOR_ERROR", candidate_files={})
+        shutil.rmtree(output / "candidate", ignore_errors=True)
         raise
     finally:
         write(output / "verdict.json", verdict)
@@ -208,7 +292,11 @@ def main(argv=None):
     try:
         verdict = execute(site=a.site, receipt_path=a.receipt, status_path=a.status,
                           payload_path=a.payload, dashboard_path=a.dashboard, output=a.output,
-                          database_url=os.environ.get("NEON_JSON_SHADOW_READONLY_DATABASE_URL", ""))
+                          database_url=os.environ.get("NEON_JSON_SHADOW_READONLY_DATABASE_URL", ""),
+                          writer_database_url=os.environ.get("MULTICITY_CANONICAL_DATABASE_URL", ""),
+                          expected_branch=os.environ.get("MULTICITY_CANONICAL_DB_BRANCH"),
+                          workflow_sha=os.environ.get("GITHUB_SHA"),
+                          input_sha=os.environ.get("PHASE1_INPUT_SHA"))
     except Exception:
         print("Neon JSON shadow BLOCKED; verdict is stored without credentials or candidate publication", file=sys.stderr)
         return 1
