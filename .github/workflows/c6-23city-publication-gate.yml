@@ -1,0 +1,113 @@
+name: C6 23-city Neon generation and fail-closed publication gate
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-neon-live-writer-freshness-2026-10-31]
+    paths:
+      - '.github/workflows/c6-23city-publication-gate.yml'
+      - 'research/neon_23city_publication_2026_10_31/pipeline.py'
+      - 'research/neon_23city_publication_2026_10_31/run-request.txt'
+permissions:
+  contents: read
+concurrency:
+  group: c6-23city-publication-child-readonly
+  cancel-in-progress: false
+jobs:
+  read-generate-gate:
+    if: github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' && github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31'
+    runs-on: ubuntu-latest
+    environment: c6-live-writer-proof
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: work
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 741f277f73d1dde1325069d25fa00b44a42d6f03
+          path: accepted
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0ecbb291e8f443f7ab366bc4ac033d096f2c44f4
+          path: site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing reader and generator dependencies
+        run: python -m pip install --disable-pip-version-check 'psycopg[binary]>=3.2,<4' 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Read existing child twice, generate 23 cities, evaluate publication gates (no source HTTP)
+        env:
+          NEON_ISOLATED_PROOF_DATABASE_URL: ${{ secrets.NEON_ISOLATED_PROOF_DATABASE_URL }}
+        run: |
+          python work/research/neon_23city_publication_2026_10_31/pipeline.py \
+            --site site/kyiv-air-alerts-grafana --accepted accepted --output evidence
+      - name: Verify physical generation completed and publication stayed blocked
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('evidence')
+          v=json.loads((p/'machine_verdict.json').read_text())
+          assert v['pipeline']=='PASS_PHYSICAL_READ_TO_23CITY_JSON'
+          assert v['cities']==23 and v['generation']['candidate_files']==6
+          assert v['decision']=='PUBLICATION_BLOCKED' and not v['publication_allowed']
+          assert v['http_source_requests']==0 and v['neon_mutations']==0
+          assert v['read_only_repeatability'] is True
+          assert not (p/'publish').exists()
+          print('GENERATION_PASS_PUBLICATION_BLOCKED',v['physical_episode_count'],len(v['unclosed_gates']))
+          PY
+      - name: Preserve full physical readback, candidate, UUID lineage and SHA-256 manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-23city-publication-${{ github.run_id }}-${{ github.run_attempt }}
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
+  save-proof:
+    needs: read-generate-gate
+    if: always() && github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-neon-live-writer-freshness-2026-10-31
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: c6-23city-publication-${{ github.run_id }}-${{ github.run_attempt }}
+          path: downloaded
+      - name: Verify every artifact hash and save bounded reports; full data remain in artifact
+        env:
+          PROOF_RUN_ID: ${{ github.run_id }}
+          PROOF_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+          src=Path('downloaded'); manifest=json.loads((src/'sha256_manifest.json').read_text())
+          assert manifest['schema']=='c6-23city-publication-01-v1'
+          for name,want in manifest['files'].items():
+              p=(src/name).resolve()
+              assert p.is_relative_to(src.resolve()) and p.is_file()
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==want,name
+          target=Path('research/neon_23city_publication_2026_10_31/proof')/(os.environ['PROOF_RUN_ID']+'-'+os.environ['PROOF_RUN_ATTEMPT'])
+          target.mkdir(parents=True,exist_ok=True)
+          names=['machine_verdict.json','publication_decision.json','cities.json','repeat_read_receipt.json','git_dependencies.json','kyiv_excluded_git_memberships.json','utc_union_diagnostics.json','active_rows_unmodified.json','REPORT.md','sha256_manifest.json']
+          for name in names:
+              if (src/name).is_file(): shutil.copyfile(src/name,target/name)
+          print('ALL_ARTIFACT_HASHES_VERIFIED',len(manifest['files']))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- research/neon_23city_publication_2026_10_31/proof/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "research(C6): save physical 23-city generation and blocked publication proof [skip netlify]"
+          git push origin HEAD:research-neon-live-writer-freshness-2026-10-31
