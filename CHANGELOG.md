@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### DOC-AUTO-MAINTENANCE-MERGE-02 — maintenance PR merged and main CI verified (2026-10-31)
+
+- [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged with merge commit [`3735f359d2bf`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3735f359d2bfa3310cc7f9fd46f9c8f3a2af0e8f). [Actions 41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) SUCCESS on main: tests, UTF-8 byte gate, history integrity and archival dry-run. Roots reduced from 20,212/11,614 B to 7,990/7,127 B; 10 entries representing 8 distinct checkpoints retained in hashed archives.
+- CI and main-only archive-PR proposal are active; below-threshold no-op does **not** prove bot PR-creation rights. GitHub rulesets empty and required status checks disabled: CI detects but does not enforce merge/push blocking. No protection change or Neon/site-prod/WIP/Netlify action. Next optional owner action: enable required `coordination-docs / size-and-integrity` check, and verify PR creation on the next natural threshold event.
+
 ### DOC-AUTO-MAINTENANCE-01 — lossless archival and CI proposed (2026-10-31)
 
 - Separate maintenance branch adds UTF-8 byte limits (12 KiB warning / 16 KiB fail), deterministic archival with dry-run/idempotency, immutable hash manifest and historical-record coverage tests. Original root snapshots and both pre-compaction Git blobs remain exact.
