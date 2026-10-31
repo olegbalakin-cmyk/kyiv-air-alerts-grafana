@@ -1,0 +1,114 @@
+name: C6 UkraineAlarm one authorized current-API GET (isolated research)
+on:
+  push:
+    branches: [research-ua-current-oneget-2026-10-31]
+    paths:
+      - '.github/workflows/c6-ua-current-oneget-20261031.yml'
+permissions:
+  contents: read
+concurrency:
+  group: c6-ukrainealarm-current-oneget-owner-20261031
+  cancel-in-progress: false
+jobs:
+  capture:
+    if: github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' && github.ref == 'refs/heads/research-ua-current-oneget-2026-10-31' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Checkout research-only code without credentials
+        uses: actions/checkout@v4
+        with:
+          path: research-repo
+          persist-credentials: false
+      - name: Checkout immutable accepted source-matrix proof
+        uses: actions/checkout@v4
+        with:
+          ref: f5bbd5a4d51fea66283cb4202d1bcf8dacb11939
+          path: accepted-reference
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile authorized one-GET parser before receiving token
+        run: python -m py_compile research-repo/research/ua_current_oneget_2026_10_31/capture.py
+      - name: Install only HTTP and authenticated encryption dependencies
+        run: python -m pip install --disable-pip-version-check 'requests>=2.31,<3' 'cryptography>=43,<48'
+      - name: One UkraineAlarm data GET and 21-region analysis; secret used only in this step
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: |
+          python research-repo/research/ua_current_oneget_2026_10_31/capture.py \
+            --matrix accepted-reference/research/neon_23city_continuity_2026_10_31/proof/41208139352/source_matrix.json \
+            --output current-proof
+      - name: Retain encrypted full HTTP body and metadata even after fail-closed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-ua-current-oneget-${{ github.run_id }}
+          path: current-proof/
+          if-no-files-found: warn
+          retention-days: 30
+  preserve:
+    needs: capture
+    if: always() && github.ref == 'refs/heads/research-ua-current-oneget-2026-10-31' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout research branch (no force)
+        uses: actions/checkout@v4
+        with:
+          ref: research-ua-current-oneget-2026-10-31
+          fetch-depth: 0
+      - name: Retrieve single-run encrypted artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: c6-ua-current-oneget-${{ github.run_id }}
+          path: proof-downloaded
+      - name: Verify all artifact hashes and preserve safe metadata, never plaintext or ciphertext in Git
+        env:
+          PROOF_RUN_ID: ${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, shutil
+          from pathlib import Path
+          src=Path('proof-downloaded')
+          manifest=json.loads((src/'sha256_manifest.json').read_text())
+          assert manifest['schema']=='c6-ua-current-oneget-2026-10-31-manifest-v1'
+          assert 1 <= len(manifest['files']) <= 8
+          for relative, expected in manifest['files'].items():
+              p=(src/relative).resolve()
+              assert p.is_relative_to(src.resolve()) and p.is_file()
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==expected, relative
+          result=json.loads((src/'machine_verdict.json').read_text())
+          assert result['checkpoint']=='C6-UA-CURRENT-ONEGET-01'
+          assert result['http_attempts'] <= 1 and result['publication_allowed'] is False
+          assert result['neon_operations']==0 and result['production_mutations']==0
+          target=Path('research/ua_current_oneget_2026_10_31/proof')/os.environ['PROOF_RUN_ID']
+          target.mkdir(parents=True, exist_ok=True)
+          safe=('http_receipt.json','region_matrix.json','machine_verdict.json','encryption.json','sha256_manifest.json')
+          for name in safe:
+              if (src/name).is_file():
+                  shutil.copyfile(src/name,target/name)
+          (target/'ARTIFACT.md').write_text(
+              'One authorized GET. Full raw response retained ONLY as an AES-256-GCM '
+              'encrypted GitHub Actions artifact. No token or plaintext in Git.\n'
+              'Actions run: '+os.environ['PROOF_RUN_ID']+'\n'
+              'Ciphertext: api_response.aes256gcm (artifact only)\n'
+              'Source matrix ref: f5bbd5a4d51fea66283cb4202d1bcf8dacb11939\n'
+              'Artifact SHA-256 manifest verified: '+str(len(manifest['files']))+' files\n'
+              'Owner can decrypt with original UKRAINEALARM_API_TOKEN and encryption.json.\n'
+              'No source retries, no DB write, no publication.\n',
+              encoding='utf-8'
+          )
+          print(json.dumps({'proof_saved':True,'artifact_files_verified':len(manifest['files']),
+                            'get_attempts':result['http_attempts'],'status':result['status']},sort_keys=True))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- research/ua_current_oneget_2026_10_31/proof/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "research(C6): preserve single UkraineAlarm current API proof metadata [skip netlify]"
+          git push origin HEAD:research-ua-current-oneget-2026-10-31
