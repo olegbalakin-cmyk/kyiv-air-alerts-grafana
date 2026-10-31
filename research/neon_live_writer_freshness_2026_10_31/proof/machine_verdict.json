@@ -1,29 +1,17 @@
 {
+  "branch_create_error": "HTTP_422_BRANCHES_LIMIT_EXCEEDED",
+  "canonical_identity_prospective": "PASS",
   "checkpoint": "C6-LIVE-WRITER-FRESHNESS-01",
-  "scope": "research-only blocked gate and reproducible replay",
-  "previous_accepted": "C6-PREVIEW-ROLLBACK-01",
-  "main_base_sha": "f6d36e76dadbf706cf0a3aee2ec6e8080d413597",
-  "approved_for_cutover": false,
-  "physical_http_this_task": "PENDING_RESEARCH_CI",
-  "branch_attempt": {
-    "project_id": "green-cake-44216048",
-    "parent_id": "br-bold-mode-b5rub8pq",
-    "requested_name": "c6-live-writer-freshness-isolated-2026-10-31",
-    "result": "BLOCKED_HTTP_422_BRANCHES_LIMIT_EXCEEDED"
-  },
-  "physical_new_child_created": false,
-  "sql_mutations": 0,
-  "physical_neon_uuid": "NOT_PROVEN",
+  "github_sha": "55f82e6cea548a18099c61f52249ef0484951fd2",
+  "global_cutover_allowed": false,
   "independent_neon_readback": "NOT_EXECUTED",
+  "physical_http": "PASS",
+  "physical_isolated_neon_write": "BLOCKED",
+  "physical_neon_uuid_from_this_run": "NOT_PROVEN",
+  "production_writer_ready": false,
   "real_site_json_after_new_write": "NOT_EXECUTED",
-  "idempotency_and_crash_recovery": "ACCEPTED_PRIOR_LOCAL_NOT_REEXECUTED; CHILD_NOT_PROVEN",
-  "freshness_gate": "SYNTHETIC_TESTS_PENDING",
-  "writer_ready_for_production": false,
-  "blockers": [
-    "Neon branch quota prevents isolated physical DML",
-    "one real HTTP receipt is not a durable Neon UUID",
-    "23-city post-COMMIT fresh JSON generation/release gate not physically executed",
-    "source continuation/current active alert and production writer activation not certified"
-  ],
-  "next_action": "Authorize capacity for one new disposable child; execute saved two-phase child writer and readback."
+  "result": "PARTIAL_HTTP_IDENTITY_ONLY",
+  "scope": "research_only_live_http_and_synthetic_freshness_gate",
+  "site_prod_git_blobs_verified": true,
+  "source_pin": "site-prod@c6636e838cc5ca1da3f250091bb1c5c0ff08229e"
 }
