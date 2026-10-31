@@ -27,7 +27,7 @@ UTC = timezone.utc
 # There is no child branch, TTL, fixed site checkout or proof-run dependency.
 ACCEPTED_SHA = '741f277f73d1dde1325069d25fa00b44a42d6f03'
 ASSETS = Path(__file__).resolve().parent / 'neon_shadow_c6_assets'
-ARCHIVE_SHA = 'f6dda060a0ed48b01b4726625b36c33b472955f6877aef918fc3c8bddf2'
+ARCHIVE_SHA = 'f6dda060a0ed48b01b4726625b36c33b472955f687be6877aef918fc3c8bddf2'
 PINNED_ACCEPTED = {
  'approved_22city_archive.b64': '992ddda36a25fd7072575fbdd08920e5c00db851',
  'source_priority_reader.py': '890769995627aa15e43743ef7cd5b24d54b1c59c',
@@ -183,14 +183,14 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     # Preserve active rows unchanged in evidence and keep active/publication gate OPEN.
     now=aware(snap['meta']['read_at']); reference=load(args.site/'data/dashboard_data.json')
     reference_derived=load(args.site/'data/site_derived.json')
-    payload,diagnostics,alerts=adapter.build_projection_from_site([r for r in closed if r['city_key']!='kyiv'],reference,now,args.site)
-    mods=adapter.import_site_modules(args.site); update=mods['update_data']; rolling=mods['apply_site_rolling_7d']; bridge=mods['apply_ukrainealarm_bridge']
     frozen_uids={r['uid'] for r in bundle['source_rows']}
     b2snapshot={k:snap[k] for k in ('classifications','source_links','events')}
     b2snapshot['episodes']=[r for r in closed if r['uid'] in frozen_uids]
     selected=b2.run_bundle(bundle,b2snapshot)
     require(selected['enrichment']['rebinds']==0,'UNAUTHORIZED_CLASSIFICATION_REBIND')
     save(out/'kyiv_selection.json',selected)
+    payload,diagnostics,alerts=adapter.build_projection_from_site([r for r in closed if r['city_key']!='kyiv'],reference,now,args.site)
+    mods=adapter.import_site_modules(args.site); update=mods['update_data']; rolling=mods['apply_site_rolling_7d']; bridge=mods['apply_ukrainealarm_bridge']
     by_token=collections.defaultdict(list)
     for row in closed:
         if row['city_key']=='kyiv': by_token[(aware(row['start_at']),aware(row['end_at']))].append(row)
@@ -214,7 +214,8 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
         matches=by_token[token]
         if len(matches)==1 and (token[0]<boundary or matches[0]['uid'] not in frozen_uids):
             append(matches[0],row['source'],'PINNED_GIT_SELECTION_EXACT_NEON_INTERVAL_NOT_SOURCE_RECEIPT')
-        else: excluded.append({'start':row['start'],'end':row['end'],'reason':'NO_UNIQUE_ELIGIBLE_PHYSICAL_PARENT','matches':[m['uid'] for m in matches]})
+        else:
+            raise Closed('MISSING_OR_AMBIGUOUS_KYIV_CANONICAL_PARENT')
     # No research-only UUID is forced into a different branch. Historical B2
     # membership is retained; later Git membership requires one exact Neon parent.
     kyiv.sort(key=lambda r:aware(r['start']))
@@ -254,7 +255,7 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
                 lineage.append({'city_key':key,'start_utc':iso(a.start),'end_utc':iso(a.end),'physical_uids':uids,'selection':'ACCEPTED_UTC_UNION_OF_PHYSICAL_PARENTS'})
     derived=importlib.import_module('derived_successor').create_derived(payload,reference_derived,alerts,now,args.site,mods)
     payload['historical_daily_kpi']=mods['build_preview_historical_daily'].produce(args.site,None,generated_at=now.isoformat(),source_override=payload,sources_override=alerts)
-    generated=datetime.now(UTC)
+    generated=aware(args.generated_at) if getattr(args, 'generated_at', None) else datetime.now(UTC)
     authority={'branch_id':args.branch_id,'database_read_at_utc':iso(now),'site_generated_at_utc':iso(generated),'source_as_of_utc_by_city':{key:cities[key]['source_captured_at_utc'] for key in keys},'publication_allowed':False,'scope':'RESEARCH_CANDIDATE_NOT_CURRENT_DATA_CERTIFICATION','dst_simulation':False,'active_status':'UNKNOWN_UNCERTIFIED','source_fallback':False,'prior_accepted_browser_proof':'66f872413f67668c9bd23b94cff17520fea705f9','physical_dst_repair_certified':False,'kyiv_current_provenance_certified':False}
     payload['meta'].update(k['meta']); payload['meta']['generated_at']=generated.astimezone(update.TZ).isoformat()
     payload['meta']['publication_authority']=authority

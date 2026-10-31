@@ -44,6 +44,17 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def load_generator():
+    import importlib.util
+    path = Path(__file__).with_name("neon_json_shadow_generator.py")
+    spec = importlib.util.spec_from_file_location("neon_json_shadow_generator", path)
+    require(spec is not None and spec.loader is not None,
+            "BLOCKED_GENERATOR_INPUT:ADAPTER_MODULE_MISSING")
+    generator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(generator)
+    return generator
+
+
 def utc(value) -> str:
     dt = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     require(dt.tzinfo is not None, "NAIVE_TIMESTAMP")
@@ -153,7 +164,7 @@ def validated_neon_rows(episodes: list[dict], keys: list[str], rows: list[dict])
 def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: Path,
             dashboard_path: Path, output: Path, database_url: str,
             verifier=None, reader=None, workflow_sha=None, input_sha=None,
-            writer_database_url=None, expected_branch=None) -> dict:
+            writer_database_url=None, expected_branch=None, generated_at=None) -> dict:
     """One branch-bound C2 Neon snapshot, then isolated six-file frontend candidate.
 
     The previously accepted canonical verifier remains the authority for C2.
@@ -173,10 +184,13 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
         "source_current_certified": False, "dst_repair_certified": False,
         "kyiv_current_provenance_certified": False,
         "candidate_files": {},
+        "physical_neon_readback_run": reader is None,
+        "readback_mode": "physical" if reader is None else "offline_fixture",
+        "current_freshness": "CURRENT_FRESHNESS_NOT_CERTIFIED",
+        "production_publication": "PRODUCTION_PUBLICATION_NOT_AUTHORIZED",
     }
     try:
         from urllib.parse import urlparse
-        import importlib.util
         require(bool(workflow_sha) and bool(input_sha) and bool(expected_branch),
                 "WORKFLOW_INPUT_BRANCH_BINDING_MISSING")
         require(bool(database_url) and bool(writer_database_url),
@@ -184,6 +198,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
         receipt, keys, episodes = verified_inputs(
             site=site, receipt_path=receipt_path, status_path=status_path,
             payload_path=payload_path, dashboard_path=dashboard_path, verifier=verifier)
+        require(reader is not None or receipt.get("offline_fixture") is not True,
+                "OFFLINE_FIXTURE_CANNOT_AUTHORIZE_PHYSICAL_READBACK")
         require(receipt.get("workflow_sha") == workflow_sha, "WORKFLOW_SHA_MISMATCH")
         require(receipt.get("input_sha") == input_sha, "INPUT_SHA_MISMATCH")
         require(receipt.get("db_branch") == expected_branch, "NEON_BRANCH_RECEIPT_MISMATCH")
@@ -194,12 +210,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 writer_host.lower().replace("-pooler.", "."),
                 "NEON_ENDPOINT_BRANCH_MISMATCH")
 
-        path = Path(__file__).with_name("neon_json_shadow_generator.py")
-        spec = importlib.util.spec_from_file_location("neon_json_shadow_generator", path)
-        require(spec is not None and spec.loader is not None,
-                "BLOCKED_GENERATOR_INPUT:ADAPTER_MODULE_MISSING")
-        generator = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(generator)
+        generator = load_generator()
 
         def input_failure(exc):
             code = getattr(exc, "code", None)
@@ -217,7 +228,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             return "BLOCKED_GENERATOR_INPUT:" + safe
 
         from types import SimpleNamespace
-        args = SimpleNamespace(site=site, branch_id=expected_branch, input_sha=input_sha)
+        args = SimpleNamespace(site=site, branch_id=expected_branch, input_sha=input_sha,
+                               generated_at=generated_at)
         with tempfile.TemporaryDirectory(prefix="neon-shadow-stage-", dir=output) as staging:
             work = Path(staging)
             try:
@@ -235,9 +247,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                     snap["meta"].get("isolation") == "repeatable read",
                     "READ_ONLY_SNAPSHOT_NOT_PROVEN")
             run_ids = {str(row["run_id"]): row for row in snap["runs"]}
-            require(all(row.get("db_branch") == expected_branch for row in snap["runs"]
-                        if row.get("db_branch") is not None),
-                    "NEON_INGESTION_BRANCH_MISMATCH")
+            # A Neon child inherits historical ingestion runs with their original
+            # branch provenance. Bind the C2 success run, never relabel ancestors.
             # The accepted original C2 writer's success run, if present, must
             # belong to the same branch and commit in the snapshot.
             if receipt.get("run_id"):
@@ -248,14 +259,34 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 provenance = run.get("parameters") or {}
                 require(provenance.get("corpus_sha256") == receipt["corpus_sha256"],
                         "C2_RUN_CORPUS_MISMATCH")
+            else:
+                require(any(row.get("db_branch") == expected_branch and
+                            row.get("status") == "succeeded" and
+                            (row.get("parameters") or {}).get("corpus_sha256") == receipt["corpus_sha256"]
+                            for row in snap["runs"]), "C2_RETRY_CORPUS_RUN_NOT_IN_SNAPSHOT")
+            corpus_ids = {episode["legacy_episode_id"] for episode in episodes}
             rows = [
                 {**row, "episode_uid": row["uid"]}
                 for row in snap["episodes"]
-                if row.get("legacy_episode_id") in
-                {episode["legacy_episode_id"] for episode in episodes}
+                if row.get("legacy_episode_id") in corpus_ids
             ]
             validated_neon_rows(episodes, keys, rows)
-            closed, active = generator.verify_snapshot(snap, adapter)
+            try:
+                closed, active = generator.verify_snapshot(snap, adapter)
+            except Exception as exc:
+                raise ShadowBlocked(input_failure(exc)) from exc
+            write(work / "readback_proof.json", {
+                "meta": snap["meta"], "mode": verdict["readback_mode"],
+                "physical_neon_readback_run": reader is None,
+                "c2_corpus_sha256": receipt["corpus_sha256"],
+                "receipt_sha256": digest(receipt_path),
+                "table_sha256": {name: generator.fingerprint(snap[name]) for name in
+                                  ("episodes", "observations", "checkpoints", "runs",
+                                   "classifications", "source_links", "events")},
+                "counts": {name: len(snap[name]) for name in
+                           ("episodes", "observations", "checkpoints", "runs",
+                            "classifications", "source_links", "events")},
+            })
             reference = load(dashboard_path)
             require(reference["multicity_meta"]["production_city_keys"] == keys,
                     "FRONTEND_CITY_BOUNDARY_CHANGED")
@@ -280,6 +311,9 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             require(all(cities[k]["source_capture_verified"] is False for k in keys),
                     "UNPROVEN_SOURCE_FRESHNESS")
             shutil.copytree(candidate, output / "candidate")
+            for name in ("kyiv_selection.json", "projection_lineage.json", "git_dependencies.json",
+                         "utc_union_diagnostics.json", "active_rows_unmodified.json", "readback_proof.json"):
+                shutil.copyfile(work / name, output / name)
             write(output / "source_gates.json", cities)
             verdict.update(status="PASS", frontend_compatible=True,
                            neon_readback_verified=True, city_count=23,
@@ -289,6 +323,10 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                            candidate_files=hashes, git_auxiliaries={
                                name: hashes[name] for name in AUXILIARIES},
                            **{"reason": "FRONTEND_SHADOW_READY_NOT_CURRENT_OR_PUBLISHABLE"})
+            verdict["generation_verdict"] = ("OFFLINE_GENERATION_PASS" if reader is not None
+                                              else "PHYSICAL_GENERATION_PASS")
+            verdict["physical_readback_verdict"] = ("PHYSICAL_NEON_READBACK_NOT_RUN" if reader is not None
+                                                     else "PHYSICAL_NEON_READBACK_RUN")
     except Exception as exc:
         verdict.update(error_type=type(exc).__name__,
                        reason=str(exc) if isinstance(exc, ShadowBlocked) else

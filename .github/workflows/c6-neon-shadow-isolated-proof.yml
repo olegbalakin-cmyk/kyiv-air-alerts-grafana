@@ -1,0 +1,101 @@
+name: C6 isolated read-only Neon shadow proof (manual, non-publishing)
+on:
+  workflow_dispatch:
+    inputs:
+      research_sha:
+        description: Exact full SHA on research-neon-shadow-frontend-2026-10-31
+        required: true
+        type: string
+      c2_artifact_run_id:
+        description: Existing successful approved C2 artifact run; no new writer is invoked
+        required: true
+        type: string
+      c2_artifact_name:
+        description: Artifact containing only c2-shadow-inputs.zip
+        required: true
+        type: string
+      bundle_sha256:
+        description: Independently owner-verified SHA-256 of c2-shadow-inputs.zip
+        required: true
+        type: string
+      writer_workflow_sha:
+        description: Full original writer workflow SHA in the approved C2 receipt
+        required: true
+        type: string
+      input_sha:
+        description: Full site input SHA in that same C2 receipt
+        required: true
+        type: string
+      db_branch:
+        description: Existing owner-approved branch matching receipt and endpoint
+        required: true
+        type: string
+      db_endpoint:
+        description: Existing owner-approved Neon endpoint hostname (no credentials)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: c6-isolated-neon-shadow-readonly
+  cancel-in-progress: false
+jobs:
+  proof:
+    if: >-
+      github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' &&
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/research-neon-shadow-frontend-2026-10-31' &&
+      github.sha == inputs.research_sha
+    environment: c6-live-writer-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.research_sha }}
+          path: research
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.input_sha }}
+          path: pinned-site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install previously tested dependencies
+        run: python -m pip install -r research/research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
+      - name: Download existing owner-approved C2 artifact (GitHub only)
+        uses: actions/download-artifact@v4
+        with:
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.c2_artifact_run_id }}
+          name: ${{ inputs.c2_artifact_name }}
+          path: existing-c2
+      - name: Read existing Neon snapshot and generate isolated six-file artifact
+        working-directory: research
+        env:
+          NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
+          BUNDLE_SHA: ${{ inputs.bundle_sha256 }}
+          WRITER_SHA: ${{ inputs.writer_workflow_sha }}
+          INPUT_SHA: ${{ inputs.input_sha }}
+          DB_BRANCH: ${{ inputs.db_branch }}
+          DB_ENDPOINT: ${{ inputs.db_endpoint }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m scripts.neon_json_shadow_physical_proof \
+            --site ../pinned-site/kyiv-air-alerts-grafana \
+            --bundle ../existing-c2/c2-shadow-inputs.zip \
+            --bundle-sha256 "$BUNDLE_SHA" --workflow-sha "$WRITER_SHA" \
+            --input-sha "$INPUT_SHA" --db-branch "$DB_BRANCH" \
+            --db-endpoint "$DB_ENDPOINT" --output ../research-evidence
+      - name: Preserve research artifacts even on fail-closed rejection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isolated-neon-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research-evidence/
+          retention-days: 30
+          if-no-files-found: warn

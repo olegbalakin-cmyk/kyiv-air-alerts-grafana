@@ -1,67 +1,46 @@
-# C6 Neon frontend shadow — bounded implementation status (2026-10-31)
+# C6 Neon shadow offline proof — research only
 
-**Status: IMPLEMENTED, NOT ACCEPTED; OFFLINE EXECUTION NOT PROVEN.**
-**Production: unchanged; GLOBAL_CUTOVER=NO.** This is not a new release checkpoint.
+**Implementation prepared; checkpoint not accepted. C6/C3=PARTIAL; GLOBAL_CUTOVER=NO.**
 
-Base: `850f7f8d86314a3edd38ad07df18ba0f668eb30e`.
-The accepted C6 code was `research/neon_23city_publication_2026_10_31/pipeline.py`
-at `37a8702972c7b875f60aa73e3b0b890b869ab73b`.
-C6 original physical run `41206457252` succeeded for the research child; it
-is **not** proof for a production C2 receipt.
+Initial exact command at `9bd04dfcbccc16fb7f875551e6f005dcb787cb13`: **10/10 executed PASS**, Python 3.12.14, exit 0. Logs and dependencies: `offline_proof/initial-unit.*`.
 
-## Implemented, subject to executable verification
+The first full real generator execution created all four frontend JSON and two explicit Git auxiliaries for 23 cities. Final immutable-source test results and candidate archive will be appended after the implementation commit.
 
-- Default-off `NEON_JSON_SHADOW_ENABLED == 'true'` opt-in in workflow.
-- Non-publishing shadow relocated after both production-side derived JSON and
-  Kyiv threat-mix builders; the current production commit/publish step is untouched.
-- Existing C2 verifier checks 23 cities, workflow/input SHA, corpus digest;
-  shadow also binds expected writer branch and endpoint identity and verifies
-  matching Neon ingestion-run corpus provenance.
-- One `REPEATABLE READ READ ONLY` snapshot holds AIR parents, source observations,
-  checkpoints, runs, Kyiv classifications, source links and events.
-- Accepted 22-city union, frozen Kyiv B2 selection, site-derived and historical
-  KPI builders are retained with immutable asset blob pins. No research child
-  TTL, host, source checkout or single-capture proof UUID is hard-coded.
-- Candidate output contract: four frontend JSON plus explicit
-  `kyiv_threat_mix.json` / `sevastopol_events.json`, with SHA-256.
-  All output stays in the isolated runner temporary directory.
-- Current status, Kyiv provenance and four physical DST cases are unverified;
-  **JSON generation MUST NOT certify those gates or permit publication**.
-  Absent/mismatched generator inputs fail closed without a candidate.
-- Existing 9/9 canonical fixture tests are prior-session claims only, not a
-  test result for this frontend adaptation.
+Minimal fixes:
 
-## Independent offline test invocation
+- Restore `be68` omitted from the archive SHA-256 during adaptation. The value matches accepted `37a87029`; all immutable asset blobs and builder pins remain enforced.
+- Bind the C2 success run to its branch/corpus while retaining inherited historical run provenance. Exact retries also require the corresponding successful corpus run.
+- Reject missing/ambiguous Kyiv canonical parents; no Git AIR interval substitution.
+- Precompute corpus IDs once; validate B2 before expensive derivation. Allow a fixed offline generation clock and retain lineage/readback digests.
+- Distinguish fixture validation from physical readback. Synthetic C2 fixtures cannot authorize a physical read.
 
-From repository root (requires the production site source checkout fixture and
-the accepted pinned C6 assets, no Neon credentials for unit tests):
+Fixtures retain the unchanged original snapshot from accepted Actions `41208139352`, preserved at `9704d5fa`, with all 85 original manifest entries verified. `fixtures/provenance.json` binds every retained member. Original readback: 31,977 AIR parents, 145 observations, 55 classifications, 223 source links.
+
+The **C2-compatible wrapper is synthetic**. The original SELECT omitted `canonicalization_version`; its local contract overlay and one synthetic run are explicitly declared. They do not prove an actual C2 receipt, COMMIT, database version field or new readback. UUIDs, intervals and source relationships from the original snapshot remain unchanged.
+
+Offline input data are pinned production `0ecbb291e8f443f7ab366bc4ac033d096f2c44f4`. All nine pinned builders match current production `3dc4aa8af4b4c2a0d157b5c9edae0bfc179fea1b` and all seven modules import. Current Git data have two additional Kyiv intervals absent from this snapshot; current completeness is not certified.
+
+Reproduce with the locked Python dependencies, from the repository root:
 
 ```sh
-python -m unittest discover -s tests -p test_neon_json_shadow_frontend.py -v
+python -m pip install -r research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_neon_json_shadow*py' -v
+python -m scripts.neon_json_shadow_offline_proof --output /tmp/neon-offline-candidate
 ```
 
-The ten added tests check 23-city binding, C2 rejection, digest rejection,
-city boundary, workflow SHA, branch, endpoint, synthetic readback interval/UUID,
-workflow flag/builder ordering, and generator surface. These are **test code
-only** until actually executed and their stdout/exit status retained. They
-do not independently prove full frontend semantics.
+Output directories must not already exist. The standalone proof blocks network and SQL and checks every output interval against original Neon parents, daily start counts, both duration series, timezone, source types, B2 relationships and all six hashes.
 
-## Before the one protected Actions proof
+## Isolated physical workflow — prepared, NOT RUN
 
-1. Run and retain the ten local unit tests and fixtures. Check pinned production
-   builder compatibility, B2 382-parent selection and derived module imports.
-2. Provision an **existing** read-only Neon credential for the same branch as
-   the actual C2 receipt and same-run corpus. Independently confirm endpoint
-   binding and privileges; no new Neon branch or writer alteration.
-3. Separately authorize **one** workflow-dispatch run on the research ref
-   with opt-in=true. Retain C2 receipt, full shadow verdict, six candidate file
-   digests and read-only snapshot proof; require zero extra source GETs/writes.
-   The updater is a production-capable workflow: do not launch it without
-   explicit permission and publication-risk controls.
-4. If any generator dependency is absent (e.g. pinned builder drift, 382 frozen
-   Kyiv identities, classification tables or source-run corpus), return
-   `BLOCKED_GENERATOR_INPUT` and name the contract. Never treat the prior C6
-   child proof as the current C2 snapshot.
+`.github/workflows/c6-neon-shadow-isolated-proof.yml` is dispatch-only, restricted to the exact selected SHA on `research-neon-shadow-frontend-2026-10-31`, with read-only GitHub permissions and existing Environment `c6-live-writer-proof`. It never invokes the updater, captures sources, writes Neon, pushes Git or deploys. Source clients are blocked during read/generation. Six files, lineage, readback digests and machine verdict are uploaded as research artifacts.
 
-**No Action run, Neon SQL, new source request, site-prod update, main merge or
-publication was performed for this change.**
+Before a separately authorized run, the owner must supply/approve:
+
+1. One dispatch authorization and approval through the existing protected Environment; verify its reviewer protection and ref policy.
+2. Existing `NEON_JSON_SHADOW_READONLY_DATABASE_URL` on the exact approved branch/endpoint. No writer credential is needed. The role needs CONNECT/USAGE and SELECT on `alert_episodes`, `alert_episode_sources`, `current_ingestion_checkpoints`, `ingestion_runs`, `attack_event_classifications`, `attack_event_sources`, `attack_events`; no DML/DDL. The snapshot rejects INSERT permission on `alert_episodes` and uses REPEATABLE READ READ ONLY.
+3. An existing verified real C2 artifact containing `c2-shadow-inputs.zip`, its independent SHA-256, original workflow/input SHAs, run/artifact IDs, branch ID and endpoint. A compatible real bundle is not established by this offline proof. Its fixed members are receipt/status/payload, five same-run `site_data/` JSON, and a `manifest.json` with schema `existing-c2-shadow-inputs-v1` and hashes for every other member. No synthetic receipt is accepted.
+4. GitHub Actions dispatch/read and artifact-read access. A workflow existing only on a research ref may need owner-approved registration on the default branch before GitHub permits dispatch; no such merge/registration is authorized or performed here.
+
+If an existing credential, branch or real C2 artifact is unavailable, stop for separate owner approval. Do not create a credential, branch or writer run automatically.
+
+Required verdict separation: `OFFLINE_GENERATION_PASS`; `PHYSICAL_NEON_READBACK_NOT_RUN`; `CURRENT_FRESHNESS_NOT_CERTIFIED`; `PRODUCTION_PUBLICATION_NOT_AUTHORIZED`. No release or production readiness follows from offline generation.
