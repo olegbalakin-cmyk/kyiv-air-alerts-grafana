@@ -1,0 +1,102 @@
+name: C6 preserve live HTTP proof in isolated research branch
+on:
+  push:
+    branches: [research-neon-live-writer-freshness-2026-10-31]
+    paths:
+      - ".github/workflows/c6-live-writer-proof-preserve.yml"
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: c6-live-writer-proof-preserve-research-only
+  cancel-in-progress: false
+jobs:
+  preserve-proof:
+    if: github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout only research ref (non-force push later)
+        uses: actions/checkout@v4
+        with:
+          ref: research-neon-live-writer-freshness-2026-10-31
+          fetch-depth: 0
+      - name: Download one immutable HTTP-only artifact, no network source replay
+        uses: actions/download-artifact@v4
+        with:
+          name: c6-live-writer-freshness-http-only
+          run-id: 41141326530
+          github-token: ${{ github.token }}
+          path: downloaded-http-proof
+      - name: Verify content SHA manifest, exact first run, provenance, and synthetic gate results
+        run: |
+          python - <<'PY'
+          import hashlib,json,sys,shutil
+          from pathlib import Path
+          prefix=Path("research/neon_live_writer_freshness_2026_10_31")
+          downloaded=Path("downloaded-http-proof")
+          manifest=json.loads((downloaded/"sha256_manifest.json").read_text())
+          assert manifest["schema"]=="c6-live-writer-freshness-v1"
+          assert len(manifest["files"])>=3
+          for name,expected in manifest["files"].items():
+            assert "/" not in name and ".." not in name, "PATH_TRAVERSAL"
+            b=(downloaded/name).read_bytes()
+            assert hashlib.sha256(b).hexdigest()==expected, "HTTP_ARTIFACT_BYTES_MISMATCH "+name
+          verdict=json.loads((downloaded/"machine_verdict.json").read_text())
+          assert verdict["github_sha"]=="55f82e6cea548a18099c61f52249ef0484951fd2"
+          assert verdict["result"]=="PARTIAL_HTTP_IDENTITY_ONLY"
+          assert verdict["physical_http"]=="PASS"
+          assert verdict["site_prod_git_blobs_verified"] is True
+          assert verdict["canonical_identity_prospective"]=="PASS"
+          assert verdict["physical_isolated_neon_write"]=="BLOCKED"
+          assert verdict["production_writer_ready"] is False
+          candidate=json.loads((downloaded/"canonical_candidate.json").read_text())
+          record=candidate["canonical_record"]
+          raw=json.dumps(record,sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()
+          assert hashlib.sha256(raw).hexdigest()==candidate["source_record_key"]
+          assert candidate["identity_status"]=="PROSPECTIVE_NOT_APPROVED_FOR_PRODUCTION"
+          sys.path.insert(0,str(prefix.resolve()))
+          import freshness_gate
+          tests=freshness_gate.self_test()
+          assert tests["passed"]==tests["test_count"]==15
+          target=prefix/"proof";target.mkdir(parents=True,exist_ok=True)
+          for path in downloaded.iterdir():
+            if path.is_file():
+              shutil.copy2(path,target/path.name)
+          (target/"freshness_unit_tests.json").write_text(json.dumps(tests,sort_keys=True,indent=2)+"\n")
+          evidence={"checkpoint":"C6-LIVE-WRITER-FRESHNESS-01",
+             "source_commit":"55f82e6cea548a18099c61f52249ef0484951fd2",
+             "actions_run_id":41141326530,"job_id":124356015192,
+             "actions_result":"SUCCESS_PHYSICAL_HTTP_AND_SYNTHETIC_GATE",
+             "actions_artifact_id":13018209142,
+             "github_artifact_digest":"sha256:64ffd75f0bd23e8400afb21bcc84f8cc6aca5004b365a0b458f41436633e5f72",
+             "verified_artifact_member_sha256_count":len(manifest["files"]),
+             "freshness_synthetic_passed":15,"new_neon_child":"DENIED_HTTP_422_BRANCH_LIMIT",
+             "neon_sql_statements_executed":0,"production_writer_ready":False,
+             "site_json_post_write":"NOT_PROVEN",
+             "source_identity":"PROSPECTIVE_NOT_APPROVED_FOR_PRODUCTION",
+             "release_authorized":False}
+          (target/"ci_evidence_manifest.json").write_text(json.dumps(evidence,sort_keys=True,indent=2)+"\n")
+          print("PRESERVED_PROOF_VERDICT="+json.dumps({"members":len(manifest["files"]),
+                     "http":"PASS","identity":"PROSPECTIVE","freshness_tests":15,
+                     "neon_write":"BLOCKED_NO_CHILD"},sort_keys=True))
+          PY
+      - name: Non-force commit and push only research proof directory
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/neon_live_writer_freshness_2026_10_31/proof/
+          git diff --cached --quiet && { echo "Proof already saved"; exit 0; }
+          git commit -m "research(C6): preserve physical HTTP identity and freshness gate proof"
+          git fetch origin research-neon-live-writer-freshness-2026-10-31
+          git rebase origin/research-neon-live-writer-freshness-2026-10-31
+          git push origin HEAD:research-neon-live-writer-freshness-2026-10-31
+      - name: Upload preserved proof as immutable backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-live-writer-freshness-preserved-proof
+          path: research/neon_live_writer_freshness_2026_10_31/proof/
+          if-no-files-found: warn
+          retention-days: 30
