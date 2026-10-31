@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/scratch/58de4de0a859/repo/scripts/neon_json_shadow_restore_fixtures.py", line 97, in <module>
+    main()
+  File "/workspace/scratch/58de4de0a859/repo/scripts/neon_json_shadow_restore_fixtures.py", line 93, in main
+    print(json.dumps(restore(args.output, args.git_repo), sort_keys=True))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/58de4de0a859/repo/scripts/neon_json_shadow_restore_fixtures.py", line 73, in restore
+    assert digest(content) == expected[name], "RESTORED_FIXTURE_MEMBER_SHA:" + name
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RESTORED_FIXTURE_MEMBER_SHA:payload.json

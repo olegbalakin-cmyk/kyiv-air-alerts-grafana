@@ -4,7 +4,7 @@
 
 Initial exact command at `9bd04dfcbccc16fb7f875551e6f005dcb787cb13`: **10/10 executed PASS**, Python 3.12.14, exit 0. Logs and dependencies: `offline_proof/initial-unit.*`.
 
-The first full real generator execution created all four frontend JSON and two explicit Git auxiliaries for 23 cities. Final immutable-source test results and candidate archive will be appended after the implementation commit.
+The recovered real generator output contains all four frontend JSON and two explicit Git auxiliaries for 23 cities. Recovery commit `e1204d084ca815ac050028cb9978e60d18132154` was independently confirmed on GitHub. See `OFFLINE_PROOF.md` and `offline_proof/resume/machine_verdict.json` for resumed verification, hashes and limitations. Full generation was not repeated. No new candidate ZIP or full AIR archive was committed.
 
 Minimal fixes:
 
@@ -14,13 +14,13 @@ Minimal fixes:
 - Precompute corpus IDs once; validate B2 before expensive derivation. Allow a fixed offline generation clock and retain lineage/readback digests.
 - Distinguish fixture validation from physical readback. Synthetic C2 fixtures cannot authorize a physical read.
 
-Fixtures retain the unchanged original snapshot from accepted Actions `41208139352`, preserved at `9704d5fa`, with all 85 original manifest entries verified. `fixtures/provenance.json` binds every retained member. Original readback: 31,977 AIR parents, 145 observations, 55 classifications, 223 source links.
+Local fixtures reconstruct the unchanged original snapshot from accepted Actions `41208139352`, preserved at `9704d5fa`, with all 85 original manifest entries verified. `fixtures/provenance.json` binds every retained member. Original readback: 31,977 AIR parents, 145 observations, 55 classifications, 223 source links.
 
 The **C2-compatible wrapper is synthetic**. The original SELECT omitted `canonicalization_version`; its local contract overlay and one synthetic run are explicitly declared. They do not prove an actual C2 receipt, COMMIT, database version field or new readback. UUIDs, intervals and source relationships from the original snapshot remain unchanged.
 
 Offline input data are pinned production `0ecbb291e8f443f7ab366bc4ac033d096f2c44f4`. All nine pinned builders match current production `3dc4aa8af4b4c2a0d157b5c9edae0bfc179fea1b` and all seven modules import. Current Git data have two additional Kyiv intervals absent from this snapshot; current completeness is not certified.
 
-Reproduce with the locked Python dependencies, from the repository root:
+For a fresh reproduction, first restore fixtures as described in `fixtures/README.md`. Use the locked Python dependencies from the repository root:
 
 ```sh
 python -m pip install -r research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt

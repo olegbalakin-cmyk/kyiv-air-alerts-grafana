@@ -13,6 +13,7 @@ import json
 import math
 import os
 import socket
+import shutil
 import subprocess
 import tempfile
 import zipfile
@@ -41,8 +42,20 @@ def save(path, value):
 
 def prepare_fixture(root):
     provenance = shadow.load(FIXTURES / "provenance.json")
+    cache = Path(os.environ.get("NEON_SHADOW_FIXTURE_CACHE", str(FIXTURES / "cache")))
+    if not cache.exists() and not all((FIXTURES / name).exists() for name in provenance["files"]):
+        from scripts.neon_json_shadow_restore_fixtures import restore
+        restore(cache)
     for archive, destination in (("site-inputs.zip", root / "site"),
                                  ("readback-c2-fixture.zip", root / "inputs")):
+        if cache.exists():
+            source = cache / archive.removesuffix(".zip")
+            expected = provenance["members"][archive]
+            actual = {str(p.relative_to(source)): sha(p.read_bytes())
+                      for p in source.rglob("*") if p.is_file()}
+            shadow.require(actual == expected, "BLOCKED_FIXTURE:CACHE_MEMBER_SHA")
+            shutil.copytree(source, destination)
+            continue
         raw = (FIXTURES / archive).read_bytes()
         shadow.require(sha(raw) == provenance["files"][archive], "BLOCKED_FIXTURE:ARCHIVE_SHA")
         with zipfile.ZipFile(FIXTURES / archive) as z:
