@@ -16,3 +16,13 @@ The archive paths point to **the very same Git blob objects** as the pre-compact
 Do **not** load either entire file into an AI chat or Work context. Search by exact checkpoint name and fetch only bounded line ranges or use local streaming scripts. Save large extracted evidence and machine diffs to files; return concise summaries with commit SHA, Actions run and artifact ID. If old Markdown anchors are needed, link to the appropriate archived file path rather than the compact root document.
 
 Archive history is not a production deployment record. Only newly accepted checkpoints documented in the compact coordination root can change the current release decision.
+
+## Automatic archival (2026-10-31 onward)
+
+Use [the manifest](manifest.json) for the complete snapshot inventory, SHA-256, Git blob SHA-1, byte lengths and byte-range hashes of transferred checkpoint records. [Browse dated snapshots](.). Root documents link here through a fixed index link. The index therefore stays discoverable without growing the root files.
+
+- Exact main roots before this maintenance: [PROJECT_STATE](2026-10-31_PROJECT_STATE_3c1fb6fe218ee955.md) and [CHANGELOG](2026-10-31_CHANGELOG_a7ab479e2fdbf3aa.md).
+- Prepared pre-archive roots: the manifest records four transferred PROJECT_STATE checkpoint sections and four transferred CHANGELOG transitions. Seven unique checkpoint IDs occur in those eight transferred sections; overlap is deliberate.
+- The two original pre-compaction archives above remain the exact original Git blobs. Nothing in them is rewritten or summarized. Each new dated snapshot is also a complete byte-exact pre-archive document.
+
+Run `python scripts/coordination_docs.py verify --base-ref origin/main` to verify immutable snapshots and historical-record coverage against the Git base. Read [maintenance instructions](../coordination-maintenance.md) for safe CLI use and automatic PR permission limits. Old relative link text is preserved; resolve it at its source Git ref or from the repository root, rather than relative to this archive directory.
