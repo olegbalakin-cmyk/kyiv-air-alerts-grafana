@@ -1,0 +1,84 @@
+name: Coordination docs
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, maintenance-coordination-docs-2026-10-31]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: coordination-docs / size-and-integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        run: python -m unittest discover -s tests -p 'test_coordination_docs.py' -v
+      - name: Size gate (UTF-8 bytes)
+        run: python scripts/coordination_docs.py check --json-output coordination-size-report.json
+      - name: Archive integrity and history coverage
+        if: always()
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+        run: |
+          base="$PR_BASE"
+          if [ -z "$base" ]; then base="$PUSH_BASE"; fi
+          if [ -z "$base" ] || [[ "$base" =~ ^0+$ ]]; then
+            base=$(git merge-base origin/main HEAD)
+          fi
+          python scripts/coordination_docs.py verify --base-ref "$base" --json-output coordination-integrity-report.json
+      - name: Archival dry-run
+        run: python scripts/coordination_docs.py archive --dry-run --json-output coordination-dry-run.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coordination-docs-proof
+          path: coordination-*.json
+          if-no-files-found: warn
+
+  archive-pr:
+    name: Prepare archival PR
+    # Never run write-capable code from a PR or maintenance proof branch.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    concurrency:
+      group: coordination-archive-pr
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Detect threshold, archive, and open PR (never push main)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python scripts/coordination_archive_pr.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coordination-archive-fallback
+          path: |
+            coordination-archive-pr-report.json
+            coordination-archive.patch
+          if-no-files-found: warn

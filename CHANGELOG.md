@@ -1,8 +1,13 @@
-# Changelog — recent accepted checkpoints
+# Changelog — recent accepted transitions
 
-Accepted coordination transitions, newest first. **This root file is intentionally small.** The complete prior changelog, with every original accepted checkpoint, remains byte-for-byte intact at [docs/coordination-archive/CHANGELOG_full_before_compaction_2026-10-30.md](docs/coordination-archive/CHANGELOG_full_before_compaction_2026-10-30.md). Historical technical detail and older judgments can be read in targeted ranges from that archive. Read the root [PROJECT_STATE.md](PROJECT_STATE.md) for the authoritative *current* coordination state.
+Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-## 2026-10-31
+<!-- coordination:history:start -->
+### DOC-AUTO-MAINTENANCE-01 — lossless archival and CI proposed (2026-10-31)
+
+- Separate maintenance branch adds UTF-8 byte limits (12 KiB warning / 16 KiB fail), deterministic archival with dry-run/idempotency, immutable hash manifest and historical-record coverage tests. Original root snapshots and both pre-compaction Git blobs remain exact.
+- Main-only automation proposes a docs-only PR above 12 KiB; it never pushes main or merges. Runtime permission denial leaves an explicit CLI/patch fallback. Main has no required checks; no protection settings changed. Workflow activation requires merge. No migration or production result is asserted.
+- Implementation `f683980230282c0696717d8d9b43438482300b15`: [Actions 41202012561](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202012561) SUCCESS, artifact **13042892819**; 17/17 tests, byte limits, archive integrity and no-op replay PASS. [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34). Concurrent accepted main `5f64048c2b8de40c336c75b263941598a606a3bf` is preserved in full snapshots and reflected in current state; integration receives its own CI run.
 
 ### C6-LIVE-WRITER-PHYSICAL-02 — one isolated child verified; physical execution blocked
 
@@ -34,35 +39,4 @@ Accepted coordination transitions, newest first. **This root file is intentional
 - Candidate visibly marked **RESEARCH / NEON CANDIDATE / DST SIMULATION**, cutoff **2026-10-30T15:27:55.138400Z**, no ongoing-freshness claim. Complete downloadable preview/proofs plus screenshots retained. No external Netlify deployment: connector lacks upload/deploy and CLI lacks authorization; local browser execution completed on the authorized Actions runner.
 - **C6/C3 PARTIAL; GLOBAL_CUTOVER=NO.** Four physical DST cases, live writer/fail-closed/ongoing freshness, Kyiv current provenance and production switch/operational rollback remain separate gates. No Neon, writer, site-prod, operational WIP or production Netlify changes. Next: close those gates; frozen parity/browser/CSV/preview rollback need no new general audit.
 
-### C6-RECOVERED-PARITY-VERIFICATION-02 — frozen replay reproduced; difference causes verified
-
-- Physically executed pinned offline replay: **31,935 → 31,939** rows after DST simulation, **23 cities**, original reports byte-identical. First saved replay checkpoint `9ea0693fa5b8d24959d88c1ba55981d059c5fc23`; final verified research commit [`741f277f`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03). Direct 22-city differences **0 without / 366 with DST projection**.
-- Corrected accounting of **1,354** exact JSON paths: **847 DST + 457 legacy derived omission of accepted C4-KH-06 + 49 cutoff timestamps + 1 research marker; unexplained 0**. Single-interval Kharkiv counterfactual reproduces published derived fields exactly. Minimal loader correction passes isolated real-loader regression checks; candidate already uses the accepted long interval. No deployed generator or Neon modification.
-- All seven DST proposal tuples match pinned source events. Four physical DST cases remain open. Reproducible harness, complete classified diff, tests, patch, source witnesses and hashes saved under `research/neon_cutover_work_2026_10_30/`; candidate ready for bounded research preview with DST simulation. Fresh database/primary receipt, complete upstream CSV, browser/CSV, freshness and switch/rollback are outside this proof. **C6/C3 PARTIAL; GLOBAL_CUTOVER=NO**. Next: authorized preview consumer and rollback rehearsal.
-
-### RECOVERY-RESEARCH-COMMITS-01 — two original Work commits saved and remotely verified
-
-- Owner recovered an original Git bundle and performed an ordinary **non-force fast-forward push**. Independently verified remote `research-neon-cutover-work-2026-10-30@e153495537ac4cf002c6ec9aaa58ddb03c0e88ba`; GitHub commit parents **b3ceeece → e8a1717afc6d2f7c574479aa8f369b8c82b4f3f2 → e153495537ac4cf002c6ec9aaa58ddb03c0e88ba**, compare ahead 2 / behind 0.
-- Recovered research source, pinned inputs, JSON machine diffs, DST simulation account, smoke script, cutover patch proposals and SHA-256 manifest exist in `research/neon_cutover_work_2026_10_30/`. Source artifacts are **research-only, not promoted or re-executed** as an accepted cutover proof. Saved machine verdict **PARTIAL_RESEARCH**, **1,354** difference paths; replay numbers are marked `recovered_not_yet_reexecuted` in the saved checkpoint.
-- **Accepted scope:** Git preservation recovered; physical latest parity, writer/readback, frontend browser/CSV, rollback and production release remain open. `RESEARCH_COMMITS_RECOVERED=PASS`, `C6=PARTIAL`, `C3=PARTIAL`, `GLOBAL_CUTOVER=NO`. Next: verify/re-execute preserved 23-city candidate and difference accounting, then fix only critical release blockers. This transition updates documentation only.
-
-## 2026-10-30
-
-### DOC-CONTEXT-COMPACTION-01 — coordination documentation compacted; historical evidence retained
-
-- Root PROJECT_STATE.md and CHANGELOG.md replaced by concise current-state and recent-transition summaries to avoid repeatedly loading ~1.43 million characters into Work sessions.
-- Their complete previous contents are kept under docs/coordination-archive by **reusing exact original Git blobs**: PROJECT_STATE **ebcc286b3bfc93372a61567f1de5fe1d3e49bc2a**, CHANGELOG **732e7a07f3e92e1138aafe311bff5561f56d60ee**. Archives are immutable historical reference, not reinterpreted evidence.
-- Confirmed newer research Actions **41123467415** completed with artifact **13009048201**, but this job did not perform physical Neon persistence and is **not** a cutover gate. Interrupted Work's reported local commits and parity improvements remain unaccepted until recovered and independently reviewed.
-- **No change** to site-prod, operational WIP, Neon data or production writer; **GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL**. Next task: preserve interrupted Work commits, then verify the actual 23-city parity candidate and rehearse rollback.
-
-### C6-PROVENANCE-04B — bounded negative evidence accepted (previous checkpoint)
-
-- [Actions 41120424463](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41120424463) failed with **zero job steps** and no artifact. The accepted negative proof does not establish an actual HTTP→physical Neon UUID. Newer, independent research run 41123467415 succeeded in the network/parser stage only; those are distinct execution scopes. Full original checkpoint in [archived changelog](docs/coordination-archive/CHANGELOG_full_before_compaction_2026-10-30.md).
-
-### C6-23CITY-INTEGRATED-SHADOW-02 — bounded physical reader accepted, release parity partial (previous checkpoint)
-
-- [Actions 41076975484](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41076975484): read-only Neon 23-city consumer-schema proof accepted (**31,903** closed AIR); **2,570** JSON path differences to pinned legacy reference, not proven current parity. Full original checkpoint and immutable evidence references in the [archived changelog](docs/coordination-archive/CHANGELOG_full_before_compaction_2026-10-30.md).
-
-## Maintenance policy
-
-After accepting any checkpoint that changes the current state or next task, update root PROJECT_STATE.md and prepend a **brief** accepted transition here. Keep the root files under approximately 20 KB; periodically move older detailed entries to dated archives while retaining exact source Git blobs and stable links. Do not record exploratory Work updates as accepted physical evidence, or infer production from a research-only run.
+<!-- coordination:history:end -->
