@@ -17,8 +17,14 @@
 - **C6-23CITY-INTEGRATED-SHADOW-02:** bounded, physical read-only Neon-to-site generation accepted for **23 cities / 31,903 closed AIR episodes**, consumer schema QA PASS (4 exact-city, 19 raion proxies). Against the pinned older production reference, **2,570 JSON-path differences** remained; full current-site parity NOT ACCEPTED. Approved reader proof: [Actions 41076975484](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41076975484), artifact **12986704632**. Do not treat each diff path as an incorrect database episode.
 - **Kyiv reader:** frozen B2 proof **382 physical parents to 198 displayed alerts**. At the accepted October cutoff, **nine** site intervals lay outside that frozen B2; **28 classifications on 27 suppressed parents must not be rebound** without provenance. Historic Kyiv reader scope and primary source-to-UUID receipts remain open.
 - **DST:** accepted research analysis identifies **three erroneous merged intervals and one missing alert** affecting Kharkiv, Poltava, Zhytomyr and Cherkasy. Proposed UTC fix is **not integrated into production Neon**; any data correction needs the authorized isolated test and a separately gated write plan.
-- **Provenance/live writer:** local PG17 crash-safe receipt proof is bounded LOCAL. C6-LIVE-WRITER-FRESHNESS-01 now proves real source HTTP/parser identity plus synthetic freshness, but Neon writes/readback are **BLOCKED** by verified 10/10 branch capacity. No end-to-end physical UUID or production writer readiness.
+- **Provenance/live writer:** local PG17 crash-safe receipt proof is bounded LOCAL. C6-LIVE-WRITER-FRESHNESS-01 proved real source HTTP/parser identity and synthetic freshness only. On 2026-10-31 the owner freed Neon capacity (**9/10 branches now**), but physical isolated write/UUID/readback and production writer readiness remain **NOT PROVEN**. See NEON-BRANCH-SLOT-FREED-01.
 - **C3 cutover:** frozen research preview source switch, frontend/CSV/derived consumer package and source-only rollback are physically proven by C6-PREVIEW-ROLLBACK-01 below. Production generator switch/operational rollback, current active alerts, writer durability/ongoing freshness and fail-closed activation still need their release gate. The frozen package retains explicit Git auxiliary dependencies.
+
+## NEON-BRANCH-SLOT-FREED-01 — verified 9/10 branches; isolated writer can now be tested (2026-10-31)
+
+- Owner reported deleting historical archived isolated leaf `br-cold-sky-b5jhai9p` (`lviv-phase1-live-poll-adapter-e2e-2026-09-28`). Independent Neon `list_branches(project=green-cake-44216048, include_deleted=false)` now lists **9 branches** under Free-plan limit **10**; deleted ID is absent. No new child created by this verification.
+- **Capacity blocker CLEARED; physical writer gate OPEN/NOT EXECUTED.** The saved two-phase research script at `research-neon-live-writer-freshness-2026-10-31@0f0d7181e04cb053b773fb5c0ecf284bb82bc66a` still requires a fresh child of `br-bold-mode-b5rub8pq`, physical first-COMMIT/crash retry, independent UUID/source readback and fail-closed generation from that child. Separate ongoing freshness/active-alert/production authorization remains necessary.
+- Container execution in this chat has no direct outbound network access to GitHub/Neon, so no new child, SQL writes, physical Python runner or cleanup was attempted here. Use an authorized Work/runner with a properly scoped child DB URL. Never put a credential into Git files or workflow logs. **GLOBAL_CUTOVER=NO; C6/C3=PARTIAL.**
 
 ## C6-LIVE-WRITER-FRESHNESS-01 — bounded real HTTP + synthetic freshness PASS; physical Neon writer BLOCKED (2026-10-31)
 
@@ -58,7 +64,7 @@
 
 ## Shortest safe next path
 
-1. **First unblock isolated Neon writer proof:** free one obsolete leaf branch only after explicit owner approval, or raise branch limit (10/10 now). Run saved physical writer/UUID/readback/retry and post-COMMIT freshness verification; no production write or source switch.
+1. **Capacity available (9/10):** run the prepared isolated C6 writer scenario on one newly created child of `br-bold-mode-b5rub8pq`. Prove physical COMMIT, idempotent retry, independent Neon UUID/source readback and post-COMMIT freshness/fail-closed JSON. Save bounded original runner evidence and clean up only with explicit owner authorization.
 2. **Close remaining source/writer gates:** resolve the four physical DST cases through the authorized isolated proof and separately gated write plan; close Kyiv current selection/provenance exceptions and durable live writer/readback. Keep existing Git auxiliary dependencies explicit.
 3. **Run production-like rehearsal:** prove ongoing update freshness, real safe writer path, full consumer contract, controlled legacy|neon switch and rollback. Only then request/execute separately approved production promotion.
 
