@@ -46,7 +46,10 @@ membership selects exact physical intervals; B2 frozen display rules stay
 unchanged, and the already accepted new physical episode is included as a
 research-only prospective observation. A full UUID/union/source link sidecar
 is retained with the physical readback in the Actions artifact. Incomplete
-source provenance is reported, never filled with a fabricated receipt.
+source provenance is reported, never filled with a fabricated receipt. Existing
+observation integrity is checked; missing historical links do not introduce a
+new full-backfill gate on top of accepted historical baseline evidence. Current
+source capture and continuity still require their own physical evidence.
 
 `source_captured_at`, checkpoint `checked_at`, ingestion `ingest_committed_at`,
 reader snapshot time and `site_generated_at` are separately recorded. Only
