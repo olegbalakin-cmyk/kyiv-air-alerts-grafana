@@ -16,3 +16,9 @@ The archive paths point to **the very same Git blob objects** as the pre-compact
 Do **not** load either entire file into an AI chat or Work context. Search by exact checkpoint name and fetch only bounded line ranges or use local streaming scripts. Save large extracted evidence and machine diffs to files; return concise summaries with commit SHA, Actions run and artifact ID. If old Markdown anchors are needed, link to the appropriate archived file path rather than the compact root document.
 
 Archive history is not a production deployment record. Only newly accepted checkpoints documented in the compact coordination root can change the current release decision.
+
+## Incremental snapshots
+
+[Machine index](index.json) lists each dated full snapshot and its manifest. Each manifest includes source commit, source SHA-256/Git blob SHA and byte ranges for every retained or archived checkpoint. The index also pins each manifest's SHA-256. The original two blobs above remain mandatory and unchanged.
+
+Run `python scripts/coordination_docs.py verify --base origin/main` to verify the snapshots and ensure every checkpoint in the comparison base is still available verbatim. Run `archive --dry-run` before archival. See [maintenance procedure and CI permissions](../coordination-maintenance.md).

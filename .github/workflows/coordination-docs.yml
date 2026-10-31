@@ -1,0 +1,54 @@
+name: Coordination docs
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coordination-docs:
+    name: coordination-docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        run: python -m unittest discover -s tests/coordination -v
+      - name: Determine history comparison base
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+        shell: bash
+        run: |
+          if [ -n "$PR_BASE" ]; then
+            base="$PR_BASE"
+          elif [ -n "$PUSH_BASE" ] && ! [[ "$PUSH_BASE" =~ ^0+$ ]]; then
+            base="$PUSH_BASE"
+          else
+            base="origin/main"
+          fi
+          echo "COORDINATION_BASE=$base" >> "$GITHUB_ENV"
+      - name: Verify exact history and UTF-8 size limits
+        run: python scripts/coordination_docs.py check --github --base "$COORDINATION_BASE" --report coordination-docs-report/check.json
+      - name: Verify archival dry run
+        # An unsplittable WARNING must not change the byte-size verdict to FAIL.
+        continue-on-error: true
+        run: python scripts/coordination_docs.py archive --dry-run --report coordination-docs-report/dry-run.json
+      - name: Save bounded machine evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coordination-docs-report
+          path: coordination-docs-report/
+          if-no-files-found: warn

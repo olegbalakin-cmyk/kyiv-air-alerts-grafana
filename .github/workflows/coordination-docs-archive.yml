@@ -1,0 +1,45 @@
+name: Archive coordination docs by PR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - PROJECT_STATE.md
+      - CHANGELOG.md
+      - scripts/coordination_docs*.py
+      - .github/workflows/coordination-docs-archive.yml
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Archive down to five changelog entries even below threshold (permission/end-to-end proof)
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: coordination-docs-archive
+  cancel-in-progress: false
+
+jobs:
+  archive-pr:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Archive exact historical records and open PR when needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE_FORCE: ${{ inputs.force || false }}
+        run: python scripts/coordination_docs_pr.py
