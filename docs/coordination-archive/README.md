@@ -26,3 +26,8 @@ Use [the manifest](manifest.json) for the complete snapshot inventory, SHA-256, 
 - The two original pre-compaction archives above remain the exact original Git blobs. Nothing in them is rewritten or summarized. Each new dated snapshot is also a complete byte-exact pre-archive document.
 
 Run `python scripts/coordination_docs.py verify --base-ref origin/main` to verify immutable snapshots and historical-record coverage against the Git base. Read [maintenance instructions](../coordination-maintenance.md) for safe CLI use and automatic PR permission limits. Old relative link text is preserved; resolve it at its source Git ref or from the repository root, rather than relative to this archive directory.
+
+## C6-23CITY-CONTINUITY-02 archival (2026-10-31)
+
+- [Project State snapshot](2026-10-31_PROJECT_STATE_55b562738dae7235.md): prior accepted publication checkpoint retained exactly.
+- [Changelog snapshot](2026-10-31_CHANGELOG_c09dc428f46904f7.md): complete recent transitions before retention trimming.
