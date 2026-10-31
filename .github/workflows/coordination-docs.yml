@@ -39,7 +39,7 @@ jobs:
             base=$(git merge-base origin/main HEAD)
           fi
           python scripts/coordination_docs.py verify --base-ref "$base" --json-output coordination-integrity-report.json
-      - name: Dry-run proves re-run is a no-op
+      - name: Archival dry-run
         run: python scripts/coordination_docs.py archive --dry-run --json-output coordination-dry-run.json
       - uses: actions/upload-artifact@v4
         if: always()
