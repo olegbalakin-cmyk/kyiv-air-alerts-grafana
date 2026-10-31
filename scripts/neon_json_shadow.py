@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -200,6 +201,21 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
         generator = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(generator)
 
+        def input_failure(exc):
+            code = getattr(exc, "code", None)
+            if not code and isinstance(exc, KeyError) and exc.args:
+                code = "MISSING_FIELD:" + str(exc.args[0])
+            if not code and isinstance(exc, ModuleNotFoundError):
+                code = "MISSING_MODULE:" + str(exc.name)
+            if not code and isinstance(exc, generator.Closed):
+                code = str(exc)
+            if not code:
+                code = type(exc).__name__
+            # Machine-readable contracts only; avoid outputting SQL,
+            # connection strings, raw source rows or credentials.
+            safe = re.sub(r"[^A-Za-z0-9_:.+/-]", "_", str(code))[:160]
+            return "BLOCKED_GENERATOR_INPUT:" + safe
+
         from types import SimpleNamespace
         args = SimpleNamespace(site=site, branch_id=expected_branch, input_sha=input_sha)
         with tempfile.TemporaryDirectory(prefix="neon-shadow-stage-", dir=output) as staging:
@@ -207,7 +223,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             try:
                 adapter, b2, bundle = generator.prepare(args, work)
             except Exception as exc:
-                raise ShadowBlocked("BLOCKED_GENERATOR_INPUT:ACCEPTED_C6_ASSETS_OR_BUILDERS") from exc
+                raise ShadowBlocked(input_failure(exc)) from exc
             # Reader can be injected by offline tests; no HTTP, no Neon writes.
             if reader is None:
                 snap = generator.snapshot(database_url, b2, bundle,
@@ -248,7 +264,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 result = generator.generate(args, work, adapter, b2, bundle,
                                             snap, closed, active, cities)
             except Exception as exc:
-                raise ShadowBlocked("BLOCKED_GENERATOR_INPUT:FRONTEND_OR_PROVENANCE_CONTRACT") from exc
+                raise ShadowBlocked(input_failure(exc)) from exc
             names = {
                 "dashboard_data.json", "site_derived.json", "alerts_combined.json",
                 "historical-daily-kpi.json", "kyiv_threat_mix.json",
