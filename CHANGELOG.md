@@ -4,6 +4,15 @@ Accepted coordination transitions, newest first. **This root file is intentional
 
 ## 2026-10-31
 
+### C6-LIVE-WRITER-PHYSICAL-02 — one isolated child verified; physical execution blocked
+
+- Research proof commit [`e9226f3bd92b9341cc6910772034b10612012088`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/e9226f3bd92b9341cc6910772034b10612012088) saved/verified as a non-force fast-forward from `0f0d7181e04cb053b773fb5c0ecf284bb82bc66a`.
+- Created exactly one child **`br-crimson-star-b59u7ge3`** from authorized shadow parent **`br-bold-mode-b5rub8pq`**. Separate branch/compute/connection-host reads verify isolation; inventory **9/10→10/10**. TTL **2026-11-01T12:20:00Z**; no manual deletion.
+- Local Python cannot resolve Neon (`gaierror [Errno -3]`); psycopg missing. Child-targeted URL obtained privately, child-only role scope not attested; no exposed secure Actions credential-injection operation. Existing Actions child-secret availability UNKNOWN. **No SQL or writer invocation**; COMMIT/crash/retry/physical UUID/readback/JSON remain NOT EXECUTED.
+- Frozen HTTP/canonical hash verification PASS. Unchanged gate rejects real saved capture **STALE_SOURCE_CAPTURE**, age **48,881.8 s** versus **21,600 s**. No recapture or synthetic retest; this is bounded stale-input rejection only.
+- Accepted bounded blocker: `BLOCKED_RUNTIME_AND_STALE_SOURCE`; **production preflight ready NO**, **C6/C3 PARTIAL; GLOBAL_CUTOVER NO**. No production Neon, site-prod, operational WIP or Netlify changes. Next: reuse this child with a network-capable runner and verified scoped credentials; retain original timestamp and obtain separate authority for current-source freshness evidence.
+
+
 ### NEON-BRANCH-SLOT-FREED-01 — capacity recovered (coordination-only)
 
 - Owner deleted obsolete historical Neon leaf `br-cold-sky-b5jhai9p`; independently checked Neon project `green-cake-44216048`: **9/10** existing branches, deleted ID absent. Quota blocker removed, but **no child created or writer run** by this verification.
