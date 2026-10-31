@@ -1,5 +1,9 @@
 # C6 two-cycle live continuity experiment
 
+Accepted result: **C6-23CITY-CONTINUITY-02 — PARTIAL, publication BLOCKED**.
+Kyiv passed both cycles; UkraineAlarm stopped after a documentation HTTP 403,
+and Sevastopol's second capture timed out. See [the closeout](ACCEPTANCE.md).
+
 One owner-authorized experiment on the existing child, capped at 60 upstream
 GETs including documentation and 70 minutes including preservation. No scheduler,
 publication, production/parent write or operational branch modification.
