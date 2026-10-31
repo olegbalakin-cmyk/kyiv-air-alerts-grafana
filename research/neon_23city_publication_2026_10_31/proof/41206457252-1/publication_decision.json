@@ -1,0 +1,90 @@
+{
+  "candidate_sha256": {
+    "alerts_combined.json": "9abb73226b603518420ab0b9c9af6c96d6112170ef8fb2759d80a911427353ba",
+    "dashboard_data.json": "ddae54981b2728989534a08051e145a2728116c1ddbf32d800b220552d3314a0",
+    "historical-daily-kpi.json": "08e580701b5093d4f5189736e00b02fed98a4a96ffa054f994c853a99007acf4",
+    "kyiv_threat_mix.json": "ebb8c5eb3ed236828ed7a7f7d7ab153ade16555120a8180c25bf9d82e29094a1",
+    "sevastopol_events.json": "50ed66e601335f2963c86ec89dfd673a125c6447dc15739588ea555a564fc827",
+    "site_derived.json": "c81e7bae1567cd32a3c41824a4922b0caec42a153263598d528763951bdfd8a5"
+  },
+  "decision": "PUBLICATION_BLOCKED",
+  "gates": {
+    "23city_generation": {
+      "evidence_kind": "physical",
+      "reason": "Existing accepted adapter/B2/pure builders; six consumer files; no DST simulation",
+      "verdict": "PASS"
+    },
+    "continuous_writer_operation": {
+      "evidence_kind": "not_proven",
+      "reason": "No scheduler/capture/writer launched; earlier single COMMIT/crash/retry proof remains bounded",
+      "verdict": "OPEN"
+    },
+    "current_active_status": {
+      "evidence_kind": "not_proven",
+      "reason": "Closed-history-only builders; zero open DB rows does not certify no active AIR alerts",
+      "verdict": "OPEN"
+    },
+    "explicit_git_auxiliaries": {
+      "evidence_kind": "physical",
+      "reason": "Git dependency SHA-256/blob/commit manifest; no Neon-error fallback",
+      "verdict": "PASS"
+    },
+    "frontend_structure": {
+      "evidence_kind": "physical",
+      "reason": "23 city keys, timezone, exact/proxy semantics and required arrays; earlier browser proof remains pinned",
+      "verdict": "PASS"
+    },
+    "isolated_branch_readonly": {
+      "evidence_kind": "physical",
+      "reason": "Exact child hostname/role/TTL and REPEATABLE READ READ ONLY transaction",
+      "verdict": "PASS"
+    },
+    "kyiv_current_provenance": {
+      "evidence_kind": "accepted_open_dependency",
+      "reason": "B2 frozen view reused; later exact Git selections/prospective UUID are research-only; suppressed classifications unchanged",
+      "verdict": "OPEN"
+    },
+    "physical_dst_repairs": {
+      "evidence_kind": "accepted_open_dependency",
+      "reason": "Four separately tracked physical repairs remain; this runner makes no repair",
+      "verdict": "OPEN"
+    },
+    "production_cutover_authorization": {
+      "evidence_kind": "owner_decision",
+      "reason": "No explicit production cutover authorization in this task",
+      "verdict": "OPEN"
+    },
+    "production_preflight": {
+      "evidence_kind": "not_proven",
+      "reason": "Operational source switch/rollback and release readiness require separate preflight",
+      "verdict": "OPEN"
+    },
+    "read_only_repeatability": {
+      "evidence_kind": "physical",
+      "reason": "Second independent read-only snapshot fingerprint equals first; no writer invoked",
+      "verdict": "PASS"
+    },
+    "source_capture_freshness": {
+      "evidence_kind": "physical",
+      "reason": "Require verified source captures <=21600s for all required cities; JSON/COMMIT time cannot refresh capture",
+      "verdict": "BLOCKED"
+    },
+    "source_continuity": {
+      "evidence_kind": "not_proven",
+      "reason": "Kyiv current checkpoint continuity_verified=false; no repeat source capture authorized",
+      "verdict": "OPEN"
+    },
+    "source_contract_and_currency": {
+      "evidence_kind": "not_proven",
+      "reason": "Kyiv source identity prospective; upstream cache currency and all-city source completeness uncertified",
+      "verdict": "OPEN"
+    },
+    "source_observation_integrity": {
+      "evidence_kind": "physical",
+      "reason": "Every existing observation UUID/parent/city link validated and retained; historical coverage gaps reported, not converted into a new full-backfill gate",
+      "verdict": "PASS"
+    }
+  },
+  "publication_allowed": false,
+  "publish_directory_created": false
+}
