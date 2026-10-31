@@ -259,7 +259,7 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     derived.setdefault('meta',{})['publication_authority']=authority
     # Keep source-specific historical KPI index exactly aligned with dashboard's
     # actual generation time; no older source or Git-data fallback is introduced.
-    payload['historical_daily_kpi']['meta']['generated_at']=payload['meta']['generated_at']
+    payload['historical_daily_kpi']['meta'].update(generated_at=payload['meta']['generated_at'],source_dashboard_generated_at=payload['meta']['generated_at'],source_ref='neon:'+CHILD,source_commit=None,generator_commit=os.getenv('GITHUB_SHA'))
     candidate=out/'candidate'
     save(candidate/'dashboard_data.json',payload); save(candidate/'site_derived.json',derived); save(candidate/'alerts_combined.json',kyiv)
     save(candidate/'historical-daily-kpi.json',payload['historical_daily_kpi'])
@@ -275,6 +275,7 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
         for section in ('kpis','monthly','weekly','daily28','rolling30','rolling90'): require(isinstance(payload['cities'][key].get(section),list),'FRONTEND_ROWS_SHAPE:'+key+':'+section)
         require(key in derived['explorations']['daily28_current']['cities'],'FRONTEND_DERIVED_CITY_MISSING')
     require(payload['historical_daily_kpi']['meta']['verified_count']==23,'HISTORICAL_INDEX_STRUCTURE')
+    require(payload['historical_daily_kpi']['meta']['source_dashboard_generated_at']==payload['meta']['generated_at'],'HISTORICAL_INDEX_DASHBOARD_TIME_MISMATCH')
     save(out/'projection_lineage.json',lineage); save(out/'active_rows_unmodified.json',active)
     save(out/'git_dependencies.json',dependencies); save(out/'kyiv_excluded_git_memberships.json',excluded)
     save(out/'utc_union_diagnostics.json',diagnostics)
