@@ -3,6 +3,12 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-LIVE-WRITER-PHYSICAL-03 — child persistence proved; current-source freshness still blocked (2026-10-31)
+
+- [Verified closeout `0617e681`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/0617e6818f34e4a807e535b35fa4a9281d8d0e0b), raw results `ac516e8fe9f25bc6cacbfe566e28bd856ea8fbe1`; [Actions 41203425205](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41203425205) SUCCESS; artifact **13043214025**, all **10** manifest hashes independently matched.
+- Protected Environment delivered the verified child-only role/URL. Original Python Phase-1 COMMIT → crash **86** → separate exact retry → independent read-only UUID/source readback PASS. **Existing canonical episode reused**; new observation/checkpoint inserted; retry inserted **0** duplicates. New UUID allocation is not proven. Original consumer builder produced one post-write Kyiv JSON witness; no full-site regeneration claim.
+- Capture remains **2026-10-30T22:56:24.503909Z**; original gate rejected **STALE_SOURCE_CAPTURE** (**50,521.9 s > 21,600 s**). Persistence **PASS**, freshness **BLOCKED** pending separately authorized new observation with valid checkpoint continuation. Runtime/credential blockers resolved; **C6/C3 PARTIAL; GLOBAL_CUTOVER NO**. Existing child TTL unchanged; no creation/deletion or production/parent/site-prod/WIP/Netlify/writer changes.
+
 ### DOC-AUTO-MAINTENANCE-MERGE-02 — maintenance PR merged and main CI verified (2026-10-31)
 
 - [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged with merge commit [`3735f359d2bf`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3735f359d2bfa3310cc7f9fd46f9c8f3a2af0e8f). [Actions 41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) SUCCESS on main: tests, UTF-8 byte gate, history integrity and archival dry-run. Roots reduced from 20,212/11,614 B to 7,990/7,127 B; 10 entries representing 8 distinct checkpoints retained in hashed archives.
