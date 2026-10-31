@@ -1,0 +1,96 @@
+name: C6 one authorized fresh HTTP poll and isolated Neon readback
+on:
+  push:
+    branches: [research-neon-live-writer-freshness-2026-10-31]
+    paths:
+      - '.github/workflows/c6-live-freshness-onecapture-04.yml'
+permissions:
+  contents: read
+concurrency:
+  group: c6-one-authorized-fresh-http-get-child
+  cancel-in-progress: false
+jobs:
+  physical-freshness:
+    if: github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' && github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    environment: c6-live-writer-proof
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: research-repo
+          persist-credentials: false
+      - name: Pinned unchanged original source and Phase-1 persistence (never deploy)
+        uses: actions/checkout@v4
+        with:
+          ref: c6636e838cc5ca1da3f250091bb1c5c0ff08229e
+          path: site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile code before any authorized HTTP call
+        run: python -m py_compile research-repo/research/neon_live_writer_freshness_2026_10_31/run_freshness_04.py
+      - name: Install only existing reader/writer dependencies
+        run: python -m pip install --disable-pip-version-check 'psycopg[binary]>=3.2,<4' 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: One physical HTTP GET, valid Phase-1 poll checkpoint, independent readback, bounded freshness
+        env:
+          NEON_ISOLATED_PROOF_DATABASE_URL: ${{ secrets.NEON_ISOLATED_PROOF_DATABASE_URL }}
+        run: |
+          python research-repo/research/neon_live_writer_freshness_2026_10_31/run_freshness_04.py \
+            --site site/kyiv-air-alerts-grafana \
+            --output physical-freshness
+      - name: Preserve immutable bounded evidence including HTTP bytes even on fail-closed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-one-freshness-capture-${{ github.run_id }}
+          path: physical-freshness/
+          retention-days: 30
+          if-no-files-found: warn
+  save-proof:
+    needs: physical-freshness
+    if: always() && github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-neon-live-writer-freshness-2026-10-31
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: c6-one-freshness-capture-${{ github.run_id }}
+          path: downloaded-freshness
+      - name: Verify all hashes; save only metadata and JSON evidence, not original HTML bytes
+        env:
+          PROOF_RUN_ID: ${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, shutil
+          from pathlib import Path
+          src=Path('downloaded-freshness')
+          manifest=json.loads((src/'sha256_manifest.json').read_text())
+          assert manifest['schema']=='c6-live-freshness-04-v1'
+          for name, expected in manifest['files'].items():
+              p=(src/name).resolve()
+              assert p.is_relative_to(src.resolve()) and p.is_file()
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==expected, name
+          target=Path('research/neon_live_writer_freshness_2026_10_31/proof/physical_04/runs')/os.environ['PROOF_RUN_ID']
+          target.mkdir(parents=True,exist_ok=True)
+          for p in src.rglob('*'):
+              if p.is_file() and p.name != 'kyiv_digital_http_entity.bin':
+                  dst=target/p.relative_to(src)
+                  dst.parent.mkdir(parents=True,exist_ok=True)
+                  shutil.copyfile(p,dst)
+          print('ONE_FRESH_CAPTURE_PROOF_CHECKSUMS_OK',len(manifest['files']))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- research/neon_live_writer_freshness_2026_10_31/proof/physical_04/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "research(C6): preserve one fresh HTTP poll and gated child proof [skip netlify]"
+          git push origin HEAD:research-neon-live-writer-freshness-2026-10-31
