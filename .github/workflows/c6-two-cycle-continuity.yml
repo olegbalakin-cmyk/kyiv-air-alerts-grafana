@@ -1,0 +1,108 @@
+name: C6 bounded two-cycle continuity on existing child only
+on:
+  push:
+    branches: [research-neon-live-writer-freshness-2026-10-31]
+    paths:
+      - 'research/neon_23city_continuity_2026_10_31/run-request.txt'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: c6-two-cycle-owner-authorized-existing-child
+  cancel-in-progress: false
+jobs:
+  continuity:
+    if: github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' && github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    environment: c6-live-writer-proof
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: work
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 741f277f73d1dde1325069d25fa00b44a42d6f03
+          path: accepted
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0ecbb291e8f443f7ab366bc4ac033d096f2c44f4
+          path: site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install established reader, parser and writer dependencies
+        run: python -m pip install --disable-pip-version-check 'psycopg[binary]>=3.2,<4' 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Compile before any source HTTP; validate authorization envelope
+        run: |
+          python -m py_compile work/research/neon_23city_continuity_2026_10_31/continuity.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('work/research/neon_23city_continuity_2026_10_31')
+          v=json.loads((p/'authorization.json').read_text())
+          assert v['max_http_gets']==60 and v['max_minutes']==70 and v['cycles']==2
+          assert v['child']=='br-crimson-star-b59u7ge3' and not v['production_publication']
+          PY
+      - name: Bounded real HTTP to C2-C3 write, independent readback, research JSON and fail-closed gate
+        env:
+          NEON_ISOLATED_PROOF_DATABASE_URL: ${{ secrets.NEON_ISOLATED_PROOF_DATABASE_URL }}
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+          GH_PREFLIGHT_TOKEN: ${{ github.token }}
+        run: |
+          timeout --signal=TERM --kill-after=15s 64m python work/research/neon_23city_continuity_2026_10_31/continuity.py \
+            --site site/kyiv-air-alerts-grafana --accepted accepted --output evidence
+      - name: Preserve complete source bytes, SQL receipts, candidates and manifest even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-two-cycle-continuity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
+  save-proof:
+    needs: continuity
+    if: always() && github.ref == 'refs/heads/research-neon-live-writer-freshness-2026-10-31' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-neon-live-writer-freshness-2026-10-31
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: c6-two-cycle-continuity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: downloaded
+      - name: Verify full manifest and preserve bounded reports; source bytes remain in artifact
+        env:
+          PROOF_RUN_ID: ${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+          src=Path('downloaded'); manifest=json.loads((src/'sha256_manifest.json').read_text())
+          assert manifest['schema']=='c6-two-cycle-continuity-v1'
+          for name,want in manifest['files'].items():
+              p=(src/name).resolve()
+              assert p.is_relative_to(src.resolve()) and p.is_file()
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==want,name
+          dest=Path('research/neon_23city_continuity_2026_10_31/proof')/os.environ['PROOF_RUN_ID']
+          for p in src.rglob('*.json'):
+              if p.stat().st_size>200000 or p.name=='neon_readback.json' or 'approved-adapter' in p.parts or 'candidate' in p.parts:
+                  continue
+              target=dest/p.relative_to(src);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target)
+          print('VERIFIED_ARTIFACT_HASHES',len(manifest['files']))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- research/neon_23city_continuity_2026_10_31/proof/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "research(C6): preserve bounded two-cycle continuity receipts [skip netlify]"
+          git push origin HEAD:research-neon-live-writer-freshness-2026-10-31
