@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-SHADOW-WORKFLOW-REGISTERED-01 — manual workflow registered; physical proof not run (2026-11-01)
+
+- Owner-approved [PR #41](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/41) merged as [`main@fccb4d3c`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/fccb4d3c43668fccb4b3d4ecc31965d76ae67e7b). Exactly one manual-only C6 workflow file; required pre-merge `coordination-docs / size-and-integrity` SUCCESS. No proof dispatch, updater modification, Neon or production publication.
+- Research exporter [`0d088a8d`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/0d088a8d820eb5d55715f8b24be1a29793f6bacf) and reader patch `efb99311` remain unmerged; no real C2 bundle. Dedicated read-only LOGIN credential/Environment still unverified. Separate DST fresh preflight [`04b0938d`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/04b0938d72ecfde675dc665a0a1268ee4d86f11d) BLOCKED_ACCESS, no SQL or repair. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+
 ### C6-UA-CURRENT-ONEGET-01 — current API access PASS; active semantics OPEN (2026-10-31)
 
 - Owner-authorized one GET `/api/v3/alerts`: HTTP 200, 72 rows, 9/21 mapped IDs directly present with AIR, 12 absent but UNKNOWN. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS; [proof d6a6340f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01), encrypted artifact **13049271828**, 5/5 hashes verified. History 21/21 separately proven by existing production client.
