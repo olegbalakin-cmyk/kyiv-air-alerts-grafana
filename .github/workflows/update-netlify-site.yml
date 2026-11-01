@@ -466,6 +466,48 @@ jobs:
       - name: Build Kyiv alert-cause JSON without Netlify
         run: python scripts/build_kyiv_threat_mix.py --output data/kyiv_threat_mix.json
 
+      # Export only existing same-run bytes. Default OFF, no DB/source calls;
+      # any export failure leaves the production Git publication path unchanged.
+      - name: Check out same-workflow C2 bundle exporter
+        id: c2_bundle_source
+        if: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: c2-bundle-source
+          persist-credentials: false
+
+      - name: Export verified same-run C2 shadow bundle
+        id: c2_bundle_export
+        if: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' && steps.c2_bundle_source.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          C2_SHADOW_BUNDLE_EXPORT_ENABLED: 'true'
+          MULTICITY_CANONICAL_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          MULTICITY_CANONICAL_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        shell: bash
+        run: |
+          cd ../c2-bundle-source
+          python -m scripts.c2_shadow_bundle \
+            --site ../kyiv-air-alerts-grafana \
+            --receipt "${RUNNER_TEMP}/multicity_canonical_db_shadow.json" \
+            --status "${RUNNER_TEMP}/c2_publication_status.json" \
+            --payload "${MULTICITY_CANONICAL_PAYLOAD_PATH}" \
+            --output "${RUNNER_TEMP}/c2-shadow-bundle"
+
+      - name: Upload verified C2 shadow inputs
+        if: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' && steps.c2_bundle_export.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-shadow-inputs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/c2-shadow-bundle/c2-shadow-inputs.zip
+            ${{ runner.temp }}/c2-shadow-bundle/c2-shadow-inputs.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
+
       # Disabled by default: NEON_JSON_SHADOW_ENABLED is exactly "true" to enable.
       # Runs after all production JSON/auxiliary builders finish, but NEVER
       # publishes shadow files. Non-success shadow cannot alter Git publication.

@@ -89,6 +89,53 @@ def prepare(args, out):
     bundle = b2.verify_approved_frozen_bundle(bundle_bytes, bundle_bytes)
     return adapter, b2, bundle
 
+# MEMBER intentionally over-approximates SET ROLE and inherited memberships.
+# Inspect every reachable role, PUBLIC grants, column grants and ownership.
+# Reject TEMP too: READ ONLY alone still permits temporary-object DDL.
+ROLE_SQL = """
+WITH reachable AS (
+  SELECT * FROM pg_roles
+  WHERE oid = current_user::regrole OR pg_has_role(current_user, oid, 'MEMBER')
+), schemas AS (
+  SELECT * FROM pg_namespace WHERE nspname !~ '^pg_' AND nspname <> 'information_schema'
+), relations AS (
+  SELECT c.* FROM pg_class c JOIN schemas s ON s.oid = c.relnamespace
+)
+SELECT
+  EXISTS (SELECT FROM reachable WHERE rolsuper OR rolcreatedb OR rolcreaterole
+          OR rolreplication OR rolbypassrls) AS privileged_role,
+  EXISTS (SELECT FROM reachable r, pg_database d
+          WHERE d.datname = current_database() AND
+          (d.datdba = r.oid OR has_database_privilege(r.oid, d.oid, 'CREATE,TEMP'))) AS database_ddl,
+  EXISTS (SELECT FROM reachable r, schemas s
+          WHERE s.nspowner = r.oid OR has_schema_privilege(r.oid, s.oid, 'CREATE')) AS schema_ddl,
+  EXISTS (SELECT FROM reachable r, relations c WHERE c.relowner = r.oid) AS object_owner,
+  EXISTS (SELECT FROM reachable r, relations c
+          WHERE c.relkind IN ('r','p','v','m','f') AND
+          (has_table_privilege(r.oid, c.oid, 'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')
+           OR has_any_column_privilege(r.oid, c.oid, 'INSERT,UPDATE,REFERENCES'))) AS table_dml,
+  EXISTS (SELECT FROM reachable r, relations c WHERE c.relkind = 'S'
+          AND has_sequence_privilege(r.oid, c.oid, 'USAGE,UPDATE')) AS sequence_write,
+  EXISTS (SELECT FROM reachable r, pg_proc p JOIN schemas s ON s.oid = p.pronamespace
+          WHERE p.proowner = r.oid OR
+          (p.prosecdef AND has_function_privilege(r.oid, p.oid, 'EXECUTE'))) AS routine_escalation,
+  EXISTS (SELECT FROM reachable r, pg_type t JOIN schemas s ON s.oid = t.typnamespace
+          WHERE t.typowner = r.oid) AS type_owner,
+  EXISTS (SELECT FROM reachable r, pg_tablespace t
+          WHERE t.spcowner = r.oid OR has_tablespace_privilege(r.oid, t.oid, 'CREATE')) AS tablespace_ddl
+"""
+
+RISKS = ("privileged_role", "database_ddl", "schema_ddl", "object_owner", "table_dml",
+         "sequence_write", "routine_escalation", "type_owner", "tablespace_ddl")
+
+
+def verify_role(connection):
+    result = connection.execute(ROLE_SQL).fetchone()
+    require(result is not None and all(result.get(key) is False for key in RISKS),
+            "READ_ONLY_ROLE_HAS_DML_DDL_OR_ESCALATION")
+    return {"role_privilege_contract": "NO_DML_DDL_OR_ESCALATION", "role_risks": dict(result)}
+
+
 def snapshot(url, b2, bundle, *, expected_host):
     """One transaction holds the complete 23-city AIR + B2 provenance + C2 corpus."""
     import psycopg
@@ -111,6 +158,7 @@ def snapshot(url, b2, bundle, *, expected_host):
         try:
             meta=cn.execute("SELECT current_user AS role,current_database() AS database,current_setting('transaction_read_only') AS read_only,current_setting('transaction_isolation') AS isolation,pg_current_snapshot()::text AS snapshot,transaction_timestamp() AS read_at,pg_is_in_recovery() AS recovery,has_table_privilege(current_user,'public.alert_episodes','INSERT') AS can_insert").fetchone()
             require(meta['read_only']=='on' and meta['isolation']=='repeatable read' and meta['can_insert'] is False,'READ_ONLY_SNAPSHOT_NOT_PROVEN')
+            meta.update(verify_role(cn))
             episodes=cn.execute("SELECT episode_uid::text AS uid,episode_uid::text,legacy_episode_id,city_key,alert_type,episode_state,start_at,end_at,created_at,updated_at,created_by_run_id::text,updated_by_run_id::text,canonicalization_version FROM public.alert_episodes WHERE alert_type='AIR' ORDER BY city_key,start_at,episode_uid").fetchall()
             observations=cn.execute("SELECT s.*,s.source_observation_id::text AS observation_uuid,s.episode_uid::text AS parent_uid FROM public.alert_episode_sources s JOIN public.alert_episodes e ON e.episode_uid=s.episode_uid WHERE e.alert_type='AIR' ORDER BY s.city_key,s.source_observation_id").fetchall()
             checkpoints=cn.execute('SELECT * FROM public.current_ingestion_checkpoints ORDER BY city_key,source_key,stream_key').fetchall()

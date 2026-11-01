@@ -6,8 +6,6 @@ No credential creation, capture HTTP, writer, Git push or update-site workflow.
 from __future__ import annotations
 import argparse
 import contextlib
-import hashlib
-import json
 import os
 import re
 import shutil
@@ -15,34 +13,14 @@ import socket
 import sys
 import tempfile
 import urllib.request
-import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 from scripts import neon_json_shadow as shadow
+from scripts.c2_shadow_bundle import verify_archive
 
-SITE_DATA = ("dashboard_data.json", "site_derived.json", "alerts_combined.json",
-             "kyiv_threat_mix.json", "sevastopol_events.json")
-
-
-def prepare_bundle(bundle, expected_sha, destination):
-    shadow.require(re.fullmatch(r"[0-9a-f]{64}", expected_sha) is not None and
-                   shadow.digest(bundle) == expected_sha, "EXISTING_C2_BUNDLE_SHA_MISMATCH")
-    expected = {"receipt.json", "status.json", "payload.json", "manifest.json"} | {
-        "site_data/" + name for name in SITE_DATA}
-    with zipfile.ZipFile(bundle) as z:
-        shadow.require(set(z.namelist()) == expected and len(z.namelist()) == len(expected),
-                       "EXISTING_C2_BUNDLE_MEMBER_SET")
-        manifest = json.loads(z.read("manifest.json"))
-        shadow.require(manifest.get("schema") == "existing-c2-shadow-inputs-v1" and
-                       set(manifest["files"]) == expected - {"manifest.json"}, "EXISTING_C2_MANIFEST")
-        for name, want in manifest["files"].items():
-            shadow.require(hashlib.sha256(z.read(name)).hexdigest() == want,
-                           "EXISTING_C2_MEMBER_SHA")
-        receipt = json.loads(z.read("receipt.json"))
-        shadow.require(receipt.get("offline_fixture") is not True,
-                       "OFFLINE_FIXTURE_CANNOT_AUTHORIZE_PHYSICAL_READBACK")
-        z.extractall(destination)  # exact allowlisted relative names above
+def prepare_bundle(bundle, expected_sha, destination, **identity):
+    return verify_archive(bundle, expected_sha, destination=destination, **identity)
 
 
 @contextlib.contextmanager
@@ -65,7 +43,7 @@ def main():
     p = argparse.ArgumentParser()
     for flag in ("site", "bundle", "output"):
         p.add_argument("--" + flag, required=True, type=Path)
-    for flag in ("bundle-sha256", "workflow-sha", "input-sha", "db-branch", "db-endpoint"):
+    for flag in ("bundle-sha256", "workflow-sha", "input-sha", "db-branch", "db-endpoint", "c2-run-id"):
         p.add_argument("--" + flag, required=True)
     args = p.parse_args()
     try:
@@ -75,7 +53,10 @@ def main():
                        "APPROVED_NEON_ENDPOINT_REQUIRED")
         with tempfile.TemporaryDirectory(prefix="isolated-neon-proof-") as td:
             work = Path(td)
-            prepare_bundle(args.bundle, args.bundle_sha256, work / "inputs")
+            prepare_bundle(args.bundle, args.bundle_sha256, work / "inputs",
+                           run_id=args.c2_run_id, workflow_sha=args.workflow_sha,
+                           input_sha=args.input_sha, db_branch=args.db_branch,
+                           db_endpoint=args.db_endpoint)
             site = work / "site"
             shutil.copytree(args.site / "scripts", site / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
             shutil.copytree(work / "inputs/site_data", site / "data")
