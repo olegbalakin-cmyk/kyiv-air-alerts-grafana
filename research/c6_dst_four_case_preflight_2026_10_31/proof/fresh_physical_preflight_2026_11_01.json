@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "checkpoint": "C6-DST-FRESH-FOUR-CASE-READONLY-PREFLIGHT-2026-11-01",
+  "reported_at_utc": "2026-11-01T09:59:29.785034Z",
+  "verdict": "BLOCKED_PHYSICAL_PREFLIGHT",
+  "access_status": "BLOCKED_ACCESS",
+  "snapshot": {
+    "timestamp_utc": null,
+    "snapshot_id": null,
+    "isolation_level": null,
+    "transaction_read_only": null,
+    "pg_is_in_recovery": null,
+    "obtained": false,
+    "reason": "No authorized existing read-only database credential was accessible in this session; no SQL connection or statement was attempted."
+  },
+  "branch_identity": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "name": "lviv-phase1-production-shadow-2026-09-28",
+    "parent_id": "br-young-feather-b5q19nli",
+    "control_plane_state": "ready",
+    "control_plane_updated_at": "2026-11-01T07:30:41Z",
+    "confirmed": true,
+    "endpoint": {
+      "id": "ep-calm-rice-b5073ypp",
+      "branch_id": "br-bold-mode-b5rub8pq",
+      "project_id": "green-cake-44216048",
+      "type": "read_only",
+      "current_state": "idle",
+      "disabled": false
+    },
+    "database_expected": "neondb",
+    "database_session_identity_verified": false
+  },
+  "access_evidence": {
+    "local_neon_or_database_credential_environment_variables_present": false,
+    "local_dotenv_files_found": false,
+    "postgres_role_metadata": [
+      {
+        "name": "neondb_owner",
+        "authentication_method": "password",
+        "branch_id": "br-bold-mode-b5rub8pq"
+      },
+      {
+        "name": "h2_catalog_inspector_ro",
+        "authentication_method": "no_login",
+        "branch_id": "br-bold-mode-b5rub8pq"
+      }
+    ],
+    "read_only_login_role_confirmed": false,
+    "privileged_owner_credential_not_used": true,
+    "explanation": "The existing replica endpoint is present, but endpoint identity alone does not establish availability of the specifically authorized read-only credential. The only password-authenticated listed role is neondb_owner; h2_catalog_inspector_ro has no_login. The SQL connector resolves credentials internally and defaults to the database owner. No owner fallback, role assumption, credential retrieval, creation or rotation was used.",
+    "allowed_actions_dispatch": false
+  },
+  "inputs": {
+    "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+    "research_branch": "research-c6-dst-four-case-preflight-2026-10-31",
+    "research_head_verified": "2944f78ada423d7f58ba05f7584e6a36c1657781",
+    "accepted_evidence_commit_verified": "7265e40af6d012267ada515e9cac415f3e1e24b7",
+    "fixture": {
+      "path": "research/c6_dst_four_case_preflight_2026_10_31/fixtures/historical_correction_candidates.json",
+      "git_blob": "2caa8d5d4fd3a8934b7a3428b26b67642a4efcb3"
+    },
+    "offline_machine_diff": {
+      "path": "research/c6_dst_four_case_preflight_2026_10_31/proof/offline_machine_diff.json",
+      "git_blob": "8d698e5f1b843918cb4c42de45f7fc70f9547025",
+      "verdict": "PASS_OFFLINE_WITNESS"
+    },
+    "prior_physical_readback_at_utc": "2026-10-30T11:55:07.977Z",
+    "current_main_checkpoint": "C6-UA-CURRENT-ONEGET-01",
+    "main_project_state_blob": "632821cc0cd13ca9f4fb458ef69d0c71ee3908e6",
+    "main_changelog_blob": "c4d07dbc1b4f433e7376362972cf8be421a7dc15"
+  },
+  "cases": [
+    {
+      "city": "cherkasy",
+      "verdict": "NOT_CHECKED_BLOCKED_ACCESS",
+      "expected_problem": "missed_interval",
+      "expected_old_record_from_prior_evidence": null,
+      "candidates": [
+        {
+          "end_utc": "2026-10-25T01:19:09.997656Z",
+          "legacy_episode_id": "cdbf2515f5abb87b26588794",
+          "start_utc": "2026-10-25T01:14:53.333785Z"
+        }
+      ],
+      "current_old_row_matches_prior_evidence": null,
+      "current_candidate_presence": null,
+      "current_dependencies_verified": false
+    },
+    {
+      "city": "kharkiv",
+      "verdict": "NOT_CHECKED_BLOCKED_ACCESS",
+      "expected_problem": "wrong_merge",
+      "expected_old_record_from_prior_evidence": {
+        "end_utc": "2026-10-25T02:22:46.862159Z",
+        "episode_uid": "bb7d4952-52a3-45f8-a1db-13153c8f6ca3",
+        "legacy_episode_id": "604d9e3f63fa9bc3cbd78adb",
+        "start_utc": "2026-10-24T23:24:46.944947Z"
+      },
+      "candidates": [
+        {
+          "end_utc": "2026-10-25T00:30:17.068083Z",
+          "legacy_episode_id": "5e1419914aca832269aecd97",
+          "start_utc": "2026-10-24T23:24:46.944947Z"
+        },
+        {
+          "end_utc": "2026-10-25T02:22:46.862159Z",
+          "legacy_episode_id": "1f926bf2181429b41da57787",
+          "start_utc": "2026-10-25T01:25:28.327265Z"
+        }
+      ],
+      "current_old_row_matches_prior_evidence": null,
+      "current_candidate_presence": null,
+      "current_dependencies_verified": false
+    },
+    {
+      "city": "poltava",
+      "verdict": "NOT_CHECKED_BLOCKED_ACCESS",
+      "expected_problem": "wrong_merge",
+      "expected_old_record_from_prior_evidence": {
+        "end_utc": "2026-10-25T01:29:42.507155Z",
+        "episode_uid": "74ba1017-63af-4137-a5ba-246795613615",
+        "legacy_episode_id": "81ba41902e7642b95aacde52",
+        "start_utc": "2026-10-25T00:06:15.155767Z"
+      },
+      "candidates": [
+        {
+          "end_utc": "2026-10-25T00:26:57.986096Z",
+          "legacy_episode_id": "9d82fda26301c5813fd5995e",
+          "start_utc": "2026-10-25T00:06:15.155767Z"
+        },
+        {
+          "end_utc": "2026-10-25T01:29:42.507155Z",
+          "legacy_episode_id": "a8bb035a0a6b812384a61f9a",
+          "start_utc": "2026-10-25T01:17:40.643305Z"
+        }
+      ],
+      "current_old_row_matches_prior_evidence": null,
+      "current_candidate_presence": null,
+      "current_dependencies_verified": false
+    },
+    {
+      "city": "zhytomyr",
+      "verdict": "NOT_CHECKED_BLOCKED_ACCESS",
+      "expected_problem": "wrong_merge",
+      "expected_old_record_from_prior_evidence": {
+        "end_utc": "2026-10-25T01:30:52.777820Z",
+        "episode_uid": "b40c570e-f9db-4c7d-b7e4-3f7769e12a95",
+        "legacy_episode_id": "3d1ae87e479c137d912f9b49",
+        "start_utc": "2026-10-25T00:06:17.978268Z"
+      },
+      "candidates": [
+        {
+          "end_utc": "2026-10-25T00:26:58.980319Z",
+          "legacy_episode_id": "770e55ab0c608d531c7d1f05",
+          "start_utc": "2026-10-25T00:06:17.978268Z"
+        },
+        {
+          "end_utc": "2026-10-25T01:30:52.777820Z",
+          "legacy_episode_id": "7a37899cb0e694f822b56661",
+          "start_utc": "2026-10-25T01:16:21.087757Z"
+        }
+      ],
+      "current_old_row_matches_prior_evidence": null,
+      "current_candidate_presence": null,
+      "current_dependencies_verified": false
+    }
+  ],
+  "preserve_existing_cherkasy": {
+    "expected_from_prior_evidence": {
+      "end_utc": "2026-10-25T00:26:58.650073Z",
+      "episode_uid": "ff046d6c-fc7e-4cd2-9470-3e5433c3d582",
+      "legacy_episode_id": "a7dd6c572640b6396fb7bec7",
+      "preserve_identity": true,
+      "start_utc": "2026-10-25T00:06:18.166695Z"
+    },
+    "current_unchanged": null
+  },
+  "dependencies": {
+    "status": "NOT_QUERIED",
+    "found_in_current_snapshot": null,
+    "required_scope": [
+      "All incoming and outgoing foreign keys, including composite keys and self references",
+      "All source observations, source membership links, source hashes and capture lineage",
+      "All classifications, attack events and alert-state snapshots",
+      "Ingestion runs and row/run provenance",
+      "Constraints, indexes, defaults, generated columns, RLS policies and applicable privileges",
+      "Triggers and referenced trigger functions, including non-FK or dynamic dependencies",
+      "Dependent ordinary and materialized views, rewrite rules, functions and partition/inheritance relationships",
+      "Non-FK UUID and legacy-ID references, including JSON or text provenance/alias records"
+    ],
+    "prior_zero_counts_in_four_tables_are_not_current_or_complete_evidence": true,
+    "external_consumers_absence_proven": false
+  },
+  "comparison_with_accepted_machine_diff": {
+    "status": "NOT_PERFORMED_PHYSICALLY",
+    "current_discrepancies": null,
+    "prior_expected_episode_delta": 4,
+    "prior_expected_duration_delta_microseconds": -9059359958,
+    "prior_expected_wrong_rows_to_supersede": 3,
+    "prior_expected_new_candidate_ids": 7,
+    "prior_full_row_before_images_available": false,
+    "note": "The pinned fixture records UUID/legacy ID/UTC boundaries and four limited relationship counts. It does not contain complete historical row before-images or a dependency inventory; full historical immutability cannot be inferred from it."
+  },
+  "supersession": {
+    "verdict": "NOT_READY_TO_SELECT_SCHEMA_COMPATIBLE_METHOD",
+    "invariant": "Retain all three old UUIDs, legacy IDs, original ingestion/source lineage and every incoming reference in an audited versioned supersession/alias strategy; create seven source-bound candidate identities, preserving the existing correct Cherkasy row.",
+    "no_delete_and_reinsert": true,
+    "prerequisites": [
+      "Fresh authorized REPEATABLE READ READ ONLY snapshot and full dependency inventory",
+      "Verified existing support for supersession/alias lineage or a separately approved schema plan",
+      "An explicit old-to-new one-to-many mapping, before-images and dependency-aware reversal contract"
+    ]
+  },
+  "transactional_rollback_conditions": {
+    "physical_rollback_tested": false,
+    "conditions_for_future_plan": [
+      "Abort before mutation on a changed target UUID, legacy ID, city, type, UTC interval, ingestion/source link, row before-image or relevant schema definition.",
+      "Abort on any pre-existing candidate ID or exact candidate interval, unknown dependency, unexpected classification/event or missing provenance binding.",
+      "Abort if the correct Cherkasy row or any preserved dependency differs from the frozen before-image.",
+      "Before COMMIT, assert exactly three supersessions, seven new records, zero unrelated changes and the accepted +4 counted-episode / -9059359958 microsecond delta; any failed assertion requires transaction ROLLBACK.",
+      "After COMMIT, reversal requires separate authorization, the exact committed repair manifest, target-row concurrency control and validation that no newer write or newly attached dependency would be lost.",
+      "Reversal must restore the three old counted identities and all original references, deactivate only the seven repair identities through the approved schema mechanism, preserve audit evidence and leave the valid Cherkasy row untouched; abort rather than cascade-delete dependents."
+    ]
+  },
+  "blockers": [
+    {
+      "code": "READ_ONLY_CREDENTIAL_UNAVAILABLE",
+      "effect": "No physical snapshot; all four cases, dependencies and drift remain unverified."
+    }
+  ],
+  "actions": {
+    "sql_connections_attempted": 0,
+    "sql_statements_attempted": 0,
+    "neon_writes": 0,
+    "credential_creates_or_changes": 0,
+    "branch_creates_or_changes": 0,
+    "source_http_gets": 0,
+    "actions_dispatches": 0,
+    "repair_sql_executed": false,
+    "writer_or_shadow_generator_edits": false,
+    "production_operations": 0
+  },
+  "coordination": {
+    "new_accepted_physical_checkpoint": false,
+    "root_docs_update_required": false,
+    "C6": "PARTIAL",
+    "C3": "PARTIAL",
+    "GLOBAL_CUTOVER": "NO"
+  },
+  "next_step": "Make the existing authorized read-only credential available through the established access path and repeat this same bounded preflight. Do not dispatch Actions, create credentials or execute a repair to bypass this access block."
+}
