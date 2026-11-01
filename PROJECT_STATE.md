@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-10-31. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted technical checkpoint: **C6-UA-CURRENT-ONEGET-01**. One authorized UkraineAlarm `GET /api/v3/alerts` returned HTTP 200: 72 top-level entries, 9/21 mapped region IDs directly present with AIR, 12 missing but **NOT PROVEN INACTIVE**. Active/ancestor semantics remain OPEN; `C6/C3=PARTIAL; GLOBAL_CUTOVER=NO`.
+**Date:** 2026-11-01. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
+Latest coordination: **C6-SHADOW-WORKFLOW-REGISTERED-01** (PR #41, `main@fccb4d3c`; manual-only, not run). Prior source-data checkpoint: **C6-UA-CURRENT-ONEGET-01**. One authorized UkraineAlarm `GET /api/v3/alerts` returned HTTP 200: 72 top-level entries, 9/21 mapped region IDs directly present with AIR, 12 missing but **NOT PROVEN INACTIVE**. Active/ancestor semantics remain OPEN; `C6/C3=PARTIAL; GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -27,11 +27,15 @@ Latest accepted technical checkpoint: **C6-UA-CURRENT-ONEGET-01**. One authorize
 
 1. **Resolve UkraineAlarm current-status interpretation, not access.** Offline review accepted full-response evidence and official ancestor/negative-state contract: 9/21 direct AIR entries, 12 absent but UNKNOWN; `lastUpdate` is not proven episode start. Source cache currency and complete active status remain OPEN. The one-GET authority is consumed; no new HTTP/Neon/cutover without a new scope. Production already proved 21/21 history data access.
 2. Resolve the four physical DST cases and Kyiv current provenance through their separate authorized scopes. Preserve the accepted frozen baseline and explicit Git auxiliaries; do not repeat parity, PG17, browser, CSV, rollback or single-capture proofs.
-3. Complete production-like source-switch/operational rollback rehearsal and the release gate before any separately approved production promotion. Two rounds do not certify long-term operation.
+3. **C6 shadow:** configure read-only Environment/LOGIN role; separately approve default-OFF C2 exporter merge (updater push triggers usual production cycle); verify real bundle, then authorize one pinned read-only dispatch. Source-switch/rollback release gate remains open.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-SHADOW-WORKFLOW-REGISTERED-01 (2026-11-01)
+
+- PR #41 merged `main@fccb4d3c`: only manual C6 workflow; required CI PASS. No dispatch, C2 exporter promotion or production mutation. Real bundle and read-only role/Environment OPEN. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+
 ## C6-UA-CURRENT-ONEGET-01 — data API access PASS; current semantics OPEN (2026-10-31)
 
 - Owner authorized **one** isolated UkraineAlarm `GET /api/v3/alerts`. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS on workflow `baa18a038f466c6ddb1759bf450d57a1db38b376`; [research proof `d6a6340f`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01); encrypted artifact **13049271828**, all **5** manifest hashes verified. No Swagger/history/regions, redirects or retries.
