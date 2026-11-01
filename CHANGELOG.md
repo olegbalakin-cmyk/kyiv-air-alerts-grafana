@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-READONLY-ROLE-PARTIAL-01 — limited role created, C6 access still blocked (2026-11-01)
+
+- Owner-approved SQL transaction on existing Neon branch `br-bold-mode-b5rub8pq`: `c6_shared_reader_ro` has LOGIN attribute, no password, `CONNECT/USAGE` and `SELECT` on seven C6 tables. Verified no elevated role flags, database/schema CREATE false. Existing `PUBLIC` grant supplies `TEMP` on `neondb`, so unchanged strict C6 privilege gate fails. No password supplied, no functioning login, no Environment/secret configuration, no global ACL changes. Existing `neondb_owner` used only for authorized provisioning, not proof; no DST repair or record mutation.
+- [PR #43](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/43) remains draft and unmerged: repository export flag cannot be changed by current GitHub connector, so no merge-triggered production C2 run was started. Physical proof not authorized by prerequisites. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+
 ### C6-SHADOW-WORKFLOW-REGISTERED-01 — manual workflow registered; physical proof not run (2026-11-01)
 
 - Owner-approved [PR #41](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/41) merged as [`main@fccb4d3c`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/fccb4d3c43668fccb4b3d4ecc31965d76ae67e7b). Exactly one manual-only C6 workflow file; required pre-merge `coordination-docs / size-and-integrity` SUCCESS. No proof dispatch, updater modification, Neon or production publication.
