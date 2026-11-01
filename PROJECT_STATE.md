@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-01. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest coordination: **C6-SHADOW-WORKFLOW-REGISTERED-01** (PR #41, `main@fccb4d3c`; manual-only, not run). Prior source-data checkpoint: **C6-UA-CURRENT-ONEGET-01**. One authorized UkraineAlarm `GET /api/v3/alerts` returned HTTP 200: 72 top-level entries, 9/21 mapped region IDs directly present with AIR, 12 missing but **NOT PROVEN INACTIVE**. Active/ancestor semantics remain OPEN; `C6/C3=PARTIAL; GLOBAL_CUTOVER=NO`.
+Latest coordination: **C6-READONLY-ROLE-PARTIAL-01** (role created; password unset; `PUBLIC TEMP` blocks C6 gate). PR #41 merged; prior data checkpoint **C6-UA-CURRENT-ONEGET-01**. One authorized UkraineAlarm `GET /api/v3/alerts` returned HTTP 200: 72 top-level entries, 9/21 mapped region IDs directly present with AIR, 12 missing but **NOT PROVEN INACTIVE**. Active/ancestor semantics remain OPEN; `C6/C3=PARTIAL; GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -32,9 +32,9 @@ Latest coordination: **C6-SHADOW-WORKFLOW-REGISTERED-01** (PR #41, `main@fccb4d3
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## C6-SHADOW-WORKFLOW-REGISTERED-01 (2026-11-01)
+## C6-READONLY-ROLE-PARTIAL-01 / SHADOW-WORKFLOW-REGISTERED-01 (2026-11-01)
 
-- PR #41 merged `main@fccb4d3c`: only manual C6 workflow; required CI PASS. No dispatch, C2 exporter promotion or production mutation. Real bundle and read-only role/Environment OPEN. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+- PR #41 merged `main@fccb4d3c`: manual-only workflow, no dispatch. Role `c6_shared_reader_ro` created on `br-bold-mode-b5rub8pq`, no password; 7 SELECT grants, no elevated attributes. `TEMP` inherited from `PUBLIC` fails C6 gate. Env/bundle OPEN. PR #43 unmerged. **GLOBAL_CUTOVER NO.**
 
 ## C6-UA-CURRENT-ONEGET-01 — data API access PASS; current semantics OPEN (2026-10-31)
 
