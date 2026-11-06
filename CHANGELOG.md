@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C2-PROD-BUNDLE-VERIFIED-01 — real same-run archive verified (2026-11-06)
+
+- Scheduled production [Actions 42297035421](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42297035421) SUCCESS at `main@0546986e`, C2 receipt `NEON_SUCCEEDED` / commit `CONFIRMED`, exporter/upload SUCCESS. Artifact **13543497560** (`c2-shadow-inputs-42297035421-1`) independently downloaded: inner ZIP SHA-256 `2e56e3af58b28ddb9450930f201c5a81f41a39327a0da57a1d6c913f0981c501` matched sidecar and log, 8/8 file hashes matched; 23 cities / 32,457 canonical episodes, same run/attempt/SHA/branch. Manifest primary endpoint `ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech`, branch `br-bold-mode-b5rub8pq`. Owner reports export flag `false` (connector cannot inspect). No C6 physical shadow run, DST fix, Neon cutover or new production dispatch. `PUBLIC TEMP` gate and secret configuration OPEN. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+
+
 ### C2-EXPORT-PR43-MERGED-01 — exporter registered; proof not accepted (2026-11-06)
 
 - Owner-approved [PR #43](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/43) merged at [`main@0546986e`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/0546986e69f2bbd4d5507f80dada426775eb1489), two files only, required CI PASS. Correct merge-triggered [Actions 42296803705](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42296803705) (push/attempt 1) cancelled when delayed scheduled [Actions 42297035421](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42297035421) started; its exporter steps SKIPPED, no bundle artifact. Scheduled run ongoing at last verification; no claim of bundle success. Owner reports temporary repository variable reset to `false`; connector has no variable read access. No additional workflow dispatch, C6 physical proof or Neon cutover. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
