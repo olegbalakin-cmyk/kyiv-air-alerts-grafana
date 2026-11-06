@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C2-EXPORT-PR43-MERGED-01 — exporter registered; proof not accepted (2026-11-06)
+
+- Owner-approved [PR #43](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/43) merged at [`main@0546986e`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/0546986e69f2bbd4d5507f80dada426775eb1489), two files only, required CI PASS. Correct merge-triggered [Actions 42296803705](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42296803705) (push/attempt 1) cancelled when delayed scheduled [Actions 42297035421](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42297035421) started; its exporter steps SKIPPED, no bundle artifact. Scheduled run ongoing at last verification; no claim of bundle success. Owner reports temporary repository variable reset to `false`; connector has no variable read access. No additional workflow dispatch, C6 physical proof or Neon cutover. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+
+
 ### C6-READONLY-ROLE-V2-GRANTS-01 — v2 reader grants verified; C6 gate blocked (2026-11-06)
 
 - Neon branch `br-bold-mode-b5rub8pq`: owner created `c6_shared_reader_v2` via SQL Editor with password, reset password and applied `CONNECT`, `USAGE`, seven-table `SELECT`. Independently checked Neon metadata (`authentication_method=password`) and direct read-only compute `ep-calm-rice-b5073ypp`: `current_user=c6_shared_reader_v2`, `SELECT=true`, `INSERT=false`. All nine C6 role-risk flags false except `database_ddl=true` solely from `TEMP` granted to `PUBLIC`. External password login and protected GitHub Environment still unverified; avoid changing database-wide `PUBLIC` ACL without impact review. PR #43 remains unmerged, no C2 run/proof/cutover. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
