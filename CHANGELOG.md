@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-READONLY-ROLE-V2-GRANTS-01 — v2 reader grants verified; C6 gate blocked (2026-11-06)
+
+- Neon branch `br-bold-mode-b5rub8pq`: owner created `c6_shared_reader_v2` via SQL Editor with password, reset password and applied `CONNECT`, `USAGE`, seven-table `SELECT`. Independently checked Neon metadata (`authentication_method=password`) and direct read-only compute `ep-calm-rice-b5073ypp`: `current_user=c6_shared_reader_v2`, `SELECT=true`, `INSERT=false`. All nine C6 role-risk flags false except `database_ddl=true` solely from `TEMP` granted to `PUBLIC`. External password login and protected GitHub Environment still unverified; avoid changing database-wide `PUBLIC` ACL without impact review. PR #43 remains unmerged, no C2 run/proof/cutover. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+
 ### C6-READONLY-ROLE-PARTIAL-01 — limited role created, C6 access still blocked (2026-11-01)
 
 - Owner-approved SQL transaction on existing Neon branch `br-bold-mode-b5rub8pq`: `c6_shared_reader_ro` has LOGIN attribute, no password, `CONNECT/USAGE` and `SELECT` on seven C6 tables. Verified no elevated role flags, database/schema CREATE false. Existing `PUBLIC` grant supplies `TEMP` on `neondb`, so unchanged strict C6 privilege gate fails. No password supplied, no functioning login, no Environment/secret configuration, no global ACL changes. Existing `neondb_owner` used only for authorized provisioning, not proof; no DST repair or record mutation.
