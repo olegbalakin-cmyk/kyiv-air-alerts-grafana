@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-06. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest: **C2-EXPORT-PR43-MERGED-01**: exporter in main, bundle unverified. V2 reader: 7 SELECT PASS; `PUBLIC TEMP` blocks C6. Source checkpoint **C6-UA-CURRENT-ONEGET-01**: 72 current entries, 9/21 direct AIR, 12 absent UNKNOWN. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
+Latest: **C2-PROD-BUNDLE-VERIFIED-01**: 23 cities / 32,457 episodes; 8/8 hashes PASS. Reader SELECT PASS; `PUBLIC TEMP` blocks C6. Current status OPEN. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO.**
 
 ## Working instructions
 
@@ -27,14 +27,14 @@ Latest: **C2-EXPORT-PR43-MERGED-01**: exporter in main, bundle unverified. V2 re
 
 1. **Resolve UkraineAlarm current-status interpretation, not access.** Offline review accepted full-response evidence and official ancestor/negative-state contract: 9/21 direct AIR entries, 12 absent but UNKNOWN; `lastUpdate` is not proven episode start. Source cache currency and complete active status remain OPEN. The one-GET authority is consumed; no new HTTP/Neon/cutover without a new scope. Production already proved 21/21 history data access.
 2. Resolve the four physical DST cases and Kyiv current provenance through their separate authorized scopes. Preserve the accepted frozen baseline and explicit Git auxiliaries; do not repeat parity, PG17, browser, CSV, rollback or single-capture proofs.
-3. **C6 shadow:** configure read-only Environment/LOGIN role; separately approve default-OFF C2 exporter merge (updater push triggers usual production cycle); verify real bundle, then authorize one pinned read-only dispatch. Source-switch/rollback release gate remains open.
+3. **C6 shadow:** C2 bundle verified (Actions 42297035421). Resolve `PUBLIC TEMP` gate without global ACL change, configure Environment secret for manifest primary host, then separately authorize one pinned read-only proof. Source-switch/rollback gate stays open.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## C2-EXPORT-PR43-MERGED-01 / C6-READONLY-ROLE-V2-GRANTS-01 (2026-11-06)
+## C2-PROD-BUNDLE-VERIFIED-01 / C6-READONLY-V2 (2026-11-06)
 
-- PR #43 merged at `main@0546986e` (two-file opt-in exporter; CI PASS). Push run `42296803705` cancelled when scheduled `42297035421` started; export skipped, no push bundle. Schedule in progress at last check. Owner reports export variable OFF; connector cannot verify. V2 reader password/7 SELECT PASS; `PUBLIC TEMP` blocks C6 privilege gate. No physical C2 bundle/proof/cutover accepted.
+- PR #43 merged `main@0546986e`; push run `42296803705` preempted by scheduled `42297035421` SUCCESS. Artifact `13543497560` same-run bundle SHA-256 `2e56e3af58b28ddb9450930f201c5a81f41a39327a0da57a1d6c913f0981c501`: 8/8 hashes, 23 cities, 32,457 episodes, `NEON_SUCCEEDED`. DB host `ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech`; branch `br-bold-mode-b5rub8pq`. Owner reports flag OFF (unverifiable). C6 physical proof pending; `PUBLIC TEMP` gate BLOCKED. **GLOBAL_CUTOVER NO.**
 
 ## C6-UA-CURRENT-ONEGET-01 — data API access PASS; current semantics OPEN (2026-10-31)
 
