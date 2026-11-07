@@ -6,7 +6,8 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
-from unittest.mock import Mock, patch
+from types import SimpleNamespace
+from unittest.mock import MagicMock, Mock, patch
 
 import yaml
 
@@ -217,8 +218,59 @@ class WorkflowContracts(unittest.TestCase):
         cn.execute.return_value.fetchone.return_value = good
         self.assertEqual(generator.verify_role(cn)["role_privilege_contract"], "NO_DML_DDL_OR_ESCALATION")
         self.assertIn("has_any_column_privilege", generator.ROLE_SQL)
-        self.assertIn("'CREATE,TEMP'", generator.ROLE_SQL)
+        self.assertIn("has_database_privilege(r.oid, d.oid, 'CREATE')", generator.ROLE_SQL)
+        self.assertNotIn("'CREATE,TEMP'", generator.ROLE_SQL)
         self.assertIn("pg_has_role", generator.ROLE_SQL)
+        for risk in generator.RISKS:
+            cn.execute.return_value.fetchone.return_value = {k: v for k, v in good.items() if k != risk}
+            with self.subTest(missing=risk), self.assertRaises(generator.Closed):
+                generator.verify_role(cn)
+
+    def snapshot_rejection(self, meta, risks, reason):
+        cn = MagicMock()
+
+        def execute(sql):
+            if sql in ("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY", "ROLLBACK"):
+                return Mock()
+            if sql.startswith("SELECT current_user AS role"):
+                return Mock(fetchone=Mock(return_value=meta))
+            if sql == generator.ROLE_SQL:
+                return Mock(fetchone=Mock(return_value=risks))
+            self.fail("Rejected role reached corpus SQL")
+
+        cn.execute.side_effect = execute
+        context = MagicMock()
+        context.__enter__.return_value = cn
+        driver = SimpleNamespace(connect=Mock(return_value=context))
+        with patch.dict("sys.modules", {"psycopg": driver,
+                                      "psycopg.rows": SimpleNamespace(dict_row=object())}):
+            with self.assertRaisesRegex(generator.Closed, reason):
+                generator.snapshot("postgresql://unit:UNIT_TEST_PASSWORD@ep-test.neon.tech/neondb?sslmode=require",
+                                   None, {}, expected_host="ep-test.neon.tech")
+        self.assertEqual(driver.connect.call_args.kwargs["options"], "-c default_transaction_read_only=on")
+        statements = [call.args[0] for call in cn.execute.call_args_list]
+        self.assertEqual(statements[0], "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        self.assertEqual(statements[-1], "ROLLBACK")
+        return statements
+
+    def test_snapshot_rejects_dml_create_escalation_before_corpus(self):
+        meta = {"read_only": "on", "isolation": "repeatable read", "can_insert": False}
+        good = {key: False for key in generator.RISKS}
+        for risk in generator.RISKS:
+            with self.subTest(risk=risk):
+                statements = self.snapshot_rejection(meta, good | {risk: True},
+                                                     "READ_ONLY_ROLE_HAS_DML_DDL_OR_ESCALATION")
+                self.assertEqual(len(statements), 4)
+                self.assertEqual(statements[2], generator.ROLE_SQL)
+
+    def test_snapshot_independently_rejects_unsafe_transaction_or_insert(self):
+        meta = {"read_only": "on", "isolation": "repeatable read", "can_insert": False}
+        good = {key: False for key in generator.RISKS}
+        for unsafe in ({"read_only": "off"}, {"isolation": "read committed"}, {"can_insert": True}):
+            with self.subTest(unsafe=unsafe):
+                statements = self.snapshot_rejection(meta | unsafe, good, "READ_ONLY_SNAPSHOT_NOT_PROVEN")
+                self.assertEqual(len(statements), 3)
+                self.assertNotIn(generator.ROLE_SQL, statements)
 
 
 if __name__ == "__main__":

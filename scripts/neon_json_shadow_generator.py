@@ -91,7 +91,9 @@ def prepare(args, out):
 
 # MEMBER intentionally over-approximates SET ROLE and inherited memberships.
 # Inspect every reachable role, PUBLIC grants, column grants and ownership.
-# Reject TEMP too: READ ONLY alone still permits temporary-object DDL.
+# TEMP (commonly granted through PUBLIC) is allowed for session-local objects;
+# permanent CREATE, ownership, DML and escalation still fail closed. The snapshot
+# independently requires REPEATABLE READ READ ONLY and always rolls back.
 ROLE_SQL = """
 WITH reachable AS (
   SELECT * FROM pg_roles
@@ -106,7 +108,7 @@ SELECT
           OR rolreplication OR rolbypassrls) AS privileged_role,
   EXISTS (SELECT FROM reachable r, pg_database d
           WHERE d.datname = current_database() AND
-          (d.datdba = r.oid OR has_database_privilege(r.oid, d.oid, 'CREATE,TEMP'))) AS database_ddl,
+          (d.datdba = r.oid OR has_database_privilege(r.oid, d.oid, 'CREATE'))) AS database_ddl,
   EXISTS (SELECT FROM reachable r, schemas s
           WHERE s.nspowner = r.oid OR has_schema_privilege(r.oid, s.oid, 'CREATE')) AS schema_ddl,
   EXISTS (SELECT FROM reachable r, relations c WHERE c.relowner = r.oid) AS object_owner,

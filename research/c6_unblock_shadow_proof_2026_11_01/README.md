@@ -1,5 +1,76 @@
 # C6 physical shadow: prepared changes for owner review
 
+## 2026-11-07: TEMP-only read-only gate unblock
+
+Preparation only; the physical Neon-to-JSON workflow has **not** been dispatched.
+`GLOBAL_CUTOVER=NO`. Main, production workflows and PR #42 are unchanged.
+The older export/setup instructions below are historical: reuse the verified existing
+C2 bundle; no further export or writer run is authorized by this preparation.
+
+Verified GitHub heads: `main@0546986e69f2bbd4d5507f80dada426775eb1489` and
+research parent `efb99311c62586321ddc93d36186e9cba4b054b5`. Main's latest accepted
+technical checkpoint is still `C6-UA-CURRENT-ONEGET-01`; this patch is not a new
+accepted checkpoint, so root coordination files remain unchanged.
+
+One catalog-only transaction logged in directly as `c6_shared_reader_v2` on
+`green-cake-44216048` / `br-bold-mode-b5rub8pq` / `neondb`, compute
+`ep-still-violet-b5bg6mhp`. It explicitly set `REPEATABLE READ READ ONLY` and
+independently read back `current_user=c6_shared_reader_v2`,
+`transaction_read_only=on`, `transaction_isolation=repeatable read`.
+No application corpus, source HTTP, generation or database mutation was performed.
+
+| Catalog result | Original ROLE_SQL | Patched ROLE_SQL |
+| --- | --- | --- |
+| database_ddl | true | false |
+| privileged_role, schema_ddl, object_owner, table_dml, sequence_write, routine_escalation, type_owner, tablespace_ddl | all false | all false |
+
+The same transaction independently returned `effective_temp=true` and
+`public_temp=true`; the latter checks database ACL entries with grantee 0 and
+privilege `TEMPORARY` (including the default ACL). TEMP is the sole cause of the
+original gate rejection at this check. The patched query SHA-256 is
+`aece266ac05aa685afac7b40e428c0fb930fc6dd08aa41a6895136003bc35fd6`.
+
+The only executable change is
+`has_database_privilege(r.oid, d.oid, 'CREATE,TEMP')` →
+`has_database_privilege(r.oid, d.oid, 'CREATE')`. TEMP allows session-local objects;
+permanent database/schema/tablespace CREATE, ownership, table/column DML, sequence
+writes, role flags and callable application SECURITY DEFINER routines still reject.
+The query still covers MEMBER roles and effective PUBLIC grants. AST comparison
+confirmed `verify_role`, `snapshot`, `prepare` and `generate` are unchanged, and
+ROLE_SQL differs only by that privilege string. The explicit read-only snapshot,
+independent INSERT check and ROLLBACK cleanup remain intact. PostgreSQL references:
+[TEMP and PUBLIC privileges](https://www.postgresql.org/docs/current/ddl-priv.html),
+[read-only transaction restrictions](https://www.postgresql.org/docs/current/sql-set-transaction.html).
+
+Existing C2 [run 42297035421](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42297035421)
+is SUCCESS on `main@0546986e69f2bbd4d5507f80dada426775eb1489`.
+Artifact `13543497560` / `c2-shadow-inputs-42297035421-1` was downloaded, not
+re-exported. Outer archive SHA-256 matches GitHub's digest
+`a676402ac53e9b1061c82b1165836d25195d6d3a5461c79e67a29e8847a4dd06`.
+Inner `c2-shadow-inputs.zip` SHA-256 is
+`2e56e3af58b28ddb9450930f201c5a81f41a39327a0da57a1d6c913f0981c501`;
+all 8 manifest member hashes match. Manifest writer SHA is
+`0546986e69f2bbd4d5507f80dada426775eb1489`, input SHA
+`f60214c61de08cef677e90f158e2824d90bc324b`; branch and endpoint match the check above.
+
+`PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_c2_shadow_bundle.py' -v`:
+**14/14 PASS**. Negative cases cover all 9 dangerous flags, unknown/missing flag
+evidence, and snapshot rejection before corpus reads with ROLLBACK. Read-write
+transactions, non-repeatable isolation and INSERT grants independently fail.
+The snapshot tests use an in-memory driver; no physical generation or previous
+full offline/parity/browser/CSV/PG17/rollback proof was repeated. `git diff --check` passes.
+
+Next: after reviewing the final research commit, the owner sets Environment
+`c6-neon-shadow-readonly` → variable `C6_SHADOW_APPROVED_RESEARCH_SHA` to that full
+40-character SHA. Use the same SHA as manual workflow input `research_sha` on
+`research-c6-unblock-shadow-proof-2026-11-01`. The existing artifact and identity
+above are reused. **Dispatch still requires separate owner authorization.**
+The role gate is unblocked; full physical generation remains unproven and will
+retain all existing fail-closed data and publication checks. No grants, roles,
+passwords, secrets or Environment values were changed.
+
+## Original preparation (2026-11-01)
+
 2026-11-01. Implementation and local contract checks are complete. No physical proof was run. `C6/C3=PARTIAL; GLOBAL_CUTOVER=NO`.
 
 Coordination baseline: `main@95397e14e7fd929b5d90585465b194affd5a49a7`; latest accepted checkpoint remains `C6-UA-CURRENT-ONEGET-01`. Reader baseline: `6e121e0629685895ea402a21cc66cccb4c6f277f`. This preparation is not a newly accepted release checkpoint; root coordination files remain unchanged pending acceptance.
@@ -56,9 +127,9 @@ The connector explicitly excludes secrets APIs. No secrets API was retried, secr
 6. In Neon Console, select the existing branch named by the new C2 receipt; confirm its endpoint hostname matches manifest `db_endpoint`, allowing only the ordinary `-pooler` hostname variation. Confirm the secret was configured for that same endpoint, database and read-only role. GitHub cannot display stored secret values; its name alone cannot establish endpoint identity. The owner can confirm the configuration record or privately replace it with the approved existing URL.
 7. Confirm this is an existing SQL-created least-privilege role with SELECT/USAGE for the seven reader tables: `alert_episodes`, `alert_episode_sources`, `current_ingestion_checkpoints`, `ingestion_runs`, `attack_event_classifications`, `attack_event_sources`, `attack_events`. Catalog SELECT is also used. Do not choose an administrator role merely because its name contains “readonly”.
 
-The proof checks the effective privileges of the current role and all MEMBER roles inside its existing `REPEATABLE READ READ ONLY` transaction. It rejects privileged role flags, table/column DML, sequence writes, database/schema/tablespace CREATE, TEMP, ownership, and callable application SECURITY DEFINER routines. The catalog check precedes episode reads and fails closed; transaction cleanup uses ROLLBACK. The check is implemented but has not been executed on Neon.
+The proof checks the effective privileges of the current role and all MEMBER roles inside its existing `REPEATABLE READ READ ONLY` transaction. It rejects privileged role flags, table/column DML, sequence writes, database/schema/tablespace CREATE, ownership, and callable application SECURITY DEFINER routines. The catalog check precedes episode reads and fails closed; transaction cleanup uses ROLLBACK. The original TEMP rejection was superseded by the verified 2026-11-07 patch above.
 
-PUBLIC grants can make a role fail even after per-role REVOKE; database TEMP is a common example. Do not revoke PUBLIC privileges on the production database blindly. If the approved role still has these rights, owner/DBA approval for the exact ACL change is required before the proof. This task prepared no grant mutation or role creation.
+PUBLIC grants can make a role fail even after per-role REVOKE. The 2026-11-07 patch allows TEMP alone without an ACL change; all other existing privilege checks remain. Do not revoke PUBLIC privileges on the production database blindly. This task prepared no grant mutation or role creation.
 
 GitHub environment setup is described in [GitHub Docs](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments). [Neon role documentation](https://github.com/neondatabase/website/blob/main/content/docs/manage/roles.md) states that Console/API/CLI-created roles receive `neon_superuser`; limited roles use SQL. The privilege query uses the [PostgreSQL 17 privilege inquiry functions](https://www.postgresql.org/docs/17/functions-info.html#FUNCTIONS-INFO-ACCESS-TABLE).
 
