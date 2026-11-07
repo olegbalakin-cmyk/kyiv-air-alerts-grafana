@@ -189,15 +189,18 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
         "current_freshness": "CURRENT_FRESHNESS_NOT_CERTIFIED",
         "production_publication": "PRODUCTION_PUBLICATION_NOT_AUTHORIZED",
     }
+    stage = "VERIFY_BINDING_INPUTS"
     try:
         from urllib.parse import urlparse
         require(bool(workflow_sha) and bool(input_sha) and bool(expected_branch),
                 "WORKFLOW_INPUT_BRANCH_BINDING_MISSING")
         require(bool(database_url) and bool(writer_database_url),
                 "NEON_ENDPOINT_BRANCH_BINDING_MISSING")
+        stage = "VERIFY_C2_INPUTS"
         receipt, keys, episodes = verified_inputs(
             site=site, receipt_path=receipt_path, status_path=status_path,
             payload_path=payload_path, dashboard_path=dashboard_path, verifier=verifier)
+        stage = "VERIFY_C2_BINDING"
         require(reader is not None or receipt.get("offline_fixture") is not True,
                 "OFFLINE_FIXTURE_CANNOT_AUTHORIZE_PHYSICAL_READBACK")
         require(receipt.get("workflow_sha") == workflow_sha, "WORKFLOW_SHA_MISMATCH")
@@ -210,6 +213,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 writer_host.lower().replace("-pooler.", "."),
                 "NEON_ENDPOINT_BRANCH_MISMATCH")
 
+        stage = "LOAD_GENERATOR"
         generator = load_generator()
 
         def input_failure(exc):
@@ -232,17 +236,20 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                                generated_at=generated_at)
         with tempfile.TemporaryDirectory(prefix="neon-shadow-stage-", dir=output) as staging:
             work = Path(staging)
+            stage = "PREPARE_GENERATOR"
             try:
                 adapter, b2, bundle = generator.prepare(args, work)
             except Exception as exc:
                 raise ShadowBlocked(input_failure(exc)) from exc
             # Reader can be injected by offline tests; no HTTP, no Neon writes.
+            stage = "READ_NEON_SNAPSHOT"
             if reader is None:
                 snap = generator.snapshot(database_url, b2, bundle,
                                           expected_host=writer_host)
             else:
                 snap = reader(database_url, b2, bundle, expected_host=writer_host)
 
+            stage = "VERIFY_SNAPSHOT_C2_BINDING"
             require(snap.get("meta", {}).get("read_only") == "on" and
                     snap["meta"].get("isolation") == "repeatable read",
                     "READ_ONLY_SNAPSHOT_NOT_PROVEN")
@@ -270,13 +277,19 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 for row in snap["episodes"]
                 if row.get("legacy_episode_id") in corpus_ids
             ]
+            stage = "VALIDATE_NEON_ROWS"
             validated_neon_rows(episodes, keys, rows)
+            stage = "VERIFY_SNAPSHOT"
             try:
                 closed, active = generator.verify_snapshot(snap, adapter)
             except Exception as exc:
                 raise ShadowBlocked(input_failure(exc)) from exc
+            stage = "WRITE_READBACK_PROOF"
             write(work / "readback_proof.json", {
-                "meta": snap["meta"], "mode": verdict["readback_mode"],
+                # psycopg returns timestamptz as datetime; stored fixtures use strings.
+                # Normalize this evidence field without mutating the native snapshot.
+                "meta": {**snap["meta"], "read_at": utc(snap["meta"]["read_at"])},
+                "mode": verdict["readback_mode"],
                 "physical_neon_readback_run": reader is None,
                 "c2_corpus_sha256": receipt["corpus_sha256"],
                 "receipt_sha256": digest(receipt_path),
@@ -287,15 +300,18 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                            ("episodes", "observations", "checkpoints", "runs",
                             "classifications", "source_links", "events")},
             })
+            stage = "BUILD_SOURCE_REPORT"
             reference = load(dashboard_path)
             require(reference["multicity_meta"]["production_city_keys"] == keys,
                     "FRONTEND_CITY_BOUNDARY_CHANGED")
             cities = generator.source_report(snap, keys, reference)
+            stage = "GENERATE_FRONTEND"
             try:
                 result = generator.generate(args, work, adapter, b2, bundle,
                                             snap, closed, active, cities)
             except Exception as exc:
                 raise ShadowBlocked(input_failure(exc)) from exc
+            stage = "VERIFY_FRONTEND_FILES"
             names = {
                 "dashboard_data.json", "site_derived.json", "alerts_combined.json",
                 "historical-daily-kpi.json", "kyiv_threat_mix.json",
@@ -310,6 +326,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                     "FRONTEND_FILE_SHA256_MISMATCH")
             require(all(cities[k]["source_capture_verified"] is False for k in keys),
                     "UNPROVEN_SOURCE_FRESHNESS")
+            stage = "PRESERVE_CANDIDATE"
             shutil.copytree(candidate, output / "candidate")
             for name in ("kyiv_selection.json", "projection_lineage.json", "git_dependencies.json",
                          "utc_union_diagnostics.json", "active_rows_unmodified.json", "readback_proof.json"):
@@ -328,7 +345,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             verdict["physical_readback_verdict"] = ("PHYSICAL_NEON_READBACK_NOT_RUN" if reader is not None
                                                      else "PHYSICAL_NEON_READBACK_RUN")
     except Exception as exc:
-        verdict.update(error_type=type(exc).__name__,
+        # Fixed stage names only: never exception messages, SQL, DSNs or row values.
+        verdict.update(error_type=type(exc).__name__, error_stage=stage,
                        reason=str(exc) if isinstance(exc, ShadowBlocked) else
                        "RECEIPT_READBACK_OR_GENERATOR_ERROR", candidate_files={})
         shutil.rmtree(output / "candidate", ignore_errors=True)

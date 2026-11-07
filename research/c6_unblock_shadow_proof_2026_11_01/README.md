@@ -1,5 +1,50 @@
 # C6 physical shadow: prepared changes for owner review
 
+## 2026-11-07: first physical TypeError — offline fix and safe stage diagnostics
+
+Research parent: `0c75fa86256b1eccbffcbe445f503d21bfff4e7b`.
+Verified [Actions 42416457017](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42416457017)
+attempt 1: FAILURE at the six-file step; preparation and existing C2 download passed.
+Job `128535500199` has no traceback. Artifact **13590979237** contains only
+`verdict.json` and its hash manifest: `BLOCKED`, `TypeError`,
+`RECEIPT_READBACK_OR_GENERATOR_ERROR`, zero candidate files.
+Downloaded ZIP SHA-256 matches GitHub's digest:
+`825a0aa4d469f359d93f5bc2e2d5cc6c5b3eaf73cb23a2cd935bf08025b3eb5d`;
+the manifest's verdict SHA-256 also matches:
+`b1864704ea9d261f7e2b96543710d58e6ddf265462c15ccb9c64b3009a9cfb3c`.
+
+**Confirmed code defect:** `snapshot()` selects `transaction_timestamp() AS read_at`.
+The live driver returns a Python `datetime`; stored JSON fixtures contain a string.
+`execute()` passed `snap['meta']` to the strict JSON writer for
+`readback_proof.json`, before source reporting and frontend generation. On the
+unchanged parent, a targeted test with a native timestamp reproduced
+`TypeError: Object of type datetime is not JSON serializable` at that call.
+The historical run's exact failure location remains unproven because its evidence
+contains no stack or stage; this patch does not claim a physical readback PASS.
+
+The fix converts only the evidence copy of `meta.read_at` through existing `utc()`.
+The native snapshot stays unchanged, and unknown JSON types still fail closed.
+Failure verdicts now add `error_stage` from fixed code labels. No exception text,
+traceback, SQL, SQL parameters, DSN, credentials or row values are added to diagnostics.
+
+Targeted offline checks: **18 frontend tests + 3 existing read-only gate tests PASS**;
+see [typeerror-tests.txt](typeerror-tests.txt). The regression uses synthetic 23-city
+inputs, a mocked snapshot transport and a stubbed projection; it exercises real
+C2 corpus/row binding and evidence serialization, without rerunning the accepted
+full generation proof. Negative cases cover snapshot/evidence/source-report/generator
+errors, naive timestamps and unexpected metadata types. Each failure preserves
+only a BLOCKED verdict, no candidate and no exception text. `git diff --check` passes.
+
+No repeat physical proof, source HTTP, SQL connection, C2 export, Neon/grant/secret/
+Environment change, production change or PR #42 mutation was performed. Read-only
+SQL and policy gates are unchanged. Main remains
+`0546986e69f2bbd4d5507f80dada426775eb1489`; its root coordination files were read.
+No new accepted technical checkpoint is claimed, so they remain unchanged.
+`GLOBAL_CUTOVER=NO`. A repeat proof requires separate owner authorization and the
+new research SHA in the existing Environment approval variable and workflow input.
+
+## Historical preparation notes
+
 ## 2026-11-07: TEMP-only read-only gate unblock
 
 Preparation only; the physical Neon-to-JSON workflow has **not** been dispatched.

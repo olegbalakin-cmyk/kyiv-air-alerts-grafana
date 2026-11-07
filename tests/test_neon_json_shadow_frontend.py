@@ -7,8 +7,10 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 from scripts import neon_json_shadow as shadow
+from scripts import neon_json_shadow_generator as generator
 
 
 class ShadowOfflineContracts(unittest.TestCase):
@@ -142,6 +144,111 @@ class ShadowOfflineContracts(unittest.TestCase):
         self.assertNotIn("br-crimson-star-b59u7ge3", text)
         self.assertNotIn("FRESH_ROOT", text)
         self.assertIn("UNAUTHORIZED_CLASSIFICATION_REBIND", text)
+
+    def native_readback(self, *, meta=None, **overrides):
+        """Exercise execute's live-driver boundary, without a DB or full projection."""
+        read_at = datetime(2026, 11, 7, 21, 34, 9, 123456, tzinfo=timezone.utc)
+        rows = [{**row, "uid": "00000000-0000-0000-0000-%012d" % i,
+                 "start_at": datetime.fromisoformat(row["start_at"].replace("Z", "+00:00")),
+                 "end_at": datetime.fromisoformat(row["end_at"].replace("Z", "+00:00"))}
+                for i, row in enumerate(self.episodes)]
+        snap = {"meta": {"read_only": "on", "isolation": "repeatable read",
+                         "snapshot": "1:2:", "read_at": read_at, **(meta or {})},
+                "episodes": rows, "observations": [], "checkpoints": [],
+                "runs": [{"run_id": "run-1", "db_branch": "br-c2", "status": "succeeded",
+                          "parameters": {"corpus_sha256": self.receipt["corpus_sha256"]}}],
+                "classifications": [], "source_links": [], "events": []}
+        names = {"dashboard_data.json", "site_derived.json", "alerts_combined.json",
+                 "historical-daily-kpi.json", *shadow.AUXILIARIES}
+
+        def generate(args, work, *unused):
+            # A live datetime must cross the real evidence writer before generation.
+            evidence = shadow.load(work / "readback_proof.json")
+            self.assertEqual(evidence["meta"]["read_at"], shadow.utc(read_at))
+            self.assertIs(snap["meta"]["read_at"], read_at)
+            candidate = work / "candidate"
+            candidate.mkdir()
+            for name in names:
+                shadow.write(candidate / name, {})
+            for name in ("kyiv_selection.json", "projection_lineage.json", "git_dependencies.json",
+                         "utc_union_diagnostics.json", "active_rows_unmodified.json"):
+                shadow.write(work / name, {})
+            return {"candidate_sha256": {name: shadow.digest(candidate / name) for name in names}}
+
+        fake = SimpleNamespace(Closed=generator.Closed, fingerprint=generator.fingerprint,
+                               prepare=Mock(return_value=(None, None, {})),
+                               snapshot=Mock(return_value=snap),
+                               verify_snapshot=Mock(return_value=(rows, [])),
+                               source_report=Mock(return_value={key: {"source_capture_verified": False}
+                                                               for key in self.keys}),
+                               generate=Mock(side_effect=generate))
+        for key, value in overrides.items():
+            setattr(fake, key, value)
+        # reader=None deliberately exercises the same physical branch as Actions;
+        # only the transport and expensive accepted projection are replaced.
+        with patch("socket.socket.connect", side_effect=AssertionError("NO_NETWORK")), \
+                patch.object(shadow, "load_generator", return_value=fake):
+            return self.execute(writer_database_url="postgresql://ep-a.neon.tech/neondb")
+
+    def test_native_datetime_readback_evidence(self):
+        verdict = self.native_readback()
+        self.assertEqual(verdict["status"], "PASS")
+        self.assertEqual(len(verdict["candidate_files"]), 6)
+        self.assertFalse(verdict["publication_allowed"])
+        evidence = shadow.load(self.root / "shadow/readback_proof.json")
+        self.assertEqual(evidence["meta"]["read_at"], "2026-11-07T21:34:09.123456Z")
+
+    def assert_safe_stage(self, stage):
+        output = self.root / "shadow"
+        verdict = shadow.load(output / "verdict.json")
+        self.assertEqual(verdict["status"], "BLOCKED")
+        self.assertEqual(verdict["error_stage"], stage)
+        self.assertFalse(verdict["publication_allowed"])
+        self.assertEqual(verdict["candidate_files"], {})
+        self.assertFalse((output / "candidate").exists())
+        self.assertEqual({p.name for p in output.iterdir()}, {"verdict.json"})
+        self.assertNotIn("SENSITIVE_EXCEPTION_TEXT", (output / "verdict.json").read_text())
+
+    def test_snapshot_typeerror_stage_without_exception_text(self):
+        with self.assertRaises(TypeError):
+            self.native_readback(snapshot=Mock(side_effect=TypeError("SENSITIVE_EXCEPTION_TEXT")))
+        self.assert_safe_stage("READ_NEON_SNAPSHOT")
+
+    def test_readback_writer_typeerror_stage_without_exception_text(self):
+        original = shadow.write
+
+        def fail_evidence(path, value):
+            if path.name == "readback_proof.json":
+                raise TypeError("SENSITIVE_EXCEPTION_TEXT")
+            return original(path, value)
+
+        with patch.object(shadow, "write", side_effect=fail_evidence), self.assertRaises(TypeError):
+            self.native_readback()
+        self.assert_safe_stage("WRITE_READBACK_PROOF")
+
+    def test_source_report_typeerror_stage_without_exception_text(self):
+        with self.assertRaises(TypeError):
+            self.native_readback(source_report=Mock(side_effect=TypeError("SENSITIVE_EXCEPTION_TEXT")))
+        self.assert_safe_stage("BUILD_SOURCE_REPORT")
+
+    def test_generator_typeerror_stage_without_exception_text(self):
+        with self.assertRaises(shadow.ShadowBlocked):
+            self.native_readback(generate=Mock(side_effect=TypeError("SENSITIVE_EXCEPTION_TEXT")))
+        self.assert_safe_stage("GENERATE_FRONTEND")
+
+    def test_evidence_writer_still_rejects_unknown_types(self):
+        with self.assertRaises(TypeError):
+            shadow.write(self.root / "unknown.json", {"unexpected": object()})
+
+    def test_native_naive_timestamp_blocks_without_candidate(self):
+        with self.assertRaisesRegex(shadow.ShadowBlocked, "NAIVE_TIMESTAMP"):
+            self.native_readback(meta={"read_at": datetime(2026, 11, 7, 21, 34)})
+        self.assert_safe_stage("WRITE_READBACK_PROOF")
+
+    def test_unknown_metadata_type_blocks_without_string_fallback(self):
+        with self.assertRaises(TypeError):
+            self.native_readback(meta={"unexpected": object()})
+        self.assert_safe_stage("WRITE_READBACK_PROOF")
 
 
 if __name__ == "__main__":
