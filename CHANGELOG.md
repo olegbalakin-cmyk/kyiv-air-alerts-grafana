@@ -1,8 +1,13 @@
 # Changelog — recent accepted transitions
 
-Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
+Current status: [PROJECT_STATE.md](PROJECT_STATE.md); previous proof: [archive index](docs/coordination-archive/README.md).
 
 <!-- coordination:history:start -->
+### C6-PHYSICAL-SHADOW-JSON-01 — physical Neon frontend JSON PASS; cutover NO (2026-11-08)
+
+- [Actions 42487688608](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42487688608) SUCCESS, research `38539e51`, artifact **13619973574**, verified 14/14 hashes: read-only Neon → 4+2 JSON for 23 cities, 32,457 C2 episodes, 0 writes.
+- All 23 source gates remain BLOCKED; DST/Kyiv, live freshness and rollback OPEN. **GLOBAL_CUTOVER NO.**
+
 ### C6-UA-CURRENT-ONEGET-01 — current API access PASS; active semantics OPEN (2026-10-31)
 
 - Owner-authorized one GET `/api/v3/alerts`: HTTP 200, 72 rows, 9/21 mapped IDs directly present with AIR, 12 absent but UNKNOWN. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS; [proof d6a6340f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01), encrypted artifact **13049271828**, 5/5 hashes verified. History 21/21 separately proven by existing production client.
