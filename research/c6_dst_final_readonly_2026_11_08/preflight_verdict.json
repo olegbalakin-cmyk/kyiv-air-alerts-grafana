@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "checkpoint": "C6-DST-FINAL-FOUR-CASE-READONLY-2026-11-08",
+  "reported_date_utc": "2026-11-08",
+  "verdict": "BLOCKED",
+  "block_reason": "READONLY_ROLE_MISSING_SELECT_ON_REQUIRED_DEPENDENCY",
+  "access_error": {
+    "sqlstate": "42501",
+    "message": "permission denied for table alert_state_snapshots",
+    "source": "mcp Neon run_sql_transaction"
+  },
+  "requested_connection": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "compute_id": "ep-calm-rice-b5073ypp",
+    "database_name": "neondb",
+    "role_name": "c6_shared_reader_v2"
+  },
+  "metadata_confirmed": {
+    "role_exists": true,
+    "role_authentication_method": "password",
+    "compute_type": "read_only",
+    "branch_state": "ready"
+  },
+  "attempt": {
+    "count": 1,
+    "transaction": "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY",
+    "queries": "identity; exact old/candidate/preserved episodes; source/run provenance; linked classifications/events/snapshots; pg_catalog relationships, constraints, indexes, triggers, RLS, rules, inheritance",
+    "requested_dml": 0,
+    "requested_ddl": 0,
+    "requested_grants": 0,
+    "source_http_requests": 0,
+    "retry_attempts": 0,
+    "sql_transaction_result": "ERROR_ABORTED",
+    "consistent_snapshot_proof_available": false,
+    "before_images_available": false
+  },
+  "four_case_current_verdicts": [
+    {
+      "city": "kharkiv",
+      "expected_issue": "wrong_merge",
+      "old_uuid": "bb7d4952-52a3-45f8-a1db-13153c8f6ca3",
+      "verdict": "BLOCKED_NOT_PHYSICALLY_RECONCILED"
+    },
+    {
+      "city": "poltava",
+      "expected_issue": "wrong_merge",
+      "old_uuid": "74ba1017-63af-4137-a5ba-246795613615",
+      "verdict": "BLOCKED_NOT_PHYSICALLY_RECONCILED"
+    },
+    {
+      "city": "zhytomyr",
+      "expected_issue": "wrong_merge",
+      "old_uuid": "b40c570e-f9db-4c7d-b7e4-3f7769e12a95",
+      "verdict": "BLOCKED_NOT_PHYSICALLY_RECONCILED"
+    },
+    {
+      "city": "cherkasy",
+      "expected_issue": "missing_interval",
+      "preserve_uuid": "ff046d6c-fc7e-4cd2-9470-3e5433c3d582",
+      "verdict": "BLOCKED_NOT_PHYSICALLY_RECONCILED"
+    }
+  ],
+  "pinned_prior_evidence": {
+    "accepted_dst_commit": "7265e40af6d012267ada515e9cac415f3e1e24b7",
+    "prior_access_block_commit": "04b0938d72ecfde675dc665a0a1268ee4d86f11d",
+    "preflight_fixture_blob": "2caa8d5d4fd3a8934b7a3428b26b67642a4efcb3",
+    "offline_machine_diff_blob": "8d698e5f1b843918cb4c42de45f7fc70f9547025",
+    "physical_json_proof_run": 42487688608,
+    "physical_json_proof_artifact": 13619973574,
+    "pr45_sha": "3e08daf4e3efc33fa1b02664e5cb96af8500de81"
+  },
+  "offline_expected_not_live_verified": {
+    "supersede_old_rows": 3,
+    "new_correct_rows": 7,
+    "net_episode_delta": 4,
+    "duration_delta_microseconds": -9059359958,
+    "other_rows_changed": 0
+  },
+  "blockers": [
+    "SELECT on public.alert_state_snapshots denied to c6_shared_reader_v2",
+    "No complete transaction result or current before-images",
+    "Current dependencies/alias capacity not certified",
+    "No authorization for DML/DDL or production promotion"
+  ],
+  "next_manual_only_step": "Resolve the read-only SELECT access issue through a separately authorized process; then run manual_only_readback.sql once with the existing role and read-only replica, preserving full before-images. Recheck drift/lineage and obtain separate Neon write approval before any repair.",
+  "production_affected": false,
+  "neon_data_modified": false,
+  "writer_modified": false,
+  "cutover_performed": false,
+  "global_cutover": "NO"
+}
