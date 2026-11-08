@@ -164,7 +164,7 @@ def validated_neon_rows(episodes: list[dict], keys: list[str], rows: list[dict])
 def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: Path,
             dashboard_path: Path, output: Path, database_url: str,
             verifier=None, reader=None, workflow_sha=None, input_sha=None,
-            writer_database_url=None, expected_branch=None, generated_at=None) -> dict:
+            writer_database_url=None, expected_branch=None, generated_at=None, dst_correction=None) -> dict:
     """One branch-bound C2 Neon snapshot, then isolated six-file frontend candidate.
 
     The previously accepted canonical verifier remains the authority for C2.
@@ -233,7 +233,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
 
         from types import SimpleNamespace
         args = SimpleNamespace(site=site, branch_id=expected_branch, input_sha=input_sha,
-                               generated_at=generated_at)
+                               generated_at=generated_at, dst_correction=dst_correction,
+                               c2_corpus_sha256=receipt["corpus_sha256"])
         with tempfile.TemporaryDirectory(prefix="neon-shadow-stage-", dir=output) as staging:
             work = Path(staging)
             stage = "PREPARE_GENERATOR"
@@ -331,6 +332,9 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             for name in ("kyiv_selection.json", "projection_lineage.json", "git_dependencies.json",
                          "utc_union_diagnostics.json", "active_rows_unmodified.json", "readback_proof.json"):
                 shutil.copyfile(work / name, output / name)
+            if dst_correction is not None:
+                shutil.copyfile(work / "dst_correction.json", output / "dst_correction.json")
+                verdict["historical_dst_projection"] = dst_correction
             write(output / "source_gates.json", cities)
             verdict.update(status="PASS", frontend_compatible=True,
                            neon_readback_verified=True, city_count=23,
@@ -360,6 +364,7 @@ def main(argv=None):
     p = argparse.ArgumentParser()
     for flag in ("site", "receipt", "status", "payload", "dashboard", "output"):
         p.add_argument("--" + flag, required=True, type=Path)
+    p.add_argument("--dst-correction", choices=["c6-dst-projection-v1"], default=None)
     a = p.parse_args(argv)
     try:
         verdict = execute(site=a.site, receipt_path=a.receipt, status_path=a.status,
@@ -368,7 +373,7 @@ def main(argv=None):
                           writer_database_url=os.environ.get("MULTICITY_CANONICAL_DATABASE_URL", ""),
                           expected_branch=os.environ.get("MULTICITY_CANONICAL_DB_BRANCH"),
                           workflow_sha=os.environ.get("GITHUB_SHA"),
-                          input_sha=os.environ.get("PHASE1_INPUT_SHA"))
+                          input_sha=os.environ.get("PHASE1_INPUT_SHA"), dst_correction=a.dst_correction)
     except Exception:
         print("Neon JSON shadow BLOCKED; verdict is stored without credentials or candidate publication", file=sys.stderr)
         return 1

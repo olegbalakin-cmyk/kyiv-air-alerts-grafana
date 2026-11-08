@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "checkpoint": "C6-DST-AFTER-GRANT-READONLY-01",
+  "base_commit": "c8261baa2c62a786df6939959b10a50d98757336",
+  "main_reviewed": "0546986e69f2bbd4d5507f80dada426775eb1489",
+  "accepted_dst_commit": "7265e40af6d012267ada515e9cac415f3e1e24b7",
+  "requested_connection": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "compute_id": "ep-calm-rice-b5073ypp",
+    "database_name": "neondb",
+    "role_name": "c6_shared_reader_v2"
+  },
+  "physical_session": {
+    "reader_role": "c6_shared_reader_v2",
+    "database_name": "neondb",
+    "isolation_level": "repeatable read",
+    "read_only": "on",
+    "replica": true,
+    "snapshot_id": "509961:510976:",
+    "captured_at_utc": "2026-11-08T22:12:15.678Z",
+    "session_role": "c6_shared_reader_v2",
+    "backend_pid": 716,
+    "finished_at_utc": "2026-11-08T22:12:17.374Z",
+    "ending_backend_pid": 716,
+    "ending_snapshot_id": "509961:510976:"
+  },
+  "permissions": [
+    {
+      "tbl": "public.alert_episodes",
+      "can_select": true,
+      "permissions_guard": 1
+    },
+    {
+      "tbl": "public.alert_episode_sources",
+      "can_select": true,
+      "permissions_guard": 1
+    },
+    {
+      "tbl": "public.ingestion_runs",
+      "can_select": true,
+      "permissions_guard": 1
+    },
+    {
+      "tbl": "public.attack_event_classifications",
+      "can_select": true,
+      "permissions_guard": 1
+    },
+    {
+      "tbl": "public.attack_events",
+      "can_select": true,
+      "permissions_guard": 1
+    },
+    {
+      "tbl": "public.alert_state_snapshots",
+      "can_select": true,
+      "permissions_guard": 1
+    }
+  ],
+  "role_attributes": {
+    "rolname": "c6_shared_reader_v2",
+    "rolsuper": false,
+    "rolinherit": false,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolcanlogin": true,
+    "rolreplication": false,
+    "rolbypassrls": false
+  },
+  "old_episode_checks": [
+    {
+      "end_utc": "2026-10-25T02:22:46.862159Z",
+      "episode_uid": "bb7d4952-52a3-45f8-a1db-13153c8f6ca3",
+      "legacy_episode_id": "604d9e3f63fa9bc3cbd78adb",
+      "start_utc": "2026-10-24T23:24:46.944947Z",
+      "city_key": "kharkiv",
+      "exact_match": true
+    },
+    {
+      "end_utc": "2026-10-25T01:29:42.507155Z",
+      "episode_uid": "74ba1017-63af-4137-a5ba-246795613615",
+      "legacy_episode_id": "81ba41902e7642b95aacde52",
+      "start_utc": "2026-10-25T00:06:15.155767Z",
+      "city_key": "poltava",
+      "exact_match": true
+    },
+    {
+      "end_utc": "2026-10-25T01:30:52.777820Z",
+      "episode_uid": "b40c570e-f9db-4c7d-b7e4-3f7769e12a95",
+      "legacy_episode_id": "3d1ae87e479c137d912f9b49",
+      "start_utc": "2026-10-25T00:06:17.978268Z",
+      "city_key": "zhytomyr",
+      "exact_match": true
+    }
+  ],
+  "candidates": [
+    {
+      "end_utc": "2026-10-25T01:19:09.997656Z",
+      "legacy_episode_id": "cdbf2515f5abb87b26588794",
+      "start_utc": "2026-10-25T01:14:53.333785Z",
+      "city_key": "cherkasy",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    },
+    {
+      "end_utc": "2026-10-25T00:30:17.068083Z",
+      "legacy_episode_id": "5e1419914aca832269aecd97",
+      "start_utc": "2026-10-24T23:24:46.944947Z",
+      "city_key": "kharkiv",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    },
+    {
+      "end_utc": "2026-10-25T02:22:46.862159Z",
+      "legacy_episode_id": "1f926bf2181429b41da57787",
+      "start_utc": "2026-10-25T01:25:28.327265Z",
+      "city_key": "kharkiv",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    },
+    {
+      "end_utc": "2026-10-25T00:26:57.986096Z",
+      "legacy_episode_id": "9d82fda26301c5813fd5995e",
+      "start_utc": "2026-10-25T00:06:15.155767Z",
+      "city_key": "poltava",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    },
+    {
+      "end_utc": "2026-10-25T01:29:42.507155Z",
+      "legacy_episode_id": "a8bb035a0a6b812384a61f9a",
+      "start_utc": "2026-10-25T01:17:40.643305Z",
+      "city_key": "poltava",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    },
+    {
+      "end_utc": "2026-10-25T00:26:58.980319Z",
+      "legacy_episode_id": "770e55ab0c608d531c7d1f05",
+      "start_utc": "2026-10-25T00:06:17.978268Z",
+      "city_key": "zhytomyr",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    },
+    {
+      "end_utc": "2026-10-25T01:30:52.777820Z",
+      "legacy_episode_id": "7a37899cb0e694f822b56661",
+      "start_utc": "2026-10-25T01:16:21.087757Z",
+      "city_key": "zhytomyr",
+      "existing_legacy_hits": 0,
+      "existing_exact_interval_hits": 0
+    }
+  ],
+  "protected_cherkasy": {
+    "end_utc": "2026-10-25T00:26:58.650073Z",
+    "episode_uid": "ff046d6c-fc7e-4cd2-9470-3e5433c3d582",
+    "legacy_episode_id": "a7dd6c572640b6396fb7bec7",
+    "preserve_identity": true,
+    "start_utc": "2026-10-25T00:06:18.166695Z",
+    "exact_identity_and_utc_match": true,
+    "city_and_type_checked_from_full_row": true,
+    "historical_full_row_byte_equality": "NOT_ASSERTED; pinned fixture contains identity and boundaries only"
+  },
+  "dependency_readback": {
+    "local_overlap_rows": 11,
+    "source_on_three_bad_and_protected_cherkasy": 0,
+    "source_near_four_cases": 0,
+    "classifications_matching_three_bad_uuid_or_legacy": 0,
+    "attack_events_matching_three_bad_uuid_or_legacy": 0,
+    "snapshots_matching_three_bad_uuid_or_legacy": 0,
+    "incoming_episode_foreign_keys": [
+      {
+        "on_relation": "alert_episode_sources",
+        "conname": "alert_episode_sources_episode_uid_fkey",
+        "contype": "f",
+        "references_relation": "alert_episodes",
+        "definition": "FOREIGN KEY (episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT"
+      },
+      {
+        "on_relation": "alert_state_snapshots",
+        "conname": "alert_state_snapshots_episode_uid_fkey",
+        "contype": "f",
+        "references_relation": "alert_episodes",
+        "definition": "FOREIGN KEY (episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT"
+      },
+      {
+        "on_relation": "attack_event_classifications",
+        "conname": "attack_event_classifications_alert_episode_uid_fkey",
+        "contype": "f",
+        "references_relation": "alert_episodes",
+        "definition": "FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT"
+      },
+      {
+        "on_relation": "attack_events",
+        "conname": "attack_events_alert_episode_uid_fkey",
+        "contype": "f",
+        "references_relation": "alert_episodes",
+        "definition": "FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT"
+      }
+    ],
+    "originating_run_count": 1,
+    "originating_run_db_record": {
+      "run_id": "8c6c2040-e6bf-4e62-9f44-006d472afeb4",
+      "status": "succeeded",
+      "schema_version": "001_phase1_core",
+      "source_event_lineage": "NOT_ESTABLISHED; no source observations in target scope",
+      "github_run_status": "NOT_REVALIDATED; no Actions proof used for this readback"
+    },
+    "constraints_returned": 165,
+    "indexes_returned": 23,
+    "noninternal_triggers": 0,
+    "policies": 0,
+    "dependent_rules": 0,
+    "inheritance_links": 0,
+    "row_security_enabled_on_six_tables": false,
+    "other_catalog_relations_not_row_read": [
+      "alert_threat_observations",
+      "attack_event_sources",
+      "ingestion_checkpoints"
+    ],
+    "non_fk_external_consumers_absent": "NOT_PROVEN"
+  },
+  "schema_blocker": {
+    "episode_columns": [
+      {
+        "column_name": "episode_uid",
+        "data_type": "uuid",
+        "attnotnull": true
+      },
+      {
+        "column_name": "legacy_episode_id",
+        "data_type": "text",
+        "attnotnull": false
+      },
+      {
+        "column_name": "city_key",
+        "data_type": "text",
+        "attnotnull": true
+      },
+      {
+        "column_name": "alert_type",
+        "data_type": "text",
+        "attnotnull": true
+      },
+      {
+        "column_name": "start_at",
+        "data_type": "timestamp with time zone",
+        "attnotnull": true
+      },
+      {
+        "column_name": "end_at",
+        "data_type": "timestamp with time zone",
+        "attnotnull": false
+      },
+      {
+        "column_name": "episode_state",
+        "data_type": "text",
+        "attnotnull": true
+      },
+      {
+        "column_name": "canonicalization_version",
+        "data_type": "text",
+        "attnotnull": true
+      },
+      {
+        "column_name": "created_by_run_id",
+        "data_type": "uuid",
+        "attnotnull": true
+      },
+      {
+        "column_name": "updated_by_run_id",
+        "data_type": "uuid",
+        "attnotnull": true
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "attnotnull": true
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "attnotnull": true
+      }
+    ],
+    "relevant_constraints": [
+      {
+        "on_relation": "alert_episodes",
+        "conname": "alert_episodes_canonicalization_version_check",
+        "contype": "c",
+        "references_relation": null,
+        "definition": "CHECK ((canonicalization_version = 'alert-canonicalization-v1'::text))"
+      },
+      {
+        "on_relation": "alert_episodes",
+        "conname": "alert_episodes_episode_state_check",
+        "contype": "c",
+        "references_relation": null,
+        "definition": "CHECK ((episode_state = ANY (ARRAY['open'::text, 'closed'::text])))"
+      },
+      {
+        "on_relation": "alert_episodes",
+        "conname": "alert_episodes_exact_interval_key",
+        "contype": "u",
+        "references_relation": null,
+        "definition": "UNIQUE (city_key, alert_type, start_at, end_at)"
+      },
+      {
+        "on_relation": "alert_episodes",
+        "conname": "alert_episodes_legacy_episode_id_key",
+        "contype": "u",
+        "references_relation": null,
+        "definition": "UNIQUE (legacy_episode_id)"
+      },
+      {
+        "on_relation": "alert_episodes",
+        "conname": "alert_episodes_state_interval_check",
+        "contype": "c",
+        "references_relation": null,
+        "definition": "CHECK ((((episode_state = 'open'::text) AND (end_at IS NULL)) OR ((episode_state = 'closed'::text) AND (end_at IS NOT NULL) AND (end_at > start_at))))"
+      }
+    ],
+    "episode_supersession_or_alias_mapping": "NOT_FOUND_IN_RETURNED_PUBLIC_CATALOG",
+    "observation_duplicate_alias": "An observation-level attribute, not a one-to-many episode supersession mechanism",
+    "classification_supersedes": "A classification-level attribute, not an episode supersession mechanism",
+    "no_schema_change_safe_repair_and_rollback": "NOT_PROVEN"
+  },
+  "completeness": {
+    "transaction_attempts": 1,
+    "statements": 25,
+    "tool_result_blocks": 1,
+    "truncation_reported": false,
+    "all_bounded_data_results_below_limit": true,
+    "source_http_requests": 0,
+    "dml": 0,
+    "ddl": 0,
+    "grants": 0,
+    "credential_changes": 0,
+    "owner_fallback": 0,
+    "write_or_rollback_rehearsal": false
+  },
+  "protected_artifact": {
+    "file_name": "c6_dst_readback_2026_11_08.json",
+    "bytes": 142396,
+    "sha256": "d36bbc8c3f724c2726054d583e98bf6e14d82edefc6b2fe8ad1bd6a53c7735a3",
+    "availability": "Owner-private artifact linked in delivery; full request and unmodified response, full row before-images and run metadata excluded from public Git"
+  },
+  "expected_arithmetic_from_accepted_evidence": {
+    "supersede_old_rows": 3,
+    "new_correct_rows": 7,
+    "net_episode_delta": 4,
+    "duration_delta_microseconds": -9059359958,
+    "other_rows_changed": 0
+  },
+  "verdict": "BLOCKED",
+  "global_cutover": "NO"
+}
+

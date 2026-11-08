@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-DST-PROJECTION-01 — offline correction ready for review; cutover NO (2026-11-09)
+
+- Research-only proposal: explicit v1 historical calculation correction in the existing generator; three excluded projected UUIDs, seven accepted source intervals, +4 episodes / -9,059,359,958 microseconds. Physical Neon rows unchanged; no schema migration. Exact corpus/evidence/schema drift stops generation. 17 targeted tests PASS, including Kyiv 2,819 unchanged, casualty/auxiliary/CSV contract and exact rollback. UTC union regression fix prepared separately from production.
+- [Implementation and proofs](research/c6_dst_projection_2026_11_09/README.md). Reused `9ba2c04c`, `7265e40a`, `741f277f`, run 42487688608 and PR #45 `3e08daf4`; no repeat physical proof, SQL, source HTTP, deployment or changes to PR #42/#44/#45. Publication false; `GLOBAL_CUTOVER=NO`. Pending review; main acceptance unchanged.
+
 ### C6-UA-CURRENT-ONEGET-01 — current API access PASS; active semantics OPEN (2026-10-31)
 
 - Owner-authorized one GET `/api/v3/alerts`: HTTP 200, 72 rows, 9/21 mapped IDs directly present with AIR, 12 absent but UNKNOWN. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS; [proof d6a6340f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01), encrypted artifact **13049271828**, 5/5 hashes verified. History 21/21 separately proven by existing production client.
@@ -23,16 +28,5 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Owner-authorized single HTTP GET; [Actions 41204874911](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41204874911) SUCCESS, [research 1cf607b3](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/1cf607b3ca00568f416fa5fc8a087ff53f4b9190), artifact **13044202361**. New source HTTP 200, 918,908 bytes, original old capture unchanged.
 - On existing isolated child, Phase-1 inserted **new episode UUID** `478ea32b-e567-4f8d-a11a-b822648c41ee`, new source observation and correct chained poll checkpoint **seq 2**. Independent direct Neon readback; original freshness gate PASS, single-episode JSON PASS.
 - **Bounded only:** `continuity_verified=false`, no full 23-city generator, upstream cache certification, recurring writer, active-status or production cutover. **C6/C3 PARTIAL; GLOBAL_CUTOVER NO**, no production changes.
-
-### C6-LIVE-WRITER-PHYSICAL-03 — child persistence proved; current-source freshness still blocked (2026-10-31)
-
-- [Verified closeout `0617e681`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/0617e6818f34e4a807e535b35fa4a9281d8d0e0b), raw results `ac516e8fe9f25bc6cacbfe566e28bd856ea8fbe1`; [Actions 41203425205](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41203425205) SUCCESS; artifact **13043214025**, all **10** manifest hashes independently matched.
-- Protected Environment delivered the verified child-only role/URL. Original Python Phase-1 COMMIT → crash **86** → separate exact retry → independent read-only UUID/source readback PASS. **Existing canonical episode reused**; new observation/checkpoint inserted; retry inserted **0** duplicates. New UUID allocation is not proven. Original consumer builder produced one post-write Kyiv JSON witness; no full-site regeneration claim.
-- Capture remains **2026-10-30T22:56:24.503909Z**; original gate rejected **STALE_SOURCE_CAPTURE** (**50,521.9 s > 21,600 s**). Persistence **PASS**, freshness **BLOCKED** pending separately authorized new observation with valid checkpoint continuation. Runtime/credential blockers resolved; **C6/C3 PARTIAL; GLOBAL_CUTOVER NO**. Existing child TTL unchanged; no creation/deletion or production/parent/site-prod/WIP/Netlify/writer changes.
-
-### DOC-AUTO-MAINTENANCE-MERGE-02 — maintenance PR merged and main CI verified (2026-10-31)
-
-- [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged with merge commit [`3735f359d2bf`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3735f359d2bfa3310cc7f9fd46f9c8f3a2af0e8f). [Actions 41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) SUCCESS on main: tests, UTF-8 byte gate, history integrity and archival dry-run. Roots reduced from 20,212/11,614 B to 7,990/7,127 B; 10 entries representing 8 distinct checkpoints retained in hashed archives.
-- CI and main-only archive-PR proposal are active; below-threshold no-op does **not** prove bot PR-creation rights. GitHub rulesets empty and required status checks disabled: CI detects but does not enforce merge/push blocking. No protection change or Neon/site-prod/WIP/Netlify action. Next optional owner action: enable required `coordination-docs / size-and-integrity` check, and verify PR creation on the next natural threshold event.
 
 <!-- coordination:history:end -->

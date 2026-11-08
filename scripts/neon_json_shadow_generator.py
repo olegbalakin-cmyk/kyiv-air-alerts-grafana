@@ -228,6 +228,30 @@ def source_report(snap, keys, reference):
         }
     return report
 
+def refresh_analytics(payload, reference, reference_derived, alerts, now, site, mods):
+    rolling=mods['apply_site_rolling_7d']; bridge=mods['apply_ukrainealarm_bridge']
+    keys=payload['multicity_meta']['production_city_keys']
+    complete=copy.deepcopy(payload['cities'])
+    for city in complete.values(): city['monthly']=[r for r in city['monthly'] if not r.get('is_partial_period')]
+    payload['comparison']['monthly']=bridge.generic_comparison(complete,keys,'monthly')
+    payload['comparison']['weekly']=bridge.generic_comparison(payload['cities'],keys,'weekly')
+    coverage={key:rolling.first_coverage_day(payload['cities'][key],alerts[key]) for key in keys}
+    ends={key:rolling.analysis_end(payload['cities'][key]) for key in keys}
+    common_start=datetime.fromisoformat(reference['all_cities_table']['meta']['common_start']).date(); common_end=min(ends.values())
+    payload['all_cities_table']['meta']['common_end']=common_end.isoformat()
+    reference_derived['all_cities_table_test']['meta']['common_end']=common_end.isoformat()
+    for key in keys:
+        payload['time_of_day_profile']['cities'][key]={'coverage_start':coverage[key].isoformat(),'analysis_end':ends[key].isoformat(),'source_type':payload['multicity_meta']['cities'][key]['source_type'],'periods':{p:rolling.time_profile(alerts[key],coverage[key],ends[key],n) for p,n in rolling.PROFILE_PERIODS.items()}}
+        payload['all_cities_table']['cities'][key]={'periods':{label:rolling.period_summary(alerts[key],common_start if n is None else max(common_start,common_end-timedelta(days=n-1)),common_end) for label,n in (('7d',7),('30d',30),('90d',90),('year',365),('common',None))}}
+        mm=payload['multicity_meta']['cities'][key]
+        mm['latest_rolling_7d_end']=ends[key].isoformat()
+        require(mm['source_type']==('exact_city' if key in ('kyiv','kharkiv','zaporizhzhia','sevastopol') else 'raion_proxy'),'SOURCE_TYPE_CHANGED')
+        require(mm.get('proxy_raion')==reference['multicity_meta']['cities'][key].get('proxy_raion'),'PROXY_CHANGED')
+    derived=importlib.import_module('derived_successor').create_derived(payload,reference_derived,alerts,now,site,mods)
+    payload['historical_daily_kpi']=mods['build_preview_historical_daily'].produce(site,None,generated_at=now.isoformat(),source_override=payload,sources_override=alerts)
+    return derived
+
+
 def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     # Completed-alert builders cannot safely close an active row using build time.
     # Preserve active rows unchanged in evidence and keep active/publication gate OPEN.
@@ -270,29 +294,7 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     # membership is retained; later Git membership requires one exact Neon parent.
     kyiv.sort(key=lambda r:aware(r['start']))
     alerts['kyiv']=update.parse_committed_alerts(kyiv)
-    raw=update.build_outputs(alerts['kyiv'],now.astimezone(update.TZ),copy.deepcopy(reference['cities']['kyiv']['meta']))
-    k=copy.deepcopy(raw)
-    mods['add_duration_unit_switch'].trim_first_partial_periods(k,min(a.start.astimezone(update.TZ).date() for a in alerts['kyiv']))
-    rolling.update_city_rolling(k,alerts['kyiv']); payload['cities']['kyiv']=k
-    for section in ('kpis','monthly','weekly','daily28','rolling30','rolling90'):
-        if section in raw: payload[section]=k[section] if section=='weekly' else raw[section]
-    keys=payload['multicity_meta']['production_city_keys']
-    complete=copy.deepcopy(payload['cities'])
-    for city in complete.values(): city['monthly']=[r for r in city['monthly'] if not r.get('is_partial_period')]
-    payload['comparison']['monthly']=bridge.generic_comparison(complete,keys,'monthly')
-    payload['comparison']['weekly']=bridge.generic_comparison(payload['cities'],keys,'weekly')
-    coverage={key:rolling.first_coverage_day(payload['cities'][key],alerts[key]) for key in keys}
-    ends={key:rolling.analysis_end(payload['cities'][key]) for key in keys}
-    common_start=datetime.fromisoformat(reference['all_cities_table']['meta']['common_start']).date(); common_end=min(ends.values())
-    payload['all_cities_table']['meta']['common_end']=common_end.isoformat()
-    reference_derived['all_cities_table_test']['meta']['common_end']=common_end.isoformat()
-    for key in keys:
-        payload['time_of_day_profile']['cities'][key]={'coverage_start':coverage[key].isoformat(),'analysis_end':ends[key].isoformat(),'source_type':payload['multicity_meta']['cities'][key]['source_type'],'periods':{p:rolling.time_profile(alerts[key],coverage[key],ends[key],n) for p,n in rolling.PROFILE_PERIODS.items()}}
-        payload['all_cities_table']['cities'][key]={'periods':{label:rolling.period_summary(alerts[key],common_start if n is None else max(common_start,common_end-timedelta(days=n-1)),common_end) for label,n in (('7d',7),('30d',30),('90d',90),('year',365),('common',None))}}
-        mm=payload['multicity_meta']['cities'][key]
-        mm['latest_rolling_7d_end']=ends[key].isoformat()
-        require(mm['source_type']==('exact_city' if key in ('kyiv','kharkiv','zaporizhzhia','sevastopol') else 'raion_proxy'),'SOURCE_TYPE_CHANGED')
-        require(mm.get('proxy_raion')==reference['multicity_meta']['cities'][key].get('proxy_raion'),'PROXY_CHANGED')
+    for key in payload['multicity_meta']['production_city_keys']:
         if key!='kyiv':
             physical=rows_by_city[key]; cursor=0
             for a in alerts[key]:
@@ -303,10 +305,26 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
                     uids.append(row['uid']); cursor+=1
                 require(bool(uids),'MISSING_UNION_MEMBERS')
                 lineage.append({'city_key':key,'start_utc':iso(a.start),'end_utc':iso(a.end),'physical_uids':uids,'selection':'ACCEPTED_UTC_UNION_OF_PHYSICAL_PARENTS'})
-    derived=importlib.import_module('derived_successor').create_derived(payload,reference_derived,alerts,now,args.site,mods)
-    payload['historical_daily_kpi']=mods['build_preview_historical_daily'].produce(args.site,None,generated_at=now.isoformat(),source_override=payload,sources_override=alerts)
+    correction = None
+    version = getattr(args, 'dst_correction', None)
+    if version is not None:
+        from scripts import c6_dst_projection as dst
+        binding = dst.binding_from_snapshot(snap, args.c2_corpus_sha256)
+        lineage, correction = dst.apply(lineage, binding, version=version)
+        dst.rebuild_affected(payload, alerts, lineage, adapter, mods, now)
+        save(out/'dst_correction.json', correction)
+    raw=update.build_outputs(alerts['kyiv'],now.astimezone(update.TZ),copy.deepcopy(reference['cities']['kyiv']['meta']))
+    k=copy.deepcopy(raw)
+    mods['add_duration_unit_switch'].trim_first_partial_periods(k,min(a.start.astimezone(update.TZ).date() for a in alerts['kyiv']))
+    rolling.update_city_rolling(k,alerts['kyiv']); payload['cities']['kyiv']=k
+    for section in ('kpis','monthly','weekly','daily28','rolling30','rolling90'):
+        if section in raw: payload[section]=k[section] if section=='weekly' else raw[section]
+    keys=payload['multicity_meta']['production_city_keys']
+    derived=refresh_analytics(payload, reference, reference_derived, alerts, now, args.site, mods)
     generated=aware(args.generated_at) if getattr(args, 'generated_at', None) else datetime.now(UTC)
     authority={'branch_id':args.branch_id,'database_read_at_utc':iso(now),'site_generated_at_utc':iso(generated),'source_as_of_utc_by_city':{key:cities[key]['source_captured_at_utc'] for key in keys},'publication_allowed':False,'scope':'RESEARCH_CANDIDATE_NOT_CURRENT_DATA_CERTIFICATION','dst_simulation':False,'active_status':'UNKNOWN_UNCERTIFIED','source_fallback':False,'prior_accepted_browser_proof':'66f872413f67668c9bd23b94cff17520fea705f9','physical_dst_repair_certified':False,'kyiv_current_provenance_certified':False}
+    if correction is not None:
+        authority['historical_dst_projection'] = correction
     payload['meta'].update(k['meta']); payload['meta']['generated_at']=generated.astimezone(update.TZ).isoformat()
     payload['meta']['publication_authority']=authority
     for key in keys:
@@ -317,6 +335,13 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     # Keep source-specific historical KPI index exactly aligned with dashboard's
     # actual generation time; no older source or Git-data fallback is introduced.
     payload['historical_daily_kpi']['meta'].update(generated_at=payload['meta']['generated_at'],source_dashboard_generated_at=payload['meta']['generated_at'],source_ref='neon:'+args.branch_id,source_commit=None,generator_commit=os.getenv('GITHUB_SHA'))
+    if correction is not None:
+        payload['historical_daily_kpi']['meta']['historical_dst_projection'] = {
+            'version': version, 'receipt_sha256': fingerprint(correction),
+            'physical_neon_observation': False, 'publication_allowed': False}
+        for key in dst.AFFECTED:
+            diagnostics[key]['historical_projection_version'] = version
+            diagnostics[key]['corrected_calculation_intervals'] = len(alerts[key])
     candidate=out/'candidate'
     save(candidate/'dashboard_data.json',payload); save(candidate/'site_derived.json',derived); save(candidate/'alerts_combined.json',kyiv)
     save(candidate/'historical-daily-kpi.json',payload['historical_daily_kpi'])

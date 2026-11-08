@@ -437,10 +437,10 @@ def bridge_events(store: dict, region: str, cutoff: datetime) -> list[Alert]:
 
 def union_alerts(alerts: list[Alert], source: str) -> list[Alert]:
     merged: list[list[datetime]] = []
-    for alert in sorted(alerts, key=lambda item: item.start):
-        if not merged or alert.start > merged[-1][1]:
+    for alert in sorted(alerts, key=lambda item: item.start.astimezone(UTC)):
+        if not merged or alert.start.astimezone(UTC) > merged[-1][1].astimezone(UTC):
             merged.append([alert.start, alert.end])
-        elif alert.end > merged[-1][1]:
+        elif alert.end.astimezone(UTC) > merged[-1][1].astimezone(UTC):
             merged[-1][1] = alert.end
     return [Alert(start=start, end=end, source=source) for start, end in merged]
 
