@@ -1,69 +1,34 @@
-# C6 DST final four-case read-only preflight — BLOCKED (2026-11-08)
+# C6 DST readback after SELECT grant
 
-## Decision
+**Physical readback PASS. Repair readiness BLOCKED. GLOBAL_CUTOVER=NO.**
 
-**BLOCKED; GLOBAL_CUTOVER=NO.** The single owner-authorized read-only SQL transaction, explicitly routed to **`c6_shared_reader_v2`** on **`br-bold-mode-b5rub8pq`** via **read-only compute `ep-calm-rice-b5073ypp`**, failed with PostgreSQL **SQLSTATE 42501, `permission denied for table alert_state_snapshots`**. The batch requested `SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY` and bounded SELECT/catalog queries only. A complete transaction result was not delivered; do **not** treat earlier SELECTs in this failed batch as independently verified, or claim a saved consistent snapshot or before-images. This was one attempt; **no retry or owner/privileged fallback**. No DML, DDL, grants, HTTP, C2 writer, production or release operation.
+On 2026-11-08 at 22:12:15.678–22:12:17.374 UTC, one authorized transaction used `c6_shared_reader_v2` on `br-bold-mode-b5rub8pq`, read-only compute `ep-calm-rice-b5073ypp`. SQL verified both current and session roles, database `neondb`, `REPEATABLE READ`, read-only state, replica recovery, and SELECT on all six required tables. Backend PID 716 and snapshot `509961:510976:` matched at the start and end. The previous 42501 blocker is resolved.
 
-Neon control-plane metadata: project `green-cake-44216048`, branch ready; named role exists with password login; target compute type `read_only`. Metadata do not establish SQL privileges. The precise blocker is a denied required dependency read, not absent Neon infrastructure.
+| Case | Fresh physical result | Write readiness |
+| --- | --- | --- |
+| Kharkiv | Wrong merged UUID, legacy ID and microsecond UTC endpoints match accepted evidence; both replacements absent | BLOCKED |
+| Poltava | Wrong merged UUID, legacy ID and microsecond UTC endpoints match accepted evidence; both replacements absent | BLOCKED |
+| Zhytomyr | Wrong merged UUID, legacy ID and microsecond UTC endpoints match accepted evidence; both replacements absent | BLOCKED |
+| Cherkasy | Missing candidate absent; earlier valid UUID/legacy/UTC preserved | BLOCKED |
 
-## Case verdicts (fresh physical confirmation)
+All seven candidates are absent by both legacy ID and exact city/AIR/UTC interval. Server-side comparisons used the original microsecond literals. Full row JSON retains timestamp precision; the connector's scalar timestamp rendering rounds down to milliseconds and must not replace those literals. The protected Cherkasy full current row is saved; historical byte equality of all metadata is not asserted because the pinned fixture contains identity and UTC endpoints only.
 
-| City | Accepted prior fault | Expected old physical UUID | 2026-11-08 verdict |
-| --- | --- | --- | --- |
-| Kharkiv | One false merge → two correct rows | `bb7d4952-52a3-45f8-a1db-13153c8f6ca3` | **BLOCKED** — current row and links not reconciled |
-| Poltava | One false merge → two correct rows | `74ba1017-63af-4137-a5ba-246795613615` | **BLOCKED** — current row and links not reconciled |
-| Zhytomyr | One false merge → two correct rows | `b40c570e-f9db-4c7d-b7e4-3f7769e12a95` | **BLOCKED** — current row and links not reconciled |
-| Cherkasy | One missing interval, preserve the earlier correct `ff046d6c-fc7e-4cd2-9470-3e5433c3d582` | None | **BLOCKED** — no fresh presence/readback |
+Four inbound episode FKs were catalogued. Searches of source observations, classifications, events and state snapshots found zero links to the three wrong UUIDs; downstream searches also checked legacy IDs in textual/JSON representations. No source observations exist on any of the four protected/target rows or in the bounded city/time window. One original ingestion-run before-image was captured for the three wrong rows. Its existence does not supply missing source-event lineage.
 
-These UUIDs and the seven candidate UTC intervals come from **prior accepted** `C6-DST-UTC-01` evidence, not the failed 2026-11-08 transaction. Pinned inputs on the verified DST research branch:
+The result includes 165 constraints, 23 indexes, full columns of six required tables, and related-column inventory. No noninternal triggers, RLS policies, dependent episode rules or inheritance links were returned for the inspected scope; the six tables have RLS disabled. All bounded data queries stayed below their limit; the response reported no truncation. Additional non-FK relations, including `attack_event_sources.classification_episode_id`, were identified but not row-read. External or unregistered consumers are not certified absent.
 
-- `fixtures/historical_correction_candidates.json` blob `2caa8d5d4fd3a8934b7a3428b26b67642a4efcb3`
-- `proof/offline_machine_diff.json` blob `8d698e5f1b843918cb4c42de45f7fc70f9547025`
-- Accepted checkpoint `7265e40af6d012267ada515e9cac415f3e1e24b7`, prior access evidence `04b0938d72ecfde675dc665a0a1268ee4d86f11d`
-- New physical JSON proof [Actions 42487688608](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42487688608) success with artifact `13619973574` — **not** a four-case dependency proof; PR #45 `3e08daf4` still draft.
+The schema blocks the proposed repair contract. `alert_episodes` has 12 columns, no supersession/alias or counted-exclusion field, `episode_state IN ('open','closed')`, and canonicalization fixed to `alert-canonicalization-v1`. No episode alias/supersession relation appeared in the returned public catalog. Observation `duplicate_alias` and classification supersession have different meanings. Keeping the three old closed rows while inserting seven would leave ten counted candidates unless an independently verified exclusion contract is added. A safe repair and rollback using the current schema/consumer contract is **not established**.
 
-## Expected arithmetic — not a fresh database assertion
+Evidence:
 
-Based on the pinned independent offline witness only: 3 incorrect merged rows superseded by 6 correct rows; 1 missing Cherkasy row added; **+4 counted episodes**, cumulative duration **−9,059,359,958 microseconds (−2 h 30 min 59.359958 s)**. Exact seven candidate legacy IDs, UTC endpoints and the expected protected Cherkasy before-image are in the pinned fixture/diff; none were recreated or reverified in Neon here. The 2026-10-30 physical readback reported zero links from the three wrong UIDs in only four tables. That **does not** establish absence of present-day source/provenance, non-FK, downstream or external dependencies.
+- [Physical checks and catalog summary](after_grant_evidence.json)
+- [Current verdict](preflight_verdict.json)
+- [Exact statements submitted in the one transaction](after_grant_statements.sql)
+- [Conditional repair and rollback gates](conditional_repair_rollback.md)
+- Prior blocked attempt: [`c8261baa`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/c8261baa2c62a786df6939959b10a50d98757336).
+- Accepted comparison: `C6-DST-UTC-01`, [`7265e40a`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/7265e40af6d012267ada515e9cac415f3e1e24b7); fixture blob `2caa8d5d4fd3a8934b7a3428b26b67642a4efcb3`, offline diff blob `8d698e5f1b843918cb4c42de45f7fc70f9547025`.
 
-## Manual-only next step
+Full before-images and unmodified request/response are retained in an owner-private artifact, SHA-256 `d36bbc8c3f724c2726054d583e98bf6e14d82edefc6b2fe8ad1bd6a53c7735a3` (142,396 bytes), linked separately to the owner. Public Git contains no full row/run before-images or credentials.
 
-Use [`manual_only_readback.sql`](manual_only_readback.sql) **only after** read-only permissions are corrected through a separate authorized process. This file is a bounded `psql` script, not a workflow. Connect explicitly using `c6_shared_reader_v2` to **`ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech`** and database `neondb`. Supply its password through the interactive prompt only; no saved secrets. For example, in an approved, trusted environment:
+Stopped after this single successful read transaction and catalog review. No DML, DDL, GRANT, source HTTP, writer, credential, deployment, PR #42/#44/#45 or production operation was performed. No history replay, parity, C2 export, JSON proof or browser QA was repeated. Resolve the specific lineage/exclusion contract in a separate scope before seeking write approval.
 
-```sh
-PGSSLMODE=require psql -X -W -v ON_ERROR_STOP=1 \
-  -h ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech \
-  -U c6_shared_reader_v2 -d neondb \
-  -f research/c6_dst_final_readonly_2026_11_08/manual_only_readback.sql
-```
-
-The script must run as **one** `REPEATABLE READ READ ONLY` transaction, first fail-closed on identity/replica and SELECT ACL checks, then capture exact full alert-row before-images, protected Cherkasy, seven candidate ID/UTC rows, bounded source observations and run provenance, classification/events/state references and catalog FKs/constraints/triggers/indexes/RLS/views/related columns. Store the output with restricted permissions as a protected before-image; do not commit source payloads with private metadata or passwords. Stop if permissions or identity are wrong; do not switch to `neondb_owner`, modify grants, create branches, or repeat queries in this scope.
-
-A successful script is **necessary but not sufficient** for write approval. An operator must review the full catalog for other non-FK/JSON/external consumers; no finite SQL read can establish absence of unregistered external readers.
-
-## Repair / rollback design (NOT executable or approved)
-
-Only after a fresh consistent readback proves all current rows, candidate absence, complete source observation lineage, incoming/outgoing relationships, triggers/constraints and permitted alias strategy:
-
-1. Secure complete before-images for all three bad rows, existing valid Cherkasy, their source/run/classification/event/state dependencies, referenced rows and exact relevant catalog definitions; pin a corpus/input SHA and current migration schema.
-2. Prove no drift on old UUID+legacy+UTC quadruples and no seven candidate IDs or city/time duplicate rows. Fail if source evidence is missing or any other dependency is discovered.
-3. In a **separately approved**, serializable/guarded write transaction, create seven new canonical identities with genuine provenance, *retain* the three existing UUIDs and legacy IDs in an auditable supersession/alias lineage, and exclude only the three superseded parents from counted current results. Never delete or rewrite historical UUIDs in place. If schema cannot represent supersession without DDL / consumer change, return **BLOCKED**, not a fabricated SQL COMMIT.
-4. Pre-COMMIT checks: exact 3→7 identity mapping, `+4` active-counted episode delta, `−9059359958` µs time delta, valid Cherkasy unchanged, no invalid overlaps, no unrelated row change, all existing source/classification references accounted for. Abort on any mismatch.
-5. Distinct rollback gate: keep all old rows and a versioned mapping of *new* UUIDs; on separate authorization, deactivate new seven, reverse exactly those three supersession records, restore audited downstream projections from preserved before-images; verify hashes and counts. Do not cascade-delete dependents. If reverse linkage is incomplete, stop rollback and preserve audit trail.
-
-No unconditional DML SQL is safe to emit with the current `42501` gap. The UTC recurrence prevention patch (not applied) in `site-prod` `apply_ukrainealarm_bridge.py:union_alerts()` is narrowly:
-
-```diff
--    for alert in sorted(alerts, key=lambda item: item.start):
--        if not merged or alert.start > merged[-1][1]:
-+    for alert in sorted(alerts, key=lambda item: item.start.astimezone(timezone.utc)):
-+        if not merged or alert.start.astimezone(timezone.utc) > merged[-1][1].astimezone(timezone.utc):
-             merged.append([alert.start, alert.end])
--        elif alert.end > merged[-1][1]:
-+        elif alert.end.astimezone(timezone.utc) > merged[-1][1].astimezone(timezone.utc):
-             merged[-1][1] = alert.end
-```
-
-This is a **proposal**, not production code or a tested promotion. The pinned accepted source-only replay already checked the DST mechanism; don't repeat parity/browser/CSV/C2 export/physical JSON proof. No production or site-prod changes in this branch.
-
-**Next gate:** separately authorize a way to restore **read-only SELECT on `public.alert_state_snapshots` for the existing reader** (or provide an equivalent already-authorized complete dependency readback), then reauthorize one fresh manual-only four-case transaction. Until then **BLOCKED; GLOBAL_CUTOVER=NO**.

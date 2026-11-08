@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-DST-AFTER-GRANT-READONLY-01 — readback PASS; repair readiness BLOCKED (2026-11-08 UTC, research only)
+
+- One owner-authorized transaction after SELECT remediation: both SQL roles verified as c6_shared_reader_v2, replica/read-only/repeatable-read and SELECT 6/6 PASS; same backend and snapshot at both ends. Three bad UUID/legacy/microsecond-UTC rows exact, seven candidate IDs/intervals absent, valid earlier Cherkasy preserved. Four checked dependency tables have zero matching links; target/full original-run before-images retained privately.
+- Repair BLOCKED: no supported episode supersession/count-exclusion contract established; no source observations on the four rows/window. Other non-FK consumers remain unverified. [Evidence](research/c6_dst_final_readonly_2026_11_08/after_grant_evidence.json), [conditional gates](research/c6_dst_final_readonly_2026_11_08/conditional_repair_rollback.md). No further SQL, data/schema/credential/production/PR changes; GLOBAL_CUTOVER=NO. Prior accepted cross-track checkpoints unchanged.
+
 ### C6-UA-CURRENT-ONEGET-01 — current API access PASS; active semantics OPEN (2026-10-31)
 
 - Owner-authorized one GET `/api/v3/alerts`: HTTP 200, 72 rows, 9/21 mapped IDs directly present with AIR, 12 absent but UNKNOWN. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS; [proof d6a6340f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01), encrypted artifact **13049271828**, 5/5 hashes verified. History 21/21 separately proven by existing production client.
@@ -36,3 +41,4 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - CI and main-only archive-PR proposal are active; below-threshold no-op does **not** prove bot PR-creation rights. GitHub rulesets empty and required status checks disabled: CI detects but does not enforce merge/push blocking. No protection change or Neon/site-prod/WIP/Netlify action. Next optional owner action: enable required `coordination-docs / size-and-integrity` check, and verify PR creation on the next natural threshold event.
 
 <!-- coordination:history:end -->
+
