@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "test_command": "python -m unittest discover -s tests -p test_c6_json_source_preview.py -v",
+  "test_count": 11,
+  "exit_code": 0,
+  "outbound_sockets_blocked": true,
+  "tests": [
+    "test_default_off_uses_git_without_neon",
+    "test_neon_routes_six_exact_files_and_preserves_assets",
+    "test_new_switch_rollback_restores_all_git_bytes",
+    "test_missing_proof_does_not_fall_back",
+    "test_changed_or_missing_proof_blocks_without_mutating_old_preview",
+    "test_missing_git_bundle_blocks",
+    "test_incompatible_json_rejected",
+    "test_unowned_and_input_outputs_rejected",
+    "test_existing_proof_is_only_a_frozen_preview",
+    "test_kyiv_membership_change_blocks_without_rebinding",
+    "test_age_recomputed_and_live_status_is_not_a_history_gate"
+  ],
+  "javascript_syntax_checks": [
+    "app.js",
+    "chart-share.js",
+    "kpi-range.js"
+  ],
+  "coordination_check": "PASS",
+  "coordination_history_integrity": "PASS"
+}

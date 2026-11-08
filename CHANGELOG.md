@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-MINIMAL-PRECUTOVER-PREVIEW-01 — prepared static routing and rollback; review pending (2026-11-08)
+
+- Reused physical proof 42487688608 / artifact 13619973574 (14/14 hashes), not rerun. Existing scheduled production 42452793451 confirms recurring C2 / 21-city history continuity. Prepared isolated production-frontend preview: Git default, explicit Neon, strict six-file/auxiliary/casualty/Kyiv checks and exact source rollback; new tests PASS. [Code/evidence and narrow next tasks](research/c6_minimal_precutover_2026_11_08/README.md).
+- Four DST cases and historical capture binding remain release blockers. Current same-run Kyiv membership matches all 2,819 intervals; no rebind or live-status feature required. No production activation, new HTTP/SQL, writer/scheduler/credential changes or PR #42/#44 mutation. Main acceptance is pending; C6/C3 PARTIAL, GLOBAL_CUTOVER NO.
+
 ### C6-UA-CURRENT-ONEGET-01 — current API access PASS; active semantics OPEN (2026-10-31)
 
 - Owner-authorized one GET `/api/v3/alerts`: HTTP 200, 72 rows, 9/21 mapped IDs directly present with AIR, 12 absent but UNKNOWN. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS; [proof d6a6340f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01), encrypted artifact **13049271828**, 5/5 hashes verified. History 21/21 separately proven by existing production client.
