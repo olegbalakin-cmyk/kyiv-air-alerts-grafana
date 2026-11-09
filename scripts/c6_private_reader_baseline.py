@@ -37,7 +37,7 @@ def _private_write(path: Path, raw: bytes) -> None:
 
 
 def retain_private_baseline(snapshot: dict, destination: Path, *, checkout: Path,
-                            approved: bool = False) -> dict:
+                            approved: bool = False, artifact_output: Path | None = None) -> dict:
     """Retain all seven raw reader table arrays and their exact serialized hashes.
 
     Never pass the resulting directory to actions/upload-artifact, Git staging,
@@ -50,6 +50,11 @@ def retain_private_baseline(snapshot: dict, destination: Path, *, checkout: Path
     checkout = Path(checkout).resolve()
     if destination == checkout or destination.is_relative_to(checkout):
         raise ValueError("RAW_BASELINE_IN_CHECKOUT_FORBIDDEN")
+    if artifact_output is not None:
+        artifact_output = Path(artifact_output).resolve()
+        if (destination == artifact_output or destination.is_relative_to(artifact_output)
+                or artifact_output.is_relative_to(destination)):
+            raise ValueError("RAW_BASELINE_IN_UPLOADED_ARTIFACT_FORBIDDEN")
     if destination.exists():
         raise ValueError("RAW_BASELINE_OUTPUT_EXISTS")
     if set(TABLES) - set(snapshot) or any(not isinstance(snapshot[k], list) for k in TABLES):
