@@ -68,5 +68,20 @@ class PrivateBaselineTests(unittest.TestCase):
                                         checkout=root / "checkout", approved=True)
 
 
+    def test_uploaded_artifact_destination_forbidden(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            checkout = root / "research"
+            checkout.mkdir()
+            artifact = root / "research-evidence"
+            artifact.mkdir()
+            with self.assertRaisesRegex(ValueError, "UPLOADED_ARTIFACT_FORBIDDEN"):
+                retain_private_baseline(self.snapshot(), artifact / "raw",
+                                        checkout=checkout, artifact_output=artifact,
+                                        approved=True)
+            self.assertFalse((artifact / "raw").exists())
+
+
+
 if __name__ == "__main__":
     unittest.main()
