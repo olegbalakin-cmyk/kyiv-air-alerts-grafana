@@ -175,7 +175,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             dashboard_path: Path, output: Path, database_url: str,
             verifier=None, reader=None, workflow_sha=None, input_sha=None,
             writer_database_url=None, expected_branch=None, generated_at=None, dst_correction=None,
-            history_bundle=None, history_bundle_sha256=None) -> dict:
+            history_bundle=None, history_bundle_sha256=None,
+            private_raw_baseline_dir=None, private_raw_baseline_approved=False) -> dict:
     """One branch-bound C2 Neon snapshot, then isolated six-file frontend candidate.
 
     The previously accepted canonical verifier remains the authority for C2.
@@ -262,6 +263,13 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             else:
                 snap = reader(database_url, b2, bundle, expected_host=writer_host)
 
+            if private_raw_baseline_dir is not None:
+                require(reader is None, "PRIVATE_RAW_BASELINE_REQUIRES_PHYSICAL_READONLY")
+                from scripts.c6_private_reader_baseline import retain_private_baseline
+                retain_private_baseline(
+                    snap, Path(private_raw_baseline_dir),
+                    checkout=Path(os.environ.get("GITHUB_WORKSPACE") or site.parents[1]),
+                    approved=private_raw_baseline_approved)
             stage = "VERIFY_SNAPSHOT_C2_BINDING"
             require(snap.get("meta", {}).get("read_only") == "on" and
                     snap["meta"].get("isolation") == "repeatable read",
