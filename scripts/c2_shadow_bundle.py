@@ -10,6 +10,7 @@ import re
 import sys
 import tempfile
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -41,6 +42,20 @@ ENDPOINT = re.compile(r"ep-[a-z0-9-]+(?:-pooler)?\.[a-z0-9.-]+\.neon\.tech")
 SECRET_TEXT = re.compile(r"(?i)(postgres(?:ql)?://|\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_)|"
                          r"-----BEGIN [A-Z ]*PRIVATE KEY|[?&](?:token|api_key|password)=)")
 SECRET_KEY = re.compile(r"(?i)(?:^|_)(?:password|passwd|secret|token|authorization|database_url|dsn)$")
+
+
+def capture_validation_clock(rows, *, now=None):
+    """Bound every response page by export time, not the oldest source capture.
+
+    The separate freshness gate continues using each receipt's conservative
+    last_checked_at (the first response page), never this validation clock.
+    """
+    from scripts.c6_history_freshness import utc
+    captures = [utc(page["captured_at"]) for row in rows for page in row.get("pages", [])]
+    require(bool(captures), "CAPTURE_RECEIPTS_EMPTY")
+    at = utc(now if now is not None else datetime.now(timezone.utc))
+    require(max(captures) <= at, "CAPTURE_PAGE_AFTER_EXPORT")
+    return at
 
 
 def safe_json(raw):
@@ -196,10 +211,8 @@ def export_bundle(*, enabled, site, receipt_path, status_path, payload_path, out
         validate_manifest(manifest)
         payload = safe_json(raw_files["payload.json"])
         if "history_capture_contract" in payload or "historical_source_receipts" in payload:
-            from scripts.c6_history_freshness import verified_capture_sources, utc
-            rows = payload["historical_source_receipts"].values()
-            read_at = max((utc(r["last_checked_at"]) for r in rows), default=None)
-            require(read_at is not None, "CAPTURE_RECEIPTS_EMPTY")
+            from scripts.c6_history_freshness import verified_capture_sources
+            read_at = capture_validation_clock(payload["historical_source_receipts"].values())
             # Validate identity and raw bytes without a new source request.
             # Freshness is evaluated later against the actual readback clock.
             sources_checked = verified_capture_sources(payload, manifest, read_at=read_at)
