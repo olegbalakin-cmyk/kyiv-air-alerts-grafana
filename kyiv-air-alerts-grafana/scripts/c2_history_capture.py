@@ -31,6 +31,12 @@ def identity(env=None):
         "workflow_sha": env.get("GITHUB_SHA"), "input_sha": env.get("PHASE1_INPUT_SHA")}
 
 
+def enabled(env=None):
+    env = os.environ if env is None else env
+    return (env.get("C2_HISTORY_CAPTURE_ENABLED") == "true"
+            and bool(env.get("MULTICITY_CANONICAL_PAYLOAD_PATH")))
+
+
 def response_page(response, *, url, started_at):
     """Call immediately after the existing successful response, before parsing."""
     raw = response.content
@@ -49,9 +55,9 @@ def record(city, source_key, source_identity, pages, completed, *, previous=None
     No payload environment means OFF, like multicity_shadow_payload itself.
     """
     env = os.environ if env is None else env
-    payload_path = env.get("MULTICITY_CANONICAL_PAYLOAD_PATH")
-    if not payload_path or env.get("C2_HISTORY_CAPTURE_ENABLED") != "true":
+    if not enabled(env):
         return None
+    payload_path = env["MULTICITY_CANONICAL_PAYLOAD_PATH"]
     checkpoints_path = Path(checkpoint_path or CHECKPOINTS)
     checkpoints = json.loads(checkpoints_path.read_text()) if checkpoints_path.exists() else {}
     previous = previous if previous is not None else checkpoints.get(city)
