@@ -93,7 +93,8 @@ def fetch_recent_messages() -> tuple[list[dict], dict]:
         capture_started = datetime.now(UTC)
         r = sess.get(url, timeout=30)
         r.raise_for_status()
-        capture_pages.append(history_capture.response_page(r, url=url, started_at=capture_started))
+        if history_capture.enabled():
+            capture_pages.append(history_capture.response_page(r, url=url, started_at=capture_started))
         rows = parse_page(r.text)
         pages += 1
         if not rows:
