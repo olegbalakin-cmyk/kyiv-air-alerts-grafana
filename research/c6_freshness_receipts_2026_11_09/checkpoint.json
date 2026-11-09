@@ -1,0 +1,47 @@
+{
+  "checkpoint": "C6-SAME-RUN-HISTORICAL-CAPTURE-RECEIPTS-01",
+  "proposed": true,
+  "status": "BLOCKED",
+  "implementation_status": "FRESHNESS_RECEIPTS_READY",
+  "publication_allowed": false,
+  "GLOBAL_CUTOVER": "NO",
+  "base_commit": "3453492b7f5c0b1e46f115a8fa1a949e4b50109d",
+  "physical_full_receipt_cities": 0,
+  "historically_bound_checkpoint_cities": 21,
+  "physical_fresh_cities": 0,
+  "physical_corpus_sha256": "f8d2970565ad908d78c3daf004affc14b463897082971307ce56745cd80bce2a",
+  "physical_readback_run": 42487688608,
+  "physical_artifact_id": 13619973574,
+  "physical_artifact_sha256": "b0aa64392cb2b682eae14faf15df5df45da3fc208d8c45323dffab63b3d4245e",
+  "later_run": 42452793451,
+  "later_run_has_compatible_export_and_readback": false,
+  "source_http": 0,
+  "new_neon_sql": 0,
+  "neon_writes": 0,
+  "ddl": 0,
+  "production_changes": 0,
+  "owner_approved_same_run_physical_proof_needed": true,
+  "new_independent_checkpoint_bootstrap_needed": [
+    "kyiv",
+    "sevastopol"
+  ],
+  "offline_tests": {
+    "total": 70,
+    "new_capture": 21,
+    "existing_freshness": 17,
+    "export_and_access": 14,
+    "existing_receipt_json_contract": 18,
+    "result": "PASS",
+    "full_frontend_generator": "stubbed",
+    "command": "python -m unittest tests.test_c6_capture_receipts tests.test_c6_history_freshness tests.test_c2_shadow_bundle tests.test_neon_json_shadow_frontend -v"
+  },
+  "fixture_full_receipts": 23,
+  "fixture_fresh_cities": 23,
+  "missing_dependencies": [
+    "approved integration into existing site-prod collectors and main exporter/reader",
+    "first independent Kyiv/Sevastopol capture checkpoints, then a regular capture proving overlap",
+    "exact retained same-run payload/dashboard/C2 export and readback within 36 hours"
+  ],
+  "git_transport_push": "unavailable: no HTTPS credential",
+  "fallback": "Git bundle and ZIP"
+}

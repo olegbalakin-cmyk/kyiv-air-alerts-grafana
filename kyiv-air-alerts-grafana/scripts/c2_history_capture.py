@@ -75,6 +75,7 @@ def record(city, source_key, source_identity, pages, completed, *, previous=None
             "missing_checkpoint_or_history_overlap", "publication_allowed": False}
     path = Path(payload_path)
     obj = json.loads(path.read_text())
+    obj["history_capture_contract"] = SCHEMA
     obj.setdefault("historical_source_receipts", {})[city] = receipt
     path.write_text(json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
     if pages and (previous is None or receipt["continuity_verified"]):
@@ -126,6 +127,7 @@ def verify(row, *, city, source_key, run_identity, read_at):
     require(all(row.get(k) == v for k, v in run_identity.items()), "CAPTURE_RUN_MISMATCH")
     pages = row.get("pages", [])
     require(bool(pages) and fingerprint(pages) == row.get("source_sha256"), "CAPTURE_SOURCE_SHA")
+    require(row.get("source_payload_kind") == "captured-response-pages-v1", "CAPTURE_PAYLOAD_KIND")
     for page in pages:
         raw = base64.b64decode(page["body_base64"], validate=True)
         require(hashlib.sha256(raw).hexdigest() == page["body_sha256"], "CAPTURE_BODY_SHA")
@@ -146,6 +148,8 @@ def verify(row, *, city, source_key, run_identity, read_at):
     completed = row.get("completed_air", [])
     require(fingerprint(completed) == row.get("completed_air_sha256"), "CAPTURE_COMPLETED_SHA")
     require(completed == replay(row), "CAPTURE_REPLAY_MISMATCH")
+    require(row.get("oldest_fetched_completed_air_start") == (completed[0]["start"] if completed else None),
+        "CAPTURE_OLDEST_COMPLETED")
     require(all(utc(r["start"]) < utc(r["end"]) for r in completed), "CAPTURE_COMPLETED_INTERVAL")
     previous = row.get("previous_checkpoint")
     require(fingerprint(previous) == row.get("previous_checkpoint_sha256"), "CAPTURE_CHECKPOINT_SHA")

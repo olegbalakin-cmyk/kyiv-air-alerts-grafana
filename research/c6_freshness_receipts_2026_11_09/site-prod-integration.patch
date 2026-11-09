@@ -90,7 +90,7 @@
 +
 +                source_identity = {"url": HISTORY_URL, "region_id": region_id}
 +                previous = {"source_key": "ukrainealarm_region_history",
-+                    "source_identity": source_identity, "last_checked_at": prev.get("last_checked_at")}
++                    "source_identity": {"url": HISTORY_URL, "region_id": str(prev.get("region_id") or "")}, "last_checked_at": prev.get("last_checked_at")}
 +                if not prev.get("last_checked_at"):
 +                    previous = None
 +                history_captures[key] = (capture, history, previous, continuous, source_identity)

@@ -55,6 +55,16 @@ def load_generator():
     return generator
 
 
+def load_history():
+    # The regular workflow invokes this file directly from the site checkout.
+    # Make its own repository importable without relying on caller PYTHONPATH.
+    root = str(Path(__file__).resolve().parents[1])
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    from scripts import c6_history_freshness
+    return c6_history_freshness
+
+
 def utc(value) -> str:
     dt = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     require(dt.tzinfo is not None, "NAIVE_TIMESTAMP")
@@ -288,7 +298,27 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             except Exception as exc:
                 raise ShadowBlocked(input_failure(exc)) from exc
             stage = "WRITE_READBACK_PROOF"
+            capture_payload = load(payload_path)
+            capture_metadata = {}
+            if "history_capture_contract" in capture_payload or "historical_source_receipts" in capture_payload:
+                require(history_bundle is not None and history_bundle_sha256,
+                        "CAPTURE_RECEIPTS_REQUIRE_HASHED_SAME_RUN_BUNDLE")
+                history = load_history()
+                capture_manifest = history.c2.verify_archive(Path(history_bundle), history_bundle_sha256,
+                    workflow_sha=workflow_sha, input_sha=input_sha, db_branch=expected_branch)
+                require(capture_manifest["files"]["payload.json"] == digest(payload_path) and
+                        capture_manifest["files"]["site_data/dashboard_data.json"] == digest(dashboard_path),
+                        "CAPTURE_SOURCE_FILES_DIFFER_FROM_EXPORT")
+                capture_metadata = {
+                    "historical_source_receipts_sha256": history.fingerprint(capture_payload.get("historical_source_receipts")),
+                    "same_run_payload_sha256": digest(payload_path),
+                    "capture_run_identity": {k: capture_manifest[k] for k in
+                        ("github_run_id", "github_run_attempt", "workflow_sha", "input_sha")}}
+                # Retain raw response evidence alongside readback diagnostics,
+                # outside the six frontend files and beyond export expiry.
+                write(output / "historical_source_receipts.json", capture_payload.get("historical_source_receipts"))
             write(work / "readback_proof.json", {
+                **capture_metadata,
                 # psycopg returns timestamptz as datetime; stored fixtures use strings.
                 # Normalize this evidence field without mutating the native snapshot.
                 "meta": {**snap["meta"], "read_at": utc(snap["meta"]["read_at"])},
@@ -310,7 +340,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             require("historical_source_receipts" not in load(payload_path) or history_bundle is not None,
                     "CAPTURE_RECEIPTS_REQUIRE_HASHED_SAME_RUN_BUNDLE")
             if history_bundle is not None or history_bundle_sha256 is not None:
-                from scripts import c6_history_freshness as history
+                history = load_history()
                 history_errors = (history.Blocked,)
                 stage = "VERIFY_HISTORICAL_RECEIPT_BINDING"
                 require(history_bundle is not None and bool(history_bundle_sha256),

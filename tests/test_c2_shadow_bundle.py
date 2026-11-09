@@ -17,7 +17,7 @@ from scripts import neon_json_shadow_generator as generator
 from scripts.neon_json_shadow_physical_proof import prepare_bundle
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = "6e121e0629685895ea402a21cc66cccb4c6f277f"
+BASE = "3453492b7f5c0b1e46f115a8fa1a949e4b50109d"
 
 
 class ExportContracts(unittest.TestCase):
@@ -164,7 +164,7 @@ class WorkflowContracts(unittest.TestCase):
     def load(self, content):
         return yaml.load(content, Loader=yaml.BaseLoader)
 
-    def test_production_contract_unchanged_except_three_optional_export_steps(self):
+    def test_production_contract_unchanged_except_bound_history_arguments(self):
         path = ".github/workflows/update-netlify-site.yml"
         before = self.load(subprocess.check_output(["git", "show", BASE + ":" + path], cwd=ROOT))
         after = self.load((ROOT / path).read_text())
@@ -177,7 +177,13 @@ class WorkflowContracts(unittest.TestCase):
             self.assertIn("vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true'", step["if"])
             self.assertIn("canonical_persistence_status == 'NEON_SUCCEEDED'", step["if"])
             self.assertEqual(step["continue-on-error"], "true")
-        after["jobs"]["update-site"]["steps"] = [s for s in steps if s.get("name") not in names]
+        shadow_step = next(s for s in steps if s.get("id") == "neon_json_shadow")
+        lines = shadow_step["run"].splitlines(keepends=True)
+        additions = [line for line in lines if "--history-bundle" in line]
+        self.assertEqual(len(additions), 2)
+        self.assertIn('c2-shadow-bundle/c2-shadow-inputs.zip', additions[0])
+        self.assertIn('c2-shadow-bundle/c2-shadow-inputs.zip.sha256', additions[1])
+        shadow_step["run"] = "".join(line for line in lines if "--history-bundle" not in line)
         self.assertEqual(after, before)
 
     def test_manual_proof_owner_ref_sha_and_readonly_environment(self):

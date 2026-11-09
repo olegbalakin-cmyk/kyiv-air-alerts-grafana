@@ -195,7 +195,7 @@ def export_bundle(*, enabled, site, receipt_path, status_path, payload_path, out
         }
         validate_manifest(manifest)
         payload = safe_json(raw_files["payload.json"])
-        if "historical_source_receipts" in payload:
+        if "history_capture_contract" in payload or "historical_source_receipts" in payload:
             from scripts.c6_history_freshness import verified_capture_sources, utc
             rows = payload["historical_source_receipts"].values()
             read_at = max((utc(r["last_checked_at"]) for r in rows), default=None)

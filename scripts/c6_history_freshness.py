@@ -25,6 +25,8 @@ def capture_contract():
 
 def verified_capture_sources(payload, manifest, *, read_at):
     contract = capture_contract()
+    require(payload.get("history_capture_contract") == contract.SCHEMA and
+            isinstance(payload.get("historical_source_receipts"), dict), "HISTORY_CAPTURE_CONTRACT_MISSING")
     receipts = payload["historical_source_receipts"]
     require(isinstance(receipts, dict) and set(receipts) <= set(payload["cities"]),
             "HISTORY_CAPTURE_CITY_MISMATCH")
@@ -141,10 +143,18 @@ def from_bundle(bundle, expected_sha256, *, readback_proof, receipt,
             utc(row.get("last_checked_at")) <= read_at,
             "HISTORY_INDEPENDENT_PROVENANCE_MISSING:" + key)
         sources[key] = {**copy.deepcopy(row), "clock": "source_history_last_checked_at"}
-    if "historical_source_receipts" in payload:
+    if "history_capture_contract" in payload or "historical_source_receipts" in payload or "historical_capture_receipts" in manifest:
         # Modern capture contract is authoritative. Never fill missing same-run
         # captures from an older dashboard checkpoint or another run.
         sources = verified_capture_sources(payload, manifest, read_at=read_at)
+        require(proof.get("historical_source_receipts_sha256") == fingerprint(payload["historical_source_receipts"]) and
+            proof.get("same_run_payload_sha256") == manifest["files"]["payload.json"] and
+            proof.get("capture_run_identity") == {k: manifest[k] for k in
+                ("github_run_id", "github_run_attempt", "workflow_sha", "input_sha")},
+            "HISTORY_READBACK_CAPTURE_METADATA_MISMATCH")
+        if "historical_capture_receipts" in manifest:
+            require(manifest["historical_capture_receipts"]["receipts_sha256"] == fingerprint(payload["historical_source_receipts"]),
+                    "HISTORY_EXPORT_CAPTURE_METADATA_MISMATCH")
     binding = {"schema": "c6-historical-freshness-v1", "publication_allowed": False,
         "corpus_sha256": corpus, "workflow_sha": workflow_sha, "input_sha": input_sha,
         "github_run_id": manifest["github_run_id"], "github_run_attempt": manifest["github_run_attempt"],

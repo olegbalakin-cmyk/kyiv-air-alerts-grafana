@@ -35,6 +35,18 @@ PINNED_ACCEPTED = {
  'derived_successor.py': 'df56d32e3cd1b58915cf785e958dadc49e4c1c2c',
 }
 
+# Exact receipt-only hook variants of three accepted collector blobs. The
+# analytics/builders are unchanged; any other byte drift still fails closed.
+CAPTURE_HOOK_BLOBS = {
+ 'scripts/update_data.py': ('cebc2b455fb08ee16e03b9e4fcdb17aa2d9d6833', '9649f75e5ed841ca5c855a7639eede9356af2766'),
+ 'scripts/apply_ukrainealarm_bridge.py': ('8b95c4b508b9a473240889603f593e399cf8815d', '1f912bca289035056cc8b19a086000ef8f24111a'),
+ 'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', 'f14437658cdb13f9464db63fc754db85c6447a86'),
+}
+
+def accepted_builder_blob(path, raw, expected):
+    actual = blob(raw)
+    return actual == expected or CAPTURE_HOOK_BLOBS.get(path) == (expected, actual)
+
 class Closed(RuntimeError): pass
 
 def require(ok, reason):
@@ -83,7 +95,7 @@ def prepare(args, out):
     for path, want in adapter.PINNED_SOURCE_BLOBS.items():
         if path.startswith('scripts/'):
             source = args.site/path
-            require(source.is_file() and blob(source.read_bytes()) == want,
+            require(source.is_file() and accepted_builder_blob(path, source.read_bytes(), want),
                     'BLOCKED_GENERATOR_INPUT:BUILDER_CODE_DRIFT:'+path)
     bundle_bytes = (ASSETS/'frozen_october_382_198_bundle.json').read_bytes()
     bundle = b2.verify_approved_frozen_bundle(bundle_bytes, bundle_bytes)
@@ -237,6 +249,7 @@ def source_report(snap, keys, reference, *, historical=None):
             report[key]['source_captured_at_utc'] = history['source_checked_at_utc']
             report[key]['source_clock'] = 'source_history_last_checked_at'
             report[key]['historical_binding_verified'] = history['historical_binding_verified']
+            report[key]['full_historical_receipt_verified'] = history.get('full_receipt_verified', False)
     return report
 
 def refresh_analytics(payload, reference, reference_derived, alerts, now, site, mods):
