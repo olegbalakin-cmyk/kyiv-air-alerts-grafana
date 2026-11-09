@@ -269,7 +269,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 retain_private_baseline(
                     snap, Path(private_raw_baseline_dir),
                     checkout=Path(os.environ.get("GITHUB_WORKSPACE") or site.parents[1]),
-                    approved=private_raw_baseline_approved)
+                    approved=private_raw_baseline_approved,
+                    artifact_output=output)
             stage = "VERIFY_SNAPSHOT_C2_BINDING"
             require(snap.get("meta", {}).get("read_only") == "on" and
                     snap["meta"].get("isolation") == "repeatable read",
