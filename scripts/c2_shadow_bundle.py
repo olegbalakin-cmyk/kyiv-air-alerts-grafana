@@ -194,6 +194,21 @@ def export_bundle(*, enabled, site, receipt_path, status_path, payload_path, out
             "files": {name: hashlib.sha256(raw).hexdigest() for name, raw in sorted(raw_files.items())},
         }
         validate_manifest(manifest)
+        payload = safe_json(raw_files["payload.json"])
+        if "history_capture_contract" in payload or "historical_source_receipts" in payload:
+            from scripts.c6_history_freshness import verified_capture_sources, utc
+            rows = payload["historical_source_receipts"].values()
+            read_at = max((utc(r["last_checked_at"]) for r in rows), default=None)
+            require(read_at is not None, "CAPTURE_RECEIPTS_EMPTY")
+            # Validate identity and raw bytes without a new source request.
+            # Freshness is evaluated later against the actual readback clock.
+            sources_checked = verified_capture_sources(payload, manifest, read_at=read_at)
+            manifest["historical_capture_receipts"] = {
+                "schema": "c2-history-capture-v1", "publication_allowed": False,
+                "receipt_cities": sorted(sources_checked),
+                "complete_cities": sorted(k for k,v in sources_checked.items() if v["full_receipt_verified"]),
+                "receipts_sha256": hashlib.sha256(json.dumps(payload["historical_source_receipts"],
+                    ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()}
         candidate = frozen / "c2-shadow-inputs.zip"
         with zipfile.ZipFile(candidate, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             for name, raw in sorted(raw_files.items()):
