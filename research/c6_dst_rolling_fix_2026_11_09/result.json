@@ -1,0 +1,34 @@
+{
+  "GLOBAL_CUTOVER": "NO",
+  "baseline_audit_exit_code": 2,
+  "initial_attempt": {
+    "passed": 9,
+    "reason": "requests missing from primary Python",
+    "resolution": "reused retained local python-deps; full suite rerun passed",
+    "setup_errors": 2
+  },
+  "publication_allowed": false,
+  "python_version": "3.12.14",
+  "reason": "REQUIRED_RAW_BASELINE_NOT_RETAINED",
+  "regular_new_corpus_allowed": false,
+  "rolling_tests": "NOT_IMPLEMENTED_MISSING_BASELINE",
+  "status": "BLOCKED",
+  "targeted_tests": {
+    "duration_seconds": 60.72,
+    "errors": 0,
+    "exit_code": 0,
+    "failures": 0,
+    "passed": 17,
+    "scope": "existing frozen-corpus DST tests; no rolling validator implemented"
+  },
+  "test_command": "PYTHONPATH=/path/to/retained/python-deps C6_TEST_SITE=/path/to/pinned/site/kyiv-air-alerts-grafana python3 -m unittest -v tests.test_c6_dst_projection",
+  "unchanged_from_base": {
+    "CHANGELOG.md": true,
+    "PROJECT_STATE.md": true,
+    "scripts/c6_dst_projection.py": true,
+    "scripts/c6_dst_projection_offline.py": true,
+    "scripts/neon_json_shadow.py": true,
+    "scripts/neon_json_shadow_generator.py": true,
+    "tests/test_c6_dst_projection.py": true
+  }
+}
