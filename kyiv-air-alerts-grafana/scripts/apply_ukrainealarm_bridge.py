@@ -788,11 +788,10 @@ def main() -> None:
                     reason = "static_alertsinua_event_matches_api" if continuous else "no_verified_static_api_event_match"
 
                 source_identity = {"url": HISTORY_URL, "region_id": region_id}
-                previous = {"source_key": "ukrainealarm_region_history",
-                    "source_identity": {"url": HISTORY_URL, "region_id": str(prev.get("region_id") or "")}, "last_checked_at": prev.get("last_checked_at")}
-                if not prev.get("last_checked_at"):
-                    previous = None
-                history_captures[key] = (capture, history, previous, continuous, source_identity)
+                # Never seed new C2 source-receipt continuity from the legacy bridge.
+                # record() must load its own persisted capture checkpoint, so the
+                # first genuine C2 capture is bootstrap-only (not a freshness PASS).
+                history_captures[key] = (capture, history, continuous, source_identity)
 
                 if continuous:
                     for event in product_history_events:
@@ -973,9 +972,9 @@ def main() -> None:
         "rows": status,
     }
     mm["official_ukrainealarm_bridge"] = summary
-    for key, (pages, completed, previous, continuous, source_identity) in history_captures.items():
+    for key, (pages, completed, continuous, source_identity) in history_captures.items():
         history_capture.record(key, "ukrainealarm_region_history", source_identity,
-            pages, completed, previous=previous, continuity=continuous)
+            pages, completed, continuity=continuous)
     DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"Verified multicity bridge continuity: {len(covered)}/{len(required_keys)} rows")
