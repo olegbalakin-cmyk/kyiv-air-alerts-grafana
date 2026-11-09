@@ -77,12 +77,42 @@ def record(city, source_key, source_identity, pages, completed, *, previous=None
     obj = json.loads(path.read_text())
     obj.setdefault("historical_source_receipts", {})[city] = receipt
     path.write_text(json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
-    if pages:
+    if pages and (previous is None or receipt["continuity_verified"]):
         checkpoints[city] = {"source_key": source_key, "source_identity": source_identity,
             "last_checked_at": checked, "source_sha256": receipt["source_sha256"], **identity(env)}
         checkpoints_path.parent.mkdir(parents=True, exist_ok=True)
         checkpoints_path.write_text(json.dumps(checkpoints, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
     return receipt
+
+
+def replay(row):
+    """Reuse source parsers; raw retained responses must yield the claimed pairs."""
+    raw_pages = [base64.b64decode(p["body_base64"], validate=True) for p in row["pages"]]
+    source = row["source_key"]
+    if source == "ukrainealarm_region_history":
+        pairs = []
+        for raw in raw_pages:
+            payload = json.loads(raw)
+            groups = [payload] if isinstance(payload, dict) else payload
+            for group in groups:
+                for alarm in group.get("alarms") or []:
+                    if str(alarm.get("alertType") or "").upper() != "AIR":
+                        continue
+                    start, end = alarm.get("startDate"), alarm.get("endDate")
+                    if start and end and utc(start) < utc(end):
+                        pairs.append({"start": start, "end": end})
+    elif source == "kyiv_digital":
+        from update_data import parse_live_history
+        alerts, _ = parse_live_history(raw_pages[0].decode("utf-8"))
+        pairs = [{"start": a.start, "end": a.end} for a in alerts]
+    elif source == "sevastopol_history":
+        from add_sevastopol_exact import parse_page, pair_recent
+        found = {m["id"]: m for raw in raw_pages for m in parse_page(raw.decode("utf-8"))}
+        pairs, _ = pair_recent(sorted(found.values(), key=lambda m: (m["at"], m["id"])))
+    else:
+        raise ValueError("CAPTURE_UNKNOWN_SOURCE")
+    return [{"start": s, "end": e} for s, e in sorted({
+        (utc(p["start"]).isoformat(), utc(p["end"]).isoformat()) for p in pairs})]
 
 
 def verify(row, *, city, source_key, run_identity, read_at):
@@ -100,9 +130,22 @@ def verify(row, *, city, source_key, run_identity, read_at):
         raw = base64.b64decode(page["body_base64"], validate=True)
         require(hashlib.sha256(raw).hexdigest() == page["body_sha256"], "CAPTURE_BODY_SHA")
         require(utc(page["started_at"]) <= utc(page["captured_at"]) <= utc(read_at), "CAPTURE_CLOCK")
+    source_identity = row.get("source_identity", {})
+    if source_key == "ukrainealarm_region_history":
+        require(source_identity.get("url") == "https://api.ukrainealarm.com/api/v3/alerts/regionHistory" and
+            bool(source_identity.get("region_id")) and all(p["url"] == source_identity["url"] +
+                "?regionId=" + source_identity["region_id"] for p in pages), "CAPTURE_SOURCE_IDENTITY")
+    elif source_key == "kyiv_digital":
+        require(source_identity == {"url": "https://kyiv.digital/storage/air-alert/stats.html"} and
+            len(pages) == 1 and pages[0]["url"] == source_identity["url"], "CAPTURE_SOURCE_IDENTITY")
+    elif source_key == "sevastopol_history":
+        require(source_identity == {"url": "https://t.me/s/razvozhaev", "channel": "razvozhaev"} and
+            all(p["url"] == source_identity["url"] or p["url"].startswith(source_identity["url"] +
+                "?before=") for p in pages), "CAPTURE_SOURCE_IDENTITY")
     require(utc(row["last_checked_at"]) == min(utc(p["captured_at"]) for p in pages), "CAPTURE_CLOCK")
     completed = row.get("completed_air", [])
     require(fingerprint(completed) == row.get("completed_air_sha256"), "CAPTURE_COMPLETED_SHA")
+    require(completed == replay(row), "CAPTURE_REPLAY_MISMATCH")
     require(all(utc(r["start"]) < utc(r["end"]) for r in completed), "CAPTURE_COMPLETED_INTERVAL")
     previous = row.get("previous_checkpoint")
     require(fingerprint(previous) == row.get("previous_checkpoint_sha256"), "CAPTURE_CHECKPOINT_SHA")

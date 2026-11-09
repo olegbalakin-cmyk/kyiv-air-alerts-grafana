@@ -538,6 +538,8 @@ jobs:
             --status "${RUNNER_TEMP}/c2_publication_status.json" \
             --payload "${MULTICITY_CANONICAL_PAYLOAD_PATH}" \
             --dashboard data/dashboard_data.json \
+            --history-bundle "${RUNNER_TEMP}/c2-shadow-bundle/c2-shadow-inputs.zip" \
+            --history-bundle-sha256 "$(cut -d ' ' -f 1 "${RUNNER_TEMP}/c2-shadow-bundle/c2-shadow-inputs.zip.sha256")" \
             --output "${RUNNER_TEMP}/neon-json-shadow"
 
       - name: Upload non-publishing Neon JSON shadow

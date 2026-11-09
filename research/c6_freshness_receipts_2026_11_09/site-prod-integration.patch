@@ -1,0 +1,169 @@
+--- a/kyiv-air-alerts-grafana/scripts/update_data.py
++++ b/kyiv-air-alerts-grafana/scripts/update_data.py
+@@ -12,6 +12,7 @@
+ from pathlib import Path
+ 
+ import multicity_shadow_payload
++import c2_history_capture as history_capture
+ from statistics import mean
+ from typing import Iterable
+ from zoneinfo import ZoneInfo
+@@ -481,8 +482,10 @@
+ 
+     historical, historical_mode, municipal_warning = load_historical_base(session)
+ 
++    capture_started = datetime.now(UTC)
+     live_response = session.get(LIVE_HISTORY_URL, timeout=30)
+     live_response.raise_for_status()
++    capture_page = history_capture.response_page(live_response, url=LIVE_HISTORY_URL, started_at=capture_started)
+     live_alerts, live_events = parse_live_history(live_response.text)
+     if not live_events:
+         raise RuntimeError("Kyiv Digital live history returned no parsable events")
+@@ -512,6 +515,8 @@
+     }
+ 
+     multicity_shadow_payload.record_city_alerts("kyiv", alerts, producer="update_data")
++    history_capture.record("kyiv", "kyiv_digital", {"url": LIVE_HISTORY_URL},
++        [capture_page], [{"start": a.start, "end": a.end} for a in live_alerts])
+     output = build_outputs(alerts, now_local, meta)
+     (DATA_DIR / "dashboard_data.json").write_text(
+         json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8"
+--- a/kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py
++++ b/kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py
+@@ -22,6 +22,7 @@
+     UkraineAlarmRetryBudgetExceeded,
+ )
+ import multicity_shadow_payload
++import c2_history_capture as history_capture
+ import add_duration_unit_switch as exactmod
+ import expand_multicity_production as base
+ import extend_remaining_proxies as extended
+@@ -223,12 +224,16 @@
+     return matches[-1]
+ 
+ 
+-def history_rows(client: UkraineAlarmClient, region_id: str, name: str) -> list[dict]:
++def history_rows(client: UkraineAlarmClient, region_id: str, name: str, *, capture=None) -> list[dict]:
++    capture_started = datetime.now(UTC)
+     response = client.get(
+         HISTORY_URL,
+         params={"regionId": region_id},
+         context=f"regionHistory {name} ({region_id})",
+     )
++    if capture is not None:
++        capture.append(history_capture.response_page(response,
++            url=HISTORY_URL + "?regionId=" + region_id, started_at=capture_started))
+     payload = response.json()
+     groups = [payload] if isinstance(payload, dict) else [x for x in payload if isinstance(x, dict)]
+     rows = []
+@@ -714,6 +719,7 @@
+     events = reconcile_completed_air_events(store.get("events", []))
+     request_errors: dict[str, str] = {}
+     fetched_keys: list[str] = []
++    history_captures = {}
+ 
+     if token:
+         client = UkraineAlarmClient(
+@@ -749,7 +755,8 @@
+                 api_name = node["regionName"]
+ 
+             try:
+-                history = history_rows(client, region_id, api_name or spec["display_target"])
++                capture = []
++                history = history_rows(client, region_id, api_name or spec["display_target"], capture=capture)
+                 product_history_events = history_events(
+                     history,
+                     city_key=key,
+@@ -765,7 +772,7 @@
+                     if key == "lviv"
+                     else []
+                 )
+-                checked_at = datetime.now(UTC)
++                checked_at = history_capture.utc(capture[0]["captured_at"])
+                 oldest = min((r["start"] for r in history), default=None)
+                 latest = max((r["end"] for r in history), default=None)
+                 initial_match = match_static_event(history, static[key])
+@@ -779,6 +786,13 @@
+                     poll_overlap = None
+                     continuous = bool(initial_match)
+                     reason = "static_alertsinua_event_matches_api" if continuous else "no_verified_static_api_event_match"
++
++                source_identity = {"url": HISTORY_URL, "region_id": region_id}
++                previous = {"source_key": "ukrainealarm_region_history",
++                    "source_identity": source_identity, "last_checked_at": prev.get("last_checked_at")}
++                if not prev.get("last_checked_at"):
++                    previous = None
++                history_captures[key] = (capture, history, previous, continuous, source_identity)
+ 
+                 if continuous:
+                     for event in product_history_events:
+@@ -959,6 +973,9 @@
+         "rows": status,
+     }
+     mm["official_ukrainealarm_bridge"] = summary
++    for key, (pages, completed, previous, continuous, source_identity) in history_captures.items():
++        history_capture.record(key, "ukrainealarm_region_history", source_identity,
++            pages, completed, previous=previous, continuity=continuous)
+     DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+ 
+     print(f"Verified multicity bridge continuity: {len(covered)}/{len(required_keys)} rows")
+--- a/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
++++ b/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+@@ -11,6 +11,7 @@
+ from bs4 import BeautifulSoup
+ 
+ import multicity_shadow_payload
++import c2_history_capture as history_capture
+ import expand_multicity_production as multi
+ from update_data import Alert, TZ, build_outputs
+ 
+@@ -85,11 +86,14 @@
+     before = None
+     pages = 0
+     stalled = 0
++    capture_pages = []
+ 
+     while pages < 100:
+         url = SOURCE_URL + (f"?before={before}" if before else "")
++        capture_started = datetime.now(UTC)
+         r = sess.get(url, timeout=30)
+         r.raise_for_status()
++        capture_pages.append(history_capture.response_page(r, url=url, started_at=capture_started))
+         rows = parse_page(r.text)
+         pages += 1
+         if not rows:
+@@ -111,6 +115,7 @@
+ 
+     messages = sorted(found.values(), key=lambda x: (x["at"], x["id"]))
+     return messages, {
++        "_capture_pages": capture_pages,
+         "lookback_days": LOOKBACK_DAYS,
+         "pages_requested": pages,
+         "messages_loaded": len(messages),
+@@ -243,6 +248,7 @@
+     store = json.loads(EVENTS_FILE.read_text(encoding="utf-8")) if EVENTS_FILE.exists() else initial_events()
+     current = {int(p["start_id"]): p for p in store.get("pairs", [])}
+     messages, fetch_meta = fetch_recent_messages()
++    capture_pages = fetch_meta.pop("_capture_pages")
+     recent_pairs, recent_anomalies = pair_recent(messages)
+     for p in recent_pairs:
+         current[int(p["start_id"])] = p
+@@ -260,7 +266,7 @@
+         "verified_corrections": applied_corrections,
+     })
+     EVENTS_FILE.write_text(json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+-    return store, fetch_meta
++    return store, {**fetch_meta, "_capture_pages": capture_pages, "_completed_air": recent_pairs}
+ 
+ 
+ def build_city_output(store: dict) -> dict:
+@@ -320,6 +326,9 @@
+     store, fetch_meta = update_event_store()
+     alerts_for_shadow = [Alert(start=datetime.fromisoformat(p["start"]).astimezone(TZ), end=datetime.fromisoformat(p["end"]).astimezone(TZ), source="sevastopol_occupation_admin_telegram") for p in store.get("pairs", []) if datetime.fromisoformat(p["end"]).astimezone(TZ) > datetime.fromisoformat(p["start"]).astimezone(TZ)]
+     multicity_shadow_payload.record_city_alerts(CITY_KEY, alerts_for_shadow, producer="add_sevastopol_exact")
++    history_capture.record(CITY_KEY, "sevastopol_history", {"url": SOURCE_URL, "channel": CHANNEL},
++        fetch_meta.pop("_capture_pages"), fetch_meta.pop("_completed_air"),
++        continuity=not store["meta"]["recent_anomalies"])
+     output = build_city_output(store)
+ 
+     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))

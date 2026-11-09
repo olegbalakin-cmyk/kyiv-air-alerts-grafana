@@ -8,12 +8,36 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 import zipfile
+import importlib.util
 from scripts import c2_shadow_bundle as c2
 
 FRESH_AFTER_HOURS = 36.0  # reconcile_bridge_freshness.py production ceiling
 TABLES = ("episodes", "observations", "checkpoints", "runs",
           "classifications", "source_links", "events")
 INDEPENDENT = {"kyiv": "kyiv_digital", "sevastopol": "sevastopol_history"}
+
+def capture_contract():
+    path = Path(__file__).resolve().parents[1] / "kyiv-air-alerts-grafana/scripts/c2_history_capture.py"
+    spec = importlib.util.spec_from_file_location("c2_history_capture_contract", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+def verified_capture_sources(payload, manifest, *, read_at):
+    contract = capture_contract()
+    receipts = payload["historical_source_receipts"]
+    require(isinstance(receipts, dict) and set(receipts) <= set(payload["cities"]),
+            "HISTORY_CAPTURE_CITY_MISMATCH")
+    run = {key: manifest[key] for key in
+           ("github_run_id", "github_run_attempt", "workflow_sha", "input_sha")}
+    sources = {}
+    for key, row in receipts.items():
+        source = INDEPENDENT.get(key, "ukrainealarm_region_history")
+        continuous = contract.verify(row, city=key, source_key=source, run_identity=run, read_at=read_at)
+        sources[key] = {k: copy.deepcopy(v) for k, v in row.items() if k != "pages"}
+        sources[key].update(continuity_verified=continuous, full_receipt_verified=continuous,
+            capture_metadata_verified=True, clock="independent_source_response_capture")
+    return sources
 
 class Blocked(ValueError):
     pass
@@ -117,6 +141,10 @@ def from_bundle(bundle, expected_sha256, *, readback_proof, receipt,
             utc(row.get("last_checked_at")) <= read_at,
             "HISTORY_INDEPENDENT_PROVENANCE_MISSING:" + key)
         sources[key] = {**copy.deepcopy(row), "clock": "source_history_last_checked_at"}
+    if "historical_source_receipts" in payload:
+        # Modern capture contract is authoritative. Never fill missing same-run
+        # captures from an older dashboard checkpoint or another run.
+        sources = verified_capture_sources(payload, manifest, read_at=read_at)
     binding = {"schema": "c6-historical-freshness-v1", "publication_allowed": False,
         "corpus_sha256": corpus, "workflow_sha": workflow_sha, "input_sha": input_sha,
         "github_run_id": manifest["github_run_id"], "github_run_attempt": manifest["github_run_attempt"],
@@ -146,7 +174,8 @@ def evaluate(binding, *, now, readback_proof):
         if source is None:
             reasons.append("MISSING_INDEPENDENT_SOURCE_CAPTURE_CHECKPOINT")
         else:
-            require(source.get("continuity_verified") is True, "HISTORY_CONTINUITY_NOT_PROVEN:" + key)
+            if source.get("continuity_verified") is not True:
+                reasons.append("CAPTURE_HISTORY_CONTINUITY_NOT_PROVEN")
             age = (now - utc(source["last_checked_at"])).total_seconds()
             require(age >= 0, "HISTORY_FUTURE_CAPTURE:" + key)
             if age > FRESH_AFTER_HOURS * 3600:
@@ -154,11 +183,17 @@ def evaluate(binding, *, now, readback_proof):
         cities[key] = {"historical_binding_verified": source is not None,
             "source_checked_at_utc": source["last_checked_at"] if source else None,
             "source_age_seconds": age, "within_36_hour_bound": age is not None and 0 <= age <= 129600,
-            "continuity_verified": source is not None,
+            "continuity_verified": bool(source and source.get("continuity_verified")),
+            "full_receipt_verified": bool(source and source.get("full_receipt_verified")),
+            "source_key": source.get("source_key") if source else None,
+            "source_identity": source.get("source_identity") if source else None,
+            "source_sha256": source.get("source_sha256") if source else None,
+            "previous_checkpoint_sha256": source.get("previous_checkpoint_sha256") if source else None,
             "historical_freshness_verdict": "BLOCKED" if reasons else "PASS", "reasons": reasons}
     return {"status": "BLOCKED" if any(c["reasons"] for c in cities.values()) else "FRESHNESS_READY_FOR_INTEGRATION",
         "publication_allowed": False, "freshness_ceiling_hours": FRESH_AFTER_HOURS,
         "historically_bound_cities": len(binding["sources"]),
+        "full_receipt_cities": sum(c["full_receipt_verified"] for c in cities.values()),
         "fresh_cities": sum(not c["reasons"] for c in cities.values()),
         "evaluated_at_utc": now.isoformat(), "cities": cities}
 

@@ -307,6 +307,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             reference = load(dashboard_path)
             require(reference["multicity_meta"]["production_city_keys"] == keys,
                     "FRONTEND_CITY_BOUNDARY_CHANGED")
+            require("historical_source_receipts" not in load(payload_path) or history_bundle is not None,
+                    "CAPTURE_RECEIPTS_REQUIRE_HASHED_SAME_RUN_BUNDLE")
             if history_bundle is not None or history_bundle_sha256 is not None:
                 from scripts import c6_history_freshness as history
                 history_errors = (history.Blocked,)
@@ -327,7 +329,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 write(output / "historical_freshness_gate.json", historical)
                 write(output / "source_gates.json", cities)
                 verdict["historical_freshness"] = {k: historical[k] for k in
-                    ("status", "historically_bound_cities", "fresh_cities", "freshness_ceiling_hours")}
+                    ("status", "historically_bound_cities", "full_receipt_cities", "fresh_cities", "freshness_ceiling_hours")}
                 args.historical_freshness = {**verdict["historical_freshness"],
                     "binding_sha256": binding["binding_sha256"],
                     "evaluated_at_utc": historical["evaluated_at_utc"]}
