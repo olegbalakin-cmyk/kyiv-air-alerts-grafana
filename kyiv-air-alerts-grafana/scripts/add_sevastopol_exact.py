@@ -11,6 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import multicity_shadow_payload
+import c2_history_capture as history_capture
 import expand_multicity_production as multi
 from update_data import Alert, TZ, build_outputs
 
@@ -85,11 +86,14 @@ def fetch_recent_messages() -> tuple[list[dict], dict]:
     before = None
     pages = 0
     stalled = 0
+    capture_pages = []
 
     while pages < 100:
         url = SOURCE_URL + (f"?before={before}" if before else "")
+        capture_started = datetime.now(UTC)
         r = sess.get(url, timeout=30)
         r.raise_for_status()
+        capture_pages.append(history_capture.response_page(r, url=url, started_at=capture_started))
         rows = parse_page(r.text)
         pages += 1
         if not rows:
@@ -111,6 +115,7 @@ def fetch_recent_messages() -> tuple[list[dict], dict]:
 
     messages = sorted(found.values(), key=lambda x: (x["at"], x["id"]))
     return messages, {
+        "_capture_pages": capture_pages,
         "lookback_days": LOOKBACK_DAYS,
         "pages_requested": pages,
         "messages_loaded": len(messages),
@@ -243,6 +248,7 @@ def update_event_store() -> tuple[dict, dict]:
     store = json.loads(EVENTS_FILE.read_text(encoding="utf-8")) if EVENTS_FILE.exists() else initial_events()
     current = {int(p["start_id"]): p for p in store.get("pairs", [])}
     messages, fetch_meta = fetch_recent_messages()
+    capture_pages = fetch_meta.pop("_capture_pages")
     recent_pairs, recent_anomalies = pair_recent(messages)
     for p in recent_pairs:
         current[int(p["start_id"])] = p
@@ -260,7 +266,7 @@ def update_event_store() -> tuple[dict, dict]:
         "verified_corrections": applied_corrections,
     })
     EVENTS_FILE.write_text(json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return store, fetch_meta
+    return store, {**fetch_meta, "_capture_pages": capture_pages, "_completed_air": recent_pairs}
 
 
 def build_city_output(store: dict) -> dict:
@@ -320,6 +326,9 @@ def main() -> None:
     store, fetch_meta = update_event_store()
     alerts_for_shadow = [Alert(start=datetime.fromisoformat(p["start"]).astimezone(TZ), end=datetime.fromisoformat(p["end"]).astimezone(TZ), source="sevastopol_occupation_admin_telegram") for p in store.get("pairs", []) if datetime.fromisoformat(p["end"]).astimezone(TZ) > datetime.fromisoformat(p["start"]).astimezone(TZ)]
     multicity_shadow_payload.record_city_alerts(CITY_KEY, alerts_for_shadow, producer="add_sevastopol_exact")
+    history_capture.record(CITY_KEY, "sevastopol_history", {"url": SOURCE_URL, "channel": CHANNEL},
+        fetch_meta.pop("_capture_pages"), fetch_meta.pop("_completed_air"),
+        continuity=not store["meta"]["recent_anomalies"])
     output = build_city_output(store)
 
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))

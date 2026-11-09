@@ -12,6 +12,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 import multicity_shadow_payload
+import c2_history_capture as history_capture
 from statistics import mean
 from typing import Iterable
 from zoneinfo import ZoneInfo
@@ -481,8 +482,10 @@ def main() -> None:
 
     historical, historical_mode, municipal_warning = load_historical_base(session)
 
+    capture_started = datetime.now(UTC)
     live_response = session.get(LIVE_HISTORY_URL, timeout=30)
     live_response.raise_for_status()
+    capture_page = history_capture.response_page(live_response, url=LIVE_HISTORY_URL, started_at=capture_started)
     live_alerts, live_events = parse_live_history(live_response.text)
     if not live_events:
         raise RuntimeError("Kyiv Digital live history returned no parsable events")
@@ -512,6 +515,8 @@ def main() -> None:
     }
 
     multicity_shadow_payload.record_city_alerts("kyiv", alerts, producer="update_data")
+    history_capture.record("kyiv", "kyiv_digital", {"url": LIVE_HISTORY_URL},
+        [capture_page], [{"start": a.start, "end": a.end} for a in live_alerts])
     output = build_outputs(alerts, now_local, meta)
     (DATA_DIR / "dashboard_data.json").write_text(
         json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8"

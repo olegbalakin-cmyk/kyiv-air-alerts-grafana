@@ -22,6 +22,7 @@ from ukrainealarm_request_policy import (
     UkraineAlarmRetryBudgetExceeded,
 )
 import multicity_shadow_payload
+import c2_history_capture as history_capture
 import add_duration_unit_switch as exactmod
 import expand_multicity_production as base
 import extend_remaining_proxies as extended
@@ -223,12 +224,16 @@ def resolve_region(nodes: list[dict], names: list[str], oblast: str) -> dict | N
     return matches[-1]
 
 
-def history_rows(client: UkraineAlarmClient, region_id: str, name: str) -> list[dict]:
+def history_rows(client: UkraineAlarmClient, region_id: str, name: str, *, capture=None) -> list[dict]:
+    capture_started = datetime.now(UTC)
     response = client.get(
         HISTORY_URL,
         params={"regionId": region_id},
         context=f"regionHistory {name} ({region_id})",
     )
+    if capture is not None:
+        capture.append(history_capture.response_page(response,
+            url=HISTORY_URL + "?regionId=" + region_id, started_at=capture_started))
     payload = response.json()
     groups = [payload] if isinstance(payload, dict) else [x for x in payload if isinstance(x, dict)]
     rows = []
@@ -714,6 +719,7 @@ def main() -> None:
     events = reconcile_completed_air_events(store.get("events", []))
     request_errors: dict[str, str] = {}
     fetched_keys: list[str] = []
+    history_captures = {}
 
     if token:
         client = UkraineAlarmClient(
@@ -749,7 +755,8 @@ def main() -> None:
                 api_name = node["regionName"]
 
             try:
-                history = history_rows(client, region_id, api_name or spec["display_target"])
+                capture = []
+                history = history_rows(client, region_id, api_name or spec["display_target"], capture=capture)
                 product_history_events = history_events(
                     history,
                     city_key=key,
@@ -765,7 +772,7 @@ def main() -> None:
                     if key == "lviv"
                     else []
                 )
-                checked_at = datetime.now(UTC)
+                checked_at = history_capture.utc(capture[0]["captured_at"])
                 oldest = min((r["start"] for r in history), default=None)
                 latest = max((r["end"] for r in history), default=None)
                 initial_match = match_static_event(history, static[key])
@@ -779,6 +786,13 @@ def main() -> None:
                     poll_overlap = None
                     continuous = bool(initial_match)
                     reason = "static_alertsinua_event_matches_api" if continuous else "no_verified_static_api_event_match"
+
+                source_identity = {"url": HISTORY_URL, "region_id": region_id}
+                previous = {"source_key": "ukrainealarm_region_history",
+                    "source_identity": {"url": HISTORY_URL, "region_id": str(prev.get("region_id") or "")}, "last_checked_at": prev.get("last_checked_at")}
+                if not prev.get("last_checked_at"):
+                    previous = None
+                history_captures[key] = (capture, history, previous, continuous, source_identity)
 
                 if continuous:
                     for event in product_history_events:
@@ -959,6 +973,9 @@ def main() -> None:
         "rows": status,
     }
     mm["official_ukrainealarm_bridge"] = summary
+    for key, (pages, completed, previous, continuous, source_identity) in history_captures.items():
+        history_capture.record(key, "ukrainealarm_region_history", source_identity,
+            pages, completed, previous=previous, continuity=continuous)
     DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"Verified multicity bridge continuity: {len(covered)}/{len(required_keys)} rows")
