@@ -772,7 +772,9 @@ def main() -> None:
                     if key == "lviv"
                     else []
                 )
-                checked_at = history_capture.utc(capture[0]["captured_at"])
+                # Existing bridge clock remains intact when optional receipts are OFF.
+                checked_at = (history_capture.utc(capture[0]["captured_at"])
+                              if capture else datetime.now(UTC))
                 oldest = min((r["start"] for r in history), default=None)
                 latest = max((r["end"] for r in history), default=None)
                 initial_match = match_static_event(history, static[key])
