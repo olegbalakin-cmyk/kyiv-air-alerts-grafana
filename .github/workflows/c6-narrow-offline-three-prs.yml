@@ -91,6 +91,8 @@ jobs:
           spec.loader.exec_module(actual_helper)
           h.capture_contract = lambda: actual_helper
           suite.capture = actual_helper
+          # Explicit fixture-only opt-in: fake source bytes; no real HTTP.
+          os.environ["C2_HISTORY_CAPTURE_ENABLED"] = "true"
 
           def actual_sources(self):
               loaded = {}
