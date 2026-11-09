@@ -104,8 +104,8 @@ jobs:
           generator = importlib.util.module_from_spec(generator_spec)
           generator_spec.loader.exec_module(generator)
           sys.modules["scripts.neon_json_shadow_generator"] = generator
-          import scripts
-          scripts.neon_json_shadow_generator = generator
+          import scripts as package_scripts
+          package_scripts.neon_json_shadow_generator = generator
           h.capture_contract = lambda: actual_helper
           suite.capture = actual_helper
           # Enable only constructed fixture capture; the fixture itself passes
