@@ -36,6 +36,8 @@ jobs:
         run: |
           echo "PHASE1_INPUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           echo "MULTICITY_CANONICAL_PAYLOAD_PATH=${RUNNER_TEMP}/multicity_canonical_payload.json" >> "$GITHUB_ENV"
+          # Capture remains OFF unless the owner explicitly enables this separately.
+          echo "C2_HISTORY_CAPTURE_ENABLED=${{ vars.C2_HISTORY_CAPTURE_ENABLED }}" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
