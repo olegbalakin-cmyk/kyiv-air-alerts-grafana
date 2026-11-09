@@ -65,5 +65,21 @@ class IntegrationWiring(unittest.TestCase):
             self.assertEqual(json.loads(checkpoint.read_text())["kyiv"], second)
 
 
+    def test_export_clock_uses_last_page_without_changing_freshness_clock(self):
+        from scripts.c2_shadow_bundle import capture_validation_clock, BundleBlocked
+
+        now = datetime.now(timezone.utc)
+        first = (now - timedelta(minutes=4)).isoformat()
+        last = (now - timedelta(minutes=1)).isoformat()
+        receipts = [{"last_checked_at": first, "pages": [
+            {"captured_at": first}, {"captured_at": last}]}]
+        self.assertEqual(capture_validation_clock(receipts, now=now), now)
+        # The conservative per-source freshness timestamp must remain the first page.
+        self.assertEqual(receipts[0]["last_checked_at"], first)
+        with self.assertRaisesRegex(BundleBlocked, "CAPTURE_PAGE_AFTER_EXPORT"):
+            capture_validation_clock(receipts, now=now - timedelta(minutes=2))
+
+
+
 if __name__ == "__main__":
     unittest.main()
