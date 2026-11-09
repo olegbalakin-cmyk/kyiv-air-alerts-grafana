@@ -25,6 +25,14 @@ class IntegrationWiring(unittest.TestCase):
             self.assertEqual(payload.read_text(), '{"cities": {}}')
             self.assertFalse(checkpoint.exists())
 
+    def test_capture_enabled_needs_both_explicit_flag_and_payload_path(self):
+        contract = freshness.capture_contract()
+        self.assertFalse(contract.enabled({}))
+        self.assertFalse(contract.enabled({"MULTICITY_CANONICAL_PAYLOAD_PATH": "/tmp/c2.json"}))
+        self.assertFalse(contract.enabled({"C2_HISTORY_CAPTURE_ENABLED": "true"}))
+        self.assertTrue(contract.enabled({"C2_HISTORY_CAPTURE_ENABLED": "true",
+                                          "MULTICITY_CANONICAL_PAYLOAD_PATH": "/tmp/c2.json"}))
+
     def test_response_page_hashes_actual_content_bytes(self):
         contract = freshness.capture_contract()
         response = Mock(content=b'{"capture":true}', text='different decoded text')
