@@ -231,7 +231,7 @@ def history_rows(client: UkraineAlarmClient, region_id: str, name: str, *, captu
         params={"regionId": region_id},
         context=f"regionHistory {name} ({region_id})",
     )
-    if capture is not None:
+    if capture is not None and history_capture.enabled():
         capture.append(history_capture.response_page(response,
             url=HISTORY_URL + "?regionId=" + region_id, started_at=capture_started))
     payload = response.json()
