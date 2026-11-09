@@ -45,6 +45,7 @@ def main():
         p.add_argument("--" + flag, required=True, type=Path)
     for flag in ("bundle-sha256", "workflow-sha", "input-sha", "db-branch", "db-endpoint", "c2-run-id"):
         p.add_argument("--" + flag, required=True)
+    p.add_argument("--private-baseline-dir", type=Path, default=None)
     args = p.parse_args()
     try:
         shadow.require(re.fullmatch(r"[0-9a-f]{40}", args.workflow_sha) is not None and
@@ -67,7 +68,11 @@ def main():
                     dashboard_path=site / "data/dashboard_data.json", output=args.output,
                     database_url=os.environ.get("NEON_JSON_SHADOW_READONLY_DATABASE_URL", ""),
                     writer_database_url="postgresql://" + args.db_endpoint + "/neondb",
-                    expected_branch=args.db_branch, workflow_sha=args.workflow_sha, input_sha=args.input_sha)
+                    expected_branch=args.db_branch, workflow_sha=args.workflow_sha, input_sha=args.input_sha,
+                    history_bundle=args.bundle, history_bundle_sha256=args.bundle_sha256,
+                    private_raw_baseline_dir=args.private_baseline_dir,
+                    private_raw_baseline_approved=(
+                        os.environ.get("C6_PRIVATE_RAW_BASELINE_APPROVED") == "true"))
             assert result["publication_allowed"] is False and len(result["candidate_files"]) == 6
     except Exception:
         args.output.mkdir(parents=True, exist_ok=True)

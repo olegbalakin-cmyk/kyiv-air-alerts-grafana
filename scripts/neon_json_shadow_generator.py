@@ -43,9 +43,20 @@ CAPTURE_HOOK_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', 'f14437658cdb13f9464db63fc754db85c6447a86'),
 }
 
+# Exact site-prod collector hook blobs verified against PR #47 head
+# 354ff3f84a2d87542f4af07ed63d585e9d5ea5f2 by narrow offline CI.
+# Keep the original frozen variants; no wildcard or arbitrary source drift.
+C6_INTEGRATION_HOOK_BLOBS = {
+ 'scripts/update_data.py': ('cebc2b455fb08ee16e03b9e4fcdb17aa2d9d6833', '45d4c3b656b91f927dc519cffdbd09f09ed00392'),
+ 'scripts/apply_ukrainealarm_bridge.py': ('8b95c4b508b9a473240889603f593e399cf8815d', 'aaedf36299bac69a76971d7e8399894e416d1643'),
+ 'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '33568c607ebd6a25c3ff881ce7f365c42e362436'),
+}
+
 def accepted_builder_blob(path, raw, expected):
     actual = blob(raw)
-    return actual == expected or CAPTURE_HOOK_BLOBS.get(path) == (expected, actual)
+    return (actual == expected or
+            CAPTURE_HOOK_BLOBS.get(path) == (expected, actual) or
+            C6_INTEGRATION_HOOK_BLOBS.get(path) == (expected, actual))
 
 class Closed(RuntimeError): pass
 
