@@ -56,6 +56,12 @@ jobs:
           ref: 3d686a8a622433e242a01917a659a299082ec5bc
           path: freshness
           persist-credentials: false
+      - name: Checkout amended PR 48 generator gate (exact reviewed blob map)
+        uses: actions/checkout@v4
+        with:
+          ref: 2e325dc79bcfe136224c4282843c039d71bc648b
+          path: pr48-gate
+          persist-credentials: false
       - name: Python
         uses: actions/setup-python@v5
         with:
@@ -66,6 +72,7 @@ jobs:
         working-directory: freshness
         env:
           PR47_SCRIPTS: ../pr47/kyiv-air-alerts-grafana/scripts
+          PR48_GENERATOR: ../pr48-gate/scripts/neon_json_shadow_generator.py
         run: |
           test "$(git -C ../pr47 rev-parse HEAD)" = "354ff3f84a2d87542f4af07ed63d585e9d5ea5f2"
           test "$(git rev-parse HEAD)" = "3d686a8a622433e242a01917a659a299082ec5bc"
@@ -89,6 +96,14 @@ jobs:
           spec = importlib.util.spec_from_file_location("pr47_actual_capture", helper)
           actual_helper = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(actual_helper)
+          # Check the generator gate from the amended, explicitly pinned PR48,
+          # not the old freshness baseline. No collector code is replaced.
+          generator_path = Path(os.environ["PR48_GENERATOR"]).resolve()
+          assert generator_path.is_file()
+          generator_spec = importlib.util.spec_from_file_location("scripts.neon_json_shadow_generator", generator_path)
+          generator = importlib.util.module_from_spec(generator_spec)
+          generator_spec.loader.exec_module(generator)
+          sys.modules["scripts.neon_json_shadow_generator"] = generator
           h.capture_contract = lambda: actual_helper
           suite.capture = actual_helper
           # Enable only constructed fixture capture; the fixture itself passes
@@ -132,7 +147,7 @@ jobs:
       - name: Checkout only PR 48 exact head
         uses: actions/checkout@v4
         with:
-          ref: 90efb3ea7d7d18da8be46742c885f27b6c32f3d7
+          ref: 2e325dc79bcfe136224c4282843c039d71bc648b
           path: pr48
           persist-credentials: false
       - name: Python
@@ -142,5 +157,5 @@ jobs:
       - name: Run narrow private-baseline tests (fixture-only)
         working-directory: pr48
         run: |
-          test "$(git rev-parse HEAD)" = "90efb3ea7d7d18da8be46742c885f27b6c32f3d7"
+          test "$(git rev-parse HEAD)" = "2e325dc79bcfe136224c4282843c039d71bc648b"
           python -m unittest -v tests.test_c6_private_raw_baseline
