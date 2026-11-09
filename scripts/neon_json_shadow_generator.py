@@ -191,7 +191,7 @@ def verify_snapshot(snap, adapter):
     return closed,active
 
 
-def source_report(snap, keys, reference):
+def source_report(snap, keys, reference, *, historical=None):
     """Do not mistake a C2 corpus receipt or DB COMMIT time for a fresh source capture."""
     report = {}
     for key in keys:
@@ -226,6 +226,17 @@ def source_report(snap, keys, reference):
             'checkpoint_sources': [{'source_key':c['source_key'], 'stream_key':c['stream_key'],
                                     'seq': int(c['checkpoint_seq'])} for c in checkpoints],
         }
+    if historical is not None:
+        require(set(historical['cities']) == set(keys), 'HISTORY_SOURCE_REPORT_COVERAGE')
+        for key in keys:
+            history = historical['cities'][key]
+            report[key]['historical_freshness'] = copy.deepcopy(history)
+            report[key]['source_age_seconds'] = history['source_age_seconds']
+            report[key]['within_36_hour_bound'] = history['within_36_hour_bound']
+            report[key]['source_checked_at_utc'] = history['source_checked_at_utc']
+            report[key]['source_captured_at_utc'] = history['source_checked_at_utc']
+            report[key]['source_clock'] = 'source_history_last_checked_at'
+            report[key]['historical_binding_verified'] = history['historical_binding_verified']
     return report
 
 def refresh_analytics(payload, reference, reference_derived, alerts, now, site, mods):
@@ -323,6 +334,8 @@ def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     derived=refresh_analytics(payload, reference, reference_derived, alerts, now, args.site, mods)
     generated=aware(args.generated_at) if getattr(args, 'generated_at', None) else datetime.now(UTC)
     authority={'branch_id':args.branch_id,'database_read_at_utc':iso(now),'site_generated_at_utc':iso(generated),'source_as_of_utc_by_city':{key:cities[key]['source_captured_at_utc'] for key in keys},'publication_allowed':False,'scope':'RESEARCH_CANDIDATE_NOT_CURRENT_DATA_CERTIFICATION','dst_simulation':False,'active_status':'UNKNOWN_UNCERTIFIED','source_fallback':False,'prior_accepted_browser_proof':'66f872413f67668c9bd23b94cff17520fea705f9','physical_dst_repair_certified':False,'kyiv_current_provenance_certified':False}
+    if getattr(args, 'historical_freshness', None) is not None:
+        authority['historical_freshness'] = copy.deepcopy(args.historical_freshness)
     if correction is not None:
         authority['historical_dst_projection'] = correction
     payload['meta'].update(k['meta']); payload['meta']['generated_at']=generated.astimezone(update.TZ).isoformat()

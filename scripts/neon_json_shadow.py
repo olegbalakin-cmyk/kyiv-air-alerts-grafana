@@ -164,7 +164,8 @@ def validated_neon_rows(episodes: list[dict], keys: list[str], rows: list[dict])
 def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: Path,
             dashboard_path: Path, output: Path, database_url: str,
             verifier=None, reader=None, workflow_sha=None, input_sha=None,
-            writer_database_url=None, expected_branch=None, generated_at=None, dst_correction=None) -> dict:
+            writer_database_url=None, expected_branch=None, generated_at=None, dst_correction=None,
+            history_bundle=None, history_bundle_sha256=None) -> dict:
     """One branch-bound C2 Neon snapshot, then isolated six-file frontend candidate.
 
     The previously accepted canonical verifier remains the authority for C2.
@@ -190,6 +191,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
         "production_publication": "PRODUCTION_PUBLICATION_NOT_AUTHORIZED",
     }
     stage = "VERIFY_BINDING_INPUTS"
+    history_errors = ()
     try:
         from urllib.parse import urlparse
         require(bool(workflow_sha) and bool(input_sha) and bool(expected_branch),
@@ -305,7 +307,34 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             reference = load(dashboard_path)
             require(reference["multicity_meta"]["production_city_keys"] == keys,
                     "FRONTEND_CITY_BOUNDARY_CHANGED")
-            cities = generator.source_report(snap, keys, reference)
+            if history_bundle is not None or history_bundle_sha256 is not None:
+                from scripts import c6_history_freshness as history
+                history_errors = (history.Blocked,)
+                stage = "VERIFY_HISTORICAL_RECEIPT_BINDING"
+                require(history_bundle is not None and bool(history_bundle_sha256),
+                        "HISTORY_BUNDLE_AND_DIGEST_REQUIRED")
+                binding = history.from_bundle(
+                    history_bundle, history_bundle_sha256,
+                    readback_proof=load(work / "readback_proof.json"), receipt=receipt,
+                    receipt_sha256=digest(receipt_path), workflow_sha=workflow_sha,
+                    input_sha=input_sha, db_branch=expected_branch)
+                # One consumption clock for both age checks and JSON metadata.
+                args.generated_at = utc(generated_at or datetime.now(timezone.utc))
+                historical = history.evaluate(binding, now=args.generated_at,
+                                               readback_proof=load(work / "readback_proof.json"))
+                cities = generator.source_report(snap, keys, reference, historical=historical)
+                write(output / "historical_freshness_binding.json", binding)
+                write(output / "historical_freshness_gate.json", historical)
+                write(output / "source_gates.json", cities)
+                verdict["historical_freshness"] = {k: historical[k] for k in
+                    ("status", "historically_bound_cities", "fresh_cities", "freshness_ceiling_hours")}
+                args.historical_freshness = {**verdict["historical_freshness"],
+                    "binding_sha256": binding["binding_sha256"],
+                    "evaluated_at_utc": historical["evaluated_at_utc"]}
+                stage = "VERIFY_HISTORICAL_FRESHNESS_GATE"
+                history.require_ready(historical)
+            else:
+                cities = generator.source_report(snap, keys, reference)
             stage = "GENERATE_FRONTEND"
             try:
                 result = generator.generate(args, work, adapter, b2, bundle,
@@ -351,7 +380,7 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
     except Exception as exc:
         # Fixed stage names only: never exception messages, SQL, DSNs or row values.
         verdict.update(error_type=type(exc).__name__, error_stage=stage,
-                       reason=str(exc) if isinstance(exc, ShadowBlocked) else
+                       reason=str(exc) if isinstance(exc, (ShadowBlocked,) + history_errors) else
                        "RECEIPT_READBACK_OR_GENERATOR_ERROR", candidate_files={})
         shutil.rmtree(output / "candidate", ignore_errors=True)
         raise
@@ -365,6 +394,8 @@ def main(argv=None):
     for flag in ("site", "receipt", "status", "payload", "dashboard", "output"):
         p.add_argument("--" + flag, required=True, type=Path)
     p.add_argument("--dst-correction", choices=["c6-dst-projection-v1"], default=None)
+    p.add_argument("--history-bundle", type=Path, default=None)
+    p.add_argument("--history-bundle-sha256", default=None)
     a = p.parse_args(argv)
     try:
         verdict = execute(site=a.site, receipt_path=a.receipt, status_path=a.status,
@@ -373,7 +404,8 @@ def main(argv=None):
                           writer_database_url=os.environ.get("MULTICITY_CANONICAL_DATABASE_URL", ""),
                           expected_branch=os.environ.get("MULTICITY_CANONICAL_DB_BRANCH"),
                           workflow_sha=os.environ.get("GITHUB_SHA"),
-                          input_sha=os.environ.get("PHASE1_INPUT_SHA"), dst_correction=a.dst_correction)
+                          input_sha=os.environ.get("PHASE1_INPUT_SHA"), dst_correction=a.dst_correction,
+                          history_bundle=a.history_bundle, history_bundle_sha256=a.history_bundle_sha256)
     except Exception:
         print("Neon JSON shadow BLOCKED; verdict is stored without credentials or candidate publication", file=sys.stderr)
         return 1
