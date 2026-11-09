@@ -51,15 +51,14 @@ The current six-file JSON delivery remains the existing Git path. Source
 receipts and raw reader rows are not frontend outputs. Neither draft changes
 PR #42, #44 or #45, nor modifies accepted coordination roots.
 
-## Additional review blocker: physical readback adapter
+## Separately staged readback adapter — PR #48
 
 The accepted `3d686a8a` research reader `scripts/neon_json_shadow.py` has
 the `history_bundle` / `history_bundle_sha256` parameters and rejects
-stale, missing, unbound, tampered and foreign receipts. **However**, its
-existing manual launcher `scripts/neon_json_shadow_physical_proof.py` has not
-yet been wired to forward its already pinned `--bundle` and
-`--bundle-sha256` to those parameters. Required minimal caller change in
-the reviewed research lineage:
+stale, missing, unbound, tampered and foreign receipts. **The exact launcher change is now committed as a separate draft PR #48**, targeting
+`research-c6-freshness-receipts-2026-11-09`, commit `54d1b7d6f67717417e81288c13d61c151a91b339`.
+It forwards `--bundle` and `--bundle-sha256` to those parameters.
+The required integration is:
 
 ```python
 # inside the existing shadow.execute(...) call, add:
@@ -74,9 +73,12 @@ into main or site-prod, do not enable the production reader.
 The optional `scripts/c6_private_reader_baseline.py` helper accepts an
 *already obtained*, read-only repeatable-read snapshot, and stages all 7
 raw reader arrays with per-file SHA-256, mode 0600, strictly outside the
-checkout. It does **not** perform any SQL/readback itself and has **not yet
-been wired into the physical reader**. A later reviewed caller must explicitly
-opt in; raw rows must not be uploaded as public Actions artifacts, committed
+checkout. It does **not** perform any SQL/readback itself. **PR #48 adds its
+optional, default-OFF call in the physical reader**, subject to the separate
+`C6_PRIVATE_RAW_BASELINE_APPROVED=true` authorization and an explicit
+`--private-baseline-dir` outside the checkout. PR #48 contains five focused
+no-network private-baseline tests. A later reviewed workflow dispatch still
+needs explicit opt-in; raw rows must not be uploaded as public Actions artifacts, committed
 to Git, or included in the frontend output. Secure owner-controlled transfer
 and retention need separate approval. Old incomplete baseline is forbidden.
 
@@ -121,7 +123,7 @@ and retention need separate approval. Old incomplete baseline is forbidden.
 4. Within 36 hours of the **oldest** relevant real source capture, separately
    authorize one branch-bound repeatable-read Neon -> JSON proof with the
    *same* C2 export run/attempt, corpus, input SHA, sources and bundle digest.
-   Complete its reviewed readback adapter before dispatch; no new HTTP,
+   Review PR #48 and explicitly authorize the revised research SHA/workflow guard before dispatch; no new HTTP,
    Neon writes, or independent collector.
 5. If separately approved, privately retain full raw reader rows and hashes
    for a **new** DST baseline; no GitHub raw-row exposure and no DST activation.
