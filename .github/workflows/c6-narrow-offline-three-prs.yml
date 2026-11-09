@@ -1,0 +1,138 @@
+name: C6 narrow offline CI - three pinned PR heads
+
+on:
+  push:
+    branches: [research-c6-narrow-offline-ci-2026-11-09]
+    paths:
+      - .github/workflows/c6-narrow-offline-three-prs.yml
+
+permissions:
+  contents: read
+
+env:
+  PUBLICATION_ALLOWED: "false"
+  GLOBAL_CUTOVER: "NO"
+  DST_CORRECTION: "OFF"
+  C2_HISTORY_CAPTURE_ENABLED: "false"
+  C2_SHADOW_EXPORT_ENABLED: "false"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  pr46-integration-wiring:
+    name: PR 46 - tests.test_c6_integration_wiring
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout only PR 46 exact head
+        uses: actions/checkout@v4
+        with:
+          ref: 07efd0aef38f12104ccc16709e9be6851a777f97
+          path: pr46
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run narrow wiring tests (no collectors)
+        working-directory: pr46
+        run: |
+          test "$(git rev-parse HEAD)" = "07efd0aef38f12104ccc16709e9be6851a777f97"
+          python -m unittest -v tests.test_c6_integration_wiring
+
+  pr47-actual-collector-hooks:
+    name: PR 47 - actual collectors + freshness capture suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout only PR 47 exact head (actual production collectors)
+        uses: actions/checkout@v4
+        with:
+          ref: 354ff3f84a2d87542f4af07ed63d585e9d5ea5f2
+          path: pr47
+          persist-credentials: false
+      - name: Checkout frozen freshness research for test harness only
+        uses: actions/checkout@v4
+        with:
+          ref: 3d686a8a622433e242a01917a659a299082ec5bc
+          path: freshness
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install sole extra test package
+        run: python -m pip install "beautifulsoup4>=4.12,<5"
+      - name: Exercise actual PR47 sources with pinned freshness tests
+        working-directory: freshness
+        env:
+          PR47_SCRIPTS: ../pr47/kyiv-air-alerts-grafana/scripts
+        run: |
+          test "$(git -C ../pr47 rev-parse HEAD)" = "354ff3f84a2d87542f4af07ed63d585e9d5ea5f2"
+          test "$(git rev-parse HEAD)" = "3d686a8a622433e242a01917a659a299082ec5bc"
+          python - <<'PY'
+          # Explicit composition, in CI RAM only: tests + frozen fixture and
+          # exporter/reader from freshness SHA; all THREE collector functions
+          # and the helper are loaded from exact PR47 SHA, never overwritten.
+          import hashlib
+          import importlib.util
+          import os
+          from pathlib import Path
+          import socket
+          import sys
+          import unittest
+          import tests.test_c6_capture_receipts as suite
+          from scripts import c6_history_freshness as h
+          scripts = Path(os.environ["PR47_SCRIPTS"]).resolve()
+          names = ("update_data.py", "apply_ukrainealarm_bridge.py", "add_sevastopol_exact.py")
+          assert all((scripts / name).is_file() for name in names)
+          helper = scripts / "c2_history_capture.py"
+          spec = importlib.util.spec_from_file_location("pr47_actual_capture", helper)
+          actual_helper = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(actual_helper)
+          h.capture_contract = lambda: actual_helper
+          suite.capture = actual_helper
+
+          def actual_sources(self):
+              loaded = {}
+              for name in names:
+                  path = scripts / name
+                  raw = path.read_bytes()
+                  compile(raw, str(path), "exec")
+                  print("ACTUAL_PR47_COLLECTOR", name, hashlib.sha256(raw).hexdigest(), flush=True)
+                  loaded[name] = raw.decode("utf-8")
+              return loaded
+
+          # Only the in-memory test fixture accessor is redirected. The real
+          # PR47 source files remain untouched and are actually executed by
+          # the Kyiv, Sevastopol and builder-acceptance tests.
+          suite.CaptureTests.patched_collectors = actual_sources
+
+          def no_socket(*_args, **_kwargs):
+              raise AssertionError("NO_SOURCE_HTTP_ALLOWED")
+          socket.socket.connect = no_socket
+          socket.create_connection = no_socket
+          tests = unittest.defaultTestLoader.loadTestsFromName("tests.test_c6_capture_receipts")
+          result = unittest.TextTestRunner(verbosity=2).run(tests)
+          sys.exit(0 if result.wasSuccessful() else 1)
+          PY
+
+  pr48-private-baseline:
+    name: PR 48 - tests.test_c6_private_raw_baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout only PR 48 exact head
+        uses: actions/checkout@v4
+        with:
+          ref: 90efb3ea7d7d18da8be46742c885f27b6c32f3d7
+          path: pr48
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run narrow private-baseline tests (fixture-only)
+        working-directory: pr48
+        run: |
+          test "$(git rev-parse HEAD)" = "90efb3ea7d7d18da8be46742c885f27b6c32f3d7"
+          python -m unittest -v tests.test_c6_private_raw_baseline
