@@ -102,6 +102,111 @@ def _publisher_url_from_google(html_bytes: bytes, base_url: str) -> str:
     return unique[0]
 
 
+def _publisher_url_from_google_rpc(html_bytes: bytes, article_url: str, *,
+                                    session, counter: list[int], pause=0.0) -> str:
+    """Decode one opaque RSS ID with Google's page-signed article response.
+
+    This is an undocumented endpoint: any unexpected shape stays NEEDS_REVIEW.
+    No guessed publisher URLs, browser automation, proxies or scraped credentials.
+    Only the fixed Google HTTPS RPC is called, then safe_url() validates its answer.
+    """
+    article_id = urlsplit(article_url).path.rsplit("/", 1)[-1]
+    if not re.fullmatch(r"[A-Za-z0-9_-]{16,900}", article_id):
+        raise CaptureError("GOOGLE_RSS_ID_INVALID")
+    soup = BeautifulSoup(html_bytes, "html.parser")
+    candidates = [
+        node for node in soup.select("[data-n-a-sg][data-n-a-ts]")
+        if not node.get("data-n-a-id") or node.get("data-n-a-id") == article_id
+    ]
+    if len(candidates) != 1:
+        raise CaptureError("GOOGLE_SIGNED_PARAMS_MISSING_OR_AMBIGUOUS")
+    signature = str(candidates[0].get("data-n-a-sg", ""))
+    timestamp = str(candidates[0].get("data-n-a-ts", ""))
+    if (not 5 <= len(signature) <= 600
+            or any(ord(c) < 33 or ord(c) > 126 for c in signature)
+            or not re.fullmatch(r"[0-9]{9,13}", timestamp)):
+        raise CaptureError("GOOGLE_SIGNED_PARAMS_INVALID")
+
+    inner = [
+        "garturlreq",
+        [["X", "X", ["X", "X"], None, None, 1, 1, "US:en",
+          None, 1, None, None, None, None, None, 0, 1],
+         "X", "X", 1, [1, 1, 1], 1, 1, None, 0, 0, None, 0],
+        article_id, int(timestamp), signature,
+    ]
+    form = {"f.req": json.dumps([[["Fbv4je", json.dumps(
+        inner, ensure_ascii=True, separators=(",", ":"))]]],
+        ensure_ascii=True, separators=(",", ":"))}
+    if counter[0] >= MAX_REQUESTS:
+        raise CaptureError("HTTP_REQUEST_BUDGET_EXHAUSTED")
+    counter[0] += 1
+    if pause:
+        time.sleep(pause)
+    try:
+        response = session.post(
+            "https://news.google.com/_/DotsSplashUi/data/batchexecute",
+            data=form, timeout=TIMEOUT, allow_redirects=False, stream=True,
+            headers={
+                "User-Agent": USER_AGENT,
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "Origin": "https://news.google.com",
+                "Referer": "https://news.google.com/",
+                "X-Same-Domain": "1",
+            },
+        )
+    except requests.Timeout as exc:
+        raise CaptureError("GOOGLE_RPC_TIMEOUT") from exc
+    except requests.RequestException as exc:
+        raise CaptureError("GOOGLE_RPC_TRANSPORT_" + type(exc).__name__.upper()) from exc
+    try:
+        if response.status_code != 200:
+            raise CaptureError("GOOGLE_RPC_HTTP_" + str(response.status_code))
+        limit = 128_000
+        length = response.headers.get("Content-Length", "")
+        if length.isdecimal() and int(length) > limit:
+            raise CaptureError("GOOGLE_RPC_BODY_TOO_LARGE")
+        chunks, used = [], 0
+        for chunk in response.iter_content(chunk_size=8192):
+            if not chunk:
+                continue
+            used += len(chunk)
+            if used > limit:
+                raise CaptureError("GOOGLE_RPC_BODY_TOO_LARGE")
+            chunks.append(chunk)
+        payload = b"".join(chunks).decode("utf-8", "replace")
+    finally:
+        response.close()
+
+    for line in payload.splitlines():
+        line = line.strip()
+        if not line.startswith("[["):
+            continue
+        try:
+            frames = json.loads(line)
+        except (ValueError, TypeError):
+            continue
+        if not isinstance(frames, list):
+            continue
+        for frame in frames:
+            if not (isinstance(frame, list) and len(frame) >= 3
+                    and frame[0] == "wrb.fr" and frame[1] == "Fbv4je"
+                    and isinstance(frame[2], str)):
+                continue
+            try:
+                decoded = json.loads(frame[2])
+            except ValueError:
+                break
+            if (isinstance(decoded, list) and len(decoded) >= 2
+                    and decoded[0] == "garturlres"
+                    and isinstance(decoded[1], str)):
+                try:
+                    return safe_url(decoded[1], allow_google=False)
+                except CaptureError as exc:
+                    raise CaptureError("GOOGLE_RPC_TARGET_NOT_ALLOWED") from exc
+        break
+    raise CaptureError("GOOGLE_RPC_UNRESOLVED_OR_BAD_RESPONSE")
+
+
 def get_publisher_document(url: str, *, session, counter: list[int], pause=0.0):
     """Manually controlled redirects and streamed response-size limit."""
     current = safe_url(url)
@@ -159,7 +264,13 @@ def get_publisher_document(url: str, *, session, counter: list[int], pause=0.0):
             redirects.append(current)
             if len(redirects) > MAX_REDIRECTS:
                 raise CaptureError("GOOGLE_WRAPPER_REDIRECT_LIMIT")
-            current = _publisher_url_from_google(body, current)
+            try:
+                current = _publisher_url_from_google(body, current)
+            except CaptureError as exc:
+                if str(exc) != "GOOGLE_WRAPPER_UNRESOLVED_OR_AMBIGUOUS":
+                    raise
+                current = _publisher_url_from_google_rpc(
+                    body, current, session=session, counter=counter, pause=pause)
             continue
         safe_url(current, allow_google=False)
         return {"url": current, "html": body, "redirects": redirects,
