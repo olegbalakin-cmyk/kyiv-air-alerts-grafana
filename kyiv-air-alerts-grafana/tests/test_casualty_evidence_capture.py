@@ -87,7 +87,8 @@ class CaptureTests(unittest.TestCase):
         self.assertTrue(all(x[1]["stream"] is True for x in s.called))
 
     def test_google_html_link_resolution(self):
-        news = (b'<html><head><link rel="canonical" href="https://suspilne.media/dnipro/real-article/">'\n                b'<meta name="description" content="Safe intermediate news redirect with a publisher canonical link"></head></html>')
+        news = (b'<html><head><link rel="canonical" href="https://suspilne.media/dnipro/real-article/">'
+                b'<meta name="description" content="Safe intermediate news redirect with a publisher canonical link"></head></html>')
         target = "https://suspilne.media/dnipro/real-article/"
         s = Session({GOOGLE: Response(content=news),
                      target: Response(content=html_doc("РФ атакувала Дніпро ракетами: двоє людей загинули."))})
