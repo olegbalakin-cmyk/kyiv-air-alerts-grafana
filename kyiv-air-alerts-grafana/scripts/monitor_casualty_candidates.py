@@ -630,10 +630,49 @@ def main() -> None:
         help="Use cached alert stores only. Intended for safe bootstrap/testing.",
     )
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--capture-evidence", action="store_true",
+                        help="Opt-in bounded article capture after the ordinary monitor; OFF by default.")
+    parser.add_argument("--capture-evidence-only", action="store_true",
+                        help="Isolated proof: use an explicit queue snapshot; no poll/search or live state writes.")
+    parser.add_argument("--evidence-queue", type=Path,
+                        help="Explicit immutable queue snapshot (required for capture-evidence-only).")
+    parser.add_argument("--evidence-output", type=Path,
+                        help="Explicit research JSON evidence output, outside operational data.")
+    parser.add_argument("--max-evidence-urls", type=int, default=4)
+    parser.add_argument("--auto-propose-output", type=Path,
+                        help="Optional separate offline reviewer output directory; no promotion.")
+    parser.add_argument("--revision-snapshot", type=Path)
+    parser.add_argument("--baseline-snapshot", type=Path)
+    parser.add_argument("--previous-proposals", type=Path)
     args = parser.parse_args()
 
     if args.self_test:
         self_test()
+        return
+    if args.capture_evidence or args.capture_evidence_only:
+        if not args.evidence_output:
+            parser.error("--evidence-output is required for opt-in capture")
+        if not 1 <= args.max_evidence_urls <= 20:
+            parser.error("--max-evidence-urls must be 1..20")
+    if args.auto_propose_output:
+        if not (args.capture_evidence or args.capture_evidence_only):
+            parser.error("--auto-propose-output requires opt-in evidence capture")
+        if not args.revision_snapshot or not args.baseline_snapshot:
+            parser.error("Offline proposal requires explicit ledger and baseline snapshots")
+    if args.capture_evidence_only:
+        if not args.evidence_queue:
+            parser.error("--evidence-queue required for isolated capture")
+        from casualty_evidence_capture import capture_snapshot
+        from review_casualty_candidates import load_queue
+        snapshot = load_queue(args.evidence_queue)
+        result = capture_snapshot(snapshot, args.evidence_output, limit=args.max_evidence_urls)
+        summary = {"mode": "isolated_capture_only", "evidence_capture": result}
+        if args.auto_propose_output:
+            from casualty_auto_review import run_offline
+            summary["auto_propose"] = run_offline(
+                args.evidence_queue, args.revision_snapshot, args.evidence_output,
+                args.baseline_snapshot, args.auto_propose_output, args.previous_proposals)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
 
     started = now_utc()
@@ -724,6 +763,21 @@ def main() -> None:
 
     atomic_json(STATE_FILE, state)
     atomic_json(QUEUE_FILE, queue)
+    # The normal workflow supplies no capture flag. This path is research opt-in
+    # and must never stop candidate search/state persistence on publisher errors.
+    if args.capture_evidence:
+        try:
+            from casualty_evidence_capture import capture_snapshot
+            report["evidence_capture"] = capture_snapshot(
+                queue, args.evidence_output, limit=args.max_evidence_urls)
+            if args.auto_propose_output:
+                from casualty_auto_review import run_offline
+                report["offline_auto_propose"] = run_offline(
+                    QUEUE_FILE, args.revision_snapshot, args.evidence_output,
+                    args.baseline_snapshot, args.auto_propose_output,
+                    args.previous_proposals)
+        except Exception as exc:
+            report["evidence_capture_error"] = type(exc).__name__
     atomic_json(LAST_RUN_FILE, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
