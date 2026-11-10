@@ -1,0 +1,25 @@
+name: C6 flags-OFF safety preflight (no production)
+
+on:
+  push:
+    branches: [research-c6-flags-off-preflight-2026-11-10]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-flags-off:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify both C2 opt-in flags remain OFF
+        shell: bash
+        env:
+          CAPTURE_ENABLED: ${{ vars.C2_HISTORY_CAPTURE_ENABLED == 'true' }}
+          EXPORT_ENABLED: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' }}
+        run: |
+          if [[ "$CAPTURE_ENABLED" != 'false' || "$EXPORT_ENABLED" != 'false' ]]; then
+            echo '::error::C2 capture or export is enabled: abort PR46 merge'
+            exit 1
+          fi
+          echo 'PASS: capture=OFF; export=OFF'
