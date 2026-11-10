@@ -403,12 +403,21 @@ def parse_args() -> argparse.Namespace:
         "promote",
         help="Persist explicitly confirmed dispositions to the canonical revision ledger",
     )
+    auto = sub.add_parser("auto-propose", help="Offline event triage; proposals only, no REVIEW/PROMOTE")
+    auto.add_argument("--evidence", type=Path, required=True)
+    auto.add_argument("--baseline-coverage", type=Path, required=True)
+    auto.add_argument("--output", type=Path, required=True)
+    auto.add_argument("--previous-proposals", type=Path)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    if args.command == "review":
+    if args.command == "auto-propose":
+        from casualty_auto_review import run_offline
+        result = run_offline(args.queue, args.revisions, args.evidence,
+                             args.baseline_coverage, args.output, args.previous_proposals)
+    elif args.command == "review":
         result = review_candidate(
             args.queue,
             candidate_id=args.candidate_id,
