@@ -181,8 +181,24 @@ def select_excerpts(html_bytes: bytes):
     for node in soup.find_all(["script", "style", "nav", "footer", "aside", "form",
                                "noscript", "iframe", "svg", "button", "figure"]):
         node.decompose()
-    roots = soup.select('[itemprop="articleBody"]') or soup.select("article") or soup.select("main")
-    root = max(roots, key=lambda n: len(_text(n))) if roots else soup
+    # Large "article" elements can be unrelated teaser cards. Prefer the
+    # publication body with actual death/attack paragraphs, not the longest card.
+    selectors = ('[itemprop="articleBody"]', '.post__content', '.entry-content',
+                 '.article__text', '.article-content', '.article-body',
+                 '.news-text', 'article', 'main')
+    candidates = []
+    for rank, selector in enumerate(selectors):
+        for node in soup.select(selector):
+            body = " ".join(_text(x) for x in node.find_all("p")[:40])
+            if len(body) < 25:
+                continue
+            score = (int(bool(RE["fatality"].search(body)) and
+                         bool(RE["attack"].search(body))),
+                     int(bool(RE["fatality"].search(body))),
+                     int(bool(RE["attribution"].search(body))),
+                     -rank, min(len(body), 4000))
+            candidates.append((score, node))
+    root = max(candidates, key=lambda value: value[0])[1] if candidates else soup
     raw = []
     headline = soup.find("h1")
     if headline:
@@ -196,6 +212,10 @@ def select_excerpts(html_bytes: bytes):
         blocks.append(value)
     if not blocks:
         raise CaptureError("HTML_NO_ARTICLE_PARAGRAPHS")
+    # A casualty headline alongside unrelated teaser text is not article proof.
+    body_blocks = [v for v in blocks if not headline or v != _text(headline)]
+    if not any(RE["fatality"].search(v) for v in body_blocks):
+        raise CaptureError("INSUFFICIENT_ARTICLE_BODY_FACTS")
     tags = [sorted(k for k, pattern in RE.items() if pattern.search(text.casefold()))
             for text in blocks]
     vital = {"fatality", "negation_update", "military_context"}
@@ -213,6 +233,13 @@ def select_excerpts(html_bytes: bytes):
     chosen, total_len = set(), 0
     for i in ordered:
         if not tags[i] and i != 0:
+            continue
+        # Air-raid warning times are not necessarily attack times. They are
+        # extraneous to fatality evidence and can mislead time-slot extraction.
+        low = blocks[i].casefold()
+        if (re.search(r"повітрян\w* (?:тривог|сил)", low) and
+                re.search(r"тривал|попередил", low) and
+                not (vital.intersection(tags[i]))):
             continue
         size = len(blocks[i])
         if size > MAX_BLOCK_CHARS:
