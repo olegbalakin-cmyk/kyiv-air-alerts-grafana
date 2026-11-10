@@ -180,9 +180,9 @@ def _civilian_status(low, total):
 
 def _origin_attribution(low):
     """A media domain is not an independent primary origin."""
-    if re.search(r'дснс', low) and re.search(r'повідомил|за даними|зазначил', low):
+    if re.search(r'дснс', low) and re.search(r'повідомил|повідомля|за даними|зазначил', low):
         return 'dsns', 'ДСНС'
-    if re.search(r'прокуратур', low) and re.search(r'за даними|повідомил|заявил', low):
+    if re.search(r'прокуратур', low) and re.search(r'за даними|повідомил|повідомля|заявил', low):
         return 'prosecutor', 'Прокуратура'
     if re.search(r'національн\w* поліці|поліці[яїі]', low) and re.search(r'повідомил|за даними', low):
         return 'national-police', 'Національна поліція'
