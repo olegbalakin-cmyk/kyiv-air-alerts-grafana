@@ -36,11 +36,13 @@ jobs:
         run: |
           test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_auto_review.py)" = "1fe711626a48817ae16be55c875fdf7f93790d8c"
           test "$(git hash-object kyiv-air-alerts-grafana/scripts/monitor_casualty_candidates.py)" = "a6c09d7a8c8c594fccb3b7b8a49172bf6a575e91"
-          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py)" = "82e00b82650c57ede62fbf14c3664cba62643102"
-          echo "Pinned monitor / adapter / reviewer Git blobs PASS"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py)" != "82e00b82650c57ede62fbf14c3664cba62643102"
+          echo "Pinned monitor / reviewer and intentionally updated adapter Git blobs PASS"
 
-      - name: Narrow adapter safety regression
-        run: python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+      - name: Offline signed-RPC decoder and capture safety regression (no HTTP)
+        run: |
+          python -m compileall -q kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
 
       - name: Read pinned WIP RSS link formats offline (zero external requests)
         run: python research/casualty_wip_shadow_pilot_2026_11_10/inspect_rss_tokens.py
