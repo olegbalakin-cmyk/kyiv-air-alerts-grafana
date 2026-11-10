@@ -166,6 +166,22 @@ class CaptureTests(unittest.TestCase):
         self.assertIn("загинули двоє", selected.casefold())
         self.assertTrue(any("negation_update" in f["reason"] for f in fragments))
 
+    def test_warning_time_is_not_selected_as_attack_time(self):
+        body = html_doc(
+            "Вранці 9 листопада РФ атакувала Одесу реактивним безпілотником.",
+            "За даними прокуратури, унаслідок атаки загинули троє людей.",
+            "Повітряна тривога тривала від 09:22 до 09:34. О 09:23 Повітряні Сили попередили про дрон.")
+        selected, _ = select_excerpts(body)
+        self.assertNotIn("09:23", selected)
+        self.assertIn("загинули троє", selected)
+
+    def test_unrelated_teaser_is_not_accepted_as_fatality_body(self):
+        body = html_doc("Російський паливний ринок знову має проблеми після відновлення постачань.")
+        body = body.replace(b"<h1>Новини про атаку на місто</h1>",
+                            "<h1>Удар по Дніпру: двоє загиблих</h1>".encode("utf-8"))
+        with self.assertRaisesRegex(CaptureError, "INSUFFICIENT_ARTICLE_BODY_FACTS"):
+            select_excerpts(body)
+
     def test_conflicting_totals_review_not_auto_ready(self):
         one = candidate("dn1", DN)
         two = candidate("dn2", AR)
