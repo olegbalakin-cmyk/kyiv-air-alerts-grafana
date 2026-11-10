@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-AUTOPROPOSE-OFFLINE-01 — draft #52, offline 0 new corrections (2026-11-10)
+
+- [`05ce47b1`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/05ce47b1a92374af6c44c662f2d31f041a8f8afc): 1,654 candidates, 1,505 potential groups, 1 already accounted (+0), 1,504 need review, 0 new revisions. Saved local 58/58 tests PASS; no independent functional CI. Next: real evidence DN-1103/OD-1109; PR #52 draft, no production/ledger/queue writes.
+
 ### C6-CAPTURE-EXPORT-OPTINS-ON-01 — owner-approved opt-ins enabled; first capture pending (2026-11-10)
 
 - After [updater 42774323341](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774323341) PASS (canonical writer/23-city QA/Git publication; export SKIPPED), owner separately approved two C2 opt-ins. Isolated read-only [Actions 42792678131](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42792678131) SUCCESS at `c12b2eb7`: both repository variables checked as `true`. First regular collector bootstrap/overlap **PENDING**; no manual updater, Neon readback proof, source switching or DST activation. `publication_allowed=false; GLOBAL_CUTOVER=NO`.
