@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-10. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest C6 accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** (bundle BLOCKED; no cutover).
-Latest casualty accepted: **CASUALTY-EVIDENCE-CAPTURE-01** (research; publish OFF).
+Latest casualty accepted: **CASUALTY-WIP-GNEWS-BLOCKED-01** (research; publish OFF).
 
 ## Working instructions
 
@@ -23,25 +23,21 @@ Latest casualty accepted: **CASUALTY-EVIDENCE-CAPTURE-01** (research; publish OF
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
 - **Operational WIP / historical reference / backfill:** unchanged and separate.
-- **Casualty:** PR #57 `13e1254f`, [run #42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462) 81/81 PASS; 4 HTTP, 3 usable, Odesa +3 shadow/replay +0; Dnipro held. WIP shadow pilot requires approval.
+- **Casualty:** [WIP #42893729621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42893729621) blocked by Google News RSS wrappers: 20/20 unresolved, 0 evidence. Next: offline URL fix, then owner-approved HTTP retest.
 
 ## Concrete next tasks
 
 1. Inspect next **scheduled** C2 run (no manual dispatch): check 23-city checkpoint overlap, writer/QA/Git JSON, and sanitized exporter `reason=... error_type=...` if bundle still BLOCKED. A workflow SUCCESS is not bundle PASS.
 2. Diagnose and fix only a verified failing guard via reviewable PR and narrow tests; preserve fail-closed, raw response isolation and missing-continuity BLOCKED.
 3. Exact-SHA PR #48 read-only same-run proof (36h) and DST raw baseline require separate approval. Rollback flags OFF; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`; other tracks separate.
-4. Casualty: owner approval before a bounded WIP-only shadow trial; auto-publish OFF.
+4. Casualty: fix Google News RSS URL resolution offline; separate approval before more HTTP. Publish OFF.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-### CASUALTY-EVIDENCE-CAPTURE-01 (2026-11-10)
+### CASUALTY-WIP-GNEWS-BLOCKED-01 (2026-11-10)
 
-- [CI #42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462), PR #57 `13e1254f`: 81/81 executed PASS, 4 HTTP pages/5 requests, 3 useful, Odesa +3 offline, Dnipro held, replay +0. Artifact `13789524180`, 10/10 internal hashes PASS. No WIP queue, production or merge; opt-in OFF.
-
-### CASUALTY-OFFLINE-PROOF-01 (2026-11-10)
-
-- [CI #42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878): reviewer `719c93c6`, 70/70 PASS; excerpts +2 Dnipro/+3 Odesa, replay +0; full WIP queue +0. PR #52 draft; no publication.
+- [WIP CI #42893729621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42893729621): 1,656 queued, 20 RSS URLs/13 cities, 40 HTTP, 0 resolved pages or proposals; replay +0, input hashes unchanged. PR #58 unmerged. Earlier direct-publisher proof [#42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462) 81/81 PASS, excerpt proof [#42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878) 70/70 PASS. Next: offline URL fix; fresh HTTP requires approval. No production/publish.
 
 ## C6-EXPORT-DIAGNOSTIC-STAGED-01 — blocked export diagnostics merged (2026-11-10)
 
