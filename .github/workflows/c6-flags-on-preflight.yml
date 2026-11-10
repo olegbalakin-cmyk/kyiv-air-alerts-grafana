@@ -1,0 +1,25 @@
+name: C6 approved flags ON preflight (no production)
+
+on:
+  push:
+    branches: [research-c6-flags-on-preflight-2026-11-10]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-approved-flags:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check both approved opt-in flags without disclosing variable values
+        shell: bash
+        env:
+          CAPTURE_ENABLED: ${{ vars.C2_HISTORY_CAPTURE_ENABLED == 'true' }}
+          EXPORT_ENABLED: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' }}
+        run: |
+          if [[ "$CAPTURE_ENABLED" != 'true' || "$EXPORT_ENABLED" != 'true' ]]; then
+            echo '::error::One or both approved C2 opt-ins are not set to true'
+            exit 1
+          fi
+          echo 'PASS: capture=true, export=true'
