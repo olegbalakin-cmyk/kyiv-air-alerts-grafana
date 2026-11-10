@@ -1,0 +1,116 @@
+name: Casualty exact-SHA offline proof 2026-11-10
+
+on:
+  push:
+    branches: [research-casualty-offline-proof-2026-11-10]
+    paths:
+      - ".github/workflows/casualty-offline-proof.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-replay:
+    name: Offline tests and genuine evidence replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact original PR HEAD (not this workflow commit)
+        uses: actions/checkout@v4
+        with:
+          ref: 719c93c6239999bc430abc95bc8694205c103bbc
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact SHA and fetch immutable pinned Git inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "719c93c6239999bc430abc95bc8694205c103bbc"
+          for sha in 388c7d48ced2c593e0e5cad016f6654f65afc9d6 fb7ba0b8997cb14dc3f7fb77f4101a611d3a955a 1157c81ba5a5395636d3b4719d7bdf47ea9a86f5; do
+            git fetch --no-tags --depth=1 origin "$sha"
+            git cat-file -e "$sha^{commit}"
+          done
+          proof="research/casualty_real_evidence_2026_11_10/results/ci"
+          mkdir -p "$proof"
+          git rev-parse HEAD > "$proof/implementation-head.txt"
+          git rev-parse HEAD^{tree} > "$proof/implementation-tree.txt"
+          cp research/casualty_automated_review_2026_11_10/results/summary.json "$proof/queue-before.json"
+          sha256sum research/casualty_real_evidence_2026_11_10/sources.json \
+            research/casualty_real_evidence_2026_11_10/pinned_revisions.csv \
+            research/casualty_automated_review_2026_11_10/baseline_coverage.json \
+            research/casualty_automated_review_2026_11_10/cached_evidence.json \
+            > "$proof/inputs-before.sha256"
+      - name: Execute three test suites, four-article proof and 1654-queue replay
+        shell: bash
+        run: |
+          set -u
+          proof="research/casualty_real_evidence_2026_11_10/results/ci"
+          failed=0
+          for f in test_casualty_auto_review.py test_casualty_real_evidence.py test_casualty_review_operator.py; do
+            python -m unittest discover -s kyiv-air-alerts-grafana/tests -p "$f" -v > "$proof/$f.log" 2>&1
+            rc=$?
+            printf '%s\n' "$rc" > "$proof/$f.rc"
+            echo "$f exit=$rc"
+            grep -E 'Ran [0-9]+ tests|^OK|^FAILED|^ERROR:|^FAIL:' "$proof/$f.log" | tail -n 25 || true
+            if [ "$rc" -ne 0 ]; then failed=1; fi
+          done
+          python research/casualty_real_evidence_2026_11_10/reproduce.py > "$proof/real-reproduce.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$proof/real-reproduce.rc"
+          echo "real-reproduce exit=$rc"
+          tail -n 35 "$proof/real-reproduce.log"
+          if [ "$rc" -ne 0 ]; then failed=1; fi
+          python research/casualty_automated_review_2026_11_10/reproduce.py > "$proof/whole-queue.log" 2>&1
+          rc=$?
+          printf '%s\n' "$rc" > "$proof/whole-queue.rc"
+          echo "whole-queue exit=$rc"
+          tail -n 45 "$proof/whole-queue.log"
+          if [ "$rc" -ne 0 ]; then failed=1; fi
+          exit "$failed"
+      - name: Check preserved source hashes and print bounded artifacts
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          proof="research/casualty_real_evidence_2026_11_10/results/ci"
+          echo "=== Exact implementation SHA ==="
+          cat "$proof/implementation-head.txt"
+          echo "=== Input hashes ==="
+          cat "$proof/inputs-before.sha256"
+          sha256sum -c "$proof/inputs-before.sha256" > "$proof/hash-check.log" 2>&1
+          code=$?
+          printf '%s\n' "$code" > "$proof/hash-check.rc"
+          cat "$proof/hash-check.log"
+          echo "=== Result files ==="
+          for f in research/casualty_real_evidence_2026_11_10/results/verdict.json \
+                   research/casualty_real_evidence_2026_11_10/results/first/proposals.csv \
+                   research/casualty_real_evidence_2026_11_10/results/replay/proposals.csv \
+                   research/casualty_automated_review_2026_11_10/results/summary.json \
+                   research/casualty_automated_review_2026_11_10/results/replay.json; do
+            if [ -f "$f" ]; then
+              echo "FILE=$f"
+              cat "$f" | head -c 10000
+              echo
+              sha256sum "$f"
+            else
+              echo "MISSING=$f"
+            fi
+          done
+          git status --short > "$proof/git-status.txt"
+          echo "=== Changed worktree files (research outputs expected only) ==="
+          cat "$proof/git-status.txt"
+          if [ "$code" -ne 0 ]; then exit 1; fi
+      - name: Save executable proof logs and output (no Git or production writes)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-exact-sha-offline-proof
+          path: |
+            research/casualty_real_evidence_2026_11_10/results/
+            research/casualty_automated_review_2026_11_10/results/
+          if-no-files-found: warn
+          retention-days: 30
