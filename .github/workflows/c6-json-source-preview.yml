@@ -1,0 +1,78 @@
+name: C6 static JSON source preview (manual, no deployment)
+
+on:
+  workflow_dispatch:
+    inputs:
+      json_source:
+        description: Frozen JSON source; Neon is opt-in, no source collection or DB access
+        type: choice
+        options: [git, neon]
+        default: git
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preview:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.actor == 'olegbalakin-cmyk' &&
+      github.ref == 'refs/heads/research-c6-minimal-precutover-2026-11-08'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: source
+          persist-credentials: false
+      - name: Check out the unchanged production frontend used by the proof
+        uses: actions/checkout@v4
+        with:
+          ref: f60214c61de08cef677e90f158e2824d90bc324b
+          path: site-input
+          persist-credentials: false
+      - name: Download existing same-run Git outputs (no new export)
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: '42297035421'
+          name: c2-shadow-inputs-42297035421-1
+          path: existing-c2
+      - name: Download accepted physical JSON outputs (no new proof)
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: '42487688608'
+          name: isolated-neon-shadow-42487688608-1
+          path: physical-proof
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check new routing, rejection and source rollback only
+        working-directory: source
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          C6_TEST_SITE: ../site-input/kyiv-air-alerts-grafana
+          C6_TEST_PROOF: ../physical-proof
+          C6_TEST_BUNDLE: ../existing-c2/c2-shadow-inputs.zip
+        run: python -m unittest discover -s tests -p test_c6_json_source_preview.py -v
+      - name: Stage marked static preview
+        working-directory: source
+        env:
+          C6_JSON_SOURCE: ${{ inputs.json_source }}
+        run: >-
+          python -m scripts.c6_json_source_preview
+          --site ../site-input/kyiv-air-alerts-grafana
+          --bundle ../existing-c2/c2-shadow-inputs.zip
+          --proof ../physical-proof
+          --output "${{ runner.temp }}/c6-static-preview"
+      - name: Preserve preview artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-static-preview-${{ inputs.json_source }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/c6-static-preview/
+          if-no-files-found: error
+          retention-days: 14
