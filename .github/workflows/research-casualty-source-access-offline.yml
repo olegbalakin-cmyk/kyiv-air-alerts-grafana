@@ -1,0 +1,39 @@
+name: Research casualty source access OFFLINE ONLY
+
+on:
+  push:
+    branches:
+      - research-casualty-source-access-policy-2026-11-10
+    paths:
+      - .github/workflows/research-casualty-source-access-offline.yml
+
+permissions:
+  contents: read
+
+jobs:
+  offline-source-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime dependencies (no publisher/network fixtures)
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Check reviewer/operator identity
+        run: |
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_auto_review.py)" = "1fe711626a48817ae16be55c875fdf7f93790d8c"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/monitor_casualty_candidates.py)" = "a6c09d7a8c8c594fccb3b7b8a49172bf6a575e91"
+          test "$(git hash-object kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json)" = "73928294881fba2c70eabc28fe85e4146d465a95"
+      - name: Execute isolated no-HTTP unit and policy regression
+        run: |
+          python -m compileall -q kyiv-air-alerts-grafana/scripts/casualty_transport_policy.py kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_source_access_policy.py' -v
+      - name: Verify no protected operational data modified
+        run: |
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/casualties kyiv-air-alerts-grafana/scripts/casualty_auto_review.py kyiv-air-alerts-grafana/scripts/monitor_casualty_candidates.py)"
+          echo "Offline policy and protected inputs PASS"
