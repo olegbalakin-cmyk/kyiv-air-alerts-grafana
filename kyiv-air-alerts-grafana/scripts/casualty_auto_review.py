@@ -81,69 +81,241 @@ def text_hints(candidate):
     return {'possible_attack_dates': sorted(dates), 'text_flags': reasons}
 
 
-def extract_cached_reports(queue, articles):
-    """Narrow text rules for retained full-text articles, never RSS snippets.
+COUNT_WORDS = {'один': 1, 'одна': 1, 'дві': 2, 'двоє': 2,
+               'три': 3, 'троє': 3, 'чотири': 4, 'четверо': 4}
+COUNT_TOKEN = r'(?:\d+|один|одна|дві|двоє|три|троє|чотири|четверо)'
+COUNT_NOUN = r'(?:люд\w*|цивільн\w*|мирн\w*|військовослужбовц\w*)'
+CITY_FORMS = {
+    'dnipro': r'\bдніпр(?:о|і|а|у|ом)\b',
+    'odesa': r'\bодес(?:а|і|у|ою)\b',
+}
 
-    Only a single explicitly dated, timed, addressed city incident qualifies.
-    Missing or mixed facts remain UNKNOWN. The underlying attribution must be
-    stated in the article; publisher/domain counts are never independence proof.
-    """
-    by_id = {c['candidate_id']: c for c in queue}
-    reports = []
-    for article in articles:
-        c = by_id[article['candidate_id']]
-        text = article.get('text', '')
-        low = text.casefold()
-        days = set(re.findall(r'(?:атака сталася|удар стався)\s+(20\d{2}-\d{2}-\d{2})', low))
-        times = set(re.findall(r'\bо (\d{2}:\d{2})\b', low))
-        places = set(re.findall(r'(?:за адресою|на вулиці)\s+([^.;\n]{3,80})', low))
-        if len(days) != 1 or len(times) != 1 or len(places) != 1:
-            continue  # No incident identity, therefore no cross-article merge.
-        day, time, place = next(iter(days)), next(iter(times)), next(iter(places))
+
+def _number(token):
+    return int(token) if token.isdigit() else COUNT_WORDS.get(token)
+
+
+def _fatal_total(low):
+    """Only a definite event total, not injuries, guesses, or a second strike."""
+    nums = []
+    patterns = (rf'\bзагинул[аои]?\s+({COUNT_TOKEN})\s+{COUNT_NOUN}',
+                rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b')
+    for pattern in patterns:
+        nums.extend(_number(m[1]) for m in re.finditer(pattern, low))
+    if re.search(r'не загинул|без загиблих|не підтвердж|непідтвердж|спростув|'
+                 r'ймовірн|попередн\w* даними|можлив\w* загиб', low):
+        return None
+    nums = {n for n in nums if n is not None}
+    return next(iter(nums)) if len(nums) == 1 else None
+
+
+def _date_signals(low, published_at):
+    """Distinguish attack date from news date; never treat a mourning date as attack."""
+    year = str(published_at or '')[:4]
+    years = [int(year)] if re.fullmatch(r'20\d{2}', year) else []
+    mentioned = []
+    attack = []
+    pattern = r'\b(\d{1,2})\s+(' + '|'.join(MONTHS) + r')\b'
+    for match in re.finditer(pattern, low):
+        if not years:
+            continue
         try:
-            date.fromisoformat(day)
+            day = date(years[0], MONTHS[match[2]], int(match[1])).isoformat()
         except ValueError:
             continue
-        if not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', time):
+        mentioned.append(day)
+        context = low[max(0, match.start()-36):match.end()+100]
+        if re.search(r'атакув|(?:удар|атака)\s+ставс|(?:завдал|здійснил).{0,25}удар', context):
+            attack.append(day)
+    for match in re.finditer(r'\b20\d{2}-\d{2}-\d{2}\b', low):
+        try:
+            day = date.fromisoformat(match[0]).isoformat()
+        except ValueError:
             continue
-        # Deliberately narrow language. No province-to-city or absence-of-military
-        # inference, no title-based attack date and no injured/dead conflation.
-        city_phrase = 'у межах міста ' + c.get('city', '').casefold()
-        boundary = True if c.get('city') and city_phrase in low else None
-        if 'передміст' in low or 'за межами міста' in low:
-            boundary = None
-        weapon = 'missile' if 'ракетний удар' in low else 'drone' if 'дронова атака' in low else 'unknown'
-        aerial = True if ('російськ' in low and weapon != 'unknown') else None
-        matches = re.findall(r'загинул[аои]?\s+(\d+)\s+цивільн\w*', low)
-        count = int(matches[0]) if len(matches) == 1 else None
-        civilian = True if count is not None else None
-        if re.search(r'військовослужбов|серед загиблих.{0,30}військов|повторн|різних атак', low):
-            civilian = None
-        if re.search(r'не загину|не підтвердж|непідтвердж|спростув|ймовір|без загиблих|навчаль|умовн', low):
-            count = None
-            civilian = None
-        origins = []
-        for term, origin in [('дснс', 'dsns'), ('національна поліція', 'national-police'),
-                             ('прокуратур', 'prosecutor'), ('міська військова адміністрація', 'city-mva')]:
-            if term in low:
-                origins.append(origin)
-        # Unknown or multiple underlying sources cannot manufacture independence.
-        origin = origins[0] if len(origins) == 1 else 'unknown-origin'
-        facts = {'city_boundary': boundary, 'russian_air_attack': aerial,
-                 'civilian': civilian, 'attack_date': True, 'incident_identity': True,
-                 'death_count': count is not None}
-        supports = [k for k,v in facts.items() if v is True] if len(origins) == 1 else []
-        reports.append({'candidate_ids': [c['candidate_id']],
-                        'candidate_fingerprints': {c['candidate_id']: fingerprint(c)},
-                        'incident': {'city_key': c['city_key'], 'attack_date': day,
-                                     'place': place, 'attack_slot': time, 'attack_type': weapon},
-                        'facts': facts, 'count': {'kind': 'total' if count is not None else 'unknown', 'value': count},
-                        'observed_at': article['observed_at'],
-                        'sources': [{'url': article['url'], 'origin_id': origin,
-                                     'basis': 'retained-text-sha256=' + hashlib.sha256(text.encode()).hexdigest(),
-                                     'supports': supports}],
-                        'provenance': {'kind': 'explicit_cached_text_rules_v1',
-                                       'article_sha256': hashlib.sha256(text.encode()).hexdigest()}})
+        mentioned.append(day)
+        context = low[max(0, match.start()-45):match.end()+65]
+        if re.search(r'атакув|(?:удар|атака)\s+ставс', context):
+            attack.append(day)
+    return (next(iter(set(attack))) if len(set(attack)) == 1 else None,
+            next(iter(set(mentioned))) if len(set(mentioned)) == 1 else None)
+
+
+def _attack_slot(low):
+    time_matches = []
+    for m in re.finditer(r'\b(?:о|близько)\s+([01]\d|2[0-3]):([0-5]\d)\b', low):
+        nearby = low[max(0, m.start()-35):m.end()+45]
+        # A later repeat is NOT the time of casualties reported earlier.
+        if not re.search(r'повторн|знову|ще раз', nearby):
+            time_matches.append(m[1] + ':' + m[2])
+    if len(set(time_matches)) == 1:
+        return time_matches[0]
+    if len(set(time_matches)) > 1:
+        return None
+    for slot, pattern in (('morning', r'вранці|ранков'),
+                          ('night', r'вночі|нічн'),
+                          ('evening', r'ввечері|увечері|вечірн'),
+                          ('afternoon', r'вдень|денн\w* удар')):
+        if re.search(pattern, low):
+            return slot
+    return None
+
+
+def _civilian_status(low, total):
+    military_victims = bool(re.search(
+        r'(?:загинул\w*|серед загиблих).{0,45}(?:військовослужбовц|військових|бійц|солдат)'
+        r'|(?:військовослужбовц|боєць|солдат).{0,45}загинул'
+        r'|змішан\w* втрат|(?:військов\w*|армійськ\w*)\s+(?:об.єкт|частин|технік)'
+        r'|склад[іу]?\s+(?:боєприпас|військов)', low))
+    if military_victims:
+        return 'civilian_ambiguous'
+    if total is None:
+        return None
+    if re.search(r'(?:загинул\w*.{0,45}(?:цивільн|мирн\w* жител)'
+                 r'|(?:цивільн\w*|мирн\w* жител).{0,45}загинул)', low):
+        return 'civilian_explicit'
+    # Owner-approved presumption ONLY for a lethal Russian air attack;
+    # final gate still checks city, air nature, source and unique event identity.
+    return 'civilian_presumed'
+
+
+def _origin_attribution(low):
+    """A media domain is not an independent primary origin."""
+    if re.search(r'дснс', low) and re.search(r'повідомил|за даними|зазначил', low):
+        return 'dsns', 'ДСНС'
+    if re.search(r'прокуратур', low) and re.search(r'за даними|повідомил|заявил', low):
+        return 'prosecutor', 'Прокуратура'
+    if re.search(r'національн\w* поліці|поліці[яїі]', low) and re.search(r'повідомил|за даними', low):
+        return 'national-police', 'Національна поліція'
+    if re.search(r'начальник\w* мва|міськ\w* військов\w* адміністраці', low) and re.search(r'написав|повідомил|за даними', low):
+        return 'city-mva', 'Міська військова адміністрація'
+    return 'unattributed', None
+
+
+def extract_cached_reports(queue, articles):
+    """Extract evidence from retained article text, not synthetic fact labels.
+
+    A unique city/date plus attack window or location anchors an incident.
+    An undated corroboration can join only ONE dated anchor with compatible
+    city, same-day reporting, time/place, and casualty total. The join is
+    preserved as an inference, NOT presented as a date assertion in its source.
+    """
+    by_id = {c['candidate_id']: c for c in queue}
+    parsed = []
+    for article in articles:
+        c = by_id[article['candidate_id']]
+        low = str(article.get('text') or '').casefold()
+        if not low.strip():
+            continue
+        city_pattern = CITY_FORMS.get(c['city_key'], rf'\b{re.escape(c.get("city", "").casefold())}\b')
+        city_present = bool(re.search(city_pattern, low))
+        outside = bool(re.search(r'передміст|за межами міста|на околиці (?:області|громади)|'
+                                 r'у (?:селі|селищі)|в (?:селі|селищі)', low))
+        boundary = True if city_present and not outside else None
+        total = _fatal_total(low)
+        day, mentioned_day = _date_signals(low, c.get('published_at'))
+        slot = _attack_slot(low)
+        weapon = ('missile' if re.search(r'ракет', low) else
+                  'drone' if re.search(r'безпілотник|безпілотн|дрон|бпла|бпіл', low)
+                  else 'unknown')
+        russian = bool(re.search(r'\bрф\b|російськ|ворог', low))
+        air = True if russian and weapon != 'unknown' else None
+        place = None
+        match = re.search(r'(?:за адресою|на вулиці)\s+([^.;\n]{3,65})', low)
+        if match:
+            place = ' '.join(match[1].split())
+        elif re.search(r'житлов\w* будин', low):
+            place = 'residential-buildings'
+        elif re.search(r'склад\w* (?:харч|продукт)', low):
+            place = 'food-warehouse'
+        elif re.search(r'інфраструктурн\w* об.єкт', low):
+            place = 'infrastructure-object'
+        origin_id, origin_name = _origin_attribution(low)
+        parsed.append({'c': c, 'article': article, 'low': low,
+                       'day': day, 'mentioned_day': mentioned_day,
+                       'slot': slot, 'weapon': weapon, 'place': place,
+                       'boundary': boundary, 'russian': russian, 'air': air,
+                       'total': total, 'status': _civilian_status(low, total),
+                       'origin_id': origin_id, 'origin_name': origin_name})
+    anchors = [p for p in parsed if p['day'] and (p['slot'] or p['place'])
+               and p['weapon'] != 'unknown' and p['boundary'] is True
+               and p['total'] is not None and p['air'] is True]
+    reports = []
+    for p in parsed:
+        if p['total'] is None:
+            continue
+        matches = []
+        for a in anchors:
+            if p['c']['city_key'] != a['c']['city_key'] or p['total'] != a['total']:
+                continue
+            if p['day'] and p['day'] != a['day']:
+                continue
+            if not p['day'] and (p['mentioned_day'] != a['day']
+                                 or str(p['c'].get('published_at', ''))[:10] != a['day']):
+                continue
+            if p['slot'] and a['slot'] and p['slot'] != a['slot']:
+                continue
+            if p['weapon'] != 'unknown' and p['weapon'] != a['weapon']:
+                continue
+            if p['place'] and a['place'] and p['place'] != a['place']:
+                continue
+            matches.append(a)
+        identities = {}
+        for a in matches:
+            key = (a['day'], a['slot'] or 'unknown', a['place'] or 'unlocated', a['weapon'])
+            identities[key] = a
+        # Multiple compatible concrete events are ambiguous, not permission to merge.
+        if len(identities) != 1:
+            continue
+        a = next(iter(identities.values()))
+        # Do not attach a second, ambiguous city/day article by total alone.
+        if p is not a and not (p['slot'] or p['place']):
+            continue
+        if p['boundary'] is not True or not p['russian']:
+            continue
+        state = p['status']
+        aerial = p['air'] is True or (p['weapon'] == 'unknown' and a['air'] is True
+                                     and p['slot'] == a['slot'])
+        if not aerial:
+            continue
+        incident = {'city_key': p['c']['city_key'], 'attack_date': a['day'],
+                    'place': a['place'] or 'unlocated',
+                    'attack_slot': a['slot'] or 'unknown',
+                    'attack_type': a['weapon']}
+        facts = {'city_boundary': p['boundary'], 'russian_air_attack': True,
+                 'civilian': True if state in ('civilian_explicit', 'civilian_presumed')
+                 else None,
+                 'attack_date': True, 'incident_identity': True, 'death_count': True}
+        sha = hashlib.sha256(str(p['article']['text']).encode()).hexdigest()
+        supports = list(facts)
+        source = {'url': p['article']['url'], 'origin_id': p['origin_id'],
+                  'origin_name': p['origin_name'],
+                  'basis': 'retained-text-sha256=' + sha,
+                  'supports': [k for k, v in facts.items() if v is True]}
+        if p['origin_name']:
+            source['contract'] = 'attributed-competent-official-v1'
+        reports.append({
+            'candidate_ids': [p['c']['candidate_id']],
+            'candidate_fingerprints': {p['c']['candidate_id']: fingerprint(p['c'])},
+            'incident': incident, 'facts': facts, 'civilian_status': state,
+            'civilian_status_basis': ('explicit article wording' if state == 'civilian_explicit'
+                                      else 'no identified military-victim/object marker in retained excerpt'
+                                      if state == 'civilian_presumed' else 'military/uncertain status marker'),
+            'count': {'kind': 'total', 'value': p['total']},
+            'observed_at': p['article']['observed_at'],
+            'sources': [source],
+            'provenance': {
+                'kind': 'parsed_retained_article_v2', 'article_sha256': sha,
+                'date_basis': 'explicit_attack_date' if p['day'] else
+                              'unique_same_day_report_corroborated_by_dated_article',
+                'attack_date_in_article': p['day'],
+                'matched_dated_article_sha256': (None if p is a else
+                    hashlib.sha256(str(a['article']['text']).encode()).hexdigest()),
+                'attack_slot_in_article': p['slot'],
+                'attack_type_in_article': p['weapon'],
+                'origin_attribution': p['origin_name'],
+                'later_attack_mentioned': bool(re.search(r'повторно.{0,35}атакув|'
+                                                          r'повторно\s+атакував', p['low']))}
+        })
     return reports
 
 
@@ -172,6 +344,11 @@ def validate_reports(queue, reports):
                         or canonical_url(d['source_url']) not in
                            {canonical_url(s['url']) for s in report.get('sources', [])}):
                     raise ValueError('Claimed existing human confirmation does not match queue')
+        if report.get('civilian_status') not in (None, 'civilian_explicit',
+                                                 'civilian_presumed', 'civilian_ambiguous'):
+            raise ValueError('Unknown civilian status evidence state')
+        if report.get('civilian_status') == 'civilian_ambiguous' and report.get('facts', {}).get('civilian') is True:
+            raise ValueError('Ambiguous civilian evidence cannot claim clear status')
         date.fromisoformat(report['observed_at'])
         count = report.get('count', {})
         if count.get('kind') not in {'total', 'increment', 'unknown'}:
@@ -231,8 +408,7 @@ def source_support(reports, fact):
             if fact in s.get('supports', []):
                 origins.add(s['origin_id'])
                 links.add(canonical_url(s['url']))
-    # Narrow authoritative contract: direct police publication, explicit facts
-    # retained in a pre-existing human-confirmed disposition. Not an RSS label.
+    # A previously human-confirmed police disposition remains no-op only.
     for r in reports:
         if r.get('facts', {}).get(fact) is True:
             for s in r.get('sources', []):
@@ -241,8 +417,24 @@ def source_support(reports, fact):
                         and r.get('provenance', {}).get('kind') == 'existing_confirmed_disposition'
                         and fact in s.get('supports', [])):
                     return True
-    # Different domains alone do not mean independent reports. Both an origin
-    # family AND distinct underlying documents are needed.
+    # Owner-approved SHADOW rule: one explicitly attributed competent official
+    # fatality account suffices for count credibility. Other event details may
+    # come from retained, traceable corroboration of the SAME uniquely anchored
+    # incident; they need not each have two independent official confirmations.
+    official_fatality = any(
+        r.get('provenance', {}).get('kind') == 'parsed_retained_article_v2'
+        and r.get('facts', {}).get('death_count') is True
+        and any(s.get('contract') == 'attributed-competent-official-v1'
+                and s.get('origin_id') in {'dsns', 'prosecutor', 'national-police', 'city-mva'}
+                and 'death_count' in s.get('supports', [])
+                for s in r.get('sources', []))
+        for r in reports)
+    if official_fatality and any(
+            r.get('facts', {}).get(fact) is True
+            and any(fact in s.get('supports', []) for s in r.get('sources', []))
+            for r in reports):
+        return True
+    # Independent media requires distinct underlying origins AND documents.
     return len(origins) >= 2 and len(links) >= 2
 
 
@@ -313,17 +505,26 @@ def prepare(queue, revisions, reports, baseline, previous_proposals=()):
         if not rs:
             reasons.append('NO_CACHED_FACT_EVIDENCE_TITLE_IS_NOT_PROOF')
         else:
+            states = {r.get('civilian_status') for r in rs if r.get('civilian_status')}
+            if 'civilian_ambiguous' in states:
+                reasons.append('CIVILIAN_AMBIGUOUS')
+            event['civilian_status'] = ('civilian_ambiguous' if 'civilian_ambiguous' in states
+                                        else 'civilian_explicit' if 'civilian_explicit' in states
+                                        else 'civilian_presumed' if 'civilian_presumed' in states
+                                        else 'legacy_not_recorded')
             for fact in FACTS:
                 vals = [r.get('facts', {}).get(fact) for r in rs]
                 if any(v is False for v in vals):
                     reasons.append(fact.upper() + '_CONFLICT_OR_OUT_OF_SCOPE')
-                elif not all(v is True for v in vals):
+                elif not any(v is True for v in vals):
                     reasons.append(fact.upper() + '_UNKNOWN')
                 elif not source_support(rs, fact):
-                    reasons.append(fact.upper() + '_INSUFFICIENT_INDEPENDENT_ORIGINS')
+                    reasons.append(fact.upper() + '_INSUFFICIENT_EVIDENCE')
             for fact in ('attack_date', 'incident_identity', 'death_count'):
-                if not source_support(rs, fact):
-                    reasons.append(fact.upper() + '_INSUFFICIENT_INDEPENDENT_ORIGINS')
+                if not any(r.get('facts', {}).get(fact) is True for r in rs):
+                    reasons.append(fact.upper() + '_UNKNOWN')
+                elif not source_support(rs, fact):
+                    reasons.append(fact.upper() + '_INSUFFICIENT_EVIDENCE')
         for m in event['messages']:
             reasons.extend(m['hints']['text_flags'])
             if m['status'] not in {'needs_review', 'confirmed'}:
@@ -368,9 +569,10 @@ def prepare(queue, revisions, reports, baseline, previous_proposals=()):
             continue
         eid, incident = event['event_id'], event['incident']
         rid = eid + ':total-' + str(event['confirmed_total_claim'])
-        source = sorted((s for r in rs for s in r['sources']), key=lambda s: s['url'])[0]
+        source = sorted((s for r in rs for s in r['sources']),
+                        key=lambda s: (s.get('contract') != 'attributed-competent-official-v1', s['url']))[0]
         validated = _validate_confirmation(rid, incident['attack_date'], delta,
-                                           source['origin_id'], source['url'])
+                                           (source.get('origin_name') or source['origin_id']), source['url'])
         row = {**validated, 'city_key': incident['city_key'],
                'observed_at': max(r['observed_at'] for r in rs), 'status': 'confirmed',
                'note': f"SHADOW PROPOSAL ONLY; event_id={eid}; total={event['confirmed_total_claim']}; already_accounted={event['already_accounted']}; reserved={event['reserved_in_previous_proposals']}",
