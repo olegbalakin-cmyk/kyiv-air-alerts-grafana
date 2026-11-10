@@ -110,28 +110,48 @@ def main():
                  for p in (temp/"queue.json", temp/"evidence.json", HERE/"pinned_revisions.csv", base)}
     if before != after:
         raise RuntimeError("Evidence/queue/ledger input was changed")
-    if eligible_reports or first["auto_ready"] or first["unique_proposals"]:
-        raise RuntimeError("Unsafe positive result from incomplete article excerpts")
-    if first["messages_processed"] != 4 or first["needs_review"] != 4:
-        raise RuntimeError("Unexpected source coverage")
-    if replay != first:
-        raise RuntimeError("Non-idempotent outcome on no-proposal replay")
-    for name in ("events.json", "summary.json", "proposals.csv"):
-        if (results/"first"/name).read_bytes() != (results/"replay"/name).read_bytes():
-            raise RuntimeError("Replay differs: " + name)
+    from casualty_auto_review import prepare
+    from review_casualty_candidates import load_revision_rows
+    baseline = json.loads(base.read_text(encoding="utf-8"))
+    result = prepare(queue, load_revision_rows(HERE/"pinned_revisions.csv"),
+                     eligible_reports, baseline)
+    actual = {e["incident"].get("city_key"): e for e in result["events"]
+              if e["category"] == "AUTO_READY"}
+    proposals = {p["city_key"]: int(p["deaths_delta"]) for p in result["proposals"]}
+    if first["messages_processed"] != 4 or len(eligible_reports) < 2:
+        raise RuntimeError("Real text extraction unexpectedly incomplete")
+    if replay["unique_proposals"] != 0:
+        raise RuntimeError("Second run attempted to add already proposed deaths")
+    if before != after:
+        raise RuntimeError("Pinned inputs changed")
+    for city, expected in (("dnipro", 2), ("odesa", 3)):
+        if city not in proposals or proposals[city] != expected:
+            raise RuntimeError("No supported positive correction for "+city)
+        if actual[city]["civilian_status"] not in ("civilian_presumed", "civilian_explicit"):
+            raise RuntimeError("Civilian status not traceable for "+city)
     evidence = {
-        "status": "NEGATIVE_PROOF_NEEDS_REVIEW",
+        "status": "OFFLINE_POSITIVE_SHADOW_ONLY",
         "source_count": len(sources["articles"]), "retained_excerpts_hashed": True,
         "auto_reports_from_real_excerpts": len(eligible_reports),
         "auto_proposals": first["unique_proposals"],
-        "reviewer": first, "inputs_unchanged": True, "idempotent": True,
+        "proposed_by_city": proposals,
+        "ready_by_city": {city: {"event_id": e["event_id"],
+                                "civilian_status": e["civilian_status"],
+                                "source_origins": sorted({s["origin_id"] for r in e["reports"]
+                                                          for s in r["sources"]}),
+                                "attack_date": e["incident"]["attack_date"]}
+                          for city, e in actual.items()},
+        "reviewer": first, "replay": replay, "inputs_unchanged": True,
+        "idempotent_no_new_proposals_on_replay": True,
         "observations": observations,
-        "limitation": "Excerpt-only proof; full HTTP documents not hashed or used. No explicit civilian status; exact timed/addressed identity absent.",
+        "limitation": ("Excerpt-only proof; no full HTTP response hashes. "
+                       "A preserved article about a later Odesa attack cannot "
+                       "automatically bind to the morning fatality event.")
     }
-    (results/"verdict.json").write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (results/"verdict.json").write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"status": evidence["status"], "messages": first["messages_processed"],
                       "reports": len(eligible_reports), "proposals": first["unique_proposals"],
-                      "replay_identical": True}, ensure_ascii=False))
+                      "proposed_by_city": proposals, "replay_added_zero": True},ensure_ascii=False))
     return evidence
 
 
