@@ -177,7 +177,7 @@ class CaptureTests(unittest.TestCase):
 
     def test_unrelated_teaser_is_not_accepted_as_fatality_body(self):
         body = html_doc("Російський паливний ринок знову має проблеми після відновлення постачань.")
-        body = body.replace(b"<h1>Новини про атаку на місто</h1>",
+        body = body.replace("<h1>Новини про атаку на місто</h1>".encode("utf-8"),
                             "<h1>Удар по Дніпру: двоє загиблих</h1>".encode("utf-8"))
         with self.assertRaisesRegex(CaptureError, "INSUFFICIENT_ARTICLE_BODY_FACTS"):
             select_excerpts(body)
