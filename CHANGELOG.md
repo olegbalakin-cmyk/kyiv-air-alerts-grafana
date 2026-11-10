@@ -3,10 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
-### CASUALTY-EVIDENCE-CAPTURE-01 — research HTTP proof; prior offline reviewer PASS (2026-11-10)
+### CASUALTY-WIP-GNEWS-BLOCKED-01 — real WIP RSS transport blocked (2026-11-10)
 
-- [HTTP Actions #42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462), PR #57 `13e1254f`: 81/81 executed tests PASS, 4 pages/5 HTTP, 3 usable packages; Odesa +3 shadow, repeat +0; Dnipro held. Artifact `13789524180`, 10/10 internal hashes PASS. No merge or operational writes; next requires owner approval for a bounded WIP shadow pilot, publication OFF.
-- Earlier **CASUALTY-OFFLINE-PROOF-01**: [Actions #42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878) exact reviewer `719c93c6`, 70/70 tests; four preserved excerpts produced Dnipro +2 and Odesa +3 shadow proposals, repeat +0; original 1,654 WIP queue still had 0 new proposals. Artifact `13785572875`, PR #52 draft.
+- [Actions #42893729621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42893729621), PR #58 `f92e6880`: WIP 1,656 queued (Git blob `73928294`), 20 recent RSS URLs across 13 cities, 40 HTTP, 0 resolved publisher pages/evidence, 0 proposals, replay +0. All 20 `GOOGLE_WRAPPER_UNRESOLVED_OR_AMBIGUOUS`; protected queue/state/ledger hashes unchanged; 13/13 adapter tests PASS. Artifact `13798413457`. Next: narrow offline wrapper resolver fix; further HTTP requires owner approval. Production and publication OFF.
+- Earlier **CASUALTY-EVIDENCE-CAPTURE-01**: [#42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462), PR #57 81/81 executed PASS, four direct publisher pages, three useful packages, Odesa +3 shadow/replay +0; Dnipro held. Artifact `13789524180`.
+- Earlier **CASUALTY-OFFLINE-PROOF-01**: [#42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878) reviewer `719c93c6` 70/70 PASS, four preserved excerpts Dnipro +2/Odesa +3 shadow/replay +0, full 1,654 queue +0. PR #52 draft; no live edits.
 
 ### C6-EXPORT-DIAGNOSTIC-STAGED-01 — C2 export reason staged, still BLOCKED (2026-11-10)
 
