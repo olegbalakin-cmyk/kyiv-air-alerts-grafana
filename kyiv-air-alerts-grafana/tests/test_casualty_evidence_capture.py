@@ -53,6 +53,13 @@ class Session:
             return Response(status=503)
         return value
 
+    def post(self, url, **kwargs):
+        self.called.append((url, kwargs))
+        value = self.responses.get(url)
+        if value is None:
+            return Response(status=503)
+        return value
+
 
 def candidate(cid, url, city="dnipro", title="Атака російських військ"):
     return {"candidate_id": cid, "city_key": city, "city": "Дніпро" if city == "dnipro" else "Одеса",
@@ -95,6 +102,96 @@ class CaptureTests(unittest.TestCase):
         doc = get_publisher_document(GOOGLE, session=s, counter=[0])
         self.assertEqual(doc["url"], target)
         self.assertEqual(len(s.called), 2)
+
+    def test_current_opaque_google_rss_signed_rpc_resolves_allowed_publisher(self):
+        opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 55 + "?oc=5"
+        token = opaque.split("?")[0].split("/")[-1]
+        google_html = ('<html><body><c-wiz><div data-n-a-id="' + token +
+                       '" data-n-a-sg="AV_R3e-signed123" data-n-a-ts="1783791812">'
+                       'Google News article redirect</div></c-wiz></body></html>').encode()
+        rpc = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+        rpc_body = b")]}'\n\n" + json.dumps([
+            ["wrb.fr", "Fbv4je", json.dumps(["garturlres", DN]), None, None, None],
+            ["di", 16]], ensure_ascii=True).encode()
+        s = Session({
+            opaque: Response(content=google_html),
+            rpc: Response(content=rpc_body),
+            DN: Response(content=html_doc(
+                "Вранці 3 листопада РФ атакувала Дніпро ракетами. Загинули двоє людей.")),
+        })
+        attempts = [0]
+        doc = get_publisher_document(opaque, session=s, counter=attempts)
+        self.assertEqual(doc["url"], DN)
+        self.assertEqual(attempts[0], 3)
+        self.assertEqual(len(s.called), 3)
+        self.assertEqual(s.called[1][0], rpc)
+        options = s.called[1][1]
+        self.assertFalse(options["allow_redirects"])
+        self.assertTrue(options["stream"])
+        self.assertIn("application/x-www-form-urlencoded", options["headers"]["Content-Type"])
+        outer = json.loads(options["data"]["f.req"])
+        self.assertEqual(outer[0][0][0], "Fbv4je")
+        inner = json.loads(outer[0][0][1])
+        self.assertEqual(inner[0], "garturlreq")
+        self.assertEqual(inner[2], token)
+        self.assertEqual(inner[3], 1783791812)
+        self.assertEqual(inner[4], "AV_R3e-signed123")
+
+    def test_current_opaque_google_rpc_rejects_unapproved_target(self):
+        opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 50
+        token = opaque.split("/")[-1]
+        html = (f'<html><div data-n-a-id="{token}" data-n-a-ts="1783791812" '
+                'data-n-a-sg="AV_R3e-signed123"></div></html>').encode()
+        rpc = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+        for target in ["http://suspilne.media/internal",
+                       "https://127.0.0.1/internal",
+                       "https://evil.example/story",
+                       "https://suspilne.media:8443/story"]:
+            with self.subTest(target=target):
+                response = b")]}'\n\n" + json.dumps([
+                    ["wrb.fr", "Fbv4je", json.dumps(["garturlres", target])]]).encode()
+                sess = Session({opaque: Response(content=html),
+                                rpc: Response(content=response)})
+                with self.assertRaisesRegex(CaptureError, "GOOGLE_RPC_TARGET_NOT_ALLOWED"):
+                    get_publisher_document(opaque, session=sess, counter=[0])
+                self.assertEqual(len(sess.called), 2)
+
+    def test_google_rpc_requires_signed_params_matching_article_id(self):
+        opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 50
+        samples = [
+            b'<html><body><div>Consent required</div></body></html>',
+            b'<html><div data-n-a-id="DIFFERENT" data-n-a-ts="1783791812" '
+            b'data-n-a-sg="AV_R3e-signed123"></div></html>',
+            b'<html><div data-n-a-ts="1783791812" data-n-a-sg="x">'
+            b'Really short signed data</div></html>',
+        ]
+        for html in samples:
+            with self.subTest(html=html[:50]):
+                sess = Session({opaque: Response(content=html)})
+                with self.assertRaises(CaptureError):
+                    get_publisher_document(opaque, session=sess, counter=[0])
+                self.assertEqual(len(sess.called), 1)
+
+    def test_google_rpc_empty_result_is_fail_closed(self):
+        opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 50
+        html = b'<html><div data-n-a-ts="1783791812" data-n-a-sg="AV_R3e-signed123"></div></html>'
+        rpc = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+        sess = Session({
+            opaque: Response(content=html),
+            rpc: Response(content=b")]}'\n\n" + json.dumps(
+                [["wrb.fr", "Fbv4je", None, None, None, [3]]]).encode())
+        })
+        with self.assertRaisesRegex(CaptureError, "GOOGLE_RPC_UNRESOLVED"):
+            get_publisher_document(opaque, session=sess, counter=[0])
+        self.assertEqual(len(sess.called), 2)
+
+    def test_google_rpc_obeys_shared_request_budget(self):
+        opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 50
+        html = b'<html><div data-n-a-ts="1783791812" data-n-a-sg="AV_R3e-signed123"></div></html>'
+        sess = Session({opaque: Response(content=html)})
+        with self.assertRaisesRegex(CaptureError, "HTTP_REQUEST_BUDGET_EXHAUSTED"):
+            get_publisher_document(opaque, session=sess, counter=[39])
+        self.assertEqual(len(sess.called), 1)
 
     def test_reject_redirect_to_internal(self):
         s = Session({GOOGLE: Response(302, headers={"Location": "https://127.0.0.1/private"})})
