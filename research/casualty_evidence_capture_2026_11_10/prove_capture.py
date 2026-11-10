@@ -60,8 +60,10 @@ def build_routing_queue():
 def monitor_call(queue_path, capture_path, output, previous=None):
     args = [sys.executable, str(MONITOR), "--capture-evidence-only",
             "--evidence-queue", str(queue_path), "--evidence-output", str(capture_path),
-            "--max-evidence-urls", "4", "--auto-propose-output", str(output),
-            "--revision-snapshot", str(LEDGER), "--baseline-snapshot", str(BASELINE)]
+            "--max-evidence-urls", "4"]
+    if output is not None:
+        args += ["--auto-propose-output", str(output),
+                 "--revision-snapshot", str(LEDGER), "--baseline-snapshot", str(BASELINE)]
     if previous:
         args += ["--previous-proposals", str(previous)]
     done = subprocess.run(args, text=True, capture_output=True, timeout=190, cwd=ROOT)
@@ -92,51 +94,79 @@ def main():
               "routing_source": "four pinned URLs/titles/dates ONLY; previous extracts NOT used",
               "production_modified": False, "publication_allowed": False}
     try:
-        first = monitor_call(queue_path, capture_path, RESULTS / "first")
-        result["first_command"] = first
-        if first["exit_code"]:
-            result["blocker"] = "MONITOR_COMMAND_FAILED"
+        # Acquire first. A single bounded retry ONLY for the initially failed
+        # source URLs is permitted before the very first reviewer decision.
+        initial = monitor_call(queue_path, capture_path, None)
+        result["initial_capture_command"] = initial
+        if initial["exit_code"]:
+            raise RuntimeError("INITIAL_MONITOR_CAPTURE_FAILED")
+        initial_summary = initial["result"]["evidence_capture"]
+        first_evidence = load_json(capture_path)
+        failures_before_retry = list(first_evidence["failures"])
+        result["initial_failures"] = failures_before_retry
+        retry_summary = {"urls_checked": 0, "http_requests": 0,
+                         "articles_downloaded": 0, "usable_evidence_packages": 0}
+        if failures_before_retry:
+            failed_ids = {x["candidate_id"] for x in failures_before_retry}
+            retry_queue = [q for q in original_queue if q["candidate_id"] in failed_ids]
+            retry_queue_path = RESULTS / "bounded_retry_queue.json"
+            write_json(retry_queue_path, retry_queue)
+            retry = monitor_call(retry_queue_path, capture_path, None)
+            result["bounded_retry_command"] = retry
+            if retry["exit_code"]:
+                raise RuntimeError("BOUNDED_RETRY_COMMAND_FAILED")
+            retry_summary = retry["result"]["evidence_capture"]
+        capture = load_json(capture_path)
+        article_ids = {a["candidate_id"] for a in capture["articles"]}
+        first_receipts = {x["candidate_id"]: x for x in capture["receipts"]}
+        original_ids = {q["candidate_id"] for q in original_queue}
+        if not article_ids <= original_ids:
+            raise RuntimeError("Capture produced a foreign candidate ID")
+        result["capture_summary"] = {
+            "urls_checked": len(original_queue),
+            "http_requests": initial_summary["http_requests"] + retry_summary["http_requests"],
+            "articles_downloaded": min(len(original_queue),
+                                       initial_summary["articles_downloaded"] +
+                                       retry_summary["articles_downloaded"]),
+            "usable_evidence_packages": len(article_ids),
+            "failed_candidates": len(capture["failures"]),
+            "bounded_retry_urls": len(failures_before_retry),
+        }
+        result["failed_sources"] = capture["failures"]
+        # Pin the completed evidence snapshot, THEN run the unchanged reviewer.
+        # No further source HTTP can affect this first decision or its replay.
+        sys.path.insert(0, str(ROOT / "kyiv-air-alerts-grafana/scripts"))
+        from casualty_auto_review import run_offline
+        first_summary = run_offline(queue_path, LEDGER, capture_path, BASELINE,
+                                    RESULTS / "first")
+        first_rows = proposal_rows(RESULTS / "first/proposals.csv")
+        result["review_summary"] = first_summary
+        result["proposals"] = [
+            {"city_key": x["city_key"], "attack_date": x["attack_date"],
+             "deaths_delta": x["deaths_delta"], "candidate_ids": x["candidate_ids"],
+             "record_id": x["record_id"]} for x in first_rows]
+        first_events = load_json(RESULTS / "first/events.json")
+        result["proposal_receipts_linked"] = all(
+            set(row["candidate_ids"].split("|")) <= (article_ids & set(first_receipts))
+            and any(e.get("proposal_record_id") == row["record_id"] for e in first_events)
+            for row in first_rows)
+        replay_summary = run_offline(queue_path, LEDGER, capture_path, BASELINE,
+                                     RESULTS / "replay", RESULTS / "first/proposals.csv")
+        replay_rows = proposal_rows(RESULTS / "replay/proposals.csv")
+        result["replay_summary"] = replay_summary
+        result["replay_added_proposals"] = len(replay_rows)
+        result["replay_added_deaths"] = sum(int(row["deaths_delta"]) for row in replay_rows)
+        expected = {"dnipro": ("2026-11-03", 2), "odesa": ("2026-11-09", 3)}
+        correct = bool(first_rows) and all(
+            (row["attack_date"], int(row["deaths_delta"])) == expected.get(row["city_key"])
+            for row in first_rows)
+        if (correct and result["proposal_receipts_linked"] and
+                result["replay_added_proposals"] == 0 and
+                result["replay_added_deaths"] == 0 and
+                result["capture_summary"]["usable_evidence_packages"] >= 1):
+            result["status"] = "PASS_REAL_AUTOMATED_OFFLINE"
         else:
-            capture = load_json(capture_path)
-            summary = load_json(RESULTS / "first/summary.json")
-            first_rows = proposal_rows(RESULTS / "first/proposals.csv")
-            result["capture_summary"] = capture["last_capture_summary"]
-            result["failed_sources"] = capture["failures"]
-            result["review_summary"] = summary
-            result["proposals"] = [{"city_key": p["city_key"], "attack_date": p["attack_date"],
-                                   "deaths_delta": p["deaths_delta"], "candidate_ids": p["candidate_ids"],
-                                   "record_id": p["record_id"]} for p in first_rows]
-            first_receipts = {c["candidate_id"]: c for c in capture["receipts"]}
-            # No candidate may be minted by the capture adapter.
-            if any(a["candidate_id"] not in {q["candidate_id"] for q in original_queue}
-                   for a in capture["articles"]):
-                raise RuntimeError("Capture produced a foreign candidate ID")
-            first_links_ok = all(set(p["candidate_ids"].split("|")) <= set(first_receipts)
-                                 for p in first_rows)
-            result["proposal_receipts_linked"] = first_links_ok
-
-            replay = monitor_call(queue_path, capture_path, RESULTS / "replay",
-                                  RESULTS / "first/proposals.csv")
-            result["replay_command"] = replay
-            if replay["exit_code"]:
-                result["blocker"] = "REPLAY_COMMAND_FAILED"
-            else:
-                replay_rows = proposal_rows(RESULTS / "replay/proposals.csv")
-                result["replay_added_proposals"] = len(replay_rows)
-                result["replay_added_deaths"] = sum(int(p["deaths_delta"]) for p in replay_rows)
-                result["replay_summary"] = load_json(RESULTS / "replay/summary.json")
-                result["repeat_capture_summary"] = load_json(capture_path)["last_capture_summary"]
-                expected = {"dnipro": 2, "odesa": 3}
-                correct = bool(first_rows) and all(
-                    int(p["deaths_delta"]) == expected.get(p["city_key"], -1)
-                    for p in first_rows)
-                if (correct and first_links_ok and
-                        result["replay_added_proposals"] == 0 and
-                        result["replay_added_deaths"] == 0 and
-                        result["capture_summary"]["usable_evidence_packages"] >= 1):
-                    result["status"] = "PASS_REAL_AUTOMATED_OFFLINE"
-                else:
-                    result["blocker"] = "NO_CORRECT_FULL_CHAIN_AUTO_PROPOSAL_OR_REPLAY_NONZERO"
+            result["blocker"] = "NO_CORRECT_AUTO_PROPOSAL_OR_REPLAY_NONZERO"
         if result["status"] != "PASS_REAL_AUTOMATED_OFFLINE":
             result.setdefault("blocker", "NO_COMPLETE_AUTO_READY_PATH")
     except Exception as exc:
