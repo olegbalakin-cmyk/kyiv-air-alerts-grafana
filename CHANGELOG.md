@@ -3,6 +3,12 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-SOURCE-POLICY-OFFLINE-01 — transport separation tested; live BLOCKED (2026-11-10)
+
+- [Actions #42904672140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42904672140) `336488d7`: 18 adapter + 7 policy tests PASS, operational inputs unchanged. [PR #59](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/59) `4aa7137` adds report only. Transport permission now separate; **no new hosts**, reviewer unchanged. Blocked RPC target hostname/URL hash diagnostics added. No live HTTP. Next: source-candidate offline selection and separate authorization for ≤5-URL shadow check.
+- Prior **CASUALTY-GNEWS-RPC-PARTIAL-01** [#42899975187](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42899975187): five RSS/17 HTTP, 3 rejected target hosts, 2 publisher HTTP 403, evidence/proposals 0, replay +0, artifact `13801289333` hashes 9/9 PASS.
+- Prior **CASUALTY-WIP-GNEWS-BLOCKED-01** [#42893729621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42893729621): 20 wrappers unresolved. Prior **CASUALTY-EVIDENCE-CAPTURE-01** [#42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462): direct-publisher Odesa +3 shadow. Prior **CASUALTY-OFFLINE-PROOF-01** [#42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878): 70/70 excerpt tests.
+
 ### C6-EXPORT-DIAGNOSTIC-STAGED-01 — C2 export reason staged, still BLOCKED (2026-11-10)
 
 - First enabled [run 42817288652](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42817288652) published `site-prod@15a3f15b` and 23/23 bootstrap checkpoints; export `C2_BUNDLE_BLOCKED`, no artifact. Owner-approved [PR #54](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/54) merged `main@ee96fa78` with safe allowlisted reason output; [offline run 42829359694](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42829359694) 4/4 PASS. Await next scheduled run for actual reason and cross-cycle receipts. No manual run/cutover/DST; `GLOBAL_CUTOVER=NO`.
