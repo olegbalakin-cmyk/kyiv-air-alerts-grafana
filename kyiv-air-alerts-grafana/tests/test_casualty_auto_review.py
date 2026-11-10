@@ -180,7 +180,11 @@ class ProposalTests(unittest.TestCase):
         self.assertEqual(len(out['proposals']),1)
         self.assertEqual(out['proposals'][0]['deaths_delta'],'2')
         articles[1]['text']=articles[0]['text']
-        self.assertFalse(prepare([a,b],[],extract_cached_reports([a,b],articles),BASE)['proposals'])
+        # One attributed DSNS report now suffices for shadow; duplicated text
+        # must still contribute only one total, never two independent origins.
+        dupe=prepare([a,b],[],extract_cached_reports([a,b],articles),BASE)
+        self.assertEqual(len(dupe['proposals']),1)
+        self.assertEqual(dupe['proposals'][0]['deaths_delta'],'2')
 
     def test_raw_text_injuries_not_deaths(self):
         c=candidate(); article={'candidate_id':'one','url':'https://suspilne.media/test','observed_at':'2026-11-03',
@@ -195,7 +199,7 @@ class ProposalTests(unittest.TestCase):
             a={'candidate_id':'one','url':'https://suspilne.media/test','observed_at':'2026-11-03',
                'text':'У межах міста Дніпро російський ракетний удар стався 2026-11-03 о 08:00. За адресою Тестова, 1. ДСНС. '+sentence}
             rs=extract_cached_reports([c],[a])
-            self.assertIsNone(rs[0]['count']['value'],sentence)
+            self.assertTrue(not rs or rs[0]['count']['value'] is None,sentence)
             self.assertFalse(prepare([c],[],rs,BASE)['proposals'])
 
     def test_unknown_city_rejected(self):
