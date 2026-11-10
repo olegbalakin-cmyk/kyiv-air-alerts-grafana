@@ -27,7 +27,7 @@ OUT = ROOT / "research/casualty_wip_shadow_pilot_2026_11_10/results"
 EXPECTED_QUEUE_BLOB = "73928294881fba2c70eabc28fe85e4146d465a95"
 EXPECTED_LAST_RUN_BLOB = "6d2d170c14b58093c0887e11347701f179d88fab"
 SINCE = "2026-11-03"
-LIMIT = 20
+LIMIT = 5
 
 
 def digest(path: Path) -> str:
@@ -97,7 +97,7 @@ def csv_rows(path: Path):
 
 def run():
     OUT.mkdir(parents=True, exist_ok=True)
-    verdict = {"status": "BLOCKED", "scope": "one bounded WIP candidate-queue shadow snapshot",
+    verdict = {"status": "BLOCKED", "scope": "one approved five-URL WIP shadow retest after signed RSS fix",
                "research_only": True, "publication_allowed": False,
                "production_modified": False, "source_search_performed": False,
                "max_candidate_urls": LIMIT, "max_http_requests": 40,
