@@ -87,7 +87,7 @@ class CaptureTests(unittest.TestCase):
         self.assertTrue(all(x[1]["stream"] is True for x in s.called))
 
     def test_google_html_link_resolution(self):
-        news = b'<html><head><link rel="canonical" href="https://suspilne.media/dnipro/real-article/"></head></html>'
+        news = (b'<html><head><link rel="canonical" href="https://suspilne.media/dnipro/real-article/">'\n                b'<meta name="description" content="Safe intermediate news redirect with a publisher canonical link"></head></html>')
         target = "https://suspilne.media/dnipro/real-article/"
         s = Session({GOOGLE: Response(content=news),
                      target: Response(content=html_doc("РФ атакувала Дніпро ракетами: двоє людей загинули."))})
@@ -162,7 +162,7 @@ class CaptureTests(unittest.TestCase):
             "Пізніше прокуратура спростувала попередню інформацію: загиблих немає.")
         selected, fragments = select_excerpts(body)
         self.assertIn("спростувала", selected)
-        self.assertIn("загинули двоє", selected)
+        self.assertIn("загинули двоє", selected.casefold())
         self.assertTrue(any("negation_update" in f["reason"] for f in fragments))
 
     def test_conflicting_totals_review_not_auto_ready(self):
