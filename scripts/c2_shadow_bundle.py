@@ -241,6 +241,39 @@ def export_bundle(*, enabled, site, receipt_path, status_path, payload_path, out
     return {"status": "EXPORTED", "bundle_sha256": checksum,
             "manifest_sha256": hashlib.sha256(json.dumps(manifest, sort_keys=True, indent=2).encode() + b"\n").hexdigest()}
 
+# Explicit allowlist: never echo exception messages, source contents or connection strings.
+# Capture verification uses CODE:city errors; only CODE is eligible for display.
+SAFE_BLOCK_REASONS = frozenset("""
+CAPTURE_RECEIPTS_EMPTY CAPTURE_PAGE_AFTER_EXPORT DUPLICATE_JSON_KEY NONFINITE_JSON
+CREDENTIAL_FIELD_REJECTED CREDENTIAL_TEXT_REJECTED C2_MANIFEST_SCHEMA
+C2_MANIFEST_GIT_SHA C2_MANIFEST_DIGEST C2_MANIFEST_RUN C2_MANIFEST_DB_IDENTITY
+C2_MANIFEST_IDENTITY_MISMATCH EXISTING_C2_BUNDLE_SHA_MISMATCH
+EXISTING_C2_BUNDLE_MEMBER_SET EXISTING_C2_BUNDLE_LIMIT EXISTING_C2_MEMBER_SHA
+OFFLINE_FIXTURE_NOT_REAL_C2 C2_MANIFEST_RECEIPT_MISMATCH
+C2_MANIFEST_CANONICAL_RUN_MISMATCH C2_GATE_NOT_CONFIRMED
+C2_STATUS_RECEIPT_MISMATCH CITY_BOUNDARY_NOT_23
+SAME_RUN_FORMAT_OR_CITY_MISMATCH SAME_RUN_COUNT_MISMATCH C2_CORPUS_BINDING_MISMATCH
+EXPORT_OUTPUT_ALREADY_EXISTS EXPORT_OUTPUT_NOT_ISOLATED EXPORT_MISSING_INPUT
+EXPORT_WRITER_ENDPOINT_REQUIRED HISTORY_CAPTURE_CONTRACT_MISSING
+HISTORY_CAPTURE_CITY_MISMATCH CAPTURE_SCHEMA CAPTURE_RUN_MISMATCH
+CAPTURE_SOURCE_SHA CAPTURE_PAYLOAD_KIND CAPTURE_BODY_SHA CAPTURE_CLOCK
+CAPTURE_SOURCE_IDENTITY CAPTURE_COMPLETED_SHA CAPTURE_REPLAY_MISMATCH
+CAPTURE_OLDEST_COMPLETED CAPTURE_COMPLETED_INTERVAL CAPTURE_CHECKPOINT_SHA
+CAPTURE_CHECKPOINT_CLOCK CAPTURE_FALSE_CONTINUITY CAPTURE_UNKNOWN_SOURCE
+CAPTURE_NAIVE_TIMESTAMP
+""".split())
+
+
+def safe_block_diagnostic(exc):
+    """Return only static codes and a Python exception type, never exception details."""
+    code = str(exc).split(":", 1)[0]
+    if code not in SAFE_BLOCK_REASONS:
+        code = "UNCLASSIFIED"
+    error_type = type(exc).__name__
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,63}", error_type):
+        error_type = "Exception"
+    return f"reason={code} error_type={error_type}"
+
 
 def main():
     p = argparse.ArgumentParser()
@@ -255,8 +288,8 @@ def main():
             workflow_sha=os.environ.get("GITHUB_SHA"), input_sha=os.environ.get("PHASE1_INPUT_SHA"),
             db_branch=os.environ.get("MULTICITY_CANONICAL_DB_BRANCH"),
             writer_url=os.environ.get("MULTICITY_CANONICAL_DATABASE_URL", ""))
-    except Exception:
-        print("C2_BUNDLE_BLOCKED; no artifact authorized")
+    except Exception as exc:
+        print("C2_BUNDLE_BLOCKED " + safe_block_diagnostic(exc) + "; no artifact authorized")
         return 1
     print(json.dumps(result, sort_keys=True))
     if result["status"] == "EXPORTED" and os.environ.get("GITHUB_STEP_SUMMARY"):
