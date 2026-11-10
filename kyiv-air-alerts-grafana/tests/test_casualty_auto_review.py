@@ -217,6 +217,73 @@ class ProposalTests(unittest.TestCase):
             for x,data in before.items(): self.assertEqual(x.read_bytes(),data)
             with self.assertRaises(ValueError): run_offline(q,rev,ev,base,p)
 
+    def test_practical_presumed_civilian_with_one_official_source(self):
+        c = candidate()
+        text = ('Вранці 3 листопада РФ атакувала Дніпро ракетами. '
+                'У Дніпрі загинули двоє людей. Про це повідомили в ДСНС.')
+        article = {'candidate_id': c['candidate_id'], 'url': c['url'],
+                   'text': text, 'observed_at': '2026-11-03'}
+        r = extract_cached_reports([c], [article])
+        self.assertEqual(len(r), 1)
+        self.assertEqual(r[0]['civilian_status'], 'civilian_presumed')
+        out = prepare([c], [], r, BASE)
+        self.assertEqual([p['deaths_delta'] for p in out['proposals']], ['2'])
+
+    def test_explicit_military_victims_are_held(self):
+        c = candidate()
+        text = ('Вранці 3 листопада РФ атакувала Дніпро ракетами. '
+                'У Дніпрі загинули двоє людей. Серед загиблих військовослужбовці. '
+                'Про це повідомили в ДСНС.')
+        r = extract_cached_reports([c], [{'candidate_id': c['candidate_id'],
+                  'url': c['url'], 'text': text, 'observed_at': '2026-11-03'}])
+        self.assertTrue(r)
+        self.assertEqual(r[0]['civilian_status'], 'civilian_ambiguous')
+        self.assertIn('CIVILIAN_AMBIGUOUS', prepare([c], [], r, BASE)['events'][0]['reasons'])
+
+    def test_military_object_unknown_victims_are_held_not_excluded(self):
+        c = candidate()
+        text = ('Вранці 3 листопада РФ атакувала Дніпро ракетами. '
+                'На військовий об’єкт припав удар. У Дніпрі загинули двоє людей. '
+                'За даними ДСНС, це сталося вранці.')
+        r = extract_cached_reports([c], [{'candidate_id': c['candidate_id'],
+                  'url': c['url'], 'text': text, 'observed_at': '2026-11-03'}])
+        self.assertTrue(r)
+        self.assertEqual(r[0]['civilian_status'], 'civilian_ambiguous')
+        out = prepare([c], [], r, BASE)
+        self.assertFalse(out['proposals'])
+        self.assertEqual(out['events'][0]['category'], 'NEEDS_REVIEW')
+
+    def test_late_death_without_event_total_not_assumed_additive(self):
+        c = candidate()
+        text = ('Вранці 3 листопада РФ атакувала Дніпро ракетами. '
+                'У лікарні згодом помер один чоловік. Про це повідомили в ДСНС.')
+        r = extract_cached_reports([c], [{'candidate_id': c['candidate_id'],
+                  'url': c['url'], 'text': text, 'observed_at': '2026-11-05'}])
+        self.assertFalse(prepare([c], [], r, BASE)['proposals'])
+
+    def test_outside_city_with_dead_not_auto_ready(self):
+        c = candidate()
+        text = ('Вранці 3 листопада РФ атакувала передмістя Дніпра ракетами. '
+                'За межами міста загинули двоє людей. Про це повідомили в ДСНС.')
+        r = extract_cached_reports([c], [{'candidate_id': c['candidate_id'],
+                  'url': c['url'], 'text': text, 'observed_at': '2026-11-03'}])
+        self.assertFalse(prepare([c], [], r, BASE)['proposals'])
+
+    def test_two_same_day_officially_reported_strikes_stay_distinct(self):
+        cs = [candidate('early'), candidate('late')]
+        articles = [
+            {'candidate_id': 'early', 'url': cs[0]['url'], 'observed_at':'2026-11-03',
+             'text': ('Вранці 3 листопада РФ атакувала Дніпро ракетами. '
+                      'У Дніпрі загинули двоє людей. Про це повідомили в ДСНС.')},
+            {'candidate_id': 'late', 'url': cs[1]['url'], 'observed_at':'2026-11-03',
+             'text': ('Увечері 3 листопада РФ атакувала Дніпро ракетами. '
+                      'У Дніпрі загинули троє людей. Про це повідомили в ДСНС.')},
+        ]
+        rs = extract_cached_reports(cs, articles)
+        out = prepare(cs, [], rs, BASE)
+        self.assertEqual(len(out['proposals']), 2)
+        self.assertEqual(sorted(int(p['deaths_delta']) for p in out['proposals']), [2, 3])
+
     def test_real_controls_and_existing_noop(self):
         root=Path(__file__).resolve().parents[2]
         evidence=json.loads((root/'research/casualty_automated_review_2026_11_10/cached_evidence.json').read_text())
