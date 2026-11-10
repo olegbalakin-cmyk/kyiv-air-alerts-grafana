@@ -1,4 +1,4 @@
-name: Research casualty WIP offline RSS inspection
+name: Research casualty five-URL Google RSS retest (one-shot)
 
 on:
   push:
@@ -44,14 +44,14 @@ jobs:
           python -m compileall -q kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py
           python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
 
-      - name: Recheck pinned WIP opaque RSS tokens offline (zero external requests)
-        run: python research/casualty_wip_shadow_pilot_2026_11_10/inspect_rss_tokens.py
+      - name: Approved five real WIP RSS URLs, evidence capture and offline replay
+        run: python research/casualty_wip_shadow_pilot_2026_11_10/run_pilot.py
 
       - name: Preserve WIP shadow proof only, no writes to operational data
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: casualty-wip-20url-shadow-pilot
+          name: casualty-wip-gnews-5url-retest
           path: research/casualty_wip_shadow_pilot_2026_11_10/results/
           if-no-files-found: warn
           retention-days: 14
