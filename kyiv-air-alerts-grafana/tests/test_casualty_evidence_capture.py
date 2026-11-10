@@ -174,7 +174,9 @@ class CaptureTests(unittest.TestCase):
 
     def test_google_rpc_empty_result_is_fail_closed(self):
         opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 50
-        html = b'<html><div data-n-a-ts="1783791812" data-n-a-sg="AV_R3e-signed123"></div></html>'
+        html = (b'<html><div data-n-a-ts="1783791812" data-n-a-sg="AV_R3e-signed123">'
+                   b'Google News article wrapper with sufficient HTML content for the size gate'
+                   b'</div></html>')
         rpc = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
         sess = Session({
             opaque: Response(content=html),
@@ -187,7 +189,9 @@ class CaptureTests(unittest.TestCase):
 
     def test_google_rpc_obeys_shared_request_budget(self):
         opaque = "https://news.google.com/rss/articles/" + "CBMi" + "A" * 50
-        html = b'<html><div data-n-a-ts="1783791812" data-n-a-sg="AV_R3e-signed123"></div></html>'
+        html = (b'<html><div data-n-a-ts="1783791812" data-n-a-sg="AV_R3e-signed123">'
+                   b'Google News article wrapper with sufficient HTML content for the size gate'
+                   b'</div></html>')
         sess = Session({opaque: Response(content=html)})
         with self.assertRaisesRegex(CaptureError, "HTTP_REQUEST_BUDGET_EXHAUSTED"):
             get_publisher_document(opaque, session=sess, counter=[39])
