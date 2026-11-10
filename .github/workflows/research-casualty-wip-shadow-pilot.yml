@@ -1,0 +1,57 @@
+name: Research casualty five-URL Google RSS retest (one-shot)
+
+on:
+  push:
+    branches:
+      - research-casualty-wip-shadow-pilot-2026-11-10
+    paths:
+      - .github/workflows/research-casualty-wip-shadow-pilot.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-casualty-wip-shadow-pilot-one-shot
+  cancel-in-progress: false
+
+jobs:
+  wip-shadow-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated research commit (no credentials)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install already required runtime
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify previously accepted code is unchanged
+        run: |
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_auto_review.py)" = "1fe711626a48817ae16be55c875fdf7f93790d8c"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/monitor_casualty_candidates.py)" = "a6c09d7a8c8c594fccb3b7b8a49172bf6a575e91"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py)" != "82e00b82650c57ede62fbf14c3664cba62643102"
+          echo "Pinned monitor / reviewer and intentionally updated adapter Git blobs PASS"
+
+      - name: Offline signed-RPC decoder and capture safety regression (no HTTP)
+        run: |
+          python -m compileall -q kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+
+      - name: Approved five real WIP RSS URLs, evidence capture and offline replay
+        run: python research/casualty_wip_shadow_pilot_2026_11_10/run_pilot.py
+
+      - name: Preserve WIP shadow proof only, no writes to operational data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-wip-gnews-5url-retest
+          path: research/casualty_wip_shadow_pilot_2026_11_10/results/
+          if-no-files-found: warn
+          retention-days: 14
