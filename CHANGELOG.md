@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-EVIDENCE-CAPTURE-01 — automatic HTTP evidence PASS (2026-11-10)
+
+- [Actions #42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462), PR #57 `13e1254f`: 81/81 executed tests PASS, 4 fetched pages/5 requests, 3 usable packages, Odesa +3 offline, repeat +0. ZIP 10/10 internal hashes PASS; Dnipro held. No merge, operational queue, ledger or production writes. Owner decision next: bounded WIP-only shadow pilot, auto-publish OFF.
+
 ### CASUALTY-OFFLINE-PROOF-01 — bounded real-excerpt proof PASS (2026-11-10)
 
 - [Run #42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878) exact reviewer `719c93c6`: 70/70 tests; shadow Dnipro +2, Odesa +3, repeat +0; 1,654-row WIP queue still +0. Artifact `13785572875`. Draft PR #52 unmerged, no live edits; next bounded automated evidence capture.
