@@ -7,7 +7,6 @@ The reviewer alone interprets the articles through its existing articles contrac
 from __future__ import annotations
 
 import hashlib
-import ipaddress
 import json
 import os
 import re
@@ -19,7 +18,8 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from bs4 import BeautifulSoup
 
-from casualty_auto_review import ALLOWED_HOSTS, fingerprint
+from casualty_auto_review import fingerprint
+from casualty_transport_policy import CaptureError, safe_url, diagnostic_host, GOOGLE_NEWS_HOST
 
 MAX_CANDIDATES = 20
 MAX_REQUESTS = 40
@@ -29,7 +29,7 @@ MAX_EXCERPT_CHARS = 4_500
 MAX_BLOCK_CHARS = 1_000
 MAX_BLOCKS = 16
 TIMEOUT = (4, 12)
-NEWS_HOST = "news.google.com"
+NEWS_HOST = GOOGLE_NEWS_HOST
 USER_AGENT = "casualty-monitor-evidence-research/1.0 (+bounded-source-check)"
 RELEVANT = {
     "fatality": r"загин|загиб|помер|померл|смерт|жертв",
@@ -42,44 +42,12 @@ RELEVANT = {
 RE = {key: re.compile(pattern, re.IGNORECASE) for key, pattern in RELEVANT.items()}
 
 
-class CaptureError(Exception):
-    """A bounded source failure. Never an eligibility judgement."""
-
-
 def sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
-def safe_url(value: str, allow_google: bool = True) -> str:
-    """Fixed publisher allowlist; redirects and extracted links are checked again."""
-    if not isinstance(value, str) or not value or len(value) > 4096:
-        raise CaptureError("URL_INVALID")
-    if any(ord(c) <= 32 or ord(c) == 127 for c in value):
-        raise CaptureError("URL_UNSAFE_CHARACTERS")
-    try:
-        p = urlsplit(value)
-        host = (p.hostname or "").lower().rstrip(".")
-        port = p.port
-    except ValueError as exc:
-        raise CaptureError("URL_INVALID") from exc
-    if p.scheme != "https" or not host or p.username or p.password or port not in (None, 443):
-        raise CaptureError("URL_NOT_HTTPS_OR_NONSTANDARD_PORT")
-    try:
-        ipaddress.ip_address(host)
-    except ValueError:
-        pass
-    else:
-        raise CaptureError("URL_IP_ADDRESS_BLOCKED")
-    plain_host = host.removeprefix("www.")
-    if plain_host not in ALLOWED_HOSTS and not (allow_google and host == NEWS_HOST):
-        raise CaptureError("HOST_NOT_ALLOWED")
-    if host == NEWS_HOST and not (p.path.startswith("/rss/articles/") or p.path.startswith("/articles/")):
-        raise CaptureError("GOOGLE_WRAPPER_PATH_NOT_ALLOWED")
-    return value
 
 
 def _publisher_url_from_google(html_bytes: bytes, base_url: str) -> str:
@@ -202,7 +170,12 @@ def _publisher_url_from_google_rpc(html_bytes: bytes, article_url: str, *,
                 try:
                     return safe_url(decoded[1], allow_google=False)
                 except CaptureError as exc:
-                    raise CaptureError("GOOGLE_RPC_TARGET_NOT_ALLOWED") from exc
+                    raise CaptureError(
+                        "GOOGLE_RPC_TARGET_NOT_ALLOWED",
+                        resolved_host=diagnostic_host(decoded[1]),
+                        transport_reason=str(exc),
+                        resolved_url_sha256=sha256(decoded[1].encode("utf-8")),
+                    ) from exc
         break
     raise CaptureError("GOOGLE_RPC_UNRESOLVED_OR_BAD_RESPONSE")
 
@@ -240,7 +213,12 @@ def get_publisher_document(url: str, *, session, counter: list[int], pause=0.0):
                 current = candidate
                 continue
             if status != 200:
-                raise CaptureError("HTTP_STATUS_" + str(status))
+                raise CaptureError(
+                    "HTTP_STATUS_" + str(status),
+                    resolved_host=diagnostic_host(current),
+                    resolved_url_sha256=sha256(current.encode("utf-8")),
+                    redirect_count=len(redirects),
+                )
             content_type = response.headers.get("Content-Type", "").split(";", 1)[0].lower().strip()
             if content_type not in ("text/html", "application/xhtml+xml"):
                 raise CaptureError("HTTP_NON_HTML_CONTENT")
@@ -459,6 +437,12 @@ def capture_snapshot(queue: list[dict], output: Path, *, limit: int = 4,
                     "candidate_id": cid, "url": origin_url,
                     "checked_at": stamp, "reason": str(exc),
                     "previous_evidence_retained": bool(prior),
+                    **({"resolved_host": exc.resolved_host} if exc.resolved_host else {}),
+                    **({"transport_reason": exc.transport_reason} if exc.transport_reason else {}),
+                    **({"resolved_url_sha256": exc.resolved_url_sha256}
+                       if exc.resolved_url_sha256 else {}),
+                    **({"redirect_count": exc.redirect_count}
+                       if exc.redirect_count is not None else {}),
                 }
                 # Do not route stale evidence after the queue identity changed.
                 if prior and prior.get("candidate_fingerprint") != fingerprint(candidate):
