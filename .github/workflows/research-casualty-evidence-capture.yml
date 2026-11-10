@@ -1,0 +1,52 @@
+name: Research casualty evidence capture (isolated)
+
+on:
+  push:
+    branches:
+      - research-casualty-evidence-capture-2026-11-10
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-casualty-evidence-capture-2026-11-10
+  cancel-in-progress: false
+
+jobs:
+  bounded-offline-and-real-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout exact research commit only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install existing dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Test capture adapter
+        run: python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+
+      - name: Test unchanged reviewer and safety controls
+        run: |
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_auto_review.py' -v
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_real_evidence.py' -v
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_review_operator.py' -v
+
+      - name: Four real publisher HTTP captures and offline proposal replay
+        run: python research/casualty_evidence_capture_2026_11_10/prove_capture.py
+
+      - name: Preserve bounded evidence, outcomes, hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-article-capture-offline-proof
+          path: research/casualty_evidence_capture_2026_11_10/results/
+          if-no-files-found: warn
+          retention-days: 14
