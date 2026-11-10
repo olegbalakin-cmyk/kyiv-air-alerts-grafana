@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-10. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-CAPTURE-EXPORT-OPTINS-ON-01**. Both owner-approved flags are ON ([Actions 42792678131](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42792678131) PASS). Post-merge updater [42774323341](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774323341) PASS before activation; first activated scheduled source capture still PENDING. No cutover or DST.
+Latest accepted: **CASUALTY-AUTOPROPOSE-OFFLINE-01** (research only). C6 latest stays **C6-CAPTURE-EXPORT-OPTINS-ON-01** (flags ON, scheduled receipt PENDING). No cutover or DST.
 
 ## Working instructions
 
@@ -21,7 +21,8 @@ Latest accepted: **C6-CAPTURE-EXPORT-OPTINS-ON-01**. Both owner-approved flags a
 - **UkraineAlarm current API (research-only):** [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS: one HTTP 200 at `2026-10-31T16:20:05Z`, 35,302 bytes, 72 region rows; 9/21 mapped IDs directly have AIR, 12 absent (UNKNOWN). Encrypted full response in artifact 13049271828, metadata proof `d6a6340f`; no Neon writes. Ancestor/negative/cache status NOT PROVEN. Production history API passed 21/21 independently (run 41210446729).
 - **DST / Kyiv:** four-case offline correction commit `14e1b0b9` passed 17 tests; rolling guard remains BLOCKED until new private full raw reader baseline. DST OFF, no physical repair/rebind; Kyiv provenance remains OPEN.
 - **Preview / C3:** [frozen browser/CSV/rollback proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) and Actions #41139538902 are research-only, not a production source switch. Operational release and recurring freshness gates OPEN.
-- **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
+- **Operational WIP / historical reference / backfill:** unchanged, separate tracks.
+- **Casualty:** [draft PR #52](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/52) research only; 0 new proposals, auto-publish OFF. Next: real evidence DN-1103 / OD-1109 and offline replay.
 
 ## Concrete next tasks
 
@@ -32,6 +33,10 @@ Latest accepted: **C6-CAPTURE-EXPORT-OPTINS-ON-01**. Both owner-approved flags a
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-AUTOPROPOSE-OFFLINE-01 — limited research acceptance (2026-11-10)
+
+- PR #52 head [`05ce47b1`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/05ce47b1a92374af6c44c662f2d31f041a8f8afc): 1,654 candidates → 1,505 potential publication/event groups; one already-accounted Sumy (+0), 1,504 NEEDS_REVIEW, 0 new proposals. Saved local tests 58/58 PASS; GitHub CI run #42819027481 checked **coordination docs**, not these tests. Next: 2-case real-evidence offline proof. No production writes or merge.
+
 ## C6-CAPTURE-EXPORT-OPTINS-ON-01 — approved flags ON; bootstrap pending (2026-11-10)
 
 - Owner separately approved `C2_HISTORY_CAPTURE_ENABLED=true` and `C2_SHADOW_BUNDLE_EXPORT_ENABLED=true`. Isolated [Actions #42792678131](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42792678131) SUCCESS at research `c12b2eb7`: both actual GitHub repository variables evaluated `true`; no manual production workflow dispatch.
