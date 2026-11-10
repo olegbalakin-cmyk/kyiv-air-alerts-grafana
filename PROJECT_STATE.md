@@ -1,7 +1,8 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-10. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** — owner-approved [PR #54](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/54) merged `main@ee96fa78`; offline 4/4 PASS. First enabled [run 42817288652](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42817288652): C2 writer, Git JSON, 23/23 checkpoint bootstrap PASS; bundle BLOCKED with cause hidden. Next regular run to show safe reason. No cutover.
+Latest C6 accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01**
+**Latest casualty accepted: CASUALTY-OFFLINE-PROOF-01** (research only). — owner-approved [PR #54](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/54) merged `main@ee96fa78`; offline 4/4 PASS. First enabled [run 42817288652](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42817288652): C2 writer, Git JSON, 23/23 checkpoint bootstrap PASS; bundle BLOCKED with cause hidden. Next regular run to show safe reason. No cutover.
 
 ## Working instructions
 
@@ -21,7 +22,8 @@ Latest accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** — owner-approved [PR #54](
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
+- **Operational WIP / historical reference / backfill:** unchanged and separate.
+- **Casualty:** [Actions #42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878) 70/70 PASS; real-excerpt shadow +2 Dnipro/+3 Odesa, repeat +0; full 1,654 queue +0. Next: bounded evidence capture in existing monitor; production OFF.
 
 ## Concrete next tasks
 
@@ -32,6 +34,10 @@ Latest accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** — owner-approved [PR #54](
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+### CASUALTY-OFFLINE-PROOF-01 (2026-11-10)
+
+- [Exact-SHA CI #42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878): reviewer `719c93c6`, 70/70 PASS; excerpt-only +2/+3, repeat +0; 1,654 WIP rows still no new proposals. PR #52 draft, no publish. Next: retain source evidence in existing monitor.
+
 ## C6-EXPORT-DIAGNOSTIC-STAGED-01 — blocked export diagnostics merged (2026-11-10)
 
 - [Run 42817288652](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42817288652): first enabled scheduled C2 writer/QA/JSON PASS (`site-prod@15a3f15b`) and 23/23 bootstrap metadata, but bundle `C2_BUNDLE_BLOCKED`, no artifact; full overlap unproven.
