@@ -3,12 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
-### CASUALTY-GNEWS-RPC-PARTIAL-01 — RSS routing improved, source access blocked (2026-11-10)
+### CASUALTY-SOURCE-POLICY-OFFLINE-01 — transport separation tested; live BLOCKED (2026-11-10)
 
-- [Run #42899975187](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42899975187), PR #58 `603496cc`: offline 18/18 tests; five real WIP RSS URLs, 17 HTTP, 5 signed-RPC destinations. 3 targets rejected by strict allowlist (RSS publisher homepages espreso.tv, vinnitsa.info, zabor.zp.ua); 2 allowed Suspilne pages HTTP 403. Evidence/proposals 0, replay +0; WIP protected hashes unchanged; artifact `13801289333` ZIP SHA-256 and 9/9 manifest PASS. Further source access review offline; HTTP requires owner approval, publication OFF.
-- Prior **CASUALTY-WIP-GNEWS-BLOCKED-01** [#42893729621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42893729621): 20/20 wrapper unresolved, 40 HTTP, 0 usable; artifact `13798413457`.
-- Prior **CASUALTY-EVIDENCE-CAPTURE-01** [#42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462): 81/81 tests, direct-publisher Odesa +3 shadow; artifact `13789524180`.
-- Prior **CASUALTY-OFFLINE-PROOF-01** [#42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878): reviewer `719c93c6`, 70/70 tests, excerpt Dnipro +2/Odesa +3 shadow.
+- [Actions #42904672140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42904672140) `336488d7`: 18 adapter + 7 policy tests PASS, operational inputs unchanged. [PR #59](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/59) `4aa7137` adds report only. Transport permission now separate; **no new hosts**, reviewer unchanged. Blocked RPC target hostname/URL hash diagnostics added. No live HTTP. Next: source-candidate offline selection and separate authorization for ≤5-URL shadow check.
+- Prior **CASUALTY-GNEWS-RPC-PARTIAL-01** [#42899975187](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42899975187): five RSS/17 HTTP, 3 rejected target hosts, 2 publisher HTTP 403, evidence/proposals 0, replay +0, artifact `13801289333` hashes 9/9 PASS.
+- Prior **CASUALTY-WIP-GNEWS-BLOCKED-01** [#42893729621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42893729621): 20 wrappers unresolved. Prior **CASUALTY-EVIDENCE-CAPTURE-01** [#42873836462](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42873836462): direct-publisher Odesa +3 shadow. Prior **CASUALTY-OFFLINE-PROOF-01** [#42863730878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42863730878): 70/70 excerpt tests.
 
 ### C6-EXPORT-DIAGNOSTIC-STAGED-01 — C2 export reason staged, still BLOCKED (2026-11-10)
 
