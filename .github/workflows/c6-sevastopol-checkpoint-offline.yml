@@ -1,0 +1,32 @@
+name: C6 Sevastopol checkpoint offline regression (research)
+
+on:
+  push:
+    branches:
+      - research-c6-sevastopol-checkpoint-fix-2026-11-11
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py"
+      - "kyiv-air-alerts-grafana/tests/test_c6_sevastopol_checkpoint.py"
+      - ".github/workflows/c6-sevastopol-checkpoint-offline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-regression:
+    if: github.ref == 'refs/heads/research-c6-sevastopol-checkpoint-fix-2026-11-11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install parser-only dependencies
+        run: python -m pip install 'requests>=2.32,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Narrow offline Sevastopol tests (no source HTTP, DB or deployment)
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m unittest discover -s tests -p test_c6_sevastopol_checkpoint.py -v
