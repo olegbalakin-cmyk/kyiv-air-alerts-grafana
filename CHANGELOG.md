@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-TIMESTAMP-OFFLINE-61-01 — PR #61 offline PASS, no production promotion (2026-11-11)
+
+- [Draft #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) exact HEAD `db157dc15befe3ecd078e853996187dc98bacb29`, [CI #42981135850](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42981135850) 16/16 PASS; source-specific UTC replay, SHA and clocks still strict. Mocked synthetic bundle is not live ZIP/SHA/readback. Merge not approved; Sevastopol 22/23 checkpoint remains open. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C6-THREE-RUN-EXPORT-01 — C2 export blocked despite healthy writer (2026-11-11)
 
 - [Manual 42902124611](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42902124611) and [scheduled 42908463331](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42908463331) SUCCESS; [scheduled 42970870607](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42970870607) writer/23-city QA/Git PASS (`site-prod@390e7635`, 33,066 episodes) but overall FAIL on GitHub diagnostic upload. Three exports blocked `CAPTURE_NAIVE_TIMESTAMP`, no bundle SHA. 22/23 refreshed checkpoints; Sevastopol stuck due unresolved recent pair anomaly. Next narrow time-source proof and 23/23 same-run readback. No cutover/DST.
