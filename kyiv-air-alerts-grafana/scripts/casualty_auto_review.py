@@ -173,20 +173,29 @@ def _incident_scopes(low):
 
 
 def _civilian_status(low, total):
-    military_victims = bool(re.search(
-        r'(?:загинул\w*|серед загиблих).{0,45}(?:військовослужбов|військових|бійц|солдат)'
-        r'|(?:військовослужбов|боєць|солдат).{0,45}загинул'
-        r'|змішан\w* втрат|(?:військов\w*|армійськ\w*)\s+(?:об.єкт|частин|технік)'
+    # A direct assertion about deceased servicemembers overrides the presumption.
+    # Keep victim wording adjacent: wounded soldiers and military officials are
+    # not evidence that those who died were soldiers.
+    person = r'(?:військовослужбов\w*|військов(?:ий|і|их|ими)|бійц\w*|боєць|солдат\w*)'
+    died = r'(?:загинул[аои]?|загинув|померл[аои]?|помер)'
+    military_deaths = bool(re.search(
+        rf'\b(?:усі\s+)?загибл(?:і|их)\s*(?:(?:[-–—:]\s*(?:це\s+)?(?:усі\s+)?)|(?:це|були|є)\s+)(?!не\s+){person}\b'
+        rf'|\bсеред\s+загиблих\s+(?:(?:є|були|також)\s+)?(?!не\s+){person}\b'
+        rf'|\b{died}\s+(?:{COUNT_TOKEN}\s+)?{person}\b'
+        rf'|\b{COUNT_TOKEN}\s+{person}\s+{died}\b'
+        rf'|\b{person}\s+{died}\b'
+        rf'|\bзагибл(?:і|их)\s*[-–—:]\s*цивільн\w*\s*(?:,|і|й|та)\s*{person}\b', low))
+    military_risk = bool(re.search(
+        r'змішан\w* втрат|(?:військов\w*|армійськ\w*)\s+(?:об.єкт|частин|технік)'
         r'|склад[іу]?\s+(?:боєприпас|військов)', low))
-    if military_victims:
+    if military_deaths or military_risk:
         return 'civilian_ambiguous'
     if total is None:
         return None
     if re.search(r'(?:загинул\w*.{0,45}(?:цивільн|мирн\w* жител)'
                  r'|(?:цивільн\w*|мирн\w* жител).{0,45}загинул)', low):
         return 'civilian_explicit'
-    # Owner-approved presumption ONLY for a lethal Russian air attack;
-    # final gate still checks city, air nature, source and unique event identity.
+    # Presume civilians only when no military deceased or risk marker applies.
     return 'civilian_presumed'
 
 
