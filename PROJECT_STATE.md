@@ -1,7 +1,11 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. Proposed next accepted on merge: **C6-WORK-B-EXACT-CORPUS-23-01** (docs-only). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
+
+## C6 Work B proposed checkpoint — exact corpus parity (pending docs PR)
+
+Read-only Neon + offline C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) proof: corpus **33,135**; raw Neon **33,397**; exactly **262** superseded, overlapping historic interval rows across 10 cities, none a distinct non-overlapping AIR event. Excluding superseded rows in the *diagnostic* latest-overlap projection gives 23/23 exact sorted ID and full episode-field digests equal to the C2 bundle. Original 23 source receipts/39 captured pages SHA-verified and offline replayed, with one-hop previous poll overlap; **full history since first event and 22-city per-episode source linkage not established**. Sevastopol `25006→25008` stays unresolved. Exact IDs and evidence: [Work B final report](research/c6_work_b_exact_corpus_2026_11_11/FINAL_REPORT.md), [262-row CSV](research/c6_work_b_exact_corpus_2026_11_11/STALE_262_EPISODES.csv). **No new Neon→JSON Work A proof, no authorized reader filter yet, no cutover. GLOBAL_CUTOVER=NO; C6=PARTIAL; DST_CORRECTION=OFF.**
 
 ## Working instructions
 
