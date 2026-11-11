@@ -295,15 +295,41 @@ def refresh_analytics(payload, reference, reference_derived, alerts, now, site, 
     return derived
 
 
+def frozen_b2_display_selection(snap, canonical_closed, bundle, b2):
+    """Verify the frozen 382-parent Kyiv view using historical read-only evidence.
+
+    Only display UIDs also present in the exact SHA-bound C2 corpus may
+    enter the 23-city statistics. Old physical parents remain evidence only.
+    """
+    pinned={r['uid'] for r in bundle['source_rows']}
+    require(len(pinned)==len(bundle['source_rows'])==382,
+            'FROZEN_B2_PINNED_UID_SET_CHANGED')
+    historical=[r for r in snap['episodes'] if r['uid'] in pinned]
+    require(len(historical)==len(pinned) and
+            {r['uid'] for r in historical}==pinned and
+            all(r['city_key']=='kyiv' and r['alert_type']=='AIR' and
+                r['episode_state']=='closed' for r in historical),
+            'FROZEN_B2_EVIDENCE_PARENTS_MISSING')
+    evidence={k:snap[k] for k in ('classifications','source_links','events')}
+    evidence['episodes']=historical
+    selected=b2.run_bundle(bundle,evidence)
+    canonical={r['uid'] for r in canonical_closed}
+    displayed=[r['uid'] for r in selected['display_alerts']]
+    require(len(displayed)==len(set(displayed)) and set(displayed)<=canonical,
+            'FROZEN_B2_DISPLAY_PARENT_NOT_C2_CANONICAL')
+    return selected
+
+
 def generate(args, out, adapter, b2, bundle, snap, closed, active, cities):
     # Completed-alert builders cannot safely close an active row using build time.
     # Preserve active rows unchanged in evidence and keep active/publication gate OPEN.
     now=aware(snap['meta']['read_at']); reference=load(args.site/'data/dashboard_data.json')
     reference_derived=load(args.site/'data/site_derived.json')
     frozen_uids={r['uid'] for r in bundle['source_rows']}
-    b2snapshot={k:snap[k] for k in ('classifications','source_links','events')}
-    b2snapshot['episodes']=[r for r in closed if r['uid'] in frozen_uids]
-    selected=b2.run_bundle(bundle,b2snapshot)
+    # Historical pinned B2 membership is evidence, not current canonical data.
+    # It needs all 382 exact parents to verify its 198 chosen display rows.
+    # Never feed the retained 184 old live parents into any city statistics.
+    selected=frozen_b2_display_selection(snap, closed, bundle, b2)
     require(selected['enrichment']['rebinds']==0,'UNAUTHORIZED_CLASSIFICATION_REBIND')
     save(out/'kyiv_selection.json',selected)
     payload,diagnostics,alerts=adapter.build_projection_from_site([r for r in closed if r['city_key']!='kyiv'],reference,now,args.site)
