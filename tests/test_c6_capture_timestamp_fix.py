@@ -143,6 +143,7 @@ class SourceSpecificTimestampTests(unittest.TestCase):
         tampered = copy.deepcopy(row)
         tampered["previous_checkpoint"]["last_checked_at"] = (
             datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+        tampered["previous_checked_at"] = tampered["previous_checkpoint"]["last_checked_at"]
         resign(tampered)
         with self.assertRaisesRegex(ValueError, "CAPTURE_FALSE_CONTINUITY"):
             verify(tampered)
@@ -177,7 +178,8 @@ class SourceSpecificTimestampTests(unittest.TestCase):
                 sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
             receipt = {"corpus_sha256": corpus, "city_count": 23,
                        "canonical_episode_count": 23, "run_id": "synthetic-run",
-                       "workflow_sha": RUN["workflow_sha"], "input_sha": RUN["input_sha"]}
+                       "workflow_sha": RUN["workflow_sha"], "input_sha": RUN["input_sha"],
+                       "db_branch": "br-synthetic-test"}
             status = {"canonical_persistence_status": "NEON_SUCCEEDED",
                       "canonical_receipt_validated": True,
                       "canonical_db_commit": "CONFIRMED",
