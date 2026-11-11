@@ -1,0 +1,58 @@
+name: Research one-shot coordination archive (docs PR only)
+
+on:
+  push:
+    branches:
+      - coord-casualty-five-inputs-2026-11-11
+    paths:
+      - .github/workflows/research-coordination-archive-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: research-coordination-archive-once
+  cancel-in-progress: false
+
+jobs:
+  archive-root-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current docs research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify we are only archiving the coordinator docs branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "coord-casualty-five-inputs-2026-11-11"
+          test "$(git branch --show-current)" = "coord-casualty-five-inputs-2026-11-11"
+      - name: Preview native archival plan
+        run: python scripts/coordination_docs.py archive --date 2026-11-11 --source-ref "$(git rev-parse HEAD)" --dry-run
+      - name: Execute native immutable archival on docs branch only
+        run: python scripts/coordination_docs.py archive --date 2026-11-11 --source-ref "$(git rev-parse HEAD)"
+      - name: Verify archive and content preservation against main
+        run: |
+          set -euo pipefail
+          python scripts/coordination_docs.py verify --base-ref "$(git merge-base origin/main HEAD)"
+          python scripts/coordination_docs.py check
+      - name: Commit and push archived root files and immutable snapshots only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- PROJECT_STATE.md CHANGELOG.md docs/coordination-archive/manifest.json docs/coordination-archive/
+          python - <<'PY'
+          import subprocess
+          names = subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines()
+          assert names, "NO_ARCHIVAL_CHANGES"
+          assert all(n in ("PROJECT_STATE.md", "CHANGELOG.md") or n.startswith("docs/coordination-archive/") for n in names), "UNEXPECTED_CHANGED_FILE"
+          assert "PROJECT_STATE.md" in names and "CHANGELOG.md" in names
+          print("Archival documents only:", names)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: archive exact coordination snapshots after casualty 45-test checkpoint"
+          git push origin HEAD:refs/heads/coord-casualty-five-inputs-2026-11-11
