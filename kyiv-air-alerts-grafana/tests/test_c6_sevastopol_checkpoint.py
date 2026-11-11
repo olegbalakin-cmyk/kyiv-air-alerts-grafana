@@ -160,7 +160,7 @@ class SevastopolContinuityTests(unittest.TestCase):
         second = json.loads(self.checkpoint_path.read_text())["sevastopol"]
         self.assertGreater(cap.utc(second["last_checked_at"]), cap.utc(first["last_checked_at"]))
 
-        bad = pages(PREV + timedelta(hours=10))[:1]
+        bad = pages(PREV + timedelta(hours=12))[:1]
         self.assertFalse(self.eligible(captured_pages=bad))
         c = cap.record("sevastopol", "sevastopol_history", SOURCE, bad, [],
                        continuity=self.eligible(captured_pages=bad),
