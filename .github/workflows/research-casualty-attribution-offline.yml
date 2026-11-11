@@ -1,0 +1,41 @@
+name: Research casualty attribution offline frozen evidence
+on:
+  push:
+    branches:
+      - research-casualty-attribution-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-attribution-offline.yml
+      - kyiv-air-alerts-grafana/scripts/casualty_auto_review.py
+      - research/casualty_attribution_2026_11_11/test_replay.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  frozen-article-offline-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download exact existing Actions evidence without publisher HTTP
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42998990269
+          name: casualty-five-source-artifact-offline-replay
+          path: research/casualty_attribution_2026_11_11/input
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run focused offline regression and replay tests
+        run: |
+          python -m unittest research/casualty_attribution_2026_11_11/test_replay.py -v
+      - name: Upload test verdict, never revisions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-attribution-offline-verdict
+          path: research/casualty_attribution_2026_11_11/results/
+          if-no-files-found: warn
+          retention-days: 21
