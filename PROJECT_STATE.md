@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01** (owner authorizes one isolated read-only run; no physical PASS). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON physical PASS still OPEN.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-FROZEN-B2-EVIDENCE-OFFLINE-01** (research offline only; physical 6-file proof OPEN). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON physical PASS still OPEN.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -25,17 +25,21 @@ Latest accepted: **C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01** (owner authorize
 
 ## Concrete next tasks
 
-1. **Owner authorized ONE physical read-only exact-run proof (2026-11-11, chat)** on research [PR #77](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/77) HEAD `93899d5bb07329e95429ed79ed8d6939ab74a633`, C2 #43055353190. Next: GitHub owner adds only `research-c6-exact-readback-integrated-2026-11-11` to Environment `c6-neon-shadow-readonly`, pins `C6_SHADOW_APPROVED_RESEARCH_SHA` to exact HEAD and manually dispatches on that branch with `APPROVE_ONE_READONLY_PROOF`. GitHub connector has no workflow_dispatch or Environment-write capability. No run verified for this SHA yet; no source HTTP, writer, DB writes, or production changes.
+1. **Next: one NEW owner-approved physical read-only proof** using [research PR #79](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/79) HEAD `beb2ad4d1f37e88b0084e49306281f8d2650d568`, branch `research-c6-frozen-b2-evidence-2026-11-11`, existing C2 #43055353190. Verify environment branch allowlist and re-pin `C6_SHADOW_APPROVED_RESEARCH_SHA` to the new exact HEAD before owner-actor dispatch. Prior approval for `93899d5b` was used on failed physical #43104972888 and does **not** carry over. No new approval yet; no source HTTP, Neon writes, deployment or cutover.
 2. Prove 23-city six-file JSON, receipts and freshness in that run; origin-complete history/episode provenance and Sevastopol `25006→25008` remain separately unresolved. Do not infer Netlify deployed from Git.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01 — one exact-head read-only proof owner-approved, dispatch pending (2026-11-11)
+## C6-FROZEN-B2-EVIDENCE-OFFLINE-01 — frozen B2 provenance isolated; exact-run offline PASS (2026-11-11)
 
-- Owner explicitly authorized **one** physical nonpublishing Neon→JSON proof on PR #77 `93899d5bb07329e95429ed79ed8d6939ab74a633`. Authorization is limited to this immutable SHA, existing C2 #43055353190 and protected Environment `c6-neon-shadow-readonly`.
-- GitHub connector cannot change Environment variables/branch deployment allowlist or dispatch this manual workflow. Owner must configure exact SHA/branch and launch. Previous failed run #43098776474 was on different SHA. No new physical PASS, no DB write, no release promotion. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+- Physical read-only [#43104972888](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43104972888), artifact #13893437446: `FRESHNESS_READY_FOR_INTEGRATION` **23/23**, then `FROZEN_PHYSICAL_PARENT_COUNT_CHANGED` at generator; no 6 JSON files.
+- Read-only Neon: 382/382 frozen Kyiv B2 parent UIDs present, 184 outdated live provenance parents plus 198 current C2 members. Research [PR #79](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/79) `beb2ad4d1f37e88b0084e49306281f8d2650d568` lets B2 inspect all 382 solely as view evidence while statistics use only exact C2 canonical episodes. [Offline #43105919875](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43105919875) SUCCESS. Protected physical rerun requires separate owner exact-SHA approval. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
+## C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01 — approval consumed by blocked physical run (2026-11-11)
+
+- Owner-authorized research PR #77 `93899d5b` physical [#43104972888](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43104972888) reached Neon readback and verified 23/23 historic receipts/freshness, then failed closed at frozen B2 generation. No six-file proof, writes or deployment.
 
 ## C6-EXACT-READBACK-INTEGRATED-OFFLINE-01 — exact C2 canonical reader + replay offline PASS (2026-11-11)
 
