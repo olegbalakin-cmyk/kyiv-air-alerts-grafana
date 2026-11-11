@@ -306,6 +306,16 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
                 closed, active = generator.verify_snapshot(snap, adapter)
             except Exception as exc:
                 raise ShadowBlocked(input_failure(exc)) from exc
+            stage = "SELECT_EXACT_C2_CANONICAL_EPISODES"
+            from scripts.c6_exact_canonical_selection import select_c2_canonical_closed
+            committed_at = run.get("ingest_committed_at") if receipt.get("run_id") else None
+            require(committed_at is not None, "C2_CANONICAL_INGEST_COMMIT_MISSING")
+            try:
+                closed, selection_evidence = select_c2_canonical_closed(
+                    episodes, closed, city_keys=keys, ingest_committed_at=committed_at)
+            except Exception as exc:
+                raise ShadowBlocked("C2_EXACT_CANONICAL_SELECTION_BLOCKED:" + type(exc).__name__) from exc
+            write(work / "canonical_selection.json", selection_evidence)
             stage = "WRITE_READBACK_PROOF"
             capture_payload = load(payload_path)
             capture_metadata = {}
@@ -400,7 +410,8 @@ def execute(*, site: Path, receipt_path: Path, status_path: Path, payload_path: 
             stage = "PRESERVE_CANDIDATE"
             shutil.copytree(candidate, output / "candidate")
             for name in ("kyiv_selection.json", "projection_lineage.json", "git_dependencies.json",
-                         "utc_union_diagnostics.json", "active_rows_unmodified.json", "readback_proof.json"):
+                         "utc_union_diagnostics.json", "active_rows_unmodified.json", "readback_proof.json",
+                         "canonical_selection.json"):
                 shutil.copyfile(work / name, output / name)
             if dst_correction is not None:
                 shutil.copyfile(work / "dst_correction.json", output / "dst_correction.json")
