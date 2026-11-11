@@ -1,0 +1,551 @@
+{
+  "scope": "SYNTHETIC ONLY. These are not real news, deaths or proposed publication.",
+  "retained_text_inputs": [
+    {
+      "candidate_id": "SYNTHETIC-A",
+      "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+      "text": "У межах міста Дніпро російський ракетний удар стався 2026-11-03 о 08:00. За адресою Тестова, 1. Загинули 2 цивільних. Повідомляє ДСНС.",
+      "observed_at": "2026-11-03"
+    },
+    {
+      "candidate_id": "SYNTHETIC-B",
+      "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+      "text": "У межах міста Дніпро російський ракетний удар стався 2026-11-03 о 08:00. За адресою Тестова, 1. Загинули 2 цивільних. Повідомляє Національна поліція.",
+      "observed_at": "2026-11-03"
+    }
+  ],
+  "initial": {
+    "summary": {
+      "messages_processed": 2,
+      "potential_events": 1,
+      "auto_ready": 1,
+      "needs_review": 0,
+      "unique_proposals": 1,
+      "duplicate_publication_excess": 0,
+      "already_accounted_events": 0,
+      "prior_proposals_suppressed": 0,
+      "reason_counts": {},
+      "publication_allowed": false,
+      "scope": "Retained queue only; not a discovery completeness/recall estimate"
+    },
+    "events": [
+      {
+        "event_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9",
+        "incident": {
+          "city_key": "dnipro",
+          "attack_date": "2026-11-03",
+          "place": "тестова, 1",
+          "attack_slot": "08:00",
+          "attack_type": "missile"
+        },
+        "reports": [
+          {
+            "candidate_ids": [
+              "SYNTHETIC-A"
+            ],
+            "candidate_fingerprints": {
+              "SYNTHETIC-A": "8c4a713dc4b01ac8743aca770d61d02889df4bce13b7657097a811d692f2747e"
+            },
+            "incident": {
+              "city_key": "dnipro",
+              "attack_date": "2026-11-03",
+              "place": "тестова, 1",
+              "attack_slot": "08:00",
+              "attack_type": "missile"
+            },
+            "facts": {
+              "city_boundary": true,
+              "russian_air_attack": true,
+              "civilian": true,
+              "attack_date": true,
+              "incident_identity": true,
+              "death_count": true
+            },
+            "count": {
+              "kind": "total",
+              "value": 2
+            },
+            "observed_at": "2026-11-03",
+            "sources": [
+              {
+                "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+                "origin_id": "dsns",
+                "basis": "retained-text-sha256=057a37151959bd9c7ea92b3d66d6a16e60db812b706b420e43bb02b306740ec4",
+                "supports": [
+                  "city_boundary",
+                  "russian_air_attack",
+                  "civilian",
+                  "attack_date",
+                  "incident_identity",
+                  "death_count"
+                ]
+              }
+            ],
+            "provenance": {
+              "kind": "explicit_cached_text_rules_v1",
+              "article_sha256": "057a37151959bd9c7ea92b3d66d6a16e60db812b706b420e43bb02b306740ec4"
+            }
+          },
+          {
+            "candidate_ids": [
+              "SYNTHETIC-B"
+            ],
+            "candidate_fingerprints": {
+              "SYNTHETIC-B": "faaf9dbb2055ebe648eb453f14dc158f87ea538a022acf4f2a859ed292446e85"
+            },
+            "incident": {
+              "city_key": "dnipro",
+              "attack_date": "2026-11-03",
+              "place": "тестова, 1",
+              "attack_slot": "08:00",
+              "attack_type": "missile"
+            },
+            "facts": {
+              "city_boundary": true,
+              "russian_air_attack": true,
+              "civilian": true,
+              "attack_date": true,
+              "incident_identity": true,
+              "death_count": true
+            },
+            "count": {
+              "kind": "total",
+              "value": 2
+            },
+            "observed_at": "2026-11-03",
+            "sources": [
+              {
+                "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+                "origin_id": "national-police",
+                "basis": "retained-text-sha256=dcee41bac0c35375a920952dd8e0c47376d6b097dc2e0bfc4d9ae5f895983b26",
+                "supports": [
+                  "city_boundary",
+                  "russian_air_attack",
+                  "civilian",
+                  "attack_date",
+                  "incident_identity",
+                  "death_count"
+                ]
+              }
+            ],
+            "provenance": {
+              "kind": "explicit_cached_text_rules_v1",
+              "article_sha256": "dcee41bac0c35375a920952dd8e0c47376d6b097dc2e0bfc4d9ae5f895983b26"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "candidate_id": "SYNTHETIC-A",
+            "city_key": "dnipro",
+            "title": "SYNTHETIC OFFLINE CONTROL",
+            "snippet": "",
+            "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+            "publisher": null,
+            "publisher_url": "https://suspilne.media",
+            "published_at": "2026-11-03T10:00:00Z",
+            "status": "needs_review",
+            "hints": {
+              "possible_attack_dates": [],
+              "text_flags": []
+            }
+          },
+          {
+            "candidate_id": "SYNTHETIC-B",
+            "city_key": "dnipro",
+            "title": "SYNTHETIC OFFLINE CONTROL",
+            "snippet": "",
+            "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+            "publisher": null,
+            "publisher_url": "https://npu.gov.ua",
+            "published_at": "2026-11-03T10:00:00Z",
+            "status": "needs_review",
+            "hints": {
+              "possible_attack_dates": [],
+              "text_flags": []
+            }
+          }
+        ],
+        "group_basis": "cached_incident_evidence",
+        "confirmed_total_claim": 2,
+        "already_accounted": 0,
+        "reserved_in_previous_proposals": 0,
+        "matched_revision_ids": [],
+        "matched_reservation_ids": [],
+        "proposed_delta": 2,
+        "reasons": [],
+        "category": "AUTO_READY",
+        "publication_allowed": false,
+        "action": "PROPOSE",
+        "proposal_record_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-2"
+      }
+    ],
+    "proposals": [
+      {
+        "record_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-2",
+        "attack_date": "2026-11-03",
+        "deaths_delta": "2",
+        "source_name": "national-police",
+        "source_url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+        "city_key": "dnipro",
+        "observed_at": "2026-11-03",
+        "status": "confirmed",
+        "note": "SHADOW PROPOSAL ONLY; event_id=casualty-event:3f1d64d49fbc2c66b5e23bd9; total=2; already_accounted=0; reserved=0",
+        "candidate_ids": "SYNTHETIC-A|SYNTHETIC-B"
+      }
+    ]
+  },
+  "update_2_to_3": {
+    "summary": {
+      "messages_processed": 2,
+      "potential_events": 1,
+      "auto_ready": 1,
+      "needs_review": 0,
+      "unique_proposals": 1,
+      "duplicate_publication_excess": 0,
+      "already_accounted_events": 0,
+      "prior_proposals_suppressed": 0,
+      "reason_counts": {},
+      "publication_allowed": false,
+      "scope": "Retained queue only; not a discovery completeness/recall estimate"
+    },
+    "events": [
+      {
+        "event_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9",
+        "incident": {
+          "city_key": "dnipro",
+          "attack_date": "2026-11-03",
+          "place": "тестова, 1",
+          "attack_slot": "08:00",
+          "attack_type": "missile"
+        },
+        "reports": [
+          {
+            "candidate_ids": [
+              "SYNTHETIC-A"
+            ],
+            "candidate_fingerprints": {
+              "SYNTHETIC-A": "8c4a713dc4b01ac8743aca770d61d02889df4bce13b7657097a811d692f2747e"
+            },
+            "incident": {
+              "city_key": "dnipro",
+              "attack_date": "2026-11-03",
+              "place": "тестова, 1",
+              "attack_slot": "08:00",
+              "attack_type": "missile"
+            },
+            "facts": {
+              "city_boundary": true,
+              "russian_air_attack": true,
+              "civilian": true,
+              "attack_date": true,
+              "incident_identity": true,
+              "death_count": true
+            },
+            "count": {
+              "kind": "total",
+              "value": 3
+            },
+            "observed_at": "2026-11-03",
+            "sources": [
+              {
+                "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+                "origin_id": "dsns",
+                "basis": "retained-text-sha256=e5aafb1c946cce17cdacf89500cca4cde31a0cc9f27491ebdf621bddd7d7f9f2",
+                "supports": [
+                  "city_boundary",
+                  "russian_air_attack",
+                  "civilian",
+                  "attack_date",
+                  "incident_identity",
+                  "death_count"
+                ]
+              }
+            ],
+            "provenance": {
+              "kind": "explicit_cached_text_rules_v1",
+              "article_sha256": "e5aafb1c946cce17cdacf89500cca4cde31a0cc9f27491ebdf621bddd7d7f9f2"
+            }
+          },
+          {
+            "candidate_ids": [
+              "SYNTHETIC-B"
+            ],
+            "candidate_fingerprints": {
+              "SYNTHETIC-B": "faaf9dbb2055ebe648eb453f14dc158f87ea538a022acf4f2a859ed292446e85"
+            },
+            "incident": {
+              "city_key": "dnipro",
+              "attack_date": "2026-11-03",
+              "place": "тестова, 1",
+              "attack_slot": "08:00",
+              "attack_type": "missile"
+            },
+            "facts": {
+              "city_boundary": true,
+              "russian_air_attack": true,
+              "civilian": true,
+              "attack_date": true,
+              "incident_identity": true,
+              "death_count": true
+            },
+            "count": {
+              "kind": "total",
+              "value": 3
+            },
+            "observed_at": "2026-11-03",
+            "sources": [
+              {
+                "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+                "origin_id": "national-police",
+                "basis": "retained-text-sha256=da40ce6477fb4d117a77bf6cc67f7c8b3b67218b2673fce359cc198907a7f1f1",
+                "supports": [
+                  "city_boundary",
+                  "russian_air_attack",
+                  "civilian",
+                  "attack_date",
+                  "incident_identity",
+                  "death_count"
+                ]
+              }
+            ],
+            "provenance": {
+              "kind": "explicit_cached_text_rules_v1",
+              "article_sha256": "da40ce6477fb4d117a77bf6cc67f7c8b3b67218b2673fce359cc198907a7f1f1"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "candidate_id": "SYNTHETIC-A",
+            "city_key": "dnipro",
+            "title": "SYNTHETIC OFFLINE CONTROL",
+            "snippet": "",
+            "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+            "publisher": null,
+            "publisher_url": "https://suspilne.media",
+            "published_at": "2026-11-03T10:00:00Z",
+            "status": "needs_review",
+            "hints": {
+              "possible_attack_dates": [],
+              "text_flags": []
+            }
+          },
+          {
+            "candidate_id": "SYNTHETIC-B",
+            "city_key": "dnipro",
+            "title": "SYNTHETIC OFFLINE CONTROL",
+            "snippet": "",
+            "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+            "publisher": null,
+            "publisher_url": "https://npu.gov.ua",
+            "published_at": "2026-11-03T10:00:00Z",
+            "status": "needs_review",
+            "hints": {
+              "possible_attack_dates": [],
+              "text_flags": []
+            }
+          }
+        ],
+        "group_basis": "cached_incident_evidence",
+        "confirmed_total_claim": 3,
+        "already_accounted": 2,
+        "reserved_in_previous_proposals": 0,
+        "matched_revision_ids": [
+          "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-2"
+        ],
+        "matched_reservation_ids": [],
+        "proposed_delta": 1,
+        "reasons": [],
+        "category": "AUTO_READY",
+        "publication_allowed": false,
+        "action": "PROPOSE",
+        "proposal_record_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-3"
+      }
+    ],
+    "proposals": [
+      {
+        "record_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-3",
+        "attack_date": "2026-11-03",
+        "deaths_delta": "1",
+        "source_name": "national-police",
+        "source_url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+        "city_key": "dnipro",
+        "observed_at": "2026-11-03",
+        "status": "confirmed",
+        "note": "SHADOW PROPOSAL ONLY; event_id=casualty-event:3f1d64d49fbc2c66b5e23bd9; total=3; already_accounted=2; reserved=0",
+        "candidate_ids": "SYNTHETIC-A|SYNTHETIC-B"
+      }
+    ]
+  },
+  "repeat": {
+    "summary": {
+      "messages_processed": 2,
+      "potential_events": 1,
+      "auto_ready": 1,
+      "needs_review": 0,
+      "unique_proposals": 0,
+      "duplicate_publication_excess": 0,
+      "already_accounted_events": 1,
+      "prior_proposals_suppressed": 0,
+      "reason_counts": {},
+      "publication_allowed": false,
+      "scope": "Retained queue only; not a discovery completeness/recall estimate"
+    },
+    "events": [
+      {
+        "event_id": "casualty-event:3f1d64d49fbc2c66b5e23bd9",
+        "incident": {
+          "city_key": "dnipro",
+          "attack_date": "2026-11-03",
+          "place": "тестова, 1",
+          "attack_slot": "08:00",
+          "attack_type": "missile"
+        },
+        "reports": [
+          {
+            "candidate_ids": [
+              "SYNTHETIC-A"
+            ],
+            "candidate_fingerprints": {
+              "SYNTHETIC-A": "8c4a713dc4b01ac8743aca770d61d02889df4bce13b7657097a811d692f2747e"
+            },
+            "incident": {
+              "city_key": "dnipro",
+              "attack_date": "2026-11-03",
+              "place": "тестова, 1",
+              "attack_slot": "08:00",
+              "attack_type": "missile"
+            },
+            "facts": {
+              "city_boundary": true,
+              "russian_air_attack": true,
+              "civilian": true,
+              "attack_date": true,
+              "incident_identity": true,
+              "death_count": true
+            },
+            "count": {
+              "kind": "total",
+              "value": 3
+            },
+            "observed_at": "2026-11-03",
+            "sources": [
+              {
+                "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+                "origin_id": "dsns",
+                "basis": "retained-text-sha256=e5aafb1c946cce17cdacf89500cca4cde31a0cc9f27491ebdf621bddd7d7f9f2",
+                "supports": [
+                  "city_boundary",
+                  "russian_air_attack",
+                  "civilian",
+                  "attack_date",
+                  "incident_identity",
+                  "death_count"
+                ]
+              }
+            ],
+            "provenance": {
+              "kind": "explicit_cached_text_rules_v1",
+              "article_sha256": "e5aafb1c946cce17cdacf89500cca4cde31a0cc9f27491ebdf621bddd7d7f9f2"
+            }
+          },
+          {
+            "candidate_ids": [
+              "SYNTHETIC-B"
+            ],
+            "candidate_fingerprints": {
+              "SYNTHETIC-B": "faaf9dbb2055ebe648eb453f14dc158f87ea538a022acf4f2a859ed292446e85"
+            },
+            "incident": {
+              "city_key": "dnipro",
+              "attack_date": "2026-11-03",
+              "place": "тестова, 1",
+              "attack_slot": "08:00",
+              "attack_type": "missile"
+            },
+            "facts": {
+              "city_boundary": true,
+              "russian_air_attack": true,
+              "civilian": true,
+              "attack_date": true,
+              "incident_identity": true,
+              "death_count": true
+            },
+            "count": {
+              "kind": "total",
+              "value": 3
+            },
+            "observed_at": "2026-11-03",
+            "sources": [
+              {
+                "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+                "origin_id": "national-police",
+                "basis": "retained-text-sha256=da40ce6477fb4d117a77bf6cc67f7c8b3b67218b2673fce359cc198907a7f1f1",
+                "supports": [
+                  "city_boundary",
+                  "russian_air_attack",
+                  "civilian",
+                  "attack_date",
+                  "incident_identity",
+                  "death_count"
+                ]
+              }
+            ],
+            "provenance": {
+              "kind": "explicit_cached_text_rules_v1",
+              "article_sha256": "da40ce6477fb4d117a77bf6cc67f7c8b3b67218b2673fce359cc198907a7f1f1"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "candidate_id": "SYNTHETIC-A",
+            "city_key": "dnipro",
+            "title": "SYNTHETIC OFFLINE CONTROL",
+            "snippet": "",
+            "url": "https://suspilne.media/SYNTHETIC-NOT-A-REAL-ARTICLE",
+            "publisher": null,
+            "publisher_url": "https://suspilne.media",
+            "published_at": "2026-11-03T10:00:00Z",
+            "status": "needs_review",
+            "hints": {
+              "possible_attack_dates": [],
+              "text_flags": []
+            }
+          },
+          {
+            "candidate_id": "SYNTHETIC-B",
+            "city_key": "dnipro",
+            "title": "SYNTHETIC OFFLINE CONTROL",
+            "snippet": "",
+            "url": "https://npu.gov.ua/SYNTHETIC-NOT-A-REAL-ARTICLE",
+            "publisher": null,
+            "publisher_url": "https://npu.gov.ua",
+            "published_at": "2026-11-03T10:00:00Z",
+            "status": "needs_review",
+            "hints": {
+              "possible_attack_dates": [],
+              "text_flags": []
+            }
+          }
+        ],
+        "group_basis": "cached_incident_evidence",
+        "confirmed_total_claim": 3,
+        "already_accounted": 3,
+        "reserved_in_previous_proposals": 0,
+        "matched_revision_ids": [
+          "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-2",
+          "casualty-event:3f1d64d49fbc2c66b5e23bd9:total-3"
+        ],
+        "matched_reservation_ids": [],
+        "proposed_delta": 0,
+        "reasons": [],
+        "category": "AUTO_READY",
+        "publication_allowed": false,
+        "action": "ALREADY_ACCOUNTED"
+      }
+    ],
+    "proposals": []
+  }
+}
