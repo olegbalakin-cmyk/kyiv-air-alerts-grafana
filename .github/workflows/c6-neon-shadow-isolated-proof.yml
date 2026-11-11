@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       research_sha:
-        description: Owner-approved exact full SHA on research-c6-unblock-shadow-proof-2026-11-01
+        description: Owner-approved exact full SHA on research-c6-post62-exact-head-tests-2026-11-11
         required: true
         type: string
       c2_artifact_run_id:
@@ -51,7 +51,7 @@ jobs:
       github.event_name == 'workflow_dispatch' &&
       github.actor == 'olegbalakin-cmyk' &&
       inputs.owner_approval == 'APPROVE_ONE_READONLY_PROOF' &&
-      github.ref == 'refs/heads/research-c6-unblock-shadow-proof-2026-11-01' &&
+      github.ref == 'refs/heads/research-c6-post62-exact-head-tests-2026-11-11' &&
       github.sha == inputs.research_sha
     environment: c6-neon-shadow-readonly
     runs-on: ubuntu-latest
