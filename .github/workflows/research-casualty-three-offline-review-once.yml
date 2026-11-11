@@ -19,6 +19,7 @@ jobs:
       - name: Checkout research only, no retained credentials
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - uses: actions/setup-python@v5
