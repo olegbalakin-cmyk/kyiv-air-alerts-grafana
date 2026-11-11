@@ -132,6 +132,7 @@ class SourceSpecificTimestampTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "CAPTURE_SOURCE_SHA"):
             verify(tampered)
         tampered = copy.deepcopy(row)
+        tampered["pages"][0]["body_base64"] = base64.b64encode(b'{"alarms":[]}').decode()
         resign(tampered)
         with self.assertRaisesRegex(ValueError, "CAPTURE_BODY_SHA"):
             verify(tampered)
@@ -204,7 +205,7 @@ class SourceSpecificTimestampTests(unittest.TestCase):
                 run_id=RUN["github_run_id"], run_attempt=1,
                 workflow_sha=RUN["workflow_sha"], input_sha=RUN["input_sha"],
                 db_branch="br-synthetic-test",
-                writer_url="postgresql://placeholder@ep-synthetic.neon.tech/test",
+                writer_url="postgresql://placeholder@ep-synthetic.us-east-2.aws.neon.tech/test",
                 verifier=lambda _: receipt)
             self.assertEqual(result["status"], "EXPORTED")
             path = output / "c2-shadow-inputs.zip"
