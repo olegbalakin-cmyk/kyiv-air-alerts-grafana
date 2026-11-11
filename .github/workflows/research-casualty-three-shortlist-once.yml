@@ -84,4 +84,18 @@ jobs:
                      'publisher':x.get('publisher'),'published_at':x.get('published_at'),
                      'title':x.get('title')
                   },ensure_ascii=False))
+          chosen_ids=[
+            "e0fba98b19473874e9a1d8f1", # Zaporizhzhia: date/official positive candidate
+            "42f2a273f56c87e0bcd22af8", # Ivano-Frankivsk: fatalities updated
+            "5e46ae290e43745fc4b827fa", # Kharkiv: weekly multi-strike retrospective
+          ]
+          chosen=[]
+          for cid in chosen_ids:
+              matches=[x for x in elig if x.get('candidate_id')==cid]
+              assert len(matches)==1, ('CANDIDATE_NOT_UNIQUE_AND_ALLOWLISTED',cid,len(matches))
+              chosen.append(matches[0])
+          assert len({x['url'] for x in chosen})==3
+          assert all(x['status']=='needs_review' for x in chosen)
+          print('FROZEN_SELECTION_JSON='+json.dumps(chosen,ensure_ascii=False,separators=(',',':')))
+          print('FROZEN_SELECTION_IDS='+','.join(chosen_ids))
           PY
