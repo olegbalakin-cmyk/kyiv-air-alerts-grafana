@@ -74,6 +74,8 @@ jobs:
           test "$(sha256sum "$three/evidence.json" | cut -d' ' -f1)" = 84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df
           test "$(sha256sum "$five/evidence.json" | cut -d' ' -f1)" = 68ceccdcca68a0c93d42a0c0173c32c9ab47b659415e9bd2b274df8d9cf0fdf9
           mkdir -p research/casualty_cumulative_update_2026_11_11/results
+          mkdir -p research/casualty_military_status_fix_2026_11_11/input
+          cp "$three"/*.json research/casualty_military_status_fix_2026_11_11/input/
           sha256sum "$three"/*.json "$five"/*.json \
             research/casualty_three_new_http_2026_11_11/{selected_queue.json,INDEPENDENT_GOLD.json} \
             research/casualty_five_candidate_selection_2026_11_11/selected_queue.json \
@@ -87,7 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m unittest \
-            research/casualty_military_status_fix_2026_11_11/test_military_status.py
+            research/casualty_military_status_fix_2026_11_11/test_military_status.py \
             research/casualty_cumulative_update_2026_11_11/test_cumulative.py \
             research/casualty_attribution_2026_11_11/test_replay.py \
             kyiv-air-alerts-grafana/tests/test_casualty_auto_review.py \
