@@ -95,6 +95,87 @@ def _number(token):
     return int(token) if token.isdigit() else COUNT_WORDS.get(token)
 
 
+def _cumulative_total_update(low):
+    """Select an explicit official *cumulative* correction, not a maximum.
+
+    Text is not assumed chronological (live articles often show newest first).
+    Only a single incident scope, one attack window/weapon, explicit revision
+    language for every differing claim and an attributable official final count
+    may unlock the otherwise conflicting totals. Ambiguity remains a hold.
+    """
+    if re.search(r'\b(?:інш\w*|окрем\w*|повторн\w*|друг\w*)\s+'
+                 r'(?:атак\w*|удар\w*|обстріл\w*)', low):
+        return None
+    if re.search(r'\b(?:ще|додатково)\s+\d+\s+'
+                 r'(?:люд\w*|загибл\w*).{0,35}(?:загинул|помер|загибл)', low):
+        return None
+    slots = {name for name, pattern in (
+        ('morning', r'\b(?:вранці|ранков\w*)\b'),
+        ('evening', r'\b(?:увечері|ввечері|вечірн\w*)\b'),
+        ('night', r'\b(?:вночі|нічн\w*)\b'),
+        ('afternoon', r'\b(?:вдень|денн\w* удар)\b'))
+        if re.search(pattern, low)}
+    if len(slots) > 1:
+        return None
+    # Different weapons in competing fatality claims cannot be treated as
+    # revisions of one attack merely because city/day matches.
+    weapons = sum(bool(re.search(p, low)) for p in
+                  (r'ракет\w*', r'дрон|бпла|безпілотн', r'\bкаб\w*|авіабомб'))
+    if weapons > 1:
+        return None
+    patterns = (rf'\bзагинул[аои]?\s+({COUNT_TOKEN})\s+{COUNT_NOUN}',
+                rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b',
+                rf'\b({COUNT_TOKEN})\s+загиблих\b')
+    claims = []
+    for sentence in re.split(r'(?<=[.!?])\s+|\n+', low):
+        if not sentence.strip():
+            continue
+        values = {_number(m[1]) for pattern in patterns
+                  for m in re.finditer(pattern, sentence)}
+        values.discard(None)
+        if not values:
+            continue
+        if len(values) != 1:
+            return None  # Multiple incompatible numbers in one statement.
+        origin, origin_name = _origin_attribution(sentence)
+        # A directly attributable DSNS correction may use "уточнили"
+        # rather than the verbs used by ordinary source attribution.
+        if origin == 'unattributed' and re.search(r'\bдснс\b', sentence) \
+                and re.search(r'уточнил\w*', sentence):
+            origin, origin_name = 'dsns', 'ДСНС'
+        update = bool(re.search(
+            r'уточнен|уточнил|за останніми даними|станом на|'
+            r'зросл\w*.{0,45}кількіст|до\s+\d+\s+люд\w*\s+зросл|'
+            r'збільшил|зменшил|пізніше|згодом|раніше|спочатку|первинно|'
+            r'виправлен|скоригован|остаточн', sentence))
+        claims.append({'value': next(iter(values)), 'origin_id': origin,
+                       'origin_name': origin_name, 'update': update,
+                       'earlier': bool(re.search(r'\bраніше\b|\bспочатку\b|'
+                                                 r'\bпервинно\b|до уточнення', sentence)),
+                       'later': bool(re.search(r'\bпізніше\b|\bзгодом\b|'
+                                               r'\bостаточн\w*|після уточнення', sentence)),
+                       'sentence_sha256': hashlib.sha256(sentence.encode()).hexdigest()})
+    totals = {claim['value'] for claim in claims}
+    if len(totals) < 2:
+        return None
+    officials = [c for c in claims if c['origin_id'] in
+                 {'dsns', 'prosecutor', 'national-police', 'city-mva'}
+                 and c['update'] and not c['earlier']]
+    later = {c['value'] for c in officials if c['later']}
+    choices = later if later else {c['value'] for c in officials}
+    if len(choices) != 1:
+        return None
+    selected = next(iter(choices))
+    # Unexplained totals may be independent groups, not earlier estimates.
+    if any(not c['update'] for c in claims if c['value'] != selected):
+        return None
+    chosen = next(c for c in officials if c['value'] == selected)
+    return {'value': selected, 'reported_totals': sorted(totals),
+            'basis': 'unique_attributed_official_cumulative_update',
+            'origin_id': chosen['origin_id'], 'origin_name': chosen['origin_name'],
+            'official_sentence_sha256': chosen['sentence_sha256']}
+
+
 def _fatal_total(low):
     """Only a definite event total, not injuries, guesses, or a second strike."""
     nums = []
@@ -105,9 +186,18 @@ def _fatal_total(low):
     if re.search(r'не загинул|без загиблих|не підтвердж|непідтвердж|спростув|'
                  r'ймовірн|попередн\w* даними|можлив\w* загиб', low):
         return None
-    nums = {n for n in nums if n is not None}
-    return next(iter(nums)) if len(nums) == 1 else None
-
+    # Also detect prior "18 загиблих" claims, without accepting that wording
+    # alone as a new standalone automatic fatality total.
+    all_values = {n for n in nums if n is not None}
+    all_values.update(_number(m[1]) for m in
+                      re.finditer(rf'\b({COUNT_TOKEN})\s+загиблих\b', low))
+    all_values.discard(None)
+    if len(all_values) == 1 and nums:
+        return next(iter(all_values))
+    if len(all_values) > 1:
+        update = _cumulative_total_update(low)
+        return update['value'] if update else None
+    return None
 
 def _date_signals(low, published_at):
     """Distinguish attack date from news date; never treat a mourning date as attack."""
@@ -250,6 +340,7 @@ def extract_cached_reports(queue, articles):
         slot = _attack_slot(low)
         weapon = ('missile' if re.search(r'ракет', low) else
                   'drone' if re.search(r'безпілотник|безпілотн|дрон|бпла|бпіл', low)
+                  else 'guided-bomb' if re.search(r'\bкаб\w*|керован\w*\s+авіабомб', low)
                   else 'unknown')
         russian = bool(re.search(r'\bрф\b|російськ|ворог', low))
         air = True if russian and weapon != 'unknown' else None
@@ -263,12 +354,15 @@ def extract_cached_reports(queue, articles):
             place = 'food-warehouse'
         elif re.search(r'інфраструктурн\w* об.єкт', low):
             place = 'infrastructure-object'
-        origin_id, origin_name = _origin_attribution(low)
+        resolution = _cumulative_total_update(low)
+        origin_id, origin_name = ((resolution['origin_id'], resolution['origin_name'])
+                                  if resolution else _origin_attribution(low))
         parsed.append({'c': c, 'article': article, 'low': low,
                        'day': day, 'mentioned_day': mentioned_day,
                        'slot': slot, 'weapon': weapon, 'place': place,
                        'boundary': boundary, 'russian': russian, 'air': air,
                        'total': total, 'status': _civilian_status(low, total),
+                       'count_resolution': resolution,
                        'origin_id': origin_id, 'origin_name': origin_name})
     anchors = [p for p in parsed if p['day'] and (p['slot'] or p['place'])
                and p['weapon'] != 'unknown' and p['boundary'] is True
@@ -347,6 +441,8 @@ def extract_cached_reports(queue, articles):
                 'attack_slot_in_article': p['slot'],
                 'attack_type_in_article': p['weapon'],
                 'origin_attribution': p['origin_name'],
+                **({'cumulative_update': p['count_resolution']}
+                   if p['count_resolution'] else {}),
                 'later_attack_mentioned': bool(re.search(r'повторно.{0,35}атакув|'
                                                           r'повторно\s+атакував', p['low']))}
         })
