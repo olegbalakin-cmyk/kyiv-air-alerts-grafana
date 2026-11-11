@@ -139,6 +139,20 @@ class MilitaryStatusTests(unittest.TestCase):
         self.assertEqual(reports[0]["civilian_status"], "civilian_presumed")
         self.assertEqual(result["events"][0]["category"], "AUTO_READY")
 
+    def test_other_fatal_attack_military_does_not_mark_first_deceased_military(self):
+        # Two separately reported lethal incidents cannot safely be combined.
+        from casualty_auto_review import _incident_scopes
+        text = (PREFIX + OFFICIAL + " Також російські військові атакували іншу громаду. "
+                "Внаслідок іншого удару загинули троє військовослужбовців.")
+        scopes = _incident_scopes(text.casefold())
+        self.assertEqual(len(scopes), 2)
+        self.assertEqual(_civilian_status(scopes[0], 2), "civilian_presumed")
+        self.assertEqual(_civilian_status(scopes[1], 3), "civilian_ambiguous")
+        reports, result = synthetic(text, "other-fatal")
+        self.assertEqual(reports, [])
+        self.assertEqual(result["events"][0]["category"], "NEEDS_REVIEW")
+        self.assertFalse(result["proposals"])
+
     def test_mixed_victims_held(self):
         reports, result = synthetic(PREFIX + "Серед загиблих військовослужбовці. " + OFFICIAL,
                                     "mixed")
