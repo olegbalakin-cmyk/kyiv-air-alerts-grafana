@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import re
 import time
@@ -230,6 +232,76 @@ def apply_corrections(current: dict[int, dict], recent_anomalies: list[dict]) ->
     return applied, unresolved
 
 
+def source_capture_reaches_checkpoint(pages: list[dict], previous: dict | None) -> bool:
+    """Fail closed unless captured Telegram pages cover the previous poll.
+
+    This is source-history coverage, NOT proof that each alert has a known end.
+    It checks actual response bytes, source pagination and checkpoint provenance.
+    C2 record()/verify() independently enforce the completed-pair overlap/replay.
+    """
+    if not isinstance(previous, dict):
+        return False
+    if (previous.get("source_key") != "sevastopol_history"
+            or previous.get("source_identity") != {"url": SOURCE_URL, "channel": CHANNEL}
+            or not re.fullmatch(r"[0-9a-f]{64}", str(previous.get("source_sha256", "")))
+            or not pages):
+        return False
+    try:
+        previous_clock = history_capture.utc(previous["last_checked_at"])
+        oldest_id = None
+        oldest_message_at = None
+        for i, page in enumerate(pages):
+            expected_url = SOURCE_URL if i == 0 else f"{SOURCE_URL}?before={oldest_id}"
+            if page["url"] != expected_url:
+                return False
+            raw = base64.b64decode(page["body_base64"], validate=True)
+            if not raw or hashlib.sha256(raw).hexdigest() != page["body_sha256"]:
+                return False
+            if not (previous_clock < history_capture.utc(page["captured_at"])
+                    and history_capture.utc(page["started_at"]) <= history_capture.utc(page["captured_at"])):
+                return False
+            messages = parse_page(raw.decode("utf-8"))
+            ids = [m["id"] for m in messages]
+            if not ids or len(ids) != len(set(ids)):
+                return False
+            if oldest_id is not None and max(ids) >= oldest_id:
+                return False
+            oldest_id = min(ids)
+            message_time = min(m["at"] for m in messages)
+            oldest_message_at = min(oldest_message_at, message_time) if oldest_message_at else message_time
+        return oldest_message_at is not None and oldest_message_at <= previous_clock
+    except (KeyError, TypeError, ValueError, UnicodeError):
+        return False
+
+
+def capture_continuity_eligible(anomalies: list[dict], pages: list[dict],
+                                *, checkpoint_path: Path | None = None) -> bool:
+    """An old unresolved event does not veto proven current source coverage.
+
+    Unknown/open/recent anomalies still veto. Never synthesizes alert ends.
+    """
+    path = checkpoint_path or history_capture.CHECKPOINTS
+    try:
+        checkpoints = json.loads(path.read_text(encoding="utf-8"))
+        previous = checkpoints.get(CITY_KEY)
+        if not source_capture_reaches_checkpoint(pages, previous):
+            return False
+        previous_clock = history_capture.utc(previous["last_checked_at"])
+        if not isinstance(anomalies, list):
+            return False
+        for anomaly in anomalies:
+            if anomaly["type"] != "missing_end_before_new_start":
+                return False
+            start = history_capture.utc(anomaly["start"]["at"])
+            next_start = history_capture.utc(anomaly["next_start"]["at"])
+            if not (start < next_start <= previous_clock
+                    and int(anomaly["start_id"]) < int(anomaly["next_start_id"])):
+                return False
+        return True
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return False
+
+
 def initial_events() -> dict:
     audit = json.loads(STRICT_AUDIT.read_text(encoding="utf-8"))
     return {
@@ -327,9 +399,12 @@ def main() -> None:
     store, fetch_meta = update_event_store()
     alerts_for_shadow = [Alert(start=datetime.fromisoformat(p["start"]).astimezone(TZ), end=datetime.fromisoformat(p["end"]).astimezone(TZ), source="sevastopol_occupation_admin_telegram") for p in store.get("pairs", []) if datetime.fromisoformat(p["end"]).astimezone(TZ) > datetime.fromisoformat(p["start"]).astimezone(TZ)]
     multicity_shadow_payload.record_city_alerts(CITY_KEY, alerts_for_shadow, producer="add_sevastopol_exact")
+    capture_pages = fetch_meta.pop("_capture_pages")
+    completed_air = fetch_meta.pop("_completed_air")
     history_capture.record(CITY_KEY, "sevastopol_history", {"url": SOURCE_URL, "channel": CHANNEL},
-        fetch_meta.pop("_capture_pages"), fetch_meta.pop("_completed_air"),
-        continuity=not store["meta"]["recent_anomalies"])
+        capture_pages, completed_air,
+        continuity=(history_capture.enabled() and capture_continuity_eligible(
+            store["meta"]["recent_anomalies"], capture_pages)))
     output = build_city_output(store)
 
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
