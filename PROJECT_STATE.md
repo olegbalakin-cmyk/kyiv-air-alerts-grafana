@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest C6 accepted: **C6-REPLAY-SEVASTOPOL-MERGED-01**. Owner-approved [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) merged `main@fe4ab1c1` (16/16 offline PASS); [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) merged `site-prod@6de49e3b` (8/8 PASS). Live ZIP/SHA, 23/23 source continuity and Neon readback remain **UNPROVEN**. `GLOBAL_CUTOVER=NO`.
-Latest casualty research checkpoint: **CASUALTY-MULTI-ATTACK-HOLD-01** (attribution 4/4 PASS; proposed Odesa +1 UNSAFE due cross-attack mixing; publish OFF).
+Latest casualty research checkpoint: **CASUALTY-CROSS-INCIDENT-ISOLATION-01** (Odesa false +1 eliminated; 10/10 targeted PASS; wider regression fixture missing; publication OFF).
 
 ## Working instructions
 
@@ -23,22 +23,22 @@ Latest casualty research checkpoint: **CASUALTY-MULTI-ATTACK-HOLD-01** (attribut
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
 - **Operational WIP / historical reference / backfill:** separate tracks; no promotion by research proof.
-- **Casualty research:** Source capture 5 HTML/4 excerpts PASS. [Attribution offline #43007370603](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43007370603) 4/4 PASS, but Odesa +1 AUTO_READY uses cross-attack details and is **REJECTED for promotion**. Reviewer incident extraction requires locality guard.
+- **Casualty research:** real 5-URL capture 5 HTML / 4 usable. New [Odesa isolation proof #43024613349](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43024613349) 10/10 targeted PASS, unsafe +1 suppressed; no real publishable proposals. Wider 45-test regression 44 PASS / 1 ERROR on absent fixture; research-only.
 
 ## Concrete next tasks
 
 1. Inspect next **regular** C2 after both merges; no manual dispatch. Check writer, 23-city QA/Git JSON and safe export diagnostic; require real same-run ZIP + SHA-256. Workflow SUCCESS alone is not bundle PASS.
 2. Verify Sevastopol source checkpoint advances with actual captured raw-page hash, pagination, overlap and provenance; historic alert `25006` remains unresolved. Require independent 23/23 full source receipts; absent proof stays BLOCKED.
 3. Separately approve exact-run read-only Neon→JSON proof (PR #48) and DST raw baseline. Do not infer Netlify deployment from `site-prod` merge. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: narrow offline incident-locality guard for multi-attack articles; Odesa Nov 7 must NOT be AUTO_READY on mixed paragraphs. Preserve direct-attribution fix and Dnipro hold; no media HTTP/merge/ledger changes.
+4. Casualty: restore **authentic** missing `research/casualty_automated_review_2026_11_10/cached_evidence.json` fixture from prior immutable proof, then rerun full legacy + new offline suite; do not fabricate evidence or rerun publisher HTTP. Current code remains research-only, merge/publication blocked.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## CASUALTY-MULTI-ATTACK-HOLD-01 — attribution fixed, unsafe mixed-incident auto-proposal (2026-11-11)
+## CASUALTY-CROSS-INCIDENT-ISOLATION-01 — bounded Odesa false-positive fixed (2026-11-11)
 
-- [Research `6d3c35d`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/6d3c35d452a034034a17bb671bf62400cb2eab55); [Actions #43007370603](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43007370603) 4/4 PASS on frozen four publisher excerpts. Odesa MVA phrase `повідомив очільник …` now attributed; Dnipro remains unattributed. Odesa `AUTO_READY=1` and offline +1 **NOT ACCEPTED**: parsed place `residential-buildings`, slot `night`, weapon `drone` came from other attacks described in the same article. Artifact `13849147170`, ZIP SHA256 `d24d4bbf…2876d2cbf` verified; replay proposals 0, inputs unchanged.
-- **Gate BLOCKED:** do not merge research parser or write `revisions.csv`. Next: narrowly prevent cross-incident fact mixing, keep evidence provenance, offline negative regression; no new source HTTP or publication.
+- [Research implementation `c19e0c0`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/c19e0c057001e9b21867261250e5b4fc74b1d980) scopes article facts to a single fatal attack section and corrects `півночі`/night word boundary; previously accepted MVA attribution retained. [Exact-head focused Actions #43024613349](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43024613349) at `e96d5217`: **10/10 PASS**, Odesa `NEEDS_REVIEW` and no fabricated +1, Dnipro `NEEDS_REVIEW`, controlled single-incident `AUTO_READY` preserved. Artifact `13856616913` SHA256 `7c8438f1…b5beb87`, verified and protected inputs unchanged; full [report `de41094c`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/de41094cbe9cf1b34ac9c24f230941564b2cc3dc).
+- **Not approved for production:** multi-attack section splitter has limited phrasing coverage. Broad 45-test run `43024467127` had 44 PASS + 1 ERROR (missing historical `cached_evidence.json` fixture); next restore authentic fixture and complete full offline regression. Original unsafe Odesa `AUTO_READY+1` from `CASUALTY-MULTI-ATTACK-HOLD-01` remains rejected; no casualty ledger, WIP, C6/Neon or publication change.
 
 ## CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01 — five real WIP URLs; reviewer blocked (2026-11-11)
 
