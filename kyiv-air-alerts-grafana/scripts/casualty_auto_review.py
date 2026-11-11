@@ -151,13 +151,25 @@ def _attack_slot(low):
         return time_matches[0]
     if len(set(time_matches)) > 1:
         return None
-    for slot, pattern in (('morning', r'вранці|ранков'),
-                          ('night', r'вночі|нічн'),
-                          ('evening', r'ввечері|увечері|вечірн'),
-                          ('afternoon', r'вдень|денн\w* удар')):
+    for slot, pattern in (('morning', r'\b(?:вранці|ранков\w*)\b'),
+                          ('night', r'\b(?:вночі|нічн\w*)\b'),
+                          ('evening', r'\b(?:ввечері|увечері|вечірн\w*)\b'),
+                          ('afternoon', r'\b(?:вдень|денн\w* удар)\b')):
         if re.search(pattern, low):
             return slot
     return None
+
+
+def _incident_scopes(low):
+    """Keep facts from separately introduced strikes out of each other's event.
+
+    This is deliberately a small, conservative narrative boundary, not NLP.
+    When multiple sections report death totals, none is auto-parsed.
+    """
+    boundary = (r'(?=(?:^|(?<=[.!?])|(?<=\n))[ \t]*'
+                r'(?:раніше|також|окремо|напередодні|до цього|перед тим|того ж дня)\b'
+                r'[^\n.!?]{0,160}\b(?:атакув\w*|удар\w*|вдарил\w*|обстрілял\w*|влуч\w*)\b)')
+    return [part.strip() for part in re.split(boundary, low) if part.strip()]
 
 
 def _civilian_status(low, total):
@@ -209,9 +221,16 @@ def extract_cached_reports(queue, articles):
     parsed = []
     for article in articles:
         c = by_id[article['candidate_id']]
-        low = str(article.get('text') or '').casefold()
-        if not low.strip():
+        full_text = str(article.get('text') or '').casefold()
+        if not full_text.strip():
             continue
+        # A whole article is not one incident: earlier/other attacks must
+        # never donate their place, weapon, time, city or official origin.
+        scopes = _incident_scopes(full_text)
+        fatal_scopes = [part for part in scopes if _fatal_total(part) is not None]
+        if len(fatal_scopes) != 1:
+            continue  # No unique fatal incident section: needs human review.
+        low = fatal_scopes[0]
         city_pattern = CITY_FORMS.get(c['city_key'], rf'\b{re.escape(c.get("city", "").casefold())}\b')
         city_present = bool(re.search(city_pattern, low))
         outside = bool(re.search(r'передміст|за межами міста|на околиці (?:області|громади)|'

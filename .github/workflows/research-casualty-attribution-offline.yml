@@ -30,7 +30,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run focused offline regression and replay tests
         run: |
-          python -m unittest research/casualty_attribution_2026_11_11/test_replay.py -v
+          python -m unittest research/casualty_attribution_2026_11_11/test_replay.py kyiv-air-alerts-grafana/tests/test_casualty_auto_review.py -v
       - name: Upload test verdict, never revisions
         if: always()
         uses: actions/upload-artifact@v4
