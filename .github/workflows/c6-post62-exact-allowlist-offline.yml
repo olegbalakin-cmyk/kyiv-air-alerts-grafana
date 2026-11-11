@@ -1,0 +1,39 @@
+name: C6 post-PR62 exact-head allowlist offline (research only)
+on:
+  push:
+    branches:
+      - research-c6-post62-exact-head-tests-2026-11-11
+    paths:
+      - .github/workflows/c6-post62-exact-allowlist-offline.yml
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head-four-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout immutable PR 70 test target
+        uses: actions/checkout@v4
+        with:
+          ref: cdfb456def46cecead8fc4e78ebe88b4f19f0b44
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact immutable test target
+        run: |
+          test "$(git rev-parse HEAD)" = "cdfb456def46cecead8fc4e78ebe88b4f19f0b44"
+          git status --porcelain
+      - name: Four targeted no-network tests
+        run: |
+          python -m unittest discover -s tests -p test_c6_post62_builder_allowlist.py -v 2>&1 | tee c6-post62-test-results.txt
+      - name: Preserve non-sensitive exact-head test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-post62-exact-head-four-tests
+          path: c6-post62-test-results.txt
+          if-no-files-found: warn
+          retention-days: 30
