@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest C6 accepted: **C6-REPLAY-SEVASTOPOL-MERGED-01**. Owner-approved [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) merged `main@fe4ab1c1` (16/16 offline PASS); [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) merged `site-prod@6de49e3b` (8/8 PASS). Live ZIP/SHA, 23/23 source continuity and Neon readback remain **UNPROVEN**. `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-INDEPENDENT-REAL-TEXT-2OF2-01** (2 real negative cases correctly NEEDS_REVIEW, zero false positives/duplicates; no real positive AUTO_READY; publish OFF).
+Latest casualty: **CASUALTY-THREE-REAL-ARTICLE-SAFETY-FINDINGS-01** (3/3 captured; reviewer 2/3 vs gold, missed +23; military-status internal safety bug; publish OFF).
 
 ## Working instructions
 
@@ -23,18 +23,22 @@ Latest casualty: **CASUALTY-INDEPENDENT-REAL-TEXT-2OF2-01** (2 real negative cas
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
 - **Operational WIP / historical reference / backfill:** separate tracks; no promotion by research proof.
-- **Casualty research:** 45/45 full offline regression PASS. [Independent 2-article proof #43049239644](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43049239644) checked Kharkiv/LB.ua and Lutsk/UNIAN vs pre-frozen gold: 2/2 NEEDS_REVIEW correct, 0 proposals/duplicates. **No eligible real positive** tested; recall/universal incident safety unproven.
+- **Casualty research:** [one-shot source HTTP #43053796144](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43053796144) 3/3 articles, 12 requests; [frozen-gold offline #43056505565](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43056505565) intentional FAIL, 2/3 statuses, 1 missed justified +23 Zaporizhzhia, 0 false AUTO_READY/duplicates. Ivano report wrongly marked explicitly military dead as civilian_presumed. No merge/publication.
 
 ## Concrete next tasks
 
 1. Inspect next **regular** C2 after both merges; no manual dispatch. Check writer, 23-city QA/Git JSON and safe export diagnostic; require real same-run ZIP + SHA-256. Workflow SUCCESS alone is not bundle PASS.
 2. Verify Sevastopol source checkpoint advances with actual captured raw-page hash, pagination, overlap and provenance; historic alert `25006` remains unresolved. Require independent 23/23 full source receipts; absent proof stays BLOCKED.
 3. Separately approve exact-run read-only Neon→JSON proof (PR #48) and DST raw baseline. Do not infer Netlify deployment from `site-prod` merge. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: next separate owner-authorized bounded source HTTP shadow of at most 3 *new* WIP article URLs, prioritizing a clearly dated, officially sourced single fatal air attack (positive-gold candidate), a cumulative deaths update and a multi-strike retrospective. Freeze gold before reviewer; no publication, merge or source HTTP until owner approval.
+4. Casualty: **first** fix explicit servicemember deaths overriding civilian_presumed, with real frozen offline negative/control tests; **then separately** fix same-incident cumulative death updates 18→20→23 without summing and warning-text false place. No more source HTTP, WIP/ledger writes, merger or publish.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-THREE-REAL-ARTICLE-SAFETY-FINDINGS-01 — live source PASS; reviewer gaps (2026-11-11)
+
+- [Physical #43053796144](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43053796144) **3/3 articles**, 12 bounded HTTP, source tests 25/25 PASS; artifact `13870872313` ZIP SHA256 `f7255cba…32f2148`. Independent gold committed **before** reviewer at `4174d3bb`. [Offline #43056505565](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43056505565) intentional FAIL: **2/3 correct**, Zaporizhzhia official 10 Oct KAB wave latest **23** (18→20→23) missed, reviewer 0 proposals/duplicates; artifact `13872120318` SHA256 `f9657caa…bdfb58f`. Ivano-Frankivsk explicit `Загиблі - військовослужбовці` was internally `civilian_presumed` (status held only by unrelated origin gate); wrong place from `на вулиці` warning. Kharkiv oblast deaths correctly held from city. [Research report `8f39b8b8`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/8f39b8b8cc16c77c340249d1b050ea79727b6949), draft PR #67. **No automatic casualty revision or promotion approved.**
+
 ## CASUALTY-INDEPENDENT-REAL-TEXT-2OF2-01 — two additional safe negatives (2026-11-11)
 
 - [Exact-head offline Actions #43049239644](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43049239644) `5ea34f85`: Kharkiv `96dc8052` and Lutsk `6c946bfd` match independent gold, frozen first at `1b0b6879`: **2/2 NEEDS_REVIEW**. First and replay proposals 0, duplicates 0, protected inputs SHA unchanged; reviewer code unchanged. [Report `10b87089`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/10b870897519d3815384b7c46a9f416ca0fc3924); artifact `13869540015` ZIP SHA256 `0c66327c…25e3209` verified.
