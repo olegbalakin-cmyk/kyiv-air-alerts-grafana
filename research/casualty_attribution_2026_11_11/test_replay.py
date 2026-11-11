@@ -66,6 +66,13 @@ class AttributionTests(unittest.TestCase):
             dnipro=next(e for e in events if e["incident"]["city_key"]=="dnipro")
             self.assertEqual(dnipro["reports"][0]["sources"][0]["origin_id"], "unattributed")
             self.assertEqual(odesa["reports"][0]["sources"][0]["origin_id"], "city-mva")
+            self.assertEqual(summary["auto_ready"], 1)
+            self.assertEqual(len(proposals), 1)
+            self.assertEqual(proposals[0]["candidate_ids"], "f4719e871b92e7563c7150da")
+            # Recorded as a WARNING, not proof of correct incident identity:
+            # residential building and drone in this text refer to other attacks.
+            self.assertEqual(odesa["incident"]["place"], "residential-buildings")
+            self.assertEqual(odesa["incident"]["attack_type"], "drone")
             self.assertEqual(duplicates, [])
             self.assertEqual({str(p): hashlib.sha256(p.read_bytes()).hexdigest()
                              for p in (EVIDENCE, SELECTED, LEDGER, BASELINE)},before)
