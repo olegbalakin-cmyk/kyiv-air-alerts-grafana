@@ -24,6 +24,20 @@ def utc(value):
     return dt.astimezone(timezone.utc)
 
 
+def ukrainealarm_event_utc(value):
+    """Match the production UkraineAlarm bridge for regionHistory event timestamps only.
+
+    apply_ukrainealarm_bridge.parse_dt interprets a timezone-less startDate/endDate
+    as UTC. This must never apply to HTTP capture clocks, checkpoints or other
+    source types: those continue through the strict utc() validator.
+    """
+    dt = value if isinstance(value, datetime) else datetime.fromisoformat(
+        str(value).strip().replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
 def identity(env=None):
     env = os.environ if env is None else env
     return {"github_run_id": int(env.get("GITHUB_RUN_ID") or 0),
@@ -106,8 +120,11 @@ def replay(row):
                     if str(alarm.get("alertType") or "").upper() != "AIR":
                         continue
                     start, end = alarm.get("startDate"), alarm.get("endDate")
-                    if start and end and utc(start) < utc(end):
-                        pairs.append({"start": start, "end": end})
+                    if start and end:
+                        start_at = ukrainealarm_event_utc(start)
+                        end_at = ukrainealarm_event_utc(end)
+                        if start_at < end_at:
+                            pairs.append({"start": start_at, "end": end_at})
     elif source == "kyiv_digital":
         from update_data import parse_live_history
         alerts, _ = parse_live_history(raw_pages[0].decode("utf-8"))
