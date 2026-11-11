@@ -1,8 +1,8 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**.
-Latest casualty research: **CASUALTY-EXPLICIT-MILITARY-STATUS-54-01**, 54/54 offline PASS; still unpublished, next bounded task cumulative 18→20→23 in Zaporizhzhia. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
+Latest casualty research: **CASUALTY-CUMULATIVE-OFFICIAL-UPDATE-63-01**: 63/63 offline PASS, shadow +23 only, publication OFF.
 
 ## Working instructions
 
@@ -22,18 +22,23 @@ Latest casualty research: **CASUALTY-EXPLICIT-MILITARY-STATUS-54-01**, 54/54 off
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill:** remain separate, not promoted. **Casualty:** [military-status PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) 54/54 PASS in isolated offline research; Ivano-Frankivsk explicit military deaths now fail closed. Zaporizhzhia chronological 18→20→23 and false warning-place remain open. No casualty merge, publication or production change.
+- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** [PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) military-status 54/54 PASS; [PR #73](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/73) cumulative totals 63/63 PASS. Zaporizhzhia official 18→20→23 yields only **shadow +23** for pinned ledger; replay 0. False `place` from warning remains open; no merge or publication.
 
 ## Concrete next tasks
 
 1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty track: independently fix chronological same-incident **18→20→23** official updates for Zaporizhzhia using original retained evidence; keep separate attacks, retractions, civilian military status, source, date/geography and dedup gates; offline-only research, no media HTTP, operational revisions or merge. Investigate unrelated warning text as attack place in another scoped task.
+4. Casualty: offline fix false attack `place` from warning `на вулиці під час тривоги`; retain all 63 regressions and existing military/incident protection. Reconcile current casualty ledger before any +23 publication; separate owner approval required.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-CUMULATIVE-OFFICIAL-UPDATE-63-01 — research proof PASS (2026-11-11)
+
+- [PR #73](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/73) draft, `6bfdf35a`; [exact CI #43080435330](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43080435330) **63/63 PASS**. Official Zaporizhzhia 10 Oct KAB totals 18→20→23 yield **23** as cumulative, not sum/max/order; one shadow `AUTO_READY +23` for pinned ledger. Replay 0 new proposals; military/incident protection and SHA invariance PASS. ZIP artifact `13884576127`, SHA256 `d439218f…adf521` verified.
+- **No production approval.** False-`place` warning defect and current casualty-ledger reconciliation remain before publication.
+
 ## CASUALTY-EXPLICIT-MILITARY-STATUS-54-01 — bounded offline safety fix PASS (2026-11-11)
 
 - [Research PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) draft, final `03cfaecb`; exact [Actions #43069489502](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43069489502) **54/54 PASS** (9 targeted +45 legacy), artifact `13876734185` ZIP SHA256 `e441eeed9817bbc41f73036376cc1c6c85047d097cc8ed97e0a28844d64540a4`. LB.ua Ivano-Frankivsk `Загиблі — військовослужбовці` now `civilian_ambiguous`/`facts.civilian=None`, `NEEDS_REVIEW`, 0 proposed civilian deaths; synthetic complete-source military case held independently. Civilian-positive controls PASS, replay duplicates 0, protected inputs unchanged. [Full report](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/03cfaecb71111bfd3b896e4a19ca6f027118963f/research/casualty_military_status_fix_2026_11_11/FINAL_REPORT.md). Earlier [3-real-article proof PR #67](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/67) remains: Zaporizhzhia 18→20→23 last total missed (`NEEDS_REVIEW`), a separate place-extraction defect persists.
