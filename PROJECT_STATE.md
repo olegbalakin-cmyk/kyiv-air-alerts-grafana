@@ -23,6 +23,10 @@ Latest accepted: **C6-EXACT-HEAD-OWNER-READONLY-AUTH-01** (owner authorized ONE 
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
 - **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
 
+## Most recent dispatch outcome
+
+- Manual run #43079123482 (2026-11-11 18:34:53 UTC) was `completed/skipped` at the sole `proof` job with no steps/artifacts: actor, event, branch and GitHub head SHA matched the pinned workflow, so the remaining job-level conditions to verify are exact `owner_approval=APPROVE_ONE_READONLY_PROOF` and exact `research_sha=b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15` input. Environment variable/secret checks occur only *after* the job starts and did not cause this SKIPPED. No Neon readback.
+
 ## Concrete next tasks
 
 1. **Owner approved exactly ONE read-only physical proof** on research SHA `b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15` (chat, 2026-11-11). GitHub administrator must set `c6-neon-shadow-readonly` environment variable `C6_SHADOW_APPROVED_RESEARCH_SHA` to that SHA, confirm secret `NEON_JSON_SHADOW_READONLY_DATABASE_URL`, and owner `olegbalakin-cmyk` must manually dispatch the workflow on that exact research ref, bound to C2 #43055353190 / artifact #13873291895. Dispatch not available through the current connected GitHub tools; do not bypass actor/environment guard. Four no-network tests PASS; no source HTTP/writer/cutover.
