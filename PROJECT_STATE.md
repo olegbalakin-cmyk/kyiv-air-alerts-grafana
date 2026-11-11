@@ -39,31 +39,6 @@ Latest casualty: **CASUALTY-FULL-OFFLINE-45-01** (45/45 PASS, authentic fixture;
 
 - [Actions #43034383784](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43034383784) at `adb0419c`: **45/45 PASS**; original fixture from `05ce47b1` verified by SHA256; [artifact `13863350735`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43034383784/artifacts/13863350735) ZIP SHA256 `14e7c469…8c69d3`. Odesa/Dnipro NEEDS_REVIEW; no real proposals or duplicates. [Full report `f46753e4`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/f46753e4b85e56052639959beb1d96ee408e227e). Research-only; production/publication NOT approved.
 
-## CASUALTY-CROSS-INCIDENT-ISOLATION-01 — bounded Odesa false-positive fixed (2026-11-11)
-
-- [Research implementation `c19e0c0`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/c19e0c057001e9b21867261250e5b4fc74b1d980) scopes article facts to a single fatal attack section and corrects `півночі`/night word boundary; previously accepted MVA attribution retained. [Exact-head focused Actions #43024613349](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43024613349) at `e96d5217`: **10/10 PASS**, Odesa `NEEDS_REVIEW` and no fabricated +1, Dnipro `NEEDS_REVIEW`, controlled single-incident `AUTO_READY` preserved. Artifact `13856616913` SHA256 `7c8438f1…b5beb87`, verified and protected inputs unchanged; full [report `de41094c`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/de41094cbe9cf1b34ac9c24f230941564b2cc3dc).
-- **Not approved for production:** multi-attack section splitter has limited phrasing coverage. Broad 45-test run `43024467127` had 44 PASS + 1 ERROR (missing historical `cached_evidence.json` fixture); next restore authentic fixture and complete full offline regression. Original unsafe Odesa `AUTO_READY+1` from `CASUALTY-MULTI-ATTACK-HOLD-01` remains rejected; no casualty ledger, WIP, C6/Neon or publication change.
-
-## CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01 — five real WIP URLs; reviewer blocked (2026-11-11)
-
-- [Live run #42998441793](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998441793): exact five pinned RSS IDs, 20 HTTP, **5 publisher HTML downloaded, 4 retained excerpts**, one `HTML_NO_ARTICLE_PARAGRAPHS`; unchanged reviewer **0 AUTO_READY/0 proposals**. Job failed only due research-harness 5-download vs 4-usable assertion; corrected without new publisher HTTP. Original artifact `13844887603`, 5/5 hashes PASS.
-- [Offline replay #42998990269](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998990269) SUCCESS on same evidence: 0 duplicate proposals/deaths, protected hashes unchanged; artifact `13845600971`, 12/12 hashes PASS. Research [PR #66](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/66) draft. Next: offline factual attribution/incident extraction; publish OFF.
-
-## CASUALTY-FIVE-WIP-INPUTS-01 — research selection validated (2026-11-11)
-
-- [Final selection `d342b791`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/d342b7919e54cf49cac618fa8b7586477d199508/research/casualty_five_candidate_selection_2026_11_11/FINAL_SELECTION.md): five unique IDs all still `needs_review`, exact metadata matches WIP blob `f3f7141aa6d7584c63ff42510b40239a18834d15` (1,657 rows); selection blob `050d8560` unchanged. `main`/WIP revisions header-only, site-prod has only unrelated Sumy row. Research-only input PASS; publisher HTTP and actual casualty evidence **NOT** proven. Next ≤5 URL shadow requires separate owner authorization. No merge/publish.
-
-## C6-REPLAY-SEVASTOPOL-MERGED-01 — two scoped fixes staged in production branches (2026-11-11)
-
-- Owner-approved [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) squash-merged to `main@fe4ab1c14bffa03ff58f1f9debc3cc510f1099b0`, exact-head [Actions #42981135850](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42981135850) **16/16 offline PASS** (UkraineAlarm event timestamp replay only).
-- Owner-approved [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) squash-merged to `site-prod@6de49e3b0cf9692c7bb242672e92f062e516af20`, exact-head [Actions #42982010821](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42982010821) **8/8 offline PASS** (Sevastopol checkpoint eligibility only). No synthetic event closure, no cutover.
-- First post-merge C2 and exact ZIP/SHA, source receipt continuity across all 23 cities, independent Neon readback and any Netlify deployment **not yet verified**. Prior source checkpoint 22/23; `25006` still unresolved. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-
-## C6-THREE-RUN-EXPORT-01 — exact blockers after activated cycles (2026-11-11)
-
-- [42902124611](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42902124611) and [42908463331](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42908463331) SUCCESS; [42970870607](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42970870607) data/Neon/23-city QA/Git PASS (`site-prod@390e7635`, 33,066 episodes), overall FAIL at artifact upload.
-- All three bundle exports BLOCKED `CAPTURE_NAIVE_TIMESTAMP`, no ZIP/SHA; 22/23 checkpoints refreshed, Sevastopol stuck since bootstrap. Cutover NO.
-
 <!-- coordination:history:end -->
 
 ## Evidence and documentation maintenance
