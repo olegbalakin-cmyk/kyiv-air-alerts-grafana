@@ -178,8 +178,8 @@ def run(live: bool):
             raise ValueError("INCOMPLETE_CANDIDATE_ACCOUNTING")
         if int(capture["urls_checked"]) != 5 or int(capture["http_requests"]) > 40:
             raise ValueError("UNEXPECTED_HTTP_SCOPE")
-        if int(capture["articles_downloaded"]) != len(articles):
-            raise ValueError("ARTICLE_COUNT_MISMATCH")
+        if int(capture["usable_evidence_packages"]) != len(articles):
+            raise ValueError("USABLE_EVIDENCE_COUNT_MISMATCH")
         failures_by_reason = Counter(x.get("reason", "UNKNOWN")
                                      for x in evidence.get("failures", []))
         verdict["per_candidate"] = [
