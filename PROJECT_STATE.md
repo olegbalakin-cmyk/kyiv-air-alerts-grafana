@@ -1,7 +1,8 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**.
+Latest casualty research: **CASUALTY-EXPLICIT-MILITARY-STATUS-54-01**, 54/54 offline PASS; still unpublished, next bounded task cumulative 18→20→23 in Zaporizhzhia. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -21,17 +22,23 @@ Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
+- **Operational WIP / historical reference / backfill:** remain separate, not promoted. **Casualty:** [military-status PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) 54/54 PASS in isolated offline research; Ivano-Frankivsk explicit military deaths now fail closed. Zaporizhzhia chronological 18→20→23 and false warning-place remain open. No casualty merge, publication or production change.
 
 ## Concrete next tasks
 
 1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+4. Casualty track: independently fix chronological same-incident **18→20→23** official updates for Zaporizhzhia using original retained evidence; keep separate attacks, retractions, civilian military status, source, date/geography and dedup gates; offline-only research, no media HTTP, operational revisions or merge. Investigate unrelated warning text as attack place in another scoped task.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-EXPLICIT-MILITARY-STATUS-54-01 — bounded offline safety fix PASS (2026-11-11)
+
+- [Research PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) draft, final `03cfaecb`; exact [Actions #43069489502](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43069489502) **54/54 PASS** (9 targeted +45 legacy), artifact `13876734185` ZIP SHA256 `e441eeed9817bbc41f73036376cc1c6c85047d097cc8ed97e0a28844d64540a4`. LB.ua Ivano-Frankivsk `Загиблі — військовослужбовці` now `civilian_ambiguous`/`facts.civilian=None`, `NEEDS_REVIEW`, 0 proposed civilian deaths; synthetic complete-source military case held independently. Civilian-positive controls PASS, replay duplicates 0, protected inputs unchanged. [Full report](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/03cfaecb71111bfd3b896e4a19ca6f027118963f/research/casualty_military_status_fix_2026_11_11/FINAL_REPORT.md). Earlier [3-real-article proof PR #67](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/67) remains: Zaporizhzhia 18→20→23 last total missed (`NEEDS_REVIEW`), a separate place-extraction defect persists.
+- **Research accepted only; no merge, production, WIP/ledger or casualty publication approval.** Earlier casualty proof/transition details remain in draft [coordination PR #65](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/65); this new coordination branch is based on current `main`, preserving newer C6 checkpoints.
+
 ## C6-POSTMERGE-C2-EXPORT-23-01 — physical same-run export and checkpoints PASS (2026-11-11)
 
 - [Actions #43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) scheduled C2 SUCCESS (16:08:40–16:36:22 UTC), after Work A `main@fe4ab1c1` and Work B `site-prod@6de49e3b`. `NEON_SUCCEEDED`: 33,135 canonical episodes (+69), 23-city QA, Git JSON publication `site-prod@cf960d7c` PASS.
