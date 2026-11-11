@@ -52,11 +52,19 @@ C6_INTEGRATION_HOOK_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '33568c607ebd6a25c3ff881ce7f365c42e362436'),
 }
 
+# Owner-approved PR #62 changed only Sevastopol checkpoint eligibility in
+# site-prod@6de49e3b0cf9692c7bb242672e92f062e516af20.
+# Keep the new exact blob isolated from the previously accepted builder hooks.
+C6_SEVASTOPOL_CHECKPOINT_BLOBS = {
+ 'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '6698ec743b6efcd9aeb059dd81b51cc05ae93493'),
+}
+
 def accepted_builder_blob(path, raw, expected):
     actual = blob(raw)
     return (actual == expected or
             CAPTURE_HOOK_BLOBS.get(path) == (expected, actual) or
-            C6_INTEGRATION_HOOK_BLOBS.get(path) == (expected, actual))
+            C6_INTEGRATION_HOOK_BLOBS.get(path) == (expected, actual) or
+            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual))
 
 class Closed(RuntimeError): pass
 
