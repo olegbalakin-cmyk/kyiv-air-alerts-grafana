@@ -125,7 +125,8 @@ def _cumulative_total_update(low):
         return None
     patterns = (rf'\bзагинул[аои]?\s+({COUNT_TOKEN})\s+{COUNT_NOUN}',
                 rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b',
-                rf'\b({COUNT_TOKEN})\s+загиблих\b')
+                rf'\b({COUNT_TOKEN})\s+загиблих\b',
+                rf'\bдо\s+({COUNT_TOKEN})\s+люд\w*\s+зросл\w*\s+кількіст\w*\s+загиблих\b')
     claims = []
     for sentence in re.split(r'(?<=[.!?])\s+|\n+', low):
         if not sentence.strip():
@@ -167,7 +168,9 @@ def _cumulative_total_update(low):
         return None
     selected = next(iter(choices))
     # Unexplained totals may be independent groups, not earlier estimates.
-    if any(not c['update'] for c in claims if c['value'] != selected):
+    if any(not any(other['update'] for other in claims
+                       if other['value'] == c['value'])
+           for c in claims if c['value'] != selected):
         return None
     chosen = next(c for c in officials if c['value'] == selected)
     return {'value': selected, 'reported_totals': sorted(totals),
@@ -191,6 +194,8 @@ def _fatal_total(low):
     all_values = {n for n in nums if n is not None}
     all_values.update(_number(m[1]) for m in
                       re.finditer(rf'\b({COUNT_TOKEN})\s+загиблих\b', low))
+    all_values.update(_number(m[1]) for m in re.finditer(
+        rf'\bдо\s+({COUNT_TOKEN})\s+люд\w*\s+зросл\w*\s+кількіст\w*\s+загиблих\b', low))
     all_values.discard(None)
     if len(all_values) == 1 and nums:
         return next(iter(all_values))
