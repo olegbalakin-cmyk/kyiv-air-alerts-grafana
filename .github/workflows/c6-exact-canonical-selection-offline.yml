@@ -1,0 +1,51 @@
+name: C6 exact canonical selection offline
+on:
+  push:
+    branches: [research-c6-exact-canonical-selection-2026-11-11]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-canonical-selection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline overlapping-event regression
+        run: python -m unittest discover -s tests -p 'test_c6_exact_canonical_selection.py' -v
+      - uses: actions/checkout@v4
+        with:
+          ref: 2fe50c323171393ab2fa725010bf3d203416af6b
+          path: work-b-evidence
+          persist-credentials: false
+      - name: Download immutable existing C2 bundle
+        uses: actions/download-artifact@v4
+        with:
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          run-id: 43055353190
+          name: c2-shadow-inputs-43055353190-1
+          github-token: ${{ github.token }}
+          path: existing-c2
+      - name: Verify ZIP checksum and extract inner archive (no HTTP to original source)
+        run: |
+          python - <<'PY'
+          import hashlib, zipfile, pathlib
+          outer = pathlib.Path("existing-c2")
+          with zipfile.ZipFile(next(outer.glob("*.zip"))) as f:
+              raw = f.read("c2-shadow-inputs.zip")
+          assert hashlib.sha256(raw).hexdigest() == "ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d"
+          pathlib.Path("verified-c2.zip").write_bytes(raw)
+          PY
+      - name: Exact 23-city real corpus offline reproduction
+        env:
+          C6_REAL_C2_BUNDLE: verified-c2.zip
+          C6_WORK_B_STALE_CSV: work-b-evidence/research/c6_work_b_exact_corpus_2026_11_11/STALE_262_EPISODES.csv
+        run: python -m unittest discover -s tests -p 'test_c6_exact_corpus_real.py' -v
