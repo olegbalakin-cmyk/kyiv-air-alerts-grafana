@@ -1,0 +1,19 @@
+name: C6 UkraineAlarm active endDate replay offline (research only)
+on:
+  push:
+    branches:
+      - research-c6-active-enddate-sentinel-fix-2026-11-11
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture-replay-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Four no-network active sentinel regression tests
+        run: python -m unittest discover -s tests -p 'test_c6_capture_active_enddate.py' -v

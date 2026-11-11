@@ -100,7 +100,11 @@ def replay(row):
                     if str(alarm.get("alertType") or "").upper() != "AIR":
                         continue
                     start, end = alarm.get("startDate"), alarm.get("endDate")
-                    if start and end and utc(start) < utc(end):
+                    # UkraineAlarm marks an ongoing AIR alert with this exact
+                    # non-timezone sentinel, not a completed end timestamp.
+                    # Exclude it before strict UTC parsing; all other malformed
+                    # timestamps must still fail closed.
+                    if start and end and end != "0001-01-01T00:00:00" and utc(start) < utc(end):
                         pairs.append({"start": start, "end": end})
     elif source == "kyiv_digital":
         from update_data import parse_live_history
