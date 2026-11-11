@@ -186,6 +186,12 @@ def _origin_attribution(low):
         return 'prosecutor', 'Прокуратура'
     if re.search(r'національн\w* поліці|поліці[яїі]', low) and re.search(r'повідомил|за даними', low):
         return 'national-police', 'Національна поліція'
+    # Direct reporter attribution: "повідомив очільник Одеської міської
+    # військової адміністрації". Keep the verb and named office in one
+    # contiguous phrase; a separate mention of a police/prosecutor or MVA
+    # elsewhere in an article is not evidence of an official statement.
+    if re.search(r'\bповідомив\s+очільник\s+(?:[а-яіїєґ-]+\s+){0,2}міськ\w*\s+військов\w*\s+адміністраці', low):
+        return 'city-mva', 'Міська військова адміністрація'
     if re.search(r'начальник\w* мва|міськ\w* військов\w* адміністраці', low) and re.search(r'написав|повідомил|за даними', low):
         return 'city-mva', 'Міська військова адміністрація'
     return 'unattributed', None
