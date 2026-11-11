@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POST62-EXACT-HEAD-PREFLIGHT-01** (research readiness only; physical readback OPEN). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Exact-head offline tests 4/4 PASS; physical Neon→JSON readback remains approval-BLOCKED.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-EXACT-HEAD-OWNER-READONLY-AUTH-01** (owner authorized ONE isolated read-only proof; GitHub Environment and physical run remain OPEN). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Exact-head offline tests 4/4 PASS; owner authorized one physical read-only proof, but protected GitHub environment and dispatch remain BLOCKED.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -25,13 +25,18 @@ Latest accepted: **C6-POST62-EXACT-HEAD-PREFLIGHT-01** (research readiness only;
 
 ## Concrete next tasks
 
-1. **Pending owner-controlled physical read-only proof:** review research `b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15`, approve the exact SHA in `c6-neon-shadow-readonly` (`C6_SHADOW_APPROVED_RESEARCH_SHA`), confirm read-only secret and dispatch one proof bound to C2 #43055353190 / artifact #13873291895. Four no-network offline tests at PR #70 HEAD `cdfb456d` already PASS; no new writer, source HTTP or cutover.
+1. **Owner approved exactly ONE read-only physical proof** on research SHA `b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15` (chat, 2026-11-11). GitHub administrator must set `c6-neon-shadow-readonly` environment variable `C6_SHADOW_APPROVED_RESEARCH_SHA` to that SHA, confirm secret `NEON_JSON_SHADOW_READONLY_DATABASE_URL`, and owner `olegbalakin-cmyk` must manually dispatch the workflow on that exact research ref, bound to C2 #43055353190 / artifact #13873291895. Dispatch not available through the current connected GitHub tools; do not bypass actor/environment guard. Four no-network tests PASS; no source HTTP/writer/cutover.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-EXACT-HEAD-OWNER-READONLY-AUTH-01 — owner-authorized ONE read-only run; GitHub environment not yet approved (2026-11-11)
+
+- Owner approved one independent exact-run read-only Neon→JSON proof for research HEAD `b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15` in the coordination chat. This does **not** approve merges, production publication, new HTTP capture or Neon writes.
+- Direct GitHub Actions `workflow_dispatch` and Environment variable/secret administration are unavailable through the connected GitHub tools. No physical run observed. Required: `c6-neon-shadow-readonly` exact SHA approval, dedicated read-only secret, and one owner-actor manual dispatch against C2 #43055353190. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ## C6-POST62-EXACT-HEAD-PREFLIGHT-01 — exact-head offline PASS; controlled physical proof remains BLOCKED (2026-11-11)
 
 - [Work A report](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15/research/c6_exact_run_readback_preflight_2026_11_11/WORK_A_REPORT.md) confirms C2 #43055353190 inner ZIP SHA and 8/8 manifest hashes, and validates all three post-PR62 production builder Git blobs against exact allowlists.
