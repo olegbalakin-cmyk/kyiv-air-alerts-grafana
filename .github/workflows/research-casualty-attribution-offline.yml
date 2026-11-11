@@ -21,21 +21,73 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Download exact existing Actions evidence without publisher HTTP
+      - name: Checkout exact historical Git commit holding original legacy fixture
+        uses: actions/checkout@v4
+        with:
+          ref: 05ce47b1a92374af6c44c662f2d31f041a8f8afc
+          path: _legacy_casualty_05ce47
+          persist-credentials: false
+      - name: Restore legacy files only in ephemeral runner and verify original hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot=_legacy_casualty_05ce47
+          test "$(git -C "$snapshot" rev-parse HEAD)" = "05ce47b1a92374af6c44c662f2d31f041a8f8afc"
+          src="$snapshot/research/casualty_automated_review_2026_11_10"
+          dst=research/casualty_automated_review_2026_11_10
+          out=research/casualty_attribution_2026_11_11/results
+          mkdir -p "$dst/results" "$out"
+          cp "$src/cached_evidence.json" "$dst/cached_evidence.json"
+          cp "$src/results/events.json" "$dst/results/events.json"
+          printf '%s  %s\n' '4dad9a007db2e396b8d2f03e9db49b5eaa98707fe7f390341399a5b0966a51b3' "$dst/cached_evidence.json" | sha256sum -c -
+          printf '%s  %s\n' 'c82ac990755bc2015fc01cb5c52881edd7b3d9f72af7e49230b5c14838d39339' "$dst/results/events.json" | sha256sum -c -
+          printf 'source_commit=05ce47b1a92374af6c44c662f2d31f041a8f8afc\nfixture_sha256=4dad9a007db2e396b8d2f03e9db49b5eaa98707fe7f390341399a5b0966a51b3\nlegacy_events_sha256=c82ac990755bc2015fc01cb5c52881edd7b3d9f72af7e49230b5c14838d39339\n' > "$out/legacy_fixture_origin.txt"
+      - name: Download same pre-existing frozen article evidence (no media HTTP)
         uses: actions/download-artifact@v4
         with:
           run-id: 42998990269
           name: casualty-five-source-artifact-offline-replay
           path: research/casualty_attribution_2026_11_11/input
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run focused offline regression and replay tests
+      - name: Record all protected input hashes before regression
+        shell: bash
         run: |
-          python -m unittest research/casualty_attribution_2026_11_11/test_replay.py -v
-      - name: Upload test verdict, never revisions
+          set -euo pipefail
+          out=research/casualty_attribution_2026_11_11/results
+          printf '%s  %s\n' '68ceccdcca68a0c93d42a0c0173c32c9ab47b659415e9bd2b274df8d9cf0fdf9' research/casualty_attribution_2026_11_11/input/evidence.json | sha256sum -c -
+          sha256sum research/casualty_attribution_2026_11_11/input/evidence.json \
+                    research/casualty_five_candidate_selection_2026_11_11/selected_queue.json \
+                    research/casualty_real_evidence_2026_11_10/pinned_revisions.csv \
+                    research/casualty_automated_review_2026_11_10/baseline_coverage.json \
+                    research/casualty_automated_review_2026_11_10/cached_evidence.json \
+                    research/casualty_automated_review_2026_11_10/results/events.json \
+                    | sort > "$out/protected_sha256_before.txt"
+      - name: Run complete existing legacy tests and ten frozen-article tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest research/casualty_attribution_2026_11_11/test_replay.py kyiv-air-alerts-grafana/tests/test_casualty_auto_review.py -v 2>&1 | tee research/casualty_attribution_2026_11_11/results/full_regression_tests.txt
+      - name: Confirm all protected inputs unchanged
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=research/casualty_attribution_2026_11_11/results
+          test -f "$out/protected_sha256_before.txt"
+          sha256sum research/casualty_attribution_2026_11_11/input/evidence.json \
+                    research/casualty_five_candidate_selection_2026_11_11/selected_queue.json \
+                    research/casualty_real_evidence_2026_11_10/pinned_revisions.csv \
+                    research/casualty_automated_review_2026_11_10/baseline_coverage.json \
+                    research/casualty_automated_review_2026_11_10/cached_evidence.json \
+                    research/casualty_automated_review_2026_11_10/results/events.json \
+                    | sort > "$out/protected_sha256_after.txt"
+          diff -u "$out/protected_sha256_before.txt" "$out/protected_sha256_after.txt"
+          printf 'inputs_unchanged=true\n' > "$out/integrity_verdict.txt"
+      - name: Upload isolated full-test verdict only, never revisions
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: casualty-attribution-offline-verdict
+          name: casualty-attribution-full-offline-regression
           path: research/casualty_attribution_2026_11_11/results/
           if-no-files-found: warn
           retention-days: 21
