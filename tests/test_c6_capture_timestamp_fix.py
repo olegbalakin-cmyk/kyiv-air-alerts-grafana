@@ -36,7 +36,7 @@ def example(*, start="2026-11-10T01:00:00", end="2026-11-10T02:00:00",
     page = contract.response_page(Mock(content=raw),
         url=URL + "?regionId=17", started_at=now - timedelta(seconds=5))
     previous_row = ({"source_key": SOURCE, "source_identity": IDENTITY,
-                     "last_checked_at": (now - timedelta(hours=2)).isoformat(),
+                     "last_checked_at": "2026-11-10T01:30:00+00:00",
                      "source_sha256": "f" * 64, **RUN} if previous else None)
     with tempfile.TemporaryDirectory() as temp:
         payload = Path(temp) / "payload.json"
