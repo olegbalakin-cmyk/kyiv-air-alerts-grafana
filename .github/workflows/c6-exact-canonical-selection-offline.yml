@@ -39,8 +39,7 @@ jobs:
           python - <<'PY'
           import hashlib, zipfile, pathlib
           outer = pathlib.Path("existing-c2")
-          with zipfile.ZipFile(next(outer.glob("*.zip"))) as f:
-              raw = f.read("c2-shadow-inputs.zip")
+          raw = (outer / "c2-shadow-inputs.zip").read_bytes()
           assert hashlib.sha256(raw).hexdigest() == "ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d"
           pathlib.Path("verified-c2.zip").write_bytes(raw)
           PY
