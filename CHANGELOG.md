@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-FIVE-WIP-INPUTS-01 — five existing candidates pinned (2026-11-11)
+
+- [Research commit `d342b791`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d342b7919e54cf49cac618fa8b7586477d199508): five preserved Google RSS candidate IDs (Dnipro, Kharkiv ×2, Lutsk, Odesa) all uniquely present and `needs_review` in WIP queue blob `f3f7141aa6d7584c63ff42510b40239a18834d15`, 1,657 rows. URLs/title/date/city unchanged; selected_queue.json blob `050d8560` unchanged. `main`/WIP revisions header-only; site-prod Sumy revision unrelated. **Only input selection PASS**: publisher reachability/usable article evidence unverified; separate owner consent for ≤5 HTTP shadow test. No production, C6/Neon, WIP queue, revisions or automatic publication changes.
+
 ### C6-REPLAY-SEVASTOPOL-MERGED-01 — narrow fixes merged, physical proof pending (2026-11-11)
 
 - [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) → `main@fe4ab1c1`, [16/16 offline Actions #42981135850](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42981135850); [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) → `site-prod@6de49e3b`, [8/8 offline Actions #42982010821](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42982010821). Next regular C2 must prove real bundle SHA and 23/23 source continuity; independent Neon readback/Netlify deployment not confirmed. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
