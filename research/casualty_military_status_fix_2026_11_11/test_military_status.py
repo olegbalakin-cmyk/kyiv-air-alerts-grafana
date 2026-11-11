@@ -80,7 +80,15 @@ class MilitaryStatusTests(unittest.TestCase):
             self.assertIn("CIVILIAN_AMBIGUOUS", event["reasons"])
             self.assertEqual(event["reports"][0]["civilian_status"], "civilian_ambiguous")
             self.assertIsNot(event["reports"][0]["facts"]["civilian"], True)
-            self.assertFalse((out / "proposals.csv").read_text().strip().splitlines()[1:])
+            # The separately authorized cumulative-update correction now
+            # permits ONE unrelated Zaporizhzhia research-only proposal.
+            with (out / "proposals.csv").open(newline="") as fp:
+                import csv
+                proposals = list(csv.DictReader(fp))
+            self.assertEqual(len(proposals), 1)
+            self.assertEqual(proposals[0]["candidate_ids"],
+                             "e0fba98b19473874e9a1d8f1")
+            self.assertEqual(proposals[0]["deaths_delta"], "23")
             self.assertFalse((again / "proposals.csv").read_text().strip().splitlines()[1:])
             self.assertEqual(before, {str(p): sha(p)
                                      for p in (CAPTURE, SELECTED, LEDGER, BASELINE)})
