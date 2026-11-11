@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01 — new read-only physical proof authorized, not run (2026-11-11; proposed on merge)
+
+- Owner approved one protected read-only C2 #43055353190 Neon→JSON proof on integrated research SHA `93899d5bb07329e95429ed79ed8d6939ab74a633`; environment exact SHA/branch allowlist and one owner-actor dispatch still required. No physical run, Neon mutation, production deployment or publication. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C6-EXACT-READBACK-INTEGRATED-OFFLINE-01 — integrated exact-run offline PASS, physical OPEN (2026-11-11; proposed on merge)
 
 - Work B #74: 33,135 C2 canonical rows equal Neon for all 23 cities, 262 superseded rows retained; capture one-hop 23/23, origin/provenance incomplete. Work C #75 [#43100877453](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43100877453) PASS and UA replay #76 [#43102017533](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43102017533) PASS combined in research [PR #77](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/77) `93899d5b` [#43102701988](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43102701988) PASS. Physical #43098776474 attempt 2 failed during receipts, no six JSON PASS; new exact SHA requires new owner approval. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
