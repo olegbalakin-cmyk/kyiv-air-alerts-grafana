@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-EXACT-HEAD-OWNER-READONLY-AUTH-01 — one read-only proof authorized; protected dispatch still OPEN (2026-11-11)
+
+- Owner approved ONE isolated Neon→JSON proof on research `b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15`; GitHub Environment exact SHA/secret and owner-actor `workflow_dispatch` remain outstanding. No physical run, DB write or production change; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C6-POST62-EXACT-HEAD-PREFLIGHT-01 — 4/4 exact-head offline PASS; physical proof approval-BLOCKED (2026-11-11)
 
 - [Actions #43074337098](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43074337098) SUCCESS on immutable [PR #70](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/70) HEAD `cdfb456d`, artifact #13882250271; exact post-PR62 builder blobs accepted. [Research Work A](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15/research/c6_exact_run_readback_preflight_2026_11_11/WORK_A_REPORT.md) on HEAD `b92174d2` stages safe branch pin. Owner/environment SHA/secret approval and physical Neon→JSON proof still OPEN. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
