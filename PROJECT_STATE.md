@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest C6 accepted: **C6-REPLAY-SEVASTOPOL-MERGED-01**. Owner-approved [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) merged `main@fe4ab1c1` (16/16 offline PASS); [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) merged `site-prod@6de49e3b` (8/8 PASS). Live ZIP/SHA, 23/23 source continuity and Neon readback remain **UNPROVEN**. `GLOBAL_CUTOVER=NO`.
-Latest casualty research accepted: **CASUALTY-FIVE-WIP-INPUTS-01** (5/5 queue entries verified; HTTP not authorized).
+Latest casualty research accepted: **CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01** (5 HTML, 4 usable; reviewer 0 READY, replay PASS, publish OFF).
 
 ## Working instructions
 
@@ -23,18 +23,23 @@ Latest casualty research accepted: **CASUALTY-FIVE-WIP-INPUTS-01** (5/5 queue en
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
 - **Operational WIP / historical reference / backfill:** separate tracks; no promotion by research proof.
-- **Casualty research:** [five pinned candidates](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/d342b7919e54cf49cac618fa8b7586477d199508/research/casualty_five_candidate_selection_2026_11_11/FINAL_SELECTION.md) validated against WIP queue blob `f3f7141a` (1,657 rows); source HTTP/evidence still unproven. No deployment or publication.
+- **Casualty research:** [one-shot #42998441793](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998441793) 5 HTML/4 evidence; reviewer 0 proposals, [offline replay #42998990269](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998990269) PASS, duplicates 0. Publication OFF.
 
 ## Concrete next tasks
 
 1. Inspect next **regular** C2 after both merges; no manual dispatch. Check writer, 23-city QA/Git JSON and safe export diagnostic; require real same-run ZIP + SHA-256. Workflow SUCCESS alone is not bundle PASS.
 2. Verify Sevastopol source checkpoint advances with actual captured raw-page hash, pagination, overlap and provenance; historic alert `25006` remains unresolved. Require independent 23/23 full source receipts; absent proof stays BLOCKED.
 3. Separately approve exact-run read-only Neon→JSON proof (PR #48) and DST raw baseline. Do not infer Netlify deployment from `site-prod` merge. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: owner decision on one ≤5-URL opt-in shadow HTTP capture from pinned candidate IDs; keep reviewer, ledger, WIP queue and publication unchanged. Do not assume any website is accessible.
+4. Casualty: diagnose 4 retained article excerpts' factual attribution/incident parsing offline; 1 HTML paragraph selector failed. No new publisher HTTP or auto-publication.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01 — five real WIP URLs; reviewer blocked (2026-11-11)
+
+- [Live run #42998441793](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998441793): exact five pinned RSS IDs, 20 HTTP, **5 publisher HTML downloaded, 4 retained excerpts**, one `HTML_NO_ARTICLE_PARAGRAPHS`; unchanged reviewer **0 AUTO_READY/0 proposals**. Job failed only due research-harness 5-download vs 4-usable assertion; corrected without new publisher HTTP. Original artifact `13844887603`, 5/5 hashes PASS.
+- [Offline replay #42998990269](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998990269) SUCCESS on same evidence: 0 duplicate proposals/deaths, protected hashes unchanged; artifact `13845600971`, 12/12 hashes PASS. Research [PR #66](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/66) draft. Next: offline factual attribution/incident extraction; publish OFF.
+
 ## CASUALTY-FIVE-WIP-INPUTS-01 — research selection validated (2026-11-11)
 
 - [Final selection `d342b791`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/d342b7919e54cf49cac618fa8b7586477d199508/research/casualty_five_candidate_selection_2026_11_11/FINAL_SELECTION.md): five unique IDs all still `needs_review`, exact metadata matches WIP blob `f3f7141aa6d7584c63ff42510b40239a18834d15` (1,657 rows); selection blob `050d8560` unchanged. `main`/WIP revisions header-only, site-prod has only unrelated Sumy row. Research-only input PASS; publisher HTTP and actual casualty evidence **NOT** proven. Next ≤5 URL shadow requires separate owner authorization. No merge/publish.
