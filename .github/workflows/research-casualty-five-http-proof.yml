@@ -1,0 +1,74 @@
+name: Research CASUALTY five pinned HTTP sources (owner-approved one-shot)
+
+on:
+  push:
+    branches:
+      - research-casualty-five-http-proof-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-five-http-proof.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-casualty-five-pinned-one-shot
+  cancel-in-progress: false
+
+jobs:
+  real-five-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated research branch without stored credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact immutable WIP queue, never its moving branch HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: c5ad6548e5ae901a75e5ff1b82ba25289341f59b
+          path: wip-pin
+          persist-credentials: false
+          sparse-checkout: |
+            kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+          sparse-checkout-cone-mode: false
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install existing dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify exact frozen implementation and selected inputs
+        run: |
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_auto_review.py)" = "1fe711626a48817ae16be55c875fdf7f93790d8c"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/monitor_casualty_candidates.py)" = "a6c09d7a8c8c594fccb3b7b8a49172bf6a575e91"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_evidence_capture.py)" = "40273785be0cefd70a0c1ac6f37ae7816b116700"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_transport_policy.py)" = "74450ca96f0a67a8c37bb3eeeb3c6274a9d570d2"
+          test "$(git hash-object research/casualty_five_candidate_selection_2026_11_11/selected_queue.json)" = "050d85606f6742306d28651a410baa23947557bd"
+          test "$(git hash-object wip-pin/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json)" = "f3f7141aa6d7584c63ff42510b40239a18834d15"
+          echo "Exact reviewer, monitor, adapter, transport and candidate snapshots verified"
+
+      - name: Offline source policy tests, no publisher HTTP
+        run: |
+          python -m compileall -q research/casualty_five_http_proof_2026_11_11/run_proof.py
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_source_access_policy.py' -v
+
+      - name: Offline five-ID WIP queue preflight, no publisher HTTP
+        run: python research/casualty_five_http_proof_2026_11_11/run_proof.py --preflight
+
+      - name: One owner-authorized five-URL source HTTP shadow capture and reviewer replay
+        run: python research/casualty_five_http_proof_2026_11_11/run_proof.py --live
+
+      - name: Upload proof and failure diagnostics, never publish casualty revisions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-five-wip-http-shadow-one-shot
+          path: research/casualty_five_http_proof_2026_11_11/results/
+          if-no-files-found: warn
+          retention-days: 21
