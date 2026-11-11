@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-EXACT-READBACK-INTEGRATED-OFFLINE-01 — integrated exact-run offline PASS, physical OPEN (2026-11-11; proposed on merge)
+
+- Work B #74: 33,135 C2 canonical rows equal Neon for all 23 cities, 262 superseded rows retained; capture one-hop 23/23, origin/provenance incomplete. Work C #75 [#43100877453](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43100877453) PASS and UA replay #76 [#43102017533](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43102017533) PASS combined in research [PR #77](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/77) `93899d5b` [#43102701988](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43102701988) PASS. Physical #43098776474 attempt 2 failed during receipts, no six JSON PASS; new exact SHA requires new owner approval. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C6-POSTMERGE-C2-EXPORT-23-01 — real C2 bundle and 23/23 checkpoints PASS (2026-11-11)
 
 - [Scheduled C2 #43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED`, 33,135 episodes (+69), 23-city QA/Git JSON PASS (`site-prod@cf960d7c`). Real [artifact #13873291895](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190/artifacts/13873291895), ZIP SHA-256 `ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, manifest SHA `f64620936677b3a329a5e7823d3f4d52e4bc60c5b6a29bb8da6ff943adf3e433`; checkpoint 23/23 updated, Sevastopol event `25006` still unresolved. Independent exact-run readback/Neon→JSON parity remains OPEN; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
