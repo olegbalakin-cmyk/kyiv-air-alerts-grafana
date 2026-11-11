@@ -3,9 +3,13 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
-### C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01 — new read-only physical proof authorized, not run (2026-11-11; proposed on merge)
+### C6-FROZEN-B2-EVIDENCE-OFFLINE-01 — frozen B2 proof-blocker fixed offline; physical OPEN (2026-11-11; proposed on merge)
 
-- Owner approved one protected read-only C2 #43055353190 Neon→JSON proof on integrated research SHA `93899d5bb07329e95429ed79ed8d6939ab74a633`; environment exact SHA/branch allowlist and one owner-actor dispatch still required. No physical run, Neon mutation, production deployment or publication. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+- Owner-approved physical [#43104972888](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43104972888) read Neon and verified 23/23 history freshness, then failed closed at B2 382-parent provenance gate; artifact #13893437446, no 6 JSON files. Read-only Neon shows 184 old suppressed parents/198 canonical B2 display rows. [Research PR #79](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/79) `beb2ad4d1f37e88b0084e49306281f8d2650d568` isolates 382 B2 evidence from canonical C2 statistics; [offline #43105919875](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43105919875) PASS. New protected physical run needs new owner SHA approval; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
+### C6-INTEGRATED-READONLY-PROOF-OWNER-AUTH-01 — owner approval consumed by failed proof (2026-11-11; proposed on merge)
+
+- Owner authorized `93899d5b`; physical #43104972888 completed with fail-closed B2 generator blockage. 23/23 historic receipts/freshness PASS, six JSON NOT proved. No writes or publication.
 
 ### C6-EXACT-READBACK-INTEGRATED-OFFLINE-01 — integrated exact-run offline PASS, physical OPEN (2026-11-11; proposed on merge)
 
