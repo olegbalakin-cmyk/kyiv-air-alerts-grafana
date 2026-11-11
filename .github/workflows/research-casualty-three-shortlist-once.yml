@@ -39,7 +39,9 @@ jobs:
           q=json.loads(Path('wip-pin/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json').read_text(encoding='utf-8'))
           prior={"5d60e1c78026fdc494ea3c84","96dc8052cf48f4ce74df29f6","6c946bfd46fffbe953d795bf","f4719e871b92e7563c7150da","81196e29c4a6ac2141a93617"}
           assert len(q)==1657
-          elig=[x for x in q if x.get('status')=='needs_review' and x.get('source')=='Google News RSS' and x.get('candidate_id') not in prior and x.get('url','').startswith('https://news.google.com/rss/articles/')]
+          from urllib.parse import urlsplit
+          allowed={'suspilne.media','armyinform.com.ua','lb.ua','npu.gov.ua','vechirniy.kyiv.ua','unian.ua','ua.korrespondent.net','t.me'}
+          elig=[x for x in q if x.get('status')=='needs_review' and x.get('source')=='Google News RSS' and x.get('candidate_id') not in prior and x.get('url','').startswith('https://news.google.com/rss/articles/') and (urlsplit(x.get('publisher_url','')).hostname or '').removeprefix('www.') in allowed]
           print("QUEUE",len(q),"ELIGIBLE",len(elig),"PUBLISHERS",collections.Counter(x.get('publisher') for x in elig).most_common(20))
           cats={
            'POSITIVE_OFFICIAL_DATED': [
@@ -76,7 +78,7 @@ jobs:
                   rank.append((score,x))
               rank.sort(key=lambda v:(-v[0],str(v[1].get('published_at') or ''),str(v[1].get('candidate_id'))),reverse=False)
               print("\nCATEGORY",category,"MATCHES",len(rank))
-              for score,x in rank[:55]:
+              for score,x in rank[:90]:
                   print(json.dumps({
                      'score':score,'id':x.get('candidate_id'),'city':x.get('city_key'),
                      'publisher':x.get('publisher'),'published_at':x.get('published_at'),
