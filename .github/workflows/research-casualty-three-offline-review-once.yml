@@ -1,0 +1,56 @@
+name: Research CASUALTY three new real-article reviewer validation (offline)
+
+on:
+  push:
+    branches:
+      - research-casualty-three-new-http-shadow-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-three-offline-review-once.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  original-three-frozen-gold-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout research only, no retained credentials
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Confirm independent gold was committed BEFORE this reviewer run
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git log -1 --format=%H -- research/casualty_three_new_http_2026_11_11/INDEPENDENT_GOLD.json)" = "4174d3bbb8e3d34e640c9d2c0677f3fa02d98a6a"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_auto_review.py)" = "0ce2cd1658ad8fa8e3d922c4ea5539e97b161301"
+          test "$(git hash-object research/casualty_three_new_http_2026_11_11/selected_queue.json)" = "98f17abc05a4fdcb490d9e27faec189076314ac4"
+          echo "INDEPENDENT_GOLD_BEFORE_REVIEWER_PASS"
+
+      - name: Download exactly one previously completed source artifact (GitHub only)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43053796144
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: research/casualty_three_new_http_2026_11_11/input/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Offline independent three-source reviewer, one replay, no HTTP
+        run: python research/casualty_three_new_http_2026_11_11/review_offline.py
+
+      - name: Upload findings including failed negative/positive checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-three-new-independent-gold-review-offline
+          path: research/casualty_three_new_http_2026_11_11/offline_results/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,66 @@
+name: Research CASUALTY three new sources, ONE owner-approved HTTP capture
+
+on:
+  push:
+    branches:
+      - research-casualty-three-new-http-shadow-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-three-live-once.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-casualty-three-new-http-one-shot-2026-11-11
+  cancel-in-progress: false
+
+jobs:
+  three-url-physical-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout frozen research implementation, no retained credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact 1657-record WIP queue only, no moving WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: c5ad6548e5ae901a75e5ff1b82ba25289341f59b
+          path: wip-pin
+          persist-credentials: false
+          sparse-checkout: |
+            kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install existing project requirements (not a publisher request)
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Offline transport and evidence tests (no publisher requests)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compileall -q research/casualty_three_new_http_2026_11_11/capture_once.py
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_source_access_policy.py' -v
+
+      - name: Preflight frozen selection SHA, 3 original WIP rows, no source HTTP
+        run: python research/casualty_three_new_http_2026_11_11/capture_once.py --preflight
+
+      - name: One authorized shadow capture, EXACTLY three URLs, NO reviewer or publication
+        run: python research/casualty_three_new_http_2026_11_11/capture_once.py --live
+
+      - name: Upload captured excerpts and redirect receipts for independent gold
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: research/casualty_three_new_http_2026_11_11/results/
+          if-no-files-found: warn
+          retention-days: 30
