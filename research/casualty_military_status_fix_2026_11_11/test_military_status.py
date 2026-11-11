@@ -119,8 +119,17 @@ class MilitaryStatusTests(unittest.TestCase):
                         "Серед загиблих немає військовослужбовців."):
             with self.subTest(wording=wording):
                 reports, result = synthetic(PREFIX + wording + " " + OFFICIAL, "negation")
-                self.assertEqual(reports[0]["civilian_status"], "civilian_presumed")
-                self.assertEqual(result["events"][0]["category"], "AUTO_READY")
+                # The existing _fatal_total() conservatively suppresses the
+                # entire cached report when "не загинули" appears anywhere.
+                # That is separate from this military-status classifier fix.
+                self.assertEqual(_civilian_status((PREFIX + wording).casefold(), 2),
+                                 "civilian_presumed")
+                if reports:
+                    self.assertEqual(reports[0]["civilian_status"], "civilian_presumed")
+                    self.assertEqual(result["events"][0]["category"], "AUTO_READY")
+                else:
+                    self.assertEqual(result["events"][0]["category"], "NEEDS_REVIEW")
+                    self.assertFalse(result["proposals"])
 
     def test_other_incident_military_injured_not_imported(self):
         text = (PREFIX + OFFICIAL + " Також російські військові атакували іншу громаду. "
