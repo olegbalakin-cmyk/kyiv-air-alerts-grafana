@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-POST62-EXACT-HEAD-PREFLIGHT-01 — 4/4 exact-head offline PASS; physical proof approval-BLOCKED (2026-11-11)
+
+- [Actions #43074337098](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43074337098) SUCCESS on immutable [PR #70](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/70) HEAD `cdfb456d`, artifact #13882250271; exact post-PR62 builder blobs accepted. [Research Work A](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/b92174d268b7b7ef934aa5ef9dbc0301fb5ecc15/research/c6_exact_run_readback_preflight_2026_11_11/WORK_A_REPORT.md) on HEAD `b92174d2` stages safe branch pin. Owner/environment SHA/secret approval and physical Neon→JSON proof still OPEN. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C6-POSTMERGE-C2-EXPORT-23-01 — real C2 bundle and 23/23 checkpoints PASS (2026-11-11)
 
 - [Scheduled C2 #43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED`, 33,135 episodes (+69), 23-city QA/Git JSON PASS (`site-prod@cf960d7c`). Real [artifact #13873291895](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190/artifacts/13873291895), ZIP SHA-256 `ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, manifest SHA `f64620936677b3a329a5e7823d3f4d52e4bc60c5b6a29bb8da6ff943adf3e433`; checkpoint 23/23 updated, Sevastopol event `25006` still unresolved. Independent exact-run readback/Neon→JSON parity remains OPEN; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
