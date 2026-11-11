@@ -1,0 +1,51 @@
+name: Research casualty independent two-real-article validation
+on:
+  push:
+    branches:
+      - research-casualty-independent-real-article-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-real-article-validation.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate-existing-articles-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout independent research-only branch without persistent credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Assert exact immutable original reviewer implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/casualty_auto_review.py)" = "0ce2cd1658ad8fa8e3d922c4ea5539e97b161301"
+          test "$(git merge-base --is-ancestor f46753e4b85e56052639959beb1d96ee408e227e HEAD; echo $?)" = 0
+          test -f research/casualty_real_article_validation_2026_11_11/INDEPENDENT_GOLD.md
+          git log --format='%H' -- research/casualty_real_article_validation_2026_11_11/INDEPENDENT_GOLD.md | grep -qx '1b0b6879894737b65ec8ff1af08e56365ec5c09d'
+      - name: Download retained GitHub Actions evidence only; no publisher HTTP
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42998990269
+          name: casualty-five-source-artifact-offline-replay
+          path: research/casualty_real_article_validation_2026_11_11/input
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run ONLY two real-article cases, no full 45-test regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/casualty_real_article_validation_2026_11_11/run_offline.py
+      - name: Upload offline verdict, NOT revisions or source data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-independent-two-article-offline-verdict
+          path: research/casualty_real_article_validation_2026_11_11/results/
+          if-no-files-found: warn
+          retention-days: 21
