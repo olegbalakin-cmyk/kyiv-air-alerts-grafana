@@ -313,6 +313,49 @@ def _origin_attribution(low):
     return 'unattributed', None
 
 
+
+def _attack_place(low):
+    """Use a site only when its own sentence describes impact or direct damage.
+
+    'На вулиці' in a safety advisory is not a strike location. Scan only
+    the fatal incident's existing narrative scope; never infer a site from
+    a separately introduced/other attack or an unanchored location mention.
+    This is a conservative extraction guard, not a new geography model.
+    """
+    impact = (r'\b(?:влуч\w*|вдар\w*|удар\w*|атакув\w*|обстріл\w*|'
+              r'приліт\w*|пошкодж\w*|зруйн\w*|руйнув\w*|'
+              r'загинул\w*|поранен\w*|постраждал\w*)\b')
+    safety = (r'\b(?:не\s+перебува\w*|не\s+виход\w*|не\s+підход\w*|'
+              r'перейдіть|сховайтеся|укрийтеся|дотримуйтесь|'
+              r'заклика\w*|рекоменду\w*|радять|прос\w*\s+мешканц\w*|'
+              r'під\s+час\s+(?:сигналу\s+)?(?:повітрян\w*\s+)?тривог\w*)\b')
+    other_strike = (r'\b(?:інш\w*|друг\w*|окрем\w*|наступн\w*|'
+                    r'попередн\w*)\s+(?:удар\w*|атак\w*|обстріл\w*|влучан\w*)\b')
+    for sentence in re.split(r'(?<=[.!?])\s+|\n+', low):
+        if (not re.search(impact, sentence) or re.search(safety, sentence)
+                or re.search(other_strike, sentence)):
+            continue
+        match = re.search(
+            r'\b(?:за\s+адресою|(?:на|по)\s+вулиц(?:і|ю))\s+([^.;\n]{3,65})',
+            sentence)
+        if match:
+            # Stop at the event predicate; do not retain the rest of a report
+            # as a street name or use generic 'під час тривоги' as a street.
+            site = re.split(
+                r'\s+(?:пошкодж\w*|зруйн\w*|влуч\w*|вдар\w*|'
+                r'загинул\w*|постраждал\w*|унаслідок|внаслідок|'
+                r'під\s+час|через)\b', match[1], maxsplit=1)[0].strip(' ,:-–—')
+            if site and len(site.split()) <= 7:
+                return ' '.join(site.split())
+        if re.search(r'житлов\w*\s+будин', sentence):
+            return 'residential-buildings'
+        if re.search(r'склад\w*\s+(?:харч|продукт)', sentence):
+            return 'food-warehouse'
+        if re.search(r'інфраструктурн\w*\s+об.єкт', sentence):
+            return 'infrastructure-object'
+    return None
+
+
 def extract_cached_reports(queue, articles):
     """Extract evidence from retained article text, not synthetic fact labels.
 
@@ -349,16 +392,7 @@ def extract_cached_reports(queue, articles):
                   else 'unknown')
         russian = bool(re.search(r'\bрф\b|російськ|ворог', low))
         air = True if russian and weapon != 'unknown' else None
-        place = None
-        match = re.search(r'(?:за адресою|на вулиці)\s+([^.;\n]{3,65})', low)
-        if match:
-            place = ' '.join(match[1].split())
-        elif re.search(r'житлов\w* будин', low):
-            place = 'residential-buildings'
-        elif re.search(r'склад\w* (?:харч|продукт)', low):
-            place = 'food-warehouse'
-        elif re.search(r'інфраструктурн\w* об.єкт', low):
-            place = 'infrastructure-object'
+        place = _attack_place(low)
         resolution = _cumulative_total_update(low)
         origin_id, origin_name = ((resolution['origin_id'], resolution['origin_name'])
                                   if resolution else _origin_attribution(low))
