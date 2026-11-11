@@ -1,0 +1,140 @@
+name: Research CASUALTY offline replay of five-URL HTTP artifact
+
+on:
+  push:
+    branches:
+      - research-casualty-five-http-proof-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-five-offline-replay.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-artifact-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout pinned research code, no retained credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout immutable WIP input, no access to publisher sites
+        uses: actions/checkout@v4
+        with:
+          ref: c5ad6548e5ae901a75e5ff1b82ba25289341f59b
+          path: wip-pin
+          persist-credentials: false
+          sparse-checkout: |
+            kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Get previous single authorized HTTP proof artifact (GitHub only)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42998441793
+          name: casualty-five-wip-http-shadow-one-shot
+          path: research/casualty_five_http_proof_2026_11_11/results/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify capture evidence, execute unchanged reviewer replay offline
+        run: |
+          python - <<'PY'
+          import csv
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          ROOT = Path.cwd()
+          OUT = ROOT / "research/casualty_five_http_proof_2026_11_11/results"
+          SELECTED = ROOT / "research/casualty_five_candidate_selection_2026_11_11/selected_queue.json"
+          LEDGER = ROOT / "research/casualty_real_evidence_2026_11_10/pinned_revisions.csv"
+          BASELINE = ROOT / "research/casualty_automated_review_2026_11_10/baseline_coverage.json"
+          EVIDENCE = OUT / "evidence.json"
+
+          def sha(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def rows(path):
+              with path.open(newline="", encoding="utf-8") as fp:
+                  return list(csv.DictReader(fp))
+
+          m = json.loads((OUT / "manifest.json").read_text(encoding="utf-8"))
+          originals = m.get("sha256", {})
+          assert len(originals) == 5, "EXPECTED_FIVE_MANIFEST_ENTRIES"
+          assert all(sha(OUT / name) == digest for name, digest in originals.items()), "ARTIFACT_SHA_MISMATCH"
+          selected = json.loads(SELECTED.read_text(encoding="utf-8"))
+          evidence = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+          original = json.loads((OUT / "first/summary.json").read_text(encoding="utf-8"))
+          initial = rows(OUT / "first/proposals.csv")
+          assert len(selected) == 5, "SELECTION_COUNT_WRONG"
+          assert len(evidence.get("articles", [])) == 4, "CAPTURED_ARTICLE_COUNT_WRONG"
+          assert len(evidence.get("receipts", [])) == 4, "RECEIPT_COUNT_WRONG"
+          assert len(evidence.get("failures", [])) == 1, "FAILURE_COUNT_WRONG"
+          assert evidence["failures"][0]["reason"] == "HTML_NO_ARTICLE_PARAGRAPHS", "UNEXPECTED_FAILURE"
+          capture = evidence["last_capture_summary"]
+          assert (capture["urls_checked"], capture["http_requests"],
+                  capture["articles_downloaded"], capture["usable_evidence_packages"]) == (5, 20, 5, 4)
+          assert original["messages_processed"] == 5 and original["unique_proposals"] == 0
+          assert original["auto_ready"] == 0 and len(initial) == 0
+          assert m.get("publication_allowed") is False
+          protected = [SELECTED, LEDGER, BASELINE, EVIDENCE, OUT / "first/proposals.csv",
+                       OUT / "first/summary.json"]
+          before = {str(p.relative_to(ROOT)): sha(p) for p in protected}
+
+          sys.path.insert(0, str(ROOT / "kyiv-air-alerts-grafana/scripts"))
+          from casualty_auto_review import run_offline
+          replay = run_offline(SELECTED, LEDGER, EVIDENCE, BASELINE,
+                               OUT / "replay", OUT / "first/proposals.csv")
+          duplicates = rows(OUT / "replay/proposals.csv")
+          assert not duplicates and int(replay["unique_proposals"]) == 0, "DUPLICATE_REPLAY"
+          assert before == {str(p.relative_to(ROOT)): sha(p) for p in protected}, "INPUT_CHANGED"
+
+          report = {
+              "status": "OFFLINE_REPLAY_PASS_CAPTURE_PARTIAL",
+              "source_http_attempt": 1,
+              "source_http_run": 42998441793,
+              "source_urls_checked": 5,
+              "http_requests_from_original_run": 20,
+              "publisher_html_downloaded": 5,
+              "usable_evidence_packages": 4,
+              "failed_candidates": [{
+                  "candidate_id": x["candidate_id"],
+                  "reason": x["reason"]
+              } for x in evidence["failures"]],
+              "reviewer_auto_ready": int(original["auto_ready"]),
+              "first_new_proposals": len(initial),
+              "replay_new_proposals": len(duplicates),
+              "replay_added_deaths": 0,
+              "artifact_manifest_hashes_valid": len(originals),
+              "protected_inputs_unchanged": True,
+              "publication_allowed": False,
+          }
+          (OUT / "offline_replay_verdict.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          (OUT / "offline_replay_manifest.json").write_text(
+              json.dumps({"sha256": {
+                  str(p.relative_to(OUT)): sha(p)
+                  for p in sorted(OUT.rglob("*")) if p.is_file()
+                  and p.name not in ("offline_replay_manifest.json",)
+              }, "publication_allowed": False}, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False))
+          PY
+
+      - name: Upload independent no-HTTP replay proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-five-source-artifact-offline-replay
+          path: research/casualty_five_http_proof_2026_11_11/results/
+          if-no-files-found: warn
+          retention-days: 21
