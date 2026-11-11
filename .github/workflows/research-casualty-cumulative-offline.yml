@@ -1,0 +1,115 @@
+name: Research CASUALTY cumulative total updates (offline)
+
+on:
+  push:
+    branches:
+      - research-casualty-cumulative-total-2026-11-11
+    paths:
+      - .github/workflows/research-casualty-cumulative-offline.yml
+      - kyiv-air-alerts-grafana/scripts/casualty_auto_review.py
+      - research/casualty_cumulative_update_2026_11_11/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  cumulative-and-54-test-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout research branch (without persisted credentials)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore original historical legacy fixture from exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: 05ce47b1a92374af6c44c662f2d31f041a8f8afc
+          path: _legacy_casualty_05ce47
+          persist-credentials: false
+
+      - name: Restore only two required legacy files; check frozen hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          dst=research/casualty_automated_review_2026_11_10
+          src=_legacy_casualty_05ce47/research/casualty_automated_review_2026_11_10
+          test "$(git -C _legacy_casualty_05ce47 rev-parse HEAD)" = "05ce47b1a92374af6c44c662f2d31f041a8f8afc"
+          mkdir -p "$dst/results" research/casualty_attribution_2026_11_11/results
+          cp "$src/cached_evidence.json" "$dst/cached_evidence.json"
+          cp "$src/results/events.json" "$dst/results/events.json"
+          echo "4dad9a007db2e396b8d2f03e9db49b5eaa98707fe7f390341399a5b0966a51b3  $dst/cached_evidence.json" | sha256sum -c -
+          echo "c82ac990755bc2015fc01cb5c52881edd7b3d9f72af7e49230b5c14838d39339  $dst/results/events.json" | sha256sum -c -
+
+      - name: Download exact old five-article offline artifact from GitHub Actions only
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42998990269
+          name: casualty-five-source-artifact-offline-replay
+          path: research/casualty_attribution_2026_11_11/input
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download original 3 captured real articles from GitHub Actions only
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43053796144
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: research/casualty_cumulative_update_2026_11_11/input
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify original SHA-256 and freeze all protected evidence inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          three=research/casualty_cumulative_update_2026_11_11/input
+          five=research/casualty_attribution_2026_11_11/input
+          test "$(sha256sum "$three/evidence.json" | cut -d' ' -f1)" = 84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df
+          test "$(sha256sum "$five/evidence.json" | cut -d' ' -f1)" = 68ceccdcca68a0c93d42a0c0173c32c9ab47b659415e9bd2b274df8d9cf0fdf9
+          mkdir -p research/casualty_cumulative_update_2026_11_11/results
+          mkdir -p research/casualty_military_status_fix_2026_11_11/input
+          cp "$three"/*.json research/casualty_military_status_fix_2026_11_11/input/
+          sha256sum "$three"/*.json "$five"/*.json \
+            research/casualty_three_new_http_2026_11_11/{selected_queue.json,INDEPENDENT_GOLD.json} \
+            research/casualty_five_candidate_selection_2026_11_11/selected_queue.json \
+            research/casualty_real_evidence_2026_11_10/pinned_revisions.csv \
+            research/casualty_automated_review_2026_11_10/{baseline_coverage.json,cached_evidence.json} \
+            research/casualty_automated_review_2026_11_10/results/events.json \
+            | sort > research/casualty_cumulative_update_2026_11_11/results/sha256_before.txt
+
+      - name: Run real cumulative + military status and full original 45-test offline regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest \
+            research/casualty_military_status_fix_2026_11_11/test_military_status.py \
+            research/casualty_cumulative_update_2026_11_11/test_cumulative.py \
+            research/casualty_attribution_2026_11_11/test_replay.py \
+            kyiv-air-alerts-grafana/tests/test_casualty_auto_review.py \
+            -v 2>&1 | tee research/casualty_cumulative_update_2026_11_11/results/test_log.txt
+
+      - name: Verify SHA-256 invariant after tests even if regression fails
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=research/casualty_cumulative_update_2026_11_11/results
+          test -f "$out/sha256_before.txt"
+          sha256sum -c "$out/sha256_before.txt" | tee "$out/sha256_verification.txt"
+          printf 'all_protected_inputs_sha256_unchanged=true\npublication_allowed=false\n' > "$out/integrity_verdict.txt"
+
+      - name: Upload offline proof even on test failure; never publish revisions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-cumulative-update-offline-proof
+          path: research/casualty_cumulative_update_2026_11_11/results/
+          retention-days: 30
+          if-no-files-found: warn
