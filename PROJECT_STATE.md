@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest C6 accepted: **C6-REPLAY-SEVASTOPOL-MERGED-01**. Owner-approved [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) merged `main@fe4ab1c1` (16/16 offline PASS); [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) merged `site-prod@6de49e3b` (8/8 PASS). Live ZIP/SHA, 23/23 source continuity and Neon readback remain **UNPROVEN**. `GLOBAL_CUTOVER=NO`.
-Latest casualty research accepted: **CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01** (5 HTML, 4 usable; reviewer 0 READY, replay PASS, publish OFF).
+Latest casualty research checkpoint: **CASUALTY-MULTI-ATTACK-HOLD-01** (attribution 4/4 PASS; proposed Odesa +1 UNSAFE due cross-attack mixing; publish OFF).
 
 ## Working instructions
 
@@ -23,18 +23,23 @@ Latest casualty research accepted: **CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01** (5 H
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
 - **Operational WIP / historical reference / backfill:** separate tracks; no promotion by research proof.
-- **Casualty research:** [one-shot #42998441793](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998441793) 5 HTML/4 evidence; reviewer 0 proposals, [offline replay #42998990269](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998990269) PASS, duplicates 0. Publication OFF.
+- **Casualty research:** Source capture 5 HTML/4 excerpts PASS. [Attribution offline #43007370603](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43007370603) 4/4 PASS, but Odesa +1 AUTO_READY uses cross-attack details and is **REJECTED for promotion**. Reviewer incident extraction requires locality guard.
 
 ## Concrete next tasks
 
 1. Inspect next **regular** C2 after both merges; no manual dispatch. Check writer, 23-city QA/Git JSON and safe export diagnostic; require real same-run ZIP + SHA-256. Workflow SUCCESS alone is not bundle PASS.
 2. Verify Sevastopol source checkpoint advances with actual captured raw-page hash, pagination, overlap and provenance; historic alert `25006` remains unresolved. Require independent 23/23 full source receipts; absent proof stays BLOCKED.
 3. Separately approve exact-run read-only Neon→JSON proof (PR #48) and DST raw baseline. Do not infer Netlify deployment from `site-prod` merge. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: diagnose 4 retained article excerpts' factual attribution/incident parsing offline; 1 HTML paragraph selector failed. No new publisher HTTP or auto-publication.
+4. Casualty: narrow offline incident-locality guard for multi-attack articles; Odesa Nov 7 must NOT be AUTO_READY on mixed paragraphs. Preserve direct-attribution fix and Dnipro hold; no media HTTP/merge/ledger changes.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-MULTI-ATTACK-HOLD-01 — attribution fixed, unsafe mixed-incident auto-proposal (2026-11-11)
+
+- [Research `6d3c35d`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/6d3c35d452a034034a17bb671bf62400cb2eab55); [Actions #43007370603](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43007370603) 4/4 PASS on frozen four publisher excerpts. Odesa MVA phrase `повідомив очільник …` now attributed; Dnipro remains unattributed. Odesa `AUTO_READY=1` and offline +1 **NOT ACCEPTED**: parsed place `residential-buildings`, slot `night`, weapon `drone` came from other attacks described in the same article. Artifact `13849147170`, ZIP SHA256 `d24d4bbf…2876d2cbf` verified; replay proposals 0, inputs unchanged.
+- **Gate BLOCKED:** do not merge research parser or write `revisions.csv`. Next: narrowly prevent cross-incident fact mixing, keep evidence provenance, offline negative regression; no new source HTTP or publication.
+
 ## CASUALTY-FIVE-HTTP-SHADOW-PARTIAL-01 — five real WIP URLs; reviewer blocked (2026-11-11)
 
 - [Live run #42998441793](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42998441793): exact five pinned RSS IDs, 20 HTTP, **5 publisher HTML downloaded, 4 retained excerpts**, one `HTML_NO_ARTICLE_PARAGRAPHS`; unchanged reviewer **0 AUTO_READY/0 proposals**. Job failed only due research-harness 5-download vs 4-usable assertion; corrected without new publisher HTTP. Original artifact `13844887603`, 5/5 hashes PASS.
