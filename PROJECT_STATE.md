@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-10. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** — owner-approved [PR #54](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/54) merged `main@ee96fa78`; offline 4/4 PASS. First enabled [run 42817288652](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42817288652): C2 writer, Git JSON, 23/23 checkpoint bootstrap PASS; bundle BLOCKED with cause hidden. Next regular run to show safe reason. No cutover.
+**Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
+Latest accepted: **C6-THREE-RUN-EXPORT-01**. C2 runs `42902124611` and `42908463331` SUCCESS; `42970870607` data/Git PASS, overall FAIL at artifact upload. Export BLOCKED `CAPTURE_NAIVE_TIMESTAMP`; 22/23 checkpoints refreshed, Sevastopol unchanged. No cutover.
 
 ## Working instructions
 
@@ -14,10 +14,10 @@ Latest accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** — owner-approved [PR #54](
 
 ## Current tracks and open release gates
 
-- **Production:** Git/JSON remains; first enabled run #42817288652 PASS, `site-prod@15a3f15b` published. Bundle export BLOCKED (nonfatal); main PR #54 changes diagnostics only. No Neon switch.
+- **Production:** Git JSON published through `site-prod@390e7635` on 11 Nov. Run `42970870607` writer/QA/Git PASS, overall FAIL uploading noncritical diagnostic (`The server is busy`). No Neon source switch.
 - **Neon reader / historical parity:** frozen 23-city [proof 741f277f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03), 0 unexplained diffs; no current full continuity PASS.
-- **Live writer / provenance:** first enabled writer PASS, 23/23 source checkpoint bootstrap saved. Prior crash/retry and Kyiv two-capture proofs were bounded; cross-cycle 23-city source continuity remains OPEN.
-- **23-city generator / publication:** frozen Neon→JSON [run 42487688608](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42487688608) PASS (research only). Run #42817288652 wrote 23/23 bootstrap metadata, but 0/23 cross-cycle full receipts verified and no same-run bundle; no permission to switch.
+- **Live writer / provenance:** three `NEON_SUCCEEDED` receipts, last 33,066 episodes across 23 cities. Source checkpoints refreshed **22/23**; Sevastopol remains on first run (recent anomaly). Full continuity OPEN.
+- **23-city generator / publication:** frozen Neon→JSON #42487688608 research-only. All three exports `C2_BUNDLE_BLOCKED reason=CAPTURE_NAIVE_TIMESTAMP`; no bundle/SHA, no same-run readback. Narrow source-specific timestamp fix needed.
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
@@ -25,13 +25,18 @@ Latest accepted: **C6-EXPORT-DIAGNOSTIC-STAGED-01** — owner-approved [PR #54](
 
 ## Concrete next tasks
 
-1. Inspect next **scheduled** C2 run (no manual dispatch): check 23-city checkpoint overlap, writer/QA/Git JSON, and sanitized exporter `reason=... error_type=...` if bundle still BLOCKED. A workflow SUCCESS is not bundle PASS.
-2. Diagnose and fix only a verified failing guard via reviewable PR and narrow tests; preserve fail-closed, raw response isolation and missing-continuity BLOCKED.
-3. Exact-SHA PR #48 read-only same-run proof (36h) and DST raw baseline require separate approval. Rollback flags OFF; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`; other tracks separate.
+1. Narrow offline correction of `CAPTURE_NAIVE_TIMESTAMP`: align source-specific UkraineAlarm UTC replay with existing production parser; preserve raw hashes and fail-closed clock/identity gates.
+2. Review Sevastopol recent unpaired alert (checkpoint stuck); do not assume continuity. Then seek same-run bundle SHA and independent 23/23 readback.
+3. PR #48 read-only proof and DST raw baseline need separate approval. GitHub diagnostic-upload failure did not prevent Git JSON publication. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-THREE-RUN-EXPORT-01 — exact blockers after activated cycles (2026-11-11)
+
+- [42902124611](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42902124611) and [42908463331](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42908463331) SUCCESS; [42970870607](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42970870607) data/Neon/23-city QA/Git PASS (`site-prod@390e7635`, 33,066 episodes), overall FAIL at artifact upload.
+- All three bundle exports BLOCKED `CAPTURE_NAIVE_TIMESTAMP`, no ZIP/SHA; 22/23 checkpoints refreshed, Sevastopol stuck since bootstrap. Cutover NO.
+
 ## C6-EXPORT-DIAGNOSTIC-STAGED-01 — blocked export diagnostics merged (2026-11-10)
 
 - [Run 42817288652](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42817288652): first enabled scheduled C2 writer/QA/JSON PASS (`site-prod@15a3f15b`) and 23/23 bootstrap metadata, but bundle `C2_BUNDLE_BLOCKED`, no artifact; full overlap unproven.
