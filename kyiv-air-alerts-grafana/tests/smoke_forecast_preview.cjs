@@ -133,10 +133,12 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
     return {viewport:innerWidth,rowLeft:r?.left,rowRight:r?.right,cardLeft:c?.left,cardRight:c?.right,
       hasCheckbox:!!row?.querySelector("#showTrend"),
       buttonCount:row?.querySelectorAll("button").length,
+      controls:[...row?.children||[]].map(node=>{const x=node.getBoundingClientRect();return {tag:node.tagName,left:x.left,right:x.right,top:x.top,bottom:x.bottom}}),
       bodyWidth:document.documentElement.scrollWidth};
   });
   if(!snapshot.mobileToolbar.hasCheckbox||snapshot.mobileToolbar.buttonCount!==3||
-     snapshot.mobileToolbar.bodyWidth>375)
+     snapshot.mobileToolbar.rowLeft<0||snapshot.mobileToolbar.rowRight>375||
+     snapshot.mobileToolbar.controls.some(x=>x.left<0||x.right>375))
     errors.push("MOBILE_TOOLBAR_INVALID:"+JSON.stringify(snapshot.mobileToolbar));
   try { await page.screenshot({path:"forecast-browser.png",fullPage:true}); } catch {}
   const output = {url,navigationError,errors,failed,network,snapshot};
