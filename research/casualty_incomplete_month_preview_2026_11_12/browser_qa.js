@@ -91,13 +91,25 @@ async function exercise(page, url, mobile=false) {
   check("annual amount is lower bound",()=>assert.equal(yr.info.value_kind,"confirmed_lower_bound_not_final"));
   if(!mobile) {
     const compare = await page.evaluate(()=>{
+      // Force a shared October window without adding or changing any original data.
+      const other = Object.entries(state.data.casualties_by_city||{})
+        .find(([key,series])=>key!=="zaporizhzhia" &&
+          series.monthly?.some(row=>String(row.month||row.time||"").slice(0,7)==="2026-10"));
+      document.getElementById("compareA").value="zaporizhzhia";
+      document.getElementById("compareB").value=other?.[0]||"zaporizhzhia";
+      document.getElementById("compareC").value="";
+      document.getElementById("compareCasualtyInterval").value="monthly";
+      document.getElementById("compareCasualtyYear").dataset.requested="2026";
+      renderComparison();
       const c=state.charts.compareCasualtiesChart;
       const ix=c?.data?.labels?.indexOf("2026-10")??-1;
-      const ds=c?.data?.datasets?.find(d=>d._coverageRows?.[ix]?.status==="INCOMPLETE");
-      return {ix, matches:Boolean(ds), label:ds?.label||null};
+      const partial=c?.data?.datasets?.find(d=>d._coverageRows?.[ix]?.status==="INCOMPLETE");
+      const otherDs=c?.data?.datasets?.find(d=>d.label===labelFor(other?.[0]));
+      return {ix, partial:Boolean(partial), hasOther:Boolean(other),
+        otherUnrelated:other?.[0] ? otherDs?._coverageRows?.[ix]?.status!=="INCOMPLETE":true};
     });
-    check("comparison uses incomplete classification without leaking city",()=>{
-      assert(compare.ix>=0);assert(compare.matches);
+    check("comparison shows October lower bound without contaminating other cities",()=>{
+      assert(compare.ix>=0);assert(compare.partial);assert(compare.otherUnrelated);
     });
     const keyboard = await page.locator("#casualtyInterval").evaluate(el=>{
       el.focus();return document.activeElement===el && el.tagName==="SELECT";
