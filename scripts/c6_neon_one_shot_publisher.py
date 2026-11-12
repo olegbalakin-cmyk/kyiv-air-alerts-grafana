@@ -167,6 +167,9 @@ def publish(checkout, prepared, decision, *, expected_head):
     require(git(checkout, "ls-remote", "origin", "refs/heads/site-prod").split()[0]
             == expected_head, "SITE_PROD_HEAD_MOVED")
     manifest = load(prepared / "RELEASE_MANIFEST.json")
+    require(candidate.sha((prepared / "RELEASE_BINDING.json").read_bytes()) ==
+            decision["release_manifest_sha256"],
+            "RELEASE_MANIFEST_BINDING_SHA_INVALID")
     require(manifest.get("schema") == "c6-neon-git-release-manifest-v1"
             and manifest.get("files") == decision["files"]
             and manifest.get("release_manifest_sha256") ==
