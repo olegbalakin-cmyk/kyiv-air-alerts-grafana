@@ -38,33 +38,6 @@ Latest casualty: **CASUALTY-FALSE-ATTACK-PLACE-76-01**: 76/76 offline PASS; publ
 
 - [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) final `503bd73e`, [exact CI #43180557264](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43180557264) **76/76 PASS**; artifact `13926406047` verified. Ivano warning now `place=unlocated`, military `NEEDS_REVIEW`; true places protected. Zaporizhzhia shadow total 23 still PASS, replay 0, SHA unchanged. **Research only, no release.** Full proof in CHANGELOG.
 
-## CASUALTY-CUMULATIVE-OFFICIAL-UPDATE-63-01 — research proof PASS (2026-11-11)
-
-- [PR #73](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/73) draft, `6bfdf35a`; [exact CI #43080435330](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43080435330) **63/63 PASS**. Official Zaporizhzhia 10 Oct KAB totals 18→20→23 yield **23** as cumulative, not sum/max/order; one shadow `AUTO_READY +23` for pinned ledger. Replay 0 new proposals; military/incident protection and SHA invariance PASS. ZIP artifact `13884576127`, SHA256 `d439218f…adf521` verified.
-- **No production approval.** False-`place` warning defect and current casualty-ledger reconciliation remain before publication.
-
-## CASUALTY-EXPLICIT-MILITARY-STATUS-54-01 — bounded offline safety fix PASS (2026-11-11)
-
-- [Research PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) draft, final `03cfaecb`; exact [Actions #43069489502](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43069489502) **54/54 PASS** (9 targeted +45 legacy), artifact `13876734185` ZIP SHA256 `e441eeed9817bbc41f73036376cc1c6c85047d097cc8ed97e0a28844d64540a4`. LB.ua Ivano-Frankivsk `Загиблі — військовослужбовці` now `civilian_ambiguous`/`facts.civilian=None`, `NEEDS_REVIEW`, 0 proposed civilian deaths; synthetic complete-source military case held independently. Civilian-positive controls PASS, replay duplicates 0, protected inputs unchanged. [Full report](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/03cfaecb71111bfd3b896e4a19ca6f027118963f/research/casualty_military_status_fix_2026_11_11/FINAL_REPORT.md). Earlier [3-real-article proof PR #67](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/67) remains: Zaporizhzhia 18→20→23 last total missed (`NEEDS_REVIEW`), a separate place-extraction defect persists.
-- **Research accepted only; no merge, production, WIP/ledger or casualty publication approval.** Earlier casualty proof/transition details remain in draft [coordination PR #65](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/65); this new coordination branch is based on current `main`, preserving newer C6 checkpoints.
-
-## C6-POSTMERGE-C2-EXPORT-23-01 — physical same-run export and checkpoints PASS (2026-11-11)
-
-- [Actions #43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) scheduled C2 SUCCESS (16:08:40–16:36:22 UTC), after Work A `main@fe4ab1c1` and Work B `site-prod@6de49e3b`. `NEON_SUCCEEDED`: 33,135 canonical episodes (+69), 23-city QA, Git JSON publication `site-prod@cf960d7c` PASS.
-- Actual C2 ZIP artifact [#13873291895](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190/artifacts/13873291895) uploaded (`c2-shadow-inputs-43055353190-1`, 3,669,061 bytes), export ZIP SHA-256 `ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, manifest SHA-256 `f64620936677b3a329a5e7823d3f4d52e4bc60c5b6a29bb8da6ff943adf3e433`. `CAPTURE_NAIVE_TIMESTAMP` absent; 23/23 persistent source checkpoints share GitHub run ID `43055353190`; Sevastopol now updated, historical `25006→25008` remains unresolved.
-- **Proof boundary:** successful export/capture does not establish independent Neon readback/parity, source freshness all-city PASS in readback, Netlify deployment, approved DST/rollback or permission for global source switch. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-
-## C6-REPLAY-SEVASTOPOL-MERGED-01 — two scoped fixes staged in production branches (2026-11-11)
-
-- Owner-approved [PR #61](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/61) squash-merged to `main@fe4ab1c14bffa03ff58f1f9debc3cc510f1099b0`, exact-head [Actions #42981135850](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42981135850) **16/16 offline PASS** (UkraineAlarm event timestamp replay only).
-- Owner-approved [PR #62](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/62) squash-merged to `site-prod@6de49e3b0cf9692c7bb242672e92f062e516af20`, exact-head [Actions #42982010821](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42982010821) **8/8 offline PASS** (Sevastopol checkpoint eligibility only). No synthetic event closure, no cutover.
-- First post-merge C2 and exact ZIP/SHA, source receipt continuity across all 23 cities, independent Neon readback and any Netlify deployment **not yet verified**. Prior source checkpoint 22/23; `25006` still unresolved. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-
-## C6-THREE-RUN-EXPORT-01 — exact blockers after activated cycles (2026-11-11)
-
-- [42902124611](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42902124611) and [42908463331](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42908463331) SUCCESS; [42970870607](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42970870607) data/Neon/23-city QA/Git PASS (`site-prod@390e7635`, 33,066 episodes), overall FAIL at artifact upload.
-- All three bundle exports BLOCKED `CAPTURE_NAIVE_TIMESTAMP`, no ZIP/SHA; 22/23 checkpoints refreshed, Sevastopol stuck since bootstrap. Cutover NO.
-
 <!-- coordination:history:end -->
 
 ## Evidence and documentation maintenance
