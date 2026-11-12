@@ -1,0 +1,63 @@
+name: C6 new C2 scoped Neon SQL parity witness (offline, no publish)
+
+on:
+  push:
+    branches:
+      - research-c6-c2-43262387718-sql-parity-2026-11-12
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  c6-c2-sql-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate pinned exact C2 run metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh api repos/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718 > "$RUNNER_TEMP/c2-run.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          run=json.loads((Path(os.environ["RUNNER_TEMP"])/"c2-run.json").read_text())
+          assert run["id"] == 43262387718 and run["run_attempt"] == 1
+          assert run["status"] == "completed" and run["conclusion"] == "success"
+          assert run["event"] == "schedule" and run["head_sha"] == "375e69351e6a5aee1be16892821f7cdde2a8f21a"
+          PY
+      - name: Download exact C2 archive; no source HTTP or Neon credentials
+        uses: actions/download-artifact@v4
+        with:
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          github-token: ${{ github.token }}
+          run-id: 43262387718
+          name: c2-shadow-inputs-43262387718-1
+          path: c2-inputs
+      - name: Offline reproduction of seven-field witness and source receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m research.c6_new_c2_same_run_2026_11_12.verify_witness \
+            --artifact c2-inputs/c2-shadow-inputs.zip \
+            --witness research/c6_new_c2_same_run_2026_11_12/NEON_SQL_WITNESS.json \
+            --out proof-evidence/PROOF.json
+          sha256sum proof-evidence/PROOF.json > proof-evidence/SHA256SUMS.txt
+          grep 'NEW_C2_NEON_JSON_PARITY' proof-evidence/PROOF.json
+      - name: Upload scoped proof and SHA256; six-JSON physical remains BLOCKED
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-new-c2-sql-witness-${{ github.run_id }}-${{ github.run_attempt }}
+          path: proof-evidence/
+          retention-days: 30
+          if-no-files-found: warn
