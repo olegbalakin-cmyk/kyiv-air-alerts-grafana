@@ -19,6 +19,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Checkout immutable C2 input containing merged PR93 Sevastopol parser
+        uses: actions/checkout@v4
+        with:
+          ref: 68629fdae5534ec3a136e666bcb7d5c84dcd05aa
+          path: approved-site
+          persist-credentials: false
+      - name: Exact PR93 generator allowlist offline acceptance and rejection
+        env:
+          C6_PR93_SITE_PARSER: approved-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+        run: python -m unittest discover -s tests -p 'test_c6_pr93_exact_generator_pin.py' -v
       - name: Offline UkraineAlarm open-end sentinel regression
         run: python -m unittest discover -s tests -p 'test_c6_capture_active_enddate.py' -v
       - name: Frozen B2 382-parent evidence / 198 canonical display regression

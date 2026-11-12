@@ -59,12 +59,18 @@ C6_SEVASTOPOL_CHECKPOINT_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '6698ec743b6efcd9aeb059dd81b51cc05ae93493'),
 }
 
+# Exact owner-approved PR #93 blob at site-prod@6704c483; no wildcard drift.
+C6_SEVASTOPOL_PR93_BLOBS = {
+ 'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', 'd31c5ac43ac9e76491ee38033f9a46838c5abfbb'),
+}
+
 def accepted_builder_blob(path, raw, expected):
     actual = blob(raw)
     return (actual == expected or
             CAPTURE_HOOK_BLOBS.get(path) == (expected, actual) or
             C6_INTEGRATION_HOOK_BLOBS.get(path) == (expected, actual) or
-            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual))
+            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual) or
+            C6_SEVASTOPOL_PR93_BLOBS.get(path) == (expected, actual))
 
 class Closed(RuntimeError): pass
 
