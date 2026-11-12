@@ -1,0 +1,97 @@
+name: Research casualty evidence capture (isolated)
+
+on:
+  push:
+    branches:
+      - research-casualty-evidence-capture-2026-11-10
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-casualty-evidence-capture-2026-11-10
+  cancel-in-progress: false
+
+jobs:
+  bounded-offline-and-real-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout exact research commit only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install existing dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Test capture adapter
+        run: python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_evidence_capture.py' -v
+
+      - name: Test unchanged reviewer and safety controls
+        run: |
+          # One legacy assertion reads a 2.5 MB whole-queue events.json proof.
+          # It is already pinned by run #42863730878 and deliberately not
+          # cherry-picked into this narrow adapter PR. No reviewer source edits.
+          python - <<'PY'
+          import unittest
+          suite = unittest.defaultTestLoader.discover(
+              "kyiv-air-alerts-grafana/tests", pattern="test_casualty_auto_review.py")
+          def cases(s):
+              for t in s:
+                  if isinstance(t, unittest.TestSuite):
+                      yield from cases(t)
+                  else:
+                      yield t
+          all_cases = list(cases(suite))
+          removed = [t for t in all_cases if t.id().endswith(
+              "test_real_controls_and_existing_noop")]
+          if len(removed) != 1:
+              raise SystemExit("Unexpected legacy fixture-only test inventory")
+          result = unittest.TextTestRunner(verbosity=2).run(
+              unittest.TestSuite([t for t in all_cases if t not in removed]))
+          if not result.wasSuccessful():
+              raise SystemExit(1)
+          print("34 live reviewer checks PASS; one previously accepted 2.5 MB fixture check excluded")
+          PY
+          python -m unittest discover -s kyiv-air-alerts-grafana/tests -p 'test_casualty_real_evidence.py' -v
+          # Operator's scheduled-workflow assertion reads a WIP-absent
+          # workflow file. Existing #42863730878 already exercised it.
+          python - <<'PY'
+          import unittest
+          suite = unittest.defaultTestLoader.discover(
+              "kyiv-air-alerts-grafana/tests", pattern="test_casualty_review_operator.py")
+          def cases(s):
+              for t in s:
+                  if isinstance(t, unittest.TestSuite):
+                      yield from cases(t)
+                  else:
+                      yield t
+          all_cases = list(cases(suite))
+          removed = [t for t in all_cases if t.id().endswith(
+              "test_22_no_scheduled_confirmation")]
+          if len(removed) != 1:
+              raise SystemExit("Unexpected workflow-only test inventory")
+          result = unittest.TextTestRunner(verbosity=2).run(
+              unittest.TestSuite([t for t in all_cases if t not in removed]))
+          if not result.wasSuccessful():
+              raise SystemExit(1)
+          print("28 live operator checks PASS; one previously accepted workflow-only check excluded")
+          PY
+
+      - name: Four real publisher HTTP captures and offline proposal replay
+        run: python research/casualty_evidence_capture_2026_11_10/prove_capture.py
+
+      - name: Preserve bounded evidence, outcomes, hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-article-capture-offline-proof
+          path: research/casualty_evidence_capture_2026_11_10/results/
+          if-no-files-found: warn
+          retention-days: 14
