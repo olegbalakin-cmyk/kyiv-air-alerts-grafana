@@ -1,0 +1,34 @@
+# CASUALTY-ZAP11-OWNER-APPROVED-HTTP-2026-11-12 — research source assessment
+
+**Scope:** Owner approved one-time capture of exact 11 PR #96 candidates, plus necessary official confirmation. No casualty revision, data publication, code promotion, Neon, WIP mutation or frontend change.
+
+**Input:** PR #96 at `ec4da5dd25bddc44ab6f3eddd129de5787278fab`; queue Git blob `a6cc94e92550dd826bbcf465df716644c712dbe6`, 11 IDs / 5 publication clusters.
+
+**Physical capture:** [workflow #43261676781](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43261676781) at `78d8bd097345e1005e50814befbc179e70775271`. Read its final status and artifact before classifying any receipt as physically verified. The live capture is bounded to ten unique article URLs (two identical Ukr.net titles map to the same original) and four official police URLs. The script records request/redirect/status/response byte length/SHA-256 and page title where accessible. It does not store or publish article bodies. **A browser/search-index article result is not equivalent to a verified HTTP capture artifact.**
+
+## Evidence found by independent external source lookups
+
+The following are **source-level findings**, not new production death credits:
+
+| Candidate IDs | Attack date (distinct from publication) | Evidence and independent-incident interpretation |
+| --- | --- | --- |
+| `43a268ae2e19123554d6d476` | 2026-10-18 | One 27-year-old woman killed by overnight UAV strike **within Zaporizhzhia city**. [ZPRZ.CITY](https://zprz.city/news/view/rosiyani-vdarili-dronami-po-zaporizhzhyu-zaginula-27richna-zhinka-poranilo-ditinu-ta-58richnu-zhitelku-foto) + [official police, 18 Oct](https://zp.npu.gov.ua/news/na-zaporizhzhi-unaslidok-vorozhykh-udariv-zahynula-zhinka-chetvero-liudei-otrymaly-poranennia-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv-rosiiskoi-armii). Distinct from 10 Oct. |
+| `7c3ac3280ba7ad4b9c10f3b1`, `dcdd2fe28fd1464e7fbabdc1`, `24654383bd30cc0f4e29c95f` | 2026-10-22 evening | **One** missile strike on a private house in Zaporizhzhia city: first **two**, later **three** killed (37-year-old husband, 38-year-old wife, 69-year-old woman). [Ukrinform earlier two](https://www.ukrinform.ua/amp/rubric-regions/4177207-armia-rf-zavdala-udaru-po-zaporizzu-zaginuli-dvoe-ludej.html); [MIG final three](https://mig.com.ua/vorozhyy-udar-po-pryvatnomu-budynku-v-zaporizhzhi-zahynuly-troye-lyudey/); [ZPRZ.CITY](https://zprz.city/news/view/u-zaporizhzhi-raketa-vbila-tsilu-rodinu-troe-zagiblih-ta-poranena-vnaslidok-atak-rf-foto-video-1); [official police, 23 Oct](https://zp.npu.gov.ua/news/na-zaporizhzhi-cherez-rosiiski-ataky-zahynulo-troie-liudei-shche-odna-otrymala-poranennia-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv). Never sum 2+3; distinguish other oblast deaths in police daily summaries. |
+| `103256b72707ad66d91f6aae`, `cb222eea2a20aa1db2d67d5d` | **2026-10-05**, death reported 26 Oct | Both identical Ukr.net candidates point to one [ZaBor article](https://www.zabor.zp.ua/new/u-zaporizhzhi-pislya-udaru-po-bagatopoverkhivtsi-zaginuv-cholovik-kvartira-vigorila-vshchent). It reports a man's later hospital death after 5 Oct drone strike, **not** a new 26 Oct fatal strike. The article stated official death confirmation was lacking at its time. `NEEDS_OFFICIAL_CONFIRMATION`; check original incident credits and whether city/month already counted. Do not add. |
+| `89a03da642500bf4def8ec9c`, `05affefbcbb9f27a322ff5d3`, `db8ada77be0650fbf7c686cd` | 2026-09-26 early morning | **One** overnight UAV strike on a private house in Zaporizhzhia city, **two women** aged 42 and 61 killed. [Shelter original/updated](https://shelter.in.ua/viyna/rosiyskyy-dron-vdaryv-po-budynku-v-zaporizzi-pid-zavalamy-mohly-zalyshatysia-dvoye-liudey), [Radio Svoboda](https://www.radiosvoboda.org/a/news-zaporizhzhia-dvoie-zahyblyh/33864729.html/), [official police, 26 Sep](https://zp.npu.gov.ua/news/pid-ranok-rosiiany-vdaryly-po-zaporizhzhiu-shakhedamy-zahynuly-dvi-zhinky-poraneni-cholovik-i-dytyna-politseiski-nadaly-dopomohu-postrazhdalym-ta-dokumentuiut-voiennyi-zlochyn). The source published on Sep 25 in WIP is not an established separate attack. |
+| `7f57e0e0e4743e98c8a88186`, `a3e25aad501f5f76e30ae65e` | 2026-09-27 morning | **One** Shahed strike on house in the Shevchenkivskyi district of Zaporizhzhia city: **one 56-year-old man** killed. [First Zaporizhzhia](https://1news.zp.ua/vorog-zapustyv-shahed-po-shevchenkivskomu-rayonu-zaporizhzhya-zagynula-lyudyna-shhe-odna-poranena-foto-video/), [Spravzhne](https://spravzhne.media/ukr/war/1790493970-rankova-ataka-na-zaporizhzhya-zaginula-lyudina-e-poraneniy), [official police, 28 Sep](https://zp.npu.gov.ua/news/na-zaporizhzhi-odna-liudyna-zahynula-chotyry-poraneno-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv-rf). Distinct from Sep 26. |
+
+### Preliminary unique-event interpretation
+
+- Three independent *currently corroborated October fatal attacks* are identified across the previously confirmed 10 Oct KAB wave (**23**) and new 18 Oct (**1**) and 22 Oct (**3**) incidents. **Potential October observed minimum: 27**, conditional on verifying no previously credited deaths in site-prod baseline/revisions and refreshing sources. Do **not** label it a published October monthly total; month remains `COVERAGE_INCOMPLETE`.
+- September 26 and 27 source groups represent **two distinct** attacks with **2 + 1 = 3** corroborated incident deaths. They are **not necessarily new credits**, because September baseline and revisions require exact comparison; citywide September completeness remains unknown.
+- The 26 Oct publication about a 5 Oct impact cannot be counted as an independent 26 Oct attack; official subsequent death confirmation and prior credit remain open.
+- The independent primary sources support deaths among civilians in residential attacks, but the official incident-death identity/credit checks remain required before any new `revisions.csv` rows.
+- No newly accepted `revisions.csv` rows, no site publication, and no production cutover. **No final monthly coverage certification.**
+
+## Required next steps before any publication
+
+1. Independently check the physical GitHub Actions receipt and source statuses; do not claim capture PASS solely from workflow start.
+2. Reconcile each incident against existing site-prod per-incident credits and legacy monthly aggregates. In particular, never assume that a monthly total of 0 means no previous incident was credited.
+3. Keep 5 Oct later-death case `NEEDS_OFFICIAL_CONFIRMATION`. Keep October `COVERAGE_INCOMPLETE`.
+4. Prepare a strictly isolated candidate revision proposal with incident identity/credited proof, then run exact-head generator, adversarial duplicate tests and user-visible incomplete-month preview. No merge/deploy without separate authorization.
