@@ -738,12 +738,17 @@ function setupCsvExports() {
     const canvas = $(chartId);
     const card = canvas?.closest(".chart-card");
     const wrap = canvas?.closest(".chart-wrap");
-    if (!canvas || !card || !wrap || card.querySelector(`[data-csv-chart="${chartId}"]`)) continue;
-    const row = document.createElement("div");
-    row.className = "chart-export-row";
-    row.dataset.csvChart = chartId;
-    row.appendChild(makeCsvButton(() => exportChartCsv(chartId)));
-    card.insertBefore(row, wrap);
+    if (!canvas || !card || !wrap) continue;
+    let row = card.querySelector(`[data-csv-chart="${chartId}"]`);
+    if (!row) {
+      row = document.createElement("div");
+      row.className = "chart-export-row";
+      row.dataset.csvChart = chartId;
+      card.insertBefore(row, wrap);
+    }
+    if (!row.querySelector(".csv-export-button")) {
+      row.appendChild(makeCsvButton(() => exportChartCsv(chartId)));
+    }
   }
 
   const tablePanel = $("allCitiesTable")?.closest(".table-panel");
