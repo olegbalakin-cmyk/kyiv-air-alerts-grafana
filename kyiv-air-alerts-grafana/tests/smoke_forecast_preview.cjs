@@ -71,6 +71,12 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
   });
   if(snapshot.toolbar.singleToolbar!==1||!snapshot.toolbar.checkbox||!snapshot.toolbar.csv||
      !snapshot.toolbar.share||!snapshot.toolbar.embed) errors.push("CHART_TOOLBAR_INCOMPLETE:"+JSON.stringify(snapshot.toolbar));
+  // The trend checkbox belongs in the same compact right-aligned group as CSV/Share.
+  if(!snapshot.toolbar.checkboxRect||!snapshot.toolbar.csvRect||
+     Math.abs(snapshot.toolbar.checkboxRect.top-snapshot.toolbar.csvRect.top)>5||
+     snapshot.toolbar.csvRect.left-snapshot.toolbar.checkboxRect.right<0||
+     snapshot.toolbar.csvRect.left-snapshot.toolbar.checkboxRect.right>20)
+    errors.push("TREND_NOT_ADJACENT_TO_CSV:"+JSON.stringify(snapshot.toolbar));
   snapshot.initialTrend = await countForecast();
   if (snapshot.initialTrend.checked !== false || snapshot.initialTrend.forecastCount !== 0 ||
       snapshot.initialTrend.forecastDatasets !== 0) errors.push("DEFAULT_TREND_NOT_OFF:"+JSON.stringify(snapshot.initialTrend));
