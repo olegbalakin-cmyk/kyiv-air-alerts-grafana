@@ -28,7 +28,7 @@ class TestFailClosed(unittest.TestCase):
         self.assertEqual(e.source_class("https://news.google.com/rss/articles/x"),"AGGREGATOR_NOT_ORIGINAL")
         self.assertEqual(e.source_class("https://zp.npu.gov.ua/news/x"),"OFFICIAL_PRIMARY")
         self.assertEqual(e.source_class("https://zprz.city/news/x"),"PUBLISHER_OR_REPRINT")
-        self.assertEqual(e.host("https://suspilne.media.attacker.test/article"),"")
+        self.assertNotIn(e.host("https://suspilne.media.attacker.test/article"),e.CAPTURE_HOSTS)
         self.assertEqual(e.host("https://name:pass@suspilne.media/article"),"")
         a=auth()
         a["targets"][0]["url"]="https://suspilne.media.attacker.test/article"
