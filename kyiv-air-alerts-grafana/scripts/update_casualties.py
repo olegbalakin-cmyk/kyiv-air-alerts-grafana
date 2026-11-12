@@ -212,7 +212,7 @@ _LEGACY_SUMY_URL = (
     "https://npu.gov.ua/news/dvoie-liudei-zahynuly-troie-poraneni-sered-nykh-dytyna-"
     "politsiia-dokumentuie-naslidky-obstriliv-sumshchyny"
 )
-_PROOF_FORMAT = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\\s]+)\\Z")
+_PROOF_FORMAT = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\s]+)\Z")
 
 
 def _pinned_legacy_sumy(row: dict) -> bool:
@@ -294,7 +294,7 @@ def reconcile_confirmed_revisions(revisions: list[dict]) -> list[dict]:
 
         # Candidate/source reuse under different incident identities cannot be
         # treated as a different death without independent provenance.
-        for candidate in re.split(r"[,;\\s|]+", row.get("candidate_ids", "")):
+        for candidate in re.split(r"[,;\s|]+", row.get("candidate_ids", "")):
             if not candidate:
                 continue
             if candidate in owner_by_candidate and owner_by_candidate[candidate] != incident:
