@@ -289,7 +289,38 @@ def capture_continuity_eligible(anomalies: list[dict], pages: list[dict],
         previous_clock = history_capture.utc(previous["last_checked_at"])
         if not isinstance(anomalies, list):
             return False
+        # An observed, genuinely open final alert is not proof of missing
+        # source history. It must remain OPEN and out of closed statistics.
+        # This exception never bypasses authenticated page coverage or the
+        # completed-AIR overlap enforced independently by record()/verify().
+        open_rows = [a for a in anomalies if a.get("type") == "open_start"]
+        if len(open_rows) > 1:
+            return False
+        if open_rows:
+            source_starts = []
+            for page in pages:
+                raw = base64.b64decode(page["body_base64"], validate=True)
+                for message in parse_page(raw.decode("utf-8")):
+                    if strict_kind(message["text"]) == "start":
+                        source_starts.append(message)
+            if not source_starts:
+                return False
+            latest = max(source_starts, key=lambda m: m["id"])
+            observed = open_rows[0]
+            start = observed["start"]
+            if not (
+                int(observed["start_id"]) == latest["id"] == int(start["id"])
+                and history_capture.utc(start["at"]) == latest["at"]
+                and start["url"] == f"https://t.me/{CHANNEL}/{latest['id']}"
+                and normalize(start["text"]) == normalize(latest["text"])
+                and latest["at"] <= history_capture.utc(pages[0]["captured_at"])
+                and all(observed.get(k) is None for k in
+                        ("next_start", "next_start_id", "end", "end_id"))
+            ):
+                return False
         for anomaly in anomalies:
+            if anomaly["type"] == "open_start":
+                continue  # Only the uniquely verified latest source start above.
             if anomaly["type"] != "missing_end_before_new_start":
                 return False
             start = history_capture.utc(anomaly["start"]["at"])
