@@ -1,0 +1,88 @@
+name: C3 actual frontend six-JSON offline browser QA (no deployment)
+
+on:
+  push:
+    branches: [fix-c3-neon-kpi-index-2026-11-12]
+    paths:
+      - ".github/workflows/c6-c3-six-json-preview-qa.yml"
+      - "research/c6_c3_preview_2026_11_12/**"
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/tests/test_live_history_binding.js"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout research-only QA
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install previously used browser test dependency
+        run: python -m pip install playwright==1.64.1
+      - name: Download three immutable GitHub Actions artifacts (no Neon or upstream API)
+        run: |
+          mkdir -p /tmp/c6-c3/neon /tmp/c6-c3/git /tmp/c6-c3/old /tmp/c6-c3/site /tmp/c6-c3/c2 /tmp/c6-c3/proof
+          gh run download 43187464328 -R "$GITHUB_REPOSITORY" -n isolated-neon-shadow-43187464328-1 -D /tmp/c6-c3/neon
+          gh run download 43055353190 -R "$GITHUB_REPOSITORY" -n c2-shadow-inputs-43055353190-1 -D /tmp/c6-c3/git
+          gh run download 41139538902 -R "$GITHUB_REPOSITORY" -n neon-preview-browser-and-rollback -D /tmp/c6-c3/old
+          unzip -q /tmp/c6-c3/old/preview-package.zip -d /tmp/c6-c3/site
+          unzip -q /tmp/c6-c3/git/c2-shadow-inputs.zip -d /tmp/c6-c3/c2
+      - name: Verify all original checksums and assemble six-file reversible preview
+        run: |
+          python - <<'PY'
+          import json,hashlib,pathlib,shutil
+          b=pathlib.Path('/tmp/c6-c3')
+          src=b/'neon'; c2=b/'c2/site_data'; site=b/'site'
+          manifest=json.loads((src/'sha256_manifest.json').read_text())['files']
+          assert len(manifest)==18
+          for relative,want in manifest.items():
+              f=src/relative
+              assert f.is_file() and hashlib.sha256(f.read_bytes()).hexdigest()==want,relative
+          c2manifest=json.loads((b/'c2/manifest.json').read_text())['files']
+          for relative,want in c2manifest.items():
+              f=b/'c2'/relative
+              assert hashlib.sha256(f.read_bytes()).hexdigest()==want,relative
+          candidates=sorted((src/'candidate').glob('*.json'))
+          assert len(candidates)==6
+          for f in candidates:
+              shutil.copyfile(f,site/'data/neon'/f.name)
+          for f in c2.glob('*.json'):
+              shutil.copyfile(f,site/'data/legacy'/f.name)
+          index=json.loads((c2/'dashboard_data.json').read_text())['historical_daily_kpi']
+          (site/'data/legacy/historical-daily-kpi.json').write_text(json.dumps(index,ensure_ascii=False,indent=2)+'\n')
+          assert len(list((site/'data/neon').glob('*.json')))==6
+          assert len(list((site/'data/legacy').glob('*.json')))==6
+          boot=site/'preview-bootstrap.js'
+          original=boot.read_text()
+          original=original.replace("source === 'neon' ? 'DST SIMULATION' : 'DST SIMULATION OFF (legacy)'","'DST CORRECTION OFF'")
+          original=original.replace("Frozen input cutoff: <time>2026-10-30T15:27:55.138400Z</time>. Frozen snapshot; no continuous Neon freshness proof.", "C2 #43055353190 / Neon artifact #13929117121; current alert freshness NOT certified. No production publication.")
+          boot.write_text(original)
+          proof={'artifact_zip_run':43187464328,'checksums_verified':len(manifest),'source_c2':43055353190,'neon_six':[f.name for f in candidates],'git_six':sorted(f.name for f in (site/'data/legacy').glob('*.json')),'dst':'OFF','publication':False}
+          (b/'proof/inputs_verified.json').write_text(json.dumps(proof,indent=2)+'\n')
+          print('C6_C3_INPUTS 18/18 and six files per source PASS')
+          PY
+      - name: Run production-compatibility index unit checks without data HTTP
+        run: |
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+      - name: Run scoped-preview historical-index, browser, CSV and rollback QA
+        run: |
+          python research/c6_c3_preview_2026_11_12/browser_qa.py \
+            --preview /tmp/c6-c3/site --out /tmp/c6-c3/proof
+      - name: Preserve isolated proof even on blocked QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-c3-reversible-preview-qa-${{ github.run_id }}
+          path: /tmp/c6-c3/proof/
+          if-no-files-found: warn
+          retention-days: 30

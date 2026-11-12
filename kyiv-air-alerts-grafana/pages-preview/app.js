@@ -3529,8 +3529,18 @@ async function init() {
   // fall back to the verified static release snapshot for older data.
   const embeddedHistory = state.data?.historical_daily_kpi;
   const sourceGeneratedAt = state.data?.meta?.generated_at;
+  // The pinned Neon index is accepted only by the isolated local-data preview.
+  // Production keeps its hardcoded site-prod Git data URL and Git index policy.
+  const isolatedNeonPreview = window.PREVIEW_CONFIG?.source === "neon" &&
+    RAW_DATA_BASE === "./data/neon/";
   const validIndex = index => index?.schema === "verified-historical-daily-start-counts-v1" &&
-    index?.meta?.source_ref === "site-prod" && index?.meta?.expected_cities === 23;
+    index?.meta?.expected_cities === 23 &&
+    (index?.meta?.source_ref === "site-prod" ||
+      (isolatedNeonPreview &&
+       index?.meta?.source_ref === "neon:br-bold-mode-b5rub8pq" &&
+       index?.meta?.verified_count === 23 &&
+       typeof sourceGeneratedAt === "string" &&
+       index?.meta?.source_dashboard_generated_at === sourceGeneratedAt));
   state.historicalDaily = validIndex(embeddedHistory) &&
     typeof sourceGeneratedAt === "string" &&
     embeddedHistory.meta.source_dashboard_generated_at === sourceGeneratedAt
