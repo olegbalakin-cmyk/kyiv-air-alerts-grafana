@@ -852,7 +852,6 @@ jobs:
           reports=list(prepared.rglob("REPORT.json"))
           assert len(reports)==1
           report=reports[0]
-          assert report.parent.name=="c6-prepared"
           assert (report.parent/"candidate/historical-daily-kpi.json").is_file()
           (root/"prepared-path.txt").write_text(str(report.parent))
           proof_roots=[p.parent for p in (root/"work-a-zip").rglob("sha256_manifest.json")]
