@@ -53,6 +53,48 @@ class CanonicalSelectionTests(unittest.TestCase):
         kept, _ = self.choose(e, rows)
         self.assertEqual(len(kept), 3)
 
+    def test_only_proven_post_c2_new_episode_is_ignored(self):
+        e, rows = self.sample()
+        _, later = entry("later-fresh", "kyiv",
+            "2026-11-12T02:00:00Z", "2026-11-12T02:40:00Z",
+            stamp="2026-11-12T07:33:11Z")
+        later["created_at"] = "2026-11-12T07:32:58Z"
+        kept, proof = self.choose(e, rows + [later])
+        self.assertEqual({r["legacy_episode_id"] for r in kept}, {"a", "b", "c"})
+        self.assertEqual(proof["historical_rows_not_selected"], 1)
+        self.assertEqual(proof["post_c2_inserted_rows_not_selected"], 1)
+        self.assertEqual(proof["raw_closed_episodes"], 5)
+        self.assertEqual(proof["by_city"]["kyiv"]["post_c2_inserted"], 1)
+        self.assertEqual(len(rows), 4)
+
+    def test_postc2_new_row_cannot_reuse_an_expected_c2_id(self):
+        e, rows = self.sample()
+        rows[0]["updated_at"] = "2026-11-12T07:33:11Z"
+        rows[0]["created_at"] = "2026-11-12T07:33:01Z"
+        with self.assertRaisesRegex(SelectionBlocked, "OUTRUNS_C2"):
+            self.choose(e, rows)
+
+    def test_old_history_modified_after_cutoff_must_fail(self):
+        e, rows = self.sample()
+        rows[1]["updated_at"] = "2026-11-12T07:33:11Z"
+        rows[1]["created_at"] = "2026-10-01T00:00:00Z"
+        with self.assertRaisesRegex(SelectionBlocked, "OUTRUNS_C2"):
+            self.choose(e, rows)
+
+    def test_later_row_without_creation_clock_cannot_be_skipped(self):
+        e, rows = self.sample()
+        _, later = entry("later-no-clock", "sumy",
+            "2026-11-12T02:00:00Z", "2026-11-12T02:40:00Z",
+            stamp="2026-11-12T07:33:11Z")
+        with self.assertRaisesRegex(SelectionBlocked, "OUTRUNS_C2"):
+            self.choose(e, rows + [later])
+        later["created_at"] = "2026-11-11T10:00:00Z"
+        with self.assertRaisesRegex(SelectionBlocked, "OUTRUNS_C2"):
+            self.choose(e, rows + [later])
+        later["created_at"] = "2026-11-12T08:00:00Z"
+        with self.assertRaisesRegex(SelectionBlocked, "OUTRUNS_C2"):
+            self.choose(e, rows + [later])
+
     def test_duplicate_and_missing_ids_fail_closed(self):
         e, rows = self.sample()
         with self.assertRaisesRegex(SelectionBlocked, "DUPLICATE"):

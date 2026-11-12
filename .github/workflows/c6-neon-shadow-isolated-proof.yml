@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       research_sha:
-        description: A NEW, separately owner-authorized exact SHA on research-c6-frozen-b2-evidence-2026-11-11; old approval does not transfer
+        description: A NEW, separately owner-authorized exact SHA on research-c6-postc2-append-only-2026-11-12; old approval does not transfer
         required: true
         type: string
       c2_artifact_run_id:
@@ -51,7 +51,7 @@ jobs:
       github.event_name == 'workflow_dispatch' &&
       github.actor == 'olegbalakin-cmyk' &&
       inputs.owner_approval == 'APPROVE_ONE_READONLY_PROOF' &&
-      github.ref == 'refs/heads/research-c6-frozen-b2-evidence-2026-11-11' &&
+      github.ref == 'refs/heads/research-c6-postc2-append-only-2026-11-12' &&
       github.sha == inputs.research_sha
     environment: c6-neon-shadow-readonly
     runs-on: ubuntu-latest
