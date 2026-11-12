@@ -3,13 +3,13 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01 — scoped Neon historical-index QA PASS (2026-11-12; proposed on merge)
+
+- PR #87 `validIndex()` guarded in copied preview only; [Actions #43201183617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43201183617) SUCCESS, artifact #13935082806: 184 views, CSV 23, rollback 23, 0 JS/HTTP/external, 28 original files restored. Actual frontend merge, public preview, current-source/DST and operational C3 rollback OPEN. `GLOBAL_CUTOVER=NO`.
+
 ### C6-PHYSICAL-SIX-JSON-READBACK-PASS-01 — physical Neon→six JSON PASS (2026-11-12; proposed on merge)
 
 - Owner-authorized [#43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) `82a7cc77` SUCCESS, artifact #13929117121: 6/6 JSON +18/18 SHA, 23/23 historical receipts/freshness, 33,135 canonical, 262 old +75 later excluded. Read-only; no writes/publication. Current source, Kyiv provenance, DST and C3 preview/rollback remain OPEN; `GLOBAL_CUTOVER=NO`.
-
-### C6-ONE-PHYSICAL-E2E-NEXT-01 — remove redundant fixture prerequisite (2026-11-12; proposed on merge)
-
-- PR #84 offline BLOCKED: no seven-table fixture. Existing physical generator already captures one read-only snapshot and builds six JSON; next PR #82 physical E2E requires fresh owner approval, no writes/cutover.
 
 ### C6-APPEND-ONLY-READBACK-OFFLINE-01 — 23-city exact-run after later inserts offline PASS (2026-11-12; proposed on merge)
 
