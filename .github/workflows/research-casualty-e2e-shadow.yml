@@ -1,0 +1,88 @@
+name: CASUALTY E2E shadow proof (offline)
+on:
+  push:
+    branches: [research-casualty-e2e-shadow-2026-11-12]
+    paths: [".github/workflows/research-casualty-e2e-shadow.yml", "research/casualty_e2e_shadow_2026_11_12/**"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  frozen-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          path: _matrix
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43053796144
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: /tmp/casualty-original
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43261676781
+          name: casualty-zap11-approved-http-43261676781-1
+          path: /tmp/casualty-receipts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Check pinned snapshots and software safety invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _wip rev-parse HEAD)" = 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          test "$(git -C _matrix rev-parse HEAD)" = 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          echo "84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df  /tmp/casualty-original/evidence.json" | sha256sum -c -
+          echo "4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b  /tmp/casualty-receipts/capture_receipts.json" | sha256sum -c -
+          python -m unittest discover -s research/casualty_e2e_shadow_2026_11_12 -p test_pipeline.py -v
+      - name: Real source-backed shadow plus idempotency replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          common=(
+            --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+            --evidence /tmp/casualty-original/evidence.json
+            --receipts /tmp/casualty-receipts/capture_receipts.json
+            --matrix _matrix/research/casualty_zaporizhzhia_additional_events_2026_11_12/verification_matrix.json
+            --revisions _site/kyiv-air-alerts-grafana/data/casualties/revisions.csv
+            --baseline research/casualty_automated_review_2026_11_10/baseline_coverage.json
+            --city-manifest _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json
+            --city-csv _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv
+            --generator _site/kyiv-air-alerts-grafana/scripts/update_casualties.py
+            --dashboard _site/kyiv-air-alerts-grafana/data/dashboard_data.json
+          )
+          mkdir -p /tmp/casualty-first /tmp/casualty-repeat
+          python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" --output /tmp/casualty-first
+          python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" --previous-proposals /tmp/casualty-first/proposals.json --output /tmp/casualty-repeat
+          python research/casualty_e2e_shadow_2026_11_12/verify_proof.py /tmp/casualty-first /tmp/casualty-repeat
+      - name: Upload evidence decisions and safety report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-e2e-shadow-proof
+          path: |
+            /tmp/casualty-first/*.json
+            /tmp/casualty-repeat/*.json
+            /tmp/casualty-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
