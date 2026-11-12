@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -22,11 +23,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test -z "$(git status --porcelain)"
           git diff --name-only 68629fdae5534ec3a136e666bcb7d5c84dcd05aa HEAD | tee changed_files.txt
           if grep -Ev '^research/casualty_incomplete_month_preview_2026_11_12/|^\.github/workflows/research-casualty-incomplete-month\.yml$' changed_files.txt; then
             echo "Protected files modified"; exit 1
           fi
-          test -z "$(git status --porcelain)"
       - name: Offline Node checks - no source HTTP, deployment or writer
         run: |
           set -euo pipefail
