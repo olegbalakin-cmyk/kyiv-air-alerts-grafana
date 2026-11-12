@@ -73,8 +73,7 @@
     if (hours === null || alerts === null) return null;
     const anchor = rows[rows.length - 1];
     const first = nextPeriod(anchor, period, 1);
-    const second = nextPeriod(anchor, period, 2);
-    if (!first || !second) return null;
+    if (!first) return null;
     const forecastValue = {
       avg_daily_alert_hours: Math.max(0, Math.min(24, hours)),
       alerts_per_day: Math.max(0, alerts),
@@ -85,7 +84,7 @@
       model: "EWMA_LEVEL",
       completedPeriods: completed.length,
       excludedIncompletePeriods: rows.length - completed.length,
-      forecasts: [Object.assign(first, forecastValue), Object.assign(second, forecastValue)]
+      forecasts: [Object.assign(first, forecastValue)]
     };
   }
 
