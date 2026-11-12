@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-INDEPENDENT-E2E-PARTIAL-01 — independent shadow audit PARTIAL (2026-11-12)
+
+- [PR #105](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/105) +23 isolated source-backed, replay 0; [independent PR #106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/106) `5441bdaf`, [Actions #43295488092](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43295488092) SUCCESS, [ZIP #13979427285](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43295488092/artifacts/13979427285) independently rehashed SHA256 `15e160bee3bdafad80aef1dc5299296deec1d7ff53fc034433f1388279b45aab`. Reviewer drops five dedup fields; generator→PR99 INCOMPLETE UI handoff FAIL; four known confirmed cases withheld for missing text/credit. No production, merge or new source HTTP. Next narrow isolated fixes + evidence policy; **NO-GO**.
+
 ### CASUALTY-MAIN-ADOPTION-READY-01 — runtime corrected; main parity PASS (2026-11-12)
 
 - `update-netlify-site.yml` checks out `site-prod`: [C2 #43262387718](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718) casualty step SUCCESS. Old `main:update.yml` job manual-only; prior runtime claim superseded. [PR #98](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/98) at `39c395cf`: [CI #43259380544](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43259380544) 37+25 PASS; ZIP #13963896363 SHA256 `5f12c4ef784ba2f3226eed5c4b58df1161bd2ef31a7d7dd90aac3a85ed654bff` independently verified. No merge; no casualty publication.
