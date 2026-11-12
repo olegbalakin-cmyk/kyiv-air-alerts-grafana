@@ -251,7 +251,26 @@ jobs:
               assert identity['github_run_attempt']==int(os.environ['C6_ATTEMPT'])
               assert identity['workflow_sha']==json.loads(Path('_approved_c6/run.json').read_text())['head_sha']
               assert readback['c2_corpus_sha256']==report['c2_corpus_sha256']
+              assert manifest['schema']=='isolated-neon-shadow-proof-v1'
               assert isinstance(manifest['files'],dict) and len(manifest['files'])>=18
+              freshness=unique('historical_freshness_gate.json')
+              binding=unique('historical_freshness_binding.json')
+              assert freshness['publication_allowed'] is False
+              assert freshness['status']=='FRESHNESS_READY_FOR_INTEGRATION'
+              assert freshness['fresh_cities']==freshness['full_receipt_cities']==23
+              assert freshness['historically_bound_cities']==23
+              assert len(binding['sources'])==23
+              from datetime import datetime,timezone
+              now=datetime.now(timezone.utc)
+              for row in binding['sources'].values():
+                  assert row['continuity_verified'] is True
+                  last=datetime.fromisoformat(row['last_checked_at'].replace('Z','+00:00'))
+                  assert last.tzinfo and 0 <= (now-last).total_seconds() <= 36*3600
+              for filename,expected_hash in manifest['files'].items():
+                  if filename.startswith('candidate/'):
+                      candidate_name=filename.removeprefix('candidate/')
+                      assert candidate_name in proof['candidate_files']
+                      assert expected_hash==proof['candidate_files'][candidate_name]
           print('APPROVED_SIX_FILE_KPI_AND_INDEPENDENT_WORK_A_PROOF_PASS')
           PY
 
