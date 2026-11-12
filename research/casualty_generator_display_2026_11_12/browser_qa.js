@@ -53,9 +53,7 @@ async function exercise(page, url, mobile=false) {
   await page.goto(url,{waitUntil:"domcontentloaded"});
   await page.waitForFunction(()=>window.CasualtyCoveragePreview && state?.data?.casualties_by_city?.zaporizhzhia?.monthly?.some(r=>r.month==="2026-10" && r.coverage_status==="INCOMPLETE"),{timeout:30000});
   await page.waitForFunction(()=>typeof state!=="undefined" && Boolean(state.charts.casualtyChart),{timeout:30000});
-  if (await page.locator("#introTour:not(.hidden) #tourSkip").count()) {
-    await page.locator("#tourSkip").click();
-  }
+  await page.evaluate(() => { if (typeof finishIntroTour === "function") finishIntroTour(); });
   await page.waitForFunction(()=>document.getElementById("introTour")?.classList.contains("hidden"),{timeout:5000});
   const d = await page.evaluate(()=>{
     const c=state.charts.casualtyChart, i=c.data.labels.indexOf("2026-10");
@@ -202,7 +200,7 @@ async function exercise(page, url, mobile=false) {
       assert.equal(before.overlay,false);assert.equal(before.rows,null);
       assert.equal(before.value,before.source??0);assert.equal(before.note,null);
     });
-    if (await rollback.locator("#introTour:not(.hidden) #tourSkip").count()) await rollback.locator("#tourSkip").click();
+    await rollback.evaluate(() => { if (typeof finishIntroTour === "function") finishIntroTour(); });
     await rollback.locator("#casualtyChart").locator("xpath=ancestor::*[contains(@class, 'chart-card')][1]").screenshot({path:path.join(proofs,"rollback.png")});
     await rollback.close();
     const digest=crypto.createHash("sha256");
