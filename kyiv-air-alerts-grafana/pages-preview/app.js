@@ -3529,8 +3529,50 @@ async function init() {
   // fall back to the verified static release snapshot for older data.
   const embeddedHistory = state.data?.historical_daily_kpi;
   const sourceGeneratedAt = state.data?.meta?.generated_at;
+  // The local Neon preview remains isolated. Git-delivered Neon requires a
+  // separately approved release recorded in the fetched dashboard, not browser config.
+  const isolatedNeonPreview = window.PREVIEW_CONFIG?.source === "neon" &&
+    RAW_DATA_BASE === "./data/neon/";
+  const releaseAuthority = state.data?.meta?.publication_authority;
+  const approvedNeonGitRelease =
+    RAW_DATA_BASE === "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/" &&
+    releaseAuthority?.publication_allowed === true &&
+    releaseAuthority?.scope === "PRODUCTION_NEON_GIT_RELEASE" &&
+    releaseAuthority?.delivery === "site-prod-git" &&
+    releaseAuthority?.branch_id === "br-bold-mode-b5rub8pq" &&
+    /^[a-f0-9]{64}$/.test(releaseAuthority?.release_manifest_sha256 || "") &&
+    /^[a-f0-9]{64}$/.test(releaseAuthority?.historical_freshness?.binding_sha256 || "") &&
+    releaseAuthority?.dst_simulation === false &&
+    releaseAuthority?.source_fallback === false &&
+    releaseAuthority?.active_status === "UNKNOWN_UNCERTIFIED";
+  const verifiedNeonCities = index => {
+    const keys = state.data?.multicity_meta?.production_city_keys;
+    const verified = index?.meta?.verified_cities;
+    const rows = index?.cities;
+    return Array.isArray(keys) && keys.length === 23 && new Set(keys).size === 23 &&
+      Array.isArray(verified) && verified.length === 23 && new Set(verified).size === 23 &&
+      rows && typeof rows === "object" && !Array.isArray(rows) &&
+      Object.keys(rows).length === 23 &&
+      keys.every(city => verified.includes(city) && rows[city]?.status === "verified");
+  };
   const validIndex = index => index?.schema === "verified-historical-daily-start-counts-v1" &&
-    index?.meta?.source_ref === "site-prod" && index?.meta?.expected_cities === 23;
+    index?.meta?.expected_cities === 23 &&
+    (index?.meta?.source_ref === "site-prod" ||
+      ((isolatedNeonPreview || (approvedNeonGitRelease && verifiedNeonCities(index) &&
+        index?.meta?.release_manifest_sha256 === releaseAuthority.release_manifest_sha256)) &&
+       index?.meta?.source_ref === "neon:br-bold-mode-b5rub8pq" &&
+       index?.meta?.verified_count === 23 &&
+       typeof sourceGeneratedAt === "string" &&
+       Number.isFinite(Date.parse(sourceGeneratedAt)) &&
+       index?.meta?.source_dashboard_generated_at === sourceGeneratedAt));
+  // A static Netlify snapshot must belong to the same dashboard generation.
+  const matchesDashboardGeneration = index =>
+    typeof sourceGeneratedAt === "string" && sourceGeneratedAt.trim() !== "" &&
+    Number.isFinite(Date.parse(sourceGeneratedAt)) &&
+    typeof index?.meta?.source_dashboard_generated_at === "string" &&
+    index.meta.source_dashboard_generated_at.trim() !== "" &&
+    Number.isFinite(Date.parse(index.meta.source_dashboard_generated_at)) &&
+    index.meta.source_dashboard_generated_at === sourceGeneratedAt;
   state.historicalDaily = validIndex(embeddedHistory) &&
     typeof sourceGeneratedAt === "string" &&
     embeddedHistory.meta.source_dashboard_generated_at === sourceGeneratedAt
@@ -3540,7 +3582,8 @@ async function init() {
       const historyResponse = await fetch("historical-daily-kpi.json?v=" + Date.now(), {cache:"no-store"});
       if (historyResponse.ok) {
         const index = await historyResponse.json();
-        if (validIndex(index) && index?.meta?.verified_count > 0) {
+        if (validIndex(index) && index?.meta?.verified_count > 0 &&
+            matchesDashboardGeneration(index)) {
           state.historicalDaily = index;
         }
       }
