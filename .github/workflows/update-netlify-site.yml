@@ -816,7 +816,6 @@ jobs:
           [[ "$C2_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_RUN_ID" =~ ^[0-9]+$ ]]
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > "$root/final-run.json"
           for kind in c2 c2_bundle work_a; do
             case "$kind" in
               c2) id="$PREP_ARTIFACT_ID" ;;
@@ -935,6 +934,7 @@ jobs:
           FINAL_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["final_release_run_id"])' "$root/owner.json")"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > "$root/final-run.json"
           curl --fail --silent --show-error --location --retry 3 \
             -H "Authorization: Bearer $GH_TOKEN" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$PREP_ARTIFACT_ID/zip" -o "$root/prep.zip"
