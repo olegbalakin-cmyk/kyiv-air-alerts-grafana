@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-REVIEWER-DEDUP-CONTRACT-WORKC-01 — reviewer contract fixed in research, no adoption (2026-11-12)
+
+- [PR #108](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/108) `fb3dcb7a`, [CI #43305347207](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43305347207) 11/11 PASS; [ZIP #13982783250](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43305347207/artifacts/13982783250) independently SHA256 verified `27e0f18fe97d0c150a6d9753784c53f483219ab85e2f1c59dc3cf3237c8c54e4`. Actual protected reviewer/promote → scratch ledger → pinned generator PASS. No merge, real writes or publication; Work D/E open.
+
 ### CASUALTY-INDEPENDENT-E2E-PARTIAL-01 — independent shadow audit PARTIAL (2026-11-12)
 
 - [PR #105](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/105) +23 isolated source-backed, replay 0; [independent PR #106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/106) `5441bdaf`, [Actions #43295488092](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43295488092) SUCCESS, [ZIP #13979427285](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43295488092/artifacts/13979427285) independently rehashed SHA256 `15e160bee3bdafad80aef1dc5299296deec1d7ff53fc034433f1388279b45aab`. Reviewer drops five dedup fields; generator→PR99 INCOMPLETE UI handoff FAIL; four known confirmed cases withheld for missing text/credit. No production, merge or new source HTTP. Next narrow isolated fixes + evidence policy; **NO-GO**.
