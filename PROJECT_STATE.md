@@ -1,7 +1,7 @@
 # Project State — coordination snapshot
 
 **Date:** 2026-11-12. **NO-GO; GLOBAL_CUTOVER=NO; C6/C3=PARTIAL.**
-Latest accepted: **C3-FRONTEND-SITEPROD-PR100-OFFLINE-PASS-01** (PR #100 exact-site-prod frontend offline PASS; production NO-GO).
+Latest accepted: **C3-STATIC-KPI-FALLBACK-GENERATION-RISK-01** (PR #101 offline 6/6 confirms unsafe stale KPI fallback; production rollback BLOCKED).
 
 ## Rules
 
@@ -13,7 +13,7 @@ Read this file and CHANGELOG first. Check immutable SHA/Actions/artifacts. Keep 
 - **C2:** latest #43172960738 33,210 episodes, 22/23 receipts; post-#93 scheduled 23/23 PENDING. Sevastopol open `25100`, old `25006→25008` unresolved.
 - **Neon parity:** physical #43187464328 PASS, 6 JSON/18 SHA/23 historical receipts from C2 #43055353190. #74 exact 33,135, 262 old preserved. Current provenance OPEN.
 - **Publication:** PR #94 gate [offline #43237670242](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43237670242) 17/17 PASS; `publication_allowed=false`. [Draft PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) exact-head [offline #43254618233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43254618233) 14/14 PASS: default-OFF generator→six-JSON detached local Git candidate, NO PUSH. Live same-run activation & publication authority OPEN.
-- **C3/frontend:** Draft PR #100 (base `site-prod@68629fda`) exact-head #43260329916 offline PASS: 184/184, CSV 23/23, Git fallback 23/23; Git remains production source. **C3/rollback:** #92 immutable Netlify HTTP/SHA PASS; research PR #101 may add offline tests but operational non-current republish and two-plane rollback remain BLOCKED. Netlify preview `6af5aecd8901ea2a40de09ad` remains isolated.
+- **C3/frontend:** Draft PR #100 (base `site-prod@68629fda`) exact-head #43260329916 offline PASS: 184/184, CSV 23/23, Git fallback 23/23; Git remains production source. **C3/rollback:** PR #101 exact-head #43260803310 6/6 offline PASS found unsafe stale Netlify static KPI fallback without dashboard generation match (Oct 23 vs Nov 12); operational rollback BLOCKED. #92 immutable Netlify HTTP/SHA PASS. Netlify preview `6af5aecd8901ea2a40de09ad` remains isolated.
 - **Current API/Kyiv/DST:** 9/21 mapped AIR, 12 UNKNOWN. Kyiv provenance OPEN. DST four-case offline PASS but raw rolling gate OPEN; DST OFF.
 - **Other tracks:** WIP, backfill, history, casualties remain separate.
 
@@ -21,11 +21,16 @@ Read this file and CHANGELOG first. Check immutable SHA/Actions/artifacts. Keep 
 
 1. Check next regular C2 23/23 and Sevastopol checkpoint, preserve open anomalies.
 2. Review PR #95 default-OFF implementation against post-PR93 natural C2 exact run/attempt and frozen physical proof; do not activate preparation/publishing or manually dispatch C2.
-3. Keep PR #100 frontend fix staged until separate release decision. Independently prove Netlify/static KPI and moving Git JSON rollback baseline, verify non-current deploy re-publish authority and handle newer C2/casualty/aux; request separately approved publication authority. No cutover. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+3. Make a single minimal C3 `app.js` static fallback generation-equality fix with negative offline test; keep PR #100 staged. At future cutover, pin fresh compatible Git-only Netlify static + Git runtime JSON as rollback reference, preserve new C2/casualty/aux and prove restore/auto-publish sequencing without a full reset. Publication authorization remains separate. No cutover. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C3-STATIC-KPI-FALLBACK-GENERATION-RISK-01 — old static KPI fallback unsafe, rollback remains BLOCKED (2026-11-12)
+
+- [Draft PR #101](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/101) exact HEAD `76d474fb72acdbab19752c0d9f1bcb686a89bcec`; [Actions #43260803310](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43260803310) SUCCESS 6/6 offline recovery-policy scenarios; artifact **#13963023002**, GitHub ZIP digest `298d43510bff61ae746e99c6cd9de76c1c663594ca9ecb1178d801b8967efb2c` (metadata). Existing static Netlify KPI generated 2026-10-23 differs from Git dashboard generated 2026-11-12. Direct read of `site-prod@68629fda:pages-preview/app.js` confirms embedded index enforces generation parity but static fallback does not; PR #100's minimal Neon predicate still has this fallback. Negative proof: `STALE_STATIC_INDEX_FALLBACK=ACCEPTED_UNSAFE_BY_OLD_APP`. 184/184 historical preview QA reused, not new operational rollback.
+- **Decision:** accept reproducible vulnerability finding, **not** operational restore readiness. Keep current Git-only production behavior. Narrow next task: add static fallback generation-equality guard in current C3 frontend with a negative test and existing offline QA (no rewrite); prepare a **fresh compatible Git-only static+runtime JSON rollback baseline** at future cutover time instead of depending on October deploy. Preserve newer C2/casualty/aux and verify deploy/revert path plus auto-publish sequencing before GO. PR #101 remains Draft, no merge/deploy. `COMPATIBLE_ROLLBACK_READY=BLOCKED; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ## C3-FRONTEND-SITEPROD-PR100-OFFLINE-PASS-01 — current site-prod frontend fix compatible, offline PASS (2026-11-12)
 
 - [Draft PR #100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/100), base `site-prod@68629fdae5534ec3a136e666bcb7d5c84dcd05aa` (after #93 Sevastopol and #91 casualty), exact HEAD `88ace2016768771b0b250bff1e08f4088761c86d`. [Actions #43260329916](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43260329916) SUCCESS exact-head, artifact **#13964062068**, GitHub ZIP digest `b83595de5ecb665765c10d73de10c4f4520065a9997fa922e1002175a55e079e` (metadata digest, not separately re-hashed). Exactly four C3-only paths; minimal `pages-preview/app.js` predicate reused from PR #90; protected production/C2/casualty/aux paths unchanged.
