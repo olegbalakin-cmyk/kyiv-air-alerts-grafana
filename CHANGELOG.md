@@ -3,6 +3,14 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-POSTPR93-REGULAR-C2-CONTINUITY-23-01 — regular post-PR93 C2 source checkpoints 23/23 PASS (2026-11-12; proposed on merge)
+
+- [Scheduled Actions #43262387718](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718) SUCCESS: 23/23 persisted receipts including Sevastopol with same run/attempt; Neon 33,267 episodes (+57, 0 updated), Git `site-prod@d0a7d22d` published. Bundle ZIP SHA `927343c620c1d55438823ad9203a16e986f540a816b35790d496200fe861944f`, manifest SHA `5c3e2326eeb98ae6e90234183764525483e64fbc6a203b20dda8deb685d9b501`, artifact #13967335571. New-run independent Neon→JSON readback and C3 rollback still OPEN; no cutover/DST.
+
+### C3-STATIC-KPI-GENERATION-GUARD-OFFLINE-01 — PR #100 static KPI timestamp guard offline PASS (2026-11-12; proposed on merge)
+
+- [Draft #100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/100) `b04e23a7`; [exact-head #43278423559](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43278423559) SUCCESS, artifact #13971078119 (GitHub SHA-256 `294d0820b493850dcdd49f3501263987a9277be1524dcf43abab0b12ef390181`). Static KPI fallback now rejects missing/stale generation in offline tests; 184/184 charts, CSV 23, Git rollback preview 23. Code unmerged, original site-prod base predates new data-only C2; no deployment, rollback readiness or publication grant.
+
 ### C3-STATIC-KPI-FALLBACK-GENERATION-RISK-01 — real stale static KPI fallback confirmed; rollback BLOCKED (2026-11-12; proposed on merge)
 
 - [Draft PR #101](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/101) `76d474fb`; exact-head [Actions #43260803310](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43260803310) SUCCESS, 6/6 offline policy checks, artifact #13963023002, GitHub digest `298d43510bff61ae746e99c6cd9de76c1c663594ca9ecb1178d801b8967efb2c`. Current `app.js` accepts stale Oct 23 static KPI on fallback against Nov 12 Git dashboard; it fails to verify generation equality. **New next task:** tiny frontend generation-parity guard with negative test; later pin fresh compatible Git-only rollback baseline and prove deploy/revert path, no full Git reset. No publication, cutover or DST. Rollback BLOCKED.

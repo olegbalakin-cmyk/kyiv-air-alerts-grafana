@@ -1,7 +1,7 @@
 # Project State — coordination snapshot
 
 **Date:** 2026-11-12. **NO-GO; GLOBAL_CUTOVER=NO; C6/C3=PARTIAL.**
-Latest accepted: **C3-STATIC-KPI-FALLBACK-GENERATION-RISK-01** (PR #101 offline 6/6 confirms unsafe stale KPI fallback; production rollback BLOCKED).
+Latest accepted: **C6-POSTPR93-REGULAR-C2-CONTINUITY-23-01** (first post-PR93 C2 23/23 same-run source checkpoints; no cutover).
 
 ## Rules
 
@@ -9,23 +9,32 @@ Read this file and CHANGELOG first. Check immutable SHA/Actions/artifacts. Keep 
 
 ## Current tracks and blockers
 
-- **Production:** Git `site-prod@68629fda` includes separate casualty PR #91 code-only after C2 parser fix #93 (`6704c483`); no runtime JSON/frontend change from casualty merge. Netlify `6adb629bc3ebc570117d82e1` unchanged. Git JSON remains source.
-- **C2:** latest #43172960738 33,210 episodes, 22/23 receipts; post-#93 scheduled 23/23 PENDING. Sevastopol open `25100`, old `25006→25008` unresolved.
+- **Production:** C2 published verified Git JSON to `site-prod@d0a7d22d` (after PR #93 Sevastopol and PR #91 casualty). Netlify `6adb629bc3ebc570117d82e1` unchanged; Git remains source.
+- **C2:** post-#93 scheduled #43262387718 SUCCESS, 33,267 episodes (+57/0 updated), **23/23 source checkpoints** incl. Sevastopol; ZIP/manifest SHA and artifact #13967335571. Independent new-run Neon→JSON readback OPEN. Sevastopol open `25100`, historical `25006→25008` unresolved.
 - **Neon parity:** physical #43187464328 PASS, 6 JSON/18 SHA/23 historical receipts from C2 #43055353190. #74 exact 33,135, 262 old preserved. Current provenance OPEN.
 - **Publication:** PR #94 gate [offline #43237670242](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43237670242) 17/17 PASS; `publication_allowed=false`. [Draft PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) exact-head [offline #43254618233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43254618233) 14/14 PASS: default-OFF generator→six-JSON detached local Git candidate, NO PUSH. Live same-run activation & publication authority OPEN.
-- **C3/frontend:** Draft PR #100 (base `site-prod@68629fda`) exact-head #43260329916 offline PASS: 184/184, CSV 23/23, Git fallback 23/23; Git remains production source. **C3/rollback:** PR #101 exact-head #43260803310 6/6 offline PASS found unsafe stale Netlify static KPI fallback without dashboard generation match (Oct 23 vs Nov 12); operational rollback BLOCKED. #92 immutable Netlify HTTP/SHA PASS. Netlify preview `6af5aecd8901ea2a40de09ad` remains isolated.
+- **C3/frontend:** Draft PR #100 HEAD `b04e23a7`, exact-head #43278423559 offline PASS: static KPI generation guard, 184/184, CSV 23, Git rollback preview 23; base `68629fda` predates new C2 data; Git remains production source. **C3/rollback:** PR #101 exact-head #43260803310 6/6 offline PASS found unsafe stale Netlify static KPI fallback without dashboard generation match (Oct 23 vs Nov 12); operational rollback BLOCKED. #92 immutable Netlify HTTP/SHA PASS. Netlify preview `6af5aecd8901ea2a40de09ad` remains isolated.
 - **Current API/Kyiv/DST:** 9/21 mapped AIR, 12 UNKNOWN. Kyiv provenance OPEN. DST four-case offline PASS but raw rolling gate OPEN; DST OFF.
 - **Other tracks:** WIP, backfill, history, casualties remain separate.
 
 ## Concrete next tasks
 
-1. Check next regular C2 23/23 and Sevastopol checkpoint, preserve open anomalies.
-2. Review PR #95 default-OFF implementation against post-PR93 natural C2 exact run/attempt and frozen physical proof; do not activate preparation/publishing or manually dispatch C2.
-3. Make a single minimal C3 `app.js` static fallback generation-equality fix with negative offline test; keep PR #100 staged. At future cutover, pin fresh compatible Git-only Netlify static + Git runtime JSON as rollback reference, preserve new C2/casualty/aux and prove restore/auto-publish sequencing without a full reset. Publication authorization remains separate. No cutover. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+1. Reuse post-PR93 C2 #43262387718 exact ZIP/receipts for **independent read-only same-run Neon→six-JSON** proof, plus source freshness checks; no manual C2/writer or production publication.
+2. Keep PR #95 prepare job default OFF; verify exact current C2 integration and publication gate separately. No source switch without owner release permission.
+3. PR #100 static KPI guard offline PASS but not merged; before any approved merge, preserve new `site-prod@d0a7d22d` C2 data. Pin compatible Git-only Netlify/static + moving Git runtime baseline and prove operational restore/auto-publish sequencing. Rollback BLOCKED. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-POSTPR93-REGULAR-C2-CONTINUITY-23-01 — first post-PR93 regular C2 23/23 source checkpoints PASS (2026-11-12)
+
+- [Scheduled C2 #43262387718](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718) SUCCESS, attempt 1, 16:46–17:15 UTC; code `main@375e6935`, input `site-prod@68629fda`, Git publish `site-prod@d0a7d22de2828c93236562cccc9d2e68c6a66e3d`. Direct persisted `c2_history_capture_checkpoints.json` has **23/23**, including Sevastopol, with identical run/attempt/input/workflow and per-city source SHA-256. Canonical Neon `NEON_SUCCEEDED`: 33,267 episodes, 57 inserted, zero updated; Git 23-city QA and publication PASS. Exact C2 bundle ZIP **SHA-256 `927343c620c1d55438823ad9203a16e986f540a816b35790d496200fe861944f`**, manifest **`5c3e2326eeb98ae6e90234183764525483e64fbc6a203b20dda8deb685d9b501`**; [artifact #13967335571](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718/artifacts/13967335571), GitHub artifact-container digest `9f4168c12795977505f5a6cbbf836c1bb7c9a632286bb62de19d532612e2841e`.
+- **Boundary:** source checkpoint 22/23 blocker CLEARED; independent live same-run Neon→six-JSON readback/current publication permission still OPEN. Sevastopol historical `25006→25008` and open `25100` are not presumed resolved; DST OFF; Netlify production unchanged. `GLOBAL_CUTOVER=NO`.
+
+## C3-STATIC-KPI-GENERATION-GUARD-OFFLINE-01 — same-generation static KPI fallback offline PASS (2026-11-12)
+
+- [Draft PR #100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/100) updated to HEAD `b04e23a739973f67a94b7e3af3be323c88643641`; exact-head [Actions #43278423559](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43278423559) SUCCESS, [artifact #13971078119](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43278423559/artifacts/13971078119), GitHub SHA-256 `294d0820b493850dcdd49f3501263987a9277be1524dcf43abab0b12ef390181`. Exact `app.js` diff adds static fallback timestamp non-empty/parseable/exact-generation guard, preserves embedded Git index and pinned Neon preview rules. Offline 184/184 charts, CSV 23/23, Git rollback preview 23/23, negative stale/missing timestamp tests PASS. **`STATIC_KPI_FALLBACK_FIX_READY` is research/offline only**, no merge; PR remains based on pre-C2 `site-prod@68629fda` and must preserve newer C2 data when staged for merge. Operational two-plane rollback BLOCKED. No deploy/cutover.
+
 ## C3-STATIC-KPI-FALLBACK-GENERATION-RISK-01 — old static KPI fallback unsafe, rollback remains BLOCKED (2026-11-12)
 
 - [Draft PR #101](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/101) exact HEAD `76d474fb72acdbab19752c0d9f1bcb686a89bcec`; [Actions #43260803310](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43260803310) SUCCESS 6/6 offline recovery-policy scenarios; artifact **#13963023002**, GitHub ZIP digest `298d43510bff61ae746e99c6cd9de76c1c663594ca9ecb1178d801b8967efb2c` (metadata). Existing static Netlify KPI generated 2026-10-23 differs from Git dashboard generated 2026-11-12. Direct read of `site-prod@68629fda:pages-preview/app.js` confirms embedded index enforces generation parity but static fallback does not; PR #100's minimal Neon predicate still has this fallback. Negative proof: `STALE_STATIC_INDEX_FALLBACK=ACCEPTED_UNSAFE_BY_OLD_APP`. 184/184 historical preview QA reused, not new operational rollback.
