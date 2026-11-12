@@ -29,21 +29,19 @@ jobs:
           site="$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)"
           test "$main" = "375e69351e6a5aee1be16892821f7cdde2a8f21a" || { echo "STOP_MAIN_MOVED"; exit 2; }
           test "$site" = "d0a7d22de2828c93236562cccc9d2e68c6a66e3d" || { echo "STOP_SITE_PROD_MOVED"; exit 2; }
-          gh api "repos/$GITHUB_REPOSITORY/actions/workflows?per_page=100" > "$RUNNER_TEMP/workflows.json"
-          python3 - <<'PY'
-          import json,os,pathlib
-          p=pathlib.Path(os.environ["RUNNER_TEMP"])
-          wf=json.loads((p/"workflows.json").read_text())["workflows"]
-          targets=[".github/workflows/update-netlify-site.yml",".github/workflows/netlify-production.yml"]
-          found=[]
-          for path in targets:
-              choices=[x for x in wf if x["path"]==path]
-              if len(choices)!=1 or choices[0]["state"] not in ("active","disabled_manually"):
-                  raise SystemExit("STOP_WORKFLOW_NOT_REGISTERED_OR_UNEXPECTED_STATE:"+path)
-              found.append((path,choices[0]["id"]))
-          (p/"workflow-ids.txt").write_text("".join(f"{name}|{num}\n" for name,num in found))
-          print("EXACT_TWO_WORKFLOWS_REGISTERED")
+          for record in ".github/workflows/update-netlify-site.yml|360885782" ".github/workflows/netlify-production.yml|360885508"; do
+            name="${record%%|*}"
+            id="${record##*|}"
+            wf="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id")"
+            WF_JSON="$wf" WANT_PATH="$name" WANT_ID="$id" python3 - <<'PY'
+          import json,os
+          j=json.loads(os.environ["WF_JSON"])
+          if j["path"]!=os.environ["WANT_PATH"] or str(j["id"])!=os.environ["WANT_ID"] or j["state"] not in ("active","disabled_manually"):
+              raise SystemExit("STOP_UNEXPECTED_WORKFLOW:"+os.environ["WANT_PATH"])
+          print("EXACT_WORKFLOW_ID_PATH_AND_STATE_CONFIRMED",j["id"],j["path"],j["state"])
           PY
+          done
+          printf '%s\n' '.github/workflows/update-netlify-site.yml|360885782' '.github/workflows/netlify-production.yml|360885508' > "$RUNNER_TEMP/workflow-ids.txt"
           while IFS='|' read -r name id; do
             gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id/runs?per_page=100" > "$RUNNER_TEMP/runs-$id.json"
             WID="$id" python3 - <<'PY'
