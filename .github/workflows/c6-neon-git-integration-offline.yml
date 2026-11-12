@@ -75,6 +75,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
           python -m unittest discover -s tests -p test_c6_neon_one_shot_publisher.py -v
+          python -m unittest discover -s tests -p test_c6_neon_release_binding.py -v
       - name: End-to-end frozen physical six-file staging (never live publication)
         run: |
           python -m scripts.c6_neon_git_candidate \
