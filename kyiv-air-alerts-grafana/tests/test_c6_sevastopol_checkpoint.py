@@ -99,6 +99,84 @@ class SevastopolContinuityTests(unittest.TestCase):
         self.assertFalse(self.eligible([{"type": "open_start", "start": {"at": START.isoformat()}}]))
         self.assertFalse(self.eligible([{"type": "orphan_end"}]))
 
+    def test_authenticated_latest_open_start_preserves_source_continuity(self):
+        captured = PREV + timedelta(hours=6)
+        p = pages(captured)
+        p[0] = page([
+            (25100, captured - timedelta(minutes=10), "Внимание всем! Воздушная тревога!"),
+            (25090, captured - timedelta(hours=1), "Внимание всем! Воздушная тревога!"),
+            (25088, captured - timedelta(hours=2), "Отбой воздушной тревоги"),
+        ], sev.SOURCE_URL, captured)
+        opened = {
+            "type": "open_start", "start_id": 25100,
+            "start": {
+                "id": 25100,
+                "at": (captured - timedelta(minutes=10)).isoformat(),
+                "text": "Внимание всем! Воздушная тревога!",
+                "url": "https://t.me/razvozhaev/25100",
+            }
+        }
+        before = json.dumps(opened, sort_keys=True)
+        self.assertTrue(self.eligible([old_anomaly(), opened], p))
+        self.assertEqual(json.dumps(opened, sort_keys=True), before)
+        completed = [{
+            "start": (PREV - timedelta(days=1, minutes=20)).isoformat(),
+            "end": (PREV - timedelta(days=1)).isoformat(),
+        }]
+        receipt = cap.record("sevastopol", "sevastopol_history", SOURCE, p, completed,
+                             continuity=self.eligible([old_anomaly(), opened], p),
+                             checkpoint_path=self.checkpoint_path, env=self.env)
+        self.assertTrue(receipt["continuity_verified"])
+        self.assertEqual(len(receipt["completed_air"]), 1)
+        self.assertEqual(json.loads(self.checkpoint_path.read_text())["sevastopol"]["github_run_id"],
+                         int(self.env["GITHUB_RUN_ID"]))
+
+    def test_open_start_requires_exact_latest_authenticated_message(self):
+        captured = PREV + timedelta(hours=6)
+        p = pages(captured)
+        p[0] = page([
+            (25100, captured - timedelta(minutes=10), "Внимание всем! Воздушная тревога!"),
+            (25090, captured - timedelta(hours=1), "Внимание всем! Воздушная тревога!"),
+            (25088, captured - timedelta(hours=2), "Отбой воздушной тревоги"),
+        ], sev.SOURCE_URL, captured)
+        opened = {
+            "type": "open_start", "start_id": 25100,
+            "start": {
+                "id": 25100,
+                "at": (captured - timedelta(minutes=10)).isoformat(),
+                "text": "Внимание всем! Воздушная тревога!",
+                "url": "https://t.me/razvozhaev/25100",
+            }
+        }
+        self.assertTrue(self.eligible([old_anomaly(), opened], p))
+        for change in (
+            {"start_id": 25090},
+            {"start": {**opened["start"], "id": 25090}},
+            {"start": {**opened["start"], "text": "Another text"}},
+            {"start": {**opened["start"], "url": "https://t.me/other/25100"}},
+            {"start": {**opened["start"], "at": (captured - timedelta(hours=2)).isoformat()}},
+            {"end": (captured + timedelta(minutes=5)).isoformat()},
+        ):
+            self.assertFalse(self.eligible([old_anomaly(), {**opened, **change}], p))
+        self.assertFalse(self.eligible([old_anomaly(), opened, opened], p))
+        self.assertFalse(self.eligible([old_anomaly(), opened, {"type": "orphan_end"}], p))
+        self.assertFalse(self.eligible([old_anomaly(), opened], p[:1]))
+        bad = [dict(x) for x in p]
+        bad[0]["body_sha256"] = "0" * 64
+        self.assertFalse(self.eligible([old_anomaly(), opened], bad))
+
+    def test_open_start_not_allowed_when_unverified_or_not_latest(self):
+        captured = PREV + timedelta(hours=6)
+        p = pages(captured)
+        opened = {
+            "type": "open_start", "start_id": 25100,
+            "start": {"id": 25100, "at": (captured - timedelta(minutes=10)).isoformat(),
+                      "text": "Внимание всем! Воздушная тревога!",
+                      "url": "https://t.me/razvozhaev/25100"},
+        }
+        self.assertFalse(self.eligible([old_anomaly(), opened], p))
+        self.assertFalse(self.eligible([opened], []))
+
     def test_missing_historical_source_overlap_blocks(self):
         current = PREV + timedelta(hours=6)
         new = [page([(25100, current, "Воздушная тревога")], sev.SOURCE_URL, current)]
