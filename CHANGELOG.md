@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-NEW-C2-SQL-EPISODE-PARITY-23-PASS-01 — new C2 Neon SQL episodes PASS; six JSON pending (2026-11-12; proposed)
+
+- [PR #103](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/103) `f6499f46`, exact-head [#43286177828](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43286177828) SUCCESS, artifact #13975755100 SHA-256 `48d2bf55d2bbb486b5e52f13cc0c0d732c6c2ff87370f329188d20275ec2f80b`. Neon SQL 33,267/33,267, 23/23, 0 diffs, 262 previous versions; CI validates pinned witness offline. Physical JSON still BLOCKED. GO=NO.
+
 ### C3-C6-MINIMAL-CUTOVER-RELEASE-GAPS-01 — Work B verified narrow cutover gaps, NO-GO (2026-11-12; proposed on merge)
 
 - [Release plan comment #6832977884](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/78#issuecomment-6832977884): PR #100 `b04e23a7` preview-only Neon predicate; current Netlify workflow rebuilds Git KPI; PR #95 only local candidate and #94 gate OFF. C2 #43262387718 23/23 PASS. Await Work A parity; prepare gated frontend/static consumer, existing one-publisher path and tested fresh two-channel Git-only recovery. `CUTOVER_PREPARATION_READY=NO; ROLLBACK_OPERATIONAL_READY=NO`. No production action.
