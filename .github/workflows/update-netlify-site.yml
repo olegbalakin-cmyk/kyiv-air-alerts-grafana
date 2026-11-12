@@ -4,6 +4,33 @@ on:
   schedule:
     - cron: "15 */4 * * *"
   workflow_dispatch:
+    inputs:
+      c6_final_prepare_only:
+        description: "Owner-approved FINAL release bytes preparation ONLY (default OFF; no C2, no deploy, no publication)"
+        type: boolean
+        required: true
+        default: false
+      c6_neon_git_release:
+        description: "Separately owner-approved one-shot Neon Git release (default OFF)"
+        type: boolean
+        required: true
+        default: false
+      c6_preparation_artifact_id:
+        description: "Immutable same-run C6 preparation artifact ID"
+        type: string
+        required: false
+      work_a_proof_artifact_id:
+        description: "Immutable independent Work A proof artifact ID"
+        type: string
+        required: false
+      c6_bundle_artifact_id:
+        description: "Immutable pinned C2 shadow-inputs artifact ID for final preparation only"
+        type: string
+        required: false
+      c6_final_release_artifact_id:
+        description: "Owner-pinned pre-Netlify eight-file FINAL artifact ID for publication (no regeneration drift)"
+        type: string
+        required: false
   push:
     branches: [main]
     paths:
@@ -11,13 +38,15 @@ on:
 
 concurrency:
   group: update-netlify-site
-  cancel-in-progress: true
+  # Never cancel a writer in its critical section in favor of a new dispatch.
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
   update-site:
+    if: ${{ (github.event_name != 'workflow_dispatch' || (!inputs.c6_neon_git_release && !inputs.c6_final_prepare_only)) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -598,3 +627,404 @@ jobs:
           path: ${{ runner.temp }}/ukrainealarm_bridge_fetch.json
           if-no-files-found: warn
           retention-days: 7
+
+  # Same-run Neon candidate preparation only; never changes existing Git delivery.
+  c6-neon-six-json-prepare:
+    needs: update-site
+    if: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED == 'true' && needs.update-site.result == 'success' && (github.event_name != 'workflow_dispatch' || !inputs.c6_final_prepare_only) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+    environment: c6-neon-shadow-readonly
+    steps:
+      - name: Checkout exact integration code with no push credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: integration
+          persist-credentials: false
+      - name: Checkout pinned six-JSON read-only generator
+        uses: actions/checkout@v4
+        with:
+          ref: 82a7cc775ed2f2a6fd0134440db709690f0c04d1
+          path: reader
+          persist-credentials: false
+      - name: Download same-run C2 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: c2-shadow-inputs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: existing-c2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact C2 SHA, writer receipt, 23 capture receipts
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,os
+          from pathlib import Path
+          from scripts.c2_shadow_bundle import verify_archive
+          root=Path("existing-c2")
+          bundle=root/"c2-shadow-inputs.zip"
+          sidecar=(root/"c2-shadow-inputs.zip.sha256").read_text().strip().split()
+          assert len(sidecar)==2 and sidecar[1]=="c2-shadow-inputs.zip"
+          digest=hashlib.sha256(bundle.read_bytes()).hexdigest()
+          assert sidecar[0]==digest
+          m=verify_archive(bundle,digest,destination=Path("same-run-inputs"),
+              run_id=os.environ["GITHUB_RUN_ID"],workflow_sha=os.environ["GITHUB_SHA"])
+          assert m["github_run_attempt"]==int(os.environ["GITHUB_RUN_ATTEMPT"])
+          assert len(m.get("historical_capture_receipts",{}).get("complete_cities",[]))==23
+          with open(os.environ["GITHUB_ENV"],"a") as f:
+              for key,value in {
+                  "C6_INPUT_SHA":m["input_sha"],"C6_BRANCH":m["db_branch"],
+                  "C6_ENDPOINT":m["db_endpoint"],"C6_CORPUS":m["corpus_sha256"],
+                  "C6_BUNDLE_SHA":digest}.items(): f.write(key+"="+str(value)+"\n")
+          print("EXACT_SAME_RUN_C2_AND_23_RECEIPTS_PASS")
+          PY
+      - name: Checkout original C2 input source revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.C6_INPUT_SHA }}
+          path: pinned-site
+          persist-credentials: false
+      - name: Pin PR93 parser blob and restore same-run data
+        run: |
+          set -euo pipefail
+          python integration/scripts/c6_pr93_generator_compat.py \
+            --generator reader/scripts/neon_json_shadow_generator.py \
+            --site-parser pinned-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+          cp -a same-run-inputs/site_data/. pinned-site/kyiv-air-alerts-grafana/data/
+      - name: Install accepted read-only reader dependencies
+        run: python -m pip install -r reader/research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
+      - name: Physical same-run Neon readback and six-JSON generation
+        working-directory: reader
+        env:
+          NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m scripts.neon_json_shadow_physical_proof \
+            --site ../pinned-site/kyiv-air-alerts-grafana \
+            --bundle ../existing-c2/c2-shadow-inputs.zip --bundle-sha256 "$C6_BUNDLE_SHA" \
+            --workflow-sha "$GITHUB_SHA" --input-sha "$C6_INPUT_SHA" \
+            --db-branch "$C6_BRANCH" --db-endpoint "$C6_ENDPOINT" \
+            --c2-run-id "$GITHUB_RUN_ID" --output ../c6-live-proof
+      - name: Recheck current freshness; stage six-file candidate outside production
+        env:
+          PYTHONPATH: integration
+        run: |
+          python -m scripts.c6_neon_git_candidate \
+            --proof c6-live-proof --site pinned-site/kyiv-air-alerts-grafana \
+            --output c6-prepared --c2-corpus "$C6_CORPUS" --db-branch "$C6_BRANCH" \
+            --input-sha "$C6_INPUT_SHA" --workflow-sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --bundle-sha256 "$C6_BUNDLE_SHA"
+      - name: Checkout Git delivery for local detached commit only
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: local-git-only
+          persist-credentials: false
+      - name: Create one isolated six-file Git commit without any remote
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          git -C local-git-only checkout --detach
+          git -C local-git-only remote remove origin
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.c6_neon_git_candidate import local_commit
+          root=Path("c6-prepared")
+          report=json.loads((root/"REPORT.json").read_text())
+          report["local_candidate_commit"]=local_commit(root,Path("local-git-only"),report)
+          report["remote_publication_performed"]=False
+          (root/"REPORT.json").write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
+          print("LOCAL_COMMIT_ONLY; NO_PUSH; NO_DEPLOY")
+          PY
+      - name: Upload preparation result, never candidate publication
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-git-preparation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            c6-prepared/REPORT.json
+            c6-prepared/candidate/**
+            c6-live-proof/verdict.json
+            c6-live-proof/sha256_manifest.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  # Release byte preparation is independent of normal C2 and the Git publisher.
+  c6-neon-final-prepare-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.c6_final_prepare_only && !inputs.c6_neon_git_release }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+    environment: c6-final-prepare-only
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PREPARE_ENABLED: ${{ vars.C6_FINAL_PREPARE_ENABLED }}
+      PREPARE_OWNER_RECEIPT: ${{ secrets.C6_FINAL_PREPARE_OWNER_RECEIPT_JSON }}
+      PREP_ARTIFACT_ID: ${{ inputs.c6_preparation_artifact_id }}
+      WORK_A_ARTIFACT_ID: ${{ inputs.work_a_proof_artifact_id }}
+      C2_BUNDLE_ARTIFACT_ID: ${{ inputs.c6_bundle_artifact_id }}
+    steps:
+      - name: Require distinct owner PREPARE ONLY receipt before any download
+        run: |
+          set -euo pipefail
+          test "$PREPARE_ENABLED" = "true"
+          test -n "$PREPARE_OWNER_RECEIPT"
+          [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$C2_BUNDLE_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          mkdir -p "$RUNNER_TEMP/c6-final"
+          printf '%s' "$PREPARE_OWNER_RECEIPT" > "$RUNNER_TEMP/c6-final/owner.json"
+          chmod 600 "$RUNNER_TEMP/c6-final/owner.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          a=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-final/owner.json").read_text())
+          assert a.get("decision")=="APPROVE_PREPARE_ONLY_NO_PUBLICATION"
+          assert a.get("prepare_code_sha")==os.environ["GITHUB_SHA"]
+          assert a.get("repository")==os.environ["GITHUB_REPOSITORY"]
+          assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
+          assert a.get("c2_bundle_artifact_id")==int(os.environ["C2_BUNDLE_ARTIFACT_ID"])
+          assert a.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
+          print("PREPARE_ONLY_OWNER_RECEIPT_PRESENT; NO_PUBLICATION")
+          PY
+      - name: Checkout exact integration code without Git push credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read pinned GitHub Actions evidence (no source HTTP)
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-final"
+          C2_RUN_ID="$(python -c 'import json,sys;print(json.load(open(sys.argv[1]))["c2_run_id"])' "$root/owner.json")"
+          WORK_A_RUN_ID="$(python -c 'import json,sys;print(json.load(open(sys.argv[1]))["work_a_run_id"])' "$root/owner.json")"
+          [[ "$C2_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          for kind in c2 c2_bundle work_a; do
+            case "$kind" in
+              c2) id="$PREP_ARTIFACT_ID" ;;
+              c2_bundle) id="$C2_BUNDLE_ARTIFACT_ID" ;;
+              work_a) id="$WORK_A_ARTIFACT_ID" ;;
+            esac
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" > "$root/$kind-artifact.json"
+            curl --fail --silent --show-error --location --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" \
+              -o "$root/$kind.zip"
+          done
+      - name: Verify immutable evidence and produce eight FINAL files
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-final"
+          python -m scripts.c6_neon_final_prepare \
+            --receipt "$root/owner.json" \
+            --c2-run "$root/c2-run.json" --work-a-run "$root/work-a-run.json" \
+            --c2-artifact "$root/c2-artifact.json" \
+            --c2-bundle-artifact "$root/c2_bundle-artifact.json" \
+            --work-a-artifact "$root/work_a-artifact.json" \
+            --c2-zip "$root/c2.zip" --c2-bundle-zip "$root/c2_bundle.zip" \
+            --work-a-zip "$root/work_a.zip" \
+            --output "$root/final" --audit "$root/PREPARE_REPORT.json" \
+            --actor "$GITHUB_ACTOR" --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" --code-sha "$GITHUB_SHA"
+          test "$(find "$root/final" -type f | wc -l)" -eq 8
+          echo "EIGHT_FINAL_FILES_PREPARED; NO_PUSH_OR_DEPLOY"
+      - name: Upload exact final ZIP as owner-pinnable immutable GitHub artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-final-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/c6-final/final/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload independent nonpublishing preparation receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-final-prepare-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/c6-final/PREPARE_REPORT.json
+          if-no-files-found: error
+          retention-days: 30
+
+  # Explicit manual release is exclusive with normal C2 through the SAME
+  # workflow-level concurrency group. No generator, updater, Neon writer or
+  # source HTTP is invoked by this job.
+  c6-neon-owner-gated-git-release:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.c6_neon_git_release && !inputs.c6_final_prepare_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: c6-neon-git-release
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_ENABLED: ${{ vars.C6_NEON_GIT_RELEASE_ENABLED }}
+      GIT_ONLY_PUBLISHER_PAUSED: ${{ vars.C6_GIT_ONLY_PUBLISHER_PAUSED }}
+      OWNER_GRANT_JSON: ${{ secrets.C6_NEON_GIT_OWNER_GRANT_JSON }}
+      PREP_ARTIFACT_ID: ${{ inputs.c6_preparation_artifact_id }}
+      WORK_A_ARTIFACT_ID: ${{ inputs.work_a_proof_artifact_id }}
+      FINAL_ARTIFACT_ID: ${{ inputs.c6_final_release_artifact_id }}
+    steps:
+      - name: Fail closed without separate owner release switch and receipt
+        run: |
+          set -euo pipefail
+          test "$RELEASE_ENABLED" = "true"
+          test "$GIT_ONLY_PUBLISHER_PAUSED" = "true"
+          test -n "$OWNER_GRANT_JSON"
+          [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$FINAL_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          install -m 700 -d "$RUNNER_TEMP/c6-release"
+          printf '%s' "$OWNER_GRANT_JSON" > "$RUNNER_TEMP/c6-release/owner.json"
+          chmod 600 "$RUNNER_TEMP/c6-release/owner.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          approval=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-release/owner.json").read_text())
+          assert approval.get("decision")=="APPROVE_ONE_SHOT_NEON_GIT_PUBLICATION"
+          assert approval.get("candidate_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
+          assert approval.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
+          assert approval.get("final_release_artifact_id")==int(os.environ["FINAL_ARTIFACT_ID"])
+          print("EXPLICIT_OWNER_RECEIPT_AND_ARTIFACT_IDS_PRESENT")
+          PY
+      - name: Check out exact release code with owner-gated workflow
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: integration
+          persist-credentials: false
+      - name: Check out current Git-only site-prod (sole push-enabled checkout)
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: live-site
+          fetch-depth: 0
+      - name: Fetch pinned GitHub evidence (not from source HTTP or Neon)
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-release"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          a=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-release/owner.json").read_text())
+          for key in ("c2_run_id","work_a_run_id","candidate_artifact_id","work_a_artifact_id",
+                      "final_release_artifact_id","final_release_run_id"):
+              assert type(a.get(key)) is int and a[key]>0
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PREP_ARTIFACT_ID" > "$root/c2-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > "$root/work-a-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID" > "$root/final-artifact.json"
+          C2_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["c2_run_id"])' "$root/owner.json")"
+          WORK_A_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["work_a_run_id"])' "$root/owner.json")"
+          FINAL_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["final_release_run_id"])' "$root/owner.json")"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > "$root/final-run.json"
+          curl --fail --silent --show-error --location --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$PREP_ARTIFACT_ID/zip" -o "$root/prep.zip"
+          curl --fail --silent --show-error --location --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID/zip" -o "$root/work-a.zip"
+          curl --fail --silent --show-error --location --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID/zip" -o "$root/final.zip"
+          python - <<'PY'
+          import json,hashlib,os
+          from pathlib import Path
+          r=Path(os.environ["RUNNER_TEMP"])/"c6-release"
+          a=json.loads((r/"owner.json").read_text())
+          for kind,file,key in (("c2","prep.zip","candidate_artifact_sha256"),
+                                ("work-a","work-a.zip","work_a_artifact_sha256"),
+                                ("final","final.zip","final_release_artifact_sha256")):
+              expected=a[key]
+              assert isinstance(expected,str) and len(expected)==64
+              assert hashlib.sha256((r/file).read_bytes()).hexdigest()==expected
+              remote=json.loads((r/(kind+"-artifact.json")).read_text())
+              assert remote["digest"]=="sha256:"+expected and not remote["expired"]
+          print("EXACT_ARTIFACT_ZIP_DIGESTS_PASS")
+          PY
+      - name: Safely unpack immutable six-JSON and full independent Work A proof
+        run: |
+          set -euo pipefail
+          PYTHONPATH=integration python - <<'PY'
+          import json,os,zipfile
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c6-release"
+          def extract(archive,output):
+              with zipfile.ZipFile(root/archive) as z:
+                  for member in z.infolist():
+                      p=Path(member.filename)
+                      assert not p.is_absolute() and not any(x==".." for x in p.parts)
+                      assert member.file_size<=64*1024*1024
+                  z.extractall(root/output)
+          extract("prep.zip","prepared-zip")
+          extract("work-a.zip","work-a-zip")
+          prepared=root/"prepared-zip"
+          reports=list(prepared.rglob("REPORT.json"))
+          assert len(reports)==1
+          report=reports[0]
+          assert (report.parent/"candidate/historical-daily-kpi.json").is_file()
+          (root/"prepared-path.txt").write_text(str(report.parent))
+          proof_roots=[p.parent for p in (root/"work-a-zip").rglob("sha256_manifest.json")]
+          assert len(proof_roots)==1
+          (root/"work-a-path.txt").write_text(str(proof_roots[0]))
+          print("EXACT_PREPARED_AND_WORK_A_ARTIFACTS_UNPACKED")
+          PY
+      - name: Verify approved deployed Netlify root KPI bytes before Git commit
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-release"
+          curl --fail --show-error --silent --location --retry 3 \
+            --header 'Cache-Control: no-cache' \
+            "https://ukraine-air-alerts.netlify.app/historical-daily-kpi.json" \
+            --output "$root/netlify-static-kpi.json"
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c6-release"
+          approval=json.loads((root/"owner.json").read_text())
+          assert approval.get("netlify_http_static_verified") is True
+          expected=approval["approved_netlify_static_kpi_sha256"]
+          actual=hashlib.sha256((root/"netlify-static-kpi.json").read_bytes()).hexdigest()
+          assert actual==expected, "NETLIFY_STATIC_KPI_SHA_MISMATCH"
+          index=json.loads((root/"netlify-static-kpi.json").read_text())
+          assert index["meta"]["source_dashboard_generated_at"]==approval["approved_generation"]
+          assert index["meta"]["release_manifest_sha256"]==approval["release_manifest_sha256"]
+          print("EXACT_NETLIFY_STATIC_KPI_HTTP_SHA_PASS")
+          PY
+      - name: Validate owner receipt and six FINAL bytes; then single fast-forward Git push
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-release"
+          python -m scripts.c6_neon_one_shot_publisher \
+            --approval "$root/owner.json" \
+            --report "$(cat "$root/prepared-path.txt")/REPORT.json" \
+            --work-a-proof "$(cat "$root/work-a-path.txt")" \
+            --prepared "$(cat "$root/prepared-path.txt")" \
+            --checkout live-site \
+            --c2-run "$root/c2-run.json" \
+            --work-a-run "$root/work-a-run.json" \
+            --c2-artifact "$root/c2-artifact.json" \
+            --work-a-artifact "$root/work-a-artifact.json" \
+            --final-artifact "$root/final-artifact.json" \
+            --final-run "$root/final-run.json" \
+            --final-zip "$root/final.zip" \
+            --repository "$GITHUB_REPOSITORY"

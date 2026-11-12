@@ -1,0 +1,163 @@
+name: C6 default-OFF Neon Git integration offline
+on:
+  push:
+    branches: [research-c6-neon-git-integration-off-2026-11-12]
+    paths:
+      - ".github/workflows/update-netlify-site.yml"
+      - ".github/workflows/c6-neon-git-integration-offline.yml"
+      - "scripts/c6_neon_git_candidate.py"
+      - "scripts/c6_neon_one_shot_publisher.py"
+      - "scripts/c6_neon_release_binding.py"
+      - "scripts/c6_neon_final_prepare.py"
+      - "scripts/c6_pr93_generator_compat.py"
+      - "scripts/c6_neon_publication_gate.py"
+      - "tests/test_c6_neon_git_candidate.py"
+      - "tests/test_c6_neon_one_shot_publisher.py"
+      - "tests/test_c6_neon_release_binding.py"
+      - "tests/test_c6_neon_final_prepare.py"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      C6_PINNED_PHYSICAL_PROOF: /tmp/c6-physical
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download existing frozen physical proof and exact C2 ZIP (GitHub only)
+        run: |
+          set -euo pipefail
+          mkdir -p "$C6_PINNED_PHYSICAL_PROOF" "$RUNNER_TEMP/c2"
+          gh run download 43187464328 -R "$GITHUB_REPOSITORY" \
+            -n isolated-neon-shadow-43187464328-1 -D "$C6_PINNED_PHYSICAL_PROOF"
+          gh run download 43055353190 -R "$GITHUB_REPOSITORY" \
+            -n c2-shadow-inputs-43055353190-1 -D "$RUNNER_TEMP/c2"
+      - name: Validate gate + pinned C2 and reconstruct exact frozen baseline
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, os, json
+          from pathlib import Path
+          from scripts.c2_shadow_bundle import verify_archive
+          from scripts.c6_neon_publication_gate import inspect,utc
+          bundle=Path(os.environ["RUNNER_TEMP"])/"c2"/"c2-shadow-inputs.zip"
+          sha=hashlib.sha256(bundle.read_bytes()).hexdigest()
+          assert sha=="ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d"
+          m=verify_archive(bundle,sha,destination=Path(os.environ["RUNNER_TEMP"])/"c2-extracted",
+              run_id=43055353190)
+          proof=Path(os.environ["C6_PINNED_PHYSICAL_PROOF"])
+          at=utc(json.loads((proof/"historical_freshness_gate.json").read_text())["evaluated_at_utc"])
+          result=inspect(proof,as_of=at)
+          assert result["status"]=="PASS_SCOPED_PROOF_NO_PUBLICATION"
+          assert result["production_publication_allowed"] is False
+          assert m["corpus_sha256"]==result["c2_corpus_sha256"]
+          site=Path(os.environ["RUNNER_TEMP"])/"site"/"data"
+          site.mkdir(parents=True)
+          for src in (Path(os.environ["RUNNER_TEMP"])/"c2-extracted"/"site_data").iterdir():
+              (site/src.name).write_bytes(src.read_bytes())
+          fields={
+              "C6_OFFLINE_ASOF":at.isoformat(),"C6_OFFLINE_BRANCH":m["db_branch"],
+              "C6_OFFLINE_INPUT_SHA":m["input_sha"],
+              "C6_OFFLINE_WORKFLOW_SHA":m["workflow_sha"],
+              "C6_OFFLINE_CORPUS":m["corpus_sha256"],
+              "C6_OFFLINE_BUNDLE_SHA":sha
+          }
+          with open(os.environ["GITHUB_ENV"],"a") as f:
+              for key,value in fields.items(): f.write(key+"="+str(value)+"\n")
+          PY
+      - name: Install offline YAML test dependency
+        run: python -m pip install 'PyYAML==6.0.2'
+      - name: Unit fail-closed and negative staging tests
+        run: |
+          python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
+          python -m unittest discover -s tests -p test_c6_neon_one_shot_publisher.py -v
+          python -m unittest discover -s tests -p test_c6_neon_release_binding.py -v
+          python -m unittest discover -s tests -p test_c6_neon_final_prepare.py -v
+      - name: End-to-end frozen physical six-file staging (never live publication)
+        run: |
+          python -m scripts.c6_neon_git_candidate \
+            --proof "$C6_PINNED_PHYSICAL_PROOF" \
+            --site "$RUNNER_TEMP/site" \
+            --output "$RUNNER_TEMP/c6-prepared" \
+            --as-of "$C6_OFFLINE_ASOF" \
+            --c2-corpus "$C6_OFFLINE_CORPUS" --db-branch "$C6_OFFLINE_BRANCH" \
+            --input-sha "$C6_OFFLINE_INPUT_SHA" \
+            --workflow-sha "$C6_OFFLINE_WORKFLOW_SHA" \
+            --run-id 43055353190 --run-attempt 1 \
+            --bundle-sha256 "$C6_OFFLINE_BUNDLE_SHA"
+      - name: Checkout PR93-pinned site parser for generator compatibility
+        uses: actions/checkout@v4
+        with:
+          ref: 6704c48306289bbc40b6e12da4fc8cac163ec428
+          path: approved-site
+          persist-credentials: false
+      - name: Checkout accepted physical generator
+        uses: actions/checkout@v4
+        with:
+          ref: 82a7cc775ed2f2a6fd0134440db709690f0c04d1
+          path: accepted-reader
+          persist-credentials: false
+      - name: Exact-blob patch for merged PR93
+        run: |
+          python scripts/c6_pr93_generator_compat.py \
+            --generator accepted-reader/scripts/neon_json_shadow_generator.py \
+            --site-parser approved-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+      - name: Create and verify an isolated no-remote local Git candidate commit
+        run: |
+          set -euo pipefail
+          git -C approved-site checkout --detach
+          git -C approved-site remote remove origin
+          python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          from scripts.c6_neon_git_candidate import local_commit,FILES
+          root=Path(os.environ["RUNNER_TEMP"])/"c6-prepared"
+          report=json.loads((root/"REPORT.json").read_text())
+          commit=local_commit(root,Path("approved-site"),report)
+          assert len(commit)==40
+          assert not subprocess.check_output(["git","-C","approved-site","remote"])
+          paths=set(subprocess.check_output([
+              "git","-C","approved-site","diff-tree","--no-commit-id",
+              "--name-only","-r","HEAD"],text=True).splitlines())
+          assert paths <= set(FILES.values()) and "historical-daily-kpi.json" in paths,paths
+          report["local_candidate_commit"]=commit
+          report["remote_publication_performed"]=False
+          (root/"REPORT.json").write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
+          print("SIX_FILE_LOCAL_ATOMIC_COMMIT_PASS; PRODUCTION_PUBLICATION_OFF")
+          PY
+      - name: Checkout unchanged exact PR104 Netlify contract
+        uses: actions/checkout@v4
+        with:
+          ref: ea71a0e2d2313ea86143500b4ef4ee25ab4c7cec
+          path: approved-pr104
+          persist-credentials: false
+      - name: Checkout unchanged exact PR100 frontend consumer
+        uses: actions/checkout@v4
+        with:
+          ref: 19446ba9b9513ec962be08a128b4132de3f1912c
+          path: approved-pr100
+          persist-credentials: false
+      - name: Exact PR95 release binding to PR104 to PR100 offline E2E
+        env:
+          WORK_H_PINNED_PR95_ROOT: ${{ github.workspace }}
+          WORK_H_PINNED_PR100_ROOT: ${{ github.workspace }}/approved-pr100
+        run: |
+          python -m unittest discover -s approved-pr104/tests -p test_c3_neon_netlify_binding.py -v
+          echo "PR95_RELEASE_BYTES_TO_PR104_NETLIFY_VALIDATOR_TO_PR100_CONSUMER_OFFLINE_PASS"
+      - name: Upload non-sensitive evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-git-integration-offline-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/c6-prepared/REPORT.json
+          retention-days: 30
+          if-no-files-found: warn
