@@ -27,6 +27,10 @@ on:
         description: "Immutable pinned C2 shadow-inputs artifact ID for final preparation only"
         type: string
         required: false
+      c6_final_release_artifact_id:
+        description: "Owner-pinned pre-Netlify eight-file FINAL artifact ID for publication (no regeneration drift)"
+        type: string
+        required: false
   push:
     branches: [main]
     paths:
@@ -812,6 +816,7 @@ jobs:
           [[ "$C2_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_RUN_ID" =~ ^[0-9]+$ ]]
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > "$root/final-run.json"
           for kind in c2 c2_bundle work_a; do
             case "$kind" in
               c2) id="$PREP_ARTIFACT_ID" ;;
@@ -874,6 +879,7 @@ jobs:
       OWNER_GRANT_JSON: ${{ secrets.C6_NEON_GIT_OWNER_GRANT_JSON }}
       PREP_ARTIFACT_ID: ${{ inputs.c6_preparation_artifact_id }}
       WORK_A_ARTIFACT_ID: ${{ inputs.work_a_proof_artifact_id }}
+      FINAL_ARTIFACT_ID: ${{ inputs.c6_final_release_artifact_id }}
     steps:
       - name: Fail closed without separate owner release switch and receipt
         run: |
@@ -883,6 +889,7 @@ jobs:
           test -n "$OWNER_GRANT_JSON"
           [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$FINAL_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           install -m 700 -d "$RUNNER_TEMP/c6-release"
           printf '%s' "$OWNER_GRANT_JSON" > "$RUNNER_TEMP/c6-release/owner.json"
           chmod 600 "$RUNNER_TEMP/c6-release/owner.json"
@@ -893,6 +900,7 @@ jobs:
           assert approval.get("decision")=="APPROVE_ONE_SHOT_NEON_GIT_PUBLICATION"
           assert approval.get("candidate_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
           assert approval.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
+          assert approval.get("final_release_artifact_id")==int(os.environ["FINAL_ARTIFACT_ID"])
           print("EXPLICIT_OWNER_RECEIPT_AND_ARTIFACT_IDS_PRESENT")
           PY
       - name: Check out exact release code with owner-gated workflow
@@ -915,13 +923,16 @@ jobs:
           import json,os
           from pathlib import Path
           a=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-release/owner.json").read_text())
-          for key in ("c2_run_id","work_a_run_id","candidate_artifact_id","work_a_artifact_id"):
+          for key in ("c2_run_id","work_a_run_id","candidate_artifact_id","work_a_artifact_id",
+                      "final_release_artifact_id","final_release_run_id"):
               assert type(a.get(key)) is int and a[key]>0
           PY
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PREP_ARTIFACT_ID" > "$root/c2-artifact.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > "$root/work-a-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID" > "$root/final-artifact.json"
           C2_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["c2_run_id"])' "$root/owner.json")"
           WORK_A_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["work_a_run_id"])' "$root/owner.json")"
+          FINAL_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["final_release_run_id"])' "$root/owner.json")"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
           curl --fail --silent --show-error --location --retry 3 \
@@ -930,13 +941,17 @@ jobs:
           curl --fail --silent --show-error --location --retry 3 \
             -H "Authorization: Bearer $GH_TOKEN" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID/zip" -o "$root/work-a.zip"
+          curl --fail --silent --show-error --location --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID/zip" -o "$root/final.zip"
           python - <<'PY'
           import json,hashlib,os
           from pathlib import Path
           r=Path(os.environ["RUNNER_TEMP"])/"c6-release"
           a=json.loads((r/"owner.json").read_text())
           for kind,file,key in (("c2","prep.zip","candidate_artifact_sha256"),
-                                ("work-a","work-a.zip","work_a_artifact_sha256")):
+                                ("work-a","work-a.zip","work_a_artifact_sha256"),
+                                ("final","final.zip","final_release_artifact_sha256")):
               expected=a[key]
               assert isinstance(expected,str) and len(expected)==64
               assert hashlib.sha256((r/file).read_bytes()).hexdigest()==expected
@@ -1009,4 +1024,7 @@ jobs:
             --work-a-run "$root/work-a-run.json" \
             --c2-artifact "$root/c2-artifact.json" \
             --work-a-artifact "$root/work-a-artifact.json" \
+            --final-artifact "$root/final-artifact.json" \
+            --final-run "$root/final-run.json" \
+            --final-zip "$root/final.zip" \
             --repository "$GITHUB_REPOSITORY"
