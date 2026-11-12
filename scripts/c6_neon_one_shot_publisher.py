@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
+import zipfile
 import re
 import shutil
 import subprocess
@@ -156,6 +158,35 @@ def validate(approval, report, work_a_proof, site, *,
             "files": files, "c2_run_id": c2_run["id"]}
 
 
+def verify_pinned_final_zip(archive, released, final, approval, artifact, run):
+    """Require the exact pre-Netlify immutable ZIP bytes before any Git write."""
+    require(artifact.get("id") == approval.get("final_release_artifact_id") and
+            artifact.get("expired") is False and
+            artifact.get("workflow_run", {}).get("id") == run.get("id") and
+            run.get("status") == "completed" and run.get("conclusion") == "success" and
+            run.get("run_attempt") == approval.get("final_release_run_attempt") and
+            run.get("head_sha") == approval.get("final_release_code_sha") and
+            run.get("path") == GH_WORKFLOW and
+            artifact.get("name") == f"c6-neon-final-release-{run.get('id')}-{run.get('run_attempt')}" and
+            HEX64.fullmatch(str(approval.get("final_release_artifact_sha256"))) and
+            artifact.get("digest") == "sha256:" + approval["final_release_artifact_sha256"] and
+            hashlib.sha256(Path(archive).read_bytes()).hexdigest() ==
+                approval["final_release_artifact_sha256"],
+            "PINNED_FINAL_ZIP_NOT_VERIFIED")
+    expected = {"RELEASE_BINDING.json", "RELEASE_MANIFEST.json"} | {
+        "candidate/" + x for x in candidate.FILES.values()}
+    with zipfile.ZipFile(archive) as z:
+        require(set(z.namelist()) == expected and len(z.namelist()) == 8,
+                "FINAL_ZIP_MEMBER_SET_MISMATCH")
+        for name in expected:
+            info = z.getinfo(name)
+            require(info.file_size <= 64 * 1024 * 1024 and
+                    z.read(name) == (Path(released) / name).read_bytes(),
+                    "FINAL_RELEASE_NOT_BYTE_IDENTICAL:" + name)
+    require(approval.get("release_manifest_sha256") == final["release_manifest_sha256"],
+            "FINAL_RELEASE_BINDING_NOT_APPROVED")
+
+
 def publish(checkout, prepared, decision, *, expected_head):
     """An atomic allowlisted Git commit; no remote changes until all guards PASS."""
     checkout, prepared = Path(checkout), Path(prepared)
@@ -229,7 +260,8 @@ def publish(checkout, prepared, decision, *, expected_head):
 def main():
     parser = argparse.ArgumentParser()
     for key in ("approval", "report", "work-a-proof", "prepared", "checkout",
-                "c2-run", "work-a-run", "c2-artifact", "work-a-artifact", "repository"):
+                "c2-run", "work-a-run", "c2-artifact", "work-a-artifact",
+                 "final-artifact", "final-run", "final-zip", "repository"):
         parser.add_argument("--" + key, required=True)
     p = parser.parse_args()
     try:
@@ -246,6 +278,8 @@ def main():
                 p.prepared, report, repository=p.repository,
                 release_id=approval.get("release_id"), output=release_root)
             decision.update(release_binding.verify_final(approval, final))
+            verify_pinned_final_zip(p.final_zip, release_root, final, approval,
+                                    load(p.final_artifact), load(p.final_run))
             sha = publish(p.checkout, release_root, decision,
                           expected_head=decision["site_prod_head_sha"])
     except Exception as exc:
