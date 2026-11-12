@@ -152,7 +152,7 @@
           ctx.textAlign = "center";
           ctx.fillStyle = "#f8e45c";
           ctx.font = "bold 13px system-ui, sans-serif";
-          ctx.fillText("≥" + info.value, p.x, Math.max(chart.chartArea.top + 35, top - 7));
+          ctx.fillText("≥" + info.value, p.x, Math.max(chart.chartArea.top + 22, top - 7));
           ctx.restore();
           parts.push(info);
         });
