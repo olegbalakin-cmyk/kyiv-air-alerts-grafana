@@ -1,0 +1,50 @@
+name: C6 one-shot C2 preflight (read only)
+on:
+  push:
+    branches: [research-c6-one-shot-code-merge-pause-2026-11-13]
+    paths:
+      - .github/workflows/c6-one-shot-c2-preflight.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PREP_ENABLED: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED }}
+      PUBLISHER_PAUSED: ${{ vars.C6_GIT_ONLY_PUBLISHER_PAUSED }}
+      BUNDLE_EXPORT: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED }}
+      HISTORY_CAPTURE: ${{ vars.C2_HISTORY_CAPTURE_ENABLED }}
+      FINAL_PREP_ENABLED: ${{ vars.C6_FINAL_PREPARE_ENABLED }}
+      RELEASE_ENABLED: ${{ vars.C6_NEON_GIT_RELEASE_ENABLED }}
+    steps:
+      - name: Confirm post-merge branches, disabled workflows, and release gate variables without secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "research-c6-one-shot-code-merge-pause-2026-11-13"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)" = "712c9e351fc3548325cf594cf0617bb33e70a002"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)" = "6648a11242fac16cf023114cd6e58a65c3b49968"
+          for entry in "360885782|.github/workflows/update-netlify-site.yml" "360885508|.github/workflows/netlify-production.yml"; do
+            id="${entry%%|*}"
+            want="${entry##*|}"
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id" > "$RUNNER_TEMP/workflow-$id.json"
+            WANT="$want" CHECKID="$id" python3 - <<'PY'
+          import json,os,pathlib
+          obj=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/("workflow-"+os.environ["CHECKID"]+".json")).read_text())
+          assert obj["path"]==os.environ["WANT"] and obj["state"]=="disabled_manually",obj
+          print("DISABLED",obj["path"],obj["id"])
+          PY
+          done
+          python3 - <<'PY'
+          import os
+          def enabled(name): return os.getenv(name,"")=="true"
+          for name in ["PREP_ENABLED","PUBLISHER_PAUSED","BUNDLE_EXPORT","HISTORY_CAPTURE","FINAL_PREP_ENABLED","RELEASE_ENABLED"]:
+            print("CONFIG",name,"true" if enabled(name) else "not-true")
+          print("PREREQUISITE_PREP_ENABLED",int(enabled("PREP_ENABLED")))
+          print("PREREQUISITE_BUNDLE_EXPORT",int(enabled("BUNDLE_EXPORT")))
+          print("PREREQUISITE_NORMAL_C2_NOT_PAUSED",int(not enabled("PUBLISHER_PAUSED")))
+          PY
+          echo "READ_ONLY_PREFLIGHT_NO_WRITES_NO_DISPATCH"
