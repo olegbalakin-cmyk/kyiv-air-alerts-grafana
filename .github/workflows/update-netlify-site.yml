@@ -5,6 +5,11 @@ on:
     - cron: "15 */4 * * *"
   workflow_dispatch:
     inputs:
+      c6_final_prepare_only:
+        description: "Owner-approved FINAL release bytes preparation ONLY (default OFF; no C2, no deploy, no publication)"
+        type: boolean
+        required: true
+        default: false
       c6_neon_git_release:
         description: "Separately owner-approved one-shot Neon Git release (default OFF)"
         type: boolean
@@ -16,6 +21,10 @@ on:
         required: false
       work_a_proof_artifact_id:
         description: "Immutable independent Work A proof artifact ID"
+        type: string
+        required: false
+      c6_bundle_artifact_id:
+        description: "Immutable pinned C2 shadow-inputs artifact ID for final preparation only"
         type: string
         required: false
   push:
@@ -33,7 +42,7 @@ permissions:
 
 jobs:
   update-site:
-    if: ${{ (github.event_name != 'workflow_dispatch' || !inputs.c6_neon_git_release) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true' }}
+    if: ${{ (github.event_name != 'workflow_dispatch' || (!inputs.c6_neon_git_release && !inputs.c6_final_prepare_only)) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -618,7 +627,7 @@ jobs:
   # Same-run Neon candidate preparation only; never changes existing Git delivery.
   c6-neon-six-json-prepare:
     needs: update-site
-    if: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED == 'true' && needs.update-site.result == 'success' }}
+    if: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED == 'true' && needs.update-site.result == 'success' && (github.event_name != 'workflow_dispatch' || !inputs.c6_final_prepare_only) }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     permissions:
@@ -746,11 +755,112 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  # Release byte preparation is independent of normal C2 and the Git publisher.
+  c6-neon-final-prepare-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.c6_final_prepare_only && !inputs.c6_neon_git_release }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+    environment: c6-final-prepare-only
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PREPARE_ENABLED: ${{ vars.C6_FINAL_PREPARE_ENABLED }}
+      PREPARE_OWNER_RECEIPT: ${{ secrets.C6_FINAL_PREPARE_OWNER_RECEIPT_JSON }}
+      PREP_ARTIFACT_ID: ${{ inputs.c6_preparation_artifact_id }}
+      WORK_A_ARTIFACT_ID: ${{ inputs.work_a_proof_artifact_id }}
+      C2_BUNDLE_ARTIFACT_ID: ${{ inputs.c6_bundle_artifact_id }}
+    steps:
+      - name: Require distinct owner PREPARE ONLY receipt before any download
+        run: |
+          set -euo pipefail
+          test "$PREPARE_ENABLED" = "true"
+          test -n "$PREPARE_OWNER_RECEIPT"
+          [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$C2_BUNDLE_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          mkdir -p "$RUNNER_TEMP/c6-final"
+          printf '%s' "$PREPARE_OWNER_RECEIPT" > "$RUNNER_TEMP/c6-final/owner.json"
+          chmod 600 "$RUNNER_TEMP/c6-final/owner.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          a=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-final/owner.json").read_text())
+          assert a.get("decision")=="APPROVE_PREPARE_ONLY_NO_PUBLICATION"
+          assert a.get("prepare_code_sha")==os.environ["GITHUB_SHA"]
+          assert a.get("repository")==os.environ["GITHUB_REPOSITORY"]
+          assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
+          assert a.get("c2_bundle_artifact_id")==int(os.environ["C2_BUNDLE_ARTIFACT_ID"])
+          assert a.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
+          print("PREPARE_ONLY_OWNER_RECEIPT_PRESENT; NO_PUBLICATION")
+          PY
+      - name: Checkout exact integration code without Git push credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read pinned GitHub Actions evidence (no source HTTP)
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-final"
+          C2_RUN_ID="$(python -c 'import json,sys;print(json.load(open(sys.argv[1]))["c2_run_id"])' "$root/owner.json")"
+          WORK_A_RUN_ID="$(python -c 'import json,sys;print(json.load(open(sys.argv[1]))["work_a_run_id"])' "$root/owner.json")"
+          [[ "$C2_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          for kind in c2 c2_bundle work_a; do
+            case "$kind" in
+              c2) id="$PREP_ARTIFACT_ID" ;;
+              c2_bundle) id="$C2_BUNDLE_ARTIFACT_ID" ;;
+              work_a) id="$WORK_A_ARTIFACT_ID" ;;
+            esac
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" > "$root/$kind-artifact.json"
+            curl --fail --silent --show-error --location --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" \
+              -o "$root/$kind.zip"
+          done
+      - name: Verify immutable evidence and produce eight FINAL files
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-final"
+          python -m scripts.c6_neon_final_prepare \
+            --receipt "$root/owner.json" \
+            --c2-run "$root/c2-run.json" --work-a-run "$root/work-a-run.json" \
+            --c2-artifact "$root/c2-artifact.json" \
+            --c2-bundle-artifact "$root/c2_bundle-artifact.json" \
+            --work-a-artifact "$root/work_a-artifact.json" \
+            --c2-zip "$root/c2.zip" --c2-bundle-zip "$root/c2_bundle.zip" \
+            --work-a-zip "$root/work_a.zip" \
+            --output "$root/final" --audit "$root/PREPARE_REPORT.json" \
+            --actor "$GITHUB_ACTOR" --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" --code-sha "$GITHUB_SHA"
+          test "$(find "$root/final" -type f | wc -l)" -eq 8
+          echo "EIGHT_FINAL_FILES_PREPARED; NO_PUSH_OR_DEPLOY"
+      - name: Upload exact final ZIP as owner-pinnable immutable GitHub artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-final-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/c6-final/final/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload independent nonpublishing preparation receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-final-prepare-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/c6-final/PREPARE_REPORT.json
+          if-no-files-found: error
+          retention-days: 30
+
   # Explicit manual release is exclusive with normal C2 through the SAME
   # workflow-level concurrency group. No generator, updater, Neon writer or
   # source HTTP is invoked by this job.
   c6-neon-owner-gated-git-release:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.c6_neon_git_release }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.c6_neon_git_release && !inputs.c6_final_prepare_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: c6-neon-git-release
