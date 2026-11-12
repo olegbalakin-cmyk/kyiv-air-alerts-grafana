@@ -339,6 +339,9 @@ def _attack_place(low):
             r'\b(?:за\s+адресою|(?:на|по)\s+вулиц(?:і|ю))\s+([^.;\n]{3,65})',
             sentence)
         if match:
+            # A generic reference to being outside is not a named street.
+            if re.match(r'(?:не\s+)?(?:перебува\w*|залиша\w*|виход\w*|бути\b|під\s+час\b|знаход\w*)', match[1].strip()):
+                continue
             # Stop at the event predicate; do not retain the rest of a report
             # as a street name or use generic 'під час тривоги' as a street.
             site = re.split(
@@ -397,13 +400,14 @@ def extract_cached_reports(queue, articles):
         origin_id, origin_name = ((resolution['origin_id'], resolution['origin_name'])
                                   if resolution else _origin_attribution(low))
         parsed.append({'c': c, 'article': article, 'low': low,
+                       'single_scope': len(scopes) == 1,
                        'day': day, 'mentioned_day': mentioned_day,
                        'slot': slot, 'weapon': weapon, 'place': place,
                        'boundary': boundary, 'russian': russian, 'air': air,
                        'total': total, 'status': _civilian_status(low, total),
                        'count_resolution': resolution,
                        'origin_id': origin_id, 'origin_name': origin_name})
-    anchors = [p for p in parsed if p['day'] and (p['slot'] or p['place'])
+    anchors = [p for p in parsed if p['day'] and (p['slot'] or p['place'] or p['single_scope'])
                and p['weapon'] != 'unknown' and p['boundary'] is True
                and p['total'] is not None and p['air'] is True]
     reports = []
@@ -434,7 +438,8 @@ def extract_cached_reports(queue, articles):
         if len(identities) != 1:
             continue
         a = next(iter(identities.values()))
-        # Do not attach a second, ambiguous city/day article by total alone.
+        # A uniquely dated single-source fatal incident may be unlocated;
+        # never join another unlocated report by city/day/total alone.
         if p is not a and not (p['slot'] or p['place']):
             continue
         if p['boundary'] is not True or not p['russian']:
