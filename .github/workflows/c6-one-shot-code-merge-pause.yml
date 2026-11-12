@@ -1,0 +1,69 @@
+name: C6 authorized one-time code-only merge safety pause (NO DEPLOY)
+on:
+  push:
+    branches: [research-c6-one-shot-code-merge-pause-2026-11-13]
+    paths:
+      - .github/workflows/c6-one-shot-code-merge-pause.yml
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: c6-one-shot-code-only-pause-2026-11-13
+  cancel-in-progress: false
+jobs:
+  verify-and-pause:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Verify exact bases and quiescence before disabling only two workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          test "$GITHUB_REF_NAME" = "research-c6-one-shot-code-merge-pause-2026-11-13"
+          test "$GITHUB_RUN_ATTEMPT" = "1"
+          main="$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)"
+          site="$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)"
+          test "$main" = "375e69351e6a5aee1be16892821f7cdde2a8f21a" || { echo "STOP_MAIN_MOVED"; exit 2; }
+          test "$site" = "d0a7d22de2828c93236562cccc9d2e68c6a66e3d" || { echo "STOP_SITE_PROD_MOVED"; exit 2; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows?per_page=100" > "$RUNNER_TEMP/workflows.json"
+          python3 - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])
+          wf=json.loads((p/"workflows.json").read_text())["workflows"]
+          targets=[".github/workflows/update-netlify-site.yml",".github/workflows/netlify-production.yml"]
+          found=[]
+          for path in targets:
+              choices=[x for x in wf if x["path"]==path]
+              if len(choices)!=1 or choices[0]["state"] not in ("active","disabled_manually"):
+                  raise SystemExit("STOP_WORKFLOW_NOT_REGISTERED_OR_UNEXPECTED_STATE:"+path)
+              found.append((path,choices[0]["id"]))
+          (p/"workflow-ids.txt").write_text("".join(f"{name}|{num}\n" for name,num in found))
+          print("EXACT_TWO_WORKFLOWS_REGISTERED")
+          PY
+          while IFS='|' read -r name id; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id/runs?per_page=100" > "$RUNNER_TEMP/runs-$id.json"
+            WID="$id" python3 - <<'PY'
+          import json,os,pathlib
+          wid=os.environ["WID"]
+          j=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/f"runs-{wid}.json").read_text())
+          active=[x for x in j["workflow_runs"] if x["status"]!="completed"]
+          if active: raise SystemExit("STOP_WORKFLOW_ACTIVE:"+wid+":"+str([x["id"] for x in active]))
+          print("NO_ACTIVE_RUNS_FOR_WORKFLOW:"+wid)
+          PY
+          done < "$RUNNER_TEMP/workflow-ids.txt"
+          while IFS='|' read -r name id; do
+            state="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id" --jq .state)"
+            if [ "$state" = active ]; then
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$id/disable"
+            elif [ "$state" != disabled_manually ]; then
+              echo "STOP_UNEXPECTED_WORKFLOW_STATE:$name:$state"; exit 2
+            fi
+            state="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id" --jq .state)"
+            test "$state" = disabled_manually || { echo "STOP_PAUSE_NOT_CONFIRMED:$name:$state"; exit 2; }
+            echo "WORKFLOW_DISABLED_MANUALLY:$name:$id"
+          done < "$RUNNER_TEMP/workflow-ids.txt"
+          echo "BOTH_WORKFLOWS_DISABLED_FOR_OWNER_AUTHORIZED_CODE_ONLY_MERGE; NO_PRODUCTION_DATA_OR_NETLIFY_DEPLOY" 
