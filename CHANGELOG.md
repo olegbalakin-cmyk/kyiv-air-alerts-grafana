@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-NETLIFY-HOSTED-PREVIEW-PASS-01 — live public Netlify preview QA PASS (2026-11-12; proposed on merge)
+
+- Owner-approved C3 draft deploy `6af5aecd8901ea2a40de09ad` ready, production `6adb629bc3ebc570117d82e1` unchanged. [Live Actions #43218752830](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43218752830) SUCCESS, artifact #13945375693: 12 exact Git+Neon JSON, 184 city/mode views, CSV 23, UI Git rollback, zero JS/HTTP/external errors; only Netlify RUM added to HTML. No cutover/current-source certification/DST; `GLOBAL_CUTOVER=NO`.
+
 ### C6-C3-PR90-FRONTEND-FIX-PASS-01 — PR #90 frontend compatibility PASS (2026-11-12; proposed on merge)
 
 - Previous `C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01`: PR #87 runner-local QA #43201183617 PASS. **New Work A:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) exact `83f14e27bf4675f64aff72fa20010630f0305d52`, [Actions #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) SUCCESS, artifact #13937630998: scoped real `app.js` KPI guard, 184/184 views, 23 CSV, Git rollback 23/23, 0 browser errors, 28 files restored. Work B #43208800105 package PASS, artifact #13940887007. Owner authorized ONE manual draft alias deploy `c3-neon-83f14e27` on 2026-11-12; pending authenticated CLI, no deploy yet. `GLOBAL_CUTOVER=NO`.
@@ -38,10 +42,5 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 ### C6-GATED-RECEIPTS-STAGED-01 — hooks staged OFF; offline CI PASS (2026-11-10)
 
 - Owner-approved [PR #47](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/47) squash-merged to `site-prod@cc8bcbe577196e6484d3a5fd83b4addfabfb9456`, followed by [PR #46](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/46) to `main@2fbe9d1970c6508cbc9c1d66db55327120fe857a`. Exact-head [Actions 42686471326](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42686471326) **32/32 offline PASS**; [preflight 42774215008](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774215008) **capture/export OFF**. Main push triggered [updater 42774323341](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774323341), outcome to verify. PR #48 research draft, DST OFF, real 23-city full receipts 0/23; no source switching, Neon cutover or flag activation. Next: post-merge updater check, separately owner-approved flags, bootstrap/overlap and read-only same-run proof. `GLOBAL_CUTOVER=NO`.
-
-### C6-UA-CURRENT-ONEGET-01 — current API access PASS; active semantics OPEN (2026-10-31)
-
-- Owner-authorized one GET `/api/v3/alerts`: HTTP 200, 72 rows, 9/21 mapped IDs directly present with AIR, 12 absent but UNKNOWN. [Actions 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954) SUCCESS; [proof d6a6340f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/d6a6340f8941799d873f02a9bce27881bce81a01), encrypted artifact **13049271828**, 5/5 hashes verified. History 21/21 separately proven by existing production client.
-- No status-negative/ancestor/cache completeness certification, Neon writes or production mutations; **C6/C3 PARTIAL; GLOBAL_CUTOVER NO**. Next: offline interpretation of official contract, no further API GET authorized.
 
 <!-- coordination:history:end -->
