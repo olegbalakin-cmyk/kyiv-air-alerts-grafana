@@ -98,9 +98,10 @@ def release_candidate(prepared, report, *, repository, release_id, output):
         "generation": generation,
         "historical_freshness_binding_sha256": freshness,
     }
-    binding_hash = candidate.sha(json.dumps(
+    binding_bytes = json.dumps(
         binding, sort_keys=True, ensure_ascii=False,
-        separators=(",", ":")).encode("utf-8"))
+        separators=(",", ":")).encode("utf-8")
+    binding_hash = candidate.sha(binding_bytes)
     authority = copy.deepcopy(original)
     authority.update({
         "publication_allowed": True, "scope": RELEASE_SCOPE,
@@ -137,6 +138,10 @@ def release_candidate(prepared, report, *, repository, release_id, output):
             "binding": binding, "release_manifest_sha256": binding_hash,
             "source_files": source_hashes, "files": files,
         }
+        # Exact file whose SHA-256 is embedded in the dashboard and KPI.
+        # Final file hashes are stored in the adjacent release receipt instead,
+        # avoiding a circular hash dependency.
+        (tmp / "RELEASE_BINDING.json").write_bytes(binding_bytes)
         (tmp / "RELEASE_MANIFEST.json").write_text(json.dumps(
             manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
             encoding="utf-8")
