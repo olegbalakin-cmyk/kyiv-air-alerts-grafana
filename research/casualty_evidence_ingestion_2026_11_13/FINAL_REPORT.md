@@ -1,6 +1,6 @@
 # WORK E — CASUALTY evidence ingestion research
 
-Decision pending exact-head physical CI: PARTIAL. Offline success is not evidence of autonomous regular collection.
+Decision: EVIDENCE_INGESTION_OFFLINE_PASS for saved sources only. Autonomous regular collection remains PARTIAL and unauthorized.
 
 ## Sources and pins
 
@@ -31,3 +31,11 @@ Before an unattended rollout, another explicit owner authorization must approve 
 Research-only workflow research-casualty-evidence-ingestion.yml is branch-push-only, read-only GitHub permissions, downloads approved GitHub Actions artifacts (not publisher URLs), checks hashes and frozen commits, runs synthetic negative safety tests, then executes real offline ingestion -> existing Work A -> pinned production generator -> strict real-source assertions. No WIP mutation, casualty JSON change, merge, deployment, C2, Neon or production source change. October stays COVERAGE_INCOMPLETE.
 
 The offline replay can validate a single archived original text, not precision/recall over all candidates or live regular autonomous ingestion. Do not claim release readiness based on offline PASS.
+
+## Exact-HEAD physical verification (2026-11-12 UTC)
+
+A complete physical offline execution succeeded: [Actions #43320160202](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320160202), at tested head `ee1b252cd8dbd9bc325bcc3387249315f01f50b9`. Both source JSON pins matched; 10/10 safety tests passed. The physical verification printed `EVIDENCE_INGESTION_OFFLINE_PASS` after the exact site-prod generator test. Proof [artifact #13989688155](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320160202/artifacts/13989688155) has GitHub uploader digest SHA-256 `56dc0e9c0308c4dc6b074bf9819d2a229ffc102a81a336fd0a754be32670effc`; not independently rehashed.
+
+Real replay: 1,682 candidates, three with original texts; two parsable reports, **one** accepted auto-ready case. The saved 10 October Zaporizhzhia article yielded **18 -> 20 -> 23** as one cumulative incident and one +23 generator-safe shadow proposal; five further PR #102 groups (eleven IDs) remained `NEEDS_REVIEW` with no factual article bodies. Work A summary was 1 AUTO_READY and 1,681 NEEDS_REVIEW. No HTTP to publishers, no production writes, and no merge/deployment. October COVERAGE_INCOMPLETE.
+
+**Final bounded decision: EVIDENCE_INGESTION_OFFLINE_PASS.** Regular autonomous HTTP capture and scheduled source ingest remain **PARTIAL / NOT AUTHORIZED**. This proves processing of previously saved originals, not readiness of unattended coverage or independent verification of new official source pages. Future capture requires a separate owner approval and a further end-to-end live-capture review.
