@@ -3703,9 +3703,29 @@ async function init() {
   state.features = await loadPreviewFeatures();
   applyPreviewFeatureVisibility();
 
-  const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
-  state.data = await response.json();
+  // A draft preview must remain usable if raw.githubusercontent.com is
+  // unavailable or temporarily returns an error. Keep the exact bundled
+  // site-prod JSON as a last-resort snapshot; never synthesize values.
+  let dashboardLoadError = null;
+  for (const source of [DATA_URL, "data.json"]) {
+    try {
+      const response = await fetch(`${source}?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!data?.cities || Object.keys(data.cities).length !== 23) {
+        throw new Error("Incomplete 23-city dashboard JSON");
+      }
+      state.data = data;
+      if (source === "data.json") {
+        console.warn("Research preview using bundled site-prod snapshot", dashboardLoadError);
+      }
+      break;
+    } catch (error) {
+      dashboardLoadError = error;
+      console.warn("Research preview dashboard source unavailable", source, error);
+    }
+  }
+  if (!state.data) throw new Error("Neither live site-prod nor bundled preview data loaded");
   // Production data are refreshed independently of frontend deployments.
   // Prefer the index generated atomically with dashboard_data.json; only
   // fall back to the verified static release snapshot for older data.
