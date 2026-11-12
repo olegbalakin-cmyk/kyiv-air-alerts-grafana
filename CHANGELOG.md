@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-FROZEN-B2-OWNER-READONLY-AUTH-01 — one exact-head proof authorized; physical pending (2026-11-12; proposed on merge)
+
+- Owner approved one read-only proof on PR #79 `beb2ad4d1f37e88b0084e49306281f8d2650d568`, C2 #43055353190; Environment SHA/branch and owner dispatch pending. No physical PASS or production change. `GLOBAL_CUTOVER=NO`.
+
 ### C6-FROZEN-B2-EVIDENCE-OFFLINE-01 — frozen B2 proof-blocker fixed offline; physical OPEN (2026-11-11; proposed on merge)
 
 - Owner-approved physical [#43104972888](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43104972888) read Neon and verified 23/23 history freshness, then failed closed at B2 382-parent provenance gate; artifact #13893437446, no 6 JSON files. Read-only Neon shows 184 old suppressed parents/198 canonical B2 display rows. [Research PR #79](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/79) `beb2ad4d1f37e88b0084e49306281f8d2650d568` isolates 382 B2 evidence from canonical C2 statistics; [offline #43105919875](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43105919875) PASS. New protected physical run needs new owner SHA approval; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
