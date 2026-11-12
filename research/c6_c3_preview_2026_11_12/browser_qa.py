@@ -54,7 +54,7 @@ def main():
       real_app = Path("kyiv-air-alerts-grafana/pages-preview/app.js").read_bytes()
       prod_root = b'"https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/"'
       preview_root = b'window.PREVIEW_CONFIG.dataBase'
-      if real_app.count(prod_root) != 1 or b'const isolatedNeonPreview =' not in real_app:
+      if real_app.count(prod_root) != 2 or b'const isolatedNeonPreview =' not in real_app:
         raise AssertionError("ACTUAL_FRONTEND_PREVIEW_GUARD_CHANGED")
       app.write_bytes(real_app.replace(prod_root, preview_root, 1))
       patched_hashes={**original_hashes,"app.js":sha(app)}
