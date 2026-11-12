@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-NEON-GIT-KPI-CONSUMER-OFFLINE-01 — gated Neon Git KPI consumer offline PASS (2026-11-12; proposed)
+
+- [PR #100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/100) `19446ba9`, exact-head [#43287759219](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43287759219) SUCCESS, artifact #13974983364 SHA-256 `f7a5f7d9b188ca92858ead9f83f232c668533a4800499a017b2b3234bded8a0e`; 4 C3-only files. Dashboard release authority, 23-city/manifest/generation and static fallback guards; short regression PASS. Full 184/184 prior head only. Code ready offline; publication/Netlify/rollback OPEN; NO-GO.
+
 ### C6-NEW-C2-SQL-EPISODE-PARITY-23-PASS-01 — new C2 Neon SQL episodes PASS; six JSON pending (2026-11-12; proposed)
 
 - [PR #103](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/103) `f6499f46`, exact-head [#43286177828](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43286177828) SUCCESS, artifact #13975755100 SHA-256 `48d2bf55d2bbb486b5e52f13cc0c0d732c6c2ff87370f329188d20275ec2f80b`. Neon SQL 33,267/33,267, 23/23, 0 diffs, 262 previous versions; CI validates pinned witness offline. Physical JSON still BLOCKED. GO=NO.
