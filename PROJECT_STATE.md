@@ -1,31 +1,33 @@
 # Project State — coordination snapshot
 
-**Date:** 2026-11-12. **NO-GO; GLOBAL_CUTOVER=NO; C6/C3=PARTIAL.**
-Latest accepted: **C6-POSTPR93-REGULAR-C2-CONTINUITY-23-01** (first post-PR93 C2 23/23 same-run source checkpoints; no cutover).
+**Date:** 2026-11-12. **NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** Latest accepted: **C3-C6-MINIMAL-CUTOVER-RELEASE-GAPS-01** (Work B release blockers).
 
 ## Rules
 
-Read this file and CHANGELOG first. Check immutable SHA/Actions/artifacts. Keep production, WIP, historical, backfill, casualties and Neon distinct. No force-push, secrets or inferred deployment from research. Keep current gates outside history; archive old checkpoint text. Maintain 5–10 CHANGELOG entries; size ≤12 KiB (≤16 KiB warning). Read bounded evidence.
+Read main:PROJECT_STATE.md and CHANGELOG.md, then PR #78; verify SHA/Actions/artifacts. Separate production, C2, C3, casualty, DST, WIP, history/backfill and Neon. No inferred deploy or unauthorized merge/publication. Archive history before removal; size ≤12 KiB.
 
 ## Current tracks and blockers
 
-- **Production:** C2 published verified Git JSON to `site-prod@d0a7d22d` (after PR #93 Sevastopol and PR #91 casualty). Netlify `6adb629bc3ebc570117d82e1` unchanged; Git remains source.
-- **C2:** post-#93 scheduled #43262387718 SUCCESS, 33,267 episodes (+57/0 updated), **23/23 source checkpoints** incl. Sevastopol; ZIP/manifest SHA and artifact #13967335571. Independent new-run Neon→JSON readback OPEN. Sevastopol open `25100`, historical `25006→25008` unresolved.
-- **Neon parity:** physical #43187464328 PASS, 6 JSON/18 SHA/23 historical receipts from C2 #43055353190. #74 exact 33,135, 262 old preserved. Current provenance OPEN.
-- **Publication:** PR #94 gate [offline #43237670242](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43237670242) 17/17 PASS; `publication_allowed=false`. [Draft PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) exact-head [offline #43254618233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43254618233) 14/14 PASS: default-OFF generator→six-JSON detached local Git candidate, NO PUSH. Live same-run activation & publication authority OPEN.
-- **C3/frontend:** Draft PR #100 HEAD `b04e23a7`, exact-head #43278423559 offline PASS: static KPI generation guard, 184/184, CSV 23, Git rollback preview 23; base `68629fda` predates new C2 data; Git remains production source. **C3/rollback:** PR #101 exact-head #43260803310 6/6 offline PASS found unsafe stale Netlify static KPI fallback without dashboard generation match (Oct 23 vs Nov 12); operational rollback BLOCKED. #92 immutable Netlify HTTP/SHA PASS. Netlify preview `6af5aecd8901ea2a40de09ad` remains isolated.
-- **Current API/Kyiv/DST:** 9/21 mapped AIR, 12 UNKNOWN. Kyiv provenance OPEN. DST four-case offline PASS but raw rolling gate OPEN; DST OFF.
-- **Other tracks:** WIP, backfill, history, casualties remain separate.
+- **Production:** latest C2 #43262387718 to Git `site-prod@d0a7d22d`, 23/23 source receipts; Neon 33,267 episodes (+57); C2 ZIP SHA `927343c620c1d55438823ad9203a16e986f540a816b35790d496200fe861944f`, artifact #13967335571. Netlify production deploy `6adb629bc3ebc570117d82e1` unchanged, Git source active.
+- **C6:** previous physical Neon→six-JSON #43187464328 PASS; independent **new-run Work A readback OPEN**. PR #95 exact-head #43254618233 offline PASS makes detached local six-file candidate, no push. PR #94 `publication_allowed=false`; one authorized publisher through existing C2/Git delivery still needed.
+- **C3:** PR #100 `b04e23a7` exact-head #43278423559 offline 184/184, CSV 23, static timestamp guard PASS. Neon index limited to isolated preview. Netlify `netlify-production.yml` regenerates static KPI from Git, not approved Neon candidate. Two narrow gated production changes remain.
+- **Rollback:** `ROLLBACK_OPERATIONAL_READY=NO`; pin fresh compatible Git-only Netlify/static + five Git runtime files; verify authorized recovery of inactive Netlify package (or exact redeploy), no-loss updates to C2/casualty/aux and single-publisher/auto-deploy lock. Do not repeat Publish check on current deploy. Historic Sevastopol `25006→25008`, open `25100` unresolved.
+- **Other:** API/UkraineAlarm current semantics, Kyiv, DST raw proof, casualty and historical/backfill separate; DST correction OFF.
 
 ## Concrete next tasks
 
-1. Reuse post-PR93 C2 #43262387718 exact ZIP/receipts for **independent read-only same-run Neon→six-JSON** proof, plus source freshness checks; no manual C2/writer or production publication.
-2. Keep PR #95 prepare job default OFF; verify exact current C2 integration and publication gate separately. No source switch without owner release permission.
-3. PR #100 static KPI guard offline PASS but not merged; before any approved merge, preserve new `site-prod@d0a7d22d` C2 data. Pin compatible Git-only Netlify/static + moving Git runtime baseline and prove operational restore/auto-publish sequencing. Rollback BLOCKED. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+1. Accept Work A new-C2 exact Neon→six-JSON readback, no repeat of full browser QA.
+2. Gate production frontend Neon KPI and bind Netlify build to approved exact static index; authorize a single existing Git publisher, **OFF until GO**.
+3. Verify fresh Git-only two-plane baseline, no-loss rollback and Netlify restore path. Separate owner permissions for merge, Netlify deploy and Neon publication. **GO=NO**.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C3-C6-MINIMAL-CUTOVER-RELEASE-GAPS-01 — minimal reversible release gaps confirmed, NO-GO (2026-11-12)
+
+- [Work B read-only evidence](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/78#issuecomment-6832977884): C2 #43262387718 published `site-prod@d0a7d22d`; its 11 changed data/dashboard paths are disjoint from PR #100 `b04e23a7` (exact-head #43278423559 PASS). Frontend accepts Neon index only in local preview; `site-prod:.github/workflows/netlify-production.yml` regenerates Git static KPI, not PR #95 candidate. PR #95 `c66cf008` / #43254618233 offline stages six files without publishing; PR #94 gate OFF.
+- **Decision:** `CUTOVER_PREPARATION_READY=NO; ROLLBACK_OPERATIONAL_READY=NO`. Await Work A new-run parity. Only scoped production KPI predicate, Netlify exact index binding and authorized single Git publisher; require fresh compatible Git-only recovery package, preservation of later C2/casualty/aux, and authenticated Netlify restore path. No merge/deploy/source switch/DST.
+
 ## C6-POSTPR93-REGULAR-C2-CONTINUITY-23-01 — first post-PR93 regular C2 23/23 source checkpoints PASS (2026-11-12)
 
 - [Scheduled C2 #43262387718](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718) SUCCESS, attempt 1, 16:46–17:15 UTC; code `main@375e6935`, input `site-prod@68629fda`, Git publish `site-prod@d0a7d22de2828c93236562cccc9d2e68c6a66e3d`. Direct persisted `c2_history_capture_checkpoints.json` has **23/23**, including Sevastopol, with identical run/attempt/input/workflow and per-city source SHA-256. Canonical Neon `NEON_SUCCEEDED`: 33,267 episodes, 57 inserted, zero updated; Git 23-city QA and publication PASS. Exact C2 bundle ZIP **SHA-256 `927343c620c1d55438823ad9203a16e986f540a816b35790d496200fe861944f`**, manifest **`5c3e2326eeb98ae6e90234183764525483e64fbc6a203b20dda8deb685d9b501`**; [artifact #13967335571](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718/artifacts/13967335571), GitHub artifact-container digest `9f4168c12795977505f5a6cbbf836c1bb7c9a632286bb62de19d532612e2841e`.

@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-C6-MINIMAL-CUTOVER-RELEASE-GAPS-01 — Work B verified narrow cutover gaps, NO-GO (2026-11-12; proposed on merge)
+
+- [Release plan comment #6832977884](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/78#issuecomment-6832977884): PR #100 `b04e23a7` preview-only Neon predicate; current Netlify workflow rebuilds Git KPI; PR #95 only local candidate and #94 gate OFF. C2 #43262387718 23/23 PASS. Await Work A parity; prepare gated frontend/static consumer, existing one-publisher path and tested fresh two-channel Git-only recovery. `CUTOVER_PREPARATION_READY=NO; ROLLBACK_OPERATIONAL_READY=NO`. No production action.
+
 ### C6-POSTPR93-REGULAR-C2-CONTINUITY-23-01 — regular post-PR93 C2 source checkpoints 23/23 PASS (2026-11-12; proposed on merge)
 
 - [Scheduled Actions #43262387718](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718) SUCCESS: 23/23 persisted receipts including Sevastopol with same run/attempt; Neon 33,267 episodes (+57, 0 updated), Git `site-prod@d0a7d22d` published. Bundle ZIP SHA `927343c620c1d55438823ad9203a16e986f540a816b35790d496200fe861944f`, manifest SHA `5c3e2326eeb98ae6e90234183764525483e64fbc6a203b20dda8deb685d9b501`, artifact #13967335571. New-run independent Neon→JSON readback and C3 rollback still OPEN; no cutover/DST.
