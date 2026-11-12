@@ -3,9 +3,9 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
-### C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01 — scoped Neon historical-index QA PASS (2026-11-12; proposed on merge)
+### C6-C3-PR90-FRONTEND-FIX-PASS-01 — PR #90 frontend compatibility PASS (2026-11-12; proposed on merge)
 
-- PR #87 `validIndex()` guarded in copied preview only; [Actions #43201183617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43201183617) SUCCESS, artifact #13935082806: 184 views, CSV 23, rollback 23, 0 JS/HTTP/external, 28 original files restored. Actual frontend merge, public preview, current-source/DST and operational C3 rollback OPEN. `GLOBAL_CUTOVER=NO`.
+- Previous `C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01`: PR #87 runner-local QA #43201183617 PASS. **New Work A:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) exact `83f14e27bf4675f64aff72fa20010630f0305d52`, [Actions #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) SUCCESS, artifact #13937630998: scoped real `app.js` KPI guard, 184/184 views, 23 CSV, Git rollback 23/23, 0 browser errors, 28 files restored. Work B preview readiness next, no merge/deployment; `GLOBAL_CUTOVER=NO`.
 
 ### C6-PHYSICAL-SIX-JSON-READBACK-PASS-01 — physical Neon→six JSON PASS (2026-11-12; proposed on merge)
 
