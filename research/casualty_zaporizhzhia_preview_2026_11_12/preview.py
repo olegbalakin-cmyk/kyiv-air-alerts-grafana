@@ -450,8 +450,8 @@ def main() -> None:
     print("PREVIEW_TOTAL=" + str(plus_summary["total"]))
     print("OCTOBER=" + str(plus_summary["october"]))
     # CI reports domain FAIL honestly. Let the job succeed if diagnostic proof was captured.
-    if not same_inputs or not rollback_ok or not other_cities_identical or not
-        plus_summary["october"] == 23:
+    if (not same_inputs or not rollback_ok or not other_cities_identical or
+            plus_summary["october"] != 23):
         raise SystemExit("Critical preview invariant failed; inspect proof before reuse")
 
 
