@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-G2-WORKI2-NETLIFY-ALIAS-PHYSICAL-PASS-01 — physical Git-only Netlify alias PASS (2026-11-12; accepted)
+
+- Owner-approved [Actions #43306339282](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282) SUCCESS at `382ea915`, [artifact #13984106982](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282/artifacts/13984106982) verified ZIP SHA `106673981e7233bcfc44522f0843227a1ee3a7efa1ea501e2bb71ab11b0301b0`; Netlify alias `6af629b311d9632a220e652a` ready/branch-deploy. 13/13 HTTP 200, 12/13 file SHA exact (index RUM inserted; sole HTML diff not proven), 23/23 cities, 184/184 graphs, 23 CSV, Kyiv/casualty PASS, zero JS errors. Production `6adb629bc3ebc570117d82e1` and site-prod `d0a7d22d` unchanged. `NETLIFY_NONPROD_REDEPLOY_PROVEN=YES`; production authority/fresh no-loss rollback OPEN, `ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C3-C6-WORKJ-FINAL-RELEASE-PREFLIGHT-NOGO-01 — Work J confirms final artifact ordering and rollback NO-GO (2026-11-12; accepted)
 
 - Proofs: physical #43299402658 23 cities/18 SHA/33,267 historical, #43302381173 PR95→104→100 12/12 offline, rollback #43297683167 32/32+8/8. PR #95 currently creates FINAL binding + six files only in Git-publishing job; #104 requires pre-existing pinned artifact for Netlify. Work K: one default-OFF prepare-only final artifact output, no release. PR #104/#100 merges may auto Netlify `--prod`; Netlify manual workflow absent on main. Pause C2/Netlify before merges and maintain sole writer afterward. Work I2 nonprod alias separately approved but unproven, fresh production rollback remains blocked. `RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
