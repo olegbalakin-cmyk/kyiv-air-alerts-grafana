@@ -1,0 +1,78 @@
+name: Research Holt damped vs EWMA backtest (no deployment)
+on:
+  push:
+    branches: [research-holt-damped-backtest-2026-11-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exact site-prod source snapshot, read only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin site-prod --depth=1
+          echo "SOURCE_SHA=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_ENV"
+          mkdir -p /tmp/holt_source
+          git show FETCH_HEAD:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/holt_source/dashboard_data.json
+          git show FETCH_HEAD:kyiv-air-alerts-grafana/data/site_derived.json > /tmp/holt_source/site_derived.json
+          sha256sum /tmp/holt_source/*.json
+      - name: Probe source layout without printing raw data
+        run: |
+          python - <<'PY'
+          import json,os
+          a=json.load(open('/tmp/holt_source/dashboard_data.json'))
+          b=json.load(open('/tmp/holt_source/site_derived.json'))
+          print('SOURCE',os.environ.get('SOURCE_SHA'), 'ROOT_KEYS',list(a), 'DERIVED_KEYS',list(b))
+          print('META', {k:v for k,v in (a.get('multicity_meta') or {}).items() if k in ('weekly_mode','production_city_keys')})
+          print('HISTORICAL_KEYS',list((a.get('historical_daily_kpi') or {})), 'HISTORICAL_META', (a.get('historical_daily_kpi') or {}).get('meta',{}))
+          for key,city in (a.get('cities') or {}).items():
+              out={'city':key}
+              for period in ('monthly','weekly','daily28'):
+                  rows=city.get(period) or []
+                  out[period]={'n':len(rows),'first':str(rows[0].get('date') or rows[0].get('month') or rows[0].get('week_start') or rows[0].get('time')) if rows else None, 'last':str(rows[-1].get('date') or rows[-1].get('month') or rows[-1].get('week_start') or rows[-1].get('time')) if rows else None}
+              print('CITY',out)
+          for objname,x in [('historical_daily_kpi',a.get('historical_daily_kpi')),('explorations',b.get('explorations'))]:
+              print('DETAIL',objname,'top-level',list(x or {}))
+              for k,v in (x or {}).items():
+                  if k!='meta':
+                      print('DETAIL_CHILD',objname,k,'type',type(v).__name__,'keys',list(v)[:15] if isinstance(v,dict) else 'length '+str(len(v)) if isinstance(v,list) else 'other')
+                      if isinstance(v,dict):
+                          for sub,vv in list(v.items())[:2]:
+                              print('DETAIL_GRANDCHILD',k,sub,'type',type(vv).__name__,'keys',list(vv)[:15] if isinstance(vv,dict) else 'length '+str(len(vv)) if isinstance(vv,list) else 'other')
+                      break
+          hist=a.get('historical_daily_kpi') or {}
+          print('HIST_CITIES', list(hist.get('cities',{})))
+          for name in ('kyiv','kharkiv','lviv'):
+              h=hist.get('cities',{}).get(name)
+              print('HIST_CITY',name,'kind',type(h).__name__,'keys',list(h)[:24] if isinstance(h,dict) else None)
+              if isinstance(h,dict):
+                  for key,v in h.items():
+                      if isinstance(v,list):
+                          print('HIST_LIST',name,key,'len',len(v),'first',v[:2],'last',v[-2:])
+                      elif isinstance(v,dict):
+                          print('HIST_DICT',name,key,'keys',list(v)[:12])
+                          for sub,vv in list(v.items())[:2]:
+                              print('HIST_DICT_SAMPLE',name,key,sub,str(vv)[:500])
+          for name in ('kyiv',):
+              daily=b.get('explorations',{}).get('cities',{}).get(name,{}).get('daily')
+              print('EXPLORATION_DAILY',name,'type',type(daily).__name__,'len',len(daily) if daily is not None else None,'first',str(daily[:2])[:1300] if isinstance(daily,list) else str(list(daily.items())[:2])[:1300] if isinstance(daily,dict) else None)
+          for period in ('monthly','weekly'):
+              rows=a['cities']['kyiv'][period]
+              print('DATA_SAMPLE',period,'first',rows[0], 'last',rows[-1])
+          PY
+
+      - name: Compute held-out 23-city model comparison
+        run: |
+          python research/forecast_holt_damped_2026_11_12/backtest.py --dashboard /tmp/holt_source/dashboard_data.json --output holt-ewma-backtest.json
+      - name: Upload independent research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: holt-vs-ewma-23city-research
+          path: holt-ewma-backtest.json
+          if-no-files-found: error
