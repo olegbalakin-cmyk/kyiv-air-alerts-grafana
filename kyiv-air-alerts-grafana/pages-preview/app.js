@@ -1691,12 +1691,18 @@ function daypartBreakdown(rows, mode) {
     { uk: "18–24", en: "18–24", key: "18_24", color: TIME_PROFILE_COLORS[4] }
   ];
   const field = mode === "daynight" ? "time_day_night_shares" : "time_band_shares";
+  const minutesField = mode === "daynight" ? "time_day_night_minutes" : "time_band_minutes";
   return defs.map(def => ({
     label: tr(def.uk, def.en),
     color: def.color,
     data: rows.map(row => {
       const value = row[field]?.[def.key];
       return value === undefined || value === null ? null : Number(value);
+    }),
+    durationMinutes: rows.map(row => {
+      const raw = row[minutesField]?.[def.key];
+      const minutes = raw === undefined || raw === null ? NaN : Number(raw);
+      return Number.isFinite(minutes) && minutes >= 0 ? minutes : null;
     })
   }));
 }
@@ -1734,6 +1740,7 @@ function renderDaypart(key) {
       datasets: bands.map(band => ({
         label: band.label,
         data: band.data,
+        durationMinutes: band.durationMinutes,
         backgroundColor: band.color + "bb",
         borderWidth: 0,
         stack: "time"
@@ -1748,7 +1755,13 @@ function renderDaypart(key) {
         legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
         tooltip: {
           callbacks: {
-            label(context) { return `${context.dataset.label}: ${fmt(context.parsed.y,1)}%`; }
+            label(context) {
+              const minutes = context.dataset.durationMinutes?.[context.dataIndex];
+              const duration = minutes == null
+                ? tr("час недоступний", "time unavailable")
+                : formatDurationMinutes(minutes);
+              return `${context.dataset.label}: ${fmt(context.parsed.y,1)}% · ${duration}`;
+            }
           }
         }
       },
