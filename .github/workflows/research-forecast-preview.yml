@@ -60,6 +60,34 @@ jobs:
           print("DRAFT_PREVIEW_URL", x.get("deploy_url") or x.get("url") or "unavailable")
           PY
 
+      - name: Browser smoke against public Netlify draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/forecast-puppeteer
+          npm --prefix /tmp/forecast-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/forecast-puppeteer/node_modules
+          export PREVIEW_URL="$(python - <<'PY'
+          import json
+          x=json.load(open('netlify-forecast-preview.json',encoding='utf-8'))
+          url=x.get('deploy_url') or x.get('url') or ''
+          if not url: raise SystemExit('Netlify draft deploy URL unavailable')
+          print(url.replace('http://','https://',1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_forecast_preview.cjs
+
+      - name: Upload browser evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-ewma-browser-proof
+          path: |
+            forecast-browser.json
+            forecast-browser.png
+          if-no-files-found: ignore
+
       - name: Upload non-production deploy receipt
         if: always()
         uses: actions/upload-artifact@v4
