@@ -24,6 +24,26 @@ on:
         description: 'SHA-256 of immutable GitHub artifact ZIP'
         type: string
         required: false
+      final_release_run_id:
+        description: 'Owner-pinned successful final-release Actions run ID (Neon only)'
+        type: string
+        required: false
+      final_release_run_attempt:
+        description: 'Exact final release run attempt'
+        type: string
+        required: false
+      final_release_artifact_id:
+        description: 'Owner-pinned PR95 final RELEASE_BINDING/MANIFEST + six-file ZIP ID'
+        type: string
+        required: false
+      final_release_artifact_sha256:
+        description: 'SHA-256 of separately approved final release ZIP'
+        type: string
+        required: false
+      approved_release_binding_sha256:
+        description: 'SHA-256 of exact PR95 RELEASE_BINDING.json bytes'
+        type: string
+        required: false
       approved_kpi_sha256:
         description: 'SHA-256 of root historical-daily-kpi.json'
         type: string
@@ -136,6 +156,21 @@ jobs:
           C6_ATTEMPT: ${{ inputs.c6_run_attempt }}
           C6_ARTIFACT_ID: ${{ inputs.c6_artifact_id }}
           C6_ARTIFACT_SHA: ${{ inputs.c6_artifact_sha256 }}
+          FINAL_RUN_ID: ${{ inputs.final_release_run_id }}
+          FINAL_ATTEMPT: ${{ inputs.final_release_run_attempt }}
+          FINAL_ARTIFACT_ID: ${{ inputs.final_release_artifact_id }}
+          FINAL_ARTIFACT_SHA: ${{ inputs.final_release_artifact_sha256 }}
+          APPROVED_BINDING_SHA: ${{ inputs.approved_release_binding_sha256 }}
+          C6_APPROVED_FINAL_RUN: ${{ vars.C6_NEON_APPROVED_FINAL_RELEASE_RUN_ID }}
+          C6_APPROVED_FINAL_ATTEMPT: ${{ vars.C6_NEON_APPROVED_FINAL_ATTEMPT }}
+          C6_APPROVED_FINAL_ARTIFACT_ID: ${{ vars.C6_NEON_APPROVED_FINAL_ARTIFACT_ID }}
+          C6_APPROVED_FINAL_HEAD_SHA: ${{ vars.C6_NEON_APPROVED_FINAL_HEAD_SHA }}
+          C6_APPROVED_FINAL_WORKFLOW: ${{ vars.C6_NEON_APPROVED_FINAL_WORKFLOW }}
+          C6_APPROVED_FINAL_NAME: ${{ vars.C6_NEON_APPROVED_FINAL_ARTIFACT_NAME }}
+          OWNER_FINAL_ARTIFACT_SHA: ${{ vars.C6_NEON_APPROVED_FINAL_ARTIFACT_SHA256 }}
+          OWNER_BINDING_SHA: ${{ vars.C6_NEON_APPROVED_FINAL_BINDING_SHA256 }}
+          OWNER_FINAL_FILES_JSON: ${{ vars.C6_NEON_APPROVED_FINAL_FILES_JSON }}
+          OWNER_WORK_A_ARTIFACT_SHA: ${{ vars.C6_NEON_APPROVED_WORK_A_ARTIFACT_SHA256 }}
           APPROVED_KPI_SHA: ${{ inputs.approved_kpi_sha256 }}
           APPROVED_GENERATION: ${{ inputs.approved_generation }}
         run: |
@@ -147,6 +182,16 @@ jobs:
           [[ "$C6_RUN_ID" =~ ^[0-9]+$ && "$C6_ATTEMPT" =~ ^[0-9]+$ && "$C6_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$C6_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ && "$APPROVED_KPI_SHA" =~ ^[a-f0-9]{64}$ ]]
           test -n "$APPROVED_GENERATION"
+          [[ "$FINAL_RUN_ID" =~ ^[0-9]+$ && "$FINAL_ATTEMPT" =~ ^[0-9]+$ && "$FINAL_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$FINAL_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ && "$APPROVED_BINDING_SHA" =~ ^[a-f0-9]{64}$ ]]
+          test "$C6_APPROVED_FINAL_RUN" = "$FINAL_RUN_ID"
+          test "$C6_APPROVED_FINAL_ATTEMPT" = "$FINAL_ATTEMPT"
+          test "$C6_APPROVED_FINAL_ARTIFACT_ID" = "$FINAL_ARTIFACT_ID"
+          test "$OWNER_FINAL_ARTIFACT_SHA" = "$FINAL_ARTIFACT_SHA"
+          test "$OWNER_BINDING_SHA" = "$APPROVED_BINDING_SHA"
+          test "$OWNER_WORK_A_ARTIFACT_SHA" = "$WORK_A_ARTIFACT_SHA"
+          test -n "$OWNER_FINAL_FILES_JSON" && test -n "$C6_APPROVED_FINAL_HEAD_SHA"
+          test -n "$C6_APPROVED_FINAL_WORKFLOW" && test -n "$C6_APPROVED_FINAL_NAME"
           mkdir -p _approved_c6
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C6_RUN_ID" > _approved_c6/run.json
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > _approved_c6/work-a-run.json
@@ -164,6 +209,14 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID/zip" \
             --output _approved_c6/artifact.zip
           test "$(sha256sum _approved_c6/artifact.zip | cut -d ' ' -f1)" = "$C6_ARTIFACT_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > _approved_c6/final-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID" > _approved_c6/final-artifact.json
+          curl --fail --show-error --silent --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID/zip" \
+            --output _approved_c6/final-release-artifact.zip
+          test "$(sha256sum _approved_c6/final-release-artifact.zip | cut -d ' ' -f1)" = "$FINAL_ARTIFACT_SHA"
           python - <<'PY'
           import json,os
           from pathlib import Path
@@ -173,6 +226,7 @@ jobs:
           assert run['run_attempt']==int(os.environ['C6_ATTEMPT'])
           assert run['status']=='completed' and run['conclusion']=='success'
           assert run['path']=='.github/workflows/update-netlify-site.yml'
+          assert run['event'] in ('schedule', 'workflow_dispatch')
           assert art['id']==int(os.environ['C6_ARTIFACT_ID'])
           assert art['name']==f"c6-neon-git-preparation-{run['id']}-{run['run_attempt']}"
           assert art['workflow_run']['id']==run['id'] and not art['expired']
@@ -182,97 +236,23 @@ jobs:
           assert work['id']==int(os.environ['WORK_A_RUN_ID'])
           assert work['id']!=run['id']
           assert work['status']=='completed' and work['conclusion']=='success'
+          assert work['path']=='.github/workflows/c6-neon-shadow-isolated-proof.yml'
           assert proof['id']==int(os.environ['WORK_A_ARTIFACT_ID'])
           assert proof['workflow_run']['id']==work['id'] and not proof['expired']
           assert proof.get('digest')=='sha256:'+os.environ['WORK_A_ARTIFACT_SHA']
+          final_run=json.loads(Path('_approved_c6/final-run.json').read_text())
+          final_art=json.loads(Path('_approved_c6/final-artifact.json').read_text())
+          assert final_run['id']==int(os.environ['FINAL_RUN_ID'])
+          assert final_run['run_attempt']==int(os.environ['FINAL_ATTEMPT'])
+          assert final_run['status']=='completed' and final_run['conclusion']=='success'
+          assert final_run['head_sha']==os.environ['C6_APPROVED_FINAL_HEAD_SHA']
+          assert final_run['path']==os.environ['C6_APPROVED_FINAL_WORKFLOW']
+          assert final_art['id']==int(os.environ['FINAL_ARTIFACT_ID'])
+          assert final_art['workflow_run']['id']==final_run['id'] and not final_art['expired']
+          assert final_art.get('digest')=='sha256:'+os.environ['FINAL_ARTIFACT_SHA']
+          assert final_art['name']==os.environ['C6_APPROVED_FINAL_NAME']
           PY
-          python - <<'PY'
-          import hashlib,json,os,zipfile
-          from pathlib import Path
-          target=Path('_approved_c6')
-          with zipfile.ZipFile(target/'artifact.zip') as z:
-              names=set(z.namelist())
-              report_paths=[n for n in names if n.endswith('REPORT.json')]
-              assert len(report_paths)==1
-              report=json.loads(z.read(report_paths[0]))
-              assert report['state']=='INTEGRATION_PREPARED_PUBLICATION_OFF'
-              assert report['publication_allowed'] is False and report['production_git_push_executed'] is False
-              assert report['prepared_files']==6
-              files=report['files']
-              expected={
-                  'historical-daily-kpi.json',
-                  'kyiv-air-alerts-grafana/data/dashboard_data.json',
-                  'kyiv-air-alerts-grafana/data/site_derived.json',
-                  'kyiv-air-alerts-grafana/data/alerts_combined.json',
-                  'kyiv-air-alerts-grafana/data/kyiv_threat_mix.json',
-                  'kyiv-air-alerts-grafana/data/sevastopol_events.json'}
-              assert set(files)==expected
-              def member(path):
-                  candidates=[n for n in names if n.endswith('candidate/'+path)]
-                  assert len(candidates)==1
-                  raw=z.read(candidates[0])
-                  assert hashlib.sha256(raw).hexdigest()==files[path]
-                  return raw
-              for path in expected:
-                  member(path)
-              raw=member('historical-daily-kpi.json')
-              index=json.loads(raw)
-              dashboard=json.loads(member('kyiv-air-alerts-grafana/data/dashboard_data.json'))
-              meta=index['meta']
-              assert files['historical-daily-kpi.json']==os.environ['APPROVED_KPI_SHA']
-              assert meta['source_ref']=='neon:'+report['neon_branch']
-              assert meta['source_dashboard_generated_at']==os.environ['APPROVED_GENERATION']
-              assert dashboard['meta']['generated_at']==os.environ['APPROVED_GENERATION']
-              assert dashboard['historical_daily_kpi']==index
-              assert meta['expected_cities']==meta['verified_count']==23
-              assert len(index['cities'])==23
-              Path('historical-daily-kpi.json').write_bytes(raw)
-          with zipfile.ZipFile(target/'work-a-artifact.zip') as z:
-              names=set(z.namelist())
-              def unique(suffix):
-                  found=[n for n in names if n.endswith(suffix)]
-                  assert len(found)==1
-                  return json.loads(z.read(found[0]))
-              proof=unique('verdict.json')
-              readback=unique('readback_proof.json')
-              manifest=unique('sha256_manifest.json')
-              assert proof['status']=='PASS'
-              assert proof['physical_neon_readback_run'] is True
-              assert proof['city_count']==23
-              assert proof['neon_branch']==report['neon_branch']
-              assert proof['c2_corpus_sha256']==report['c2_corpus_sha256']
-              assert proof['candidate_files']=={
-                  n:files['historical-daily-kpi.json' if n=='historical-daily-kpi.json'
-                          else 'kyiv-air-alerts-grafana/data/'+n]
-                  for n in ('dashboard_data.json','site_derived.json','alerts_combined.json',
-                            'kyiv_threat_mix.json','sevastopol_events.json','historical-daily-kpi.json')}
-              identity=readback['capture_run_identity']
-              assert identity['github_run_id']==int(os.environ['C6_RUN_ID'])
-              assert identity['github_run_attempt']==int(os.environ['C6_ATTEMPT'])
-              assert identity['workflow_sha']==json.loads(Path('_approved_c6/run.json').read_text())['head_sha']
-              assert readback['c2_corpus_sha256']==report['c2_corpus_sha256']
-              assert manifest['schema']=='isolated-neon-shadow-proof-v1'
-              assert isinstance(manifest['files'],dict) and len(manifest['files'])>=18
-              freshness=unique('historical_freshness_gate.json')
-              binding=unique('historical_freshness_binding.json')
-              assert freshness['publication_allowed'] is False
-              assert freshness['status']=='FRESHNESS_READY_FOR_INTEGRATION'
-              assert freshness['fresh_cities']==freshness['full_receipt_cities']==23
-              assert freshness['historically_bound_cities']==23
-              assert len(binding['sources'])==23
-              from datetime import datetime,timezone
-              now=datetime.now(timezone.utc)
-              for row in binding['sources'].values():
-                  assert row['continuity_verified'] is True
-                  last=datetime.fromisoformat(row['last_checked_at'].replace('Z','+00:00'))
-                  assert last.tzinfo and 0 <= (now-last).total_seconds() <= 36*3600
-              for filename,expected_hash in manifest['files'].items():
-                  if filename.startswith('candidate/'):
-                      candidate_name=filename.removeprefix('candidate/')
-                      assert candidate_name in proof['candidate_files']
-                      assert expected_hash==proof['candidate_files'][candidate_name]
-          print('APPROVED_SIX_FILE_KPI_AND_INDEPENDENT_WORK_A_PROOF_PASS')
-          PY
+          python scripts/c3_final_neon_kpi_contract.py _approved_c6
 
       - name: Build static frontend
         run: |
@@ -281,6 +261,10 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
           cp kyiv-air-alerts-grafana/pages-preview/kpi-range.js historical-daily-kpi.json _site/
           test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 12
+          if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
+            cmp historical-daily-kpi.json _site/historical-daily-kpi.json
+            test "$(sha256sum _site/historical-daily-kpi.json | cut -d ' ' -f1)" = "${{ inputs.approved_kpi_sha256 }}"
+          fi
 
       - name: Deploy production to Netlify
         env:
@@ -304,6 +288,9 @@ jobs:
           done
           cmp kyiv-air-alerts-grafana/pages-preview/kpi-range.js /tmp/production-kpi-range.js
           cmp kyiv-air-alerts-grafana/pages-preview/app.js /tmp/production-app.js
+          if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
+            cmp historical-daily-kpi.json /tmp/production-historical-daily-kpi.json
+          fi
           python - <<'PY'
           import json
           with open("/tmp/production-historical-daily-kpi.json", encoding="utf-8") as f:
