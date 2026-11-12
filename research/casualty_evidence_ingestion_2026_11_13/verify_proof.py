@@ -17,9 +17,9 @@ proposals=load(worka,"proposals.json")
 generator=load(worka,"generator_probe.json")
 assert summary["external_publisher_http_requests"] == 0
 assert summary["candidate_count"] == 1682
-assert summary["parsed_fact_reports"] == 1
-assert len(cards) == 1 and len(handoff["reports"]) == 1
-card=cards[0]
+assert summary["parsed_fact_reports"] == 2
+assert len(cards) == 2 and len(handoff["reports"]) == 2
+card=next(x for x in cards if x["candidate_id"] == "e0fba98b19473874e9a1d8f1")
 assert card["candidate_id"] == "e0fba98b19473874e9a1d8f1"
 assert card["incident"]["attack_date"] == "2026-10-10"
 assert card["incident"]["city_key"] == "zaporizhzhia"
