@@ -29,7 +29,8 @@ jobs:
         shell: bash
         run: |
           test "$GITHUB_REF_NAME" = "research-forecast-bars-preview-2026-11-11"
-          grep -q 'forecast-trend.js' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'ForecastTrend = api' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'app.js?v=20261112-forecast-bundled2' kyiv-air-alerts-grafana/pages-preview/index.html
           echo "Preview branch only; no production write or source switch"
 
       - name: Prepare isolated static draft preview
