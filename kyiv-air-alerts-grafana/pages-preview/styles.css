@@ -139,17 +139,17 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 /* Selected-range KPI provenance and coverage note. */
 .kpi-range-note{margin:-8px 0 18px;color:#9cb0c1;font-size:12px;line-height:1.6}
 
-/* Opt-in forecast shares the graph's CSV / share / embed action row. */
+/* One compact right-aligned group: Trend, CSV, Share, Embed. */
+.chart-export-row[data-csv-chart="cityIntensityChart"]{
+  justify-content:flex-end;
+  gap:8px;
+}
 .chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control{
-  margin:0 auto 0 0;
+  margin:0;
   white-space:nowrap;
   min-height:28px;
 }
 .chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control.hidden{display:none}
-@media(max-width:420px){
-  .chart-export-row[data-csv-chart="cityIntensityChart"]{justify-content:flex-end}
-  .chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control{margin-right:auto}
-}
 
 /* Allow Chart.js canvas and chart actions to shrink on narrow viewports. */
 .chart-grid > .chart-card{min-width:0}
