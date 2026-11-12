@@ -12,11 +12,13 @@ import json
 import re
 import shutil
 import subprocess
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 from scripts import c6_neon_git_candidate as candidate
 from scripts import c6_neon_publication_gate as proof_gate
+from scripts import c6_neon_release_binding as release_binding
 
 HEX40 = re.compile(r"^[a-f0-9]{40}$")
 HEX64 = re.compile(r"^[a-f0-9]{64}$")
@@ -141,8 +143,8 @@ def validate(approval, report, work_a_proof, site, *,
             generation == approval.get("approved_generation"),
             "RELEASE_INDEX_SOURCE_OR_GENERATION_MISMATCH")
     require(approval.get("approved_netlify_deploy_id") and
-            approval.get("approved_netlify_static_kpi_sha256") ==
-            files["historical-daily-kpi.json"] and
+            HEX64.fullmatch(str(approval.get("approved_netlify_static_kpi_sha256"))) and
+            approval.get("release_id") and
             approval.get("netlify_http_static_verified") is True and
             approval.get("git_only_publisher_paused") is True,
             "NETLIFY_FIRST_OR_SINGLE_WRITER_NOT_APPROVED")
@@ -164,6 +166,17 @@ def publish(checkout, prepared, decision, *, expected_head):
             "GIT_CHECKOUT_NOT_PINNED_AND_CLEAN")
     require(git(checkout, "ls-remote", "origin", "refs/heads/site-prod").split()[0]
             == expected_head, "SITE_PROD_HEAD_MOVED")
+    manifest = load(prepared / "RELEASE_MANIFEST.json")
+    require(manifest.get("schema") == "c6-neon-git-release-manifest-v1"
+            and manifest.get("files") == decision["files"]
+            and manifest.get("release_manifest_sha256") ==
+                decision["release_manifest_sha256"],
+            "RELEASE_MANIFEST_INVALID")
+    for path, expected in decision["files"].items():
+        source = prepared / "candidate" / path
+        require(source.is_file() and not source.is_symlink() and
+                candidate.sha(source.read_bytes()) == expected,
+                "RELEASE_SIX_SHA_INVALID:" + path)
     before = checkout / "kyiv-air-alerts-grafana/data"
     new = prepared / "candidate/kyiv-air-alerts-grafana/data"
     old_dashboard = load(before / "dashboard_data.json")
@@ -222,8 +235,16 @@ def main():
             c2_run=load(p.c2_run), work_a_run=load(p.work_a_run),
             c2_artifact=load(p.c2_artifact),
             work_a_artifact=load(p.work_a_artifact), repository=p.repository)
-        sha = publish(p.checkout, p.prepared, decision,
-                      expected_head=decision["site_prod_head_sha"])
+        approval = load(p.approval)
+        report = load(p.report)
+        with tempfile.TemporaryDirectory(prefix="c6-owner-release-") as temp:
+            release_root = Path(temp) / "release"
+            final = release_binding.release_candidate(
+                p.prepared, report, repository=p.repository,
+                release_id=approval.get("release_id"), output=release_root)
+            decision.update(release_binding.verify_final(approval, final))
+            sha = publish(p.checkout, release_root, decision,
+                          expected_head=decision["site_prod_head_sha"])
     except Exception as exc:
         # Never expose owner grant content or C2 raw source data in logs.
         print("C6_NEON_GIT_PUBLICATION_BLOCKED:" + type(exc).__name__)
