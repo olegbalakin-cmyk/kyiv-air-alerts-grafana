@@ -23,7 +23,7 @@ jobs:
       - name: Checkout research-only QA
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Pin current site-prod ancestry and protect non-C3 files
         run: |
           python - <<'PY'
@@ -32,7 +32,7 @@ jobs:
           base="68629fdae5534ec3a136e666bcb7d5c84dcd05aa"
           def git(*args):
               return subprocess.check_output(["git",*args],text=True).strip()
-          assert git("rev-parse","HEAD^")==base,"EXACT_SITE_PROD_BASE_MOVED"
+          assert git("merge-base",base,"HEAD")==base,"EXACT_SITE_PROD_BASE_NOT_ANCESTOR"
           expected={
               "kyiv-air-alerts-grafana/pages-preview/app.js",
               "kyiv-air-alerts-grafana/tests/test_live_history_binding.js",

@@ -53,4 +53,38 @@ assert.equal(check(neon,{...scoped,time:123}),false,"invalid dashboard timestamp
 assert.equal(check(null,scoped),false,"missing index");
 console.log("PASS scoped Neon historical index positive/negative cases");
 
+// Run the *actual* static fallback condition, not a copied approximation.
+const generationGuard=app.match(/  const matchesDashboardGeneration = index =>[\s\S]*?;\n/);
+const staticIf=app.match(/        if \((validIndex\(index\)[\s\S]*?)\) \{\n          state\.historicalDaily = index;/);
+assert.ok(generationGuard && staticIf,"static fallback must have the production generation guard");
+const checkStatic=(index,{mode,base=gitBase,time="2026-11-12T09:08:13.340390+02:00"}={})=>
+  Boolean(vm.runInNewContext(guard[0]+generationGuard[0]+"\n("+staticIf[1]+")",
+    {index,window:mode?{PREVIEW_CONFIG:{source:mode}}:{},
+      RAW_DATA_BASE:base,sourceGeneratedAt:time},{timeout:1000}));
+const nov12="2026-11-12T09:08:13.340390+02:00";
+const oct23="2026-10-23T07:47:16.946235+03:00";
+const gitStatic={...git,meta:{...git.meta,source_dashboard_generated_at:nov12}};
+assert.equal(checkStatic(gitStatic),true,"matching static index accepted");
+assert.equal(checkStatic({...gitStatic,meta:{...gitStatic.meta,source_dashboard_generated_at:oct23}}),
+  false,"Oct 23 static index rejected against Nov 12 Git dashboard");
+for(const [name,index,time] of [
+  ["missing dashboard",gitStatic,null],
+  ["empty dashboard",gitStatic,""],
+  ["numeric dashboard",gitStatic,123],
+  ["malformed dashboard",gitStatic,"not-a-timestamp"],
+  ["missing index timestamp",{...gitStatic,meta:{...gitStatic.meta,source_dashboard_generated_at:undefined}},nov12],
+  ["empty index timestamp",{...gitStatic,meta:{...gitStatic.meta,source_dashboard_generated_at:""}},nov12],
+  ["numeric index timestamp",{...gitStatic,meta:{...gitStatic.meta,source_dashboard_generated_at:123}},nov12],
+  ["malformed both",{...gitStatic,meta:{...gitStatic.meta,source_dashboard_generated_at:"not-a-timestamp"}},"not-a-timestamp"],
+  ["wrong schema",{...gitStatic,schema:"wrong"},nov12],
+  ["wrong source",{...gitStatic,meta:{...gitStatic.meta,source_ref:"wrong"}},nov12],
+  ["wrong city count",{...gitStatic,meta:{...gitStatic.meta,expected_cities:22}},nov12],
+  ["empty verified count",{...gitStatic,meta:{...gitStatic.meta,verified_count:0}},nov12]
+]) assert.equal(checkStatic(index,{time}),false,"static fallback: "+name);
+assert.equal(checkStatic({...neon,meta:{...neon.meta,source_dashboard_generated_at:nov12}}),
+  false,"Neon static index rejected in Git mode");
+assert.equal(checkStatic({...neon,meta:{...neon.meta,source_dashboard_generated_at:nov12}},
+  {mode:"neon",base:"./data/neon/"}),true,"isolated Neon preview remains valid");
+console.log("PASS static KPI generation parity and negative recovery scenarios");
+
 console.log("PASS live-index binding preserves source-generation synchronization and static fallback");

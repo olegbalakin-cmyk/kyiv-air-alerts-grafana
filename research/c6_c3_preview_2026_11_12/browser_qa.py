@@ -147,6 +147,43 @@ def main():
         report["results"][-1]["city_mode_combinations"]=len(all_cities)
         p.screenshot(path=str(out/"git-rollback.png"))
         p.close()
+        # Exercise the real static HTTP fallback with the embedded index unavailable.
+        # These are loopback-only synthetic Oct-23-vs-Nov-12 recovery fixtures.
+        report["static_fallback"]=[]
+        git_fixture=json.loads((root/"data/legacy/dashboard_data.json").read_text())
+        static_fixture=json.loads((root/"data/legacy/historical-daily-kpi.json").read_text())
+        nov12="2026-11-12T09:08:13.340390+02:00"
+        oct23="2026-10-23T07:47:16.946235+03:00"
+        git_fixture["historical_daily_kpi"]=None
+        git_fixture["meta"]["generated_at"]=nov12
+        dashboard_body=json.dumps(git_fixture,ensure_ascii=False)
+        for name,index_time,should_accept in [
+          ("same_generation",nov12,True),
+          ("stale_oct23_against_nov12",oct23,False),
+          ("missing_generation",None,False),
+        ]:
+          index=json.loads(json.dumps(static_fixture))
+          if index_time is None:
+            index["meta"].pop("source_dashboard_generated_at",None)
+          else:
+            index["meta"]["source_dashboard_generated_at"]=index_time
+          index_body=json.dumps(index,ensure_ascii=False)
+          probe=context.new_page()
+          probe.on("pageerror",lambda err:report["js_errors"].append(str(err)))
+          probe.on("response",lambda res:report["failed_responses"].append({"status":res.status,"url":res.url}) if res.status>=400 else None)
+          probe.route("**/data/legacy/dashboard_data.json*",lambda route:route.fulfill(status=200,content_type="application/json",body=dashboard_body))
+          probe.route("**/historical-daily-kpi.json*",lambda route,body=index_body:route.fulfill(status=200,content_type="application/json",body=body))
+          probe.goto(base,wait_until="networkidle",timeout=90000)
+          probe.wait_for_function("typeof state !== 'undefined' && !!state.data && !!state.charts.cityIntensityChart",timeout=90000)
+          observed=index_source(probe)
+          expected="site-prod" if should_accept else None
+          if observed!=expected:
+            raise AssertionError(("STATIC_FALLBACK_GENERATION_POLICY",name,observed,expected))
+          chart_ok=probe.evaluate("() => !!(state.charts.cityIntensityChart?.data?.labels?.length && state.charts.cityDurationChart?.data?.labels?.length)")
+          if not chart_ok:
+            raise AssertionError(("STATIC_FALLBACK_CHARTS_MISSING",name))
+          report["static_fallback"].append({"case":name,"accepted":bool(observed),"other_charts_ok":chart_ok})
+          probe.close()
         post_rollback={k:sha(root/k) for k in original_hashes if k!="preview-config.js"}
         report["rollback"]={"sources":["git","neon","git"],"config_only":True,"unchanged_files":len(post_rollback),"digest_differences":[k for k,v in post_rollback.items() if v!=patched_hashes[k]],"git_historical_index":git_index}
         report["fix_diagnostic"]={"scope":"REAL_FRONTEND_SCOPED_PREVIEW_COMPATIBILITY","source_ref_accepted":neon_index,"expected":"neon:br-bold-mode-b5rub8pq","candidate_json_bytes_unchanged":True}

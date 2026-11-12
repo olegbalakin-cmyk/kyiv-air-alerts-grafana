@@ -3541,6 +3541,14 @@ async function init() {
        index?.meta?.verified_count === 23 &&
        typeof sourceGeneratedAt === "string" &&
        index?.meta?.source_dashboard_generated_at === sourceGeneratedAt));
+  // A static Netlify snapshot must belong to the same dashboard generation.
+  const matchesDashboardGeneration = index =>
+    typeof sourceGeneratedAt === "string" && sourceGeneratedAt.trim() !== "" &&
+    Number.isFinite(Date.parse(sourceGeneratedAt)) &&
+    typeof index?.meta?.source_dashboard_generated_at === "string" &&
+    index.meta.source_dashboard_generated_at.trim() !== "" &&
+    Number.isFinite(Date.parse(index.meta.source_dashboard_generated_at)) &&
+    index.meta.source_dashboard_generated_at === sourceGeneratedAt;
   state.historicalDaily = validIndex(embeddedHistory) &&
     typeof sourceGeneratedAt === "string" &&
     embeddedHistory.meta.source_dashboard_generated_at === sourceGeneratedAt
@@ -3550,7 +3558,8 @@ async function init() {
       const historyResponse = await fetch("historical-daily-kpi.json?v=" + Date.now(), {cache:"no-store"});
       if (historyResponse.ok) {
         const index = await historyResponse.json();
-        if (validIndex(index) && index?.meta?.verified_count > 0) {
+        if (validIndex(index) && index?.meta?.verified_count > 0 &&
+            matchesDashboardGeneration(index)) {
           state.historicalDaily = index;
         }
       }
