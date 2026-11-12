@@ -808,15 +808,8 @@ jobs:
           PY
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PREP_ARTIFACT_ID" > "$root/c2-artifact.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > "$root/work-a-artifact.json"
-          python - <<'PY'
-          import json,os
-          from pathlib import Path
-          r=Path(os.environ["RUNNER_TEMP"])/"c6-release"
-          a=json.loads((r/"owner.json").read_text())
-          for key,out in (("c2_run_id","c2-run"),("work_a_run_id","work-a-run")):
-              with open(os.environ["GITHUB_ENV"],"a") as f:
-                  f.write(key.upper()+"="+str(a[key])+"\n")
-          PY
+          C2_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["c2_run_id"])' "$root/owner.json")"
+          WORK_A_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["work_a_run_id"])' "$root/owner.json")"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
           curl --fail --silent --show-error --location --retry 3 \
