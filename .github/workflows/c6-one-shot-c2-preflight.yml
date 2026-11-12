@@ -47,4 +47,11 @@ jobs:
           print("PREREQUISITE_BUNDLE_EXPORT",int(enabled("BUNDLE_EXPORT")))
           print("PREREQUISITE_NORMAL_C2_NOT_PAUSED",int(not enabled("PUBLISHER_PAUSED")))
           PY
+          echo "REPOSITORY_VARIABLE_API_CHECK_BEGIN"
+          if gh api "repos/$GITHUB_REPOSITORY/actions/variables/C6_NEON_JSON_PREPARE_ENABLED" --jq '{name:.name,value:.value}' 2>"$RUNNER_TEMP/var-err"; then
+            echo "VARIABLE_GET_PERMITTED"
+          else
+            echo "VARIABLE_GET_NOT_PERMITTED"
+            sed -E 's/(token|authorization|password|secret).*/[redacted]/I' "$RUNNER_TEMP/var-err" | head -c 300 || true
+          fi
           echo "READ_ONLY_PREFLIGHT_NO_WRITES_NO_DISPATCH"
