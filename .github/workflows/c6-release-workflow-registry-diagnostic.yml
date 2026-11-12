@@ -31,4 +31,11 @@ jobs:
             echo "EXACT_LOOKUP_BEGIN:$path"
             gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$path" --jq '[.id,.path,.state] | @tsv' || echo "EXACT_LOOKUP_UNAVAILABLE:$path"
           done
+          test "$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)" = "712c9e351fc3548325cf594cf0617bb33e70a002"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)" = "d0a7d22de2828c93236562cccc9d2e68c6a66e3d"
+          for id in 360885782 360885508; do
+            state="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id" --jq .state)"
+            test "$state" = disabled_manually || { echo "STOP_WORKFLOW_NOT_DISABLED:$id:$state"; exit 2; }
+            echo "POST_PR95_STILL_DISABLED:$id"
+          done
           echo "NO_WORKFLOW_DISABLED_NO_GIT_WRITES_NO_DEPLOY"
