@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-PHYSICAL-E2E-OWNER-AUTH-01** (one exact-head read-only proof approved; not yet dispatched). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent Neon→JSON physical readback attempted but no six-file PASS.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-PHYSICAL-SIX-JSON-READBACK-PASS-01** (physical PASS, cutover NO). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Physical Neon→six-JSON readback PASS #43187464328; release NO-GO.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -17,7 +17,7 @@ Latest accepted: **C6-PHYSICAL-E2E-OWNER-AUTH-01** (one exact-head read-only pro
 - **Production:** Git JSON updated and remote publication confirmed in C2 #43055353190 (`site-prod@cf960d7c`); frontend/source still Git, no Neon cutover. Netlify deployment not independently verified.
 - **Neon reader / historical parity:** [Work B #74](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/74) verified exact 33,135 C2 IDs/fields 23/23, 262 older Neon episodes retained. [Work C #75](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/75) exact-ID canonical selection offline PASS; not a general DB-only supersession policy. Full origin/provenance OPEN.
 - **Live writer / provenance:** C2 #43055353190 SUCCESS 33,135 episodes, 23/23 one-hop checkpoints. New regular [#43172960738](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43172960738) SUCCESS 33,210 canonical episodes (+75); its same-run continuity is only 22/23 (Sevastopol), so cannot substitute as full freshness proof. Sevastopol historical `25006→25008` OPEN.
-- **23-city generator / publication:** Frozen C2 #43055353190 / ZIP SHA `ebcf2b6a...04c1d`; protected physical attempts #43098776474, #43104972888 and [#43180832950](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43180832950) failed closed in successive receipt, frozen-B2 and post-C2-row checks, respectively. Physical 23/23 source freshness reached in #43104972888, but no six-file output. [Research PR #82](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/82) `82a7cc77` [offline #43181978935](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43181978935) PASS, physical still OPEN.
+- **23-city generator / publication:** [Physical #43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) on PR #82 `82a7cc77` **PASS**; artifact #13929117121: 6/6 JSON, 18/18 hashes, 23/23 historical receipts/freshness, 33,135 C2 canonical, 262 stale +75 later excluded. Read-only, no publication. Current freshness/Kyiv provenance and DST NOT certified; preview/C3 OPEN.
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
@@ -25,16 +25,16 @@ Latest accepted: **C6-PHYSICAL-E2E-OWNER-AUTH-01** (one exact-head read-only pro
 
 ## Concrete next tasks
 
-1. **Next: one new owner-approved physical read-only E2E**, [PR #82](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/82) exact SHA `82a7cc775ed2f2a6fd0134440db709690f0c04d1`, pinned C2 #43055353190. Existing `generator.snapshot()` reads all seven Neon sets in one read-only transaction and feeds the six-JSON generator. No additional private-fixture prerequisite. Owner authorized ONE run on this SHA (2026-11-12); GitHub Environment exact branch/SHA pin and manual dispatch still pending.
-2. If six-file physical E2E and 23-city parity PASS, proceed to reversible preview/browser/rollback C3. If BLOCKED, record only the exact gate; no automatic re-run or new test infrastructure. Sevastopol `25006→25008` and DST remain separately gated.
+1. **Next: controlled, reversible preview** using [physical artifact #13929117121](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328/artifacts/13929117121). Compare all six JSON, 23 cities, historical/CSV/aux against Git; run unchanged frontend browser QA. Ask owner before preview deployment. Do not treat candidate as current-certified publication.
+2. Then demonstrate C3 rollback and certify current-source freshness before any cutover; Kyiv current provenance, DST and Sevastopol `25006→25008` remain open.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## C6-PHYSICAL-E2E-OWNER-AUTH-01 — one protected E2E authorized (2026-11-12)
+## C6-PHYSICAL-SIX-JSON-READBACK-PASS-01 — protected six-JSON physical PASS (2026-11-12)
 
-- Owner approved ONE read-only physical six-JSON proof on PR #82 `82a7cc775ed2f2a6fd0134440db709690f0c04d1` and frozen C2 #43055353190. Protected Environment pin and owner dispatch pending. No workflow run or cutover.
+- Owner-authorized [#43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) SUCCESS on PR #82 `82a7cc77`, C2 #43055353190. Artifact #13929117121: 18/18 hashes, 6/6 JSON, 23/23 historical receipts/freshness, canonical 33,135; 262 historical +75 later excluded; Kyiv frozen B2 382→198. No Neon writes, source HTTP or deployment. Current source/Kyiv provenance and DST not certified. Preview/C3 rollback remains OPEN; `GLOBAL_CUTOVER=NO`.
 
 ## C6-ONE-PHYSICAL-E2E-NEXT-01 — simplify E2E (2026-11-12)
 
