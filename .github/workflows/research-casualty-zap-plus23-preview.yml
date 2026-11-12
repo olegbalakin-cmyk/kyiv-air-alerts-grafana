@@ -1,0 +1,39 @@
+name: Research casualty Zaporizhzhia reversible +23 offline preview
+on:
+  push:
+    branches:
+      - research-casualty-zap-plus23-preview-2026-11-12
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch immutable production and WIP evidence commits
+        run: |
+          git fetch --no-tags origin fc7261660bdee75ee59296ee94cc1189be6b1a22
+          git fetch --no-tags origin c66c242a852d7647b6183425228cb3db2d1d088b
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install generator dependencies
+        shell: bash
+        run: python -m pip install -r <(git show fc7261660bdee75ee59296ee94cc1189be6b1a22:kyiv-air-alerts-grafana/requirements.txt)
+      - name: Reversible generator tests, no publisher HTTP
+        run: python research/casualty_zaporizhzhia_preview_2026_11_12/preview.py
+      - name: Upload immutable proof (including diagnostic FAIL cases)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-zap-plus23-preview-${{ github.run_id }}
+          path: research/casualty_zaporizhzhia_preview_2026_11_12/proof/
+          if-no-files-found: warn
+          retention-days: 30
