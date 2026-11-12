@@ -1,8 +1,8 @@
-name: C3 actual frontend six-JSON offline browser QA (no deployment)
+name: C3 pinned six-JSON Netlify draft package QA (offline only)
 
 on:
   push:
-    branches: [fix-c3-neon-kpi-index-2026-11-12]
+    branches: [research-c3-netlify-preview-ready-2026-11-12]
     paths:
       - ".github/workflows/c6-c3-six-json-preview-qa.yml"
       - "research/c6_c3_preview_2026_11_12/**"
@@ -74,15 +74,109 @@ jobs:
         run: |
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+      - name: Assemble exact Work A frontend and safe Netlify draft package (offline)
+        run: |
+          python - <<'PY'
+          import json,hashlib,os,pathlib
+          b=pathlib.Path('/tmp/c6-c3');site=b/'site'
+          orig=pathlib.Path('kyiv-air-alerts-grafana/pages-preview/app.js').read_bytes()
+          sha=lambda data:hashlib.sha256(data).hexdigest()
+          assert sha(orig)=='832aca5d33f51999b509513dc5a694a5d9aac02d87db462b5c6e20c432a6542c','WORK_A_FRONTEND_SHA_MISMATCH'
+          git=b'"https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/"'
+          assert orig.count(git)==1
+          preview=orig.replace(git,b'window.PREVIEW_CONFIG.dataBase',1)
+          assert sha(preview)=='88b322e5b35983f7ca7ef241f4647c8d677acd3b3ff8a2f17badf185f289a578','WORK_A_BROWSER_CONSUMER_MISMATCH'
+          (site/'app.js').write_bytes(preview)
+          (site/'preview-config.js').write_text('window.PREVIEW_DEFAULT_SOURCE = "neon";\n')
+          boot=site/'preview-bootstrap.js'
+          text=boot.read_text()
+          assert 'DST CORRECTION OFF' in text
+          assert 'current alert freshness NOT certified' in text
+          text=text.replace('current alert freshness NOT certified. No production publication.','CURRENT ALERT STATUS UNVERIFIED — HISTORICAL STATISTICS ONLY. No production publication.')
+          boot.write_text(text)
+          candidates=json.loads((b/'neon/verdict.json').read_text())['candidate_files']
+          assert len(candidates)==6
+          for name,expected in candidates.items():
+              assert sha((site/'data/neon'/name).read_bytes())==expected, name
+          for src in ('neon','legacy'):
+              assert sorted(p.name for p in (site/'data'/src).glob('*.json'))==sorted(candidates),src
+          dashboard=json.loads((site/'data/neon/dashboard_data.json').read_text())
+          cities=dashboard['cities'];assert len(cities)==23
+          assert not any(v.get('meta',{}).get('current_source_verified') is True for v in cities.values())
+          kpi=dashboard['historical_daily_kpi']; assert kpi['meta']['source_ref']=='neon:br-bold-mode-b5rub8pq'
+          assert kpi['meta']['source_dashboard_generated_at']==dashboard['meta']['generated_at']
+          assert kpi['meta']['expected_cities']==23 and kpi['meta']['verified_count']==23
+          assert json.loads((site/'features.json').read_text())['attack_events'] is False
+          assert 'X-Robots-Tag: noindex' in (site/'_headers').read_text()
+          assert 'preview-bootstrap.js' in (site/'index.html').read_text()
+          assert not (site/'netlify.toml').exists()
+          original_manifest=site/'preview-manifest.json'
+          manifest={
+            'schema':'controlled-c3-six-json-netlify-draft-v1',
+            'prepared_from_work_a_commit':'83f14e27bf4675f64aff72fa20010630f0305d52',
+            'packaging_commit':os.environ['GITHUB_SHA'],
+            'work_a_actual_frontend_sha256':sha(orig),
+            'preview_route_only_frontend_sha256':sha(preview),
+            'physical_neon_run':43187464328,
+            'physical_neon_artifact':13929117121,
+            'git_c2_run':43055353190,
+            'git_c2_artifact':13873291895,
+            'neon_cities':23,
+            'preview_default':'neon',
+            'rollback_query':'?preview_source=legacy',
+            'current_alert_status':'UNCERTIFIED',
+            'dst_correction':'OFF',
+            'production_deployment':False,
+            'production_configuration_changes':False,
+            'site':'ukraine-air-alerts',
+            'site_id':'b5aafc46-7468-4070-baf1-db80a4d30501',
+            'source_sha256':{f'data/neon/{name}':value for name,value in candidates.items()},
+            'git_source_sha256':{f'data/legacy/{p.name}':sha(p.read_bytes()) for p in sorted((site/'data/legacy').glob('*.json'))}
+          }
+          original_manifest.write_text(json.dumps(manifest,ensure_ascii=False,sort_keys=True,indent=2)+'\n')
+          (b/'proof/package_manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,sort_keys=True,indent=2)+'\n')
+          print('C3_PACKAGE_ASSEMBLED 6 Neon JSON, 6 Git JSON, pinned Work A frontend PASS')
+          PY
       - name: Run scoped-preview historical-index, browser, CSV and rollback QA
         run: |
           python research/c6_c3_preview_2026_11_12/browser_qa.py \
             --preview /tmp/c6-c3/site --out /tmp/c6-c3/proof
+      - name: Seal immutable manual draft deployment ZIP (no Netlify invocation)
+        run: |
+          python - <<'PY'
+          import json,hashlib,pathlib,zipfile,os
+          b=pathlib.Path('/tmp/c6-c3');root=b/'site';out=b/'proof'
+          qa=json.loads((out/'browser_result.json').read_text())
+          assert qa['verdict']=='PASS_SCOPED_NEON_INDEX_OFFLINE_PREVIEW'
+          assert qa['files_exact_restored'] is True
+          assert len(qa['csv'])==23 and qa['results'][0]['city_mode_combinations']==184
+          assert not qa['js_errors'] and not qa['failed_responses'] and not qa['external_requests']
+          assert qa['rollback']['digest_differences']==[]
+          assert qa['preview_consumer']['runner_local_sha256']==hashlib.sha256((root/'app.js').read_bytes()).hexdigest()
+          manifest=json.loads((root/'preview-manifest.json').read_text())
+          for relative,expected in {**manifest['source_sha256'],**manifest['git_source_sha256']}.items():
+              assert hashlib.sha256((root/relative).read_bytes()).hexdigest()==expected,relative
+          assert (root/'preview-config.js').read_text().strip()=='window.PREVIEW_DEFAULT_SOURCE = "neon";'
+          assert 'CURRENT ALERT STATUS UNVERIFIED' in (root/'preview-bootstrap.js').read_text()
+          paths=sorted((p for p in root.rglob('*') if p.is_file()),key=lambda p:str(p.relative_to(root)))
+          package=out/'c3-netlify-preview-site.zip'
+          with zipfile.ZipFile(package,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+              for p in paths:
+                  arc=str(p.relative_to(root))
+                  info=zipfile.ZipInfo(arc,date_time=(2026,11,12,0,0,0))
+                  info.compress_type=zipfile.ZIP_DEFLATED
+                  info.external_attr=0o644<<16
+                  z.writestr(info,p.read_bytes(),compress_type=zipfile.ZIP_DEFLATED,compresslevel=6)
+          digest=hashlib.sha256(package.read_bytes()).hexdigest()
+          receipt={'schema':'c3-ready-for-owner-approval-v1','verdict':'READY_FOR_PREVIEW_NOT_DEPLOYED','deployment':False,'commit':os.environ['GITHUB_SHA'],'source_commit':manifest['prepared_from_work_a_commit'],'zip_sha256':digest,'zip_bytes':package.stat().st_size,'site_files':len(paths),'neon_files':6,'git_files':6,'qa_verdict':qa['verdict'],'cities':23,'modes':8,'csv':23,'errors':0,'publication':'NO','dst':'OFF','command':'netlify deploy --no-build --dir=./site --site=b5aafc46-7468-4070-baf1-db80a4d30501 --alias=c3-neon-83f14e27 --message=c3-controlled-neon-six-json'}
+          (out/'NETLIFY_PREVIEW_READY.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n')
+          print('C3_READY_FOR_PREVIEW zip_sha256='+digest+' zip_bytes='+str(package.stat().st_size)+' files='+str(len(paths)))
+          PY
       - name: Preserve isolated proof even on blocked QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: c6-c3-reversible-preview-qa-${{ github.run_id }}
+          name: c3-netlify-preview-ready-${{ github.run_id }}
           path: /tmp/c6-c3/proof/
           if-no-files-found: warn
           retention-days: 30
