@@ -1,0 +1,33 @@
+name: Research casualty Zaporizhzhia ledger reconciliation (read-only)
+on:
+  push:
+    branches:
+      - research-casualty-zaporizhzhia-ledger-2026-11-12
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout research script
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact frozen refs (no writer)
+        run: |
+          git fetch --no-tags origin 375e69351e6a5aee1be16892821f7cdde2a8f21a
+          git fetch --no-tags origin fc7261660bdee75ee59296ee94cc1189be6b1a22
+          git fetch --no-tags origin c66c242a852d7647b6183425228cb3db2d1d088b
+      - name: Run pinned ledger checks and compare public bytes
+        run: python research/casualty_zaporizhzhia_ledger_2026_11_12/reconcile.py
+      - name: Upload immutable read-only report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zaporizhzhia-ledger-reconciliation-${{ github.run_id }}
+          path: research/casualty_zaporizhzhia_ledger_2026_11_12/proof/
+          if-no-files-found: warn
+          retention-days: 30
