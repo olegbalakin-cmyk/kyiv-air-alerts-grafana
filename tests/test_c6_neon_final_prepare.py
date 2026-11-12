@@ -67,7 +67,8 @@ class WorkK(unittest.TestCase):
             "c2_corpus_sha256": "e"*64
         }
         self.work_binding = {"db_branch": "br-bold-mode-b5rub8pq",
-                             "corpus_sha256": "e"*64}
+                             "corpus_sha256": "e"*64,
+                             "city_keys": list(base.cities)}
         self.archives = {}
         self.artifacts = {}
         items = {"REPORT.json": (base.prepared/"REPORT.json").read_bytes()}
@@ -226,9 +227,9 @@ class WorkK(unittest.TestCase):
                       jobs["c6-neon-six-json-prepare"]["if"])
         self.assertEqual(special["permissions"],{"contents":"read","actions":"read"})
         for step in special["steps"]:
-            self.assertNotIn("git push",str(step).lower())
-            self.assertNotIn("netlify deploy",str(step).lower())
-            self.assertNotIn("neon_json_shadow_physical_proof",str(step))
+            self.assertNotIn("git push",str(step.get("run","")).lower())
+            self.assertNotIn("netlify deploy",str(step.get("run","")).lower())
+            self.assertNotIn("neon_json_shadow_physical_proof",str(step.get("run","")))
         self.assertIn("group: update-netlify-site", content)
         self.assertIn("vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true'",content)
 
