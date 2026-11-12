@@ -598,3 +598,133 @@ jobs:
           path: ${{ runner.temp }}/ukrainealarm_bridge_fetch.json
           if-no-files-found: warn
           retention-days: 7
+
+  # Same-run Neon candidate preparation only; never changes existing Git delivery.
+  c6-neon-six-json-prepare:
+    needs: update-site
+    if: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED == 'true' && needs.update-site.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+    environment: c6-neon-shadow-readonly
+    steps:
+      - name: Checkout exact integration code with no push credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: integration
+          persist-credentials: false
+      - name: Checkout pinned six-JSON read-only generator
+        uses: actions/checkout@v4
+        with:
+          ref: 82a7cc775ed2f2a6fd0134440db709690f0c04d1
+          path: reader
+          persist-credentials: false
+      - name: Download same-run C2 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: c2-shadow-inputs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: existing-c2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact C2 SHA, writer receipt, 23 capture receipts
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,os
+          from pathlib import Path
+          from scripts.c2_shadow_bundle import verify_archive
+          root=Path("existing-c2")
+          bundle=root/"c2-shadow-inputs.zip"
+          sidecar=(root/"c2-shadow-inputs.zip.sha256").read_text().strip().split()
+          assert len(sidecar)==2 and sidecar[1]=="c2-shadow-inputs.zip"
+          digest=hashlib.sha256(bundle.read_bytes()).hexdigest()
+          assert sidecar[0]==digest
+          m=verify_archive(bundle,digest,destination=Path("same-run-inputs"),
+              run_id=os.environ["GITHUB_RUN_ID"],workflow_sha=os.environ["GITHUB_SHA"])
+          assert m["github_run_attempt"]==int(os.environ["GITHUB_RUN_ATTEMPT"])
+          assert len(m.get("historical_capture_receipts",{}).get("complete_cities",[]))==23
+          with open(os.environ["GITHUB_ENV"],"a") as f:
+              for key,value in {
+                  "C6_INPUT_SHA":m["input_sha"],"C6_BRANCH":m["db_branch"],
+                  "C6_ENDPOINT":m["db_endpoint"],"C6_CORPUS":m["corpus_sha256"],
+                  "C6_BUNDLE_SHA":digest}.items(): f.write(key+"="+str(value)+"\n")
+          print("EXACT_SAME_RUN_C2_AND_23_RECEIPTS_PASS")
+          PY
+      - name: Checkout original C2 input source revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.C6_INPUT_SHA }}
+          path: pinned-site
+          persist-credentials: false
+      - name: Pin PR93 parser blob and restore same-run data
+        run: |
+          set -euo pipefail
+          python integration/scripts/c6_pr93_generator_compat.py \
+            --generator reader/scripts/neon_json_shadow_generator.py \
+            --site-parser pinned-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+          cp -a same-run-inputs/site_data/. pinned-site/kyiv-air-alerts-grafana/data/
+      - name: Install accepted read-only reader dependencies
+        run: python -m pip install -r reader/research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
+      - name: Physical same-run Neon readback and six-JSON generation
+        working-directory: reader
+        env:
+          NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m scripts.neon_json_shadow_physical_proof \
+            --site ../pinned-site/kyiv-air-alerts-grafana \
+            --bundle ../existing-c2/c2-shadow-inputs.zip --bundle-sha256 "$C6_BUNDLE_SHA" \
+            --workflow-sha "$GITHUB_SHA" --input-sha "$C6_INPUT_SHA" \
+            --db-branch "$C6_BRANCH" --db-endpoint "$C6_ENDPOINT" \
+            --c2-run-id "$GITHUB_RUN_ID" --output ../c6-live-proof
+      - name: Recheck current freshness; stage six-file candidate outside production
+        env:
+          PYTHONPATH: integration
+        run: |
+          python -m scripts.c6_neon_git_candidate \
+            --proof c6-live-proof --site pinned-site/kyiv-air-alerts-grafana \
+            --output c6-prepared --c2-corpus "$C6_CORPUS" --db-branch "$C6_BRANCH" \
+            --input-sha "$C6_INPUT_SHA" --workflow-sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --bundle-sha256 "$C6_BUNDLE_SHA"
+      - name: Checkout Git delivery for local detached commit only
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: local-git-only
+          persist-credentials: false
+      - name: Create one isolated six-file Git commit without any remote
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          git -C local-git-only checkout --detach
+          git -C local-git-only remote remove origin
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.c6_neon_git_candidate import local_commit
+          root=Path("c6-prepared")
+          report=json.loads((root/"REPORT.json").read_text())
+          report["local_candidate_commit"]=local_commit(root,Path("local-git-only"),report)
+          report["remote_publication_performed"]=False
+          (root/"REPORT.json").write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
+          print("LOCAL_COMMIT_ONLY; NO_PUSH; NO_DEPLOY")
+          PY
+      - name: Upload preparation result, never candidate publication
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-git-preparation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            c6-prepared/REPORT.json
+            c6-live-proof/verdict.json
+            c6-live-proof/sha256_manifest.json
+          if-no-files-found: warn
+          retention-days: 30
