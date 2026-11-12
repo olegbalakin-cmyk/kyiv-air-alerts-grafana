@@ -42,11 +42,22 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
       hasKpiRange:typeof window.KpiRange!=="undefined"
     };
   });
+  // Verify a fresh daily window with actual observations and both forecast bars.
+  await page.select("#cityPeriod", "daily28");
+  await page.waitForFunction(() => {
+    const canvas=document.getElementById("cityIntensityChart");
+    const chart=window.Chart?.getChart(canvas);
+    return chart && chart.data?.labels?.some(x => String(x).includes("Прогноз") || String(x).includes("Forecast"));
+  }, {timeout:25000}).catch(err => errors.push("FORECAST_DAILY_MISSING: "+String(err)));
+  snapshot.daily28ForecastLabels = await page.evaluate(() => {
+    const chart=window.Chart?.getChart(document.getElementById("cityIntensityChart"));
+    return chart?.data?.labels?.filter(x => String(x).includes("Прогноз") || String(x).includes("Forecast")).length || 0;
+  });
   try { await page.screenshot({path:"forecast-browser.png",fullPage:true}); } catch {}
   const output = {url,navigationError,errors,failed,network,snapshot};
   fs.writeFileSync("forecast-browser.json",JSON.stringify(output,null,2));
   console.log("FORECAST_BROWSER",JSON.stringify(output));
   await browser.close();
   if (snapshot.cityOptions < 23 || !snapshot.chartHasInstance ||
-      !snapshot.numericData || !snapshot.generated || errors.length) process.exitCode=1;
+      !snapshot.numericData || !snapshot.generated || snapshot.daily28ForecastLabels !== 2 || errors.length) process.exitCode=1;
 })().catch(err=>{console.error("SMOKE_EXCEPTION",err);process.exitCode=1;});
