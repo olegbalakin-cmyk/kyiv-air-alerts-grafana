@@ -42,7 +42,7 @@ jobs:
       - name: Assemble localhost copy of site-prod
         run: |
           python research/casualty_incomplete_month_preview_2026_11_12/prepare_local_preview.py --chart-js node_modules/chart.js/dist/chart.umd.js --output "$RUNNER_TEMP/casualty-preview"
-      - name: Chromium QA: desktop, mobile, CSV, PNG, embed
+      - name: "Chromium QA: desktop, mobile, CSV, PNG, embed"
         env:
           PREVIEW_DIR: ${{ runner.temp }}/casualty-preview
           PROOF_DIR: ${{ runner.temp }}/casualty-browser-proof
