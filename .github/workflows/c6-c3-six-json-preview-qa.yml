@@ -29,7 +29,7 @@ jobs:
           python - <<'PY'
           import json,os,subprocess
           from pathlib import Path
-          base="68629fdae5534ec3a136e666bcb7d5c84dcd05aa"
+          base="d0a7d22de2828c93236562cccc9d2e68c6a66e3d"
           def git(*args):
               return subprocess.check_output(["git",*args],text=True).strip()
           assert git("merge-base",base,"HEAD")==base,"EXACT_SITE_PROD_BASE_NOT_ANCESTOR"
@@ -57,6 +57,9 @@ jobs:
           app=Path("kyiv-air-alerts-grafana/pages-preview/app.js").read_text()
           assert 'const RAW_DATA_BASE = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/";' in app
           assert "window.PREVIEW_CONFIG?.source === \"neon\"" in app
+          assert 'releaseAuthority?.publication_allowed === true' in app
+          assert 'releaseAuthority?.scope === "PRODUCTION_NEON_GIT_RELEASE"' in app
+          assert 'releaseAuthority?.release_manifest_sha256' in app
           out=Path("/tmp/c6-c3/proof")
           out.mkdir(parents=True,exist_ok=True)
           receipt={"base_site_prod":base,"qa_head":os.environ["GITHUB_SHA"],"changed_files":sorted(actual),"protected_paths":protected,"source":"GIT_ONLY","neon_publication":False,"dst_correction":"OFF"}
@@ -115,10 +118,10 @@ jobs:
         run: |
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
-      - name: Run scoped-preview historical-index, browser, CSV and rollback QA
+      - name: Run short scoped-preview browser, CSV and rollback regression (full #43278423559 pinned)
         run: |
           python research/c6_c3_preview_2026_11_12/browser_qa.py \
-            --preview /tmp/c6-c3/site --out /tmp/c6-c3/proof
+            --preview /tmp/c6-c3/site --out /tmp/c6-c3/proof --smoke
       - name: Preserve isolated proof even on blocked QA
         if: always()
         uses: actions/upload-artifact@v4

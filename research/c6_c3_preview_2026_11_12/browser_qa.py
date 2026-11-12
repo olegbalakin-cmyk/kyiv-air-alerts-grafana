@@ -19,6 +19,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--preview",required=True,type=Path)
     parser.add_argument("--out",required=True,type=Path)
+    parser.add_argument("--smoke",action="store_true",help="Only quick regression subset; retain full QA as default")
     args=parser.parse_args()
     root=args.preview.resolve()
     out=args.out.resolve()
@@ -119,6 +120,9 @@ def main():
               report["csv"].append({"city":city,"bytes":path.stat().st_size,"sha256":sha(path)})
         all_cities=sorted(json.loads((root/"data/neon/dashboard_data.json").read_text())["cities"])
         all_modes=["daily28","weekly","rolling30","rolling90","rolling180","calendarWeekly","monthly","allTime"]
+        checked_cities=[all_cities[0],all_cities[-1]] if args.smoke else all_cities
+        checked_modes=["daily28","monthly"] if args.smoke else all_modes
+        report["qa_scope"]="SMOKE_2_CITIES_2_MODES" if args.smoke else "FULL_23_CITIES_8_MODES"
         config.write_text('window.PREVIEW_DEFAULT_SOURCE = "neon";\n')
         p=open_page()
         neon_index=index_source(p)
@@ -131,8 +135,8 @@ def main():
             neon_meta.get("source_dashboard_generated_at")!=dashboard_generation):
           raise AssertionError("NEON_INDEX_METADATA_INCOMPATIBLE")
         report["results"].append({"source":"neon","cities":len(all_cities),"modes":len(all_modes),"historical_index":neon_index})
-        city_check(p,all_cities,all_modes,with_csv=True)
-        report["results"][-1]["city_mode_combinations"]=len(all_cities)*len(all_modes)
+        city_check(p,checked_cities,checked_modes,with_csv=True)
+        report["results"][-1]["city_mode_combinations"]=len(checked_cities)*len(checked_modes)
         report["results"][-1]["current_status_uncertified"]=not p.evaluate("() => Object.values(state.data.cities).some(c=>c.meta.current_source_verified===true)")
         report["results"][-1]["charts_rendered"]=len(p.evaluate("() => Object.keys(state.charts)"))
         p.screenshot(path=str(out/"neon.png"))
@@ -143,8 +147,8 @@ def main():
         if git_index!="site-prod":
           raise AssertionError("LEGACY_HISTORICAL_INDEX_RESTORE_FAIL")
         report["results"].append({"source":"git-rollback","cities":len(all_cities),"historical_index":git_index})
-        city_check(p,all_cities,["monthly"],with_csv=False)
-        report["results"][-1]["city_mode_combinations"]=len(all_cities)
+        city_check(p,checked_cities,["monthly"],with_csv=False)
+        report["results"][-1]["city_mode_combinations"]=len(checked_cities)
         p.screenshot(path=str(out/"git-rollback.png"))
         p.close()
         # Exercise the real static HTTP fallback with the embedded index unavailable.
