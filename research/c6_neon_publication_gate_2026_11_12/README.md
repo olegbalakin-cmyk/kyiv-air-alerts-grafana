@@ -24,7 +24,7 @@ A structurally valid pinned proof returns `PASS_SCOPED_PROOF_NO_PUBLICATION` and
 
 1. Confirm the next scheduled C2 reached 23/23 full same-run historical receipts after PR #93, preserving Sevastopol open #25100 and unresolved 25006→25008.
 2. Bind the existing read-only Neon generator to **that same C2 run** and re-evaluate historical freshness against the real current clock; no reuse of this frozen artifact as a live publication input.
-3. Pin compatible Git JSON, Kyoto/Kyiv intervals, auxiliary and casualty baseline; obtain a separately accepted production publication authority and matching frontend/index semantics.
+3. Pin compatible Git JSON, Kyiv intervals, auxiliary and casualty baseline; obtain a separately accepted production publication authority and matching frontend/index semantics.
 4. Integrate atomic six-file Git replacement behind a default-OFF switch and fail-closed release gate into existing delivery, prove no change on failure, preserve Netlify rollback and obtain owner approval before any deployment.
 
 **This PR is the testable preparatory gate, not the final integration.** Do not merge into main solely to enable Neon publication. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
