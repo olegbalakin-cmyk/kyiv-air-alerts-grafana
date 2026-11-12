@@ -122,6 +122,11 @@
   }
   const hatchPlugin = {
     id: "casualtyConfirmedMinimumOverlay",
+    beforeUpdate: function (chart) {
+      // Keep the ≥ marker outside the tallest bar even on a 375px chart.
+      // Chart.js' own y-scale grace creates space without changing any count.
+      if (chart.options.scales && chart.options.scales.y) chart.options.scales.y.grace = "25%";
+    },
     afterDatasetsDraw: function (chart) {
       const ctx = chart.ctx;
       if (!chart.chartArea) return;
