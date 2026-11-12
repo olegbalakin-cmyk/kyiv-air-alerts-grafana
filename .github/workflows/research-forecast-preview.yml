@@ -1,4 +1,4 @@
-name: Research EWMA two-bar preview (non-production)
+name: Research EWMA one-period preview (non-production)
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
         run: |
           test "$GITHUB_REF_NAME" = "research-forecast-bars-preview-2026-11-11"
           grep -q 'ForecastTrend = api' kyiv-air-alerts-grafana/pages-preview/app.js
-          grep -q 'app.js?v=20261112-forecast-bundled2' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'app.js?v=20261112-forecast-one-period' kyiv-air-alerts-grafana/pages-preview/index.html
           echo "Preview branch only; no production write or source switch"
 
       - name: Prepare isolated static draft preview
@@ -53,7 +53,7 @@ jobs:
             --dir=_site \
             --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
             --auth="$NETLIFY_AUTH_TOKEN" \
-            --message="research-EWMA-two-bars-$GITHUB_SHA" \
+            --message="research-EWMA-one-period-$GITHUB_SHA" \
             --json > netlify-forecast-preview.json
           python - <<'PY'
           import json
