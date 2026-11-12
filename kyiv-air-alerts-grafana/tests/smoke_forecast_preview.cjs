@@ -56,6 +56,21 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
       controlVisible:document.getElementById("showTrend")?.closest("label")?.getClientRects().length>0
     };
   });
+  snapshot.toolbar = await page.evaluate(() => {
+    const card=document.getElementById("cityIntensityChart")?.closest(".chart-card");
+    const row=card?.querySelector('[data-csv-chart="cityIntensityChart"]');
+    const checkbox=row?.querySelector("#showTrend");
+    const csv=row?.querySelector(".csv-export-button:not(.chart-image-button):not(.chart-embed-button)");
+    const share=row?.querySelector('[data-share-image="cityIntensityChart"]');
+    const embed=row?.querySelector('[data-embed-chart="cityIntensityChart"]');
+    const rect=node=>{const r=node?.getBoundingClientRect();return r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom}:null};
+    return {singleToolbar:card?.querySelectorAll('[data-csv-chart="cityIntensityChart"]').length,
+      checkbox:!!checkbox,csv:!!csv,share:!!share,embed:!!embed,
+      order:[checkbox,csv,share,embed].map(n=>n?.getBoundingClientRect().left),
+      checkboxRect:rect(checkbox?.closest("label")),csvRect:rect(csv),shareRect:rect(share)};
+  });
+  if(snapshot.toolbar.singleToolbar!==1||!snapshot.toolbar.checkbox||!snapshot.toolbar.csv||
+     !snapshot.toolbar.share||!snapshot.toolbar.embed) errors.push("CHART_TOOLBAR_INCOMPLETE:"+JSON.stringify(snapshot.toolbar));
   snapshot.initialTrend = await countForecast();
   if (snapshot.initialTrend.checked !== false || snapshot.initialTrend.forecastCount !== 0 ||
       snapshot.initialTrend.forecastDatasets !== 0) errors.push("DEFAULT_TREND_NOT_OFF:"+JSON.stringify(snapshot.initialTrend));
@@ -104,6 +119,20 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
   snapshot.finalTrend=await countForecast();
   snapshot.daily28ForecastLabels=snapshot.finalTrend.forecastCount;
   if(snapshot.finalTrend.checked||snapshot.finalTrend.forecastCount!==0)errors.push("FINAL_TREND_NOT_OFF:"+JSON.stringify(snapshot.finalTrend));
+  // Small-screen check: the same row must contain all chart actions without horizontal overflow.
+  await page.setViewport({width:375,height:812,deviceScaleFactor:1});
+  snapshot.mobileToolbar = await page.evaluate(() => {
+    const row=document.querySelector('[data-csv-chart="cityIntensityChart"]');
+    const card=document.getElementById("cityIntensityChart")?.closest(".chart-card");
+    const r=row?.getBoundingClientRect(),c=card?.getBoundingClientRect();
+    return {viewport:innerWidth,rowLeft:r?.left,rowRight:r?.right,cardLeft:c?.left,cardRight:c?.right,
+      hasCheckbox:!!row?.querySelector("#showTrend"),
+      buttonCount:row?.querySelectorAll("button").length,
+      bodyWidth:document.documentElement.scrollWidth};
+  });
+  if(!snapshot.mobileToolbar.hasCheckbox||snapshot.mobileToolbar.buttonCount!==3||
+     snapshot.mobileToolbar.bodyWidth>375)
+    errors.push("MOBILE_TOOLBAR_INVALID:"+JSON.stringify(snapshot.mobileToolbar));
   try { await page.screenshot({path:"forecast-browser.png",fullPage:true}); } catch {}
   const output = {url,navigationError,errors,failed,network,snapshot};
   fs.writeFileSync("forecast-browser.json",JSON.stringify(output,null,2));
