@@ -1,8 +1,8 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
+**Date:** 2026-11-12. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-FALSE-ATTACK-PLACE-76-01**: 76/76 offline PASS; publication OFF.
+Latest casualty: **CASUALTY-ZAPORIZHZHIA-LEDGER-DELTA-23-01**: read-only current-series reconciliation PASS on frozen 2026-11-12 site-prod; +23 review candidate, **no publication**.
 
 ## Working instructions
 
@@ -22,18 +22,22 @@ Latest casualty: **CASUALTY-FALSE-ATTACK-PLACE-76-01**: 76/76 offline PASS; publ
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) **76/76 research PASS**, military/cumulative/place fixes. Zaporizhzhia +23 shadow only. No release.
+- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** offline reviewer [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) 76/76 PASS; [production-series reconciliation](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43185423680) confirms as-of pinned 2026-11-12 `site-prod@fc726166` Zaporizhzhia **0/23 credited, +23 for separate review**. Publication OFF.
 
 ## Concrete next tasks
 
 1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: **read-only current-ledger reconciliation** for Zaporizhzhia +23 research proposal; prove already-counted and remaining delta (if any), no writes or merge. Production approval separate.
+4. Casualty: before any approval, prepare a **reversible offline publication preview** for Zaporizhzhia October 2026 (the current validated series ends September), verify generator/JSON October row, overlay and dedup behavior, and repeat read-only live-ledger check at proposed release SHA. No production write/merge without new owner decision.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-ZAPORIZHZHIA-LEDGER-DELTA-23-01 — published series reconciled read-only (2026-11-12)
+
+- [Exact-head CI #43185423680](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43185423680) SUCCESS at research `3dbff8f3`. Frozen `site-prod@fc726166`: Zaporizhzhia city validated through **18 Sep 2026** (316 confirmed deaths; last monthly row Sep), no October row, **0** confirmed city revisions; only confirmed production revision is Sumy +1. Public Netlify `app.js` and served raw dashboard JSON byte-hash matched pinned Git. Thus **0 of 23** credited for 10 Oct Zaporizhzhia attack in verified published series; **+23 RECONCILED_DELTA_FOR_REVIEW**, never automatically apply. Artifact `13928441241` SHA256 `d0e1ba44…068c8` verified. 16 related WIP titles remain unconfirmed, not ledger entries. Future production snapshots need fresh reconciliation.
+
 ## CASUALTY-FALSE-ATTACK-PLACE-76-01 — real place guard PASS (2026-11-12)
 
 - [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) final `503bd73e`, [exact CI #43180557264](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43180557264) **76/76 PASS**; artifact `13926406047` verified. Ivano warning now `place=unlocated`, military `NEEDS_REVIEW`; true places protected. Zaporizhzhia shadow total 23 still PASS, replay 0, SHA unchanged. **Research only, no release.** Full proof in CHANGELOG.
