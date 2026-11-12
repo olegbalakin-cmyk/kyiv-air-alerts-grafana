@@ -151,10 +151,18 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C6_RUN_ID" > _approved_c6/run.json
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > _approved_c6/work-a-run.json
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > _approved_c6/work-a-artifact.json
-          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID/zip" > _approved_c6/work-a-artifact.zip
+          curl --fail --show-error --silent --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID/zip" \
+            --output _approved_c6/work-a-artifact.zip
           test "$(sha256sum _approved_c6/work-a-artifact.zip | cut -d ' ' -f1)" = "$WORK_A_ARTIFACT_SHA"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID" > _approved_c6/artifact.json
-          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID/zip" > _approved_c6/artifact.zip
+          curl --fail --show-error --silent --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID/zip" \
+            --output _approved_c6/artifact.zip
           test "$(sha256sum _approved_c6/artifact.zip | cut -d ' ' -f1)" = "$C6_ARTIFACT_SHA"
           python - <<'PY'
           import json,os
