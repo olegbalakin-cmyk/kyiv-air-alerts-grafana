@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     env:
       GH_TOKEN: ${{ github.token }}
-      C6_PINNED_PHYSICAL_PROOF: ${{ runner.temp }}/c6-physical
+      C6_PINNED_PHYSICAL_PROOF: /tmp/c6-physical
     steps:
       - uses: actions/checkout@v4
         with:
