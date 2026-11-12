@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-PHYSICAL-E2E-OWNER-AUTH-01 — approved, not dispatched (2026-11-12; proposed on merge)
+
+- Owner approved one read-only physical E2E on PR #82 `82a7cc775ed2f2a6fd0134440db709690f0c04d1` and C2 #43055353190; branch/SHA Environment pin and manual dispatch pending. No new physical PASS; `GLOBAL_CUTOVER=NO`.
+
 ### C6-ONE-PHYSICAL-E2E-NEXT-01 — remove redundant fixture prerequisite (2026-11-12; proposed on merge)
 
 - PR #84 offline BLOCKED: no seven-table fixture. Existing physical generator already captures one read-only snapshot and builds six JSON; next PR #82 physical E2E requires fresh owner approval, no writes/cutover.
