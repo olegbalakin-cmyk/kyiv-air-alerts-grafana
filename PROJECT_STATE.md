@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-12. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01** (runner-only C3 QA PASS; cutover NO). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Physical Neon→six-JSON readback PASS #43187464328; release NO-GO.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-C3-PR90-FRONTEND-FIX-PASS-01** (actual frontend offline QA PASS; preview deployment OPEN). C2 #43055353190 SUCCESS: 33,135 episodes, 23-city QA, Git `site-prod@cf960d7c`; physical six-JSON readback #43187464328 PASS. Release NO-GO. `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -20,21 +20,21 @@ Latest accepted: **C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01** (runner-only C3 QA 
 - **23-city generator / publication:** [Physical #43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) on PR #82 `82a7cc77` **PASS**; artifact #13929117121: 6/6 JSON, 18/18 hashes, 23/23 historical receipts/freshness, 33,135 C2 canonical, 262 stale +75 later excluded. Read-only, no publication. Current freshness/Kyiv provenance and DST NOT certified; preview/C3 OPEN.
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
-- **Preview / C3:** [PR #87](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/87) scoped preview KPI guard [CI #43201183617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43201183617) PASS: 184/184 views, CSV 23/23, 23-city config rollback, 0 browser errors, 28 files restored. Actual frontend/Netlify unchanged; C3 operational gate OPEN.
+- **Preview / C3:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) base `site-prod`, exact `83f14e27`, [Actions #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) PASS: 184 city/mode views, 23 CSV, 23 rollback, zero JS/HTTP/external errors, 28 files restored. Public preview/operational C3 rollback OPEN.
 - **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
 
 ## Concrete next tasks
 
-1. **Next: one narrow frontend compatibility Draft PR** with the PR #87 proven source-aware KPI guard (only vetted Neon ref in Neon mode, preserve schema/city/count/generation checks); no merge or Netlify deployment without owner approval.
+1. **Next: Work B isolated Netlify preview READINESS** on PR #90 exact `83f14e27bf4675f64aff72fa20010630f0305d52` and artifact #13929117121. Confirm preview Git↔Neon source selection, six JSON SHA, deploy target, rollback plan; no public deployment without owner approval.
 2. Before cutover: approve public preview separately, demonstrate operational C3 rollback, certify current-source/Kyiv provenance. Research-only rollback is PASS; DST/Sevastopol `25006→25008` OPEN.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01 — scoped KPI preview PASS (2026-11-12)
+## C6-C3-PR90-FRONTEND-FIX-PASS-01 — real frontend isolated QA PASS (2026-11-12)
 
-- [PR #87](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/87) runner-only source guard, [Actions #43201183617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43201183617) SUCCESS (artifact #13935082806): 184/184 chart views; 23 CSV; 23 rollback; zero browser errors; 28 originals restored. Physical proof #43187464328 PASS. Public preview/frontend promotion/operational rollback/current-source certification still OPEN. `GLOBAL_CUTOVER=NO`.
+- Previous accepted `C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01`: PR #87 runner-only Neon index QA #43201183617 PASS. **Work A accepted:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) exact `83f14e27`, base `site-prod`; [CI #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) SUCCESS, artifact #13937630998: real `validIndex()` guarded, 184/184 views, CSV 23/23, rollback 23/23, 0 errors, 28 restored files. No merge, Neon readback, Netlify deployment or cutover; Work B readiness next. `GLOBAL_CUTOVER=NO`.
 
 ## C6-PHYSICAL-SIX-JSON-READBACK-PASS-01 — protected six-JSON physical PASS (2026-11-12)
 
