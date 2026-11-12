@@ -259,10 +259,15 @@ def run(args):
               "city_manifest", "city_csv", "generator", "dashboard")]
     if not all(p.is_file() for p in paths):
         raise RuntimeError("BLOCKED_INPUT_NOT_PRESENT")
+    previous_path = Path(args.previous_proposals).resolve() if args.previous_proposals else None
+    if previous_path:
+        if not previous_path.is_file():
+            raise RuntimeError("PREVIOUS_SHADOW_PROPOSALS_NOT_FOUND")
+        paths.append(previous_path)
     out = Path(args.output).resolve()
     ensure_output_isolated(out, paths)
     queue_path, evidence_path, receipt_path, matrix_path, revision_path, baseline_path, \
-        manifest_path, csv_path, generator_path, dashboard_path = paths
+        manifest_path, csv_path, generator_path, dashboard_path = paths[:10]
     before = {p.name + ":" + str(i): sha(p.read_bytes()) for i, p in enumerate(paths)}
     queue = load_queue(queue_path)
     if len({c["city_key"] for c in queue}) != 23:
@@ -276,7 +281,12 @@ def run(args):
     ledger = load_revision_rows(revision_path)
     original_articles, source_errors = anchored_articles(queue, original)
     reports = extract_cached_reports(queue, original_articles)
-    prepared = prepare(queue, ledger, reports, baseline)
+    previous_proposals = []
+    if previous_path:
+        previous_proposals, _ = read_pinned(previous_path)
+        if not isinstance(previous_proposals, list) or any(not isinstance(r, dict) for r in previous_proposals):
+            raise RuntimeError("PREVIOUS_PROPOSAL_FORMAT_INVALID")
+    prepared = prepare(queue, ledger, reports, baseline, previous_proposals)
     sources, clusters = source_index(matrix, receipts)
     candidate_to_event = {}
     for event in prepared["events"]:
@@ -299,7 +309,9 @@ def run(args):
     positive_id = CONFIRMED_ZAP_CANDIDATE
     bridge_error = None
     positive = candidate_to_event.get(positive_id)
-    if positive is not None and positive["category"] == "AUTO_READY":
+    if positive is not None and positive.get("action") == "PROPOSAL_ALREADY_PREPARED":
+        generator_result = {"status": "SKIPPED_ALREADY_RESERVED", "new_proposals": 0}
+    elif positive is not None and positive["category"] == "AUTO_READY":
         try:
             row = make_proposal(positive, proofs, manifest, city_rows, ledger)
             generator_result = generator_probe(generator_path, revision_path, row, city_rows,
@@ -322,7 +334,7 @@ def run(args):
             reasons.append("TRANSPORT_RECEIPT_NOT_FACT_EVIDENCE")
         if cid == positive_id and bridge_error:
             reasons.append("BLOCKED_GENERATOR_COMPATIBILITY")
-        if cid == positive_id and proposals:
+        if cid == positive_id and (proposals or positive.get("action") == "PROPOSAL_ALREADY_PREPARED"):
             status = "AUTO_READY"
             reasons = []
         elif event.get("category") == "AUTO_READY" and event.get("action") == "ALREADY_ACCOUNTED" and has_report:
@@ -347,9 +359,9 @@ def run(args):
         attack_decisions.append({
             "cluster_id": "oct_10_guided_bomb", "incident": positive_event.get("incident"),
             "candidate_ids": [positive_id], "status": by_id[positive_id]["status"],
-            "proposed_total": positive_event.get("confirmed_total_claim") if proposals else None,
-            "new_increment": int(proposals[0]["deaths_delta"]) if proposals else None,
-            "source_text_sha256": RETAINED_ZAP_TEXT_SHA256 if proposals else None,
+            "proposed_total": positive_event.get("confirmed_total_claim") if by_id[positive_id]["status"] == "AUTO_READY" else None,
+            "new_increment": int(proposals[0]["deaths_delta"]) if proposals else 0 if positive_event.get("action") == "PROPOSAL_ALREADY_PREPARED" else None,
+            "source_text_sha256": RETAINED_ZAP_TEXT_SHA256 if by_id[positive_id]["status"] == "AUTO_READY" else None,
             "reasons": by_id[positive_id]["reasons"], "publication_allowed": False})
     for group in clusters:
         ids = group["candidate_ids"]
@@ -398,6 +410,7 @@ def run(args):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--previous-proposals", help="JSON proposals from an earlier shadow-only execution")
     for f in ("queue", "evidence", "receipts", "matrix", "revisions", "baseline",
               "city_manifest", "city_csv", "generator", "dashboard", "output"):
         p.add_argument("--" + f.replace("_", "-"), required=True)
