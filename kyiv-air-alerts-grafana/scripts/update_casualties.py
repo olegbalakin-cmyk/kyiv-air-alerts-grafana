@@ -190,10 +190,172 @@ def load_revisions() -> list[dict]:
                     "source_url": (row.get("source_url") or "").strip(),
                     "note": (row.get("note") or "").strip(),
                     "candidate_ids": (row.get("candidate_ids") or "").strip(),
+                    # Optional, evidence-backed incident contract; old CSV headers still load.
+                    "incident_id": (row.get("incident_id") or "").strip(),
+                    "count_kind": (row.get("count_kind") or "").strip().lower(),
+                    "baseline_credited": (row.get("baseline_credited") or "").strip(),
+                    "identity_proof": (row.get("identity_proof") or "").strip(),
+                    "credited_proof": (row.get("credited_proof") or "").strip(),
                 }
             )
     return rows
 
+
+
+# Compatibility fence for the ONE manually accepted, pre-contract production row.
+# Any new/altered legacy-format confirmed row fails closed; do not generalize this.
+_LEGACY_SUMY_ID = (
+    "casualty:sumy:2026-09-20:fpv-double-strike-zarichnyi-apartment-entrance"
+)
+_LEGACY_SUMY_CANDIDATE = "a25952a45587fdc555fbbb43"
+_LEGACY_SUMY_URL = (
+    "https://npu.gov.ua/news/dvoie-liudei-zahynuly-troie-poraneni-sered-nykh-dytyna-"
+    "politsiia-dokumentuie-naslidky-obstriliv-sumshchyny"
+)
+_PROOF_FORMAT = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\s]+)\Z")
+
+
+def _pinned_legacy_sumy(row: dict) -> bool:
+    return (
+        row["record_id"] == _LEGACY_SUMY_ID
+        and row["city_key"] == "sumy"
+        and row["attack_date"] == date(2026, 9, 20)
+        and row["deaths_delta"] == 1
+        and row["observed_at"] == "2026-10-09T11:11:26+03:00"
+        and row["candidate_ids"] == _LEGACY_SUMY_CANDIDATE
+        and row["source_url"] == _LEGACY_SUMY_URL
+        and row["status"] == "confirmed"
+        and not any(row.get(k) for k in (
+            "incident_id", "count_kind", "baseline_credited",
+            "identity_proof", "credited_proof"
+        ))
+    )
+
+
+def reconcile_confirmed_revisions(revisions: list[dict]) -> list[dict]:
+    """One documented incident -> one effective delta, with unknowns rejected.
+
+    For count_kind=cumulative, deaths_delta is an official TOTAL for the event;
+    only max(0, latest_total - already_credited_in_baseline) is applied.
+    For count_kind=delta, deaths_delta is an independently verified increment;
+    only ONE delta record may exist per incident. Same-event additional deltas
+    require a new reviewed cumulative statement rather than guessed summation.
+    """
+    grouped: dict[str, list[dict]] = defaultdict(list)
+    effective = []
+    owner_by_candidate: dict[str, str] = {}
+    owner_by_source: dict[str, str] = {}
+    owner_by_identity_proof: dict[str, str] = {}
+
+    for row in revisions:
+        if row["status"] != "confirmed":
+            continue
+        record_id = row["record_id"]
+        incident = row.get("incident_id", "")
+        if not incident:
+            if not _pinned_legacy_sumy(row):
+                raise RuntimeError(
+                    f"Confirmed revision {record_id}: missing documented incident "
+                    "identity / credited provenance (unsafe automatic credit)"
+                )
+            incident = "legacy-pinned-sumy-september-20"
+            effective.append(dict(row, _source_records=1, _baseline_credited=0))
+        else:
+            if not re.fullmatch(r"incident:[a-z0-9][a-z0-9:_-]{7,119}", incident):
+                raise RuntimeError(f"Confirmed revision {record_id}: invalid incident_id")
+            if row.get("count_kind") not in {"cumulative", "delta"}:
+                raise RuntimeError(f"Confirmed revision {record_id}: invalid count_kind")
+            credit = row.get("baseline_credited", "")
+            if not re.fullmatch(r"(?:0|[1-9][0-9]*)", credit):
+                raise RuntimeError(
+                    f"Confirmed revision {record_id}: undocumented baseline_credited"
+                )
+            row["_baseline_credited"] = int(credit)
+            if row["deaths_delta"] < 0:
+                raise RuntimeError(f"Confirmed revision {record_id}: negative death count")
+            for field in ("identity_proof", "credited_proof"):
+                if not _PROOF_FORMAT.fullmatch(row.get(field, "")):
+                    raise RuntimeError(
+                        f"Confirmed revision {record_id}: missing immutable {field}"
+                    )
+            if not row.get("candidate_ids") or not row.get("source_url"):
+                raise RuntimeError(
+                    f"Confirmed revision {record_id}: missing source/candidate provenance"
+                )
+            try:
+                observed = datetime.fromisoformat(row["observed_at"])
+                if observed.tzinfo is None or observed.utcoffset() is None:
+                    raise ValueError("timezone missing")
+            except ValueError as exc:
+                raise RuntimeError(
+                    f"Confirmed revision {record_id}: observed_at must include timezone"
+                ) from exc
+            grouped[incident].append(row)
+
+        # Candidate/source reuse under different incident identities cannot be
+        # treated as a different death without independent provenance.
+        for candidate in re.split(r"[,;\s|]+", row.get("candidate_ids", "")):
+            if not candidate:
+                continue
+            if candidate in owner_by_candidate and owner_by_candidate[candidate] != incident:
+                raise RuntimeError(f"Ambiguous candidate_id across incidents: {candidate}")
+            owner_by_candidate[candidate] = incident
+        if row.get("source_url"):
+            url = row["source_url"]
+            if url in owner_by_source and owner_by_source[url] != incident:
+                raise RuntimeError(f"Ambiguous source_url across incidents: {url}")
+            owner_by_source[url] = incident
+        proof = row.get("identity_proof")
+        if proof:
+            if proof in owner_by_identity_proof and owner_by_identity_proof[proof] != incident:
+                raise RuntimeError(f"Ambiguous identity_proof across incidents: {proof}")
+            owner_by_identity_proof[proof] = incident
+
+    for incident, group in sorted(grouped.items()):
+        first = group[0]
+        identity_fields = (
+            "city_key", "attack_date", "count_kind", "baseline_credited",
+            "identity_proof", "credited_proof"
+        )
+        for row in group[1:]:
+            if any(row[field] != first[field] for field in identity_fields):
+                raise RuntimeError(
+                    f"Conflicting identity/credited provenance for incident {incident}"
+                )
+        if first["count_kind"] == "delta":
+            if len(group) != 1:
+                raise RuntimeError(
+                    f"Multiple incremental records for incident {incident}; "
+                    "require a reviewed cumulative total"
+                )
+            increment = first["deaths_delta"]
+            chosen = first
+        else:
+            snapshots = sorted(
+                group, key=lambda r: datetime.fromisoformat(r["observed_at"])
+            )
+            for previous, current in zip(snapshots, snapshots[1:]):
+                if current["deaths_delta"] < previous["deaths_delta"]:
+                    raise RuntimeError(
+                        f"Downward/ambiguous cumulative update for incident {incident}: "
+                        "manual reconciliation required"
+                    )
+                if (
+                    current["deaths_delta"] != previous["deaths_delta"]
+                    and current["observed_at"] == previous["observed_at"]
+                ):
+                    raise RuntimeError(
+                        f"Unordered cumulative snapshots for incident {incident}"
+                    )
+            chosen = snapshots[-1]
+            increment = max(
+                0, chosen["deaths_delta"] - first["_baseline_credited"]
+            )
+        effective.append(dict(
+            chosen, deaths_delta=increment, _source_records=len(group),
+            _baseline_credited=first["_baseline_credited"],
+        ))
+    return effective
 
 def month_timestamp(month: str) -> str:
     year, mon = map(int, month.split("-"))
@@ -212,6 +374,11 @@ def build_monthly(
             continue
         month = row["attack_date"].strftime("%Y-%m")
         deltas[month] += row["deaths_delta"]
+        if row.get("_baseline_credited", 0) > int(base.get(month, {}).get("deaths", 0)):
+            raise RuntimeError(
+                f"Undocumented baseline credit for {city_key} {month}: "
+                "not present in baseline month"
+            )
 
     all_months = sorted(set(base) | set(deltas))
     output = []
@@ -529,8 +696,16 @@ def apply_city_revision_overlay(
     original_total = sum(int(row.get("deaths") or 0) for row in monthly)
     by_month = {str(row.get("month")): row for row in monthly if row.get("month")}
 
+    claimed_baseline_credit = defaultdict(int)
     for revision in confirmed:
         month = revision["attack_date"].strftime("%Y-%m")
+        claimed_baseline_credit[month] += revision.get("_baseline_credited", 0)
+        source_base = int(by_month.get(month, {}).get("deaths", 0))
+        if claimed_baseline_credit[month] > source_base:
+            raise RuntimeError(
+                f"Unproven baseline credit for {city_key} {month}: "
+                f"{claimed_baseline_credit[month]} exceeds {source_base}"
+            )
         if month not in by_month:
             item = {
                 "time": month_timestamp(month),
@@ -555,7 +730,9 @@ def apply_city_revision_overlay(
     meta = dict(series.get("meta") or {})
     meta["baseline_confirmed_deaths"] = original_total
     meta["confirmed_deaths"] = sum(int(row.get("deaths") or 0) for row in monthly)
-    meta["confirmed_revision_records"] = len(confirmed)
+    meta["confirmed_revision_records"] = sum(
+        int(row.get("_source_records", 1)) for row in confirmed
+    )
     return {"meta": meta, "monthly": monthly}
 
 
@@ -563,6 +740,7 @@ def update_dashboard_data(no_network: bool) -> None:
     baseline = load_baseline()
     validate_baseline(baseline)
     revisions = load_revisions()
+    effective_revisions = reconcile_confirmed_revisions(revisions)
     routes = city_baseline_routes()
     unknown_revision_cities = sorted(
         {
@@ -583,7 +761,7 @@ def update_dashboard_data(no_network: bool) -> None:
     if not isinstance(queue, list):
         queue = []
 
-    monthly = build_monthly(baseline, revisions, city_key="kyiv")
+    monthly = build_monthly(baseline, effective_revisions, city_key="kyiv")
     confirmed_kyiv = [
         r for r in revisions
         if r["status"] == "confirmed" and r.get("city_key") == "kyiv"
@@ -625,7 +803,7 @@ def update_dashboard_data(no_network: bool) -> None:
             raise RuntimeError(f"Missing validated casualty baseline for {city_key}")
         city_series[city_key] = apply_city_revision_overlay(
             city_series[city_key],
-            revisions,
+            effective_revisions,
             city_key,
         )
     dashboard_data["casualties_by_city"] = city_series
