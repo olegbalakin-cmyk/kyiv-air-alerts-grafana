@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-ONE-PHYSICAL-E2E-NEXT-01** (coordination only; proof not run). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent Neon→JSON physical readback attempted but no six-file PASS.** `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C6-PHYSICAL-E2E-OWNER-AUTH-01** (one exact-head read-only proof approved; not yet dispatched). First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent Neon→JSON physical readback attempted but no six-file PASS.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -25,13 +25,17 @@ Latest accepted: **C6-ONE-PHYSICAL-E2E-NEXT-01** (coordination only; proof not r
 
 ## Concrete next tasks
 
-1. **Next: one new owner-approved physical read-only E2E**, [PR #82](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/82) exact SHA `82a7cc775ed2f2a6fd0134440db709690f0c04d1`, pinned C2 #43055353190. Existing `generator.snapshot()` reads all seven Neon sets in one read-only transaction and feeds the six-JSON generator. No additional private-fixture prerequisite. No owner approval yet for this SHA.
+1. **Next: one new owner-approved physical read-only E2E**, [PR #82](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/82) exact SHA `82a7cc775ed2f2a6fd0134440db709690f0c04d1`, pinned C2 #43055353190. Existing `generator.snapshot()` reads all seven Neon sets in one read-only transaction and feeds the six-JSON generator. No additional private-fixture prerequisite. Owner authorized ONE run on this SHA (2026-11-12); GitHub Environment exact branch/SHA pin and manual dispatch still pending.
 2. If six-file physical E2E and 23-city parity PASS, proceed to reversible preview/browser/rollback C3. If BLOCKED, record only the exact gate; no automatic re-run or new test infrastructure. Sevastopol `25006→25008` and DST remain separately gated.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-PHYSICAL-E2E-OWNER-AUTH-01 — one protected E2E authorized (2026-11-12)
+
+- Owner approved ONE read-only physical six-JSON proof on PR #82 `82a7cc775ed2f2a6fd0134440db709690f0c04d1` and frozen C2 #43055353190. Protected Environment pin and owner dispatch pending. No workflow run or cutover.
+
 ## C6-ONE-PHYSICAL-E2E-NEXT-01 — simplify E2E (2026-11-12)
 
 - PR #84 lacks full offline fixture; existing physical read-only generator already reads all seven tables in one transaction and builds six JSON. Next: one separately owner-approved PR #82 physical E2E. No cutover.
