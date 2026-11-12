@@ -1,0 +1,137 @@
+name: C3 live read-only Netlify preview browser/CSV QA
+on:
+  push:
+    branches: [research-c3-postdeploy-live-qa-2026-11-12]
+    paths: [".github/workflows/c3-postdeploy-live-qa.yml"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  live-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install existing browser test dependency
+        run: python -m pip install playwright==1.64.1
+      - name: Retrieve pinned prepared C3 package
+        run: |
+          mkdir -p /tmp/c3-hosted/in /tmp/c3-hosted/proof
+          gh run download 43208800105 -R "$GITHUB_REPOSITORY" -n c3-netlify-preview-ready-43208800105 -D /tmp/c3-hosted/in
+      - name: Read-only verify actual Netlify HTTPS assets and browser behavior
+        run: |
+          python - <<'PY'
+          import hashlib,json,shutil,urllib.request,urllib.parse,zipfile,traceback
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          base='https://c3-neon-83f14e27--ukraine-air-alerts.netlify.app/'
+          zip_path=Path('/tmp/c3-hosted/in/c3-netlify-preview-site.zip')
+          out=Path('/tmp/c3-hosted/proof');out.mkdir(parents=True,exist_ok=True)
+          report={'deploy':'6af5aecd8901ea2a40de09ad','scope':'READ_ONLY_LIVE_C3_PREVIEW','files_verified':[],'csv':[],
+          'views':{},'js_errors':[],'http_errors':[],'external_requests':[],'verdict':'BLOCKED'}
+          def sha(b):return hashlib.sha256(b).hexdigest()
+          def get(n):
+           req=urllib.request.Request(urllib.parse.urljoin(base,n),headers={'User-Agent':'C3-live-qa'})
+           with urllib.request.urlopen(req,timeout=30) as r:
+            content=r.read();headers=dict(r.headers.items());url=r.url
+            assert r.status==200
+           assert urllib.parse.urlparse(url).netloc==urllib.parse.urlparse(base).netloc
+           return content,headers
+          try:
+           assert sha(zip_path.read_bytes())=='3e453b78f57bb1455a2b1dc13f59868be38bac5d1832ba5cebd123d5715f4c1b'
+           with zipfile.ZipFile(zip_path) as z:
+            hashes={n:sha(z.read(n)) for n in z.namelist()}
+            cities=sorted(json.loads(z.read('data/neon/dashboard_data.json'))['cities'])
+            man=json.loads(z.read('preview-manifest.json'))
+           assert len(hashes)==29 and len(cities)==23
+           assert man['source_sha256']=={k:v for k,v in hashes.items() if k.startswith('data/neon/')}
+           assert man['git_source_sha256']=={k:v for k,v in hashes.items() if k.startswith('data/legacy/')}
+           for name,want in hashes.items():
+            if name in ('.gitignore','_headers'):continue
+            got,headers=get(name)
+            assert sha(got)==want,('DEPLOYED_HASH_MISMATCH',name,sha(got),want)
+            report['files_verified'].append(name)
+            if name=='index.html':
+             robots={k.lower():v for k,v in headers.items()}.get('x-robots-tag','')
+             assert 'noindex' in robots.lower(),('NOINDEX_MISSING',robots)
+           with sync_playwright() as pw:
+            exe=shutil.which('google-chrome') or shutil.which('chromium')
+            assert exe,'CHROME_NOT_FOUND'
+            browser=pw.chromium.launch(executable_path=exe,headless=True,args=['--no-sandbox'])
+            ctx=browser.new_context(viewport={'width':1440,'height':1080},accept_downloads=True)
+            ctx.add_init_script("try{localStorage.setItem('air-alerts-intro-tour-v5','done')}catch(e){}")
+            def route(r):
+             if r.request.url.startswith(base):r.continue_()
+             else:
+              report['external_requests'].append(r.request.url)
+              r.abort()
+            ctx.route('**/*',route)
+            page=ctx.new_page()
+            page.on('pageerror',lambda e:report['js_errors'].append(str(e)))
+            page.on('response',lambda r:report['http_errors'].append([r.status,r.url]) if r.status>=400 else None)
+            def ready():
+             page.wait_for_function("typeof state!=='undefined' && !!state.data && !!state.charts.cityIntensityChart",timeout=90000)
+             if page.locator('#tourSkip').is_visible():page.locator('#tourSkip').click()
+            def index():return page.evaluate("() => state.historicalDaily?.meta?.source_ref || null")
+            def verify(modes,csv=False):
+             count=0
+             for city in cities:
+              page.locator('#citySelect').select_option(city)
+              for period in modes:
+               page.locator('#cityPeriod').select_option(period)
+               x=page.evaluate("""() => {const a=state.charts.cityIntensityChart,b=state.charts.cityDurationChart;return {city:document.querySelector('#citySelect').value,period:document.querySelector('#cityPeriod').value,n:a?.data?.labels?.length,m:b?.data?.labels?.length,w:a?.width,h:a?.height}}""")
+               assert x['city']==city and x['period']==period and x['n'] and x['m']==x['n'] and x['w'] and x['h'],('CHART_FAIL',x)
+               count+=1
+              if csv:
+               page.locator('#cityPeriod').select_option('monthly')
+               with page.expect_download(timeout=25000) as event:
+                page.locator('[data-csv-chart="cityIntensityChart"] button.csv-export-button:not(.chart-image-button):not(.chart-embed-button)').click()
+               dest=out/(city+'-monthly.csv')
+               event.value.save_as(dest)
+               raw=dest.read_bytes()
+               assert len(raw)>100 and (b',' in raw or b';' in raw)
+               report['csv'].append({'city':city,'sha256':sha(raw)})
+             return count
+            page.goto(base,wait_until='networkidle',timeout=90000);ready()
+            assert page.locator('#previewSource').input_value()=='neon' and index()=='neon:br-bold-mode-b5rub8pq'
+            assert page.evaluate("() => window.PREVIEW_CONFIG?.source==='neon' && window.PREVIEW_CONFIG?.dataBase==='./data/neon/'")
+            assert not page.evaluate("() => Object.values(state.data.cities).some(c=>c.meta?.current_source_verified===true)")
+            assert 'HISTORICAL STATISTICS ONLY' in page.locator('#researchNotice').inner_text()
+            report['views']['neon']=verify(['daily28','weekly','rolling30','rolling90','rolling180','calendarWeekly','monthly','allTime'],True)
+            page.screenshot(path=str(out/'neon-live.png'))
+            page.locator('#previewSource').select_option('legacy')
+            page.wait_for_url('**preview_source=legacy',timeout=30000);ready()
+            assert index()=='site-prod'
+            report['views']['git']=verify(['monthly'])
+            page.screenshot(path=str(out/'git-live.png'))
+            page.locator('#previewSource').select_option('neon')
+            page.wait_for_url('**preview_source=neon',timeout=30000);ready()
+            assert index()=='neon:br-bold-mode-b5rub8pq'
+            report['views']['neon_return']=True
+            ctx.close();browser.close()
+           assert report['views']['neon']==184 and report['views']['git']==23 and len(report['csv'])==23
+           assert not report['js_errors'] and not report['http_errors'] and not report['external_requests']
+           report['verdict']='PASS_LIVE_C3'
+          except Exception as exc:
+           report['error']=str(exc);report['traceback']=traceback.format_exc()
+          finally:
+           (out/'RESULT.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+           print('C3_LIVE_VERDICT='+report['verdict'])
+           print('C3_LIVE_VERIFIED_FILES='+str(len(report['files_verified']))+' CSV='+str(len(report['csv'])))
+           print('C3_LIVE_BROWSER='+json.dumps(report['views']))
+          if report['verdict']!='PASS_LIVE_C3':raise SystemExit(2)
+          
+          PY
+      - name: Upload live QA proof even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-netlify-live-qa-${{ github.run_id }}
+          path: /tmp/c3-hosted/proof
+          retention-days: 30
+          if-no-files-found: warn
