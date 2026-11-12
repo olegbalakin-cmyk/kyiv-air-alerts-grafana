@@ -150,3 +150,9 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
   .chart-export-row[data-csv-chart="cityIntensityChart"]{justify-content:flex-end}
   .chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control{margin-right:auto}
 }
+
+/* Allow Chart.js canvas and chart actions to shrink on narrow viewports. */
+.chart-grid > .chart-card{min-width:0}
+.chart-grid .chart-wrap{min-width:0;max-width:100%}
+.chart-grid .chart-wrap canvas{max-width:100%}
+.chart-export-row[data-csv-chart="cityIntensityChart"]{min-width:0}
