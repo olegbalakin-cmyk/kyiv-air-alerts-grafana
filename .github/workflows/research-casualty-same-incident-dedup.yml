@@ -1,0 +1,37 @@
+name: Research casualty clean same-incident dedup (offline)
+on:
+  push:
+    branches:
+      - research-casualty-dedup-clean-site-prod-2026-11-12
+permissions:
+  contents: read
+jobs:
+  dedup:
+    if: github.ref == 'refs/heads/research-casualty-dedup-clean-site-prod-2026-11-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch immutable production source
+        run: git fetch --no-tags origin fc7261660bdee75ee59296ee94cc1189be6b1a22
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install frozen production generator dependencies
+        shell: bash
+        run: python -m pip install -r <(git show fc7261660bdee75ee59296ee94cc1189be6b1a22:kyiv-air-alerts-grafana/requirements.txt)
+      - name: Full physical offline dedup proof (domain FAIL fails job)
+        run: python research/casualty_same_incident_dedup_2026_11_12/test_dedup.py
+      - name: Upload retained verification proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-clean-dedup-${{ github.run_id }}
+          path: research/casualty_same_incident_dedup_2026_11_12/proof/
+          if-no-files-found: warn
+          retention-days: 30
