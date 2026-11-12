@@ -32,6 +32,18 @@ on:
         description: 'Exact dashboard generation'
         type: string
         required: false
+      work_a_run_id:
+        description: 'Independent Work A successful Actions run ID'
+        type: string
+        required: false
+      work_a_artifact_id:
+        description: 'Independent Work A physical proof artifact ID'
+        type: string
+        required: false
+      work_a_artifact_sha256:
+        description: 'Exact Work A proof artifact ZIP digest'
+        type: string
+        required: false
   push:
     branches: [site-prod]
     paths:
@@ -116,6 +128,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           C6_RELEASE_OWNER_APPROVED: ${{ vars.C6_NEON_RELEASE_OWNER_APPROVED }}
+          C6_APPROVED_WORK_A_RUN: ${{ vars.C6_NEON_WORK_A_APPROVED_RUN_ID }}
+          WORK_A_RUN_ID: ${{ inputs.work_a_run_id }}
+          WORK_A_ARTIFACT_ID: ${{ inputs.work_a_artifact_id }}
+          WORK_A_ARTIFACT_SHA: ${{ inputs.work_a_artifact_sha256 }}
           C6_RUN_ID: ${{ inputs.c6_run_id }}
           C6_ATTEMPT: ${{ inputs.c6_run_attempt }}
           C6_ARTIFACT_ID: ${{ inputs.c6_artifact_id }}
@@ -126,11 +142,17 @@ jobs:
           set -euo pipefail
           # Separate owner action is mandatory. Default unset/OFF.
           test "$C6_RELEASE_OWNER_APPROVED" = "true"
+          test -n "$WORK_A_RUN_ID" && test "$C6_APPROVED_WORK_A_RUN" = "$WORK_A_RUN_ID"
+          [[ "$WORK_A_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ && "$WORK_A_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ ]]
           [[ "$C6_RUN_ID" =~ ^[0-9]+$ && "$C6_ATTEMPT" =~ ^[0-9]+$ && "$C6_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$C6_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ && "$APPROVED_KPI_SHA" =~ ^[a-f0-9]{64}$ ]]
           test -n "$APPROVED_GENERATION"
           mkdir -p _approved_c6
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C6_RUN_ID" > _approved_c6/run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > _approved_c6/work-a-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > _approved_c6/work-a-artifact.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID/zip" > _approved_c6/work-a-artifact.zip
+          test "$(sha256sum _approved_c6/work-a-artifact.zip | cut -d ' ' -f1)" = "$WORK_A_ARTIFACT_SHA"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID" > _approved_c6/artifact.json
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID/zip" > _approved_c6/artifact.zip
           test "$(sha256sum _approved_c6/artifact.zip | cut -d ' ' -f1)" = "$C6_ARTIFACT_SHA"
@@ -147,6 +169,14 @@ jobs:
           assert art['name']==f"c6-neon-git-preparation-{run['id']}-{run['run_attempt']}"
           assert art['workflow_run']['id']==run['id'] and not art['expired']
           assert art.get('digest')=='sha256:'+os.environ['C6_ARTIFACT_SHA']
+          work=json.loads(Path('_approved_c6/work-a-run.json').read_text())
+          proof=json.loads(Path('_approved_c6/work-a-artifact.json').read_text())
+          assert work['id']==int(os.environ['WORK_A_RUN_ID'])
+          assert work['id']!=run['id']
+          assert work['status']=='completed' and work['conclusion']=='success'
+          assert proof['id']==int(os.environ['WORK_A_ARTIFACT_ID'])
+          assert proof['workflow_run']['id']==work['id'] and not proof['expired']
+          assert proof.get('digest')=='sha256:'+os.environ['WORK_A_ARTIFACT_SHA']
           PY
           python - <<'PY'
           import hashlib,json,os,zipfile
@@ -189,7 +219,32 @@ jobs:
               assert meta['expected_cities']==meta['verified_count']==23
               assert len(index['cities'])==23
               Path('historical-daily-kpi.json').write_bytes(raw)
-          print('APPROVED_SIX_FILE_KPI_EXACT_SHA_SOURCE_GENERATION_PASS')
+          with zipfile.ZipFile(target/'work-a-artifact.zip') as z:
+              names=set(z.namelist())
+              def unique(suffix):
+                  found=[n for n in names if n.endswith(suffix)]
+                  assert len(found)==1
+                  return json.loads(z.read(found[0]))
+              proof=unique('verdict.json')
+              readback=unique('readback_proof.json')
+              manifest=unique('sha256_manifest.json')
+              assert proof['status']=='PASS'
+              assert proof['physical_neon_readback_run'] is True
+              assert proof['city_count']==23
+              assert proof['neon_branch']==report['neon_branch']
+              assert proof['c2_corpus_sha256']==report['c2_corpus_sha256']
+              assert proof['candidate_files']=={
+                  n:files['historical-daily-kpi.json' if n=='historical-daily-kpi.json'
+                          else 'kyiv-air-alerts-grafana/data/'+n]
+                  for n in ('dashboard_data.json','site_derived.json','alerts_combined.json',
+                            'kyiv_threat_mix.json','sevastopol_events.json','historical-daily-kpi.json')}
+              identity=readback['capture_run_identity']
+              assert identity['github_run_id']==int(os.environ['C6_RUN_ID'])
+              assert identity['github_run_attempt']==int(os.environ['C6_ATTEMPT'])
+              assert identity['workflow_sha']==json.loads(Path('_approved_c6/run.json').read_text())['head_sha']
+              assert readback['c2_corpus_sha256']==report['c2_corpus_sha256']
+              assert isinstance(manifest['files'],dict) and len(manifest['files'])>=18
+          print('APPROVED_SIX_FILE_KPI_AND_INDEPENDENT_WORK_A_PROOF_PASS')
           PY
 
       - name: Build static frontend
