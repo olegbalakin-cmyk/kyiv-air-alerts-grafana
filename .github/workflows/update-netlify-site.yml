@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   update-site:
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.c6_neon_git_release }}
+    if: ${{ (github.event_name != 'workflow_dispatch' || !inputs.c6_neon_git_release) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -760,6 +760,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_ENABLED: ${{ vars.C6_NEON_GIT_RELEASE_ENABLED }}
+      GIT_ONLY_PUBLISHER_PAUSED: ${{ vars.C6_GIT_ONLY_PUBLISHER_PAUSED }}
       OWNER_GRANT_JSON: ${{ secrets.C6_NEON_GIT_OWNER_GRANT_JSON }}
       PREP_ARTIFACT_ID: ${{ inputs.c6_preparation_artifact_id }}
       WORK_A_ARTIFACT_ID: ${{ inputs.work_a_proof_artifact_id }}
@@ -768,6 +769,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$RELEASE_ENABLED" = "true"
+          test "$GIT_ONLY_PUBLISHER_PAUSED" = "true"
           test -n "$OWNER_GRANT_JSON"
           [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
@@ -858,6 +860,28 @@ jobs:
           assert len(proof_roots)==1
           (root/"work-a-path.txt").write_text(str(proof_roots[0]))
           print("EXACT_PREPARED_AND_WORK_A_ARTIFACTS_UNPACKED")
+          PY
+      - name: Verify approved deployed Netlify root KPI bytes before Git commit
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c6-release"
+          curl --fail --show-error --silent --location --retry 3 \
+            --header 'Cache-Control: no-cache' \
+            "https://ukraine-air-alerts.netlify.app/historical-daily-kpi.json" \
+            --output "$root/netlify-static-kpi.json"
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c6-release"
+          approval=json.loads((root/"owner.json").read_text())
+          assert approval.get("netlify_http_static_verified") is True
+          expected=approval["approved_netlify_static_kpi_sha256"]
+          actual=hashlib.sha256((root/"netlify-static-kpi.json").read_bytes()).hexdigest()
+          assert actual==expected, "NETLIFY_STATIC_KPI_SHA_MISMATCH"
+          index=json.loads((root/"netlify-static-kpi.json").read_text())
+          assert index["meta"]["source_dashboard_generated_at"]==approval["approved_generation"]
+          assert index["meta"]["release_manifest_sha256"]==approval["release_manifest_sha256"]
+          print("EXACT_NETLIFY_STATIC_KPI_HTTP_SHA_PASS")
           PY
       - name: Validate owner receipt and six FINAL bytes; then single fast-forward Git push
         env:
