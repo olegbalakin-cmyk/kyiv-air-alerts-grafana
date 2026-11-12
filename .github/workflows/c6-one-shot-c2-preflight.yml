@@ -54,4 +54,10 @@ jobs:
             echo "VARIABLE_GET_NOT_PERMITTED"
             sed -E 's/(token|authorization|password|secret).*/[redacted]/I' "$RUNNER_TEMP/var-err" | head -c 300 || true
           fi
+          test "$PREP_ENABLED" = "true" || { echo "STOP_REQUIRED_C6_PREPARATION_NOT_ENABLED"; exit 2; }
+          test "$BUNDLE_EXPORT" = "true" || { echo "STOP_C2_BUNDLE_EXPORT_OFF"; exit 2; }
+          test "$HISTORY_CAPTURE" = "true" || { echo "STOP_C2_CAPTURE_OFF"; exit 2; }
+          test "$PUBLISHER_PAUSED" != "true" || { echo "STOP_NORMAL_C2_PAUSED"; exit 2; }
+          test "$RELEASE_ENABLED" != "true" || { echo "STOP_NEON_PUBLICATION_GATE_ENABLED"; exit 2; }
+          echo "ONE_CONTROLLED_C2_PRECONDITIONS_PASS"
           echo "READ_ONLY_PREFLIGHT_NO_WRITES_NO_DISPATCH"
