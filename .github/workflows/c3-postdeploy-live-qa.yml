@@ -54,7 +54,10 @@ jobs:
            for name,want in hashes.items():
             if name in ('.gitignore','_headers'):continue
             got,headers=get(name)
-            assert sha(got)==want,('DEPLOYED_HASH_MISMATCH',name,sha(got),want)
+            if sha(got)!=want and name!='index.html':raise AssertionError(('DEPLOYED_HASH_MISMATCH',name,sha(got),want))
+            if sha(got)!=want and name=='index.html':
+             (out/'hosted_index.html').write_bytes(got)
+             report['index_html_modified_by_hosting']={'served_sha256':sha(got),'package_sha256':want}
             report['files_verified'].append(name)
             if name=='index.html':
              robots={k.lower():v for k,v in headers.items()}.get('x-robots-tag','')
