@@ -1,27 +1,34 @@
 # Project State — coordination snapshot
 
-**2026-11-12 NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** Latest accepted: **C3-FINAL-AUTHORIZED-KPI-PR104-EXACT-HEAD-12PASS-01** — final KPI release contract offline PASS; production still Git-only.
+**2026-11-12 NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** Latest: **C3-C6-WORKJ-FINAL-RELEASE-PREFLIGHT-NOGO-01**. Historic Neon data and component-code proofs PASS; release integration and operational rollback blocked.
 
-Read main:PROJECT_STATE.md and CHANGELOG.md, then PR #78. Verify exact SHA/Actions/artifacts. Keep production, C2/C3, Neon, casualty, WIP/history/backfill and DST separate. Archives: [index](docs/coordination-archive/README.md). Offline test is not release approval.
+Read main PROJECT_STATE.md/CHANGELOG.md first; newer PR #78 governs. Verify exact SHA, Actions and artifacts. Separate production, C2/C3, Neon, casualty, DST, WIP/backfill. [Immutable archive index](docs/coordination-archive/README.md).
 
 ## Gates
 
-- **Production:** `site-prod@d0a7d22d` still Git-only; C2 #43262387718 23/23 receipts; Netlify current deployment `6adb629bc3ebc570117d82e1` unchanged.
-- **Historical data:** PR #103 SQL 33,267/33,267, 23/23, 0 diffs; owner physical #43299402658 SUCCESS artifact #13980242828, 6/6 candidate hashes, 18/18 evidence SHA, no writes. **`NEW_C2_NEON_JSON_PARITY=PASS` historical only**, live current alerts not certified, research authority OFF.
-- **Frontend:** PR #100 `19446ba9` guarded Git Neon KPI consumer offline READY, Draft/unmerged.
-- **Release contract code:** PR #95 `2064f38c` owner-gated single Git publisher default OFF; PR #104 **`ea71a0e2`**, exact-head [Actions #43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) 12/12 and PR #95→#104→#100 fixture E2E PASS. Four-file final-authorized KPI / immutable Work A proof binding; Git-only Netlify path unchanged, Neon mode OFF. **`FINAL_NEON_KPI_RELEASE_CONTRACT_CODE_READY=YES` offline**, but no separately owner-authorized final release artifact, no Git push/Netlify deployment/production GO.
-- **Rollback:** PR #107 `581b1cff`, offline 32/32+8/8 PASS; **`ROLLBACK_OFFLINE_READY=YES; ROLLBACK_OPERATIONAL_READY=NO`** until separately owner-authorized non-prod Netlify alias deploy permission test and a fresh compatible cutover-time Git-only package preserving later C2/casualty/aux.
-- **Separate:** Sevastopol `25006→25008`, `25100` unresolved. Casualty and DST distinct; DST OFF.
+- **Production:** Git-only `site-prod@d0a7d22d`, `main@375e6935`; C2 #43262387718 23/23 receipts; Netlify `6adb629bc3ebc570117d82e1` unchanged.
+- **History:** PR #103 33,267/33,267 SQL parity; physical owner [#43299402658](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43299402658), artifact #13980242828, 23/23 historical cities, six candidate + 18 evidence SHA PASS. `NEW_C2_NEON_JSON_PARITY=PASS` for that C2 only; live current not certified, research publication OFF.
+- **Code:** PR #95 `2064f38c` publisher default OFF; PR #104 `ea71a0e2` and PR #100 `19446ba9` exact-head offline [#43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) 12/12 PR95→104→100 fixture PASS. All Draft/unmerged, non-overlapping files. **`FINAL_NEON_KPI_RELEASE_CONTRACT_CODE_READY=YES` offline; `RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO`.**
+- **Final artifact blocker:** #95 creates final `RELEASE_BINDING`, `RELEASE_MANIFEST` and six final SHAs only in owner-gated Git-publishing job; #104 needs an immutable separately pinned FINAL artifact *before* Netlify deploy. `FINAL_AUTHORIZED_RELEASE_ARTIFACT=PENDING`: one scoped prepare-only nonpublishing step needed.
+- **Trigger blocker:** #104/#100 merge into `site-prod` triggers Netlify `--prod`; #95 merge into `main` can trigger ordinary C2. Pause/guard both before code-only merge. Manual `netlify-production.yml` absent on default `main`; use operator-controlled CLI or separately registered workflow. Ensure sole JSON publisher after release.
+- **Rollback:** PR #107 `581b1cff` 32/32 + 8/8 offline PASS, Work I 18/18 and five Git blobs verified. `ROLLBACK_OFFLINE_READY=YES; NETLIFY_NONPROD_REDEPLOY_PROVEN=NO; ROLLBACK_DEPLOY_AUTHORITY_READY=NO; ROLLBACK_OPERATIONAL_READY=NO`. Owner approved one PR107 nonprod alias rehearsal (Work I2), **no deploy proof yet**; real recovery needs fresh cutover-time package/Netlify production rights, no loss of newer C2/casualty/aux.
+- **Separate:** Sevastopol `25006→25008`, `25100` unresolved; casualty and DST distinct; DST OFF.
 
 ## Next
 
-1. Verify Netlify CLI deploy authority using PR #107 *non-production alias* only after separate owner permission; alias may be accessible by URL, and does not by itself prove inactive prod restore.
-2. Pre-release no-write checklist: exact PR #95/#100/#104 code-only merge order and prevent automatic Netlify deploy before owner GO; release final artifact and six SHA authorization, single writer lock, current compatible Git-only rollback snapshot.
-3. Only then request distinct owner approvals for merges, controlled Netlify production deploy and atomic six-JSON Git publish. No repeated physical/SQL parity on same unchanged C2.
+1. Work K: minimal PR #95 prepare-only FINAL release archive job, read-only exact C2/Work A proof, own digest/manifest, default OFF; offline exact-HEAD tests, no Git push/Netlify.
+2. Work I2: owner-approved one non-prod alias deploy only if secure operator auth permits, verify real deployment/HTTP/SHA and unchanged production; no `--prod`, no auto-retry. Alias PASS alone does not prove production rollback.
+3. Once both report: owner-approved pause of auto Netlify + C2; code-only merges #95→#104→#100 with checks; select last C2 (new run requires matching Work A, no reusing other run proof), final owner-pinned release artifact, fresh rollback baseline, authorized Netlify-first then one Git publisher, restore only one post-cutover writer. No GO until separate owner release approval.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C3-C6-WORKJ-FINAL-RELEASE-PREFLIGHT-NOGO-01 — final minimal release preflight NO-GO (2026-11-12)
+
+- Work J independently checked Work A [#43299402658](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43299402658), artifact #13980242828 (23/23, 18 SHA, 33,267 canonical), PR #107 [#43297683167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297683167), artifact #13980651600 (32/32 offline and 8/8 synthetic no-loss), PR #95→#104→#100 fixture [#43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) 12/12. Draft HEADs `2064f38c`, `ea71a0e2`, `19446ba9`; current bases main `375e6935`, site-prod `d0a7d22d`; no file collision.
+- Confirmed contract ordering: PR #95 `scripts/c6_neon_one_shot_publisher.py` calls `release_binding.release_candidate()` only inside publishing path before Git push; PR #104 requires completed owner-pinned final artifact before Netlify deployment. Require narrow default-OFF prepare-only FINAL ZIP, original Work A/C2 and final six SHA preserved; no publication.
+- #104/#100 merges trigger `netlify-production.yml` push `--prod`; default `main` lacks that workflow for normal manual dispatch. Pause Netlify and C2 before code-only merges, plan exclusive publisher after cutover. Work I2 one nonprod alias separately approved but no physical deploy evidence; operational rollback demands cutover-time fresh package and production restore rights. **`RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO; ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.**
+
 ## C3-FINAL-AUTHORIZED-KPI-PR104-EXACT-HEAD-12PASS-01 — authorized final KPI contract code offline PASS (2026-11-12)
 
 - [Draft PR #104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/104) exact HEAD `ea71a0e2d2313ea86143500b4ef4ee25ab4c7cec`, [Actions #43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) SUCCESS attempt 1, **12/12 tests**. Four paths only: existing Netlify production workflow and offline workflow, `scripts/c3_final_neon_kpi_contract.py`, corresponding tests. CI read-only checked pinned PR #95 `2064f38c` release binding and PR #100 `19446ba9` frontend predicate; fixture end-to-end final `RELEASE_BINDING.json`, `RELEASE_MANIFEST.json`, six final SHA, exact served KPI byte identity, original immutable Work A proof and source/C2 generation PASSED. Missing owner grant, incorrect final SHA, C2 attempt and generation fail closed. Research `publication_allowed=false`; Git-only Netlify path unchanged and Neon release default OFF.

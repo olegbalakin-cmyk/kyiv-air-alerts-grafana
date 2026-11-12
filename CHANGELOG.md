@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-C6-WORKJ-FINAL-RELEASE-PREFLIGHT-NOGO-01 — Work J confirms final artifact ordering and rollback NO-GO (2026-11-12; accepted)
+
+- Proofs: physical #43299402658 23 cities/18 SHA/33,267 historical, #43302381173 PR95→104→100 12/12 offline, rollback #43297683167 32/32+8/8. PR #95 currently creates FINAL binding + six files only in Git-publishing job; #104 requires pre-existing pinned artifact for Netlify. Work K: one default-OFF prepare-only final artifact output, no release. PR #104/#100 merges may auto Netlify `--prod`; Netlify manual workflow absent on main. Pause C2/Netlify before merges and maintain sole writer afterward. Work I2 nonprod alias separately approved but unproven, fresh production rollback remains blocked. `RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C3-FINAL-AUTHORIZED-KPI-PR104-EXACT-HEAD-12PASS-01 — PR #104 final authorized KPI contract exact-HEAD offline PASS (2026-11-12; accepted)
 
 - [PR #104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/104) `ea71a0e2` exact [#43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) SUCCESS: 12/12 cases and real pinned PR #95→#104→#100 fixture E2E, six final SHA, immutable original proof and byte-identical static KPI, fail-closed negatives. Four code-only paths, Git-only default unchanged, Neon release OFF. Physical historical six-JSON #43299402658 already PASS; no real authorized final artifact, Netlify deployment or Git publication. `FINAL_NEON_KPI_RELEASE_CONTRACT_CODE_READY=YES` offline; `ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
