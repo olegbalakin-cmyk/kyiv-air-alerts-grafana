@@ -54,7 +54,7 @@ jobs:
           test "$(git -C _matrix rev-parse HEAD)" = 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
           echo "84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df  /tmp/casualty-original/evidence.json" | sha256sum -c -
           echo "4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b  /tmp/casualty-receipts/capture_receipts.json" | sha256sum -c -
-          python -m unittest research/casualty_e2e_shadow_2026_11_12/test_pipeline.py -v
+          python -m unittest discover -s research/casualty_e2e_shadow_2026_11_12 -p test_pipeline.py -v
       - name: Real source-backed shadow plus idempotency replay
         shell: bash
         run: |
