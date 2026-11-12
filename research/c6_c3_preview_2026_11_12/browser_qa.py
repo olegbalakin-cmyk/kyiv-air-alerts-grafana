@@ -172,7 +172,7 @@ def main():
           probe.on("pageerror",lambda err:report["js_errors"].append(str(err)))
           probe.on("response",lambda res:report["failed_responses"].append({"status":res.status,"url":res.url}) if res.status>=400 else None)
           probe.route("**/data/legacy/dashboard_data.json*",lambda route:route.fulfill(status=200,content_type="application/json",body=dashboard_body))
-          probe.route("**/historical-daily-kpi.json*",lambda route,body=index_body:route.fulfill(status=200,content_type="application/json",body=body))
+          probe.route("**/historical-daily-kpi.json*",lambda route,request,body=index_body:route.fulfill(status=200,content_type="application/json",body=body))
           probe.goto(base,wait_until="networkidle",timeout=90000)
           probe.wait_for_function("typeof state !== 'undefined' && !!state.data && !!state.charts.cityIntensityChart",timeout=90000)
           observed=index_source(probe)
