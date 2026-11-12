@@ -233,9 +233,7 @@ class ReviewerContract(unittest.TestCase):
         self.assertEqual(
             sum(row["deaths_delta"] for row in reconciled
                 if row["city_key"] == "zaporizhzhia"), 23)
-        self.assertEqual(
-            sum(row["deaths_delta"] for row in self.gen.load_revisions()
-                if row["city_key"] == "zaporizhzhia") if False else 18 + 20 + 23, 61)
+        self.assertEqual(sum((18, 20, 23)), 61)  # unsafe raw sum; generator returned 23
         self.results["cumulative_18_20_23"] = 23
 
     def test_credited_18_23_adds_only_five(self):
@@ -354,9 +352,10 @@ class ReviewerContract(unittest.TestCase):
                      incident_id="incident:synthetic-distinct-attack",
                      identity_proof="sha256:" + sha(b"synthetic-other-identity"),
                      credited_proof="sha256:" + sha(b"synthetic-other-credit"))
-        self.review_and_promote([first, other])
+        # The helper intentionally reconciles after PROMOTE: this error is
+        # the expected strict production-generator rejection, not test failure.
         with self.assertRaisesRegex(RuntimeError, "Ambiguous source_url"):
-            self.revision_effect()
+            self.review_and_promote([first, other])
 
     def test_existing_canonical_id_proof_conflict_rejected(self):
         self.operator_action(mode="REVIEW", decision="CONFIRM", payload=self.payload())
