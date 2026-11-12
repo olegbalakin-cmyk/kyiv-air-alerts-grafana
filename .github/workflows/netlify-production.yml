@@ -2,6 +2,68 @@ name: Deploy Netlify production site
 
 on:
   workflow_dispatch:
+    inputs:
+      neon_release_mode:
+        description: 'Owner-gated immutable six-JSON static KPI release (default OFF)'
+        type: boolean
+        required: true
+        default: false
+      c6_run_id:
+        description: 'C6 preparation Actions run ID (Neon mode only)'
+        type: string
+        required: false
+      c6_run_attempt:
+        description: 'Exact C6 preparation run attempt'
+        type: string
+        required: false
+      c6_artifact_id:
+        description: 'Exact preparation artifact ID'
+        type: string
+        required: false
+      c6_artifact_sha256:
+        description: 'SHA-256 of immutable GitHub artifact ZIP'
+        type: string
+        required: false
+      final_release_run_id:
+        description: 'Owner-pinned successful final-release Actions run ID (Neon only)'
+        type: string
+        required: false
+      final_release_run_attempt:
+        description: 'Exact final release run attempt'
+        type: string
+        required: false
+      final_release_artifact_id:
+        description: 'Owner-pinned PR95 final RELEASE_BINDING/MANIFEST + six-file ZIP ID'
+        type: string
+        required: false
+      final_release_artifact_sha256:
+        description: 'SHA-256 of separately approved final release ZIP'
+        type: string
+        required: false
+      approved_release_binding_sha256:
+        description: 'SHA-256 of exact PR95 RELEASE_BINDING.json bytes'
+        type: string
+        required: false
+      approved_kpi_sha256:
+        description: 'SHA-256 of root historical-daily-kpi.json'
+        type: string
+        required: false
+      approved_generation:
+        description: 'Exact dashboard generation'
+        type: string
+        required: false
+      work_a_run_id:
+        description: 'Independent Work A successful Actions run ID'
+        type: string
+        required: false
+      work_a_artifact_id:
+        description: 'Independent Work A physical proof artifact ID'
+        type: string
+        required: false
+      work_a_artifact_sha256:
+        description: 'Exact Work A proof artifact ZIP digest'
+        type: string
+        required: false
   push:
     branches: [site-prod]
     paths:
@@ -23,6 +85,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   deploy-production:
@@ -61,7 +124,8 @@ jobs:
             test -s "kyiv-air-alerts-grafana/pages-preview/$asset"
           done
 
-      - name: Prepare immutable historical KPI bootstrap (read-only data)
+      - name: Prepare immutable historical KPI bootstrap (Git-only default)
+        if: ${{ !inputs.neon_release_mode }}
         run: |
           python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
           python kyiv-air-alerts-grafana/tests/test_monthly_seconds.py
@@ -79,6 +143,117 @@ jobs:
           print("Bootstrap index ready for 23 cities")
           PY
 
+      - name: Select approved exact Neon KPI from pinned six-file artifact
+        if: ${{ inputs.neon_release_mode }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          C6_RELEASE_OWNER_APPROVED: ${{ vars.C6_NEON_RELEASE_OWNER_APPROVED }}
+          C6_APPROVED_WORK_A_RUN: ${{ vars.C6_NEON_WORK_A_APPROVED_RUN_ID }}
+          WORK_A_RUN_ID: ${{ inputs.work_a_run_id }}
+          WORK_A_ARTIFACT_ID: ${{ inputs.work_a_artifact_id }}
+          WORK_A_ARTIFACT_SHA: ${{ inputs.work_a_artifact_sha256 }}
+          C6_RUN_ID: ${{ inputs.c6_run_id }}
+          C6_ATTEMPT: ${{ inputs.c6_run_attempt }}
+          C6_ARTIFACT_ID: ${{ inputs.c6_artifact_id }}
+          C6_ARTIFACT_SHA: ${{ inputs.c6_artifact_sha256 }}
+          FINAL_RUN_ID: ${{ inputs.final_release_run_id }}
+          FINAL_ATTEMPT: ${{ inputs.final_release_run_attempt }}
+          FINAL_ARTIFACT_ID: ${{ inputs.final_release_artifact_id }}
+          FINAL_ARTIFACT_SHA: ${{ inputs.final_release_artifact_sha256 }}
+          APPROVED_BINDING_SHA: ${{ inputs.approved_release_binding_sha256 }}
+          C6_APPROVED_FINAL_RUN: ${{ vars.C6_NEON_APPROVED_FINAL_RELEASE_RUN_ID }}
+          C6_APPROVED_FINAL_ATTEMPT: ${{ vars.C6_NEON_APPROVED_FINAL_ATTEMPT }}
+          C6_APPROVED_FINAL_ARTIFACT_ID: ${{ vars.C6_NEON_APPROVED_FINAL_ARTIFACT_ID }}
+          C6_APPROVED_FINAL_HEAD_SHA: ${{ vars.C6_NEON_APPROVED_FINAL_HEAD_SHA }}
+          C6_APPROVED_FINAL_WORKFLOW: ${{ vars.C6_NEON_APPROVED_FINAL_WORKFLOW }}
+          C6_APPROVED_FINAL_NAME: ${{ vars.C6_NEON_APPROVED_FINAL_ARTIFACT_NAME }}
+          OWNER_FINAL_ARTIFACT_SHA: ${{ vars.C6_NEON_APPROVED_FINAL_ARTIFACT_SHA256 }}
+          OWNER_BINDING_SHA: ${{ vars.C6_NEON_APPROVED_FINAL_BINDING_SHA256 }}
+          OWNER_FINAL_FILES_JSON: ${{ vars.C6_NEON_APPROVED_FINAL_FILES_JSON }}
+          OWNER_WORK_A_ARTIFACT_SHA: ${{ vars.C6_NEON_APPROVED_WORK_A_ARTIFACT_SHA256 }}
+          APPROVED_KPI_SHA: ${{ inputs.approved_kpi_sha256 }}
+          APPROVED_GENERATION: ${{ inputs.approved_generation }}
+        run: |
+          set -euo pipefail
+          # Separate owner action is mandatory. Default unset/OFF.
+          test "$C6_RELEASE_OWNER_APPROVED" = "true"
+          test -n "$WORK_A_RUN_ID" && test "$C6_APPROVED_WORK_A_RUN" = "$WORK_A_RUN_ID"
+          [[ "$WORK_A_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ && "$WORK_A_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$C6_RUN_ID" =~ ^[0-9]+$ && "$C6_ATTEMPT" =~ ^[0-9]+$ && "$C6_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$C6_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ && "$APPROVED_KPI_SHA" =~ ^[a-f0-9]{64}$ ]]
+          test -n "$APPROVED_GENERATION"
+          [[ "$FINAL_RUN_ID" =~ ^[0-9]+$ && "$FINAL_ATTEMPT" =~ ^[0-9]+$ && "$FINAL_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$FINAL_ARTIFACT_SHA" =~ ^[a-f0-9]{64}$ && "$APPROVED_BINDING_SHA" =~ ^[a-f0-9]{64}$ ]]
+          test "$C6_APPROVED_FINAL_RUN" = "$FINAL_RUN_ID"
+          test "$C6_APPROVED_FINAL_ATTEMPT" = "$FINAL_ATTEMPT"
+          test "$C6_APPROVED_FINAL_ARTIFACT_ID" = "$FINAL_ARTIFACT_ID"
+          test "$OWNER_FINAL_ARTIFACT_SHA" = "$FINAL_ARTIFACT_SHA"
+          test "$OWNER_BINDING_SHA" = "$APPROVED_BINDING_SHA"
+          test "$OWNER_WORK_A_ARTIFACT_SHA" = "$WORK_A_ARTIFACT_SHA"
+          test -n "$OWNER_FINAL_FILES_JSON" && test -n "$C6_APPROVED_FINAL_HEAD_SHA"
+          test -n "$C6_APPROVED_FINAL_WORKFLOW" && test -n "$C6_APPROVED_FINAL_NAME"
+          mkdir -p _approved_c6
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C6_RUN_ID" > _approved_c6/run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > _approved_c6/work-a-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > _approved_c6/work-a-artifact.json
+          curl --fail --show-error --silent --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID/zip" \
+            --output _approved_c6/work-a-artifact.zip
+          test "$(sha256sum _approved_c6/work-a-artifact.zip | cut -d ' ' -f1)" = "$WORK_A_ARTIFACT_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID" > _approved_c6/artifact.json
+          curl --fail --show-error --silent --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$C6_ARTIFACT_ID/zip" \
+            --output _approved_c6/artifact.zip
+          test "$(sha256sum _approved_c6/artifact.zip | cut -d ' ' -f1)" = "$C6_ARTIFACT_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > _approved_c6/final-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID" > _approved_c6/final-artifact.json
+          curl --fail --show-error --silent --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID/zip" \
+            --output _approved_c6/final-release-artifact.zip
+          test "$(sha256sum _approved_c6/final-release-artifact.zip | cut -d ' ' -f1)" = "$FINAL_ARTIFACT_SHA"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          run=json.loads(Path('_approved_c6/run.json').read_text())
+          art=json.loads(Path('_approved_c6/artifact.json').read_text())
+          assert run['id']==int(os.environ['C6_RUN_ID'])
+          assert run['run_attempt']==int(os.environ['C6_ATTEMPT'])
+          assert run['status']=='completed' and run['conclusion']=='success'
+          assert run['path']=='.github/workflows/update-netlify-site.yml'
+          assert run['event'] in ('schedule', 'workflow_dispatch')
+          assert art['id']==int(os.environ['C6_ARTIFACT_ID'])
+          assert art['name']==f"c6-neon-git-preparation-{run['id']}-{run['run_attempt']}"
+          assert art['workflow_run']['id']==run['id'] and not art['expired']
+          assert art.get('digest')=='sha256:'+os.environ['C6_ARTIFACT_SHA']
+          work=json.loads(Path('_approved_c6/work-a-run.json').read_text())
+          proof=json.loads(Path('_approved_c6/work-a-artifact.json').read_text())
+          assert work['id']==int(os.environ['WORK_A_RUN_ID'])
+          assert work['id']!=run['id']
+          assert work['status']=='completed' and work['conclusion']=='success'
+          assert work['path']=='.github/workflows/c6-neon-shadow-isolated-proof.yml'
+          assert proof['id']==int(os.environ['WORK_A_ARTIFACT_ID'])
+          assert proof['workflow_run']['id']==work['id'] and not proof['expired']
+          assert proof.get('digest')=='sha256:'+os.environ['WORK_A_ARTIFACT_SHA']
+          final_run=json.loads(Path('_approved_c6/final-run.json').read_text())
+          final_art=json.loads(Path('_approved_c6/final-artifact.json').read_text())
+          assert final_run['id']==int(os.environ['FINAL_RUN_ID'])
+          assert final_run['run_attempt']==int(os.environ['FINAL_ATTEMPT'])
+          assert final_run['status']=='completed' and final_run['conclusion']=='success'
+          assert final_run['head_sha']==os.environ['C6_APPROVED_FINAL_HEAD_SHA']
+          assert final_run['path']==os.environ['C6_APPROVED_FINAL_WORKFLOW']
+          assert final_art['id']==int(os.environ['FINAL_ARTIFACT_ID'])
+          assert final_art['workflow_run']['id']==final_run['id'] and not final_art['expired']
+          assert final_art.get('digest')=='sha256:'+os.environ['FINAL_ARTIFACT_SHA']
+          assert final_art['name']==os.environ['C6_APPROVED_FINAL_NAME']
+          PY
+          python scripts/c3_final_neon_kpi_contract.py _approved_c6
+
       - name: Build static frontend
         run: |
           rm -rf _site
@@ -86,6 +261,10 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
           cp kyiv-air-alerts-grafana/pages-preview/kpi-range.js historical-daily-kpi.json _site/
           test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 12
+          if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
+            cmp historical-daily-kpi.json _site/historical-daily-kpi.json
+            test "$(sha256sum _site/historical-daily-kpi.json | cut -d ' ' -f1)" = "${{ inputs.approved_kpi_sha256 }}"
+          fi
 
       - name: Deploy production to Netlify
         env:
@@ -109,6 +288,9 @@ jobs:
           done
           cmp kyiv-air-alerts-grafana/pages-preview/kpi-range.js /tmp/production-kpi-range.js
           cmp kyiv-air-alerts-grafana/pages-preview/app.js /tmp/production-app.js
+          if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
+            cmp historical-daily-kpi.json /tmp/production-historical-daily-kpi.json
+          fi
           python - <<'PY'
           import json
           with open("/tmp/production-historical-daily-kpi.json", encoding="utf-8") as f:
