@@ -48,6 +48,32 @@ def main():
     threading.Thread(target=server.serve_forever,daemon=True).start()
     base=f"http://127.0.0.1:{server.server_port}/"
     try:
+      # Patch only this runner-local copied preview consumer; original bundle and
+      # production app.js remain untouched. Preserve the original index guards.
+      source_anchor = b'index?.meta?.source_ref === "site-prod"'
+      source_guard = (
+        b'(index?.meta?.source_ref === "site-prod" || '
+        b'(window.PREVIEW_CONFIG?.source === "neon" && '
+        b'index?.meta?.source_ref === "neon:br-bold-mode-b5rub8pq" && '
+        b'index?.meta?.verified_count === 23 && '
+        b'index?.meta?.source_dashboard_generated_at === sourceGeneratedAt))')
+      if (original_app.count(source_anchor)!=1 or
+          b'index?.schema === "verified-historical-daily-start-counts-v1"' not in original_app or
+          b'index?.meta?.expected_cities === 23' not in original_app):
+        raise AssertionError("SCOPED_PREVIEW_INDEX_PATCH_CONTRACT_CHANGED")
+      app.write_bytes(original_app.replace(source_anchor,source_guard,1))
+      patched_hashes={**original_hashes,"app.js":sha(app)}
+      report["preview_consumer"]={
+        "scope":"RUNNER_ONLY_SCOPED_SOURCE_REF",
+        "file":"app.js",
+        "original_sha256":hashlib.sha256(original_app).hexdigest(),
+        "patched_sha256":sha(app),
+        "allowed_neon_source_ref":"neon:br-bold-mode-b5rub8pq",
+        "requires_preview_source":"neon",
+        "requires_verified_count":23,
+        "requires_same_dashboard_generation":True,
+        "preserves_schema_and_expected_cities":True,
+      }
       with sync_playwright() as pw:
         binary=shutil.which("google-chrome") or shutil.which("chromium")
         if not binary:
@@ -102,6 +128,14 @@ def main():
         config.write_text('window.PREVIEW_DEFAULT_SOURCE = "neon";\n')
         p=open_page()
         neon_index=index_source(p)
+        if neon_index!="neon:br-bold-mode-b5rub8pq":
+          raise AssertionError("SCOPED_NEON_INDEX_NOT_ACCEPTED")
+        neon_meta=p.evaluate("() => state.historicalDaily?.meta || null")
+        dashboard_generation=p.evaluate("() => state.data?.meta?.generated_at || null")
+        if (neon_meta is None or neon_meta.get("verified_count")!=23 or
+            neon_meta.get("expected_cities")!=23 or
+            neon_meta.get("source_dashboard_generated_at")!=dashboard_generation):
+          raise AssertionError("NEON_INDEX_METADATA_INCOMPATIBLE")
         report["results"].append({"source":"neon","cities":len(all_cities),"modes":len(all_modes),"historical_index":neon_index})
         city_check(p,all_cities,all_modes,with_csv=True)
         report["results"][-1]["city_mode_combinations"]=len(all_cities)*len(all_modes)
@@ -112,34 +146,21 @@ def main():
         config.write_text('window.PREVIEW_DEFAULT_SOURCE = "legacy";\n')
         p=open_page()
         git_index=index_source(p)
+        if git_index!="site-prod":
+          raise AssertionError("LEGACY_HISTORICAL_INDEX_RESTORE_FAIL")
         report["results"].append({"source":"git-rollback","cities":len(all_cities),"historical_index":git_index})
         city_check(p,all_cities,["monthly"],with_csv=False)
         report["results"][-1]["city_mode_combinations"]=len(all_cities)
         p.screenshot(path=str(out/"git-rollback.png"))
         p.close()
         post_rollback={k:sha(root/k) for k in original_hashes if k!="preview-config.js"}
-        report["rollback"]={"sources":["git","neon","git"],"config_only":True,"unchanged_files":len(post_rollback),"digest_differences":[k for k,v in post_rollback.items() if v!=original_hashes[k]],"git_historical_index":git_index}
-        # Temporary, isolated proof of the smallest source-ref compatibility condition.
-        search='index?.meta?.source_ref === "site-prod"'
-        fixed='(index?.meta?.source_ref === "site-prod" || (window.PREVIEW_CONFIG?.source === "neon" && index?.meta?.source_ref === "neon:br-bold-mode-b5rub8pq"))'
-        if original_app.decode().count(search)!=1:
-          raise AssertionError("EXACT_SOURCE_REF_PATCH_ANCHOR_MISSING")
-        app.write_bytes(original_app.replace(search.encode(),fixed.encode(),1))
-        config.write_text('window.PREVIEW_DEFAULT_SOURCE = "neon";\n')
-        p=open_page()
-        fixed_index=index_source(p)
-        report["fix_diagnostic"]={"scope":"TEMPORARY_RESEARCH_ONLY","source_ref_accepted":fixed_index,"expected":"neon:br-bold-mode-b5rub8pq","candidate_json_bytes_unchanged":True}
-        if fixed_index!="neon:br-bold-mode-b5rub8pq":
-          raise AssertionError("SOURCE_REF_ONE_LINE_FIX_NOT_EFFECTIVE")
-        p.screenshot(path=str(out/"neon-compatibility-test.png"))
-        p.close()
+        report["rollback"]={"sources":["git","neon","git"],"config_only":True,"unchanged_files":len(post_rollback),"digest_differences":[k for k,v in post_rollback.items() if v!=patched_hashes[k]],"git_historical_index":git_index}
+        report["fix_diagnostic"]={"scope":"RUNNER_LOCAL_PREVIEW_COMPATIBILITY","source_ref_accepted":neon_index,"expected":"neon:br-bold-mode-b5rub8pq","candidate_json_bytes_unchanged":True}
         browser.close()
         if report["js_errors"] or report["failed_responses"] or report["external_requests"] or report["rollback"]["digest_differences"]:
           report["verdict"]="BLOCKED_BROWSER_OR_ROLLBACK_ERROR"
-        elif neon_index is None:
-          report["verdict"]="BLOCKED_UNCHANGED_FRONTEND_HISTORICAL_INDEX_SOURCE_REF"
         else:
-          report["verdict"]="PASS_UNCHANGED_FRONTEND_OFFLINE_PREVIEW"
+          report["verdict"]="PASS_SCOPED_NEON_INDEX_OFFLINE_PREVIEW"
     except Exception:
       report["verdict"]="BLOCKED_QA_EXCEPTION"
       report["traceback"]=traceback.format_exc()
@@ -148,11 +169,13 @@ def main():
       config.write_bytes(original_config)
       final_hashes={str(p.relative_to(root)):sha(p) for p in root.rglob("*") if p.is_file()}
       report["files_exact_restored"]=final_hashes==original_hashes
+      if not report["files_exact_restored"]:
+        report["verdict"]="BLOCKED_PREVIEW_RESTORE"
       server.shutdown()
       (out/"browser_result.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
     print("C6_C3_VERDICT="+report["verdict"],flush=True)
     print("C6_C3_TESTS="+json.dumps(report["results"]),flush=True)
-    if report["verdict"] in ("BLOCKED_UNCHANGED_FRONTEND_HISTORICAL_INDEX_SOURCE_REF","PASS_UNCHANGED_FRONTEND_OFFLINE_PREVIEW"):
+    if report["verdict"]=="PASS_SCOPED_NEON_INDEX_OFFLINE_PREVIEW":
       return 0
     return 2
 

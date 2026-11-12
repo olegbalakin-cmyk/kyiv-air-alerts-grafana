@@ -68,7 +68,7 @@ jobs:
           (b/'proof/inputs_verified.json').write_text(json.dumps(proof,indent=2)+'\n')
           print('C6_C3_INPUTS 18/18 and six files per source PASS')
           PY
-      - name: Run unchanged-frontend browser, CSV and config-only rollback QA
+      - name: Run scoped-preview historical-index, browser, CSV and rollback QA
         run: |
           python research/c6_c3_preview_2026_11_12/browser_qa.py \
             --preview /tmp/c6-c3/site --out /tmp/c6-c3/proof
