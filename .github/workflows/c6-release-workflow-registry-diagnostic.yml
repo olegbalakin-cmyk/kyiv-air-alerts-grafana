@@ -32,10 +32,10 @@ jobs:
             gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$path" --jq '[.id,.path,.state] | @tsv' || echo "EXACT_LOOKUP_UNAVAILABLE:$path"
           done
           test "$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)" = "712c9e351fc3548325cf594cf0617bb33e70a002"
-          test "$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)" = "3cdac85ad699808e0a715af53825334bd900355a"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)" = "6648a11242fac16cf023114cd6e58a65c3b49968"
           for id in 360885782 360885508; do
             state="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id" --jq .state)"
             test "$state" = disabled_manually || { echo "STOP_WORKFLOW_NOT_DISABLED:$id:$state"; exit 2; }
-            echo "POST_PR104_STILL_DISABLED:$id"
+            echo "POST_PR100_STILL_DISABLED:$id"
           done
           echo "NO_WORKFLOW_DISABLED_NO_GIT_WRITES_NO_DEPLOY"
