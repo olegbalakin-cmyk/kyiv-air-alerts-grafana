@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-PR93-GENERATOR-PREFLIGHT-OFFLINE-PASS-01 — PR93 exact generator fix offline PASS, new physical run pending (2026-11-12; proposed)
+
+- Research [`9bb62afe`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/9bb62afe088c18ec4bb36f5213319acfd982063c), exact-head [Actions #43297121030](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297121030) SUCCESS: only allowlist merged PR93 Sevastopol parser blob `d31c5ac4`, six negative/positive tests; physical workflow unchanged. Earlier #43293835094 failed before six JSON. **Generator offline ready; current-C2 Neon six-JSON proof still BLOCKED** until new separately owner-approved read-only run for `9bb62afe`. No writer/HTTP/publication/cutover; `GLOBAL_CUTOVER=NO`.
+
 ### C3-C6-ROLLBACK-MINIMAL-GIT-ONLY-PLAN-OFFLINE-01 — selected minimal Git-only rollback; operational BLOCKED (2026-11-12; proposed)
 
 - Work G reports 9/9 offline structural/no-loss tests on `site-prod@d0a7d22d`, no new PR/artifact; reproducible proof still open. Oct 23 Netlify deployment `6adb629bc3ebc570117d82e1` is stale for current Git JSON, read-only Netlify API confirms current site but not CLI deploy rights. Recovery: pin **fresh compatible** frontend/static KPI + Git C2/casualty/aux; return Git-only by existing C2, redeploy matching Netlify package, avoid reset/force/reverting newer data. Authorize a non-production alias deploy only separately. `ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
