@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-C6-ROLLBACK-MINIMAL-GIT-ONLY-PLAN-OFFLINE-01 — selected minimal Git-only rollback; operational BLOCKED (2026-11-12; proposed)
+
+- Work G reports 9/9 offline structural/no-loss tests on `site-prod@d0a7d22d`, no new PR/artifact; reproducible proof still open. Oct 23 Netlify deployment `6adb629bc3ebc570117d82e1` is stale for current Git JSON, read-only Netlify API confirms current site but not CLI deploy rights. Recovery: pin **fresh compatible** frontend/static KPI + Git C2/casualty/aux; return Git-only by existing C2, redeploy matching Netlify package, avoid reset/force/reverting newer data. Authorize a non-production alias deploy only separately. `ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C6-PHYSICAL-PR93-BUILDER-DRIFT-WORKF-PARTIAL-01 — owner physical attempt PREPARE_GENERATOR FAIL, PR #95 release code partial (2026-11-12; proposed)
 
 - [#43293835094](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43293835094) FAIL, artifact #13978646521: `BUILDER_CODE_DRIFT:scripts/add_sevastopol_exact.py` (PR #93 parser pin), inputs/permissions/C2 download PASS, zero six JSON. No SQL parity failure. Existing PR #95 exact PR93 blob patch reusable; require separately approved new research SHA. [PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) `2064f38c`, exact-head [#43293275773](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43293275773) offline PASS: default-OFF owner-gated Git publisher, final manifest; code NOT READY until PR #104 pins final authorized KPI, E2E offline PASS. Git/Netlify production unchanged, rollback BLOCKED, GO=NO.
