@@ -75,6 +75,31 @@ async function exercise(page, url, mobile=false) {
 
   check("no runtime errors",()=>assert.equal(errors.length,0));
   check("generator-derived lower bound has no finalized deaths",()=>assert.equal(d.row.deaths,null));
+  const geometry = await page.evaluate(()=>{
+    const chart=state.charts.casualtyChart;
+    const ix=chart.data.labels.indexOf("2026-10");
+    const p=chart.getDatasetMeta(0).data[ix].getProps(["x","y","base","width"],true);
+    const legendTop=chart.chartArea.top;
+    const textY=Math.max(legendTop+35,Math.min(p.y,p.base)-7);
+    return {x:p.x,textY,barWidth:p.width,left:chart.chartArea.left,
+      right:chart.chartArea.right,top:chart.chartArea.top,bottom:chart.chartArea.bottom};
+  });
+  check("≥23 label geometry fits the original chart canvas on this viewport",()=>{
+    assert(geometry.barWidth>0);
+    assert(geometry.x>geometry.left+12 && geometry.x<geometry.right-12);
+    assert(geometry.textY>=geometry.top && geometry.textY<geometry.bottom);
+  });
+  const tooltip = await page.evaluate(()=>{
+    const chart=state.charts.casualtyChart;
+    const ix=chart.data.labels.indexOf("2026-10");
+    const ctx={dataset:chart.data.datasets[0],dataIndex:ix,formattedValue:"23"};
+    const callbacks=chart.options.plugins.tooltip.callbacks;
+    return {label:callbacks.label(ctx),footer:callbacks.footer([ctx])};
+  });
+  check("actual Chart.js tooltip explains both minimum and non-final status",()=>{
+    assert.match(tooltip.label,/щонайменше 23.*дані неповні/);
+    assert.match(tooltip.footer,/нижня межа.*не остаточний/);
+  });
   await page.mouse.move(0,0);
   await page.locator("#casualtySection").screenshot({path:path.join(proofs,mobile?"mobile-casualty.png":"desktop-casualty.png")});
   const png = await page.evaluate(()=>window.ChartShare.renderChartPng("casualtyChart",document.getElementById("casualtyChart").closest(".chart-card")));
