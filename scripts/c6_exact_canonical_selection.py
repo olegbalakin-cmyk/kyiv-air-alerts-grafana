@@ -34,7 +34,9 @@ def select_c2_canonical_closed(c2_episodes, closed_rows, *, city_keys, ingest_co
 
     This is only an exact-run, SHA-bound projection. It is NOT a general policy
     for determining canonical status from two overlapping historical intervals.
-    A later DB write than this C2 ingestion fails closed.
+    Post-C2 insertions are excluded from that older C2 projection only if
+    created_at and updated_at prove their insertion happened AFTER C2.
+    Changes to ANY row already present at that C2 cutoff remain fail-closed.
     """
     require(ingest_committed_at is not None, "CANONICAL_C2_COMMIT_REQUIRED")
     cutoff = utc(ingest_committed_at)
@@ -57,6 +59,8 @@ def select_c2_canonical_closed(c2_episodes, closed_rows, *, city_keys, ingest_co
     seen = set()
     retained = []
     ignored_ids = []
+    post_c2_inserted_ids = []
+    post_c2_inserted_by_city = Counter()
     raw_by_city = Counter()
     for row in closed_rows:
         key = row.get("legacy_episode_id")
@@ -64,9 +68,19 @@ def select_c2_canonical_closed(c2_episodes, closed_rows, *, city_keys, ingest_co
                 row.get("episode_state") == "closed" and
                 isinstance(key, str) and bool(key),
                 "CANONICAL_RAW_EPISODE_INVALID")
-        # Prevent using an old C2 manifest silently against a later live DB state.
-        require(utc(row["updated_at"]) <= cutoff, "CANONICAL_SNAPSHOT_OUTRUNS_C2")
+        # A later snapshot may contain *new* episodes from later C2 runs.
+        # Those episodes cannot belong to this immutable earlier C2 corpus.
+        # Never accept a later mutation to a row that already existed at C2.
+        updated = utc(row["updated_at"])
         raw_by_city[row["city_key"]] += 1
+        if updated > cutoff:
+            created = row.get("created_at")
+            require(key not in expected and created is not None and
+                    utc(created) > cutoff and utc(created) <= updated,
+                    "CANONICAL_SNAPSHOT_OUTRUNS_C2")
+            post_c2_inserted_ids.append(key)
+            post_c2_inserted_by_city[row["city_key"]] += 1
+            continue
         if key not in expected:
             ignored_ids.append(key)
             continue
@@ -100,10 +114,14 @@ def select_c2_canonical_closed(c2_episodes, closed_rows, *, city_keys, ingest_co
         "historical_rows_not_selected": len(ignored_ids),
         "historical_rows_id_sha256": hashlib.sha256(
             "\n".join(sorted(ignored_ids)).encode("ascii")).hexdigest(),
+        "post_c2_inserted_rows_not_selected": len(post_c2_inserted_ids),
+        "post_c2_inserted_ids_sha256": hashlib.sha256(
+            "\n".join(sorted(post_c2_inserted_ids)).encode("ascii")).hexdigest(),
         "by_city": {city: {
             "raw_closed": raw_by_city[city],
             "selected": retained_by_city[city],
             "not_selected": raw_by_city[city] - retained_by_city[city],
+            "post_c2_inserted": post_c2_inserted_by_city[city],
         } for city in sorted(city_keys)},
     }
     return retained, evidence
