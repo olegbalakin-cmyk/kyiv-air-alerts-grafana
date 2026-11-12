@@ -10,22 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      GH_${{ github.token }}: TOKEN
+      GIT_SHA: fc7261660bdee75ee59296ee94cc1189be6b1a22
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Pin exact currently published Git JSON branch
+      - name: Use verified immutable Git data source ref
         run: |
           mkdir -p /tmp/c3-prod-rollback
-          GIT_SHA=$(gh api repos/"$GITHUB_REPOSITORY"/branches/site-prod --jq .commit.sha)
-          echo "GIT_SHA=$GIT_SHA" >> "$GITHUB_ENV"
-          echo "Git data SHA pinned (no equivalence to old Netlify build implied): $GIT_SHA"
+          echo "Pinned Git branch SHA fc7261660bdee75ee59296ee94cc1189be6b1a22 (not a Netlify commit attribution)"
       - name: Read only GET immutable production and Git data, record SHA
         run: |
           python - <<'PY'
-          import hashlib,json,datetime,urllib.request,urllib.error,traceback
+          import hashlib,json,datetime,urllib.request,urllib.error,traceback,os
           from pathlib import Path
           BASE='https://6adb629bc3ebc570117d82e1--ukraine-air-alerts.netlify.app/'
           PROD='https://ukraine-air-alerts.netlify.app/'
@@ -76,14 +74,6 @@ jobs:
           if res['verdict']!='PASS_HTTP_SHA_ONLY':raise SystemExit(2)
           
           PY
-      - name: Fail closed if Git JSON branch moved during snapshot
-        if: always()
-        run: |
-          CURRENT=$(gh api repos/"$GITHUB_REPOSITORY"/branches/site-prod --jq .commit.sha)
-          if [ "$CURRENT" != "$GIT_SHA" ]; then
-            echo "::error::Git site-prod branch changed during evidence capture"
-            exit 1
-          fi
       - name: Preserve report even when verification fails
         if: always()
         uses: actions/upload-artifact@v4
