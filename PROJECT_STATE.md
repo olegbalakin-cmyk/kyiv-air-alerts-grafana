@@ -39,22 +39,6 @@ Latest casualty: **CASUALTY-ZAPORIZHZHIA-ADDITIONAL-EVENTS-WORKB-01** `BLOCKED_M
 
 - [PR #88](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/88) final `34bc539d`: 11 WIP candidates / 5 priority Sep–Oct Zaporizhzhia groups, all `BLOCKED_MISSING_SOURCE` (no original publisher body). Retained earlier captures do not match target IDs. **0 additional deaths established by this review** is NOT a finding of zero actual deaths. October remains **≥23 minimum / COVERAGE_INCOMPLETE**. No new HTTP, CI or source ZIP verification claimed; production and WIP unchanged.
 
-## CASUALTY-ZAPORIZHZHIA-PLUS23-OFFLINE-PREVIEW-01 — duplicate-event BLOCKED (2026-11-12)
-
-- [Draft PR #86](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/86) HEAD `fb32184e`, exact [Actions #43195244991](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43195244991) runner SUCCESS but **domain 19 PASS / 3 FAIL**. Isolated +23 creates October row (316→339), frontend Node render/rollback PASS, frozen production files unchanged; **same incident with prior credit 18/23 re-adds +23; 18→20→23 separate confirmed rows become 61**. Event-canonical dedup correction required. Artifact `13931798566`, SHA256 `f5f7894b…d8237b0` verified; **PREVIEW_BLOCKED, no release**.
-
-## CASUALTY-ZAPORIZHZHIA-OCTOBER-COVERAGE-WORKB-01 — incomplete monthly coverage (2026-11-12)
-
-- [Draft PR #85](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/85) final `19fad288`, read-only inventory: WIP `c66c242a` contains **208** Zaporizhzhia-tagged candidates, **197** published Sep 19–Oct 31, all `needs_review`. Other suspected city attacks (Oct 18/22–23/26) lack independently checked publisher evidence. Original 10 Oct attack confirms **≥23**, but full October and Sep 19–30 coverage NOT proven; **COVERAGE_INCOMPLETE**. No new CI for this methodology report. Never display 23 as a complete monthly total.
-
-## CASUALTY-ZAPORIZHZHIA-LEDGER-DELTA-23-01 — published series reconciled read-only (2026-11-12)
-
-- [Exact-head CI #43185423680](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43185423680) SUCCESS at research `3dbff8f3`. Frozen `site-prod@fc726166`: Zaporizhzhia city validated through **18 Sep 2026** (316 confirmed deaths; last monthly row Sep), no October row, **0** confirmed city revisions; only confirmed production revision is Sumy +1. Public Netlify `app.js` and served raw dashboard JSON byte-hash matched pinned Git. Thus **0 of 23** credited for 10 Oct Zaporizhzhia attack in verified published series; **+23 RECONCILED_DELTA_FOR_REVIEW**, never automatically apply. Artifact `13928441241` SHA256 `d0e1ba44…068c8` verified. 16 related WIP titles remain unconfirmed, not ledger entries. Future production snapshots need fresh reconciliation.
-
-## CASUALTY-FALSE-ATTACK-PLACE-76-01 — real place guard PASS (2026-11-12)
-
-- [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) final `503bd73e`, [exact CI #43180557264](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43180557264) **76/76 PASS**; artifact `13926406047` verified. Ivano warning now `place=unlocated`, military `NEEDS_REVIEW`; true places protected. Zaporizhzhia shadow total 23 still PASS, replay 0, SHA unchanged. **Research only, no release.** Full proof in CHANGELOG.
-
 <!-- coordination:history:end -->
 
 ## Evidence and documentation maintenance
