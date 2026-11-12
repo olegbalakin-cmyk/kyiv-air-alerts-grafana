@@ -270,12 +270,14 @@ def run(args):
         manifest_path, csv_path, generator_path, dashboard_path = paths[:10]
     before = {p.name + ":" + str(i): sha(p.read_bytes()) for i, p in enumerate(paths)}
     queue = load_queue(queue_path)
-    if len({c["city_key"] for c in queue}) != 23:
-        raise RuntimeError("Expected current 23-city WIP queue")
+    if not queue or len({c["city_key"] for c in queue}) > 23:
+        raise RuntimeError("Invalid 23-city WIP queue snapshot")
     original, _ = read_pinned(evidence_path, RETAINED_EVIDENCE_SHA256)
     receipts, _ = read_pinned(receipt_path, RECEIPTS_102_SHA256)
     matrix, _ = read_pinned(matrix_path)
     baseline, _ = read_pinned(baseline_path)
+    if len(baseline) != 23 or not {c["city_key"] for c in queue}.issubset(set(baseline)):
+        raise RuntimeError("WIP candidates contain unknown monitored city")
     manifest, _ = read_pinned(manifest_path)
     city_rows = read_csv(csv_path)
     ledger = load_revision_rows(revision_path)
@@ -376,7 +378,8 @@ def run(args):
     issue_counts = Counter(r for c in candidate_decisions for r in c["reasons"])
     summary = {
         "mode": "SHADOW_ONLY", "publication_allowed": False,
-        "city_count": len({c["city_key"] for c in queue}),
+        "city_count": len(baseline),
+        "candidate_city_count": len({c["city_key"] for c in queue}),
         "candidates_seen": len(queue), "auto_ready_candidates": counters["AUTO_READY"],
         "needs_review_candidates": counters["NEEDS_REVIEW"],
         "rejected_candidates": counters["REJECTED"],
