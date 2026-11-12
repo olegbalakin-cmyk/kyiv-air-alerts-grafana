@@ -6,9 +6,11 @@ on:
       - ".github/workflows/update-netlify-site.yml"
       - ".github/workflows/c6-neon-git-integration-offline.yml"
       - "scripts/c6_neon_git_candidate.py"
+      - "scripts/c6_neon_one_shot_publisher.py"
       - "scripts/c6_pr93_generator_compat.py"
       - "scripts/c6_neon_publication_gate.py"
       - "tests/test_c6_neon_git_candidate.py"
+      - "tests/test_c6_neon_one_shot_publisher.py"
 permissions:
   contents: read
   actions: read
@@ -68,7 +70,9 @@ jobs:
               for key,value in fields.items(): f.write(key+"="+str(value)+"\n")
           PY
       - name: Unit fail-closed and negative staging tests
-        run: python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
+        run: |
+          python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
+          python -m unittest discover -s tests -p test_c6_neon_one_shot_publisher.py -v
       - name: End-to-end frozen physical six-file staging (never live publication)
         run: |
           python -m scripts.c6_neon_git_candidate \
