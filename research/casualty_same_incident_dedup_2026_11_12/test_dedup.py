@@ -234,8 +234,8 @@ def main():
         # Existing pinned frontend chart functions, not a browser deployment.
         ui = subprocess.run(
             ["node", str(HERE / "frontend_probe.js"),
-             str(root / "only_23" / GENERATED),
-             str(root / "only_23" / "pages-preview/app.js")],
+             str(root / "18_then_23" / GENERATED),
+             str(root / "18_then_23" / "pages-preview/app.js")],
             capture_output=True, text=True, timeout=30)
         check("pinned_frontend_function", ui.returncode == 0,
               ui.stdout[-500:] if ui.returncode == 0 else ui.stderr[-500:], "PASS")
