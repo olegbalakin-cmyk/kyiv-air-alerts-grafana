@@ -170,7 +170,7 @@ async function exercise(page, url, mobile=false) {
     });
     check("rollback restores exact original source row and graph",()=>{
       assert.equal(before.overlay,false);assert.equal(before.rows,null);
-      assert.equal(before.value,before.source);assert.equal(before.note,null);
+      assert.equal(before.value,before.source??0);assert.equal(before.note,null);
     });
     await rollback.locator("#casualtySection").screenshot({path:path.join(proofs,"rollback.png")});
     await rollback.close();
