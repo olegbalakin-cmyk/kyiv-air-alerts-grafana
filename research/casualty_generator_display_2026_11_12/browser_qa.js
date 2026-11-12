@@ -50,10 +50,10 @@ async function exercise(page, url, mobile=false) {
     if (u.protocol === "http:" && u.hostname === "127.0.0.1") route.continue();
     else route.abort();
   });
+  await page.addInitScript(() => localStorage.setItem("air-alerts-intro-tour-v5","1"));
   await page.goto(url,{waitUntil:"domcontentloaded"});
   await page.waitForFunction(()=>window.CasualtyCoveragePreview && state?.data?.casualties_by_city?.zaporizhzhia?.monthly?.some(r=>r.month==="2026-10" && r.coverage_status==="INCOMPLETE"),{timeout:30000});
   await page.waitForFunction(()=>typeof state!=="undefined" && Boolean(state.charts.casualtyChart),{timeout:30000});
-  await page.evaluate(() => { if (typeof finishIntroTour === "function") finishIntroTour(); });
   await page.waitForFunction(()=>document.getElementById("introTour")?.classList.contains("hidden"),{timeout:5000});
   const d = await page.evaluate(()=>{
     const c=state.charts.casualtyChart, i=c.data.labels.indexOf("2026-10");
@@ -186,6 +186,7 @@ async function exercise(page, url, mobile=false) {
       const u=new URL(route.request().url());
       if(u.protocol==="http:"&&u.hostname==="127.0.0.1")route.continue();else route.abort();
     });
+    await rollback.addInitScript(() => localStorage.setItem("air-alerts-intro-tour-v5","1"));
     await rollback.goto(base+"rollback/?city=zaporizhzhia&casyear=2026",{waitUntil:"domcontentloaded"});
     await rollback.waitForFunction(()=>typeof state!=="undefined" && Boolean(state.charts.casualtyChart),{timeout:30000});
     const before=await rollback.evaluate(()=>{
@@ -200,7 +201,6 @@ async function exercise(page, url, mobile=false) {
       assert.equal(before.overlay,false);assert.equal(before.rows,null);
       assert.equal(before.value,before.source??0);assert.equal(before.note,null);
     });
-    await rollback.evaluate(() => { if (typeof finishIntroTour === "function") finishIntroTour(); });
     await rollback.locator("#casualtyChart").locator("xpath=ancestor::*[contains(@class, 'chart-card')][1]").screenshot({path:path.join(proofs,"rollback.png")});
     await rollback.close();
     const digest=crypto.createHash("sha256");
