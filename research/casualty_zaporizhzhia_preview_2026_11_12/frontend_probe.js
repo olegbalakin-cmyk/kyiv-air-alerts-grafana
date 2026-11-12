@@ -62,7 +62,7 @@ assert(idx >= 0, "October must appear in the monthly chart");
 assert.strictEqual(values[idx], 23);
 assert.strictEqual(element("casualtySourceNote").textContent.includes("339 загиблих"), true);
 const sorted = [...labels].sort();
-assert.deepStrictEqual(labels, sorted, "All month labels must be chronological");
+assert.strictEqual(JSON.stringify(labels), JSON.stringify(sorted), "All month labels must be chronological");
 element("casualtyInterval").value = "yearly";
 vm.runInContext('renderCasualties("zaporizhzhia")', ctx);
 assert(charts.length === 2);
