@@ -42,39 +42,73 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
       hasKpiRange:typeof window.KpiRange!=="undefined"
     };
   });
-  // Three supported calendar scales must show exactly one forecast.
+  const countForecast = async () => page.evaluate(() => {
+    const chart=window.Chart?.getChart(document.getElementById("cityIntensityChart"));
+    const labels=chart?.data?.labels||[];
+    const indices=labels.map((x,i)=>String(x).includes("Прогноз")||String(x).includes("Forecast")?i:-1).filter(i=>i>=0);
+    const counts=chart?.data?.datasets?.filter(d=>String(d.label).includes("EWMA"))||[];
+    return {
+      forecastCount:indices.length,
+      forecastLabels:indices.map(i=>labels[i]),
+      forecastDatasets:counts.length,
+      forecastDataPoints:counts.map(d=>indices.filter(i=>Number.isFinite(d.data[i])).length),
+      checked:document.getElementById("showTrend")?.checked,
+      controlVisible:document.getElementById("showTrend")?.closest("label")?.getClientRects().length>0
+    };
+  });
+  snapshot.initialTrend = await countForecast();
+  if (snapshot.initialTrend.checked !== false || snapshot.initialTrend.forecastCount !== 0 ||
+      snapshot.initialTrend.forecastDatasets !== 0) errors.push("DEFAULT_TREND_NOT_OFF:"+JSON.stringify(snapshot.initialTrend));
+
+  // Supported scales: off by default, on -> one period, off -> no forecast.
   snapshot.forecastsByPeriod = {};
-  for (const period of ["daily28", "calendarWeekly", "monthly", "allTime"]) {
-    await page.select("#cityPeriod", period);
-    await page.waitForFunction(p => {
-      const chart=window.Chart?.getChart(document.getElementById("cityIntensityChart"));
-      return chart && document.getElementById("cityPeriod").value === p;
-    }, {timeout:25000}, period);
-    const result = await page.evaluate(() => {
-      const chart=window.Chart?.getChart(document.getElementById("cityIntensityChart"));
-      const labels=chart?.data?.labels||[];
-      const indices=labels.map((x,i)=>String(x).includes("Прогноз")||String(x).includes("Forecast")?i:-1).filter(i=>i>=0);
-      const counts=chart?.data?.datasets?.filter(d=>String(d.label).includes("EWMA"))||[];
-      return {forecastCount:indices.length, forecastLabels:indices.map(i=>labels[i]), forecastDatasets:counts.length, forecastDataPoints:counts.map(d=>indices.filter(i=>Number.isFinite(d.data[i])).length)};
-    });
-    snapshot.forecastsByPeriod[period] = result;
-    if (result.forecastCount !== 1 || result.forecastDatasets !== 2 || result.forecastDataPoints.some(n=>n!==1)) errors.push("INVALID_ONE_PERIOD_FORECAST:"+period+":"+JSON.stringify(result));
-  }
-  for (const period of ["weekly", "rolling30", "rolling90", "rolling180"]) {
+  for (const period of ["daily28","calendarWeekly","monthly","allTime"]) {
     await page.select("#cityPeriod",period);
-    const count=await page.evaluate(() => {
-      const chart=window.Chart?.getChart(document.getElementById("cityIntensityChart"));
-      return chart?.data?.labels?.filter(x=>String(x).includes("Прогноз")||String(x).includes("Forecast")).length||0;
-    });
-    if(count!==0)errors.push("FORECAST_ON_ROLLING:"+period+":"+count);
+    const initial=await countForecast();
+    if(initial.forecastCount!==0||initial.checked!==false||!initial.controlVisible)
+      errors.push("TREND_SHOULD_BE_HIDDEN_IN_CHART:"+period+":"+JSON.stringify(initial));
+    await page.click("#showTrend");
+    const on=await countForecast();
+    if(on.forecastCount!==1||on.forecastDatasets!==2||on.forecastDataPoints.some(n=>n!==1)||!on.checked)
+      errors.push("TREND_OPT_IN_FAILED:"+period+":"+JSON.stringify(on));
+    await page.click("#showTrend");
+    const off=await countForecast();
+    if(off.forecastCount!==0||off.forecastDatasets!==0||off.checked)
+      errors.push("TREND_OPT_OUT_FAILED:"+period+":"+JSON.stringify(off));
+    snapshot.forecastsByPeriod[period]={initial,on,off};
   }
-  await page.select("#cityPeriod", "daily28");
-  snapshot.daily28ForecastLabels = snapshot.forecastsByPeriod.daily28.forecastCount;
+  // Preserve the user's opt-in across supported interval and city changes.
+  await page.click("#showTrend");
+  await page.select("#cityPeriod","monthly");
+  const retained=await countForecast();
+  if(!retained.checked||retained.forecastCount!==1)errors.push("TREND_NOT_PRESERVED_BETWEEN_SCALES:"+JSON.stringify(retained));
+  const cityChoices=await page.$$eval("#citySelect option", options=>options.map(x=>x.value).filter(Boolean));
+  if(cityChoices.length>1) {
+    await page.select("#citySelect",cityChoices[1]);
+    const cityResult=await countForecast();
+    if(!cityResult.checked||cityResult.forecastCount!==1)errors.push("TREND_NOT_PRESERVED_BETWEEN_CITIES:"+JSON.stringify(cityResult));
+  }
+  // Unsupported rolling scales retain opt-in but never add forecast points.
+  snapshot.rolling = {};
+  for (const period of ["weekly","rolling30","rolling90","rolling180"]) {
+    await page.select("#cityPeriod",period);
+    const rolling=await countForecast();
+    snapshot.rolling[period]=rolling;
+    if(rolling.forecastCount!==0||rolling.forecastDatasets!==0||rolling.controlVisible)
+      errors.push("TREND_ON_ROLLING:"+period+":"+JSON.stringify(rolling));
+  }
+  await page.select("#cityPeriod","daily28");
+  const restored=await countForecast();
+  if(!restored.checked||restored.forecastCount!==1)errors.push("TREND_NOT_RESTORED:"+JSON.stringify(restored));
+  await page.click("#showTrend");
+  snapshot.finalTrend=await countForecast();
+  snapshot.daily28ForecastLabels=snapshot.finalTrend.forecastCount;
+  if(snapshot.finalTrend.checked||snapshot.finalTrend.forecastCount!==0)errors.push("FINAL_TREND_NOT_OFF:"+JSON.stringify(snapshot.finalTrend));
   try { await page.screenshot({path:"forecast-browser.png",fullPage:true}); } catch {}
   const output = {url,navigationError,errors,failed,network,snapshot};
   fs.writeFileSync("forecast-browser.json",JSON.stringify(output,null,2));
   console.log("FORECAST_BROWSER",JSON.stringify(output));
   await browser.close();
   if (snapshot.cityOptions < 23 || !snapshot.chartHasInstance ||
-      !snapshot.numericData || !snapshot.generated || snapshot.daily28ForecastLabels !== 1 || errors.length) process.exitCode=1;
+      !snapshot.numericData || !snapshot.generated || snapshot.daily28ForecastLabels !== 0 || errors.length || failed.length || network.length) process.exitCode=1;
 })().catch(err=>{console.error("SMOKE_EXCEPTION",err);process.exitCode=1;});
