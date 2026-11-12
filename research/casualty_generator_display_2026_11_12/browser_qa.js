@@ -167,7 +167,7 @@ async function exercise(page, url, mobile=false) {
     const desktop=await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true});
     await exercise(desktop,base+"?city=zaporizhzhia&casyear=2026",false);
     await desktop.close();
-    const mobile=await browser.newPage({viewport:{width:375,height:812},isMobile:true,hasTouch:true,acceptDownloads:true});
+    const mobile=await browser.newPage({viewport:{width:375,height:812},hasTouch:true,acceptDownloads:true});
     await exercise(mobile,base+"?city=zaporizhzhia&casyear=2026",true);
     await mobile.close();
     const embedded=await browser.newPage({viewport:{width:800,height:650}});
