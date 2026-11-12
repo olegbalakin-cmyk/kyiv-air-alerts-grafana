@@ -1,27 +1,28 @@
 # Project State — coordination snapshot
 
-**2026-11-12 NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** Latest: **C3-G2-WORKI2-NETLIFY-ALIAS-PHYSICAL-PASS-01**. Physical Git-only Netlify nonproduction alias PASS. Production rollback and release integration blocked.
+**2026-11-12 NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF. Latest: C6-C3-WORKK-54PASS-FINAL-WORKFLOW-NOGO-01.** Read main PROJECT_STATE.md/CHANGELOG.md before work; newer PR #78 governs. Verify exact SHA, Actions, artifacts; separate production, Neon, casualty, DST. Prior checkpoints below/[archive](docs/coordination-archive/README.md).
 
-Before repository work read main PROJECT_STATE.md + CHANGELOG.md; PR #78 newer checkpoints govern. Verify exact commits/Actions/artifacts. Separate production/C2/C3, Neon, casualty, WIP/backfill and DST. [History archive](docs/coordination-archive/README.md).
+## Active gates
 
-## Gates
-
-- **Production:** Git-only `site-prod@d0a7d22d`, `main@375e6935`; C2 #43262387718 23/23; Netlify production `6adb629bc3ebc570117d82e1` unchanged.
-- **Historical data:** PR #103 33,267/33,267 canonical; [physical #43299402658](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43299402658) artifact #13980242828: 23/23 historical cities, six JSON + 18 proof SHA PASS. `NEW_C2_NEON_JSON_PARITY=PASS` for that C2; research `publication_allowed=false`. Live current uncertified.
-- **Release code:** PR #95 `2064f38c` default OFF; PR #104 `ea71a0e2`; PR #100 `19446ba9` exact [#43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) 12/12 fixture E2E PASS; all Draft/unmerged. `FINAL_NEON_KPI_RELEASE_CONTRACT_CODE_READY=YES` components only; `RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO`.
-- **Work K open:** PR #95 final binding/manifest/six SHAs created inside Git-publishing job, whereas #104 Netlify needs owner-pinned final artifact first. Add narrow prepare-only non-publishing step; `FINAL_AUTHORIZED_RELEASE_ARTIFACT=PENDING`.
-- **Automations:** site-prod PR #104/#100 merge can trigger Netlify `--prod`; main PR #95 merge can trigger C2. Must pause both before code-only owner-approved merges; default main lacks manual Netlify workflow. After cutover keep one exclusive JSON publisher.
-- **Work I2:** [#43306339282](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282) exact `382ea915` SUCCESS, artifact #13984106982 SHA verified; Netlify `6af629b311d9632a220e652a` ready/branch-deploy, 13/13 HTTP 200, 12/13 exact SHA (index Netlify RUM injection, rest of HTML changes unproven), 23 cities/184 charts/23 CSV and Kyiv/casualty PASS, zero JS errors. Production/site-prod unchanged. **`ROLLBACK_OFFLINE_READY=YES; NETLIFY_NONPROD_REDEPLOY_PROVEN=YES; ROLLBACK_DEPLOY_AUTHORITY_READY=NO; ROLLBACK_OPERATIONAL_READY=NO`**. One alias owner approval consumed; still need actual production redeploy authority and fresh no-loss cutover-time C2/casualty/aux rollback package.
-- **Separate:** Sevastopol `25006→25008`, `25100` open; casualty and DST independent, DST OFF.
+- **Data:** Work A #43299402658 23 cities/33,267 canonical/6 JSON PASS, historical only for C2 #43262387718; no live-status certification.
+- **Work K:** PR #95 `d25f02f2`, #43307825507 **54/54 offline PASS**; #104/#100 fixture PASS. Actual prepare job references undefined `FINAL_RUN_ID`; publish job lacks `final-run.json` download. **`RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO`**. C2 #43262387718 has no same-run C6 preparation artifact.
+- **Rollback:** Work I2 Netlify alias `6af629b311d9632a220e652a` PASS; `NETLIFY_NONPROD_REDEPLOY_PROVEN=YES; ROLLBACK_OPERATIONAL_READY=NO` pending production restoration rights and fresh no-loss backup.
+- **Production:** Git-only `site-prod@d0a7d22d`, Netlify `6adb629bc3ebc570117d82e1` unchanged. Pause C2 and auto Netlify `--prod` before separately approved merges; retain sole post-cutover publisher.
 
 ## Next
 
-1. Finish Work K PR #95 prepare-only ZIP and exact-head offline CI, no release dispatch.
-2. Only by separate owner GO: pause C2 and automatic Netlify, code-only merge #95→#104→#100 with exact checks, capture last C2 and its matching independent Work A proof, final pinned artifact, fresh no-loss rollback package/production redeploy right, then Netlify-first and single Git publisher with HTTP/hash validation. No repeat Work I2 deploy.
+Work K2 fix exact workflow lines and CI, then owner-controlled merge, matching new C2+Work A, final release artifact, fresh rollback, production GO decision. No deployment approved.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-C3-WORKK-54PASS-FINAL-WORKFLOW-NOGO-01 — Work K 54 offline PASS, runtime NO-GO (2026-11-12)
+
+- [PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) exact HEAD `d25f02f2baca151af51a1aeda6145a305aa2ef96`, [Actions #43307825507](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43307825507) SUCCESS attempt 1; 14 staging + 6 publisher + 5 binding + 17 Work K + 12 PR104/PR100 = **54/54**. [Artifact #13983708946](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43307825507/artifacts/13983708946) ZIP SHA verified `c44dfb4f552c2afbfafa751dcd79f150194dbbc7edfc5650d33bf5b9bb14b214`. Five changed paths vs old #95 `2064f38c`; default-OFF prepare-only fixture, no actual final artifact.
+- **Two untested workflow failures:** `.github/workflows/update-netlify-site.yml` prepare-only line 819 executes `gh api .../$FINAL_RUN_ID` with undefined variable and `set -u`; release job defines it line 935 but omits `final-run.json` GET, then publisher requires that file line 1028. Work K2 move call to release job, add focused test.
+- **C2 prerequisite:** #43262387718 contains original C2 bundle #13967335571, but no exact `c6-neon-git-preparation-43262387718-1`; Work A physical #43299402658 cannot substitute. Need matching future C2 preparation/proof, not forged identity.
+- `FINAL_RELEASE_ARTIFACT_OFFLINE_E2E=PASS` fixture, `FINAL_RELEASE_ARTIFACT_PREPARE_WORKFLOW_READY=NO; RELEASE_CODE_INTEGRATION_READY=NO; REAL_AUTHORIZED_FINAL_RELEASE_ARTIFACT=NOT_CREATED; CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ## C3-G2-WORKI2-NETLIFY-ALIAS-PHYSICAL-PASS-01 — one authorized physical Netlify nonproduction alias PASS (2026-11-12)
 
 - Exact [Actions #43306339282](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282) SUCCESS attempt 1, research SHA `382ea915c11d721240a1024d9f4ac23d1a7e1164`; exactly one CLI `deploy --alias=g2-git-only-d0a7d22d`, without `--prod`. [Artifact #13984106982](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282/artifacts/13984106982) independently downloaded; ZIP SHA-256 `106673981e7233bcfc44522f0843227a1ee3a7efa1ea501e2bb71ab11b0301b0` matches GitHub. Inspected `preflight.json`, `deploy_receipt.json`, `http_qa.json`, `browser.json`: G2 18/18 checks, five Git blobs, Netlify alias [deployment `6af629b311d9632a220e652a`](https://g2-git-only-d0a7d22d--ukraine-air-alerts.netlify.app/) **ready/branch-deploy** confirmed independently via Netlify connector.

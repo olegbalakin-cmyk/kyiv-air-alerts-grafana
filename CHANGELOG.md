@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C3-WORKK-54PASS-FINAL-WORKFLOW-NOGO-01 — Work K 54/54 offline PASS with workflow runtime NO-GO (2026-11-12; accepted)
+
+- [PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) `d25f02f2`, [#43307825507](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43307825507) SUCCESS 54/54, artifact #13983708946 SHA `c44dfb4f552c2afbfafa751dcd79f150194dbbc7edfc5650d33bf5b9bb14b214`. Prepare-only uses undefined `FINAL_RUN_ID`; publisher does not download required `final-run.json`. Exact #43262387718 C2 bundle exists, same-run C6 preparation artifact absent. Work K2 narrow fix + future matching provenance needed. `RELEASE_CODE_INTEGRATION_READY=NO; CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C3-G2-WORKI2-NETLIFY-ALIAS-PHYSICAL-PASS-01 — physical Git-only Netlify alias PASS (2026-11-12; accepted)
 
 - Owner-approved [Actions #43306339282](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282) SUCCESS at `382ea915`, [artifact #13984106982](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43306339282/artifacts/13984106982) verified ZIP SHA `106673981e7233bcfc44522f0843227a1ee3a7efa1ea501e2bb71ab11b0301b0`; Netlify alias `6af629b311d9632a220e652a` ready/branch-deploy. 13/13 HTTP 200, 12/13 file SHA exact (index RUM inserted; sole HTML diff not proven), 23/23 cities, 184/184 graphs, 23 CSV, Kyiv/casualty PASS, zero JS errors. Production `6adb629bc3ebc570117d82e1` and site-prod `d0a7d22d` unchanged. `NETLIFY_NONPROD_REDEPLOY_PROVEN=YES`; production authority/fresh no-loss rollback OPEN, `ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
