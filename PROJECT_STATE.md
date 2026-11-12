@@ -1,28 +1,32 @@
 # Project State — coordination snapshot
 
-**2026-11-12 NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** Latest: **C6-PR93-GENERATOR-PREFLIGHT-OFFLINE-PASS-01** (generator exact-blob fix offline PASS; physical Neon→six JSON still pending).
+**2026-11-12 NO-GO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** Latest: **C3-G2-ROLLBACK-OFFLINE-PACKAGE-32-8-PASS-01** (rollback offline PASS, operational BLOCKED).
 
-Read main PROJECT_STATE.md and CHANGELOG.md, then newer PR #78. Verify exact SHA/Actions/artifacts. Separate production C2/C3, Neon, casualty, DST, WIP and historical/backfill. Immutable history in [archive index](docs/coordination-archive/README.md); offline PASS is never production GO.
+Read main PROJECT_STATE.md / CHANGELOG.md and newer PR #78. Verify SHA/Actions/artifacts; separate production, Neon, C2/C3, casualty, DST, WIP/backfill. [Archive](docs/coordination-archive/README.md); offline proofs are not deployments.
 
-## Release gates
+## Gates
 
-- **Production:** `site-prod@d0a7d22d` still Git-only; regular C2 #43262387718 SUCCESS, 23/23 receipts. Netlify current deployment `6adb629bc3ebc570117d82e1` (2026-10-23) unchanged.
-- **SQL parity:** PR #103, 33,267/33,267 episodes, 23/23, 0 unexplained differences; 262 superseded preserved, PASS.
-- **Physical six JSON:** owner run #43293835094 failed PREPARE_GENERATOR (merged PR93 Sevastopol parser blob drift). **Research exact fix** `9bb62afe`, [#43297121030](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297121030) offline PASS, six narrow tests. `PHYSICAL_GENERATOR_PREFLIGHT_READY=YES` code-only, **`NEW_C2_NEON_JSON_PARITY=BLOCKED`** until new owner-authorized protected read-only physical run with changed research_sha; do not reuse old approval.
-- **Frontend:** PR #100 `19446ba9`, gated Neon KPI offline PASS; unmerged and not deployed.
-- **Publisher:** PR #95 `2064f38c` exact-head #43293275773 offline PASS, gated one-shot Git release default OFF. **`NEON_PUBLICATION_CODE_READY=NO`** until final KPI SHA contract with PR #104/E2E.
-- **Netlify:** PR #104 `a18e2029` research KPI static offline PASS, does not yet accept final owner-authorized KPI. Production unchanged.
-- **Rollback:** `ROLLBACK_OPERATIONAL_READY=NO`. Work G selected fresh compatible Git-only C2 + Netlify static/frontend package; no new immutable practical restore, read-only Netlify API not deploy authority. No reset/full `site-prod` rewind. Sevastopol old `25006→25008`, open `25100`; casualty, WIP and DST separate.
+- **Production:** Git `site-prod@d0a7d22d` live; C2 #43262387718 23/23 SUCCESS. Netlify `6adb629bc3ebc570117d82e1` (Oct 23) unchanged, stale as rollback.
+- **Data:** PR #103 33,267/33,267 SQL parity PASS; physical six JSON new-C2 **BLOCKED** after old #43293835094 PR93 parser drift, fixed offline at `9bb62afe`, #43297121030 PASS. Requires separately authorized new protected read-only dispatch.
+- **C3:** PR #100 `19446ba9` gated frontend offline PASS, unmerged. PR #104 `a18e2029` Netlify research KPI offline PASS, final authorized KPI contract OPEN.
+- **Publisher:** PR #95 `2064f38c` one owner-gated Git release default OFF, offline tests PASS; `NEON_PUBLICATION_CODE_READY=NO` until PR #104 E2E final binding.
+- **Rollback:** PR #107 `581b1cff`, #43297683167 32 checks + 8 synthetic no-loss PASS, 5 Git JSON + 12 static + data.json and casualty hash manifest. **`ROLLBACK_OFFLINE_READY=YES; ROLLBACK_OPERATIONAL_READY=NO`**. Await cutover-time refreshed package and separately authorized Netlify alias deploy rights/recovery. No reset or overwrite of newer C2/casualty/aux.
+- **Other:** Sevastopol `25006→25008` and `25100` unresolved. DST/casualty separate, DST OFF.
 
 ## Next
 
-1. Owner separately approve research SHA `9bb62afe088c18ec4bb36f5213319acfd982063c` in `c6-neon-shadow-readonly` and manually dispatch **one** existing read-only workflow on exact C2 #43262387718. Verify resulting six file SHA, generation, provenance, casualty/aux/Kyiv preservation. No automatic retry.
-2. Work H update PR #104 final authorized release KPI binding to PR #95/#100; scoped E2E offline, default OFF.
-3. Work G2 immutable fresh Git-only rollback package and Netlify redeploy authority (non-production alias test only after separate owner grant); then request independent merge/deploy/cutover GO.
+1. One owner-approved read-only physical six JSON on research `9bb62afe`.
+2. Work H final PR #104 KPI contract with PR #95/#100, offline E2E.
+3. Optional Netlify **non-prod alias** rehearsal from PR #107 only after separate owner authorization; refresh Git-only snapshot immediately before cutover. Then owner release GO.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C3-G2-ROLLBACK-OFFLINE-PACKAGE-32-8-PASS-01 — immutable rollback offline PASS, operational NO-GO (2026-11-12)
+
+- [Draft PR #107](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/107) HEAD `581b1cff4ccd3d25a5a96f3fac120c04f8a6255c`, exact-head [Actions #43297683167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297683167) SUCCESS attempt 1, [artifact #13980651600](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297683167/artifacts/13980651600), GitHub SHA-256 `fa81604b686caa8302ebd1f2056a3980a291f7884f766e0d3d798cd79e8ca4d8`. CI verified **32/32 structural checks + 8/8 synthetic no-loss cases**; inner package SHA `f3e2601c5122f413bea8c70851a3006797e0eb8f95c689247d33d3674fd63045`, manifest SHA `e62c673940dbbba0a2d15c464be73eb03ccc39960b422f3857b9afb115726378`. Pinned `site-prod@d0a7d22d`, PR #100 `19446ba9`, PR #104 `a18e2029`, C2 #43262387718: 23/23 cities, generation `2026-11-12T18:47:43.912004+02:00`, 5 Git JSON, 12 static + `data.json`, hashes of 12 casualty tracked files (not bundled for rollback overwrite).
+- [Runbook](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/581b1cff4ccd3d25a5a96f3fac120c04f8a6255c/research/c3_g2_git_only_rollback_2026_11_12/RUNBOOK.md): existing C2 Git-only recapture + matched Netlify CLI redeploy, no `git reset`, force or blind older C2/casualty/aux restore. **`ROLLBACK_OFFLINE_READY=YES; ROLLBACK_OPERATIONAL_READY=NO`** until fresh cutover-time package, independent operator deploy rights/non-prod alias test (only on separate authorization) and no-loss production recovery proof. No deploy occurred.
+
 ## C6-PR93-GENERATOR-PREFLIGHT-OFFLINE-PASS-01 — exact merged-PR93 generator guard fixed offline (2026-11-12)
 
 - Physical [#43293835094](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43293835094) artifact #13978646521 previously blocked at `PREPARE_GENERATOR:BUILDER_CODE_DRIFT:scripts/add_sevastopol_exact.py` before any candidate JSON, with zero source HTTP / Neon writes / production writes. Research branch `research-c6-postc2-append-only-2026-11-12` advanced without force from `82a7cc77` to [commit `9bb62afe088c18ec4bb36f5213319acfd982063c`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/9bb62afe088c18ec4bb36f5213319acfd982063c). Only three paths: frozen generator exact Sevastopol PR93 Git blob `d31c5ac43ac9e76491ee38033f9a46838c5abfbb` allowlist, 6 narrow tests, existing offline CI step; physical workflow unchanged. [Exact-head Actions #43297121030](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297121030) SUCCESS, parser positive/negative guard + prior offline regressions all PASS, no artifact. **`PHYSICAL_GENERATOR_PREFLIGHT_READY=YES` offline only; `NEW_C2_NEON_JSON_PARITY=BLOCKED`** until owner updates `C6_SHADOW_APPROVED_RESEARCH_SHA` in protected Environment to new exact SHA and starts a new separate read-only run using same pinned C2 #43262387718. Old owner approval cannot transfer; no production GO.

@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-G2-ROLLBACK-OFFLINE-PACKAGE-32-8-PASS-01 — 32/32 Git-only rollback offline PASS, operational BLOCKED (2026-11-12; accepted)
+
+- [PR #107](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/107) `581b1cff`, exact-head [#43297683167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297683167) SUCCESS, artifact #13980651600 GitHub SHA-256 `fa81604b686caa8302ebd1f2056a3980a291f7884f766e0d3d798cd79e8ca4d8`: 32 checks, 8 no-loss synthetic cases, 23/23, 5 Git JSON + 12 static + `data.json`; casualty tracked only by hashes. Inner package SHA `f3e2601c…fd63045`, manifest SHA `e62c6739…726378`. Requires owner-approved Netlify non-prod alias test and refreshed cutover-time rollback package; no real redeploy. `ROLLBACK_OFFLINE_READY=YES; ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C6-PR93-GENERATOR-PREFLIGHT-OFFLINE-PASS-01 — PR93 exact generator fix offline PASS, new physical run pending (2026-11-12; proposed)
 
 - Research [`9bb62afe`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/9bb62afe088c18ec4bb36f5213319acfd982063c), exact-head [Actions #43297121030](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43297121030) SUCCESS: only allowlist merged PR93 Sevastopol parser blob `d31c5ac4`, six negative/positive tests; physical workflow unchanged. Earlier #43293835094 failed before six JSON. **Generator offline ready; current-C2 Neon six-JSON proof still BLOCKED** until new separately owner-approved read-only run for `9bb62afe`. No writer/HTTP/publication/cutover; `GLOBAL_CUTOVER=NO`.
