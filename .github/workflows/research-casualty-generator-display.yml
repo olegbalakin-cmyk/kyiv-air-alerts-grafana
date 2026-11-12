@@ -94,7 +94,7 @@ jobs:
             /tmp/casualty-qualified.json /tmp/casualty-bridge-proof.json /tmp/casualty-first/generator_probe.json
       - name: Install browser dependencies (localhost only, no source HTTP)
         run: |
-          npm install --no-save --no-package-lock playwright@1.56.1 chart.js@4.4.7
+          npm install --no-save --no-package-lock playwright@1.64.1 chart.js@4.4.7
           npx playwright install --with-deps chromium
       - name: Build real-generator preview and clean rollback
         run: |
