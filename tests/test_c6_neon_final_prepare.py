@@ -209,6 +209,42 @@ class WorkK(unittest.TestCase):
         with self.assertRaisesRegex(candidate.Blocked,"FINAL_RELEASE_NOT_BYTE_IDENTICAL"):
             publisher.verify_pinned_final_zip(final_zip,self.final,result,approval,artifact,run)
 
+    def test_final_run_api_fetch_only_after_publisher_id_and_before_use(self):
+        """The final run does not yet exist during prepare-only dispatch."""
+        wf = yaml.safe_load(Path(".github/workflows/update-netlify-site.yml").read_text())
+        jobs = wf["jobs"]
+        prepare = jobs["c6-neon-final-prepare-only"]
+        publisher = jobs["c6-neon-owner-gated-git-release"]
+        final_api = 'gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FINAL_RUN_ID" > "$root/final-run.json"'
+        final_id = 'FINAL_RUN_ID="$(python -c '
+        final_consumer = '--final-run "$root/final-run.json"'
+
+        # Recheck ALL steps, not merely the intended evidence-fetch step.
+        prep_commands = "\\n".join(str(s.get("run", "")) for s in prepare["steps"])
+        publish_commands = "\\n".join(str(s.get("run", "")) for s in publisher["steps"])
+        self.assertNotIn(final_api, prep_commands)
+        self.assertNotIn("$FINAL_RUN_ID", prep_commands)
+        self.assertNotIn("final-run.json", prep_commands)
+        self.assertEqual(publish_commands.count(final_api), 1)
+
+        evidence = [step for step in publisher["steps"]
+                    if 'FINAL_RUN_ID="$(python -c ' in str(step.get("run", ""))]
+        self.assertEqual(len(evidence), 1)
+        fetch_step = evidence[0]["run"]
+        self.assertIn(final_id, fetch_step)
+        self.assertIn(final_api, fetch_step)
+        self.assertLess(fetch_step.index(final_id), fetch_step.index(final_api))
+        self.assertIn('gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID"',
+                      fetch_step)
+        self.assertLess(fetch_step.index(final_api),
+                        fetch_step.index('curl --fail --silent --show-error --location --retry 3'))
+        self.assertIn(final_consumer, publish_commands)
+        self.assertLess(publish_commands.index(final_api),
+                        publish_commands.index(final_consumer))
+        self.assertEqual(prepare["permissions"], {"contents": "read", "actions": "read"})
+        self.assertFalse(wf[True]["workflow_dispatch"]["inputs"]["c6_final_prepare_only"]["default"])
+        self.assertFalse(wf[True]["workflow_dispatch"]["inputs"]["c6_neon_git_release"]["default"])
+
     def test_workflow_prepare_only_is_exclusive_and_default_off(self):
         path=Path(".github/workflows/update-netlify-site.yml")
         content=path.read_text()
