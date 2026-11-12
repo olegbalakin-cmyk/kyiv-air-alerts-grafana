@@ -18,6 +18,13 @@
 - Neon project `green-cake-44216048`, branch `br-bold-mode-b5rub8pq`. Actual database run `306bda37-e4e9-406f-b09b-ec20090e22c1`, `succeeded`, persisted corpus SHA equals C2.
 - Superseded inventory file blob `958bc6e679a77d7145d76ab713858f2e2b335319` on PR #74 HEAD `2fe50c323171393ab2fa725010bf3d203416af6b`.
 
+## GitHub-hosted CI proof (exact HEAD)
+
+- [Actions #43286060405](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43286060405): **SUCCESS** on verification-code HEAD `debe7d70dbb552fc465205d3149d8587187f0b01`. All required steps succeeded, including exact C2 run metadata and archived witness verification.
+- [Artifact #13974134720](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43286060405/artifacts/13974134720), ZIP SHA-256 `84e324228e41a8f8767eaefae730ded730cc21c0708111ceb535b18e75779f41` (GitHub artifact digest and Actions upload-log corroboration).
+- Inside artifact, `PROOF.json` SHA-256 `13bc1a07ae88e92eebe1fb97b092a57c032949dba4e8d629d80ea95ba8baba14` (Actions console). It explicitly records `NEW_C2_EPISODE_NEON_PARITY=PASS` and `NEW_C2_NEON_JSON_PARITY=BLOCKED`.
+- The separate first CI #43285928417 failed because its verifier expected the outer artifact ZIP, while `download-artifact` had already extracted it to the inner C2 ZIP. This was corrected without changing source content or witnessed Neon hashes; the latest exact-head CI above supersedes that packaging failure.
+
 ## Proof execution / limitations
 
 A new read-only `SELECT` ran against existing Neon branch through the Neon connector. It excluded only 262 pinned superseded legacy IDs, then computed per-city canonical counts and SHA-256 over seven fields. C2 archive was downloaded from the specified GitHub artifact and independently verified. `verify_witness.py` rechecks archive SHA, inner file SHA, corpus SHA, 23 receipts and exact 23-city Neon witness hashes; its GitHub Actions run provides a non-sensitive proof JSON and SHA-256.
