@@ -121,6 +121,11 @@ if (!url || !/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url)) throw new Erro
   if(snapshot.finalTrend.checked||snapshot.finalTrend.forecastCount!==0)errors.push("FINAL_TREND_NOT_OFF:"+JSON.stringify(snapshot.finalTrend));
   // Small-screen check: the same row must contain all chart actions without horizontal overflow.
   await page.setViewport({width:375,height:812,deviceScaleFactor:1});
+  await page.reload({waitUntil:"domcontentloaded",timeout:60000});
+  await page.waitForFunction(() => {
+    const row=document.querySelector('[data-csv-chart="cityIntensityChart"]');
+    return row?.querySelectorAll("button").length===3 && window.Chart?.getChart(document.getElementById("cityIntensityChart"));
+  },{timeout:60000});
   snapshot.mobileToolbar = await page.evaluate(() => {
     const row=document.querySelector('[data-csv-chart="cityIntensityChart"]');
     const card=document.getElementById("cityIntensityChart")?.closest(".chart-card");
