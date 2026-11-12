@@ -53,6 +53,10 @@ async function exercise(page, url, mobile=false) {
   await page.goto(url,{waitUntil:"domcontentloaded"});
   await page.waitForFunction(()=>window.CasualtyCoveragePreview && state?.data?.casualties_by_city?.zaporizhzhia?.monthly?.some(r=>r.month==="2026-10" && r.coverage_status==="INCOMPLETE"),{timeout:30000});
   await page.waitForFunction(()=>typeof state!=="undefined" && Boolean(state.charts.casualtyChart),{timeout:30000});
+  if (await page.locator("#introTour:not(.hidden) #tourSkip").count()) {
+    await page.locator("#tourSkip").click();
+  }
+  await page.waitForFunction(()=>document.getElementById("introTour")?.classList.contains("hidden"),{timeout:5000});
   const d = await page.evaluate(()=>{
     const c=state.charts.casualtyChart, i=c.data.labels.indexOf("2026-10");
     const row=state.data.casualties_by_city.zaporizhzhia.monthly.find(r=>r.month==="2026-10");
@@ -80,14 +84,15 @@ async function exercise(page, url, mobile=false) {
     const ix=chart.data.labels.indexOf("2026-10");
     const p=chart.getDatasetMeta(0).data[ix].getProps(["x","y","base","width"],true);
     const legendTop=chart.chartArea.top;
-    const textY=Math.max(legendTop+35,Math.min(p.y,p.base)-7);
-    return {x:p.x,textY,barWidth:p.width,left:chart.chartArea.left,
+    const textY=Math.max(legendTop+22,Math.min(p.y,p.base)-7);
+    return {x:p.x,textY,barTop:Math.min(p.y,p.base),barWidth:p.width,left:chart.chartArea.left,
       right:chart.chartArea.right,top:chart.chartArea.top,bottom:chart.chartArea.bottom};
   });
   check("≥23 label geometry fits the original chart canvas on this viewport",()=>{
     assert(geometry.barWidth>0);
     assert(geometry.x>geometry.left+12 && geometry.x<geometry.right-12);
     assert(geometry.textY>=geometry.top && geometry.textY<geometry.bottom);
+    assert(geometry.textY < geometry.barTop, "≥23 must be above hatch, not overprinted on it");
   });
   const tooltip = await page.evaluate(()=>{
     const chart=state.charts.casualtyChart;
@@ -101,7 +106,7 @@ async function exercise(page, url, mobile=false) {
     assert.match(tooltip.footer,/нижня межа.*не остаточний/);
   });
   await page.mouse.move(0,0);
-  await page.locator("#casualtySection").screenshot({path:path.join(proofs,mobile?"mobile-casualty.png":"desktop-casualty.png")});
+  await page.locator("#casualtyChart").locator("xpath=ancestor::*[contains(@class, 'chart-card')][1]").screenshot({path:path.join(proofs,mobile?"mobile-casualty.png":"desktop-casualty.png")});
   const png = await page.evaluate(()=>window.ChartShare.renderChartPng("casualtyChart",document.getElementById("casualtyChart").closest(".chart-card")));
   check("share image PNG generated",()=>assert(/^data:image\/png;base64,/.test(png.dataUrl)));
   fs.writeFileSync(path.join(proofs,mobile?"mobile-share.png":"desktop-share.png"),Buffer.from(png.dataUrl.split(",")[1],"base64"));
@@ -197,7 +202,8 @@ async function exercise(page, url, mobile=false) {
       assert.equal(before.overlay,false);assert.equal(before.rows,null);
       assert.equal(before.value,before.source??0);assert.equal(before.note,null);
     });
-    await rollback.locator("#casualtySection").screenshot({path:path.join(proofs,"rollback.png")});
+    if (await rollback.locator("#introTour:not(.hidden) #tourSkip").count()) await rollback.locator("#tourSkip").click();
+    await rollback.locator("#casualtyChart").locator("xpath=ancestor::*[contains(@class, 'chart-card')][1]").screenshot({path:path.join(proofs,"rollback.png")});
     await rollback.close();
     const digest=crypto.createHash("sha256");
     for(const name of fs.readdirSync(proofs).sort())digest.update(fs.readFileSync(path.join(proofs,name)));
