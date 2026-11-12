@@ -8,11 +8,13 @@ on:
       - "scripts/c6_neon_git_candidate.py"
       - "scripts/c6_neon_one_shot_publisher.py"
       - "scripts/c6_neon_release_binding.py"
+      - "scripts/c6_neon_final_prepare.py"
       - "scripts/c6_pr93_generator_compat.py"
       - "scripts/c6_neon_publication_gate.py"
       - "tests/test_c6_neon_git_candidate.py"
       - "tests/test_c6_neon_one_shot_publisher.py"
       - "tests/test_c6_neon_release_binding.py"
+      - "tests/test_c6_neon_final_prepare.py"
 permissions:
   contents: read
   actions: read
@@ -71,11 +73,14 @@ jobs:
           with open(os.environ["GITHUB_ENV"],"a") as f:
               for key,value in fields.items(): f.write(key+"="+str(value)+"\n")
           PY
+      - name: Install offline YAML test dependency
+        run: python -m pip install 'PyYAML==6.0.2'
       - name: Unit fail-closed and negative staging tests
         run: |
           python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
           python -m unittest discover -s tests -p test_c6_neon_one_shot_publisher.py -v
           python -m unittest discover -s tests -p test_c6_neon_release_binding.py -v
+          python -m unittest discover -s tests -p test_c6_neon_final_prepare.py -v
       - name: End-to-end frozen physical six-file staging (never live publication)
         run: |
           python -m scripts.c6_neon_git_candidate \
@@ -128,6 +133,25 @@ jobs:
           (root/"REPORT.json").write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
           print("SIX_FILE_LOCAL_ATOMIC_COMMIT_PASS; PRODUCTION_PUBLICATION_OFF")
           PY
+      - name: Checkout unchanged exact PR104 Netlify contract
+        uses: actions/checkout@v4
+        with:
+          ref: ea71a0e2d2313ea86143500b4ef4ee25ab4c7cec
+          path: approved-pr104
+          persist-credentials: false
+      - name: Checkout unchanged exact PR100 frontend consumer
+        uses: actions/checkout@v4
+        with:
+          ref: 19446ba9b9513ec962be08a128b4132de3f1912c
+          path: approved-pr100
+          persist-credentials: false
+      - name: Exact PR95 release binding to PR104 to PR100 offline E2E
+        env:
+          WORK_H_PINNED_PR95_ROOT: ${{ github.workspace }}
+          WORK_H_PINNED_PR100_ROOT: ${{ github.workspace }}/approved-pr100
+        run: |
+          python -m unittest discover -s approved-pr104/tests -p test_c3_neon_netlify_binding.py -v
+          echo "PR95_RELEASE_BYTES_TO_PR104_NETLIFY_VALIDATOR_TO_PR100_CONSUMER_OFFLINE_PASS"
       - name: Upload non-sensitive evidence only
         if: always()
         uses: actions/upload-artifact@v4
