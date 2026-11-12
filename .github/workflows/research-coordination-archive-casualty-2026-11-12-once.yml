@@ -1,0 +1,58 @@
+name: One-off lossless casualty coordination archive 2026-11-12
+
+on:
+  push:
+    branches:
+      - coord-casualty-military-status-54-2026-11-11
+    paths:
+      - .github/workflows/research-coordination-archive-casualty-2026-11-12-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: casualty-coordination-archive-2026-11-12
+  cancel-in-progress: false
+
+jobs:
+  archive-without-changing-current-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: coord-casualty-military-status-54-2026-11-11
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate immutable pre-archive head, run official archival dry-run
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          source_ref="$(git rev-parse HEAD)"
+          echo "ARCHIVE_SOURCE_HEAD=$source_ref"
+          python scripts/coordination_docs.py archive --date 2026-11-12 --source-ref "$source_ref" --dry-run
+          python scripts/coordination_docs.py verify --base-ref origin/main
+      - name: Archive intact historical checkpoints using repo official tool
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_ref="$(git rev-parse HEAD)"
+          python scripts/coordination_docs.py archive --date 2026-11-12 --source-ref "$source_ref"
+          python scripts/coordination_docs.py check
+          python scripts/coordination_docs.py verify --base-ref origin/main
+          git status --short
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add PROJECT_STATE.md CHANGELOG.md docs/coordination-archive
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "ARCHIVE_NO_CHANGES"
+          else
+            git commit -m "docs(casualty): archive accepted checkpoint history losslessly"
+            git push origin HEAD:coord-casualty-military-status-54-2026-11-11
+            echo "ARCHIVE_PUSH_SUCCESS"
+          fi
