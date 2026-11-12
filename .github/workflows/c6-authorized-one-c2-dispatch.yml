@@ -1,0 +1,126 @@
+name: C6 authorized ONE C2 run then re-disable (NO NETLIFY)
+on:
+  push:
+    branches: [research-c6-authorized-single-c2-dispatch-2026-11-13]
+    paths:
+      - .github/workflows/c6-authorized-one-c2-dispatch.yml
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: owner-approved-one-c2-2026-11-13
+  cancel-in-progress: false
+jobs:
+  one-c2-and-repause:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PREP_ENABLED: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED }}
+      BUNDLE_EXPORT: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED }}
+      HISTORY_CAPTURE: ${{ vars.C2_HISTORY_CAPTURE_ENABLED }}
+      PUBLISHER_PAUSED: ${{ vars.C6_GIT_ONLY_PUBLISHER_PAUSED }}
+      FINAL_PREP_ENABLED: ${{ vars.C6_FINAL_PREPARE_ENABLED }}
+      RELEASE_ENABLED: ${{ vars.C6_NEON_GIT_RELEASE_ENABLED }}
+    steps:
+      - name: Owner-approved dispatch of exactly one C2 and re-disable C2 workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          test "$GITHUB_REF_NAME" = "research-c6-authorized-single-c2-dispatch-2026-11-13"
+          test "$GITHUB_RUN_ATTEMPT" = "1"
+          test "$PREP_ENABLED" = true || { echo "STOP_C6_PREP_FLAG_NOT_TRUE"; exit 2; }
+          test "$BUNDLE_EXPORT" = true || { echo "STOP_C2_BUNDLE_FLAG_NOT_TRUE"; exit 2; }
+          test "$HISTORY_CAPTURE" = true || { echo "STOP_C2_HISTORY_CAPTURE_NOT_TRUE"; exit 2; }
+          test "$PUBLISHER_PAUSED" != true || { echo "STOP_REGULAR_C2_PAUSED"; exit 2; }
+          test "$RELEASE_ENABLED" != true || { echo "STOP_NEON_GIT_RELEASE_FLAG_NOT_OFF"; exit 2; }
+          test "$FINAL_PREP_ENABLED" != true || { echo "STOP_FINAL_RELEASE_PREP_FLAG_NOT_OFF"; exit 2; }
+          main="$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)"
+          site="$(gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq .commit.sha)"
+          test "$main" = "712c9e351fc3548325cf594cf0617bb33e70a002" || { echo "STOP_MAIN_DRIFT"; exit 2; }
+          test "$site" = "6648a11242fac16cf023114cd6e58a65c3b49968" || { echo "STOP_SITE_DRIFT"; exit 2; }
+          verify_workflow() {
+            local id="$1" path="$2" want="$3" json
+            json="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id")"
+            WORKFLOW_JSON="$json" WANT_PATH="$path" WANT_STATE="$want" WANT_ID="$id" python3 - <<'PY'
+          import json,os
+          w=json.loads(os.environ["WORKFLOW_JSON"])
+          assert w["id"]==int(os.environ["WANT_ID"]) and w["path"]==os.environ["WANT_PATH"] and w["state"]==os.environ["WANT_STATE"],w
+          print("EXACT_WORKFLOW",w["id"],w["path"],w["state"])
+          PY
+          }
+          verify_workflow 360885782 ".github/workflows/update-netlify-site.yml" disabled_manually
+          verify_workflow 360885508 ".github/workflows/netlify-production.yml" disabled_manually
+          for id in 360885782 360885508; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$id/runs?per_page=100" > "$RUNNER_TEMP/check-$id.json"
+            WID="$id" python3 - <<'PY'
+          import json,os,pathlib
+          j=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/("check-"+os.environ["WID"]+".json")).read_text())
+          pending=[(x["id"],x["status"]) for x in j["workflow_runs"] if x["status"]!="completed"]
+          if pending: raise SystemExit("STOP_ACTIVE_PRODUCTION_RUN:"+str(pending))
+          print("NO_ACTIVE_PRODUCTION_RUN",os.environ["WID"])
+          PY
+          done
+          # The owner approved exactly one normal C2 run, including its canonical writer,
+          # original Git JSON update, same-run C2 bundle and independent read-only
+          # C6 six-JSON preparation job. No Netlify or Neon Git publication.
+          need_pause=0
+          cleanup() {
+            rc="$?"
+            trap - EXIT
+            if [ "$need_pause" = 1 ]; then
+              if gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/360885782/disable"; then
+                echo "C2_EMERGENCY_REPAUSE_API_ACCEPTED"
+              else
+                echo "::error::CRITICAL_C2_REPAUSE_FAILED"
+              fi
+              gh api "repos/$GITHUB_REPOSITORY/actions/workflows/360885782" --jq '.state' || true
+            fi
+            exit "$rc"
+          }
+          trap cleanup EXIT
+          need_pause=1
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/360885782/enable"
+          verify_workflow 360885782 ".github/workflows/update-netlify-site.yml" active
+          verify_workflow 360885508 ".github/workflows/netlify-production.yml" disabled_manually
+          before="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          # Single dispatch. No retry, even on ambiguous API failure.
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/360885782/dispatches" \
+            -f ref=main \
+            -f "inputs[c6_final_prepare_only]=false" \
+            -f "inputs[c6_neon_git_release]=false"
+          echo "ONE_DISPATCH_API_ACCEPTED_AT:$before"
+          run_id=""
+          for i in $(seq 1 36); do
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/360885782/runs?event=workflow_dispatch&per_page=40" > "$RUNNER_TEMP/dispatch-runs.json"
+            run_id="$(AFTER="$before" WANT_SHA="$main" python3 - <<'PY'
+          import json,os,pathlib
+          j=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"dispatch-runs.json").read_text())
+          matches=[x for x in j["workflow_runs"] if x["created_at"]>=os.environ["AFTER"] and x["head_sha"]==os.environ["WANT_SHA"] and x["head_branch"]=="main" and x["event"]=="workflow_dispatch"]
+          if len(matches)>1: raise SystemExit("STOP_MULTIPLE_C2_DISPATCHES:"+str([x["id"] for x in matches]))
+          print(matches[0]["id"] if matches else "")
+          PY
+          )"
+            if [ -n "$run_id" ]; then break; fi
+            sleep 3
+          done
+          test -n "$run_id" || { echo "::error::C2_DISPATCH_ACCEPTED_BUT_RUN_NOT_FOUND"; exit 2; }
+          echo "ONE_AUTHORIZED_C2_RUN_ID:$run_id"
+          echo "ONE_AUTHORIZED_C2_RUN_URL:https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+          started=0
+          for i in $(seq 1 60); do
+            status="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq '.status')"
+            if [ "$status" = in_progress ]; then started=1; break; fi
+            if [ "$status" = completed ]; then break; fi
+            sleep 2
+          done
+          echo "C2_RUN_STATUS_BEFORE_REPAUSE:$status"
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/360885782/disable"
+          verify_workflow 360885782 ".github/workflows/update-netlify-site.yml" disabled_manually
+          verify_workflow 360885508 ".github/workflows/netlify-production.yml" disabled_manually
+          need_pause=0
+          echo "C2_WORKFLOW_REDISABLED; ONE_RUN_ONLY; NETLIFY_STILL_DISABLED"
+          test "$started" = 1 || { echo "::error::DISPATCHED_C2_NOT_OBSERVED_STARTED; NO_SECOND_DISPATCH"; exit 2; }
+          echo "SUCCESS_C2_STARTED_ONCE_AND_PRODUCTION_AUTOMATION_PAUSED"
