@@ -20,13 +20,13 @@ Latest accepted: **C6-C3-PR90-FRONTEND-FIX-PASS-01** (actual frontend offline QA
 - **23-city generator / publication:** [Physical #43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) on PR #82 `82a7cc77` **PASS**; artifact #13929117121: 6/6 JSON, 18/18 hashes, 23/23 historical receipts/freshness, 33,135 C2 canonical, 262 stale +75 later excluded. Read-only, no publication. Current freshness/Kyiv provenance and DST NOT certified; preview/C3 OPEN.
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
-- **Preview / C3:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) base `site-prod`, exact `83f14e27`, [Actions #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) PASS: 184 city/mode views, 23 CSV, 23 rollback, zero JS/HTTP/external errors, 28 files restored. Public preview/operational C3 rollback OPEN.
+- **Preview / C3:** [PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) frontend/browser #43205095573 PASS. Work B package [#43208800105](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43208800105) PASS. ONE draft deploy owner-approved, **not executed**. Production unchanged; live QA and C3 rollback OPEN.
 - **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
 
 ## Concrete next tasks
 
-1. **Next: Work B isolated Netlify preview READINESS** on PR #90 exact `83f14e27bf4675f64aff72fa20010630f0305d52` and artifact #13929117121. Confirm preview Git↔Neon source selection, six JSON SHA, deploy target, rollback plan; no public deployment without owner approval.
-2. Before cutover: approve public preview separately, demonstrate operational C3 rollback, certify current-source/Kyiv provenance. Research-only rollback is PASS; DST/Sevastopol `25006→25008` OPEN.
+1. **Next: ONE approved Netlify draft deploy, not yet executed**: [Work B #43208800105](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43208800105), ZIP #13940887007, SHA `e4cd3fda`. Alias `c3-neon-83f14e27`; no `--prod`. Owner authorized 2026-11-12. Authenticated CLI required (connector cannot deploy). Then live URL QA.
+2. Verify live preview browser/CSV/rollback and unchanged production. Current-source/Kyiv provenance, operational C3 rollback, DST and Sevastopol `25006→25008` OPEN.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
@@ -34,7 +34,7 @@ Latest accepted: **C6-C3-PR90-FRONTEND-FIX-PASS-01** (actual frontend offline QA
 <!-- coordination:history:start -->
 ## C6-C3-PR90-FRONTEND-FIX-PASS-01 — real frontend isolated QA PASS (2026-11-12)
 
-- Previous accepted `C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01`: PR #87 runner-only Neon index QA #43201183617 PASS. **Work A accepted:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) exact `83f14e27`, base `site-prod`; [CI #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) SUCCESS, artifact #13937630998: real `validIndex()` guarded, 184/184 views, CSV 23/23, rollback 23/23, 0 errors, 28 restored files. No merge, Neon readback, Netlify deployment or cutover; Work B readiness next. `GLOBAL_CUTOVER=NO`.
+- Previous accepted `C6-C3-SCOPED-NEON-INDEX-PREVIEW-PASS-01`: PR #87 runner-only Neon index QA #43201183617 PASS. **Work A accepted:** [Draft PR #90](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/90) exact `83f14e27`, base `site-prod`; [CI #43205095573](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43205095573) SUCCESS, artifact #13937630998: real `validIndex()` guarded, 184/184 views, CSV 23/23, rollback 23/23, 0 errors, 28 restored files. Work B package PASS; one draft deploy authorized but not performed. No merge/cutover. `GLOBAL_CUTOVER=NO`.
 
 ## C6-PHYSICAL-SIX-JSON-READBACK-PASS-01 — protected six-JSON physical PASS (2026-11-12)
 
