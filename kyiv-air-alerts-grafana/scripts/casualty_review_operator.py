@@ -82,6 +82,9 @@ def _revision_effect(revisions: list[dict], reviewed: dict) -> dict:
         "attack_date": reviewed["attack_date"],
         "deaths_delta": str(reviewed["deaths_delta"]),
         "status": "confirmed",
+        **{key: reviewed[key] for key in (
+            "incident_id", "count_kind", "baseline_credited",
+            "identity_proof", "credited_proof")},
     }
     if existing:
         conflict = {field: (existing.get(field), value) for field, value
@@ -93,7 +96,24 @@ def _revision_effect(revisions: list[dict], reviewed: dict) -> dict:
                   if row["city_key"] == reviewed["city_key"]
                   and row["attack_date"].startswith(month)
                   and row["status"] == "confirmed")
-    increment = 0 if existing else reviewed["deaths_delta"]
+    # Preview is provisional; strict generator reconciliation is authoritative.
+    if reviewed["count_kind"] == "cumulative":
+        credit = int(reviewed["baseline_credited"])
+        same = [row for row in revisions if row.get("incident_id") == reviewed["incident_id"]
+                and row.get("status") == "confirmed"]
+        if any(any(str(row.get(key) or "") != str(reviewed[key]) for key in (
+                "city_key", "attack_date", "count_kind", "baseline_credited",
+                "identity_proof", "credited_proof")) for row in same):
+            raise ValueError("Conflicting same-incident proof in preview")
+        previous_total = max((int(row["deaths_delta"]) for row in same), default=credit)
+        if reviewed["deaths_delta"] < previous_total:
+            raise ValueError("Downward cumulative total requires manual reconciliation")
+        increment = 0 if existing else max(0, reviewed["deaths_delta"] - credit) - max(0, previous_total - credit)
+    else:
+        if not existing and any(row.get("incident_id") == reviewed["incident_id"]
+                                for row in revisions):
+            raise ValueError("Multiple deltas for one incident are unsafe")
+        increment = 0 if existing else reviewed["deaths_delta"]
     return {
         "canonical_id_exists": bool(existing),
         "projected_revision_increment": increment,
@@ -205,7 +225,10 @@ def build_preview(*, mode: str, candidate_id: str, decision: str,
                 raise ValueError("deaths_delta must be a positive whole number")
             confirmed = _validate_confirmation(
                 payload.get("record_id"), payload.get("attack_date"),
-                value, payload.get("source_name"), payload.get("source_url"))
+                value, payload.get("source_name"), payload.get("source_url"),
+                payload.get("incident_id"), payload.get("count_kind"),
+                payload.get("baseline_credited"), payload.get("identity_proof"),
+                payload.get("credited_proof"))
             clean.update(confirmed)
             reviewed = {**confirmed, "city_key": city}
             preview["effect"] = _revision_effect(revisions, reviewed)
@@ -274,7 +297,9 @@ def apply_preview(preview: dict, *, queue_path: Path, revisions_path: Path,
                 **common,
                 **({key: payload[key] for key in (
                     "record_id", "attack_date", "deaths_delta", "source_name",
-                    "source_url")} if decision == "CONFIRM" else {}))
+                    "source_url", "incident_id", "count_kind",
+                    "baseline_credited", "identity_proof",
+                    "credited_proof")} if decision == "CONFIRM" else {}))
         elif decision == "HOLD":
             result = hold_candidate(queue_path, **common)
         elif decision == "REOPEN":
