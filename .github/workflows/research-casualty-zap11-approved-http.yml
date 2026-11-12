@@ -1,0 +1,36 @@
+name: Research casualty 11 exact-source approved HTTP capture
+on:
+  push:
+    branches:
+      - research-casualty-zap11-approved-http-2026-11-12
+    paths:
+      - ".github/workflows/research-casualty-zap11-approved-http.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-once:
+    if: ${{ github.ref == 'refs/heads/research-casualty-zap11-approved-http-2026-11-12' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact frozen research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python stdlib only
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: One-pass HTTP capture and SHA-256 receipts
+        run: python research/casualty_zaporizhzhia_http_capture_2026_11_12/capture_once.py
+      - name: Upload receipts only (no article bodies)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-zap11-approved-http-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/casualty_zaporizhzhia_http_capture_2026_11_12/capture_receipts.json
+          if-no-files-found: warn
+          retention-days: 30
