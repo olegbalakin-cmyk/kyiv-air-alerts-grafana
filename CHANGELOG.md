@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-ROLLBACK-OLD-DEPLOY-HTTP-SHA-PASS-01 — old deploy HTTP/SHA proof PASS; rollback BLOCKED (2026-11-12; proposed on merge)
+
+- [PR #92](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/92), [Actions #43224744877](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43224744877) SUCCESS / artifact #13946647755: 7 immutable Netlify files, 5 pinned Git JSON, 23-city index HTTP/SHA PASS. Oct 23 static KPI source vs Nov 12 Git dashboard generations differ; operator Publish deploy + compatible data rollback OPEN. No cutover/rollback. `GLOBAL_CUTOVER=NO`.
+
 ### C3-NETLIFY-HOSTED-PREVIEW-PASS-01 — live public Netlify preview QA PASS (2026-11-12; proposed on merge)
 
 - Owner-approved C3 draft deploy `6af5aecd8901ea2a40de09ad` ready, production `6adb629bc3ebc570117d82e1` unchanged. [Live Actions #43218752830](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43218752830) SUCCESS, artifact #13945375693: 12 exact Git+Neon JSON, 184 city/mode views, CSV 23, UI Git rollback, zero JS/HTTP/external errors; only Netlify RUM added to HTML. No cutover/current-source certification/DST; `GLOBAL_CUTOVER=NO`.
@@ -38,9 +42,5 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 ### C6-CAPTURE-EXPORT-OPTINS-ON-01 — owner-approved opt-ins enabled; first capture pending (2026-11-10)
 
 - After [updater 42774323341](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774323341) PASS (canonical writer/23-city QA/Git publication; export SKIPPED), owner separately approved two C2 opt-ins. Isolated read-only [Actions 42792678131](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42792678131) SUCCESS at `c12b2eb7`: both repository variables checked as `true`. First regular collector bootstrap/overlap **PENDING**; no manual updater, Neon readback proof, source switching or DST activation. `publication_allowed=false; GLOBAL_CUTOVER=NO`.
-
-### C6-GATED-RECEIPTS-STAGED-01 — hooks staged OFF; offline CI PASS (2026-11-10)
-
-- Owner-approved [PR #47](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/47) squash-merged to `site-prod@cc8bcbe577196e6484d3a5fd83b4addfabfb9456`, followed by [PR #46](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/46) to `main@2fbe9d1970c6508cbc9c1d66db55327120fe857a`. Exact-head [Actions 42686471326](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42686471326) **32/32 offline PASS**; [preflight 42774215008](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774215008) **capture/export OFF**. Main push triggered [updater 42774323341](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/42774323341), outcome to verify. PR #48 research draft, DST OFF, real 23-city full receipts 0/23; no source switching, Neon cutover or flag activation. Next: post-merge updater check, separately owner-approved flags, bootstrap/overlap and read-only same-run proof. `GLOBAL_CUTOVER=NO`.
 
 <!-- coordination:history:end -->
