@@ -1,0 +1,34 @@
+name: C6 release automation registry read-only diagnostic
+on:
+  push:
+    branches: [research-c6-one-shot-code-merge-pause-2026-11-13]
+    paths:
+      - .github/workflows/c6-release-workflow-registry-diagnostic.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Read-only registry and exact workflow paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows?per_page=100" > "$RUNNER_TEMP/workflows.json"
+          python3 - <<'PY'
+          import json,os,pathlib
+          j=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"workflows.json").read_text())
+          print("REGISTRY_TOTAL",j["total_count"],"RETURNED",len(j["workflows"]))
+          for x in j["workflows"]:
+              if "netlify" in x["path"].lower() or "netlify" in x["name"].lower():
+                  print("REGISTERED",x["path"],x["id"],x["state"])
+          PY
+          for path in update-netlify-site.yml netlify-production.yml; do
+            echo "EXACT_LOOKUP_BEGIN:$path"
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$path" --jq '[.id,.path,.state] | @tsv' || echo "EXACT_LOOKUP_UNAVAILABLE:$path"
+          done
+          echo "NO_WORKFLOW_DISABLED_NO_GIT_WRITES_NO_DEPLOY"
