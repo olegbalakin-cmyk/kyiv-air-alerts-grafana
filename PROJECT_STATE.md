@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty research: **CASUALTY-CUMULATIVE-OFFICIAL-UPDATE-63-01**: 63/63 offline PASS, shadow +23 only, publication OFF.
+Latest casualty: **CASUALTY-FALSE-ATTACK-PLACE-76-01**: 76/76 offline PASS; publication OFF.
 
 ## Working instructions
 
@@ -22,18 +22,22 @@ Latest casualty research: **CASUALTY-CUMULATIVE-OFFICIAL-UPDATE-63-01**: 63/63 o
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** [PR #69](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/69) military-status 54/54 PASS; [PR #73](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/73) cumulative totals 63/63 PASS. Zaporizhzhia official 18→20→23 yields only **shadow +23** for pinned ledger; replay 0. False `place` from warning remains open; no merge or publication.
+- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) **76/76 research PASS**, military/cumulative/place fixes. Zaporizhzhia +23 shadow only. No release.
 
 ## Concrete next tasks
 
 1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: offline fix false attack `place` from warning `на вулиці під час тривоги`; retain all 63 regressions and existing military/incident protection. Reconcile current casualty ledger before any +23 publication; separate owner approval required.
+4. Casualty: **read-only current-ledger reconciliation** for Zaporizhzhia +23 research proposal; prove already-counted and remaining delta (if any), no writes or merge. Production approval separate.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-FALSE-ATTACK-PLACE-76-01 — real place guard PASS (2026-11-12)
+
+- [PR #81](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/81) final `503bd73e`, [exact CI #43180557264](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43180557264) **76/76 PASS**; artifact `13926406047` verified. Ivano warning now `place=unlocated`, military `NEEDS_REVIEW`; true places protected. Zaporizhzhia shadow total 23 still PASS, replay 0, SHA unchanged. **Research only, no release.** Full proof in CHANGELOG.
+
 ## CASUALTY-CUMULATIVE-OFFICIAL-UPDATE-63-01 — research proof PASS (2026-11-11)
 
 - [PR #73](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/73) draft, `6bfdf35a`; [exact CI #43080435330](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43080435330) **63/63 PASS**. Official Zaporizhzhia 10 Oct KAB totals 18→20→23 yield **23** as cumulative, not sum/max/order; one shadow `AUTO_READY +23` for pinned ledger. Replay 0 new proposals; military/incident protection and SHA invariance PASS. ZIP artifact `13884576127`, SHA256 `d439218f…adf521` verified.
