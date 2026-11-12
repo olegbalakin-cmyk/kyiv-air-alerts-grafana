@@ -3,9 +3,13 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-ONE-PHYSICAL-E2E-NEXT-01 — remove redundant fixture prerequisite (2026-11-12; proposed on merge)
+
+- PR #84 offline BLOCKED: no seven-table fixture. Existing physical generator already captures one read-only snapshot and builds six JSON; next PR #82 physical E2E requires fresh owner approval, no writes/cutover.
+
 ### C6-APPEND-ONLY-READBACK-OFFLINE-01 — 23-city exact-run after later inserts offline PASS (2026-11-12; proposed on merge)
 
-- C2 #43055353190 = 33,135 canonical +262 older (Work B #74); old physical #43098776474 receipt BLOCKED, #43104972888 reached 23/23 historical freshness but frozen B2 blocked, #43180832950 on #79 blocked after 75 **new** later rows (0 old rows changed). Research PRs #75/#76/#77/#79 fix exact-ID selection, UA open-end and B2 evidence; latest [PR #82](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/82) `82a7cc775ed2f2a6fd0134440db709690f0c04d1` [offline #43181978935](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43181978935) PASS. Regular C2 #43172960738 has 33,210 but only 22/23 continuity; not ready as replacement freshness proof. Next: one full offline six-file E2E before a new owner-approved physical run. C3/DST OPEN, `GLOBAL_CUTOVER=NO`.
+- C2 #43055353190 = 33,135 canonical +262 older (Work B #74); old physical #43098776474 receipt BLOCKED, #43104972888 reached 23/23 historical freshness but frozen B2 blocked, #43180832950 on #79 blocked after 75 **new** later rows (0 old rows changed). Research PRs #75/#76/#77/#79 fix exact-ID selection, UA open-end and B2 evidence; latest [PR #82](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/82) `82a7cc775ed2f2a6fd0134440db709690f0c04d1` [offline #43181978935](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43181978935) PASS. Regular C2 #43172960738 has 33,210 but only 22/23 continuity; not ready as replacement freshness proof. PR #84 found no offline fixture; next is existing read-only physical E2E, new owner approval required. C3/DST OPEN, `GLOBAL_CUTOVER=NO`.
 
 ### C6-POSTMERGE-C2-EXPORT-23-01 — real C2 bundle and 23/23 checkpoints PASS (2026-11-11)
 
