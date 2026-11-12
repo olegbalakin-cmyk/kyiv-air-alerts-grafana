@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-12. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-ZAPORIZHZHIA-PLUS23-OFFLINE-PREVIEW-01** `PREVIEW_BLOCKED` (19 pass/3 duplicate-event fails) and **CASUALTY-ZAPORIZHZHIA-OCTOBER-COVERAGE-WORKB-01** `COVERAGE_INCOMPLETE` (≥23 minimum, not monthly final). **No publication**.
+Latest casualty: **CASUALTY-ZAPORIZHZHIA-ADDITIONAL-EVENTS-WORKB-01** `BLOCKED_MISSING_EVIDENCE` (11 candidates, 5/5 clusters lack publisher bodies); October **≥23 confirmed minimum**, `COVERAGE_INCOMPLETE`. Work A [PR #89](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/89) unaccepted; duplicate fix still gated. **No publication**.
 
 ## Working instructions
 
@@ -22,7 +22,7 @@ Latest casualty: **CASUALTY-ZAPORIZHZHIA-PLUS23-OFFLINE-PREVIEW-01** `PREVIEW_BL
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** [PR #86](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/86) preview confirms single +23 generates Oct row, rollback PASS, but event-level dedup **FAIL**; [PR #85](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/85) proves only **≥23** for October, with other unverified attacks. **Both release gates NO-GO; no full-month publication.**
+- **Operational WIP / historical reference / backfill:** unchanged. **Casualty:** [PR #88](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/88) read-only evidence audit: 11 priority WIP candidates in 5 groups; 0 *additional established*, all source-body blocked, October minimum ≥23 and month incomplete. [PR #86](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/86) dedup PREVIEW_BLOCKED. **No release**.
 
 ## Concrete next tasks
 
@@ -30,11 +30,15 @@ Latest casualty: **CASUALTY-ZAPORIZHZHIA-PLUS23-OFFLINE-PREVIEW-01** `PREVIEW_BL
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 4. Casualty Work A: scoped research-only fix for **same-incident duplicate prevention in confirmed revision overlay**. Exact 0/18/23 previously credited and cumulative 18→20→23 tests must pass with unchanged schema, fail-closed ambiguity, rollback and all independent city data intact. Reconcile current site-prod again before any release.
-5. Casualty Work B: independently prioritize retained evidence for possible separate Zaporizhzhia city attacks (notably Oct 18, 22–23, 26; Sep 26–27). Do not infer complete October from WIP titles or 764 alert-check receipts; decide how to display **incomplete ≥23 minimum** outside normal full-month series. No new media HTTP or production writes without separate authorization.
+5. Casualty Work B: request owner authorization for **bounded source-body capture of up to 11 named candidate articles** from [PR #88 matrix](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/88), or recover direct publisher/official archived texts offline first. Confirm real attack date, Zaporizhzhia city, civilian status, unique event and cumulative count; never infer complete October from RSS. Capture in isolated research only, separate proof, no production.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-ZAPORIZHZHIA-ADDITIONAL-EVENTS-WORKB-01 — source evidence unavailable (2026-11-12)
+
+- [PR #88](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/88) final `34bc539d`: 11 WIP candidates / 5 priority Sep–Oct Zaporizhzhia groups, all `BLOCKED_MISSING_SOURCE` (no original publisher body). Retained earlier captures do not match target IDs. **0 additional deaths established by this review** is NOT a finding of zero actual deaths. October remains **≥23 minimum / COVERAGE_INCOMPLETE**. No new HTTP, CI or source ZIP verification claimed; production and WIP unchanged.
+
 ## CASUALTY-ZAPORIZHZHIA-PLUS23-OFFLINE-PREVIEW-01 — duplicate-event BLOCKED (2026-11-12)
 
 - [Draft PR #86](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/86) HEAD `fb32184e`, exact [Actions #43195244991](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43195244991) runner SUCCESS but **domain 19 PASS / 3 FAIL**. Isolated +23 creates October row (316→339), frontend Node render/rollback PASS, frozen production files unchanged; **same incident with prior credit 18/23 re-adds +23; 18→20→23 separate confirmed rows become 61**. Event-canonical dedup correction required. Artifact `13931798566`, SHA256 `f5f7894b…d8237b0` verified; **PREVIEW_BLOCKED, no release**.
