@@ -44,5 +44,35 @@ class PublisherReleaseTests(unittest.TestCase):
             self.assertEqual(list(Path(tmp).iterdir()), [])
 
 
+    def test_remote_site_prod_moved_blocks_before_file_access(self):
+        expected = "a" * 40
+        def mocked_git(repo, *args):
+            if args == ("rev-parse", "HEAD"):
+                return expected
+            if args == ("status", "--porcelain"):
+                return ""
+            if args == ("branch", "--show-current"):
+                return "site-prod"
+            if args == ("ls-remote", "origin", "refs/heads/site-prod"):
+                return "b" * 40 + "\\trefs/heads/site-prod"
+            raise AssertionError("unexpected Git operation")
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(release, "git", side_effect=mocked_git):
+                with self.assertRaisesRegex(candidate.Blocked, "SITE_PROD_HEAD_MOVED"):
+                    release.publish(Path(tmp), Path(tmp), {"files": {}},
+                                    expected_head=expected)
+            self.assertEqual(list(Path(tmp).iterdir()), [])
+
+    def test_c2_single_writer_and_release_mode_are_exclusive(self):
+        workflow = Path(".github/workflows/update-netlify-site.yml").read_text()
+        self.assertIn("group: update-netlify-site", workflow)
+        self.assertIn("cancel-in-progress: false", workflow)
+        self.assertIn("c6-neon-owner-gated-git-release:", workflow)
+        self.assertIn("vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true'", workflow)
+        self.assertIn("test \"$GIT_ONLY_PUBLISHER_PAUSED\" = \"true\"", workflow)
+        self.assertIn("github.event_name == 'workflow_dispatch' && inputs.c6_neon_git_release", workflow)
+        self.assertIn("!inputs.c6_neon_git_release", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
