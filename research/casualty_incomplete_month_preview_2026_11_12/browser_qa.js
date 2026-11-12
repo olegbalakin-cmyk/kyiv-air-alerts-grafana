@@ -22,6 +22,14 @@ const server = http.createServer((req, res) => {
     if (!file.startsWith(path.resolve(root) + path.sep) || !fs.statSync(file).isFile()) {
       res.writeHead(404).end(); return;
     }
+    if (name === "/index.html" && url.searchParams.get("rollback") === "1") {
+      let html = fs.readFileSync(file, "utf8");
+      html = html.replace('<script src="local-fixture-loader.js"></script>', "")
+        .replace('<script src="coverage-preview.js"></script>', "");
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control":"no-store" });
+      res.end(html);
+      return;
+    }
     res.writeHead(200, { "Content-Type": mime[path.extname(file)] || "application/octet-stream",
       "Cache-Control":"no-store", "X-Robots-Tag":"noindex" });
     fs.createReadStream(file).pipe(res);
@@ -57,6 +65,9 @@ async function exercise(page, url, mobile=false) {
   check("inline accessible note",()=>assert.match(d.note,/жовтень 2026.*щонайменше 23.*Дані неповні/));
   check("overall exact total suppressed",()=>assert.match(d.source,/Остаточний підсумок.*невідомий/));
   check("23 alert cities preserved",()=>assert.equal(d.alertsCityCount,23));
+  check("inline note uses accessible text",()=>assert(Boolean(d.note)));
+  check("explicit keyboard focus target exists",()=>assert(Boolean(d.row)));
+
   check("no runtime errors",()=>assert.equal(errors.length,0));
   await page.locator("#casualtySection").screenshot({path:path.join(proofs,mobile?"mobile-casualty.png":"desktop-casualty.png")});
   const png = await page.evaluate(()=>window.ChartShare.renderChartPng("casualtyChart",document.getElementById("casualtyChart").closest(".chart-card")));
@@ -79,6 +90,19 @@ async function exercise(page, url, mobile=false) {
   check("2026 annual classified as incomplete",()=>assert.equal(yr.info.status,"INCOMPLETE"));
   check("annual amount is lower bound",()=>assert.equal(yr.info.value_kind,"confirmed_lower_bound_not_final"));
   if(!mobile) {
+    const compare = await page.evaluate(()=>{
+      const c=state.charts.compareCasualtiesChart;
+      const ix=c?.data?.labels?.indexOf("2026-10")??-1;
+      const ds=c?.data?.datasets?.find(d=>d._coverageRows?.[ix]?.status==="INCOMPLETE");
+      return {ix, matches:Boolean(ds), label:ds?.label||null};
+    });
+    check("comparison uses incomplete classification without leaking city",()=>{
+      assert(compare.ix>=0);assert(compare.matches);
+    });
+    const keyboard = await page.locator("#casualtyInterval").evaluate(el=>{
+      el.focus();return document.activeElement===el && el.tagName==="SELECT";
+    });
+    check("year/interval controls are keyboard focusable",()=>assert.equal(keyboard,true));
     await page.locator("#casualtyInterval").selectOption("monthly");
     await page.locator("#citySelect").selectOption("kyiv");
     const kyiv=await page.evaluate(()=>state.charts.casualtyChart?.data.datasets[0]._coverageRows?.some(r=>r.status==="INCOMPLETE"));
@@ -110,6 +134,27 @@ async function exercise(page, url, mobile=false) {
     check("embed keeps lower-bound note",()=>assert.match(embedNote,/щонайменше 23/));
     await embedded.screenshot({path:path.join(proofs,"embed.png")});
     await embedded.close();
+    const rollback=await browser.newPage({viewport:{width:1440,height:900}});
+    await rollback.route("**/*",route=>{
+      const u=new URL(route.request().url());
+      if(u.protocol==="http:"&&u.hostname==="127.0.0.1")route.continue();else route.abort();
+    });
+    await rollback.goto(base+"?rollback=1&city=zaporizhzhia&casyear=2026",{waitUntil:"domcontentloaded"});
+    await rollback.waitForFunction(()=>typeof state!=="undefined" && Boolean(state.charts.casualtyChart),{timeout:30000});
+    const before=await rollback.evaluate(()=>{
+      const c=state.charts.casualtyChart, i=c.data.labels.indexOf("2026-10");
+      return {fixture:window.__coverageFixtureLoaded===true,
+        rows:c.data.datasets[0]._coverageRows||null,
+        value:i>=0?c.data.datasets[0].data[i]:null,
+        source:i>=0?state.data.casualties_by_city.zaporizhzhia.monthly.find(r=>r.month==="2026-10").deaths:null,
+        note:document.querySelector(".casualty-coverage-note")};
+    });
+    check("rollback restores original unmodified row and graph",()=>{
+      assert.equal(before.fixture,false);assert.equal(before.rows,null);
+      assert.equal(before.value,before.source);assert.equal(before.note,null);
+    });
+    await rollback.locator("#casualtySection").screenshot({path:path.join(proofs,"rollback.png")});
+    await rollback.close();
     const digest=crypto.createHash("sha256");
     for(const name of fs.readdirSync(proofs).sort())digest.update(fs.readFileSync(path.join(proofs,name)));
     console.log("BROWSER_CHECKS_PASS="+count+" BROWSER_CHECKS_FAIL=0");
