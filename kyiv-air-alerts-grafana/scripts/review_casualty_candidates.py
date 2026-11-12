@@ -103,9 +103,9 @@ def _validate_source(source_name: str | None, source_url: str | None) -> tuple[s
 
 
 
-_DEDUP_ID = re.compile(r"incident:[a-z0-9][a-z0-9:_-]{7,119}\\Z")
-_DEDUP_PROOF = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\\s]+)\\Z")
-_BASELINE = re.compile(r"(?:0|[1-9][0-9]*)\\Z")
+_DEDUP_ID = re.compile(r"incident:[a-z0-9][a-z0-9:_-]{7,119}\Z")
+_DEDUP_PROOF = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\\s]+)\Z")
+_BASELINE = re.compile(r"(?:0|[1-9][0-9]*)\Z")
 
 
 def _validate_dedup_contract(
