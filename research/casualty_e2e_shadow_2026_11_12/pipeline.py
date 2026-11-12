@@ -259,6 +259,11 @@ def run(args):
               "city_manifest", "city_csv", "generator", "dashboard")]
     if not all(p.is_file() for p in paths):
         raise RuntimeError("BLOCKED_INPUT_NOT_PRESENT")
+    if args.ingested_reports:
+        ingested_path = Path(args.ingested_reports).resolve()
+        if not ingested_path.is_file():
+            raise RuntimeError("INGESTED_REPORTS_MISSING")
+        paths.append(ingested_path)
     previous_path = Path(args.previous_proposals).resolve() if args.previous_proposals else None
     if previous_path:
         if not previous_path.is_file():
@@ -283,6 +288,16 @@ def run(args):
     ledger = load_revision_rows(revision_path)
     original_articles, source_errors = anchored_articles(queue, original)
     reports = extract_cached_reports(queue, original_articles)
+    if args.ingested_reports:
+        ingested, _ = read_pinned(Path(args.ingested_reports))
+        if (ingested.get("schema") != "casualty-evidence-ingestion-v1"
+                or ingested.get("queue_sha256") != sha(queue_path.read_bytes())
+                or ingested.get("source_evidence_sha256") != RETAINED_EVIDENCE_SHA256
+                or ingested.get("pr102_receipts_sha256") != RECEIPTS_102_SHA256
+                or ingested.get("publication_allowed") is not False
+                or stable_sha(ingested.get("reports")) != stable_sha(reports)):
+            raise RuntimeError("INGESTED_REPORTS_FAIL_CLOSED_PROVENANCE_OR_FACT_MISMATCH")
+        reports = ingested["reports"]
     previous_proposals = []
     if previous_path:
         previous_proposals, _ = read_pinned(previous_path)
@@ -414,6 +429,7 @@ def run(args):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--previous-proposals", help="JSON proposals from an earlier shadow-only execution")
+    p.add_argument("--ingested-reports", help="Verified offline ingestion handoff; rechecked against pinned source bodies")
     for f in ("queue", "evidence", "receipts", "matrix", "revisions", "baseline",
               "city_manifest", "city_csv", "generator", "dashboard", "output"):
         p.add_argument("--" + f.replace("_", "-"), required=True)
