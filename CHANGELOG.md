@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-FINAL-AUTHORIZED-KPI-PR104-EXACT-HEAD-12PASS-01 — PR #104 final authorized KPI contract exact-HEAD offline PASS (2026-11-12; accepted)
+
+- [PR #104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/104) `ea71a0e2` exact [#43302381173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43302381173) SUCCESS: 12/12 cases and real pinned PR #95→#104→#100 fixture E2E, six final SHA, immutable original proof and byte-identical static KPI, fail-closed negatives. Four code-only paths, Git-only default unchanged, Neon release OFF. Physical historical six-JSON #43299402658 already PASS; no real authorized final artifact, Netlify deployment or Git publication. `FINAL_NEON_KPI_RELEASE_CONTRACT_CODE_READY=YES` offline; `ROLLBACK_OPERATIONAL_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C6-NEW-C2-NEON-SIX-JSON-PHYSICAL-READBACK-23-PASS-01 — current-C2 Neon physical six historical JSON PASS (2026-11-12; accepted)
 
 - Owner [#43299402658](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43299402658) SUCCESS exact SHA `9bb62afe`, [artifact #13980242828](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43299402658/artifacts/13980242828) ZIP SHA-256 `bd67b7607a3b345bc28a18a21676752a8334b90264e25fedbaaf718bdc37b6cc`; 6/6 candidate SHA, 18/18 proof SHA, 23/23 historical receipts <=36h, 33,267 canonical episodes, matching dashboard/KPI generation. No writer/source HTTP/prod writes. **`NEW_C2_NEON_JSON_PARITY=PASS` historical only.** Research authority OFF, live current not certified, no cutover; PR #104 final KPI and operational rollback pending.
