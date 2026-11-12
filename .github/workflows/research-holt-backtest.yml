@@ -45,4 +45,23 @@ jobs:
                           for sub,vv in list(v.items())[:2]:
                               print('DETAIL_GRANDCHILD',k,sub,'type',type(vv).__name__,'keys',list(vv)[:15] if isinstance(vv,dict) else 'length '+str(len(vv)) if isinstance(vv,list) else 'other')
                       break
+          hist=a.get('historical_daily_kpi') or {}
+          print('HIST_CITIES', list(hist.get('cities',{})))
+          for name in ('kyiv','kharkiv','lviv'):
+              h=hist.get('cities',{}).get(name)
+              print('HIST_CITY',name,'kind',type(h).__name__,'keys',list(h)[:24] if isinstance(h,dict) else None)
+              if isinstance(h,dict):
+                  for key,v in h.items():
+                      if isinstance(v,list):
+                          print('HIST_LIST',name,key,'len',len(v),'first',v[:2],'last',v[-2:])
+                      elif isinstance(v,dict):
+                          print('HIST_DICT',name,key,'keys',list(v)[:12])
+                          for sub,vv in list(v.items())[:2]:
+                              print('HIST_DICT_SAMPLE',name,key,sub,str(vv)[:500])
+          for name in ('kyiv',):
+              daily=b.get('explorations',{}).get('cities',{}).get(name,{}).get('daily')
+              print('EXPLORATION_DAILY',name,'type',type(daily).__name__,'len',len(daily) if daily is not None else None,'first',str(daily[:2])[:1300] if isinstance(daily,list) else str(list(daily.items())[:2])[:1300] if isinstance(daily,dict) else None)
+          for period in ('monthly','weekly'):
+              rows=a['cities']['kyiv'][period]
+              print('DATA_SAMPLE',period,'first',rows[0], 'last',rows[-1])
           PY
