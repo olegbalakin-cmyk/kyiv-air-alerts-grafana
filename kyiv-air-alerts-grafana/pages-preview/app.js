@@ -73,8 +73,7 @@
     if (hours === null || alerts === null) return null;
     const anchor = rows[rows.length - 1];
     const first = nextPeriod(anchor, period, 1);
-    const second = nextPeriod(anchor, period, 2);
-    if (!first || !second) return null;
+    if (!first) return null;
     const forecastValue = {
       avg_daily_alert_hours: Math.max(0, Math.min(24, hours)),
       alerts_per_day: Math.max(0, alerts),
@@ -85,7 +84,7 @@
       model: "EWMA_LEVEL",
       completedPeriods: completed.length,
       excludedIncompletePeriods: rows.length - completed.length,
-      forecasts: [Object.assign(first, forecastValue), Object.assign(second, forecastValue)]
+      forecasts: [Object.assign(first, forecastValue)]
     };
   }
 
@@ -2466,8 +2465,8 @@ function renderCity() {
 
   if (intensitySubtitle && projectedRows.length) {
     intensitySubtitle.textContent += " " + tr(
-      "Два останні штриховані стовпчики — експериментальний прогноз EWMA 0,3; це не попередження про майбутні атаки. Прогноз не використовує неповний період.",
-      "The final two outlined bars are an experimental EWMA 0.3 forecast, not a warning of future attacks. Incomplete periods are excluded."
+      "Останній штрихований стовпчик — експериментальний прогноз на наступний період (EWMA 0,3). Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
+      "The final outlined bar is an experimental forecast for the next period (EWMA 0.3), not a warning of future attacks. Incomplete periods are excluded from the calculation."
     );
   }
 
