@@ -65,3 +65,14 @@ jobs:
               rows=a['cities']['kyiv'][period]
               print('DATA_SAMPLE',period,'first',rows[0], 'last',rows[-1])
           PY
+
+      - name: Compute held-out 23-city model comparison
+        run: |
+          python research/forecast_holt_damped_2026_11_12/backtest.py --dashboard /tmp/holt_source/dashboard_data.json --output holt-ewma-backtest.json
+      - name: Upload independent research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: holt-vs-ewma-23city-research
+          path: holt-ewma-backtest.json
+          if-no-files-found: error
