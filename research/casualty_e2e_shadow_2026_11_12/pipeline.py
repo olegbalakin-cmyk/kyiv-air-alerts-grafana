@@ -224,7 +224,7 @@ def generator_probe(generator: Path, ledger: Path, proposal: dict, monthly: list
         assert len([r for r in effective if r["city_key"] == "zaporizhzhia"]) == 1
         series = {"meta": city_manifest,
                   "monthly": [{"month": r["month"], "time": module.month_timestamp(r["month"]),
-                               "deaths": int(r["deaths"])} for r in monthly]}
+                               "deaths": int(r["deaths_confirmed"])} for r in monthly]}
         after = module.apply_city_revision_overlay(series, effective, "zaporizhzhia")
         month = proposal["attack_date"][:7]
         before_count = sum(int(r["deaths"]) for r in series["monthly"] if r["month"] == month)
