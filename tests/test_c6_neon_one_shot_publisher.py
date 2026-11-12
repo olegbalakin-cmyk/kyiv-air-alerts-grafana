@@ -24,6 +24,17 @@ class PublisherReleaseTests(unittest.TestCase):
                              c2_artifact={}, work_a_artifact={},
                              repository="olegbalakin-cmyk/kyiv-air-alerts-grafana")
 
+    def test_owner_grant_expired_blocks_before_any_publisher(self):
+        grant={"schema":release.RECEIPT_SCHEMA,"decision":release.APPROVAL,
+               "global_cutover":"OWNER_SEPARATELY_APPROVED",
+               "dst_correction":"OFF",
+               "repository":"olegbalakin-cmyk/kyiv-air-alerts-grafana",
+               "expires_at":"2026-01-01T00:00:00+00:00"}
+        with self.assertRaisesRegex(candidate.Blocked, "GRANT_EXPIRED_OR_TOO_LONG"):
+            release.validate(grant, {}, ".", ".", c2_run={}, work_a_run={},
+                             c2_artifact={}, work_a_artifact={},
+                             repository="olegbalakin-cmyk/kyiv-air-alerts-grafana")
+
     def test_no_clean_exact_checkout_cannot_write(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(release, "git", return_value="wrong-sha"):
