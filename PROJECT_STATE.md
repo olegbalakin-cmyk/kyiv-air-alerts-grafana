@@ -1,37 +1,41 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-12. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C3-NETLIFY-HOSTED-PREVIEW-PASS-01** (public C3 preview QA PASS). C2 #43055353190 and physical Neon→JSON #43187464328 PASS; production unchanged. `GLOBAL_CUTOVER=NO`.
+Latest accepted: **C3-ROLLBACK-OLD-DEPLOY-HTTP-SHA-PASS-01** (old production HTTP/SHA PASS; rollback BLOCKED). Live C3 preview #43218752830 PASS. Production unchanged. `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
-1. Read this root file and [CHANGELOG.md](CHANGELOG.md) before repository work. This file governs current coordination; newer accepted repository checkpoints govern older chat memory.
-2. Verify immutable commits, Actions runs and proof artifacts. Research CI is not production release evidence.
-3. Keep production, WIP, historical, backfill, casualty and Neon tracks separate. Never force-push shared work, expose credentials or infer release from research.
-4. Keep blockers/next tasks outside history markers; accepted checkpoints inside, newest first. Append transitions to CHANGELOG; preserve full evidence in archives.
-5. Size gate ≤12 KiB PASS, 12–16 KiB WARNING, >16 KiB FAIL; retain 5–10 CHANGELOG entries. Archive older records with `scripts/coordination_docs.py` on a separate branch; see [maintenance](docs/coordination-maintenance.md).
-6. Never load entire archives/large dumps/logs; read bounded evidence by checkpoint ID and save reproducible work promptly.
+1. Read root state and CHANGELOG before action; newer accepted checkpoints supersede chat memory.
+2. Verify immutable SHA, Actions/artifacts. Research proof is not a production release.
+3. Keep production/WIP/historical/backfill/casualty/Neon separate; no forced shared pushes, credential exposure or inferred deployments.
+4. Keep blockers/tasks outside history; accepted records inside. Preserve archived evidence. Maintain 5–10 CHANGELOG transitions.
+5. UTF-8 gate ≤12 KiB PASS, >12 KiB WARNING, >16 KiB FAIL. Archive safely with `scripts/coordination_docs.py` when needed; see [maintenance](docs/coordination-maintenance.md).
+6. Read bounded proof, not complete archives or large dumps; save work promptly.
 
 ## Current tracks and open release gates
 
-- **Production:** Git JSON updated and remote publication confirmed in C2 #43055353190 (`site-prod@cf960d7c`); frontend/source still Git, no Neon cutover. Netlify deployment not independently verified.
-- **Neon reader / historical parity:** [Work B #74](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/74) verified exact 33,135 C2 IDs/fields 23/23, 262 older Neon episodes retained. [Work C #75](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/75) exact-ID canonical selection offline PASS; not a general DB-only supersession policy. Full origin/provenance OPEN.
-- **Live writer / provenance:** C2 #43055353190 SUCCESS 33,135 episodes, 23/23 one-hop checkpoints. New regular [#43172960738](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43172960738) SUCCESS 33,210 canonical episodes (+75); its same-run continuity is only 22/23 (Sevastopol), so cannot substitute as full freshness proof. Sevastopol historical `25006→25008` OPEN.
-- **23-city generator / publication:** [Physical #43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) on PR #82 `82a7cc77` **PASS**; artifact #13929117121: 6/6 JSON, 18/18 hashes, 23/23 historical receipts/freshness, 33,135 C2 canonical, 262 stale +75 later excluded. Read-only, no publication. Current freshness/Kyiv provenance and DST NOT certified; preview/C3 OPEN.
+- **Production:** Netlify deploy `6adb629bc3ebc570117d82e1` current/ready; runtime Git `site-prod@fc726166`, no Neon cutover. Old HTTP/SHA #43224744877 PASS; operator production rollback untested.
+- **Neon reader / historical parity:** [PR #74](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/74) exact 33,135 C2 IDs/fields 23/23 with 262 older episodes retained; [PR #75](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/75) canonical selection offline PASS. Full provenance OPEN.
+- **Live writer / provenance:** C2 #43055353190 33,135 episodes/23 checkpoints PASS; later #43172960738 33,210 (+75), only 22/23 same-run continuity (Sevastopol). Historical `25006→25008` OPEN.
+- **23-city generator / publication:** physical [#43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) PASS: six JSON, 18 hashes, 23 receipts, 33,135 canon; 262 old +75 later excluded. No publication. Current source/Kyiv/DST OPEN.
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
-- **Preview / C3:** draft Netlify deploy `6af5aecd8901ea2a40de09ad` ready; [live QA #43218752830](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43218752830) PASS (12/12 Neon+Git JSON, 184 views, 23 CSV, UI rollback, 0 errors). Production `6adb629bc3ebc570117d82e1` unchanged. Production cutover/rollback OPEN.
+- **Preview / C3:** Netlify draft `6af5aecd8901ea2a40de09ad` ready; [live #43218752830](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43218752830) PASS (184 views/23 CSV/UI fallback). [PR #92](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/92) HTTP/SHA #43224744877 PASS; Publish deploy and compatible Git rollback OPEN.
 - **Operational WIP / historical reference / backfill / casualty:** separate tracks; no change or promotion is established by these research or documentation checkpoints. Consult the relevant pinned evidence through the archive index before acting on a track.
 
 ## Concrete next tasks
 
-1. **Next: owner review of live C3 preview** `https://c3-neon-83f14e27--ukraine-air-alerts.netlify.app/`; production cutover requires a separate decision.
-2. Before production: certify current-source/Kyiv provenance; approve reversible production rollout and rollback. DST/Sevastopol `25006→25008` separate.
-3. Research preview does not authorize production. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+1. **Rollback PR #92:** owner/operator checks `Publish deploy` exists without clicking. HTTP/SHA #43224744877 PASS. Pin compatible Git data/index rollback generation.
+2. **Main pre-cutover:** regular Neon→JSON→Git delivery fail-closed, protect C2/casualty and draft reversible production plan; no deployment now.
+3. Current source/Kyiv provenance, DST and Sevastopol remain OPEN. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C3-ROLLBACK-OLD-DEPLOY-HTTP-SHA-PASS-01 — immutable old production HTTP/SHA PASS (2026-11-12)
+
+- [PR #92](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/92); read-only [Actions #43224744877](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43224744877) SUCCESS, artifact #13946647755: seven old Netlify assets + five pinned Git JSON HTTP 200/SHA, 23-city KPI index, matching main-domain static hashes. Old index Oct 23 generation differs from current Git Nov 12: two-plane rollback needs compatible baseline. Operator Publish deploy and production rollback untested; NO-GO. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ## C3-NETLIFY-HOSTED-PREVIEW-PASS-01 — public C3 browser/CSV/rollback PASS (2026-11-12)
 
 - Owner-approved draft Netlify `6af5aecd8901ea2a40de09ad` ready at alias `c3-neon-83f14e27`; production `6adb629bc3ebc570117d82e1` remains current. Pinned Work B #43208800105 / artifact #13940887007. [Live QA #43218752830](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43218752830) SUCCESS, artifact #13945375693: 12/12 candidate+Git JSON SHA exact, 184/184 views, CSV 23/23, Neon→Git→Neon UI rollback, 0 browser errors, noindex. Netlify inserted its own RUM script into `index.html` only. Current-source/Kyiv provenance and production rollback/cutover remain OPEN; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
