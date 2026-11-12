@@ -3,9 +3,9 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
-### C6-PHYSICAL-E2E-OWNER-AUTH-01 — approved, not dispatched (2026-11-12; proposed on merge)
+### C6-PHYSICAL-SIX-JSON-READBACK-PASS-01 — physical Neon→six JSON PASS (2026-11-12; proposed on merge)
 
-- Owner approved one read-only physical E2E on PR #82 `82a7cc775ed2f2a6fd0134440db709690f0c04d1` and C2 #43055353190; branch/SHA Environment pin and manual dispatch pending. No new physical PASS; `GLOBAL_CUTOVER=NO`.
+- Owner-authorized [#43187464328](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43187464328) `82a7cc77` SUCCESS, artifact #13929117121: 6/6 JSON +18/18 SHA, 23/23 historical receipts/freshness, 33,135 canonical, 262 old +75 later excluded. Read-only; no writes/publication. Current source, Kyiv provenance, DST and C3 preview/rollback remain OPEN; `GLOBAL_CUTOVER=NO`.
 
 ### C6-ONE-PHYSICAL-E2E-NEXT-01 — remove redundant fixture prerequisite (2026-11-12; proposed on merge)
 
