@@ -45,7 +45,7 @@ def build(target, chart_js):
     index = index.replace(tag, tag +
         '\n  <script src="local-fixture-loader.js"></script>' +
         '\n  <script src="coverage-preview.js"></script>')
-    index = index.replace('<meta name="robots" content="index,follow,max-snippet:large">',
+    index = index.replace('<meta name="robots" content="index,follow,max-snippet:-1">',
                           '<meta name="robots" content="noindex,nofollow">')
     # No possibility of public crawling when served on localhost, but also set an unambiguous watermark.
     index = index.replace('</body>', '<div id="fixture-watermark" style="position:fixed;bottom:4px;left:6px;font:12px system-ui;color:#f8e45c;z-index:9999;pointer-events:none">LOCAL RESEARCH FIXTURE · NOT PUBLISHED</div>\n</body>')
