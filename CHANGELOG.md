@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C3-FRONTEND-SITEPROD-PR100-OFFLINE-PASS-01 — site-prod frontend compatibility offline PASS (2026-11-12; proposed on merge)
+
+- [Draft PR #100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/100) base `site-prod@68629fda`, HEAD `88ace201`; exact-head [Actions #43260329916](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43260329916) SUCCESS, artifact #13964062068 (GitHub SHA-256 `b83595de5ecb665765c10d73de10c4f4520065a9997fa922e1002175a55e079e`). Four C3-only files; 18/18 source hashes, 184/184 historical views, CSV 23/23, Git preview rollback 23/23, 0 browser/network errors. Git stays production source, PR #90 predicate scoped to pinned Neon preview; production C2/casualty untouched. Offline `FRONTEND_COMPATIBILITY_READY` only; no merge/deploy/publication, two-plane rollback and next C2 remain OPEN. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C6-NEON-GIT-DEFAULT-OFF-INTEGRATION-PREPARED-01 — default-OFF six-file Neon Git candidate offline PASS (2026-11-12; proposed on merge)
 
 - [Draft PR #95](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/95) `c66cf00884e28b0d04d6eccd3bc5875a45c2e2b5`; [Actions #43254618233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43254618233) SUCCESS **14/14**, artifact **#13961690528**. Frozen physical #43187464328 + C2 #43055353190 replay; six JSON + exact PR #93 parser; detached local Git commit without remote. Five runtime JSON plus root KPI index bound; automatic preparation default OFF, `publication_allowed=false`. Next: natural C2 23/23, compatible PR #90 frontend and two-plane rollback, separate release permission. No production push/cutover/DST.
