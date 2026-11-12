@@ -37,9 +37,16 @@ def verify(outer_path, witness_path):
     witness_cities = {r["city_key"]: r for r in witness["cities"]}
     require(len(witness_cities) == 23 and witness["canonical_rows"] == 33267, "WITNESS_INCOMPLETE")
     with ZipFile(outer_path) as outer:
-        blob = outer.read("c2-shadow-inputs.zip")
+        # actions/download-artifact extracts the outer wrapper; it leaves the
+        # inner c2-shadow-inputs.zip as a standalone file at the CI path.
+        if "c2-shadow-inputs.zip" in outer.namelist():
+            blob = outer.read("c2-shadow-inputs.zip")
+            require(outer.read("c2-shadow-inputs.zip.sha256").decode().split()[0] == BUNDLE_SHA, "SIDECAR_SHA_MISMATCH")
+        elif "manifest.json" in outer.namelist():
+            blob = Path(outer_path).read_bytes()
+        else:
+            raise ValueError("UNEXPECTED_ARTIFACT_LAYOUT")
         require(digest(blob) == BUNDLE_SHA, "BUNDLE_SHA_MISMATCH")
-        require(outer.read("c2-shadow-inputs.zip.sha256").decode().split()[0] == BUNDLE_SHA, "SIDECAR_SHA_MISMATCH")
     with ZipFile(io.BytesIO(blob)) as z:
         require(digest(z.read("manifest.json")) == MANIFEST_SHA, "MANIFEST_SHA_MISMATCH")
         m = json.loads(z.read("manifest.json"))
