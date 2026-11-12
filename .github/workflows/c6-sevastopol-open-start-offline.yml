@@ -1,0 +1,31 @@
+name: C6 Sevastopol latest-open-start offline regression (research only)
+
+on:
+  push:
+    branches: [fix-c6-sevastopol-open-start-receipt-2026-11-12]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py"
+      - "kyiv-air-alerts-grafana/tests/test_c6_sevastopol_checkpoint.py"
+      - ".github/workflows/c6-sevastopol-open-start-offline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    if: github.ref == 'refs/heads/fix-c6-sevastopol-open-start-receipt-2026-11-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install parser-only test dependencies
+        run: python -m pip install 'requests>=2.32,<3' 'beautifulsoup4>=4.12,<5'
+      - name: No-HTTP Sevastopol checkpoint tests
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m unittest discover -s tests -p test_c6_sevastopol_checkpoint.py -v
