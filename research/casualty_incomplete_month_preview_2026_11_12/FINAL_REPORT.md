@@ -1,6 +1,17 @@
 # CASUALTY — incomplete-month display preview (research only)
 
-**Decision at creation: `INCOMPLETE_PREVIEW_BLOCKED` pending a real browser/export run.** Offline unit tests are not release permission. No production data mutation, PR merge, deployment or Netlify action.
+**Final scoped decision: `INCOMPLETE_PREVIEW_PASS` (isolated local preview only; NOT production approval).** Browser, export and rollback proof completed without production modification, merge or deployment.
+
+## Final physical proof (code HEAD `505d67a19c22fb7f8e1f054baa985a798224d41d`)
+
+- [GitHub Actions #43261511563](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43261511563) **SUCCESS**: offline **40/40**, actual headless Chromium **36/36**, 0 FAIL; Ubuntu 24.04, locally copied original `site-prod` frontend and original data.
+- [Artifact #13964680588](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43261511563/artifacts/13964680588), 682,804 bytes: `desktop-casualty.png`, `mobile-casualty.png`, `desktop-share.png`, `mobile-share.png`, `embed.png`, `rollback.png`, desktop/mobile CSV, individual SHA-256 file list, exact HEAD and logged checks.
+- Deterministic **browser proof contents SHA-256** (concatenated alphabetically sorted generated proof file contents, not ZIP digest): `756c39012d3cb50bc5d7f07937d4b43dfd33d13418ae2aa01dcc525739d5cea6`. Fixture SHA-256: `10b451e8765ce6850fe9062de38e5dd78c1f6798a9bdbbc97db2fdc46890d7c3`.
+- Verified: visible `≥23`, non-final monthly/annual semantics, no fabricated zero, exported CSV classification, generated PNG, embed note, comparison city isolation, keyboard focus, responsive 375px mobile, no JS errors, 23 unchanged alert-city records, and original graph restoration when fixture/overlay scripts are removed.
+- Original `main`, `site-prod`, real casualty JSON, generator, reviewer, WIP, C6/Neon, deployment and Netlify are **untouched**. Research work only.
+
+**Review boundary:** This PASS proves the isolated fixture UI, not that production casualty coverage is complete, not that the 23 deaths are published, and not permission for a production schema/generator/frontend change. Owner must separately accept the visual design and publication contract.
+
 
 ## Evidence and scope
 
@@ -54,6 +65,6 @@ Suggested manual browser checks: hover October bar; use keyboard focus to read i
 
 ## Proof boundary
 
-The offline test covers normalization, unknown-vs-zero, annual lower-bound semantics, file isolation, target functions, CSV hooks and static export mechanisms. **It does not establish visual browser QA, actual PNG semantics, clipboard/share, generated CSV byte parity, mobile accessibility, or full dataset parity.** These must be independently verified in the isolated local browser before `INCOMPLETE_PREVIEW_PASS`. The untouched legacy frontend can be restored by simply not injecting local preview scripts; no production rollback is needed.
+40 offline plus 36 Chromium checks prove the fixture-only display, actual CSV lower-bound columns, canvas PNG generation, embed explanation, city switching, keyboard focus and browser rollback of the local overlay. `UNKNOWN` and all-12-month COMPLETE arithmetic are additionally covered by offline tests. The production-source alert-city count remains 23; the research commits are only allowlisted paths. Browser QA does not certify exhaustive source monitoring or establish end-user assistive-technology certification; those remain separate methodological and release decisions. No production rollback was needed.
 
 Do **not** import any fixture or status keys into production JSON before separate owner approval of the display and generator contract.
