@@ -4,7 +4,7 @@
 
 **Input:** PR #96 at `ec4da5dd25bddc44ab6f3eddd129de5787278fab`; queue Git blob `a6cc94e92550dd826bbcf465df716644c712dbe6`, 11 IDs / 5 publication clusters.
 
-**Physical capture:** [workflow #43261676781](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43261676781) at `78d8bd097345e1005e50814befbc179e70775271`. Read its final status and artifact before classifying any receipt as physically verified. The live capture is bounded to ten unique article URLs (two identical Ukr.net titles map to the same original) and four official police URLs. The script records request/redirect/status/response byte length/SHA-256 and page title where accessible. It does not store or publish article bodies. **A browser/search-index article result is not equivalent to a verified HTTP capture artifact.**
+**Physical capture:** [workflow #43261676781](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43261676781) at `78d8bd097345e1005e50814befbc179e70775271`. **Physical run SUCCESS:** capture step and upload step both PASS; runner log states `CAPTURE_DONE receipts=14 candidates=11 passed=14`, 14 HTTP 200 with SHA-256; [artifact #13963708531](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43261676781/artifacts/13963708531) (4,002 bytes ZIP); uploader-reported ZIP SHA-256 `8f374d0d8e15eb479b5552c88a82f4da22d5fe6bf6d65f032fb61996aa4e326e`. The ZIP was **not independently redownloaded and rehashed** in this check. Each target was attempted exactly once, and no publisher blocking bypass was used. The live capture is bounded to ten unique article URLs (two identical Ukr.net titles map to the same original) and four official police URLs. The script records request/redirect/status/response byte length/SHA-256 and page title where accessible. It does not store or publish article bodies. **A browser/search-index article result is not equivalent to a verified HTTP capture artifact.**
 
 ## Evidence found by independent external source lookups
 
@@ -28,7 +28,7 @@ The following are **source-level findings**, not new production death credits:
 
 ## Required next steps before any publication
 
-1. Independently check the physical GitHub Actions receipt and source statuses; do not claim capture PASS solely from workflow start.
+1. Before accepting a new publication checkpoint, independently download the physical artifact, recompute ZIP and response hashes where possible, inspect per-URL `page_title` and redirects, and verify each target returned the intended original rather than a generic page. HTTP 200 alone is transport confirmation.
 2. Reconcile each incident against existing site-prod per-incident credits and legacy monthly aggregates. In particular, never assume that a monthly total of 0 means no previous incident was credited.
 3. Keep 5 Oct later-death case `NEEDS_OFFICIAL_CONFIRMATION`. Keep October `COVERAGE_INCOMPLETE`.
 4. Prepare a strictly isolated candidate revision proposal with incident identity/credited proof, then run exact-head generator, adversarial duplicate tests and user-visible incomplete-month preview. No merge/deploy without separate authorization.
