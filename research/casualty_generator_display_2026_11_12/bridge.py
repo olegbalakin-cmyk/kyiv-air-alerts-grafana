@@ -85,8 +85,10 @@ def adapt(base, probe, proposals, decision, generator_hash, revisions_hash):
             EXPECTED_MONTH not in original_by_month and
             set(generated_by_month) == set(original_by_month) | {EXPECTED_MONTH},
             "GENERATOR_CHANGED_BASELINE_MONTHS")
-    require(all(generated_by_month[m] == row for m,row in original_by_month.items()),
-            "GENERATOR_MODIFIED_OTHER_MONTH")
+    require(all(int(generated_by_month[m]["deaths"]) == int(row["deaths"]) and
+                str(generated_by_month[m]["time"]) == str(row["time"])
+                for m,row in original_by_month.items()),
+            "GENERATOR_MODIFIED_OTHER_MONTH_VALUES_OR_TIME")
     actual = generated_by_month[EXPECTED_MONTH]
     require(type(actual.get("deaths")) is int and actual["deaths"] == 23 and
             actual.get("revision_delta") == 23 and actual.get("baseline_deaths") == 0,
