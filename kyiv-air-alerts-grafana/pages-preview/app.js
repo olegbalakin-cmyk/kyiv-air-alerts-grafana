@@ -259,7 +259,7 @@ function applyStaticLanguage(){
  document.querySelector('meta[name="description"]')?.setAttribute("content",md);document.querySelector('meta[property="og:locale"]')?.setAttribute("content",currentLanguage==="en"?"en_US":"uk_UA");document.querySelector('meta[property="og:site_name"]')?.setAttribute("content",tr("Повітряні тривоги — міста України","Air alerts — Ukrainian cities"));document.querySelector('meta[property="og:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[property="og:description"]')?.setAttribute("content",md);document.querySelector('meta[name="twitter:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[name="twitter:description"]')?.setAttribute("content",md);
  setLocalizedText(".header-copy .eyebrow","Відкриті дані · міста України","Open data · Ukrainian cities");setLocalizedText(".header-copy h1","Повітряні тривоги","Air alerts");setLocalizedText(".header-copy .subtitle","Історичні дані про повітряні тривоги в обласних центрах України. Там, де тривога не оголошується окремо для міста, використовуються дані відповідного адміністративного району — це завжди явно позначено.","Historical air-alert data for Ukrainian regional centres. Where alerts are not issued separately for a city, the corresponding administrative district is used and clearly labelled.");
  setLocalizedAttr("#languageSwitch","aria-label","Мова","Language");$("langUk")?.setAttribute("aria-pressed",currentLanguage==="uk"?"true":"false");$("langEn")?.setAttribute("aria-pressed",currentLanguage==="en"?"true":"false");setLocalizedText("#showTour","Показати тур","Show tour");setLocalizedText("#copyLink","Скопіювати посилання","Copy link");
- setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","allTime","За весь час","All time");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
+ setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText("#showTrendLabel","Показати тренд","Show trend");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","allTime","За весь час","All time");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  for(const id of ["cityDateFrom","rolling7dDateFrom","shortDateFrom","compareDateFrom","tableDateFrom"])setLocalizedText(`label[for="${id}"]`,"Від","From");
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
  for(const picker of document.querySelectorAll(".date-picker-native")) {
@@ -2353,8 +2353,12 @@ function renderCity() {
   const forecastable = ["daily28", "calendarWeekly", "monthly", "allTime"].includes(period);
   const isCurrentRange = rows.length && allRows.length &&
     rows[rows.length - 1] === allRows[allRows.length - 1];
+  // The trend is explicitly opt-in; hide its control on unsupported modes or
+  // manually selected historical ranges, retaining the selection for other modes.
+  const trendControl = $("showTrend")?.closest("label");
+  if (trendControl) trendControl.classList.toggle("hidden", !forecastable || !isCurrentRange);
   // Never extrapolate a manually chosen historical range or a rolling window.
-  const previewForecast = forecastable && isCurrentRange && window.ForecastTrend
+  const previewForecast = forecastable && isCurrentRange && $("showTrend")?.checked && window.ForecastTrend
     ? window.ForecastTrend.build(allRows, period) : null;
   const projectedRows = previewForecast?.forecasts || [];
   const forecastIndices = projectedRows.map((_, i) => labels.length + i);
@@ -3614,6 +3618,7 @@ function bind() {
     if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();
     renderCity();
   });
+  $("showTrend")?.addEventListener("change", () => renderCity());
   document.querySelectorAll(".time-of-day-range-option").forEach(option => {
     option.addEventListener("change", () => {
       if (!selectedTimeOfDayRanges().length) option.checked = true;
@@ -3820,6 +3825,8 @@ async function init() {
   fillSelect($("compareB"), keys, bDefault);
   fillSelect($("compareC"), keys, cDefault, true);
   $("cityPeriod").value = periodDefault;
+  // Always start with actual observations only, including fresh page loads.
+  if ($("showTrend")) $("showTrend").checked = false;
   $("comparePeriod").value = compareDefault;
   setSelectedTimeOfDayRanges(heatmapDefault);
   if ($("timeOfDayBin")) $("timeOfDayBin").value = timeOfDayBinDefault;
