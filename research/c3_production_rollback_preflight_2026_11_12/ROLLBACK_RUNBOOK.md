@@ -1,6 +1,6 @@
 # C3 production rollback operational preflight — 2026-11-12
 
-**Scope:** documentation-only, read-only operational inspection. **Verdict: BLOCKED (operator authorization/restore control not yet demonstrated)**; documented rollback path and immutable baseline exist, but Netlify **Publish deploy** privilege and a production rollback have not been exercised. **GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** This report does not certify cutover.
+**Scope:** documentation-only, read-only operational inspection. **Verdict: BLOCKED (operator Publish deploy control and compatible data-generation restore not yet demonstrated)**; read-only immutable production HTTP/SHA evidence PASS, but Netlify **Publish deploy** privilege and a production rollback have not been exercised. **GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.** This report does not certify cutover.
 
 ## Pinned state and evidence
 
@@ -83,11 +83,18 @@ The two paths in this template are **illustrations**, not a declaration that a f
 | C3 branch deploy isolated and `ready` | PASS read-only |
 | Git `site-prod` head and static build workflow | PASS read-only |
 | Live C3 QA job and artifact availability | PASS metadata; not repeated |
-| HTTP retrieval of immutable production deployment assets | **UNVERIFIED** in this execution environment (DNS resolution unavailable) |
+| HTTP retrieval of immutable production deployment assets | **PASS** [read-only CI #43224744877](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43224744877), artifact #13946647755: seven old static assets HTTP 200 and SHA-256 pinned |
 | Authorized operator can click Netlify **Publish deploy** | **UNVERIFIED**; action not exercised |
-| Original Netlify deployed static SHA inventory | **UNVERIFIED**; `commit_ref=null`, source ZIP absent |
+| Original Netlify deployed static SHA inventory | **PARTIAL PASS** for seven served static files; full original deployment source ZIP unavailable, `commit_ref=null` |
 | Production rollback/re-publish | **NOT EXECUTED** |
 | Production data rollback | **NOT EXECUTED** |
 | Production 23-city post-rollback QA | **NOT EXECUTED** |
 
-**Smallest unblock:** before release, an authorized Netlify Developer/Owner must open the exact old deploy detail and verify the **Publish deploy** control without clicking; an operator/read-only runner must capture the old deploy's core HTTP assets, hashes and 23-city historical index. Pin the **actual** pre-cutover Git JSON snapshot and generation metadata. This is a preparatory gate, not permission to deploy or to rollback. After these are recorded, the existing Netlify UI supports controlled restoration; production rollback itself will remain untested until explicitly authorized and performed. No new rollback infrastructure is needed.
+**Smallest unblock:** an authorized Netlify Developer/Owner must visually verify **Publish deploy** exists for the exact retained old deploy **without clicking**; pin a compatible Git JSON restore generation just before cutover and prove it matches the restored frontend/index (current generation differs from the old embedded KPI index). The independent read-only HTTP/SHA snapshot is already PASS. This is a preparatory gate, not permission to deploy or to rollback. After these are recorded, the existing Netlify UI supports controlled restoration; production rollback itself will remain untested until explicitly authorized and performed. No new rollback infrastructure is needed.
+
+## Accepted narrow evidence — immutable HTTP/SHA baseline (2026-11-12)
+
+- Isolated read-only [Actions #43224744877](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43224744877) **SUCCESS**, artifact [#13946647755](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43224744877/artifacts/13946647755), research proof SHA `21b59965b12168d473461ff6eb83aaeec4282107`. This proof reads only immutable public Netlify URLs and pinned Git JSON URLs; it neither touches Netlify publishing nor Git writes. Production `site-prod` SHA pinned before and rechecked after: `fc7261660bdee75ee59296ee94cc1189be6b1a22`.
+- Captured HTTP 200, SHA-256, byte lengths and headers for **seven** old immutable Netlify files: `index.html`, `app.js`, `kpi-range.js`, `chart-share.js`, `styles.css`, `features.json`, `historical-daily-kpi.json`; and **five** pinned Git runtime files: `dashboard_data.json`, `site_derived.json`, `alerts_combined.json`, `kyiv_threat_mix.json`, `sevastopol_events.json`. Main production URL returns the same bytes as the old immutable Netlify URL for `app.js`, `historical-daily-kpi.json`, and `features.json`. The report contains all full digests; old Netlify build `commit_ref` remains unknown.
+- Old Netlify `historical-daily-kpi.json` meta: `source_ref=site-prod`, `verified_count=23`, `expected_cities=23`, `source_dashboard_generated_at=2026-10-23T07:47:16.946235+03:00`. Pinned **current** Git dashboard: **23 cities**, `meta.generated_at=2026-11-12T09:08:13.340390+02:00`. Their generations **do not match**. A Netlify-only Publish deploy reversion is therefore not evidence of full historical-KPI or data rollback. Use a compatible Git JSON generation or separately proved fail-closed fallback; keep casualty and newer C2 data protected.
+- **Gate remains BLOCKED:** owner/operator Publish deploy permission unverified, compatible two-plane restore baseline not yet approved, production rollback not performed. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
