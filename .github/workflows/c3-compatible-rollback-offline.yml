@@ -1,0 +1,51 @@
+name: C3 compatible rollback isolated proof (no publication)
+on:
+  push:
+    branches: [research-c3-compatible-rollback-proof-2026-11-12]
+    paths:
+      - ".github/workflows/c3-compatible-rollback-offline.yml"
+      - "research/c3_compatible_rollback_2026_11_12/**"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout independent research-only proof
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned current production Git, no writes
+        uses: actions/checkout@v4
+        with:
+          ref: 68629fdae5534ec3a136e666bcb7d5c84dcd05aa
+          path: pinned-site-prod
+          persist-credentials: false
+      - name: Download only immutable prior proof artifacts
+        run: |
+          mkdir -p /tmp/c3-recovery/old /tmp/c3-recovery/preview /tmp/c3-recovery/site /tmp/c3-recovery/proof
+          gh run download 43224744877 -R "$GITHUB_REPOSITORY" -n c3-prod-old-deploy-http-sha-proof -D /tmp/c3-recovery/old
+          gh run download 43208800105 -R "$GITHUB_REPOSITORY" -n c3-netlify-preview-ready-43208800105 -D /tmp/c3-recovery/preview
+          unzip -q /tmp/c3-recovery/preview/c3-netlify-preview-site.zip -d /tmp/c3-recovery/site
+      - name: Check exact bytes, real validIndex, 23-city contracts and six recovery policies
+        run: |
+          python research/c3_compatible_rollback_2026_11_12/check_recovery.py \
+            --production-tree pinned-site-prod \
+            --old-report /tmp/c3-recovery/old/HTTP_SHA_REPORT.json \
+            --preview-root /tmp/c3-recovery/site \
+            --preview-qa /tmp/c3-recovery/preview/browser_result.json \
+            --out /tmp/c3-recovery/proof
+      - name: Preserve evidence on PASS or BLOCKED
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-compatible-rollback-proof-${{ github.run_id }}
+          path: /tmp/c3-recovery/proof/
+          if-no-files-found: warn
+          retention-days: 30
