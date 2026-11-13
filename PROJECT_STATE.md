@@ -1,24 +1,27 @@
 # Project State — coordination snapshot
 
-**2026-11-13 Work L C2 recovery offline PASS; physical proof PENDING. GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF. Latest: C6-WORKL-RECOVERY-OFFLINE-PASS-01.**
+**2026-11-13: physical Neon→6 JSON PASS; FINAL ZIP/rollback OPEN. GLOBAL_CUTOVER=NO; DST OFF. Latest: C6-WORKL-PHYSICAL-SIXJSON-PASS-01.**
 
-Read main PROJECT_STATE.md/CHANGELOG.md first; newer PR #78 governs. Verify SHA, Actions and proof artifacts. Separate production, C2/Neon historical, casualty, backfill, DST. Past records below / [archive](docs/coordination-archive/README.md).
+Read main docs first; newer PR #78 checkpoints govern. Verify exact SHA/runs; keep production, Neon, casualty and DST separate.
 
 ## Current gates
 
-- **C2:** [#43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) attempt 1 main@712c9e35: update-site SUCCESS; overall FAILURE because c6-neon-six-json-prepare FAILED (GitHub jobs API has no steps; precise cause unverified).
-- **Evidence:** C2 artifact #13991878472 outer ZIP SHA-256 2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde independently checked. 23/23 capture checkpoints in [site-prod@f0cfcbc8](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/f0cfcbc862ca3dbf1b853e72de07ffcf6042856f) bind to this run, attempt and main SHA. Full Neon writer receipt not independently accepted yet.
-- **Missing:** c6-neon-git-preparation-43321997695-1 absent from 5 artifacts; fresh Work A read-only proof, FINAL ZIP and fresh no-loss rollback unproven.
-- **Production:** Netlify current deploy 6adb629bc3ebc570117d82e1 unchanged; workflows disabled after dispatch, no re-enable, no Neon Git publication or deployment.
-- **Owner action:** Reset C6_NEON_JSON_PREPARE_ENABLED=false in GitHub Settings after C6 completed; workflow token API 403.
+- **C2:** #43321997695 attempt 1: `update-site` SUCCESS (33,315 +48, 23/23); dependent C6 pre-run FAIL. No C2 rerun.
+- **Physical Work L:** [#43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985) SUCCESS at PR #113 `325669a4`. Artifact #14020616892; 18/18 SHA, 6/6 JSON, 23/23 historical freshness; Neon read-only, no writer, source HTTP or publication. Current alerts/DST not certified.
+- **Release blockers:** Original C2-run-bound preparation artifact absent; independent Work L proof is not a substitute. FINAL ZIP provenance owner gate and fresh rollback pending.
+- **Production:** Netlify unchanged at last check; workflows paused; no cutover. Owner reports prep flag false.
 
 ## Next
 
-Work L #113 reuses pinned C2 without a new writer: next authorize exact-HEAD protected read-only Work A proof. C6 scheduler root cause unknown; final-ZIP binding and no-loss rollback remain separate release gates. CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.
+No new C2. Bind Work L proof to FINAL ZIP only through a separately approved exact provenance gate; fresh no-loss rollback and release authorization follow. GLOBAL_CUTOVER=NO.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WORKL-PHYSICAL-SIXJSON-PASS-01 — physical Neon→6 JSON PASS (2026-11-13)
+
+- [Actions #43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985) SUCCESS attempt 1, PR #113 SHA `325669a4441f5cfaeed8327f08032c0ecf4449b9`; [artifact #14020616892](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985/artifacts/14020616892) independently hashed `79acb3017dccefdf19def7fe15bdaf2033b27d8c8a6d41f146d7b0e903bd3954`. Manifest 18/18, six JSON, historical 23/23 PASS; same C2 #43321997695 attempt 1; zero writer/source HTTP/publication. Current alert/DST unverified; C2 prep, FINAL ZIP and rollback OPEN. GLOBAL_CUTOVER=NO.
+
 ## C6-WORKL-RECOVERY-OFFLINE-PASS-01 — exact C2 reuse gate PASS (2026-11-13)
 
 - [PR #113](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/113) `325669a4`, [CI #43389706624](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43389706624) SUCCESS: 20 tests and real C2 job/ZIP gate PASS. Inner SHA `3f53c7ca4a0bc1d0f25cd228dcde003cd45ac247ecab76747405f556f75e8030`; writer 33,315 (+48), 23/23. New owner/environment receipt required; six JSON/FINAL ZIP pending. NO CUTOVER.
