@@ -1,23 +1,28 @@
 # Project State — coordination snapshot
 
-**2026-11-13 ONE C2 RUN IN PROGRESS, RELEASE NO-GO. GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF. Latest: C6-C2-ONESHOT-DISPATCHED-REPAUSED-INFLIGHT-01.**
+**2026-11-13 C2 DATA PASS / C6 PREPARATION FAIL. GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF. Latest: C6-C2-ONESHOT-DATA-PASS-PREP-NOARTIFACT-01.**
 
 Read main PROJECT_STATE.md/CHANGELOG.md first; newer PR #78 governs. Verify SHA, Actions and proof artifacts. Separate production, C2/Neon historical, casualty, backfill, DST. Past records below / [archive](docs/coordination-archive/README.md).
 
 ## Current gates
 
-- **Code staged:** PR #95 → `main@712c9e351fc3548325cf594cf0617bb33e70a002`; #104/#100 → `site-prod@6648a11242fac16cf023114cd6e58a65c3b49968` before current C2. Netlify prod `6adb629bc3ebc570117d82e1` unchanged. No Neon Git publisher/cutover.
-- **ONE owner-approved C2 active:** user set `C6_NEON_JSON_PREPARE_ENABLED=true`, [preflight #43321776471](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321776471) PASS. [Controller #43321969919](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321969919) SUCCESS: exactly one [C2 #43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) attempt 1, `main@712c9e35`, observed `in_progress`. This C2 may write regular Neon canonical and Git-only JSON; **NOT** Neon six-JSON release. No second C2 approved.
-- **Production automation paused again:** C2 workflow ID `360885782` and Netlify deploy ID `360885508` rechecked `disabled_manually` AFTER C2 started. C2 is allowed to finish, but scheduled repeats are blocked. Netlify production release OFF. Owner/admin must reset the `C6_NEON_JSON_PREPARE_ENABLED` repo variable to its prior not-true state **after C6 job evaluation** (Actions token variable access HTTP 403).
-- **Not yet proven:** pending C2 outcome, same-run C2 bundle and `c6-neon-git-preparation-43321997695-1`, 23-city freshness, independent Work A physical proof, final ZIP and production rollback. Older Work A #43299402658 cannot substitute for this new C2. `ROLLBACK_OPERATIONAL_READY=NO; CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+- **C2:** [#43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) attempt 1 main@712c9e35: update-site SUCCESS; overall FAILURE because c6-neon-six-json-prepare FAILED (GitHub jobs API has no steps; precise cause unverified).
+- **Evidence:** C2 artifact #13991878472 outer ZIP SHA-256 2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde independently checked. 23/23 capture checkpoints in [site-prod@f0cfcbc8](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/f0cfcbc862ca3dbf1b853e72de07ffcf6042856f) bind to this run, attempt and main SHA. Full Neon writer receipt not independently accepted yet.
+- **Missing:** c6-neon-git-preparation-43321997695-1 absent from 5 artifacts; fresh Work A read-only proof, FINAL ZIP and fresh no-loss rollback unproven.
+- **Production:** Netlify current deploy 6adb629bc3ebc570117d82e1 unchanged; workflows disabled after dispatch, no re-enable, no Neon Git publication or deployment.
+- **Owner action:** Reset C6_NEON_JSON_PREPARE_ENABLED=false in GitHub Settings after C6 completed; workflow token API 403.
 
 ## Next
 
-Read C2 #43321997695 completion, job outcomes and exact artifacts before accepting any PASS. Keep workflows disabled. After C6 job finishes, owner resets flag; separately gate new matching Work A and final release proof. No further C2/Netlify/Neon Git publication without new authorization.
+Diagnose zero-step C6 failure without source HTTP/writer or second C2; consider separately gated read-only recovery from immutable bundle. No cutover until matching proof, FINAL ZIP and no-loss rollback pass. CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-C2-ONESHOT-DATA-PASS-PREP-NOARTIFACT-01 — C2 data PASS; C6 preparation FAIL (2026-11-13)
+
+- [#43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695), main@712c9e35 attempt 1: update-site SUCCESS; C6 preparation FAILURE (no steps), release jobs skipped; overall FAILURE. C2 artifact #13991878472 outer SHA-256 2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde verified. site-prod@f0cfcbc8 contains 23/23 run-bound capture checkpoints. C6 preparation artifact absent; no Work A/FINAL ZIP/rollback proof. Reset prep flag false; GLOBAL_CUTOVER=NO.
+
 ## C6-C2-ONESHOT-DISPATCHED-REPAUSED-INFLIGHT-01 — one owner-approved C2 dispatched; automation restored to paused state (2026-11-13)
 
 - [Preflight #43321776471](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321776471) SUCCESS confirmed user-enabled `C6_NEON_JSON_PREPARE_ENABLED=true`, C2 bundle/capture ON, final preparation and Neon Git release OFF. Single-shot [controller #43321969919](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321969919) SUCCESS checked exact main/site HEAD, no active production jobs, enabled C2 workflow `360885782` only, dispatched **one** [C2 #43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) (`workflow_dispatch`, attempt 1, `main@712c9e35`), observed `in_progress`, then verified both C2 `360885782` and Netlify `360885508` workflows `disabled_manually`. No Netlify deploy or gated Neon Git release. User's one-run permission consumed.
