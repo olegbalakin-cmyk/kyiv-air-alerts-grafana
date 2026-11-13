@@ -2,7 +2,7 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-Current accepted: **C6-C3-MERGE130-CAPTURE-DIAGNOSTIC-PASS-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
+Current accepted: **C6-C3-MERGE133-PRECAPTURE-DIAGNOSTIC-STAGED-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
 
 ## Work S final execution observation (2026-11-13; publication not executed)
 
@@ -16,6 +16,10 @@ Current accepted: **C6-C3-MERGE130-CAPTURE-DIAGNOSTIC-PASS-01.** GLOBAL_CUTOVER=
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
 
 <!-- coordination:history:start -->
+### C6-C3-MERGE133-PRECAPTURE-DIAGNOSTIC-STAGED-01 — PR #133 diagnostic merged, pilot not run (2026-11-14)
+
+- Owner-approved [PR #133](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/133), source `c0a90abd82e48f77f2f19018387a1010c59f9a8f`, squash-merged to `main@5606147a955b64e17474688c6a13596b21d93580`. Exact-head C6 offline [#43522310073](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43522310073), timestamp [#43522310133](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43522310133), coordination docs [#43522310077](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43522310077) SUCCESS. Redacted read-only Git status added immediately before existing `capture()`; fail-closed logic unchanged. Owner screenshots confirmed legacy pause=true, new AUTO flag absent, both workflows disabled. `site-prod@54079326` and Netlify `6af76b2d` locked unchanged, no production runs from merge. `GLOBAL_CUTOVER=YES; ROOT_CAUSE=UNKNOWN; MERGE_133=YES; PILOT=NOT_RUN; AUTO_NEON_GIT=OFF`. One manual pilot authorized only after fresh gates; GitHub connector cannot enable/dispatch workflow. No production publication or deployment.
+
 ### C6-C3-MERGE130-CAPTURE-DIAGNOSTIC-PASS-01 — diagnostics merged (2026-11-14)
 
 - [PR #130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/130) squash-merged into `main@9576dd06beb6b905f5fc4001672e524ed0ba5d0b`; exact source HEAD `2920931f27bec8de3214ee6d83322626e44be9a5` and required offline CI PASS. Manual C2→Neon→Git [#43510482714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510482714) FAIL at `capture()` step 46; Neon +129 PASS; Git publication 0. Diagnostics now expose only fixed allowed error codes; cause still unknown. Production `site-prod@54079326`, Netlify `6af76b2d` locked unchanged; auto OFF, no pilot GO.
