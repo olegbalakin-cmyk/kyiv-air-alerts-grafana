@@ -781,7 +781,7 @@ jobs:
           set -euo pipefail
           test "$PREPARE_ENABLED" = "true"
           test -n "$PREPARE_OWNER_RECEIPT"
-          [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          # Work M recovery has no original C2 preparation artifact.
           [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$C2_BUNDLE_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           mkdir -p "$RUNNER_TEMP/c6-final"
@@ -794,7 +794,18 @@ jobs:
           assert a.get("decision")=="APPROVE_PREPARE_ONLY_NO_PUBLICATION"
           assert a.get("prepare_code_sha")==os.environ["GITHUB_SHA"]
           assert a.get("repository")==os.environ["GITHUB_REPOSITORY"]
-          assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
+          # Checkout has not happened yet: no module import at this gate.
+          # The exact-pair hash/run/JOB validation runs after checkout.
+          RECOVERY_SCHEMA="c6-final-release-prepare-only-work-l-v1"
+          if a.get("schema")==RECOVERY_SCHEMA:
+              assert a.get("provenance_contract")=="C2_FAILED_PRERUN_C6_WORKL_PHYSICAL_PROOF_V1"
+              assert not os.environ.get("PREP_ARTIFACT_ID")
+              assert not a.get("c2_artifact_id")
+              assert not a.get("c2_artifact_sha256")
+          else:
+              assert a.get("schema")=="c6-final-release-prepare-only-v1"
+              assert os.environ["PREP_ARTIFACT_ID"].isdigit()
+              assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
           assert a.get("c2_bundle_artifact_id")==int(os.environ["C2_BUNDLE_ARTIFACT_ID"])
           assert a.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
           print("PREPARE_ONLY_OWNER_RECEIPT_PRESENT; NO_PUBLICATION")
@@ -816,7 +827,14 @@ jobs:
           [[ "$C2_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_RUN_ID" =~ ^[0-9]+$ ]]
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          RECOVERY_MODE="$(python -c 'import json,sys; from scripts.c6_neon_final_prepare import RECOVERY_SCHEMA; print("true" if json.load(open(sys.argv[1])).get("schema")==RECOVERY_SCHEMA else "false")' "$root/owner.json")"
+          if [ "$RECOVERY_MODE" = "true" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID/jobs?per_page=100" > "$root/c2-jobs.json"
+          fi
           for kind in c2 c2_bundle work_a; do
+            if [ "$kind" = "c2" ] && [ "$RECOVERY_MODE" = "true" ]; then
+              continue
+            fi
             case "$kind" in
               c2) id="$PREP_ARTIFACT_ID" ;;
               c2_bundle) id="$C2_BUNDLE_ARTIFACT_ID" ;;
@@ -832,17 +850,24 @@ jobs:
         run: |
           set -euo pipefail
           root="$RUNNER_TEMP/c6-final"
+          # Explicit recovery source; original path remains unchanged.
+          extra=()
+          if test -f "$root/c2-jobs.json"; then
+            extra+=(--c2-jobs "$root/c2-jobs.json")
+          else
+            extra+=(--c2-artifact "$root/c2-artifact.json" --c2-zip "$root/c2.zip")
+          fi
           python -m scripts.c6_neon_final_prepare \
             --receipt "$root/owner.json" \
             --c2-run "$root/c2-run.json" --work-a-run "$root/work-a-run.json" \
-            --c2-artifact "$root/c2-artifact.json" \
             --c2-bundle-artifact "$root/c2_bundle-artifact.json" \
             --work-a-artifact "$root/work_a-artifact.json" \
-            --c2-zip "$root/c2.zip" --c2-bundle-zip "$root/c2_bundle.zip" \
+            --c2-bundle-zip "$root/c2_bundle.zip" \
             --work-a-zip "$root/work_a.zip" \
             --output "$root/final" --audit "$root/PREPARE_REPORT.json" \
             --actor "$GITHUB_ACTOR" --run-id "$GITHUB_RUN_ID" \
-            --run-attempt "$GITHUB_RUN_ATTEMPT" --code-sha "$GITHUB_SHA"
+            --run-attempt "$GITHUB_RUN_ATTEMPT" --code-sha "$GITHUB_SHA" \
+            "${extra[@]}"
           test "$(find "$root/final" -type f | wc -l)" -eq 8
           echo "EIGHT_FINAL_FILES_PREPARED; NO_PUSH_OR_DEPLOY"
       - name: Upload exact final ZIP as owner-pinnable immutable GitHub artifact
@@ -897,7 +922,14 @@ jobs:
           from pathlib import Path
           approval=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-release/owner.json").read_text())
           assert approval.get("decision")=="APPROVE_ONE_SHOT_NEON_GIT_PUBLICATION"
-          assert approval.get("candidate_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
+          if approval.get("schema")=="c6-approved-one-shot-neon-git-work-m-v1":
+              assert approval.get("provenance_contract")=="C2_FAILED_PRERUN_C6_WORKL_PHYSICAL_PROOF_V1"
+              assert int(os.environ["PREP_ARTIFACT_ID"])==13991878472
+              assert approval.get("c2_artifact_id")==13991878472
+              assert not approval.get("candidate_artifact_id")
+          else:
+              assert approval.get("schema")=="c6-approved-one-shot-neon-git-v1"
+              assert approval.get("candidate_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
           assert approval.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
           assert approval.get("final_release_artifact_id")==int(os.environ["FINAL_ARTIFACT_ID"])
           print("EXPLICIT_OWNER_RECEIPT_AND_ARTIFACT_IDS_PRESENT")
@@ -922,13 +954,25 @@ jobs:
           import json,os
           from pathlib import Path
           a=json.loads((Path(os.environ["RUNNER_TEMP"])/"c6-release/owner.json").read_text())
-          for key in ("c2_run_id","work_a_run_id","candidate_artifact_id","work_a_artifact_id",
+          for key in ("c2_run_id","work_a_run_id","work_a_artifact_id",
                       "final_release_artifact_id","final_release_run_id"):
               assert type(a.get(key)) is int and a[key]>0
+          if a.get("schema")=="c6-approved-one-shot-neon-git-work-m-v1":
+              assert a.get("c2_artifact_id")==13991878472
+              assert a.get("final_prepare_report_artifact_id")==14025729121
+              assert a.get("final_release_run_id")==43403595621
+          else:
+              assert type(a.get("candidate_artifact_id")) is int
+              assert a["candidate_artifact_id"]>0
           PY
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PREP_ARTIFACT_ID" > "$root/c2-artifact.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > "$root/work-a-artifact.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID" > "$root/final-artifact.json"
+          RECOVERY="$(python -c 'import json,sys; print("true" if json.load(open(sys.argv[1])).get("schema")=="c6-approved-one-shot-neon-git-work-m-v1" else "false")' "$root/owner.json")"
+          if [ "$RECOVERY" = "true" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14025729121" > "$root/work-m-report-artifact.json"
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/43321997695/jobs?per_page=100" > "$root/c2-jobs.json"
+          fi
           C2_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["c2_run_id"])' "$root/owner.json")"
           WORK_A_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["work_a_run_id"])' "$root/owner.json")"
           FINAL_RUN_ID="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["final_release_run_id"])' "$root/owner.json")"
@@ -944,14 +988,23 @@ jobs:
           curl --fail --silent --show-error --location --retry 3 \
             -H "Authorization: Bearer $GH_TOKEN" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID/zip" -o "$root/final.zip"
+          if [ "$RECOVERY" = "true" ]; then
+            curl --fail --silent --show-error --location --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/14025729121/zip" -o "$root/work-m-report.zip"
+          fi
           python - <<'PY'
           import json,hashlib,os
           from pathlib import Path
           r=Path(os.environ["RUNNER_TEMP"])/"c6-release"
           a=json.loads((r/"owner.json").read_text())
-          for kind,file,key in (("c2","prep.zip","candidate_artifact_sha256"),
-                                ("work-a","work-a.zip","work_a_artifact_sha256"),
-                                ("final","final.zip","final_release_artifact_sha256")):
+          recovery=a.get("schema")=="c6-approved-one-shot-neon-git-work-m-v1"
+          items=[("c2","prep.zip","c2_artifact_sha256" if recovery else "candidate_artifact_sha256"),
+                 ("work-a","work-a.zip","work_a_artifact_sha256"),
+                 ("final","final.zip","final_release_artifact_sha256")]
+          if recovery:
+              items.append(("work-m-report","work-m-report.zip","final_prepare_report_artifact_sha256"))
+          for kind,file,key in items:
               expected=a[key]
               assert isinstance(expected,str) and len(expected)==64
               assert hashlib.sha256((r/file).read_bytes()).hexdigest()==expected
@@ -973,14 +1026,27 @@ jobs:
                       assert not p.is_absolute() and not any(x==".." for x in p.parts)
                       assert member.file_size<=64*1024*1024
                   z.extractall(root/output)
-          extract("prep.zip","prepared-zip")
+          approval=json.loads((root/"owner.json").read_text())
+          recovery=approval.get("schema")=="c6-approved-one-shot-neon-git-work-m-v1"
+          if recovery:
+              # prep.zip is the original C2 bundle here, never a fabricated prep artifact.
+              extract("work-m-report.zip","work-m-report")
+              extract("final.zip","work-m-final")
+              prepared=root/"work-m-final"
+              reports=list((root/"work-m-report").rglob("PREPARE_REPORT.json"))
+              assert len(reports)==1
+              report=reports[0]
+              assert (prepared/"RELEASE_BINDING.json").is_file()
+          else:
+              extract("prep.zip","prepared-zip")
+              prepared=root/"prepared-zip"
+              reports=list(prepared.rglob("REPORT.json"))
+              assert len(reports)==1
+              report=reports[0]
           extract("work-a.zip","work-a-zip")
-          prepared=root/"prepared-zip"
-          reports=list(prepared.rglob("REPORT.json"))
-          assert len(reports)==1
-          report=reports[0]
-          assert (report.parent/"candidate/historical-daily-kpi.json").is_file()
-          (root/"prepared-path.txt").write_text(str(report.parent))
+          assert (prepared/"candidate/historical-daily-kpi.json").is_file()
+          (root/"prepared-path.txt").write_text(str(prepared))
+          (root/"report-path.txt").write_text(str(report))
           proof_roots=[p.parent for p in (root/"work-a-zip").rglob("sha256_manifest.json")]
           assert len(proof_roots)==1
           (root/"work-a-path.txt").write_text(str(proof_roots[0]))
@@ -1014,9 +1080,14 @@ jobs:
         run: |
           set -euo pipefail
           root="$RUNNER_TEMP/c6-release"
+          WORK_N_EXTRA_ARGS=()
+          if test -f "$root/c2-jobs.json"; then
+            WORK_N_EXTRA_ARGS+=(--work-m-report-artifact "$root/work-m-report-artifact.json"
+                                --c2-jobs "$root/c2-jobs.json")
+          fi
           python -m scripts.c6_neon_one_shot_publisher \
             --approval "$root/owner.json" \
-            --report "$(cat "$root/prepared-path.txt")/REPORT.json" \
+            --report "$(cat "$root/report-path.txt")" \
             --work-a-proof "$(cat "$root/work-a-path.txt")" \
             --prepared "$(cat "$root/prepared-path.txt")" \
             --checkout live-site \
@@ -1027,4 +1098,5 @@ jobs:
             --final-artifact "$root/final-artifact.json" \
             --final-run "$root/final-run.json" \
             --final-zip "$root/final.zip" \
+            ${WORK_N_EXTRA_ARGS[@]} \
             --repository "$GITHUB_REPOSITORY"
