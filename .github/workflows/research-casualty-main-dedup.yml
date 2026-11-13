@@ -1,0 +1,54 @@
+name: Research casualty main dedup adoption (offline)
+on:
+  push:
+    branches:
+      - research-casualty-main-dedup-2026-11-12
+permissions:
+  contents: read
+jobs:
+  main-adoption-proof:
+    if: github.ref == 'refs/heads/research-casualty-main-dedup-2026-11-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Ensure only scope-approved paths changed from original main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only 375e69351e6a5aee1be16892821f7cdde2a8f21a HEAD > "$RUNNER_TEMP/changed-paths.txt"
+          cat "$RUNNER_TEMP/changed-paths.txt"
+          if grep -E '(^|/)(revisions\.csv|dashboard_data\.json|baseline_monthly\.csv|source_state\.json|review_queue\.json)$|^kyiv-air-alerts-grafana/pages|^kyiv-air-alerts-grafana/data/|^PROJECT_STATE\.md$|^CHANGELOG\.md$' "$RUNNER_TEMP/changed-paths.txt"; then
+            echo "Protected file modified"; exit 1
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing main generator dependencies
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Syntax check and current-main offline regression
+        run: |
+          python -m py_compile kyiv-air-alerts-grafana/scripts/update_casualties.py
+          python research/casualty_main_dedup_2026_11_12/test_main_dedup.py
+      - name: Regression already present for existing main collector
+        run: python kyiv-air-alerts-grafana/tests/test_update_fallback.py
+      - name: Original 25/25 production source and Sumy reference regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin 68629fdae5534ec3a136e666bcb7d5c84dcd05aa fc7261660bdee75ee59296ee94cc1189be6b1a22
+          git worktree add --detach "$RUNNER_TEMP/siteprod-proof" 68629fdae5534ec3a136e666bcb7d5c84dcd05aa
+          (cd "$RUNNER_TEMP/siteprod-proof" && python research/casualty_same_incident_dedup_2026_11_12/test_dedup.py)
+          mkdir -p research/casualty_main_dedup_2026_11_12/proof/siteprod_reference
+          cp -a "$RUNNER_TEMP/siteprod-proof/research/casualty_same_incident_dedup_2026_11_12/proof/." research/casualty_main_dedup_2026_11_12/proof/siteprod_reference/
+      - name: Upload complete isolated proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-main-adoption-proof
+          path: research/casualty_main_dedup_2026_11_12/proof/
+          if-no-files-found: warn
+          retention-days: 30
