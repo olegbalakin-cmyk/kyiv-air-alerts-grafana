@@ -45,7 +45,7 @@ def check_fixtures():
         assert actual == sha, (directory, actual)
         assert "ref: " + sha + "\n          path: " + directory in workflow, directory
     assert not (r.HERE / "launch.json").exists(), "REAL_LAUNCH_NOT_ALLOWED"
-    assert "branches: [research-casualty-workn-clean-rearm-2026-11-13]" in workflow
+    assert "branches: [research-casualty-workn-prehttp-launch-state-fix-2026-11-13]" in workflow
     assert "research-casualty-workl-three-source-preflight-2026-11-13" not in workflow
     assert "research-casualty-workm-prehttp-ci-fix-2026-11-13" not in workflow
     assert "One approved source-only pilot; no publication" in workflow
