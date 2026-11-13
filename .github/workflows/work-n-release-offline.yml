@@ -1,0 +1,102 @@
+name: Work N publisher and current rollback offline only
+on:
+  push:
+    branches: [research-work-n-publisher-rollback-2026-11-13]
+    paths:
+      - ".github/workflows/work-n-release-offline.yml"
+      - ".github/workflows/update-netlify-site.yml"
+      - "scripts/c6_neon_one_shot_publisher.py"
+      - "tests/test_c6_work_n_publisher.py"
+      - "research/work_n_rollback_2026_11_13/**"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Existing publisher + binding + Work N negative tests
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p test_c6_neon_one_shot_publisher.py -v
+          python -m unittest discover -s tests -p test_c6_neon_release_binding.py -v
+          python -m unittest discover -s tests -p test_c6_work_n_publisher.py -v
+      - name: Exact C2 / Work L / Work M remote metadata (no source HTTP)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,subprocess
+          repo="olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          def get(path):
+              return json.loads(subprocess.check_output(["gh","api",f"repos/{repo}/{path}"]))
+          runs=[(43321997695,"failure","712c9e351fc3548325cf594cf0617bb33e70a002"),
+                (43390770985,"success","325669a4441f5cfaeed8327f08032c0ecf4449b9"),
+                (43403595621,"success","9d846279b91b44b324a722ca00276a99956b4fca")]
+          for id,conclusion,sha in runs:
+              r=get(f"actions/runs/{id}")
+              assert r["run_attempt"]==1 and r["conclusion"]==conclusion
+              assert r["head_sha"]==sha
+          for id,a_id,digest in (
+              (43321997695,13991878472,"2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde"),
+              (43390770985,14020616892,"79acb3017dccefdf19def7fe15bdaf2033b27d8c8a6d41f146d7b0e903bd3954"),
+              (43403595621,14025629654,"f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed"),
+              (43403595621,14025729121,"f4f786b168d28f37bdf6a333d4e514b503e402e4fda25553d99ffa0a8d6a8648")):
+              a=get(f"actions/artifacts/{a_id}")
+              assert a["workflow_run"]["id"]==id and not a["expired"]
+              assert a["digest"]=="sha256:"+digest
+          print("WORK_N_EXACT_THREE_RUNS_AND_FOUR_ARTIFACTS_METADATA_PASS")
+          PY
+      - name: Checkout current site-prod without write credentials
+        uses: actions/checkout@v4
+        with:
+          ref: f0cfcbc862ca3dbf1b853e72de07ffcf6042856f
+          path: pinned-site
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Generate current Git-only rollback and eight no-loss checks
+        run: |
+          set -euo pipefail
+          python research/work_n_rollback_2026_11_13/prepare.py \
+            --site pinned-site --frontend pinned-site --netlify pinned-site \
+            --out /tmp/work-n-rollback
+          cd /tmp/work-n-rollback
+          sha256sum -c package.sha256
+          python - <<'PY'
+          import json,zipfile,hashlib
+          from pathlib import Path
+          r=json.loads(Path("REPORT.json").read_text())
+          m=json.loads(Path("manifest.json").read_text())
+          assert r["state"]=="PASS_OFFLINE_ONLY"
+          assert r["ROLLBACK_OPERATIONAL_READY"]=="NO"
+          assert len(json.loads(Path("no_loss_cases.json").read_text()))==8
+          with zipfile.ZipFile("git-only-rollback-package.zip") as z:
+              assert len(z.namelist())==18
+              assert set(z.namelist())==set(m["package_entries"])
+              for name,entry in m["package_entries"].items():
+                  raw=z.read(name)
+                  assert len(raw)==entry["bytes"]
+                  assert hashlib.sha256(raw).hexdigest()==entry["sha256"]
+          print("CURRENT_23_CITY_GIT_ONLY_ROLLBACK_OFFLINE_PASS")
+          PY
+      - name: Upload offline-only recovery evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: work-n-rollback-offline-${{ github.run_id }}
+          path: |
+            /tmp/work-n-rollback/REPORT.json
+            /tmp/work-n-rollback/manifest.json
+            /tmp/work-n-rollback/package.sha256
+            /tmp/work-n-rollback/checks.json
+            /tmp/work-n-rollback/no_loss_cases.json
+            /tmp/work-n-rollback/git-only-rollback-package.zip
+          if-no-files-found: error
+          retention-days: 30
