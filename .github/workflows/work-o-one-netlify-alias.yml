@@ -1,0 +1,196 @@
+name: WORK O one authorized Netlify alias (NO PROD)
+on:
+  push:
+    branches: [research-work-o-netlify-alias-2026-11-13]
+    paths: [.github/workflows/work-o-one-netlify-alias.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: work-o-netlify-current-alias-2026-11-13
+  cancel-in-progress: false
+jobs:
+  one_alias:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Validate authorization and download exact immutable artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$GITHUB_REF_NAME" = research-work-o-netlify-alias-2026-11-13
+          test -n "$NETLIFY_AUTH_TOKEN" || { echo 'BLOCKED_NO_GITHUB_NETLIFY_SECRET'; exit 2; }
+          mkdir -p "$RUNNER_TEMP/work-o/site" "$RUNNER_TEMP/work-o/proof"
+          curl -fsSL --retry 0 --max-time 120 -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/14028565807/zip" -o "$RUNNER_TEMP/work-o/outer.zip"
+          python - <<'PY'
+          import hashlib,io,json,os,pathlib,urllib.request,zipfile
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'work-o'
+          sha=lambda b:hashlib.sha256(b).hexdigest()
+          z1='e2914fac206e0ec2d7c2d5ff466703126cd47d5c9023490a71c9ae816d9a727a'
+          z2='79e6a1ba0339c9f02d4089933cd91f77db060221a572e49df3c7d11fb2d31ff5'
+          z3='e1d859fa97535dcb10745239f4de786e3674fda331bdfa9d16d074e335e47c4b'
+          git_sha='f0cfcbc862ca3dbf1b853e72de07ffcf6042856f'
+          prod_id='6adb629bc3ebc570117d82e1'
+          site_id='b5aafc46-7468-4070-baf1-db80a4d30501'
+          assert sha((root/'outer.zip').read_bytes())==z1,'ARTIFACT_SHA'
+          with zipfile.ZipFile(root/'outer.zip') as outer:
+              manifest=outer.read('manifest.json'); package=outer.read('git-only-rollback-package.zip')
+              report=json.loads(outer.read('REPORT.json'))
+          assert sha(manifest)==z3 and sha(package)==z2,'PACKAGE_OR_MANIFEST_SHA'
+          m=json.loads(manifest)
+          assert report['state']=='PASS_OFFLINE_ONLY' and report['check_count']==32 and report['no_loss_cases']==8
+          assert report['package_sha256']==z2 and report['manifest_sha256']==z3 and report['site_prod_sha']==git_sha
+          assert report['netlify_deploy_executed'] is False and report['git_publication_executed'] is False
+          assert m['schema']=='c3-work-n-git-only-rollback-manifest-v1'
+          assert m['site_prod_commit']==git_sha and m['site_id']==site_id
+          assert m['source_receipts']==23 and len(m['city_keys'])==23 and len(set(m['city_keys']))==23
+          assert m['global_cutover']=='NO' and m['dst_correction']=='OFF' and m['cutover_time_fresh'] is False
+          with zipfile.ZipFile(io.BytesIO(package)) as inner:
+              items=set(n for n in inner.namelist() if not n.endswith('/'))
+              assert items==set(m['package_entries']) and len(items)==18,'ENTRY_SET'
+              site_items=[n for n in items if n.startswith('netlify/_site/')]
+              assert len(site_items)==13,'SITE_FILE_COUNT'
+              for name in items:
+                  assert '..' not in pathlib.PurePosixPath(name).parts and not name.startswith('/')
+                  blob=inner.read(name); expected=m['package_entries'][name]
+                  assert len(blob)==expected['bytes'] and sha(blob)==expected['sha256'],('ENTRY_SHA',name)
+                  if name in site_items: (root/'site'/name.rsplit('/',1)[-1]).write_bytes(blob)
+              for name,entry in m['git_json'].items():
+                  blob=inner.read('git-json/kyiv-air-alerts-grafana/data/'+name)
+                  gitblob=hashlib.sha1(b'blob '+str(len(blob)).encode()+b'\0'+blob).hexdigest()
+                  assert sha(blob)==entry['sha256'] and gitblob==entry['git_blob_sha1'],('GIT_BLOB',name)
+              assert sha(inner.read('git-json/kyiv-air-alerts-grafana/data/dashboard_data.json'))==m['package_entries']['netlify/_site/data.json']['sha256']
+          def api(url,token):
+              req=urllib.request.Request(url,headers={'Authorization':'Bearer '+token,'Accept':'application/json','User-Agent':'work-o-read-only'})
+              with urllib.request.urlopen(req,timeout=40) as response:return json.load(response)
+          gh=api('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/branches/site-prod',os.environ['GH_TOKEN'])
+          assert gh['commit']['sha']==git_sha,'SITE_PROD_CHANGED_STOP'
+          nf=api('https://api.netlify.com/api/v1/sites/'+site_id,os.environ['NETLIFY_AUTH_TOKEN'])
+          published=(nf.get('published_deploy') or {}).get('id') or nf.get('published_deploy_id')
+          assert published==prod_id,('PROD_CHANGED_STOP',published)
+          (root/'manifest.json').write_bytes(manifest)
+          (root/'proof'/'preflight.json').write_text(json.dumps({'status':'PASS','artifact_sha256':z1,'package_sha256':z2,'manifest_sha256':z3,'package_entries':18,'static_site_files':13,'git_json_blobs':5,'cities':23,'site_prod_before':git_sha,'production_before':published,'secret_present':True},indent=2))
+          print('PREDEPLOY_PASS artifact/manifest/18 members/13 site files/5 Git blobs/23 cities, Netlify secret present, production unchanged')
+          PY
+      - name: Exactly one authorized NONPRODUCTION alias deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test -f "$RUNNER_TEMP/work-o/proof/preflight.json"
+          npx -y netlify-cli@latest deploy --dir="$RUNNER_TEMP/work-o/site" --site=b5aafc46-7468-4070-baf1-db80a4d30501 --alias=work-o-git-only-f0cfcbc8 --auth="$NETLIFY_AUTH_TOKEN" --json > "$RUNNER_TEMP/work-o/deploy.json"
+          python - <<'PY'
+          import json,os,pathlib,re
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'work-o'
+          d=json.loads((root/'deploy.json').read_text())
+          did=d.get('deploy_id') or d.get('id')
+          assert re.fullmatch(r'[0-9a-f]{24}',str(did or '')),'NO_REAL_DEPLOY_ID'
+          receipt={'id':did,'url':'https://work-o-git-only-f0cfcbc8--ukraine-air-alerts.netlify.app/','cli_url':d.get('deploy_url') or d.get('url'),'publication':'NONPROD_ONLY'}
+          (root/'proof'/'deploy_receipt.json').write_text(json.dumps(receipt,indent=2))
+          print('ONE_ALIAS_DEPLOY_ID='+did)
+          print('ONE_ALIAS_URL='+receipt['url'])
+          PY
+      - name: Verify real hosted files and production/site-prod unchanged
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,pathlib,urllib.request
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'work-o'
+          manifest=json.loads((root/'manifest.json').read_text())
+          receipt=json.loads((root/'proof'/'deploy_receipt.json').read_text())
+          def request(url,token=None):
+              headers={'User-Agent':'work-o-read-only'}
+              if token:headers['Authorization']='Bearer '+token
+              with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=60) as r:return r.status,r.read()
+          checks={}
+          for path,meta in sorted(manifest['package_entries'].items()):
+              if not path.startswith('netlify/_site/'):continue
+              name=path.rsplit('/',1)[-1]
+              status,body=request(receipt['url']+(name if name!='index.html' else ''))
+              digest=hashlib.sha256(body).hexdigest()
+              exact=digest==meta['sha256']
+              injected=name=='index.html' and not exact and b'netlify-rum-container' in body
+              checks[name]={'http':status,'expected_sha256':meta['sha256'],'served_sha256':digest,'identical':exact,'netlify_rum_script':injected}
+              assert status==200 and (exact or injected),('HTTP_OR_SHA_FAIL',name,status,digest)
+          assert len(checks)==13
+          _,raw=request('https://api.netlify.com/api/v1/deploys/'+receipt['id'],os.environ['NETLIFY_AUTH_TOKEN'])
+          dep=json.loads(raw)
+          assert dep.get('id')==receipt['id'] and dep.get('state')=='ready',('DEPLOY_FAILED',dep.get('state'))
+          assert dep.get('context')=='branch-deploy' and dep.get('published_at') is None,('NONPRODUCTION_CONTEXT_REQUIRED',dep.get('context'),dep.get('published_at'))
+          _,raw=request('https://api.netlify.com/api/v1/sites/b5aafc46-7468-4070-baf1-db80a4d30501',os.environ['NETLIFY_AUTH_TOKEN'])
+          nf=json.loads(raw)
+          prod=(nf.get('published_deploy') or {}).get('id') or nf.get('published_deploy_id')
+          assert prod=='6adb629bc3ebc570117d82e1',('PRODUCTION_CHANGED',prod)
+          _,raw=request('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/branches/site-prod',os.environ['GH_TOKEN'])
+          gh=json.loads(raw)
+          assert gh['commit']['sha']=='f0cfcbc862ca3dbf1b853e72de07ffcf6042856f','SITE_PROD_CHANGED'
+          result={'status':'PASS','deploy_id':receipt['id'],'url':receipt['url'],'state':dep.get('state'),'context':dep.get('context'),'production_after':prod,'site_prod_after':gh['commit']['sha'],'files':checks}
+          (root/'proof'/'http_qa.json').write_text(json.dumps(result,indent=2))
+          print('REAL_HOSTED_HTTP_PASS 13/13; alias nonproduction; production/site-prod unchanged')
+          PY
+      - name: Set up browser
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Real URL 23-city, chart, KPI, Kyiv, casualty and CSV smoke
+        run: |
+          set -euo pipefail
+          python -m pip -q install playwright==1.64.1
+          python - <<'PY'
+          import csv,json,os,pathlib,shutil
+          from playwright.sync_api import sync_playwright
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'work-o'
+          m=json.loads((root/'manifest.json').read_text())
+          alias=json.loads((root/'proof'/'deploy_receipt.json').read_text())['url']
+          results={'status':'BLOCKED','cities':0,'chart_views':0,'csv':0,'errors':[]}
+          modes=['daily28','weekly','rolling30','rolling90','rolling180','calendarWeekly','monthly','allTime']
+          with sync_playwright() as p:
+              binary=shutil.which('google-chrome') or shutil.which('chromium')
+              assert binary,'CHROME_MISSING'
+              browser=p.chromium.launch(executable_path=binary,headless=True,args=['--no-sandbox'])
+              context=browser.new_context(accept_downloads=True,viewport={'width':1440,'height':1080})
+              context.add_init_script("try{localStorage.setItem('air-alerts-intro-tour-v5','done')}catch(e){}")
+              page=context.new_page()
+              page.on('pageerror',lambda err:results['errors'].append(str(err)))
+              page.goto(alias,wait_until='domcontentloaded',timeout=90000)
+              page.wait_for_function("typeof state !== 'undefined' && !!state.data && !!state.charts.cityIntensityChart",timeout=90000)
+              if page.locator('#tourSkip').is_visible():page.locator('#tourSkip').click()
+              basis=page.evaluate("() => ({generation:state.data.meta.generated_at,cities:Object.keys(state.data.cities||{}).length,casualties:Object.keys(state.data.casualties_by_city||{}).length,kyiv:!!state.data.cities.kyiv.monthly?.length,hasDeaths:!!state.data.casualties.monthly?.length,historical:!!state.data.historical_daily_kpi?.cities})")
+              assert basis['generation']==m['dashboard_generated_at'] and basis['cities']==23 and basis['casualties']==23 and basis['kyiv'] and basis['hasDeaths'] and basis['historical'],basis
+              city_opts=page.locator('#citySelect option').evaluate_all('(els)=>els.map(x=>x.value)')
+              assert set(m['city_keys']).issubset(set(city_opts))
+              for city in m['city_keys']:
+                  page.locator('#citySelect').select_option(city)
+                  for mode in modes:
+                      page.locator('#cityPeriod').select_option(mode)
+                      c=page.evaluate("() => ({city:document.querySelector('#citySelect').value,mode:document.querySelector('#cityPeriod').value,a:state.charts.cityIntensityChart?.data.labels.length,b:state.charts.cityDurationChart?.data.labels.length,w:state.charts.cityIntensityChart?.width})")
+                      assert c['city']==city and c['mode']==mode and c['a']>0 and c['a']==c['b'] and c['w']>0,('CHART',c)
+                      results['chart_views']+=1
+                  page.locator('#cityPeriod').select_option('monthly')
+                  with page.expect_download(timeout=20000) as d:page.evaluate("exportChartCsv('cityIntensityChart')")
+                  with open(d.value.path(),encoding='utf-8-sig',newline='') as f:rows=list(csv.reader(f))
+                  assert len(rows)>1 and len(rows[0])>1,('CSV',city)
+                  results['csv']+=1; results['cities']+=1
+              assert not results['errors'],('JS_ERRORS',results['errors'])
+              page.screenshot(path=str(root/'proof'/'browser.png'),full_page=False)
+              browser.close()
+          results['status']='PASS';results['basis']=basis
+          (root/'proof'/'browser.json').write_text(json.dumps(results,indent=2))
+          print('BROWSER_PASS 23 cities, 184 views, 23 CSV, Kyiv and casualty')
+          PY
+      - name: Upload nonsecret Work O proof regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: work-o-g2-alias-proof
+          path: ${{ runner.temp }}/work-o/proof/
+          if-no-files-found: warn
+          retention-days: 30
