@@ -8,6 +8,11 @@ on:
         type: boolean
         required: true
         default: false
+      work_l_recovery_mode:
+        description: 'Exact Work L to Work M recovery path, default OFF; separately owner-gated'
+        type: boolean
+        required: true
+        default: false
       c6_run_id:
         description: 'C6 preparation Actions run ID (Neon mode only)'
         type: string
@@ -148,6 +153,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           C6_RELEASE_OWNER_APPROVED: ${{ vars.C6_NEON_RELEASE_OWNER_APPROVED }}
+          C6_WORK_L_RECOVERY_MODE: ${{ inputs.work_l_recovery_mode }}
+          C6_WORK_L_RECOVERY_ENABLED: ${{ vars.C6_WORK_L_NETLIFY_RECOVERY_ENABLED }}
+          C6_RECOVERY_OWNER_RELEASE_GRANT_JSON: ${{ secrets.C6_WORK_L_NETLIFY_OWNER_RELEASE_GRANT_JSON }}
           C6_APPROVED_WORK_A_RUN: ${{ vars.C6_NEON_WORK_A_APPROVED_RUN_ID }}
           WORK_A_RUN_ID: ${{ inputs.work_a_run_id }}
           WORK_A_ARTIFACT_ID: ${{ inputs.work_a_artifact_id }}
@@ -193,6 +201,28 @@ jobs:
           test -n "$OWNER_FINAL_FILES_JSON" && test -n "$C6_APPROVED_FINAL_HEAD_SHA"
           test -n "$C6_APPROVED_FINAL_WORKFLOW" && test -n "$C6_APPROVED_FINAL_NAME"
           mkdir -p _approved_c6
+          # Recovery is an explicit owner-approved dispatch only; original mode is unchanged.
+          if [[ "$C6_WORK_L_RECOVERY_MODE" == "true" ]]; then
+            test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+            test "$GITHUB_ACTOR" = "olegbalakin-cmyk"
+            test "$C6_WORK_L_RECOVERY_ENABLED" = "true"
+            test -n "$C6_RECOVERY_OWNER_RELEASE_GRANT_JSON"
+            # The two recovery witnesses and their attempts are immutable.
+            test "$C6_RUN_ID" = "43321997695" && test "$C6_ATTEMPT" = "1"
+            test "$C6_ARTIFACT_ID" = "13991878472"
+            test "$WORK_A_RUN_ID" = "43390770985" && test "$WORK_A_ARTIFACT_ID" = "14020616892"
+            test "$FINAL_RUN_ID" = "43403595621" && test "$FINAL_ATTEMPT" = "1"
+            test "$FINAL_ARTIFACT_ID" = "14025629654"
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C6_RUN_ID/jobs?per_page=100" > _approved_c6/c2-jobs.json
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14025729121" > _approved_c6/work-m-report-artifact.json
+            curl --fail --show-error --silent --location --retry 3 \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              --header "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/14025729121/zip" \
+              --output _approved_c6/work-m-report-artifact.zip
+          else
+            test "$C6_WORK_L_RECOVERY_MODE" != "true"
+          fi
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C6_RUN_ID" > _approved_c6/run.json
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > _approved_c6/work-a-run.json
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WORK_A_ARTIFACT_ID" > _approved_c6/work-a-artifact.json
@@ -217,7 +247,8 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ARTIFACT_ID/zip" \
             --output _approved_c6/final-release-artifact.zip
           test "$(sha256sum _approved_c6/final-release-artifact.zip | cut -d ' ' -f1)" = "$FINAL_ARTIFACT_SHA"
-          python - <<'PY'
+          if [[ "$C6_WORK_L_RECOVERY_MODE" != "true" ]]; then
+            python - <<'PY'
           import json,os
           from pathlib import Path
           run=json.loads(Path('_approved_c6/run.json').read_text())
@@ -252,6 +283,9 @@ jobs:
           assert final_art.get('digest')=='sha256:'+os.environ['FINAL_ARTIFACT_SHA']
           assert final_art['name']==os.environ['C6_APPROVED_FINAL_NAME']
           PY
+          fi
+          # Both branches run the same entrypoint; recovery branches only on
+          # explicit opt-in, and validates its own exact immutable evidence.
           python scripts/c3_final_neon_kpi_contract.py _approved_c6
 
       - name: Build static frontend
