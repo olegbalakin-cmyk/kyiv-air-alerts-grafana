@@ -183,7 +183,7 @@ class Preflight(unittest.TestCase):
         url = PLAN["targets"][0]["url"]
         for resp, reason in [(Response(200, body=b"x"*1000001), "BODY_LIMIT_EXCEEDED"),
                              (Response(200, content_type="application/pdf"), "NON_HTML"),
-                             (Response(200, body=b"<html>CAPTCHA</html>"), "CONTENT_INACCESSIBLE")]:
+                             (Response(200, body=b"<html>CAPTCHA</html>"), "CONTENT_INACCESSIBLE_OR_NOT_ARTICLE")]:
             with self.subTest(reason=reason), patch.object(e.time, "sleep"):
                 receipt, body = e._capture_once(url, live_shaped(), {"used": 0}, FakeOpener([resp]))
             self.assertEqual(receipt["reason"], reason)
