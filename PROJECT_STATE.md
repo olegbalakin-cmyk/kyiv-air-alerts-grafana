@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-13. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01**. Owner-approved Work L single launch [#43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) at `e1f9c3af` failed in pre-HTTP offline test: `_pr102/.../capture_once.py` missing. Grant/commit gates PASS; capture step SKIPPED; **0 source GET**, no evidence, no publication. **Authorization consumed; no retry.**
+Latest casualty: **CASUALTY-WORKM-PREHTTP-CI-FIX-OFFLINE-PASS-01**. [Draft PR #125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/125) exact `657fd70564bf5393d3fcd209e47d95fa986f3010`; [Actions #43504057015](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43504057015) attempt1, 2/2 jobs SUCCESS, 68/68 live-path pre-HTTP offline safety PASS. ZIP #14074633696 SHA256 independently MATCH. Missing pinned `_pr102` and `_site` checkouts repaired in research only. **Zero source GET; old owner grant CONSUMED; no current HTTP authorization.**
 
 ## Working instructions
 
@@ -30,11 +30,15 @@ Latest casualty: **CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01**. Owne
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 4. Casualty Work H: PR #114 current site-prod frontend compatibility accepted in isolated browser (no merge/production). Work I PR #115 strict redirects accepted offline. Monitor exact site-prod baseline before future release.
-5. Casualty next: fix Work L live workflow test fixture checkout (`_pr102/.../capture_once.py`) in separate offline-only research branch; prove complete live-job pre-network safety locally/CI before requesting NEW owner grant and fresh one-shot SHA. Do not re-run #43502247617 or modify existing launch branch.
+5. Casualty next: prepare one clean, never-launched research branch from PR #125 (not consumed #124 launch branch); re-pin Work L branch/HEAD and launch-only path guards to that branch with unchanged T03/T04/T05 scope, then offline PASS. Seek NEW explicit owner grant (≤6 GET, no unapproved redirects, 1s, 1 MB, 15s, 0 retries, ≤24h, one run) before a single live launch. Review real 2→3 and official claim; no auto-PROMOTE or production.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKM-PREHTTP-CI-FIX-OFFLINE-PASS-01 — Work L live-job fixture dependencies repaired offline (2026-11-13)
+
+- [Draft PR #125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/125) exact HEAD `657fd70564bf5393d3fcd209e47d95fa986f3010`, [Actions #43504057015](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43504057015) attempt 1 SUCCESS: both jobs 2/2, 68/68 E/G/I/J/K/L safety tests with 0 FAIL/SKIP and mock 3x NEEDS_REVIEW cards, no source GET. [Artifact #14074633696](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43504057015/artifacts/14074633696) independently SHA256 MATCH `26e4b256a09d5f10d2307c2596c614cb1c12cca4dfe8a0e1f4c6e999c886016f`. Added pinned `_pr102@bb553f92` and `_site@d0a7d22d` checkouts to live pre-HTTP workflow. No `launch.json` on Work M, no merge/deploy/writer. Original [failed live run #43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) remains consumed and immutable. **Next:** only clean new branch with re-pinned single-use branch guard + fresh owner consent; original launch branch must NOT be reused.
+
 ## CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01 — one authorized launch blocked before GET (2026-11-13)
 
 - [Actions #43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) attempt 1, exact `e1f9c3af1dacd3fe77e2ba899df14afb6dd84858`: launch-only owner/commit gate PASS, offline safety test FAIL because `_pr102/research/casualty_zaporizhzhia_http_capture_2026_11_12/capture_once.py` missing. Source capture job SKIPPED; no artifact, **0 HTTP GET**, 0 source facts, 0 casualty credit, production unchanged. Owner one-shot authorization treated CONSUMED; new offline fix and fresh approval required. Never rerun or reuse this launch branch grant.
