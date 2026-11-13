@@ -1,7 +1,7 @@
 name: CASUALTY Work L offline launch-safety and evidence proof
 on:
   push:
-    branches: [research-casualty-workl-three-source-preflight-2026-11-13]
+    branches: [research-casualty-workl-three-source-preflight-2026-11-13, research-casualty-workm-prehttp-ci-fix-2026-11-13]
     paths-ignore:
       - research/casualty_one_time_capture_2026_11_13/launch.json
 permissions:
@@ -106,3 +106,85 @@ jobs:
             /tmp/workl/generator/generator_probe.json
           retention-days: 30
           if-no-files-found: warn
+
+  pre-http:
+    name: Exact live-checkout pre-HTTP mock and full safety regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fail closed without owner launch (before dependency install)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
+          python - <<'PY'
+          from pathlib import Path
+          from research.casualty_one_time_capture_2026_11_13 import run_capture as r
+          from review_casualty_candidates import load_queue
+          q=load_queue(Path('_wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json'))
+          _,template=r.check_scope(q)
+          assert template['status']=='NOT_AUTHORIZED'
+          try:
+              r.validate_launch({},template,q)
+          except RuntimeError as exc:
+              assert 'NEW_OWNER_GRANT_SCOPE_INVALID' in str(exc), str(exc)
+          else:
+              raise AssertionError('MISSING_AUTHORIZATION_ACCEPTED')
+          print('WORKM_MISSING_OWNER_GRANT_FAIL_CLOSED')
+          PY
+      - name: Install exact live pre-HTTP extraction dependencies
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Full E G I J K L tests, mock owner gates and three-card evidence (sockets blocked)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/workm-prehttp
+          python -m research.casualty_workm_prehttp_ci_fix_2026_11_13.verify_prehttp --output /tmp/workm-prehttp
+      - name: Verify immutable checkouts and no launch file
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
+          test "$(git -C _wip rev-parse HEAD)" = 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          test "$(git -C _pr102 rev-parse HEAD)" = bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          git diff --exit-code
+          git -C _wip diff --exit-code
+          git -C _pr102 diff --exit-code
+          git -C _site diff --exit-code
+      - name: Upload pre-HTTP research-only offline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workm-prehttp-exact-live-checkout
+          path: |
+            /tmp/workm-prehttp/workm-prehttp-proof.json
+            /tmp/workm-prehttp/tests.log
+            /tmp/workm-prehttp/workk-proof.json
+            /tmp/workm-prehttp/workl-proof.json
+            /tmp/workm-prehttp/synthetic/*.json
+          if-no-files-found: warn
+          retention-days: 30
