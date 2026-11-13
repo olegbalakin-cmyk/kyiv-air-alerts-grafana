@@ -16,6 +16,8 @@ import subprocess
 from datetime import datetime, timedelta, timezone
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
 EXPECTED_BASE = "da49571a9e22e2e1e62a2842f902f984cbd0ab10"
 EXPECTED_BRANCH = "research-casualty-one-time-10-source-2026-11-13"
