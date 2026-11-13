@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKN-T03T05-HTTP200-FACT-EXTRACTION-BLOCKED-01 — T03–T05 live capture 3/3 PASS; parsing BLOCKED (2026-11-13)
+
+- Owner-approved [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) launch `5e5628a8`, [run #43510162714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510162714) SUCCESS 3/3 HTTP200, 3 GET, 0 redirects, 68/68 safety. [ZIP #14076819100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510162714/artifacts/14076819100) SHA256 independently verified `dc7d1ba10d66e6b3e39f7f3a85fffbb7522e8930390117b139185e5eb6627da6`; all 4 JSON hashes match. 3 NEEDS_REVIEW cards, publisher parser reports 0 and no factual excerpts; police claims 3 without event link. 0 casualty credits/PROMOTE/publication. Single-use authorization consumed; no recapture until fresh owner approval.
+
 ### CASUALTY-WORKN-LAUNCH-STATE-FIX-OFFLINE-PASS-01 — Work N offline PASS and safety fix on independent branch (2026-11-13)
 
 - [PR #127](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/127) `4ae85477`, [Actions #43507349125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43507349125) 68/68 PASS, both artifact ZIP hashes independently checked. Live test/launch file contradiction fixed in [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) `236d3d3a`, [CI #43508802671](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43508802671) 2/2 PASS incl 68/68 synthetic launch-present, ZIP #14076498074 SHA256 `2eb23ffc7fab82ee660f765becd147ca65609a24a1fc36f01a3b73d0ff3d5d84` checked. GET=0; new SHA-specific owner grant needed. No PROMOTE/production.
