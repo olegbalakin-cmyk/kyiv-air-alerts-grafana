@@ -17,13 +17,63 @@ class AutoGitOnlyTests(unittest.TestCase):
         self.assertIn("vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true'", workflow)
         self.assertIn("C6_AUTO_NEON_GIT_ENABLED != 'true'", workflow)
         self.assertIn("c6-neon-auto-git-publish:", workflow)
+        self.assertIn('c6_neon_git_pilot:', workflow)
+        self.assertIn('ONE separately owner-approved manual', workflow)
+        self.assertIn("github.ref == 'refs/heads/main'", workflow)
+        self.assertIn("github.actor == 'olegbalakin-cmyk'", workflow)
+        self.assertIn("vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true'", workflow)
         self.assertIn("needs: [update-site, c6-neon-six-json-prepare]", workflow)
         self.assertIn("NETLIFY_DEPLOYMENTS_PER_UPDATE: '0'", workflow)
+        self.assertIn("C6_AUTO_NEON_GIT_ENABLED: ${{", workflow)
         self.assertNotIn("netlify deploy", workflow.lower())
         netlify = (ROOT / ".github/workflows/netlify-production.yml").read_text()
         only_push = netlify.split("  push:", 1)[1].split("concurrency:", 1)[0]
         self.assertNotIn("data/**", only_push)
         self.assertNotIn("grafana/dashboard.json", only_push)
+
+    def test_manual_pilot_is_default_off_and_solely_isolated(self):
+        # YAML is parsed in CI with PyYAML; this stdlib test enforces the
+        # exact gating contract even when standalone unit tests run.
+        import re
+        w = (ROOT / ".github/workflows/update-netlify-site.yml").read_text()
+        pilot = re.search(
+            r"^      c6_neon_git_pilot:\\n(?P<body>(?:        .+\\n)+)", w,
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(pilot)
+        self.assertIn("type: boolean", pilot["body"])
+        self.assertIn("required: true", pilot["body"])
+        self.assertIn("default: false", pilot["body"])
+        for job in ("update-site", "c6-neon-six-json-prepare",
+                    "c6-neon-auto-git-publish"):
+            header = re.search(r"^  " + re.escape(job)
+                               + r":\\n    (?:needs:.*\\n)?    if: (?P<gate>.+)$",
+                               w, re.MULTILINE)
+            self.assertIsNotNone(header, job)
+            self.assertIn("inputs.c6_neon_git_pilot", header["gate"], job)
+            self.assertIn("C6_GIT_ONLY_PUBLISHER_PAUSED == 'true'",
+                          header["gate"], job)
+            self.assertIn("refs/heads/main", header["gate"], job)
+            self.assertIn("olegbalakin-cmyk", header["gate"], job)
+        self.assertIn("test \\"$GITHUB_ACTOR\\" = \\"olegbalakin-cmyk\\"", w)
+        self.assertIn("test \\"$LEGACY_PAUSED\\" = \\"true\\"", w)
+        self.assertIn("test \\"$AUTO_ENABLED\\" != \\"true\\"", w)
+        self.assertIn("if: \${{ vars.C6_AUTO_NEON_GIT_ENABLED != 'true' && !inputs.c6_neon_git_pilot }}", w)
+        self.assertIn("&& !inputs.c6_neon_git_pilot", w)
+        self.assertIn("NETLIFY_DEPLOYMENTS_PER_UPDATE: '0'", w)
+        self.assertNotIn("netlify deploy", w.lower())
+
+    def test_manual_pilot_capture_not_schedule_only(self):
+        w = (ROOT / ".github/workflows/update-netlify-site.yml").read_text()
+        section = w.split("      - name: Require C2 same-run Neon bundle", 1)[1].split(
+            "      - name: Checkout exact same-run integration scripts", 1)[0]
+        self.assertIn("if [ \\"$GITHUB_EVENT_NAME\\" = \\"workflow_dispatch\\" ]; then", section)
+        self.assertIn('test "$PILOT_INPUT" = "true"', section)
+        self.assertIn('test "$GITHUB_EVENT_NAME" = "schedule"', section)
+        self.assertIn("NEON_SUCCEEDED", section)
+        self.assertIn("c2-shadow-inputs.zip.sha256", section)
+        # No old schedule-only guard must run before C2 delta capture.
+        self.assertNotIn('test "${{ github.event_name }}" = "schedule"', section)
 
     def test_switch_and_zero_deploys_required(self):
         for enabled, count in [("", "0"), ("true", "1")]:
