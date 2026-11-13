@@ -1,0 +1,146 @@
+# Research-only: reproduce capture() with immutable archived C2 files.
+# This reconstructs only the archived five site_data JSON files. The original
+# runner worktree was not retained, so a PASS does not prove the old root cause.
+name: C6 archived-capture replay offline
+on:
+  push:
+    branches: [research-c6-capture-artifact-replay-2026-11-14]
+    paths: [".github/workflows/c6-capture-artifact-replay-offline.yml"]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: c6-archived-capture-replay-offline
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout immutable site-prod baseline without credentials
+        uses: actions/checkout@v4
+        with:
+          ref: 54079326ae2b4e691e2bfcf7cd1a51c9705404eb
+          path: site-prod-baseline
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout approved diagnostic code without credentials
+        uses: actions/checkout@v4
+        with:
+          ref: 9576dd06beb6b905f5fc4001672e524ed0ba5d0b
+          path: capture-code
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Get original frozen C2 artifact from previous run
+        uses: actions/download-artifact@v4
+        with:
+          name: c2-shadow-inputs-43510482714-1
+          run-id: 43510482714
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          github-token: ${{ github.token }}
+          path: evidence/c2-zip
+      - name: Get original canonical writer status from previous run
+        uses: actions/download-artifact@v4
+        with:
+          name: c2-publication-status-43510482714-1
+          run-id: 43510482714
+          repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          github-token: ${{ github.token }}
+          path: evidence/c2-status
+      - name: Set up Python for deterministic offline replay
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify immutable artifacts and reconstruct archived file differences
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, shutil, subprocess
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+
+          outer = Path("evidence/c2-zip/c2-shadow-inputs.zip")
+          sidecar = Path("evidence/c2-zip/c2-shadow-inputs.zip.sha256")
+          expected = sidecar.read_text(encoding="utf-8").split()[0]
+          assert hashlib.sha256(outer.read_bytes()).hexdigest() == expected, "ZIP_DIGEST_MISMATCH"
+
+          bundle = Path("evidence/c2")
+          with ZipFile(outer) as archive:
+              expected_names = {
+                  "payload.json", "receipt.json", "status.json", "manifest.json",
+                  "site_data/dashboard_data.json", "site_data/alerts_combined.json",
+                  "site_data/site_derived.json", "site_data/kyiv_threat_mix.json",
+                  "site_data/sevastopol_events.json",
+              }
+              assert set(archive.namelist()) == expected_names, "ARCHIVE_MEMBER_SET_MISMATCH"
+              archive.extractall(bundle)
+
+          manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+          status = json.loads(Path("evidence/c2-status/c2_publication_status.json").read_text(encoding="utf-8"))
+          receipt = json.loads((bundle / "receipt.json").read_text(encoding="utf-8"))
+          assert manifest["github_run_id"] == 43510482714
+          assert manifest["github_run_attempt"] == 1
+          assert manifest["input_sha"] == "54079326ae2b4e691e2bfcf7cd1a51c9705404eb"
+          assert manifest["workflow_sha"] == "05e39b79dd5992ccdb8fb5d3f8168f7dc7c40ea9"
+          assert status == json.loads((bundle / "status.json").read_text(encoding="utf-8"))
+          assert status["canonical_persistence_status"] == "NEON_SUCCEEDED"
+          assert status["canonical_receipt_validated"] is True
+          assert status["input_sha"] == manifest["input_sha"]
+          assert status["workflow_sha"] == manifest["workflow_sha"]
+          assert receipt["canonical_episode_count"] == 33444
+          assert receipt["episodes_inserted"] == 129
+          assert receipt["city_count"] == 23
+
+          for name, digest in manifest["files"].items():
+              name_path = PurePosixPath(name)
+              assert not name_path.is_absolute() and ".." not in name_path.parts, "PATH_UNSAFE"
+              assert hashlib.sha256((bundle / name).read_bytes()).hexdigest() == digest, "FILE_DIGEST_MISMATCH"
+
+          baseline = Path("site-prod-baseline")
+          assert subprocess.check_output(["git", "-C", str(baseline), "rev-parse", "HEAD"], text=True).strip() == manifest["input_sha"]
+          subprocess.run(["git", "-C", str(baseline), "switch", "-c", "site-prod"], check=True, capture_output=True, text=True)
+
+          names = ("dashboard_data.json", "alerts_combined.json", "site_derived.json",
+                   "kyiv_threat_mix.json", "sevastopol_events.json")
+          for name in names:
+              target = baseline / "kyiv-air-alerts-grafana" / "data" / name
+              assert target.is_file(), "BASELINE_MEMBER_MISSING"
+              source = bundle / "site_data" / name
+              assert target.read_bytes() != source.read_bytes(), "NO_DELTA_FOR_ARCHIVED_FILE"
+              shutil.copyfile(source, target)
+
+          assert (baseline / "kyiv-air-alerts-grafana/data/c2_history_capture_checkpoints.json").is_file()
+          print("ARCHIVE_VERIFIED: 8 SHA-256 members, exact run/status")
+          print("OFFLINE_RECONSTRUCTION: 5 archived site_data files over frozen site-prod")
+          print("LIMITATION: original runner checkout and unarchived files were not preserved")
+          PY
+      - name: Replay capture only without writer HTTP Neon Git push or Netlify
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          PYTHONPATH=capture-code python capture-code/scripts/c6_neon_auto_git.py capture \
+            --checkout "$GITHUB_WORKSPACE/site-prod-baseline" \
+            --status "$GITHUB_WORKSPACE/evidence/c2-status/c2_publication_status.json" \
+            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \
+            --workflow-sha 05e39b79dd5992ccdb8fb5d3f8168f7dc7c40ea9 \
+            --run-id 43510482714 --run-attempt 1 \
+            --output "$RUNNER_TEMP/c6-archived-capture-delta" \
+            > "$RUNNER_TEMP/c6-replay-result.txt" 2>&1
+          code=$?
+          set -e
+          cat "$RUNNER_TEMP/c6-replay-result.txt"
+          echo "Archived C2 inputs replay: exit code $code" >> "$GITHUB_STEP_SUMMARY"
+          echo "Research only: original runner worktree not retained; PASS does not prove original failure cause." >> "$GITHUB_STEP_SUMMARY"
+          test "$code" -eq 0
+      - name: Preserve only safe offline capture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-archived-capture-replay-offline
+          path: |
+            ${{ runner.temp }}/c6-replay-result.txt
+            ${{ runner.temp }}/c6-archived-capture-delta/manifest.json
+          if-no-files-found: warn
+          retention-days: 7
