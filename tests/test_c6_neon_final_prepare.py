@@ -270,5 +270,110 @@ class WorkK(unittest.TestCase):
         self.assertIn("vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true'",content)
 
 
+
+class WorkMExactPairContract(unittest.TestCase):
+    """Narrow Work L exception cannot weaken normal original-artifact validation."""
+
+    def setUp(self):
+        self.fixture = WorkK("test_missing_owner_approval")
+        self.fixture.setUp()
+        self.addCleanup(self.fixture.doCleanups)
+        self.receipt = copy.deepcopy(self.fixture.receipt)
+        self.c2 = copy.deepcopy(self.fixture.c2)
+        self.work = copy.deepcopy(self.fixture.work)
+        self.receipt.pop("c2_artifact_id")
+        self.receipt.pop("c2_artifact_sha256")
+        self.receipt["schema"] = prep.RECOVERY_SCHEMA
+        self.receipt["provenance_contract"] = prep.RECOVERY_CONTRACT
+        self.receipt.update(prep.RECOVERY_PINS)
+        self.c2.update({
+            "id": prep.RECOVERY_PINS["c2_run_id"],
+            "run_attempt": prep.RECOVERY_PINS["c2_run_attempt"],
+            "head_sha": prep.RECOVERY_PINS["c2_head_sha"],
+            "head_branch": "main", "conclusion": "failure",
+        })
+        self.work.update({
+            "id": prep.RECOVERY_PINS["work_a_run_id"],
+            "run_attempt": prep.RECOVERY_PINS["work_a_run_attempt"],
+            "head_sha": prep.RECOVERY_PINS["work_a_head_sha"],
+            "head_branch": "research-c6-work-l-recover-2026-11-13",
+        })
+        self.jobs = {"total_count": 4, "jobs": []}
+        for name, (job_id, conclusion) in prep.RECOVERY_JOB_RESULTS.items():
+            self.jobs["jobs"].append({
+                "name": name, "id": job_id, "run_id": self.c2["id"],
+                "status": "completed", "conclusion": conclusion,
+                "runner_id": 0 if name == "c6-neon-six-json-prepare" else 123,
+                "runner_name": "" if name == "c6-neon-six-json-prepare" else "runner",
+                "steps": [] if name != "update-site" else [{"name": "ran"}],
+                "created_at": "2026-11-12T23:08:37Z",
+                "started_at": "2026-11-12T23:08:37Z",
+            })
+
+    def check(self):
+        prep.validate_receipt(
+            self.receipt, self.c2, self.work, actor="olegbalakin-cmyk",
+            run_id=789, run_attempt=1, code_sha=self.fixture.code,
+            now=self.fixture.now, c2_jobs=self.jobs)
+
+    def test_exact_recovery_receipt_and_prerun_shape(self):
+        self.check()
+
+    def test_recovery_wrong_c2_run_id_blocks(self):
+        self.receipt["c2_run_id"] += 1
+        with self.assertRaisesRegex(candidate.Blocked, "UNAPPROVED_WORK_L_RECOVERY_PAIR|PINNED_RUN_IDENTITY_MISMATCH"):
+            self.check()
+
+    def test_recovery_wrong_work_l_sha_blocks(self):
+        self.receipt["work_a_artifact_sha256"] = "0" * 64
+        with self.assertRaisesRegex(candidate.Blocked, "UNAPPROVED_WORK_L_RECOVERY_PAIR"):
+            self.check()
+
+    def test_recovery_original_c2_artifact_claim_blocks(self):
+        self.receipt["c2_artifact_id"] = 111
+        with self.assertRaisesRegex(candidate.Blocked, "UNAPPROVED_WORK_L_RECOVERY_PAIR"):
+            self.check()
+
+    def test_recovery_prep_failure_with_runner_blocks(self):
+        failed = next(j for j in self.jobs["jobs"]
+                      if j["name"] == "c6-neon-six-json-prepare")
+        failed["runner_id"] = 122
+        failed["steps"] = [{"name": "ran"}]
+        with self.assertRaisesRegex(candidate.Blocked, "C2_FAILED_JOB_WAS_NOT_PRERUN"):
+            self.check()
+
+    def test_recovery_release_job_not_skipped_blocks(self):
+        release = next(j for j in self.jobs["jobs"]
+                       if j["name"] == "c6-neon-owner-gated-git-release")
+        release["conclusion"] = "success"
+        with self.assertRaisesRegex(candidate.Blocked, "C2_JOB_NOT_PINNED"):
+            self.check()
+
+    def test_recovery_missing_owner_gate_blocks(self):
+        self.receipt.pop("decision")
+        with self.assertRaisesRegex(candidate.Blocked, "OWNER_PREPARE_ONLY_APPROVAL_REQUIRED"):
+            self.check()
+
+    def test_old_schema_still_rejects_failed_c2(self):
+        self.receipt["schema"] = prep.SCHEMA
+        with self.assertRaisesRegex(candidate.Blocked, "PINNED_RUN_IDENTITY_MISMATCH"):
+            self.check()
+
+    def test_prepare_workflow_default_off_and_recovery_explicit(self):
+        wf = yaml.safe_load(
+            Path(".github/workflows/update-netlify-site.yml").read_text())
+        inputs = wf[True]["workflow_dispatch"]["inputs"]
+        self.assertIs(inputs["c6_final_prepare_only"]["default"], False)
+        self.assertIs(inputs["c6_neon_git_release"]["default"], False)
+        job = wf["jobs"]["c6-neon-final-prepare-only"]
+        script = "\\n".join(str(step.get("run", "")) for step in job["steps"])
+        self.assertIn("RECOVERY_SCHEMA", script)
+        self.assertIn("RECOVERY_PINS", script)
+        self.assertIn("--c2-jobs", script)
+        self.assertNotIn("git push", script)
+        self.assertNotIn("netlify deploy", script)
+        self.assertEqual(job["permissions"], {"contents": "read", "actions": "read"})
+
+
 if __name__ == "__main__":
     unittest.main()
