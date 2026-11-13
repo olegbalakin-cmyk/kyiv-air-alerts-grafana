@@ -185,7 +185,13 @@ def _cumulative_total_update(low):
 
 
 def _fatal_total(low):
-    """Only a definite event total, not injuries, guesses, or a second strike."""
+    """Only a definite event total, not injuries, guesses, or an increment."""
+    # Without a separately established cumulative event total, "two MORE"
+    # cannot safely become the incident's full casualty count.
+    if re.search(r'\b(?:ще|додатково)\s+(?:загинул\w*\s+)?'
+                 rf'{COUNT_TOKEN}\s+{COUNT_NOUN}\s+загинул\w*'
+                 rf'|\bзагинул\w*\s+(?:ще|додатково)\s+{COUNT_TOKEN}\b', low):
+        return None
     nums = []
     patterns = (rf'\bзагинул[аои]?\s+({COUNT_TOKEN})\s+{COUNT_NOUN}',
                 rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b')
