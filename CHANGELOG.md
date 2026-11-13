@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C3-WORKQ-NETLIFY-CONTRACT-NOGO-01 — accepted Netlify recovery-proof release blocker (2026-11-13)
+
+- Verified `main@712c9e35`, `site-prod@f0cfcbc8`, Work L/M/N artifacts and Netlify restored production unchanged; Work P rollback operational PASS. Work N publisher PR #119 Draft. Netlify Neon release requires successful C2 `update-netlify-site.yml` C6 preparation artifact absent from C2 #43321997695 (update-site job PASS, overall FAIL); isolated Work L #43390770985 does not satisfy. Scope one fail-closed Netlify recovery-proof contract fix; then separately approved merges, effective workflow rights/owner gate and fresh no-loss manifest. `FINAL_PREFLIGHT=FAIL; ROLLBACK_OPERATIONAL_READY=YES` (tested setup); `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
+
 ### C3-WORKP-PRODUCTION-RESTORE-PASS-01 — physical Netlify publish-and-restore PASS (2026-11-13; accepted)
 
 - Owner-approved Work P temporarily published ready Work O alias `6af6eac51390a92065e9164f` then republished original `6adb629bc3ebc570117d82e1`. Independently verified Netlify `published_at` 11:22:01Z/11:23:02Z; original current/ready, `site-prod@f0cfcbc8` unchanged. Uploaded operator receipt: browser before/during/after rendered text identical, 23 cities/casualties present, Auto publishing ON restored. No new CDN byte-hash audit or code deploy; previous Work N/O files/proofs reused. `ROLLBACK_OPERATIONAL_READY=YES` (tested setup); cutover-time no-loss/auto-publish and release-owner gates OPEN. `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
