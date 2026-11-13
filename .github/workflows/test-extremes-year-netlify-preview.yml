@@ -11,6 +11,8 @@ on:
       - "kyiv-air-alerts-grafana/pages-preview/styles.css"
       - "kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js"
       - "kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js"
+      - "kyiv-air-alerts-grafana/scripts/build_kyiv_threat_mix.py"
+      - "kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_preview.json"
 
 permissions:
   contents: read
@@ -43,6 +45,7 @@ jobs:
           node kyiv-air-alerts-grafana/tests/test_chart_share.js
           node kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js
           node kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js
+          python kyiv-air-alerts-grafana/tests/test_kyiv_cause_archive.py
           echo "PREVIEW_ONLY_FRONTEND_QA_PASS"
 
       - name: Build read-only historical KPI index
@@ -78,8 +81,9 @@ jobs:
              kyiv-air-alerts-grafana/pages-preview/favicon.svg \
              kyiv-air-alerts-grafana/pages-preview/favicon-32.png \
              historical-daily-kpi.json _site/
+          cp kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_preview.json _site/
           cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
-          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 14
           echo "PREVIEW_STATIC_BUNDLE_PASS"
 
       - name: Publish non-production draft URL only
