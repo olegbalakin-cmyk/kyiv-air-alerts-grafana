@@ -46,15 +46,14 @@ class AutoGitOnlyTests(unittest.TestCase):
         self.assertIn("default: false", pilot["body"])
         for job in ("update-site", "c6-neon-six-json-prepare",
                     "c6-neon-auto-git-publish"):
-            header = re.search(r"^  " + re.escape(job)
-                               + r":\n    (?:needs:.*\n)?    if: (?P<gate>.+)$",
-                               w, re.MULTILINE)
-            self.assertIsNotNone(header, job)
-            self.assertIn("inputs.c6_neon_git_pilot", header["gate"], job)
-            self.assertIn("C6_GIT_ONLY_PUBLISHER_PAUSED == 'true'",
-                          header["gate"], job)
-            self.assertIn("refs/heads/main", header["gate"], job)
-            self.assertIn("olegbalakin-cmyk", header["gate"], job)
+            section = w.split(f"  {job}:\n", 1)[1].split("\n  ", 1)[0]
+            match = re.search(r"^    if: (?P<gate>.+)$", section, re.MULTILINE)
+            self.assertIsNotNone(match, job)
+            gate = match["gate"]
+            self.assertIn("inputs.c6_neon_git_pilot", gate, job)
+            self.assertIn("C6_GIT_ONLY_PUBLISHER_PAUSED == 'true'", gate, job)
+            self.assertIn("refs/heads/main", gate, job)
+            self.assertIn("olegbalakin-cmyk", gate, job)
         self.assertIn("test \"$GITHUB_ACTOR\" = \"olegbalakin-cmyk\"", w)
         self.assertIn("test \"$LEGACY_PAUSED\" = \"true\"", w)
         self.assertIn("test \"$AUTO_ENABLED\" != \"true\"", w)
