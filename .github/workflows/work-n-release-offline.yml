@@ -55,6 +55,67 @@ jobs:
               assert a["digest"]=="sha256:"+digest
           print("WORK_N_EXACT_THREE_RUNS_AND_FOUR_ARTIFACTS_METADATA_PASS")
           PY
+      - name: Physically verify exact C2 Work L Work M artifacts without publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/work-n-physical
+          for entry in 13991878472 14020616892 14025629654 14025729121; do
+            curl --fail --silent --show-error --location --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$entry/zip" \
+              -o "/tmp/work-n-physical/$entry.zip"
+          done
+          python - <<'PY'
+          import hashlib,json,zipfile
+          from pathlib import Path
+          from scripts import c6_neon_git_candidate as candidate
+          from scripts import c6_neon_final_prepare as work_m
+          base=Path("/tmp/work-n-physical")
+          digests={
+            13991878472:"2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde",
+            14020616892:"79acb3017dccefdf19def7fe15bdaf2033b27d8c8a6d41f146d7b0e903bd3954",
+            14025629654:"f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed",
+            14025729121:"f4f786b168d28f37bdf6a333d4e514b503e402e4fda25553d99ffa0a8d6a8648"}
+          for i,d in digests.items():
+            assert hashlib.sha256((base/f"{i}.zip").read_bytes()).hexdigest()==d,i
+          with zipfile.ZipFile(base/"14025629654.zip") as z:
+            expected={"RELEASE_BINDING.json","RELEASE_MANIFEST.json"}|{
+              "candidate/"+p for p in candidate.FILES.values()}
+            assert set(z.namelist())==expected and len(z.namelist())==8
+            b=json.loads(z.read("RELEASE_BINDING.json"))
+            m=json.loads(z.read("RELEASE_MANIFEST.json"))
+            assert m["binding"]==b
+            assert hashlib.sha256(z.read("RELEASE_BINDING.json")).hexdigest()==m["release_manifest_sha256"]
+            assert b["c2_run_id"]==43321997695
+            assert b["c2_corpus_sha256"]==work_m.RECOVERY_PINS["c2_corpus_sha256"]
+            assert b["repository"]==work_m.REPO
+            assert len(m["source_files"])==len(m["files"])==6
+            for name,digest in m["files"].items():
+              assert hashlib.sha256(z.read("candidate/"+name)).hexdigest()==digest
+            dash=json.loads(z.read("candidate/"+candidate.FILES["dashboard_data.json"]))
+            idx=json.loads(z.read("candidate/"+candidate.FILES["historical-daily-kpi.json"))
+            assert len(dash["multicity_meta"]["production_city_keys"])==23
+            assert idx["meta"]["verified_count"]==23
+            assert dash["historical_daily_kpi"]==idx
+          with zipfile.ZipFile(base/"14025729121.zip") as z:
+            reports=[n for n in z.namelist() if n.endswith("PREPARE_REPORT.json")]
+            assert len(reports)==1
+            report=json.loads(z.read(reports[0]))
+            assert report["status"]=="FINAL_BYTES_PREPARED_NOT_PUBLISHED"
+            assert report["publication_allowed"] is False
+            assert report["production_git_push_executed"] is False
+            assert report["release_binding_sha256"]==m["release_manifest_sha256"]
+            assert report["final_files"]==m["files"]
+            assert report["provenance_contract"]==work_m.RECOVERY_CONTRACT
+          with zipfile.ZipFile(base/"14020616892.zip") as z:
+            for name,path in candidate.FILES.items():
+              matches=[n for n in z.namelist() if n.endswith("/candidate/"+name) or n=="candidate/"+name]
+              assert len(matches)==1,(name,matches)
+              assert hashlib.sha256(z.read(matches[0])).hexdigest()==m["source_files"][path]
+          print("C2_WORKL_WORKM_PHYSICAL_SHA_AND_SIX_SOURCE_HASH_PASS; NO_PUBLICATION")
+          PY
       - name: Checkout current site-prod without write credentials
         uses: actions/checkout@v4
         with:
