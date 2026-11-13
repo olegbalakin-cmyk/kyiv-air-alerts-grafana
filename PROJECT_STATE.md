@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-13. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-WORKL-THREE-SOURCE-LIVE-PREFLIGHT-OFFLINE-PASS-01**. [PR #124](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/124) exact `78fd147294cc2cd2b7c5d8f608aee8778a20beca`, [CI #43500434087](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43500434087) 68/68 offline PASS; ZIP #14072718715 SHA256 independently verified. Three-source T03/T04/T05 live pilot prepared (no launch). **HTTP NOT_AUTHORIZED**, special GitHub trigger registration NOT_CONFIRMED. No casualty credits or publication.
+Latest casualty: **CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01**. Owner-approved Work L single launch [#43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) at `e1f9c3af` failed in pre-HTTP offline test: `_pr102/.../capture_once.py` missing. Grant/commit gates PASS; capture step SKIPPED; **0 source GET**, no evidence, no publication. **Authorization consumed; no retry.**
 
 ## Working instructions
 
@@ -30,11 +30,15 @@ Latest casualty: **CASUALTY-WORKL-THREE-SOURCE-LIVE-PREFLIGHT-OFFLINE-PASS-01**.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 4. Casualty Work H: PR #114 current site-prod frontend compatibility accepted in isolated browser (no merge/production). Work I PR #115 strict redirects accepted offline. Monitor exact site-prod baseline before future release.
-5. Casualty next: check special non-default-branch launch trigger availability and owner GitHub actor; obtain NEW explicit one-time owner grant for T03/T04/T05 only, max 6 GET, no redirects unless separately exact-approved, ≤24h, no retries. Only then allow single audited launch.json-only push; verify source text/2→3 and police event identity, keep all credits NEEDS_REVIEW and publication OFF.
+5. Casualty next: fix Work L live workflow test fixture checkout (`_pr102/.../capture_once.py`) in separate offline-only research branch; prove complete live-job pre-network safety locally/CI before requesting NEW owner grant and fresh one-shot SHA. Do not re-run #43502247617 or modify existing launch branch.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01 — one authorized launch blocked before GET (2026-11-13)
+
+- [Actions #43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) attempt 1, exact `e1f9c3af1dacd3fe77e2ba899df14afb6dd84858`: launch-only owner/commit gate PASS, offline safety test FAIL because `_pr102/research/casualty_zaporizhzhia_http_capture_2026_11_12/capture_once.py` missing. Source capture job SKIPPED; no artifact, **0 HTTP GET**, 0 source facts, 0 casualty credit, production unchanged. Owner one-shot authorization treated CONSUMED; new offline fix and fresh approval required. Never rerun or reuse this launch branch grant.
+
 ## CASUALTY-WORKL-THREE-SOURCE-LIVE-PREFLIGHT-OFFLINE-PASS-01 — bounded three-source pilot offline PASS, new owner grant required (2026-11-13)
 
 - [PR #124](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/124) HEAD `78fd147294cc2cd2b7c5d8f608aee8778a20beca`; [Actions #43500434087](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43500434087) SUCCESS 68/68 offline, 0 source GET. [Artifact #14072718715](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43500434087/artifacts/14072718715) independently SHA256 MATCH `f3d8742828897bda7c102ce7a4d9cb985db18b784ad9ca94eb46c93a86feb2e0`, 4/4 inner JSON hashes. Proposed T03/T04/T05 exact three sources, max six GET, redirect-default-deny, one-shot launch.json-only research workflow, no active grant or launch. Trigger availability not independently verified. 3 synthetic cards, Work J excerpts & privacy holds PASS offline; real event identity/2→3/prior credits unknown. No publication or production changes.
