@@ -127,7 +127,7 @@ class WorkL(unittest.TestCase):
                 assert hashlib.sha256((root/name).read_bytes()).hexdigest()==sha
 
     def test_09_no_unknown_redirect_or_extra_get(self):
-        from research.casualty_controlled_capture_preflight import test_preflight as g
+        from research.casualty_controlled_capture_preflight_2026_11_13 import test_preflight as g
         grant,plan=self.launch()
         _,template=r.check_scope(queue())
         policy=r.validate_launch(synthetic_launch(),template,queue(),environ=synthetic_env())
