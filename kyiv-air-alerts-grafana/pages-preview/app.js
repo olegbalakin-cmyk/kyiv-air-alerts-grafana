@@ -149,7 +149,7 @@ function applyStaticLanguage(){
  }
  setKpiLabel("kpiAlerts","Кількість тривог","Alerts started");setKpiLabel("kpiHours","Час під тривогою","Time under alert");setKpiLabel("kpiDuration","Середня тривалість тривоги","Average alert duration");setKpiLabel("kpiMaxDay","Максимум тривог за день","Most alerts in one day");setKpiLabel("kpiExplosionsPct","Тривог, під час яких повідомлялось про вибухи","Alerts with reported explosions");
  setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
- setSectionHeading("timeOfDaySection","Час доби","Time of day","Як тривоги розподіляються протягом доби","How alerts are distributed through the day","Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.","Two complementary views: a detailed normalized profile and the actual distribution of all alert time across parts of the day.");setSectionHeading("alertBurdenSection","Структура навантаження","Burden structure","Тривалість і навантаження","Duration and burden","Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.","How days were distributed by time under alert and how the longest episodes changed.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText('label[for="timeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#timeOfDayBin","aria-label","Інтервал добового профілю","Time-of-day profile interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("timeOfDayBin",v,u,e);setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");setLocalizedText('label[for="burdenYear"]',"Рік","Year");setLocalizedAttr("#burdenYear","aria-label","Рік для розподілу днів за часом під тривогою","Year for days-by-alert-burden chart");setLocalizedText('label[for="extremesYear"]',"Рік","Year");setLocalizedAttr("#extremesYear","aria-label","Рік для найдовшої тривоги та тиші","Year for longest alert and quiet spell chart");setLocalizedText('label[for="daypartMode"]',"Розподіл","Grouping");setLocalizedAttr("#daypartMode","aria-label","Спосіб розподілу часу під тривогою","Alert time grouping");setOptionText("daypartMode","four","4 частини доби","Four time bands");setOptionText("daypartMode","daynight","День / вечір і ніч","Day / evening & night");setLocalizedText('label[for="daypartYear"]',"Рік","Year");setLocalizedText("#heavyDaysExcludeZeroLabel","Не враховувати дні без тривог","Exclude days without alerts");setCardCopy("heavyDaysChart","Розподіл днів за часом під тривогою","Distribution of days by time under alert","100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.","Each month is normalized to 100% and split by days with no alert, under 1 hour, 1–3, 3–6, 6–12, and 12+ hours under alert.");setCardCopy("extremesChart","Найдовша тривога і найдовша тиша","Longest alert and longest quiet spell","Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.","Left axis: the longest alert that started in the month. Right axis: the longest continuous alert-free spell within the month.");setCardCopy("daypartChart","Розподіл часу під тривогою за частинами доби","Distribution of alert time by part of day","100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.","100% of actual alert time in each month is split into 00–06, 06–12, 12–18 and 18–24 in Europe/Kyiv time.");setLocalizedText("#timeOfDaySection .daypart-note","На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.","Unlike the profile above, this shows the share of all actual alert time that fell in each part of the day.");
+ setSectionHeading("timeOfDaySection","Час доби","Time of day","Як тривоги розподіляються протягом доби","How alerts are distributed through the day","Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.","Two complementary views: a detailed normalized profile and the actual distribution of all alert time across parts of the day.");setSectionHeading("alertBurdenSection","Структура навантаження","Burden structure","Тривалість і навантаження","Duration and burden","Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.","How days were distributed by time under alert and how the longest episodes changed.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText('label[for="timeOfDayBin"]',"Інтервал","Interval");setLocalizedAttr("#timeOfDayBin","aria-label","Інтервал добового профілю","Time-of-day profile interval");for(const [v,u,e] of [["15","15 хв","15 min"],["30","30 хв","30 min"],["60","1 година","1 hour"]])setOptionText("timeOfDayBin",v,u,e);setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");setLocalizedText('label[for="burdenYear"]',"Рік","Year");setLocalizedAttr("#burdenYear","aria-label","Рік для розподілу днів за часом під тривогою","Year for days-by-alert-burden chart");setLocalizedText('label[for="extremesYear"]',"Рік","Year");setLocalizedAttr("#extremesYear","aria-label","Рік для найдовшої тривоги та тиші","Year for longest alert and quiet spell chart");setLocalizedText('label[for="daypartMode"]',"Розподіл","Grouping");setLocalizedAttr("#daypartMode","aria-label","Спосіб розподілу часу під тривогою","Alert time grouping");setOptionText("daypartMode","four","4 частини доби","Four time bands");setOptionText("daypartMode","daynight","День / вечір і ніч","Day / evening & night");setLocalizedText('label[for="daypartYear"]',"Рік","Year");setLocalizedText('label[for="kyivCausePeriod"]',"Період","Period");setLocalizedAttr("#kyivCausePeriod","aria-label","Період розподілу причин повітряних тривог у Києві","Time range for Kyiv air-alert causes");setLocalizedText("#heavyDaysExcludeZeroLabel","Не враховувати дні без тривог","Exclude days without alerts");setCardCopy("heavyDaysChart","Розподіл днів за часом під тривогою","Distribution of days by time under alert","100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.","Each month is normalized to 100% and split by days with no alert, under 1 hour, 1–3, 3–6, 6–12, and 12+ hours under alert.");setCardCopy("extremesChart","Найдовша тривога і найдовша тиша","Longest alert and longest quiet spell","Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.","Left axis: the longest alert that started in the month. Right axis: the longest continuous alert-free spell within the month.");setCardCopy("daypartChart","Розподіл часу під тривогою за частинами доби","Distribution of alert time by part of day","100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.","100% of actual alert time in each month is split into 00–06, 06–12, 12–18 and 18–24 in Europe/Kyiv time.");setLocalizedText("#timeOfDaySection .daypart-note","На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.","Unlike the profile above, this shows the share of all actual alert time that fell in each part of the day.");
  setSectionHeading("rolling7dSection","Ковзні 7 днів","Rolling 7 days","Динаміка за 7-денним вікном","7-day rolling trend","Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.","Each point covers 7 completed calendar days and is dated by the window’s final day; adjacent points overlap by 6 days. The current calendar year is shown by default.");setLocalizedText('label[for="rolling7dYear"]',"Швидкий вибір","Quick range");setLocalizedAttr("#rolling7dYear","aria-label","Швидкий вибір періоду для 7-денного вікна","Quick range for the 7-day window");setCardCopy("rolling7dIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.","Bars: average hours under alert per day across 7 days. Line: average alerts per day across the same 7 days.");setCardCopy("rolling7dDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися у відповідному 7-денному вікні.","Average duration of alerts that started within the corresponding 7-day window.");
  setSectionHeading("shortHorizonSection","Короткий горизонт","Short horizon","Щоденний розріз","Daily view","Доступні останні 28 завершених днів для обраного міста. Поточний неповний день включено лише за наявності підтверджених даних; KPI розраховуються за вибраний діапазон дат.","The last 28 completed days are available for the selected city. Today is excluded.");setCardCopy("daily28HoursChart","Сумарний час під тривогою за день","Total time under alert per day","Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.","Hours of each calendar day spent under air alert. Overlapping intervals are not counted twice; an alert crossing midnight is split between the relevant days.");setCardCopy("daily28AlertsDurationChart","Кількість тривог і середня тривалість за день","Alert count and average duration per day","Стовпчики — нові тривоги за день; лінія — середня тривалість. У підказці — час під тривогою і кількість активних відрізків.","Bars show alerts started that day; the line shows average duration. Hover for time under alert and number of active segments.");
  setSectionHeading("casualtySection","","","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.","Deaths occurring later from attack-related injuries are attributed to the month of the attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="casualtyInterval"]',"Інтервал","Interval");setOptionText("casualtyInterval","monthly","Місяці","Months");setOptionText("casualtyInterval","yearly","Роки","Years");setLocalizedAttr("#casualtyInterval","aria-label","Інтервал для графіка загиблих","Interval for the deaths chart");setLocalizedText('label[for="casualtyYear"]',"Рік","Year");setLocalizedAttr("#casualtyYear","aria-label","Рік для графіка загиблих","Year for the deaths chart");
@@ -441,6 +441,8 @@ function exportContextParts(chartId, slug) {
     } else if (chartId === "heavyDaysChart" || chartId === "extremesChart") {
       parts.push(safeFilePart($(chartId === "extremesChart" ? "extremesYear" : "burdenYear")?.value || "all"));
       if (chartId === "heavyDaysChart" && $("heavyDaysExcludeZero")?.checked) parts.push("alert-days-only");
+    } else if (chartId === "kyivThreatCausesChart") {
+      parts.push(safeFilePart($("kyivCausePeriod")?.value || "all"));
     } else if (chartId === "daypartChart") {
       parts.push(safeFilePart($("daypartYear")?.value || "all"));
       parts.push(safeFilePart($("daypartMode")?.value || "four"));
@@ -1465,6 +1467,7 @@ function updateUrl() {
   if ($("heavyDaysExcludeZero")?.checked) params.set("heavyexclude", "1");
   if ($("daypartYear")?.value) params.set("daypartyear", $("daypartYear").value);
   if ($("daypartMode")?.value) params.set("daypartmode", $("daypartMode").value);
+  if ($("kyivCausePeriod")?.value) params.set("causeperiod", $("kyivCausePeriod").value);
   if ($("casualtyYear")?.value) params.set("casyear", $("casualtyYear").value);
   if ($("casualtyInterval")?.value) params.set("casint", $("casualtyInterval").value);
   if ($("compareCasualtyYear")?.value) params.set("ccasyear", $("compareCasualtyYear").value);
@@ -2003,6 +2006,36 @@ function shortDateLabel(iso) {
   return parts.length === 3 ? `${parts[2]}.${parts[1]}` : iso;
 }
 
+// Kyiv Digital's cause-mix export contains at most 28 *completed* daily rows.
+// Only offer periods fully available in that export; never infer 90-day or
+// annual cause history from the general alert series.
+function kyivCauseRangeRows(rows, period) {
+  return period === "7" || period === "14" ? rows.slice(-Number(period)) : rows;
+}
+
+function kyivCausePeriodOptions(rows) {
+  const select = $("kyivCausePeriod");
+  if (!select) return "all";
+  const ranges = [
+    ...(rows.length >= 7 ? ["7"] : []),
+    ...(rows.length >= 14 ? ["14"] : []),
+    "all"
+  ];
+  const requested = select.dataset.requested || "";
+  const current = select.value || "";
+  const selected = ranges.includes(current)
+    ? current
+    : (ranges.includes(requested) ? requested : "all");
+  select.innerHTML = [
+    ...(rows.length >= 7 ? [`<option value="7">${tr("7 днів","7 days")}</option>`] : []),
+    ...(rows.length >= 14 ? [`<option value="14">${tr("14 днів","14 days")}</option>`] : []),
+    `<option value="all">${rows.length} ${tr("днів (усі)","days (all)")}</option>`
+  ].join("");
+  select.value = selected;
+  delete select.dataset.requested;
+  return selected;
+}
+
 function renderKyivThreatCauses(key) {
   const section = $("kyivThreatCausesSection");
   const note = $("kyivThreatCausesNote");
@@ -2019,15 +2052,17 @@ function renderKyivThreatCauses(key) {
   }
 
   section.classList.remove("hidden");
+  const period = kyivCausePeriodOptions(rows);
+  const shownRows = kyivCauseRangeRows(rows, period);
   const used = KYIV_THREAT_CAUSE_ORDER.filter(cause =>
-    rows.some(row => Number(row.minutes?.[cause] || 0) > 0)
+    shownRows.some(row => Number(row.minutes?.[cause] || 0) > 0)
   );
-  const labels = rows.map(row => row.date);
+  const labels = shownRows.map(row => row.date);
   const datasets = used.map(cause => ({
     cause,
     label: kyivThreatCauseLabel(cause),
-    data: rows.map(row => Number(row.shares?.[cause] || 0)),
-    alertMinutes: rows.map(row => Number(row.minutes?.[cause] || 0)),
+    data: shownRows.map(row => Number(row.shares?.[cause] || 0)),
+    alertMinutes: shownRows.map(row => Number(row.minutes?.[cause] || 0)),
     backgroundColor: KYIV_THREAT_CAUSE_COLORS[cause],
     borderColor: KYIV_THREAT_CAUSE_COLORS[cause],
     borderWidth: 0,
@@ -2049,7 +2084,7 @@ function renderKyivThreatCauses(key) {
           mode: "index",
           intersect: false,
           filter(context) {
-            const total = Number(rows[context.dataIndex]?.total_minutes || 0);
+            const total = Number(shownRows[context.dataIndex]?.total_minutes || 0);
             return total > 0 && Number(context.raw) > 0;
           },
           callbacks: {
@@ -2058,7 +2093,7 @@ function renderKyivThreatCauses(key) {
               return labels[items[0].dataIndex] || "";
             },
             label(context) {
-              const row = rows[context.dataIndex];
+              const row = shownRows[context.dataIndex];
               const cause = context.dataset.cause;
               const pct = Number(context.raw || 0);
               const mins = Number(row.minutes?.[cause] || 0);
@@ -2066,7 +2101,7 @@ function renderKyivThreatCauses(key) {
             },
             footer(items) {
               if (!items.length) return "";
-              const total = Number(rows[items[0].dataIndex]?.total_minutes || 0);
+              const total = Number(shownRows[items[0].dataIndex]?.total_minutes || 0);
               return total > 0
                 ? `${tr("Усього під тривогою","Total time under alert")}: ${formatDurationMinutes(total)}`
                 : tr("Тривог не було","No alerts");
@@ -2102,8 +2137,8 @@ function renderKyivThreatCauses(key) {
 
   const meta = data.meta || {};
   const first = meta.first_differentiated_date || rows[0]?.date || "";
-  const start = meta.visible_start || rows[0]?.date || "";
-  const end = meta.visible_end || rows[rows.length - 1]?.date || "";
+  const start = shownRows[0]?.date || "";
+  const end = shownRows[shownRows.length - 1]?.date || "";
   if (note) {
     note.textContent = tr(
       `Kyiv Digital · показано ${start} — ${end}. Диференційовані причини доступні з ${first}. Причина задається на рівні всієї завершеної тривоги; зміни причини всередині однієї тривоги історичний API не відновлює. Якщо в тривоги кілька причин, її час віднесено до «Комбінованої».`,
@@ -3447,6 +3482,7 @@ function bind() {
   $("heavyDaysExcludeZero")?.addEventListener("change", () => { renderAlertBurden($("citySelect").value); updateUrl(); });
   $("daypartYear")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
   $("daypartMode")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
+  $("kyivCausePeriod")?.addEventListener("change", () => { renderKyivThreatCauses($("citySelect").value); updateUrl(); });
   $("cityPeriod").addEventListener("change", () => {
     if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();
     renderCity();
@@ -3631,6 +3667,7 @@ async function init() {
   if ($("extremesYear")) $("extremesYear").dataset.requested = getParams().get("extremesyear") || getParams().get("burdenyear") || "";
   if ($("daypartYear")) $("daypartYear").dataset.requested = getParams().get("daypartyear") || "";
   if ($("daypartMode")) $("daypartMode").value = validParam("daypartmode", ["four", "daynight"], "four");
+  if ($("kyivCausePeriod")) $("kyivCausePeriod").dataset.requested = getParams().get("causeperiod") || "all";
   if ($("heavyDaysExcludeZero")) $("heavyDaysExcludeZero").checked = getParams().get("heavyexclude") === "1";
 
   fillSelect($("citySelect"), keys, cityDefault);
