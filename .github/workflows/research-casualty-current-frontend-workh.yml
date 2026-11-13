@@ -212,11 +212,6 @@ jobs:
             /tmp/workf-qualified.json /tmp/workf-display-bridge.json \
             /tmp/workf-browser-checks.txt /tmp/workf-workc-regression \
             /tmp/workf-proof-manifest.json
-            /tmp/workh-qualified.json
-            /tmp/workh-rebase.json
-            /tmp/workh-browser-checks.txt
-            /tmp/workh-browser/**
-            /tmp/workh-final-manifest.json
           sha256sum /tmp/workf-proof-manifest.json
           python research/casualty_current_frontend_workh_2026_11_13/verify_current.py \
             /tmp/workf-proof-manifest.json \
@@ -242,5 +237,10 @@ jobs:
             /tmp/workf-browser/**
             /tmp/workf-workc-regression/**
             /tmp/workf-proof-manifest.json
+            /tmp/workh-qualified.json
+            /tmp/workh-rebase.json
+            /tmp/workh-browser-checks.txt
+            /tmp/workh-browser/**
+            /tmp/workh-final-manifest.json
           if-no-files-found: warn
           retention-days: 30
