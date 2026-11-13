@@ -46,7 +46,7 @@ class AutoGitOnlyTests(unittest.TestCase):
         self.assertIn("default: false", pilot["body"])
         for job in ("update-site", "c6-neon-six-json-prepare",
                     "c6-neon-auto-git-publish"):
-            section = w.split(f"  {job}:\n", 1)[1].split("\n  ", 1)[0]
+            section = w.split(f"  {job}:\n", 1)[1]
             match = re.search(r"^    if: (?P<gate>.+)$", section, re.MULTILINE)
             self.assertIsNotNone(match, job)
             gate = match["gate"]
