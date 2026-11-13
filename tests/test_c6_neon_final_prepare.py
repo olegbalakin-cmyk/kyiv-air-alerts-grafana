@@ -368,7 +368,7 @@ class WorkMExactPairContract(unittest.TestCase):
         job = wf["jobs"]["c6-neon-final-prepare-only"]
         script = "\\n".join(str(step.get("run", "")) for step in job["steps"])
         self.assertIn("RECOVERY_SCHEMA", script)
-        self.assertIn("RECOVERY_PINS", script)
+        self.assertIn("provenance_contract", script)
         self.assertIn("--c2-jobs", script)
         self.assertNotIn("git push", script)
         self.assertNotIn("netlify deploy", script)
