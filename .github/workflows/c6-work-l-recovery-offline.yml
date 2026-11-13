@@ -6,6 +6,7 @@ on:
     branches: [research-c6-postc2-append-only-2026-11-12]
 permissions:
   contents: read
+  actions: read
 jobs:
   recovery-offline:
     runs-on: ubuntu-latest
@@ -19,6 +20,32 @@ jobs:
           python-version: '3.12'
       - name: Recovery gate positive/negative tests (no remote API, no Neon)
         run: python -m unittest discover -s tests -p 'test_c6_failed_c2_recovery_gate.py' -v
+      - name: Physically verify immutable C2 artifact + GitHub job metadata (read-only GitHub)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p work-l-live
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/43321997695" > work-l-live/run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/43321997695/jobs?filter=all&per_page=100" > work-l-live/jobs.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13991878472" > work-l-live/artifact.json
+          curl --fail --silent --show-error --location --retry 2 \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/13991878472/zip" \
+            --output work-l-live/outer.zip
+          python scripts/c6_failed_c2_recovery_gate.py \
+            --run work-l-live/run.json --jobs work-l-live/jobs.json \
+            --artifact work-l-live/artifact.json --outer work-l-live/outer.zip \
+            --bundle-output work-l-live/c2-shadow-inputs.zip \
+            --run-id 43321997695 --run-attempt 1 \
+            --workflow-sha 712c9e351fc3548325cf594cf0617bb33e70a002 \
+            --input-sha 6648a11242fac16cf023114cd6e58a65c3b49968 \
+            --corpus-sha f855be9c2cfb8617903666d0d898c223c6a91ac0fc56029b5b036dc153db84d4 \
+            --bundle-sha256 3f53c7ca4a0bc1d0f25cd228dcde003cd45ac247ecab76747405f556f75e8030 \
+            --db-branch br-bold-mode-b5rub8pq \
+            --db-endpoint ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech \
+            --artifact-id 13991878472 --artifact-name c2-shadow-inputs-43321997695-1
+          sha256sum work-l-live/c2-shadow-inputs.zip
       - name: Assert protected proof, no production release and pinned data
         run: |
           python - <<'PY'
