@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-13: Work R Netlify recovery contract 16/16 offline PASS. Latest accepted: C6-C3-WORKR-NETLIFY-RECOVERY-OFFLINE-PASS-01. Merges/release NOT authorized; ROLLBACK_OPERATIONAL_READY=YES (tested), CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.**
+**2026-11-13: pre-merge read-only release preparation completed; admin publication guards NOT verified or changed. Latest accepted: C6-C3-PREMERGE-GUARDS-UNVERIFIED-01. ROLLBACK_OPERATIONAL_READY=YES (Work P tested); CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.**
 
 Read main documentation first; PR #78 newer accepted checkpoints govern. Keep production, Neon, casualty and DST separate.
 
@@ -17,11 +17,17 @@ Read main documentation first; PR #78 newer accepted checkpoints govern. Keep pr
 
 ## Next
 
-Separate owner approval for merge of PR #119 (main) and PR #120 (site-prod); verify live Actions permissions and fresh C2/casualty/aux/freshness/rollback hashes. One explicit production GO required. No merge, deployment or cutover now.
+Owner authorized preparation ONLY; PR #119 and #120 merges and all Git/Netlify publication remain separately gated. **First, through authorized Cloud Browser/operator:** set GitHub repo variable `C6_GIT_ONLY_PUBLISHER_PAUSED=true` (verify), disable GitHub Actions workflow `Deploy Netlify production site` before merging PR #120, verify no competing publisher jobs, and disable/lock Netlify Auto publishing (previous Work P receipt says ON). Confirm all guards **before** any PR merge. GitHub workflow `Update Ukraine air-alert production data` has a push trigger on its own YAML, so the pause variable is required before PR #119 merge. The Netlify workflow has push trigger on its own YAML and runs `netlify-cli deploy --prod`, unaffected by Netlify auto-publish OFF. Connected read-only tools cannot change/admin-verify these settings. After guards verified, obtain separate merge approval and later distinct owner release GO. Refresh current C2/casualty/aux, historical freshness and rollback hashes at release. The publisher contract requires Netlify-first static KPI proof before Git JSON publication. No action performed now; `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-C3-PREMERGE-GUARDS-UNVERIFIED-01 — read-only release preparation, administrative freeze pending (2026-11-13)
+
+- Owner authorized preparation, **not merges/publishing**. GitHub verified `main@712c9e351fc3548325cf594cf0617bb33e70a002` protected, `site-prod@f0cfcbc862ca3dbf1b853e72de07ffcf6042856f`; Draft PR #119 `6f8502e0` and #120 `ac32540f` open/mergeable. Exact-head offline Actions #43407785056 (Work N) and #43422122898 (Work R) SUCCESS; immutable Work M #14025629654 and Work N rollback #14028565807 artifacts not expired. No site-prod drift against Work N baseline. Netlify production still `6adb629bc3ebc570117d82e1` ready, Work O `6af6eac51390a92065e9164f` ready; Work P restore previously proven.
+- **Pre-merge hazard:** PR #119 updates `update-netlify-site.yml` which triggers normal C2 on main push unless `C6_GIT_ONLY_PUBLISHER_PAUSED=true`. PR #120 updates `netlify-production.yml` which triggers a GitHub Actions `--prod` deploy on site-prod push, even if Netlify Auto publishing is OFF. Current admin switches/permissions cannot be independently read or changed using connected tools. **ADMIN_FREEZE_VERIFIED=NO; NO MERGES**. Work P receipt says Auto publishing restored ON. Release publisher requires Netlify-first static SHA/proof before one-shot Git JSON write. No source HTTP, C2, Neon writer, publication, merge or cutover in this preparation. `ROLLBACK_OPERATIONAL_READY=YES` tested configuration; `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
+
 ## C6-C3-WORKR-NETLIFY-RECOVERY-OFFLINE-PASS-01 — Netlify release contract offline PASS (2026-11-13)
 
 - [Draft PR #120](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/120) exact `ac32540fcb0074afaed20ec9f6849b32777dc9c7`: [Actions #43422122898](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43422122898) SUCCESS attempt 1. 16/16 focused fail-closed/legacy identity tests PASS; original Netlify path retained. Two fixes only to offline test assertions after #43421545056 FAIL and #43422060631 FAIL. The C2→Work L→Work M path remains default OFF, owner-gated; no real publish/merge. `NETLIFY_CONTRACT_READY=YES` (offline); `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
