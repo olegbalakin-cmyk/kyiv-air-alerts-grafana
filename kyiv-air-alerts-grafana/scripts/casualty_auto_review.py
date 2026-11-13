@@ -339,6 +339,9 @@ def extract_cached_reports(queue, articles, *, diagnostics=None):
     parsed = []
     trace = []
     stage = {'articles_seen': len(articles), 'source_text_present': 0,
+             'fatal_mention_articles': 0, 'parseable_fatal_scopes': 0,
+             'unparseable_fatal_mention_articles': 0,
+             'multiple_fatal_scope_articles': 0,
              'unique_fatal_scope': 0, 'city_boundary_supported': 0,
              'explicit_attack_date': 0, 'weapon_and_origin_supported': 0,
              'dated_incident_anchors': 0, 'unique_incident_match': 0,
@@ -357,8 +360,13 @@ def extract_cached_reports(queue, articles, *, diagnostics=None):
         # A whole article is not one incident: earlier/other attacks must
         # never donate their place, weapon, time, city or official origin.
         scopes = _incident_scopes(full_text)
+        has_fatal_words = bool(re.search(r'загиб|загин|помер|смерт', full_text))
+        stage['fatal_mention_articles'] += int(has_fatal_words)
         fatal_scopes = [part for part in scopes if _fatal_total(part) is not None]
+        stage['parseable_fatal_scopes'] += len(fatal_scopes)
         if len(fatal_scopes) != 1:
+            stage['unparseable_fatal_mention_articles'] += int(has_fatal_words and not fatal_scopes)
+            stage['multiple_fatal_scope_articles'] += int(len(fatal_scopes) > 1)
             if len(fatal_scopes) > 1:
                 reason = 'MULTIPLE_POSSIBLE_INCIDENTS'
             elif re.search(r'\b(?:ще|додатково)\s+\d+\s+люд', full_text):
