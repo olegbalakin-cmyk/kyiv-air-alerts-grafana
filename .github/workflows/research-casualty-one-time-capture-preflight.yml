@@ -1,0 +1,50 @@
+name: CASUALTY one-time capture offline code preflight
+on:
+  push:
+    branches: [research-casualty-one-time-10-source-2026-11-13]
+    paths:
+      - "research/casualty_one_time_capture_2026_11_13/run_capture.py"
+permissions:
+  contents: read
+jobs:
+  offline-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Offline regression and exact source scope (zero publisher GET)
+        run: |
+          set -euo pipefail
+          python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+          python -m py_compile research/casualty_one_time_capture_2026_11_13/run_capture.py
+          python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_ingest research.casualty_controlled_capture_preflight_2026_11_13.test_preflight research.casualty_strict_redirect_2026_11_13.test_redirect -v
+          mkdir -p /tmp/casualty-source-one-shot-preflight
+          python research/casualty_one_time_capture_2026_11_13/run_capture.py --preflight-only --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json --output /tmp/casualty-source-one-shot-preflight
+          grep -q '"authorization_status": "NOT_AUTHORIZED"' /tmp/casualty-source-one-shot-preflight/preflight.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-one-time-capture-offline-preflight
+          path: /tmp/casualty-source-one-shot-preflight/*.json
+          if-no-files-found: warn
+          retention-days: 30
