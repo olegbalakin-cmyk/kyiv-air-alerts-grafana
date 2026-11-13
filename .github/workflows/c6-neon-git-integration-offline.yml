@@ -1,7 +1,7 @@
 name: C6 default-OFF Neon Git integration offline
 on:
   push:
-    branches: [research-c6-neon-git-integration-off-2026-11-12]
+    branches: [research-c6-neon-git-integration-off-2026-11-12, research-c6-auto-neon-git-zero-netlify-2026-11-13]
     paths:
       - ".github/workflows/update-netlify-site.yml"
       - ".github/workflows/c6-neon-git-integration-offline.yml"
@@ -15,11 +15,21 @@ on:
       - "tests/test_c6_neon_one_shot_publisher.py"
       - "tests/test_c6_neon_release_binding.py"
       - "tests/test_c6_neon_final_prepare.py"
+      - "tests/test_c6_neon_auto_git.py"
+      - "scripts/c6_neon_auto_git.py"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/update-netlify-site.yml"
+      - ".github/workflows/c6-neon-git-integration-offline.yml"
+      - "scripts/c6_neon_auto_git.py"
+      - "tests/test_c6_neon_auto_git.py"
 permissions:
   contents: read
   actions: read
 jobs:
   offline:
+    if: github.ref == 'refs/heads/research-c6-neon-git-integration-off-2026-11-12'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -161,3 +171,41 @@ jobs:
             ${{ runner.temp }}/c6-prepared/REPORT.json
           retention-days: 30
           if-no-files-found: warn
+
+  auto-neon-git-offline:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13') || (github.event_name == 'pull_request' && github.head_ref == 'research-c6-auto-neon-git-zero-netlify-2026-11-13')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline no-network guard and no-deploy regression
+        run: python -m unittest discover -s tests -p test_c6_neon_auto_git.py -v
+      - name: Existing C6 fail-closed publication regression
+        run: python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
+      - name: Inspect workflow YAML structure without executing any publisher
+        run: |
+          python -m pip install 'PyYAML==6.0.2'
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          p=Path(".github/workflows/update-netlify-site.yml")
+          workflow=yaml.safe_load(p.read_text())
+          jobs=workflow["jobs"]
+          assert "c6-neon-auto-git-publish" in jobs
+          assert "c6-neon-six-json-prepare" in jobs
+          assert "update-site" in jobs
+          legacy=[x for x in jobs["update-site"]["steps"] if x.get("name","").startswith("Commit updated production data")]
+          assert len(legacy)==1 and "C6_AUTO_NEON_GIT_ENABLED != 'true'" in legacy[0]["if"]
+          publish=jobs["c6-neon-auto-git-publish"]
+          assert "schedule" in publish["if"] and "C6_AUTO_NEON_GIT_ENABLED" in publish["if"]
+          for step in publish["steps"]:
+              assert "netlify deploy" not in step.get("run","").lower()
+          assert "0" in str(publish["steps"][-1]["env"]["NETLIFY_DEPLOYMENTS_PER_UPDATE"])
+          print("AUTO_NEON_GIT_ONLY_DEFAULT_OFF_ZERO_NETLIFY_YAML_PASS")
+          PY
