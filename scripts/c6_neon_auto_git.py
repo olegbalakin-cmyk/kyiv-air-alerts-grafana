@@ -335,6 +335,23 @@ def publish(checkout, delta, prepared, proof, *, repository,
                 "netlify_deployments_per_update": 0}
 
 
+
+def safe_block_reason(error):
+    """Expose only fixed-shape diagnostic codes, never exception text or data."""
+    if isinstance(error, (Blocked, candidate.Blocked)):
+        value = str(error)
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+        if 3 <= len(value) <= 80 and value[0] in alphabet[:26] and all(
+                char in alphabet for char in value):
+            return value
+        return "VALIDATION_BLOCKED"
+    if isinstance(error, subprocess.CalledProcessError):
+        return "SUBPROCESS_FAILED"
+    if isinstance(error, OSError):
+        return "IO_FAILED"
+    return "INVALID_INPUT"
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("operation", choices=["capture", "publish"])
@@ -366,8 +383,11 @@ def main():
                 enabled=os.getenv("C6_AUTO_NEON_GIT_ENABLED", ""),
                 zero_deploys=os.getenv("NETLIFY_DEPLOYMENTS_PER_UPDATE", ""))
     except (Blocked, candidate.Blocked, OSError, KeyError, TypeError,
-            ValueError, subprocess.CalledProcessError):
-        print("C6_AUTO_NEON_GIT_BLOCKED; ZERO_GIT_PUBLICATION_BY_THIS_RUN")
+            ValueError, subprocess.CalledProcessError) as error:
+        # The original pilot lost the exact guard reason. Do not log raw
+        # exceptions, file paths, C2 bytes, environment or subprocess output.
+        print("C6_AUTO_NEON_GIT_BLOCKED; ZERO_GIT_PUBLICATION_BY_THIS_RUN;"
+              f" C6_BLOCK_REASON={safe_block_reason(error)}")
         return 2
     print(json.dumps(result, sort_keys=True))
     return 0
