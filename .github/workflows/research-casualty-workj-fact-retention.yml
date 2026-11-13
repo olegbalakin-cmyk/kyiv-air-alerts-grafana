@@ -40,6 +40,11 @@ jobs:
           name: casualty-zap11-approved-http-43261676781-1
           path: /tmp/casualty-receipts
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
