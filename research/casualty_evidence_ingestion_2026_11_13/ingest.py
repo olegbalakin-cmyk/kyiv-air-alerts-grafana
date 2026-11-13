@@ -41,7 +41,7 @@ OFFICIAL_HOSTS = frozenset({"zp.npu.gov.ua"})
 SCHEMA = "casualty-evidence-ingestion-v1"
 ALLOWED_OUTPUTS = ("work_a_reports.json", "fact_cards.json",
                    "source_decisions.json", "blocked_clusters.json",
-                   "summary.json", "manifest.json")
+                   "summary.json", "manifest.json", "minimal_capture_facts.json")
 USER_AGENT = "CasualtyEvidenceResearch/1.0 (source-only, owner-authorized)"
 
 def digest(data: bytes) -> str:
@@ -154,7 +154,8 @@ def build(queue: list[dict], original: dict, receipts102: dict, matrix: dict,
     if len(by_id) != len(queue):
         raise RuntimeError("DUPLICATE_WIP_CANDIDATE")
     articles, article_errors = work_a.anchored_articles(queue, original)
-    reports = extract_cached_reports(queue, articles)
+    parser_trace = {}
+    reports = extract_cached_reports(queue, articles, diagnostics=parser_trace)
     article_by_id = {a["candidate_id"]: a for a in articles}
     retained_receipts = _article_receipts(original)
     receipts_index, groups = work_a.source_index(matrix, receipts102)
@@ -233,7 +234,14 @@ def build(queue: list[dict], original: dict, receipts102: dict, matrix: dict,
     for group in groups:
         ids = group["candidate_ids"]
         if any(cid in reported_ids for cid in ids):
-            raise RuntimeError("PR102_CLUSTER_HAS_UNEXPECTED_FACT_REPORT")
+            blocked.append({
+                "cluster_id": group["cluster_id"], "candidate_ids": ids,
+                "status": "NEEDS_REVIEW",
+                "reasons": ["NEW_FACTS_REQUIRE_EVENT_RECONCILIATION",
+                            "OFFICIAL_INCIDENT_MATCH_NOT_VERIFIED",
+                            "PRIOR_CREDIT_NOT_VERIFIED"],
+                "publication_allowed": False, "proposed_delta": None})
+            continue
         canonical = {canonical_url(receipts_index[cid]["original_url"]) for cid in ids}
         reasons = [REASON_MISSING, "TRANSPORT_ONLY_NOT_FACT_EVIDENCE",
                    "NO_RETAINED_OFFICIAL_CONFIRMATION_BODY"]
@@ -260,12 +268,15 @@ def build(queue: list[dict], original: dict, receipts102: dict, matrix: dict,
         "source_evidence_sha256": original_sha,
         "pr102_receipts_sha256": receipts_sha,
         "reports": reports,
+        "parser_diagnostics": parser_trace,
         "publication_allowed": False,
     }
     summary = {
         "schema": SCHEMA, "mode": MODE_DEFAULT,
         "candidate_count": len(queue),
         "parsed_fact_reports": len(reports),
+        "parser_stage_counts": parser_trace.get("stage_counts", {}),
+        "parser_reason_counts": parser_trace.get("reason_counts", {}),
         "source_text_available_candidates": len(article_by_id),
         "source_text_missing_or_unusable_candidates": len(queue) - len(reported_ids),
         "blocked_pr102_clusters": len(blocked),
@@ -554,6 +565,85 @@ def controlled_capture(approval: dict, queue: list[dict], *, enabled: bool) -> t
     audit["requests_used"] = budget["used"]
     return ephemeral, audit
 
+
+def minimal_capture_facts(original: dict, queue: list[dict]) -> dict:
+    """Capture only short, linked factual audit cards, never whole articles.
+
+    Official originals are separate claims until a reviewer verifies the event.
+    """
+    from casualty_auto_review import (_fatal_total, _date_signals, _attack_slot,
+                                      _incident_scopes, _origin_attribution,
+                                      _cumulative_total_update)
+    candidates = {c["candidate_id"]: c for c in queue}
+    cards, decisions = [], []
+    for role, articles in (("publisher", original.get("articles", [])),
+                           ("official", original.get("official_articles", []))):
+        for article in articles:
+            cid = article.get("candidate_id") if role == "publisher" else None
+            c = candidates.get(cid, {}) if cid else {}
+            raw = str(article.get("text") or "")
+            url = str(article.get("url") or "")
+            source_sha = article.get("response_sha256")
+            if not source_sha and cid:
+                receipt = next((r for r in original.get("receipts", [])
+                                if r.get("candidate_id") == cid and
+                                r.get("resolved_url") == url), None)
+                source_sha = (receipt or {}).get("response_sha256")
+            if not raw.strip():
+                decisions.append({"candidate_id": cid, "source_url": url,
+                                  "role": role, "reason": "SOURCE_TEXT_NOT_RETAINED"})
+                continue
+            low = raw.casefold()
+            scopes = _incident_scopes(low)
+            fatal_scopes = [x for x in scopes if _fatal_total(x) is not None]
+            reasons = []
+            if len(fatal_scopes) != 1:
+                reasons.append("MULTIPLE_POSSIBLE_INCIDENTS" if len(fatal_scopes) > 1
+                               else "NO_PARSEABLE_FATAL_TOTAL")
+            scope = fatal_scopes[0] if len(fatal_scopes) == 1 else ""
+            total = _fatal_total(scope) if scope else None
+            published = c.get("published_at")
+            day, _ = _date_signals(scope, published) if scope else (None, None)
+            if not day:
+                reasons.append("ATTACK_DATE_MISSING")
+            origin_id, origin_name = _origin_attribution(scope)
+            if role == "publisher" and origin_id == "unattributed":
+                reasons.append("OFFICIAL_CONFIRMATION_MISSING")
+            if role == "official":
+                reasons.append("OFFICIAL_INCIDENT_MATCH_NOT_VERIFIED")
+            if total is None:
+                reasons.append("NO_FATAL_CLAIM")
+            excerpts = _short_excerpts(raw, [total] if total else [])
+            resolution = _cumulative_total_update(scope) if scope else None
+            card = {
+                "schema": "casualty-minimal-source-facts-v1",
+                "candidate_id": cid, "source_url": url, "source_role": role,
+                "publication_date": published, "attack_date_explicit": day,
+                "city_key_candidate_not_verified": c.get("city_key") or None,
+                "locality_verified": None,
+                "claim_deaths": total, "count_kind": (
+                    "cumulative_correction" if resolution else
+                    "single_report_total" if total is not None else "unknown"),
+                "claim_origin": {"origin_id": origin_id, "name": origin_name,
+                                  "source_role": role},
+                "excerpts": excerpts,
+                "document_sha256": source_sha,
+                "extracted_text_sha256": digest(raw.encode("utf-8")),
+                "parser_version": "casualty-auto-review-workj-v1",
+                "attack_slot_hint_not_identity": _attack_slot(scope) if scope else None,
+                "decision": "NEEDS_REVIEW",
+                "reasons": sorted(set(reasons + ["NO_AUTOMATIC_CREDIT"])),
+                "publication_allowed": False}
+            cards.append(card)
+            decisions.append({"candidate_id": cid, "source_url": url,
+                              "role": role, "reason": "SOURCE_FACTS_CAPTURED_NOT_CONFIRMED",
+                              "card_sha256": stable_digest(card)})
+    return {"schema": "casualty-minimal-source-facts-v1",
+            "facts": cards, "decisions": decisions, "publication_allowed": False,
+            "official_incidents_automatically_matched": 0,
+            "automatic_credits": 0}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--mode", choices=("OFFLINE_REPLAY", "CONTROLLED_CAPTURE"),
@@ -592,7 +682,8 @@ def main():
     result = build(queue, original, receipts102, matrix, queue_sha=digest(queue_bytes),
                    original_sha=osha, receipts_sha=rsha)
     if capture_audit:
-        # Audit metadata only. No raw publisher/official article bodies written.
+        # Future separately authorized captures retain short audit facts, not bodies.
+        result["minimal_capture_facts.json"] = minimal_capture_facts(original, queue)
         result["summary.json"]["mode"] = "CONTROLLED_CAPTURE"
         result["summary.json"]["external_publisher_http_requests"] = capture_audit["requests_used"]
         result["summary.json"]["decision"] = "CAPTURED_UNVALIDATED_RESEARCH_ONLY"
