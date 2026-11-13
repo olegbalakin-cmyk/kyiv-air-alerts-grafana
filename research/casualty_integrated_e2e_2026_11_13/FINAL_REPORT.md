@@ -4,7 +4,7 @@
 
 ## Decision
 
-**PENDING PHYSICAL CI**. The integration must not be called `INTEGRATED_SHADOW_PASS` before the exact-HEAD workflow finishes successfully, its generated artifact exists and the post-PROMOTE generator actually feeds the 42 browser checks. The verification script fails closed.
+**INTEGRATED_SHADOW_PASS (physical offline integration verified).** The successful physical GitHub Actions job checked the newly generated Work E/A outputs through Work C scratch REVIEW/PROMOTE, then the real post-PROMOTE production generator and Work D browser QA. The status does **not** establish regular autonomous 23-city monitoring or production publication readiness. The verification script fails closed.
 
 ## Inputs and immutable versions
 
@@ -69,4 +69,13 @@ Workflow: `.github/workflows/research-casualty-integrated-e2e.yml`.
 Proposed checkpoint (only if exact-HEAD physical proof succeeds):
 `CASUALTY-INTEGRATED-E2E-SHADOW-WORKF-01`.
 
-CI ID, exact HEAD, ZIP SHA-256 and final verdict: **await physical exact-HEAD verification**. No changes to PR #71.
+### Physical proof (2026-11-13 UTC)
+
+- First integrated full-path SUCCESS: [GitHub Actions #43387002997](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43387002997) at code/CI HEAD `2d9e733f89297acf7e31341799fc46c49ccb0ed8`. Its uploaded artifact is [#14018768361](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43387002997/artifacts/14018768361), 1,809,299 bytes; GitHub API and uploader logs both give ZIP SHA-256 `3e3279f2ac237f8e90b5d8b35794ce2e9620be16466755d93ee3716d905f5b6e` (**GitHub reported, not independently downloaded/rehashed**).
+- Final integrated verification output: `INTEGRATED_SHADOW_PASS: 18->20->23 -> Work E/A -> guarded scratch Work C REVIEW/PROMOTE -> actual generator -> Work D INCOMPLETE >=23 -> 42 browser checks; NO PUBLISH`. The independent manifest `/tmp/workf-proof-manifest.json` SHA-256 is `093fcc1cb3fb8a4b42353096c9c094121ffa4b50266ac9942cc71b1252c838ba`; its content is uploaded in the artifact.
+- Actual scratch Work C run: `WORKF_PROMOTED_GENERATOR_PASS`; net +23, replay +0, all five fields kept, Sumy +1 kept, scratch rollback PASS, and unchanged current production generator accepts the private promoted ledger. Work C 11/11 PASS.
+- Work D: 42/42 Chromium PASS including desktop, 375px mobile, tooltip, hatching, ≥23 label, CSV, ChartShare PNG, embed, city switch, keyboard focus, and clean isolated rollback. Browser artifact SHA-256 over sorted evidence files `48e60217249b270d90de483b02a0f326eaf2be103e56713fc861dfc69e965e14`.
+- The first preliminary run failed the *final tracked checkout cleanliness check* only because Python tests generated untracked cache files; all actual Work E/A/C/D integration and 42 browser checks had passed. The narrowly amended final workflow explicitly checks tracked source modifications with `--untracked-files=no`; it never treats generated test caches as production source drift. The subsequent exact-code run succeeded.
+- The follow-up edit to this report only does not change integration code or workflow semantics. A fresh exact-HEAD workflow is required to certify the final documentation commit; use the PR's newest Actions checks for final exact HEAD.
+
+**Decision: `INTEGRATED_SHADOW_PASS` strictly for this archived source and frozen historical frontend. Source completeness remains unknown; current frontend browser compatibility remains untested; routine automation remains unauthorized. No change to PR #71 or production.**
