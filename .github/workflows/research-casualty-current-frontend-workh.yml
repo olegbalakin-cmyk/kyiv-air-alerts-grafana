@@ -186,10 +186,13 @@ jobs:
             --rollback /tmp/workf-rollback
           python research/casualty_current_frontend_workh_2026_11_13/fix_rollback_route.py \
             /tmp/workf-rollback /tmp/workf-preview
+          python research/casualty_current_frontend_workh_2026_11_13/adapt_browser_qa.py \
+            _workd/research/casualty_generator_display_2026_11_12/browser_qa.js \
+            research/casualty_current_frontend_workh_2026_11_13/workd_browser_current_generated.js
           PREVIEW_DIR=/tmp/workf-preview \
           ROLLBACK_DIR=/tmp/workf-rollback \
           PROOF_DIR=/tmp/workf-browser \
-          node _workd/research/casualty_generator_display_2026_11_12/browser_qa.js \
+          node research/casualty_current_frontend_workh_2026_11_13/workd_browser_current_generated.js \
             | tee /tmp/workf-browser-checks.txt
           grep -q 'BROWSER_CHECKS_FAIL=0' /tmp/workf-browser-checks.txt
       - name: Independent current frontend controls, alerts and rollback regression
