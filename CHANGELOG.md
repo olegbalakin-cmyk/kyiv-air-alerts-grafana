@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C3-WORKR-NETLIFY-RECOVERY-OFFLINE-PASS-01 — Work R 16/16 offline PASS (2026-11-13; accepted)
+
+- Draft [PR #120](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/120) `ac32540fcb0074afaed20ec9f6849b32777dc9c7`, [exact-head CI #43422122898](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43422122898) SUCCESS 16/16 offline incl. legacy path, SHA/run/approval negatives; initial #43421545056/#43422060631 failures fixed by test assertion corrections only. No merge or production action. `NETLIFY_CONTRACT_READY=YES` offline; PR #119/120 merge and fresh publisher/Netlify gates require separate GO. `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C6-C3-WORKQ-NETLIFY-CONTRACT-NOGO-01 — accepted Netlify recovery-proof release blocker (2026-11-13)
 
 - Verified `main@712c9e35`, `site-prod@f0cfcbc8`, Work L/M/N artifacts and Netlify restored production unchanged; Work P rollback operational PASS. Work N publisher PR #119 Draft. Netlify Neon release requires successful C2 `update-netlify-site.yml` C6 preparation artifact absent from C2 #43321997695 (update-site job PASS, overall FAIL); isolated Work L #43390770985 does not satisfy. Scope one fail-closed Netlify recovery-proof contract fix; then separately approved merges, effective workflow rights/owner gate and fresh no-loss manifest. `FINAL_PREFLIGHT=FAIL; ROLLBACK_OPERATIONAL_READY=YES` (tested setup); `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
