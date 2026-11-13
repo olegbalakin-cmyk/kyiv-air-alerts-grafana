@@ -14,10 +14,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/checkout@v4
         with:
           ref: 236d3d3af785ea89f44504995498bcd0915d2e10
           path: _baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _baseline/_pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _baseline/_wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _baseline/_site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          path: _baseline/_matrix
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
