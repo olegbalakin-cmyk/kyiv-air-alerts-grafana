@@ -1,23 +1,27 @@
 # Project State — coordination snapshot
 
-**2026-11-13: Work M prepare-only OWNER APPROVED, NOT DISPATCHED; FINAL ZIP/rollback OPEN. Latest: C6-WORKM-OWNER-GRANT-NODISPATCH-01. GLOBAL_CUTOVER=NO.**
+**2026-11-13: Work M final eight-file ZIP INDEPENDENT PASS; release publisher/rollback still blocked. Latest: C6-WORKM-FINALZIP-INDEPENDENT-PASS-01. GLOBAL_CUTOVER=NO; DST OFF.**
 
-Read main docs first; newer PR #78 checkpoints govern. Verify exact SHA/runs; keep production, Neon, casualty and DST separate.
+Read main docs first; newer PR #78 checkpoints govern. Verify exact SHA/runs; keep production, Neon, casua## Current gates
 
-## Current gates
-
-- **C2:** #43321997695 attempt 1: `update-site` SUCCESS (33,315 +48, 23/23); dependent C6 pre-run FAIL. No C2 rerun.
-- **Physical Work L:** [#43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985) SUCCESS at PR #113 `325669a4`. Artifact #14020616892; 18/18 SHA, 6/6 JSON, 23/23 historical freshness; Neon read-only, no writer, source HTTP or publication. Current alerts/DST not certified.
-- **Release blockers:** Original C2 prep artifact missing; Work M exact-SHA approval granted but dispatch inaccessible. No exact-head Work M CI/FINAL ZIP; fresh rollback pending.
-- **Production:** Netlify unchanged at last check; workflows paused; no cutover. Owner reports prep flag false.
+- **C2:** #43321997695 attempt 1: update-site SUCCESS, Neon 33,315 (+48), 23/23 capture receipts; dependent C6 failed pre-run. No repeat C2.
+- **Work L:** [#43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985), artifact #14020616892, 6/6 JSON and 23/23 historical freshness PASS; read-only, no publication.
+- **Work M:** [prepare-only #43403595621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621) SUCCESS at exact PR #116 `9d846279b91b44b324a722ca00276a99956b4fca`. FINAL artifact #14025629654 SHA-256 `f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed`. Independently downloaded: 8/8 final members, 6/6 parseable JSON and hashes, six source hashes matched original Work L; binding/manifest/report hashes PASS. Prepare report #14025729121 independently SHA-256 checked. No publisher/C2/Netlify job ran.
+- **Release blockers:** existing publisher still requires absent original same-run C2 preparation and overall C2 success; fresh Git+Netlify no-loss rollback and production restoration authorization unproven. `FINAL_ZIP=PASS; ROLLBACK_READY=NO; CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`. Owner reports temporary admin switches restored; not independently readable here.
 
 ## Next
 
-No C2. Owner/admin must securely satisfy Action gates; confirm C2 publisher paused **before** enabling shared workflow. One Work M dispatch only; approval unconsumed. GLOBAL_CUTOVER=NO.
+One scoped release-readiness task: preserve exact C2→Work L→Work M binding in publisher without removing other owner gates; prove a fresh no-loss Git/Netlify rollback. Then seek distinct owner release GO. No new C2/Neon writer/source HTTP or production publishing until all gates PASS.
+
+d. GLOBAL_CUTOVER=NO.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WORKM-FINALZIP-INDEPENDENT-PASS-01 — independent FINAL ZIP PASS; release NO-GO (2026-11-13)
+
+- [#43403595621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621) SUCCESS attempt 1 at PR #116 exact `9d846279b91b44b324a722ca00276a99956b4fca`, prepare-only SUCCESS, C2/release/C6 jobs SKIPPED. Downloaded [final artifact #14025629654](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621/artifacts/14025629654), independent outer SHA-256 `f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed`; report #14025729121 SHA-256 `f4f786b168d28f37bdf6a333d4e514b503e402e4fda25553d99ffa0a8d6a8648`. Final 8/8 files verified, 6/6 JSON hashes/parse PASS, source Work L 6/6 bytes/hash PASS, binding/manifest/report SHA PASS. Report `FINAL_BYTES_PREPARED_NOT_PUBLISHED`, `publication_allowed=false`; no production deploy or push. FINAL_ZIP=PASS. Publisher compatibility with absent C2 preparation and overall C2 failure plus fresh no-loss rollback still OPEN. `ROLLBACK_READY=NO; CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ## C6-WORKM-OWNER-GRANT-NODISPATCH-01 — prepare-only approved, not run (2026-11-13)
 
 - Owner authorized one exact [PR #116](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/116) SHA `9d846279b91b44b324a722ca00276a99956b4fca` prepare-only, **no C2/Neon writer/source HTTP/Git publication/Netlify/merge/cutover**. Connector cannot enable/dispatch workflow or manage repository Actions gates. No run created; permit unused. Require `C6_GIT_ONLY_PUBLISHER_PAUSED=true` before re-enabling scheduled workflow. Work M CI, FINAL ZIP and rollback OPEN. `GLOBAL_CUTOVER=NO`.
