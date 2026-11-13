@@ -10,6 +10,7 @@ on:
       - "kyiv-air-alerts-grafana/pages-preview/app.js"
       - "kyiv-air-alerts-grafana/pages-preview/styles.css"
       - "kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js"
+      - "kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js"
 
 permissions:
   contents: read
@@ -41,6 +42,7 @@ jobs:
           grep -q 'labels: extremesLabels' kyiv-air-alerts-grafana/pages-preview/app.js
           node kyiv-air-alerts-grafana/tests/test_chart_share.js
           node kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js
+          node kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js
           echo "PREVIEW_ONLY_FRONTEND_QA_PASS"
 
       - name: Build read-only historical KPI index
