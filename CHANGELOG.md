@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C2-ONESHOT-DATA-PASS-PREP-NOARTIFACT-01 — C2 data PASS; C6 preparation FAIL (2026-11-13; accepted)
+
+- [#43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) attempt 1: update-site SUCCESS; C6 prep FAILURE without steps, overall FAILURE. C2 artifact #13991878472 outer SHA-256 2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde verified; site-prod@f0cfcbc8 23/23 capture checkpoints. No C6 prep artifact, new Work A, FINAL ZIP or rollback proof. Production unchanged; owner reset C6 flag false. GLOBAL_CUTOVER=NO.
+
 ### C6-C2-ONESHOT-DISPATCHED-REPAUSED-INFLIGHT-01 — one authorized C2 launched; C2 and Netlify automation re-disabled (2026-11-13; accepted)
 
 - [Preflight #43321776471](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321776471) PASS with `C6_NEON_JSON_PREPARE_ENABLED=true`; [one-shot controller #43321969919](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321969919) SUCCESS dispatched exactly one [C2 #43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) attempt 1, observed `in_progress` at `main@712c9e35`; C2 `360885782` + Netlify `360885508` returned `disabled_manually`. No Netlify/Neon Git release; C2 results and same-run C6 prep pending. Owner one-run grant used; owner must reset C6 prepare flag after run. `CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO`.
