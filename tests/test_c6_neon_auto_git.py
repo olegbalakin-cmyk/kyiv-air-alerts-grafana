@@ -143,11 +143,31 @@ class AutoGitOnlyTests(unittest.TestCase):
             (auto.Blocked("C2_WRITER_RECEIPT_NOT_PASS"), "C2_WRITER_RECEIPT_NOT_PASS"),
             (auto.Blocked("C2_GENERATION_NOT_UPDATED"), "C2_GENERATION_NOT_UPDATED"),
             (auto.Blocked("unsafe /tmp/secret=token"), "VALIDATION_BLOCKED"),
+            (auto.Blocked("NEON_DATABASE_URL_SECRET123"), "VALIDATION_BLOCKED"),
+            (auto.Blocked("UNKNOWN_CAPTURE_GUARD"), "VALIDATION_BLOCKED"),
             (OSError("/tmp/private/connection"), "IO_FAILED"),
             (KeyError("secret_key"), "INVALID_INPUT"),
             (subprocess.CalledProcessError(1, ["git", "secret"]), "SUBPROCESS_FAILED"),
         ):
             self.assertEqual(auto.safe_block_reason(exception), expected)
+
+    def test_cli_unknown_uppercase_block_reason_is_redacted(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            with patch("sys.argv", [
+                "c6_neon_auto_git.py", "capture",
+                "--checkout", str(root), "--output", str(root / "out"),
+                "--status", str(root / "status.json"),
+                "--input-sha", "a" * 40, "--workflow-sha", "b" * 40,
+                "--run-id", "43510482714", "--run-attempt", "1",
+            ]), patch.object(auto, "capture", side_effect=auto.Blocked(
+                    "NEON_DATABASE_URL_SECRET123")):
+                out = io.StringIO()
+                with redirect_stdout(out):
+                    self.assertEqual(auto.main(), 2)
+                self.assertIn("C6_BLOCK_REASON=VALIDATION_BLOCKED", out.getvalue())
+                self.assertIn("ZERO_GIT_PUBLICATION_BY_THIS_RUN", out.getvalue())
+                self.assertNotIn("NEON_DATABASE_URL_SECRET123", out.getvalue())
 
     def test_cli_capture_failure_reports_only_allowlisted_reason(self):
         with TemporaryDirectory() as temp:
