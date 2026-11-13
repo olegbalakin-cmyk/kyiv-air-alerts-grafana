@@ -146,7 +146,7 @@ class RecoveryIdentityTests(unittest.TestCase):
 
     def test_missing_separate_owner_approval(self):
         self.env.pop("C6_RECOVERY_OWNER_RELEASE_GRANT_JSON")
-        self.assert_blocked("OWNER_GRANT")
+        self.assert_blocked("NEW_EXACT_OWNER_RELEASE_GRANT_REQUIRED")
 
     def test_work_m_prepare_only_is_not_owner_grant(self):
         self.env["C6_RECOVERY_OWNER_RELEASE_GRANT_JSON"] = json.dumps({
