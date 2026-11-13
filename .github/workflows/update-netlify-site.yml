@@ -781,7 +781,7 @@ jobs:
           set -euo pipefail
           test "$PREPARE_ENABLED" = "true"
           test -n "$PREPARE_OWNER_RECEIPT"
-          [[ "$PREP_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          # Work M recovery has no original C2 preparation artifact.
           [[ "$WORK_A_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$C2_BUNDLE_ARTIFACT_ID" =~ ^[0-9]+$ ]]
           mkdir -p "$RUNNER_TEMP/c6-final"
@@ -794,7 +794,18 @@ jobs:
           assert a.get("decision")=="APPROVE_PREPARE_ONLY_NO_PUBLICATION"
           assert a.get("prepare_code_sha")==os.environ["GITHUB_SHA"]
           assert a.get("repository")==os.environ["GITHUB_REPOSITORY"]
-          assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
+          from scripts.c6_neon_final_prepare import (
+              SCHEMA, RECOVERY_SCHEMA, RECOVERY_CONTRACT, RECOVERY_PINS)
+          if a.get("schema")==RECOVERY_SCHEMA:
+              assert a.get("provenance_contract")==RECOVERY_CONTRACT
+              assert not os.environ.get("PREP_ARTIFACT_ID")
+              assert all(a.get(k)==v for k,v in RECOVERY_PINS.items())
+              assert not a.get("c2_artifact_id")
+              assert not a.get("c2_artifact_sha256")
+          else:
+              assert a.get("schema")==SCHEMA
+              assert os.environ["PREP_ARTIFACT_ID"].isdigit()
+              assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
           assert a.get("c2_bundle_artifact_id")==int(os.environ["C2_BUNDLE_ARTIFACT_ID"])
           assert a.get("work_a_artifact_id")==int(os.environ["WORK_A_ARTIFACT_ID"])
           print("PREPARE_ONLY_OWNER_RECEIPT_PRESENT; NO_PUBLICATION")
@@ -816,7 +827,14 @@ jobs:
           [[ "$C2_RUN_ID" =~ ^[0-9]+$ && "$WORK_A_RUN_ID" =~ ^[0-9]+$ ]]
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID" > "$root/c2-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WORK_A_RUN_ID" > "$root/work-a-run.json"
+          RECOVERY_MODE="$(python -c 'import json,sys; from scripts.c6_neon_final_prepare import RECOVERY_SCHEMA; print("true" if json.load(open(sys.argv[1])).get("schema")==RECOVERY_SCHEMA else "false")' "$root/owner.json")"
+          if [ "$RECOVERY_MODE" = "true" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$C2_RUN_ID/jobs?per_page=100" > "$root/c2-jobs.json"
+          fi
           for kind in c2 c2_bundle work_a; do
+            if [ "$kind" = "c2" ] && [ "$RECOVERY_MODE" = "true" ]; then
+              continue
+            fi
             case "$kind" in
               c2) id="$PREP_ARTIFACT_ID" ;;
               c2_bundle) id="$C2_BUNDLE_ARTIFACT_ID" ;;
@@ -832,17 +850,24 @@ jobs:
         run: |
           set -euo pipefail
           root="$RUNNER_TEMP/c6-final"
+          # Explicit recovery source; original path remains unchanged.
+          extra=()
+          if test -f "$root/c2-jobs.json"; then
+            extra+=(--c2-jobs "$root/c2-jobs.json")
+          else
+            extra+=(--c2-artifact "$root/c2-artifact.json" --c2-zip "$root/c2.zip")
+          fi
           python -m scripts.c6_neon_final_prepare \
             --receipt "$root/owner.json" \
             --c2-run "$root/c2-run.json" --work-a-run "$root/work-a-run.json" \
-            --c2-artifact "$root/c2-artifact.json" \
             --c2-bundle-artifact "$root/c2_bundle-artifact.json" \
             --work-a-artifact "$root/work_a-artifact.json" \
-            --c2-zip "$root/c2.zip" --c2-bundle-zip "$root/c2_bundle.zip" \
+            --c2-bundle-zip "$root/c2_bundle.zip" \
             --work-a-zip "$root/work_a.zip" \
             --output "$root/final" --audit "$root/PREPARE_REPORT.json" \
             --actor "$GITHUB_ACTOR" --run-id "$GITHUB_RUN_ID" \
-            --run-attempt "$GITHUB_RUN_ATTEMPT" --code-sha "$GITHUB_SHA"
+            --run-attempt "$GITHUB_RUN_ATTEMPT" --code-sha "$GITHUB_SHA" \
+            "${extra[@]}"
           test "$(find "$root/final" -type f | wc -l)" -eq 8
           echo "EIGHT_FINAL_FILES_PREPARED; NO_PUSH_OR_DEPLOY"
       - name: Upload exact final ZIP as owner-pinnable immutable GitHub artifact
