@@ -21,12 +21,12 @@ import sys
 sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
 EXPECTED_BASE = "657fd70564bf5393d3fcd209e47d95fa986f3010"
-EXPECTED_BRANCH = "research-casualty-workn-prehttp-launch-state-fix-2026-11-13"
+EXPECTED_BRANCH = "research-casualty-workp-worko-runner-2026-11-14"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
-    "research/casualty_evidence_ingestion_2026_11_13/ingest.py": "a1af3457e0edbc23e3d23059a0256aebce10a2f5",
-    "kyiv-air-alerts-grafana/scripts/casualty_auto_review.py": "19d0ed3911b62b7abc02700bd9f9a431e1d442e0",
+    "research/casualty_evidence_ingestion_2026_11_13/ingest.py": "86bc17b1112da1027fca4f0317534c322329b04f",
+    "kyiv-air-alerts-grafana/scripts/casualty_auto_review.py": "76518b35009615b5c29a4455bf0b9c3a3933cab7",
     "research/casualty_controlled_capture_preflight_2026_11_13/capture_plan.json": "2f45d15b0e79cb11bf8ab605e314436dc0d3ed7c",
 }
 import research.casualty_evidence_ingestion_2026_11_13.ingest as e
@@ -56,7 +56,15 @@ LIMITS = {"max_initial_urls": 3, "max_requests_total": 6,
 
 def check_scope(queue):
     for name, expected in BLOBS.items():
-        if git("rev-parse", "HEAD:" + name) != expected:
+        if (git("rev-parse", "HEAD:" + name) != expected
+                or git("hash-object", name) != expected):
+            raise RuntimeError("PINNED_SOURCE_BLOB_DRIFT:" + name)
+    # The checked tree and working files must also be the modules imported by
+    # this runner (rather than a different copy earlier on sys.path).
+    for module, name in ((e, "research/casualty_evidence_ingestion_2026_11_13/ingest.py"),
+                         (sys.modules.get("casualty_auto_review"),
+                          "kyiv-air-alerts-grafana/scripts/casualty_auto_review.py")):
+        if module is None or Path(getattr(module, "__file__", "")).resolve() != ROOT / name:
             raise RuntimeError("PINNED_SOURCE_BLOB_DRIFT:" + name)
     upstream = json.loads((ROOT / "research/casualty_controlled_capture_preflight_2026_11_13/capture_plan.json").read_text())
     plan = json.loads(PLAN_PATH.read_text())
