@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import html
+import ipaddress
 import json
 import re
 import sys
@@ -60,6 +61,48 @@ def host(url: str) -> str:
         return parsed.hostname.lower().removeprefix("www.")
     except ValueError:
         return ""
+
+
+def _exact_request_key(url: str) -> tuple | None:
+    """Exact HTTPS authority, port, path and query; no canonical URL guesses."""
+    if not isinstance(url, str) or not url or re.search(r"[\x00-\x20\x7f\\]", url) or "#" in url:
+        return None
+    try:
+        parsed = urlsplit(url)
+        hostname = parsed.hostname
+        port = parsed.port
+    except (ValueError, AttributeError):
+        return None
+    if (parsed.scheme.lower() != "https" or not parsed.netloc or not hostname
+            or "@" in parsed.netloc or port not in (None, 443)
+            or not parsed.path.startswith("/")):
+        return None
+    hostname = hostname.lower()
+    if (not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", hostname)
+            or ".." in hostname):
+        return None
+    try:
+        ipaddress.ip_address(hostname)
+    except ValueError:
+        pass
+    else:
+        return None
+    # Preserve path spelling/escaping/case, query order and even empty '?' markers.
+    return ("https", hostname, 443, parsed.path, parsed.query, "?" in url)
+
+
+def _authorization_still_current(approval: dict) -> bool:
+    """Authorization must remain valid before EACH request, including redirects."""
+    if not isinstance(approval, dict) or not approval.get("authorization_id"):
+        return False
+    try:
+        start = datetime.fromisoformat(approval["approved_at_utc"].replace("Z", "+00:00"))
+        end = datetime.fromisoformat(approval["expires_at_utc"].replace("Z", "+00:00"))
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return False
+    now = datetime.now(timezone.utc)
+    return bool(start.tzinfo and end.tzinfo and
+                start <= now <= end and timedelta(0) < end - start <= timedelta(hours=24))
 
 def source_class(url: str) -> str:
     rawhost = (urlsplit(str(url or "")).hostname or "").lower()
@@ -301,7 +344,7 @@ def validate_capture_approval(approval: dict, enabled: bool, queue: list[dict],
         end = datetime.fromisoformat(approval["expires_at_utc"].replace("Z", "+00:00"))
     except (KeyError, TypeError, ValueError, AttributeError) as exc:
         raise RuntimeError("INVALID_AUTHORIZATION_WINDOW") from exc
-    if start.tzinfo is None or end.tzinfo is None or not start <= now <= end or end - start > timedelta(hours=48):
+    if start.tzinfo is None or end.tzinfo is None or not start <= now <= end or end - start > timedelta(hours=24):
         raise RuntimeError("EXPIRED_OR_EXCESSIVE_AUTHORIZATION_WINDOW")
     targets = approval.get("targets")
     if not isinstance(targets, list) or not 1 <= len(targets) <= 14:
@@ -318,14 +361,17 @@ def validate_capture_approval(approval: dict, enabled: bool, queue: list[dict],
     if not isinstance(allowed_hosts, list) or not allowed_hosts or not set(allowed_hosts).issubset(CAPTURE_HOSTS):
         raise RuntimeError("UNAPPROVED_HOST")
     valid_ids = {c["candidate_id"] for c in queue}
-    seen_urls = set()
+    initial_keys = set()
     for target in targets:
-        url = target.get("url", "")
-        if not isinstance(url, str) or host(url) not in allowed_hosts or not urlsplit(url).path:
+        if not isinstance(target, dict):
             raise RuntimeError("TARGET_NOT_EXACT_ALLOWLISTED")
-        if url in seen_urls:
+        url = target.get("url", "")
+        key = _exact_request_key(url)
+        if key is None or host(url) not in allowed_hosts:
+            raise RuntimeError("TARGET_NOT_EXACT_ALLOWLISTED")
+        if key in initial_keys:
             raise RuntimeError("DUPLICATE_HTTP_TARGET")
-        seen_urls.add(url)
+        initial_keys.add(key)
         role = target.get("role")
         ids = target.get("candidate_ids", [])
         if role not in ("publisher", "official") or not isinstance(ids, list):
@@ -334,32 +380,80 @@ def validate_capture_approval(approval: dict, enabled: bool, queue: list[dict],
             raise RuntimeError("UNPINNED_WIP_CANDIDATE")
         if role == "official" and ids:
             raise RuntimeError("OFFICIAL_NEEDS_SEPARATE_LINKING_NOT_CANDIDATE_BINDING")
+    for target in targets:
+        redirects = target.get("approved_redirect_urls", [])
+        if not isinstance(redirects, list) or len(redirects) > 3:
+            raise RuntimeError("INVALID_EXACT_REDIRECT_LIST")
+        own_key = _exact_request_key(target["url"])
+        seen_redirects = set()
+        for url in redirects:
+            key = _exact_request_key(url)
+            if key is None or host(url) not in allowed_hosts:
+                raise RuntimeError("REDIRECT_TARGET_NOT_EXACT_ALLOWLISTED")
+            if key in initial_keys and key != own_key:
+                raise RuntimeError("REDIRECT_CROSSES_SOURCE_TARGET")
+            if key in seen_redirects:
+                raise RuntimeError("DUPLICATE_EXACT_REDIRECT")
+            seen_redirects.add(key)
     return approval
 
 def _capture_once(url: str, approval: dict, budget: dict, opener=None) -> tuple[dict, str]:
-    """Allowed only after validate_capture_approval; no JS, login, proxy or bypass."""
-    opener = opener or build_opener(_NoRedirect, ProxyHandler({}))
+    """One source; redirect addresses are separately approved PER original source."""
     receipt = {
         "requested_url": url, "capture_time_utc": datetime.now(timezone.utc).isoformat(),
-        "redirect_chain": [], "http_status": None, "resolved_url": None,
-        "response_sha256": None, "response_bytes": None, "page_title": None,
-        "status": "NEEDS_REVIEW", "reason": "TRANSPORT_UNAVAILABLE",
+        "redirect_chain": [], "request_attempt_urls": [], "http_status": None,
+        "resolved_url": None, "response_sha256": None, "response_bytes": None,
+        "page_title": None, "status": "NEEDS_REVIEW", "reason": "TRANSPORT_UNAVAILABLE",
     }
+    initial_key = _exact_request_key(url)
+    target = next((t for t in approval.get("targets", [])
+                   if isinstance(t, dict) and _exact_request_key(t.get("url")) == initial_key),
+                  None)
+    if initial_key is None or target is None or host(url) not in approval["allowed_hosts"]:
+        receipt["reason"] = "TARGET_NOT_EXACT_ALLOWLISTED"
+        return receipt, ""
+    redirects = target.get("approved_redirect_urls", [])
+    if not isinstance(redirects, list):
+        receipt["reason"] = "INVALID_EXACT_REDIRECT_LIST"
+        return receipt, ""
+    allowed = {initial_key}
+    allowed.update(_exact_request_key(r) for r in redirects)
+    if None in allowed:
+        receipt["reason"] = "REDIRECT_NOT_ALLOWLISTED"
+        return receipt, ""
+    # Prevent urllib from following any 301/302/303/307/308 without this loop's check.
+    opener = opener or build_opener(_NoRedirect, ProxyHandler({}))
+    seen = set()
     current = url
     for redirect in range(4):
-        if host(current) not in approval["allowed_hosts"]:
+        key = _exact_request_key(current)
+        if key is None or host(current) not in approval["allowed_hosts"]:
             receipt["reason"] = "REDIRECT_NOT_ALLOWLISTED"
+            return receipt, ""
+        if key not in allowed:
+            receipt["reason"] = "REDIRECT_NOT_EXACT_APPROVED"
+            return receipt, ""
+        if key in seen:
+            receipt["reason"] = "REDIRECT_LOOP"
+            return receipt, ""
+        if not _authorization_still_current(approval):
+            receipt["reason"] = "AUTHORIZATION_EXPIRED"
             return receipt, ""
         if budget["used"] >= approval["max_requests_total"]:
             receipt["reason"] = "REQUEST_BUDGET_EXCEEDED"
             return receipt, ""
         if budget["used"]:
             time.sleep(approval["min_delay_seconds"])
+        if not _authorization_still_current(approval):
+            receipt["reason"] = "AUTHORIZATION_EXPIRED"
+            return receipt, ""
+        seen.add(key)
         budget["used"] += 1
+        receipt["request_attempt_urls"].append(current)
         try:
-            response = opener.open(Request(current, headers={"User-Agent": USER_AGENT,
-                    "Accept": "text/html,application/xhtml+xml", "Accept-Language": "uk,en;q=0.8"},
-                    method="GET"), timeout=15)
+            response = opener.open(Request(current, headers={
+                "User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml",
+                "Accept-Language": "uk,en;q=0.8"}, method="GET"), timeout=15)
         except HTTPError as exc:
             response = exc
         except (OSError, URLError, ValueError) as exc:
@@ -368,13 +462,31 @@ def _capture_once(url: str, approval: dict, budget: dict, opener=None) -> tuple[
         with response:
             status = int(response.status or response.code)
             location = response.headers.get("Location")
-            receipt["redirect_chain"].append({"request_url": current,
-                       "http_status": status, "location": location if status in (301, 302, 303, 307, 308) else None})
+            receipt["redirect_chain"].append({
+                "request_url": current, "http_status": status,
+                "location": location if status in (301, 302, 303, 307, 308) else None})
             if status in (301, 302, 303, 307, 308):
                 if not location or redirect == 3:
                     receipt["reason"] = "REDIRECT_LIMIT"
                     return receipt, ""
-                current = urljoin(current, location)
+                if not isinstance(location, str) or re.search(r"[\x00-\x1f\x7f\\]", location):
+                    receipt["reason"] = "REDIRECT_NOT_ALLOWLISTED"
+                    return receipt, ""
+                next_url = urljoin(current, location)
+                next_key = _exact_request_key(next_url)
+                if next_key is None or host(next_url) not in approval["allowed_hosts"]:
+                    receipt["reason"] = "REDIRECT_NOT_ALLOWLISTED"
+                    receipt["blocked_redirect_url"] = next_url
+                    return receipt, ""
+                if next_key in seen:
+                    receipt["reason"] = "REDIRECT_LOOP"
+                    receipt["blocked_redirect_url"] = next_url
+                    return receipt, ""
+                if next_key not in allowed:
+                    receipt["reason"] = "REDIRECT_NOT_EXACT_APPROVED"
+                    receipt["blocked_redirect_url"] = next_url
+                    return receipt, ""
+                current = next_url
                 continue
             receipt["http_status"] = status
             receipt["resolved_url"] = current
@@ -414,6 +526,13 @@ def controlled_capture(approval: dict, queue: list[dict], *, enabled: bool) -> t
     for target in policy["targets"]:
         receipt, text = _capture_once(target["url"], policy, budget)
         audit["targets"].append(receipt)
+        if receipt["reason"] in {
+                "TARGET_NOT_EXACT_ALLOWLISTED", "REDIRECT_NOT_ALLOWLISTED",
+                "REDIRECT_NOT_EXACT_APPROVED", "REDIRECT_LOOP", "REDIRECT_LIMIT",
+                "AUTHORIZATION_EXPIRED", "REQUEST_BUDGET_EXCEEDED"}:
+            audit["stopped_early"] = True
+            audit["stop_reason"] = receipt["reason"]
+            break
         if not text:
             continue
         if target["role"] == "official":
