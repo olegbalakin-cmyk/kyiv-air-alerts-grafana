@@ -28,4 +28,4 @@ Maintain freeze; future diagnostic pilot requires separate GO. Casualty/WIP/DST 
 
 - [Archive index](docs/coordination-archive/README.md), [manifest](docs/coordination-archive/manifest.json), and [maintenance CLI](docs/coordination-maintenance.md) retain historical proofs; archive via a PR, no direct main push.
 - **DOC-AUTO-MAINTENANCE-MERGE-02:** [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged `main@3735f359`; [Actions #41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) PASS. Ten archived records indexed above. Bot archival PR permission unverified; not a Neon release.
-
+- **2026-11-13 archive housekeeping:** full pre-archive PR #78 root blobs are indexed in the manifest with source ref `421054a20f93a87a548cdebbe9a14fce669be293`; six older records from each root moved to immutable snapshots. No release gate changed.
