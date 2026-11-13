@@ -33,7 +33,7 @@ jobs:
             -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/13991878472/zip" \
             --output work-l-live/outer.zip
-          python scripts/c6_failed_c2_recovery_gate.py \
+          PYTHONPATH=. python scripts/c6_failed_c2_recovery_gate.py \
             --run work-l-live/run.json --jobs work-l-live/jobs.json \
             --artifact work-l-live/artifact.json --outer work-l-live/outer.zip \
             --bundle-output work-l-live/c2-shadow-inputs.zip \
