@@ -37,7 +37,7 @@ class AutoGitOnlyTests(unittest.TestCase):
         import re
         w = (ROOT / ".github/workflows/update-netlify-site.yml").read_text()
         pilot = re.search(
-            r"^      c6_neon_git_pilot:\\n(?P<body>(?:        .+\\n)+)", w,
+            r"^      c6_neon_git_pilot:\n(?P<body>(?:        .+\n)+)", w,
             re.MULTILINE,
         )
         self.assertIsNotNone(pilot)
@@ -47,7 +47,7 @@ class AutoGitOnlyTests(unittest.TestCase):
         for job in ("update-site", "c6-neon-six-json-prepare",
                     "c6-neon-auto-git-publish"):
             header = re.search(r"^  " + re.escape(job)
-                               + r":\\n    (?:needs:.*\\n)?    if: (?P<gate>.+)$",
+                               + r":\n    (?:needs:.*\n)?    if: (?P<gate>.+)$",
                                w, re.MULTILINE)
             self.assertIsNotNone(header, job)
             self.assertIn("inputs.c6_neon_git_pilot", header["gate"], job)
@@ -55,10 +55,10 @@ class AutoGitOnlyTests(unittest.TestCase):
                           header["gate"], job)
             self.assertIn("refs/heads/main", header["gate"], job)
             self.assertIn("olegbalakin-cmyk", header["gate"], job)
-        self.assertIn("test \\"$GITHUB_ACTOR\\" = \\"olegbalakin-cmyk\\"", w)
-        self.assertIn("test \\"$LEGACY_PAUSED\\" = \\"true\\"", w)
-        self.assertIn("test \\"$AUTO_ENABLED\\" != \\"true\\"", w)
-        self.assertIn("if: \${{ vars.C6_AUTO_NEON_GIT_ENABLED != 'true' && !inputs.c6_neon_git_pilot }}", w)
+        self.assertIn("test \"$GITHUB_ACTOR\" = \"olegbalakin-cmyk\"", w)
+        self.assertIn("test \"$LEGACY_PAUSED\" = \"true\"", w)
+        self.assertIn("test \"$AUTO_ENABLED\" != \"true\"", w)
+        self.assertIn("if: ${{ vars.C6_AUTO_NEON_GIT_ENABLED != 'true' && !inputs.c6_neon_git_pilot }}", w)
         self.assertIn("&& !inputs.c6_neon_git_pilot", w)
         self.assertIn("NETLIFY_DEPLOYMENTS_PER_UPDATE: '0'", w)
         self.assertNotIn("netlify deploy", w.lower())
@@ -67,7 +67,7 @@ class AutoGitOnlyTests(unittest.TestCase):
         w = (ROOT / ".github/workflows/update-netlify-site.yml").read_text()
         section = w.split("      - name: Require C2 same-run Neon bundle", 1)[1].split(
             "      - name: Checkout exact same-run integration scripts", 1)[0]
-        self.assertIn("if [ \\"$GITHUB_EVENT_NAME\\" = \\"workflow_dispatch\\" ]; then", section)
+        self.assertIn("if [ \"$GITHUB_EVENT_NAME\" = \"workflow_dispatch\" ]; then", section)
         self.assertIn('test "$PILOT_INPUT" = "true"', section)
         self.assertIn('test "$GITHUB_EVENT_NAME" = "schedule"', section)
         self.assertIn("NEON_SUCCEEDED", section)
