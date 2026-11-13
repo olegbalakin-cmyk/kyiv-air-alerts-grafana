@@ -2,7 +2,7 @@
 
 **Scope:** research only; clean Work N parent 236d3d3af785ea89f44504995498bcd0915d2e10. No launch.json, new publisher HTTP, merge, deploy, PROMOTE, casualty JSON, WIP, C2, Neon or production writes.
 
-**Evidence-limited verdict:** PARTIAL_REAL_HTML_REQUIRED. Specific code-level defects were identified and narrowly changed; exact-HEAD CI proof must independently pass before accepting the fixes. Real T03–T05 HTML was never retained, so its failure cannot be reproduced on genuine source text.
+**Evidence-limited verdict:** PARTIAL_REAL_HTML_REQUIRED. Code-level defects were corrected and physically tested offline, including immutable archival evidence and generator replay. Real T03–T05 HTML was never retained, so the exact real-world failure cannot be reproduced on genuine source text.
 
 ## Physically verified pilot evidence
 
@@ -36,7 +36,11 @@ The hashes do not allow reconstruction or inspection of the original ephemeral t
 
 New synthetic tests cover wording, 2 -> 3 never 5, separate incidents, missing attack date and police association, HTML menu/ad/main extraction, complete short excerpt retention, name withholding, no inferred facts and no publication. Frozen pre-launch Work N 68 offline tests and existing Work A tests are executed separately: frozen safety tests must not be made to run against altered immutable authorization pins. The original 18 -> 20 -> 23 physical evidence/generator regression remains an earlier validated checkpoint, not a new physical regression proof unless the exact retained artifact and generator are rerun.
 
-**Conditional evidence:** Exact-HEAD CI, PASS/FAIL/SKIP totals, manifest SHA and proof ZIP digest must be taken from an actual successful Actions run, not inferred from this document. Any current failed or pending CI means BLOCKED for acceptance.
+**Observed physical evidence on code-and-tests HEAD 90f708bdff9f04f84ca5d709f76789647ee52537:** [GitHub Actions #43513639931](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513639931) SUCCESS. Frozen E/G/I/J/K/L baseline: 68 PASS, 0 FAIL, 0 SKIP. New Work O / Work J/E: 31 PASS, 0 FAIL, 0 SKIP. Work A: 34 PASS, 0 FAIL, 1 SKIP (missing untracked historical cached_evidence.json; not reported as passed). Total 133 PASS, 0 FAIL, 1 SKIP. Separate pinned original-evidence ingestion and exact existing generator verification succeeded: 18→20→23, +23, five source-empty clusters blocked. Zero new publisher/police GET; no production publish or automatic casualty credits.
+
+[Proof artifact #14080260918](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513639931/artifacts/14080260918), ZIP SHA256 **731f2d94e0844513e804bc83aac40ef8ca3fb1fa5ec854f604788448314c0f39**, independently downloaded and hashed byte-for-byte. All **7/7** manifest file SHA256 hashes independently rehashed and PASS. Proof manifest SHA256 values: baseline.log 83542845e09caf50e5f7a93f485e0e00a17fa19666fab7d0d763d44186485e76; new.log ce31b18d989d896fb1dcf9eb0ccbe9bb13697709d2dbac5c790851d45113e89d; work-a.log f3184879d2e3b192fa7be2274c977b5e5fd6b4dade04ef03bebe50ae23644edb; proof.json d4906e12b4f4a308eb0ae68a1e6afa5a9dad9605111e783a7510c102d2c4940e.
+
+**Exact-HEAD caveat:** This report update creates a documentation-only successor commit. Verify the successor's GitHub Actions SUCCESS separately before reporting it as exact-final-HEAD PASS. The successful code-and-tests HEAD above is immutable and remains validated, including all affected implementation files.
 
 ## Why the live pilot failed, and what must wait
 
