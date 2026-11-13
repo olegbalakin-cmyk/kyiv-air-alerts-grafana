@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-ONE-TIME-SOURCE-TRANSPORT-PASS-FACT-EXTRACTION-BLOCKED-01 — physical one-time transport PASS, facts BLOCKED (2026-11-13)
+
+- [PR #118](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/118) live [Actions #43405970445](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43405970445) SUCCESS, head `fbc721e7`, ten T01–T10 HTTP 200, ten GET of ≤20, zero redirects/retries, 36/36 safety. ZIP [#14027391709](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43405970445/artifacts/14027391709) independently SHA256 `d43e81484c043d45a9ebee7435f041207303060590fb5ba0687bbaa1d9205bf3`. **Zero new structured fact reports, no source text/excerpts retained; no casualties credited/published. One-time grant consumed.** Next offline parser/retention diagnosis, no new HTTP without approval.
+
 ### CASUALTY-CURRENT-SITEPROD-FRONTEND-WORKH-01 — exact HEAD current frontend PASS (2026-11-13)
 
 - [PR #114](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/114) `46728a37`, [CI #43397597547](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43397597547) 42+32 PASS, [ZIP #14023123111](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43397597547/artifacts/14023123111) independently SHA256 `c68ea1bc107a2d1a427ac57a7a086fc724998fd093ae37b4058098ddef753cc9`. Source→scratch PROMOTE→current frontend `INCOMPLETE/≥23`; 23 alert cities, Sumy +1, rollback intact. No live deployment or publication.
