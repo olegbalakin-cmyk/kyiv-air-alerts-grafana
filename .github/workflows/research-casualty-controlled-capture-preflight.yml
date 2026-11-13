@@ -1,0 +1,54 @@
+name: CASUALTY Work G controlled capture OFFLINE preflight
+on:
+  push:
+    branches: [research-casualty-controlled-capture-preflight-2026-11-13]
+permissions:
+  contents: read
+jobs:
+  offline-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout candidate Work E research only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout exact PR102 target inventory (not execute)
+        uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - name: Checkout frozen site-prod casualty baseline (read only)
+        uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Offline dependencies as in Work E
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Verify immutable source HEAD and safety tests (mock HTTP only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _pr102 rev-parse HEAD)" = bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          python -m unittest research.casualty_controlled_capture_preflight_2026_11_13.test_preflight -v
+      - name: Produce read-only offline verification summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/casualty_controlled_capture_preflight_2026_11_13/verify_offline.py /tmp/workg-proof/offline_proof.json
+          grep -q '"authorization_status": "NOT_AUTHORIZED"' /tmp/workg-proof/offline_proof.json
+          grep -q '"media_http_requests": 0' /tmp/workg-proof/offline_proof.json
+      - name: Upload OFFLINE audit receipt only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-controlled-capture-preflight-offline
+          path: /tmp/workg-proof/offline_proof.json
+          if-no-files-found: warn
+          retention-days: 30
