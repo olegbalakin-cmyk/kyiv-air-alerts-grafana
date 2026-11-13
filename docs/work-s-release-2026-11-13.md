@@ -1,5 +1,7 @@
 # Work S: final release preflight, 13 November 2026
 
+Current execution: **BLOCKED before publication by automatic approval review of temporary Netlify unlock**. Dispatch UI is registered and available; 13 variables/grant were installed and cleaned up. No dispatch or source switch. Current main pin is `1dbacef11367b97805c43be112cfeb2c23c12072`. See [final execution receipt](work-s-final-execution-2026-11-13.json). The original preflight findings below are historical; templates require a new actual expiry before any resumption.
+
 `FINAL_RELEASE_PREFLIGHT=FAIL; CUTOVER_READY=NO; ROLLBACK_READY=YES; ADMIN_FREEZE_VERIFIED=YES; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 Data, historical freshness, merged recovery code and current rollback bytes pass. Execution is blocked by uninstalled production authorization: `c6-neon-git-release` does not exist; neither production grant nor the required release variables is configured. Existing Work M authorization is prepare-only. **Minimal action: obtain a separate owner production GO for this exact sequence and its temporary configuration.** No C2, Work L/M rerun, source request or code fix is needed at the checked state.
@@ -8,7 +10,7 @@ The [machine receipt and invalid grant templates](work-s-release-2026-11-13.json
 
 ## Verified state
 
-- `main@d68e35e35c8d50954a77adf99a7dda668724734b` and `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839` match the approved merges. Work N/R changed code is byte-identical to the exact research heads with prior 20/20 and 16/16 offline PASS; these suites were not rerun. Work R merge changed only its four release-code/test/workflow files.
+- `main@1dbacef11367b97805c43be112cfeb2c23c12072` and `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839` match the approved merges. Work N/R changed code is byte-identical to the exact research heads with prior 20/20 and 16/16 offline PASS; these suites were not rerun. Work R merge changed only its four release-code/test/workflow files.
 - C2 #43321997695 attempt 1 still has successful `update-site` and the exact C6 failure before runner/steps. Work L #43390770985 and Work M #43403595621 are successful, attempt 1. Their artifacts and Work N backup are unexpired. Physical L/M/final-report/N ZIP digests match their pinned metadata.
 - FINAL generation `2026-11-13T10:08:11.334497+02:00`; 23 cities; six JSON hashes match manifest. Current Git generation `2026-11-13T00:40:41.768144+02:00`. Current casualty tracked blobs (12), two auxiliary audit blobs, five runtime JSON and frontend match Work N. Embedded casualty fields match the final candidate; Kyiv intervals **2858 → 2858**, none lost. There were 55 read-only identity/hash/preservation checks, not a new regression suite.
 - Work N #14028565807 remains a current data/static backup after #120. Its 18 member hashes pass; inner package SHA `79e6a1ba0339c9f02d4089933cd91f77db060221a572e49df3c7d11fb2d31ff5`. No redundant snapshot or physical Work P test was made. Work P API publication/restoration timestamps remain 11:22:01Z/11:23:02Z; current `6adb629bc3ebc570117d82e1` is ready/locked and Work O alias `6af6eac51390a92065e9164f` is ready.
@@ -52,7 +54,7 @@ The [machine receipt and invalid grant templates](work-s-release-2026-11-13.json
 ```
 
 The job validates C2 → Work L → Work M, uses FINAL root KPI bytes, deploys the static frontend and verifies live app.js, kpi-range.js and KPI bytes. It must not publish Git JSON. If it fails, stop before step 4. After success, record the actual new production deploy ID, independently confirm the live root KPI SHA `ce3cd92fb28e7bad1217d598b2350ac08700c29035e035e36afe702a672194d5`, generation, release binding `d09bde00bfe80182b19ac70640fc9b07a1fe3f7e4dcb9ecb84f5c6b827584ff7` and 23 verified cities. Re-lock the new approved production deploy and re-disable the Netlify workflow. No Git grant may claim HTTP verification before this proof exists.
-4. Fill the separate **Git** grant template with that observed Netlify deploy ID and a fresh expiry at most one hour/before the historical deadline. Store it as `C6_NEON_GIT_OWNER_GRANT_JSON` in `c6-neon-git-release`; set environment variable `C6_NEON_GIT_RELEASE_ENABLED=true`. Recheck expected site-prod SHA and pause=true, then temporarily enable only workflow **360885782**, `.github/workflows/update-netlify-site.yml`. Dispatch **once**, ref `main`, expected SHA `d68e35e35c8d50954a77adf99a7dda668724734b`:
+4. Fill the separate **Git** grant template with that observed Netlify deploy ID and a fresh expiry at most one hour/before the historical deadline. Store it as `C6_NEON_GIT_OWNER_GRANT_JSON` in `c6-neon-git-release`; set environment variable `C6_NEON_GIT_RELEASE_ENABLED=true`. Recheck expected site-prod SHA and pause=true, then temporarily enable only workflow **360885782**, `.github/workflows/update-netlify-site.yml`. Dispatch **once**, ref `main`, expected SHA `1dbacef11367b97805c43be112cfeb2c23c12072`:
 
 ```json
 {
@@ -94,3 +96,4 @@ If no post-snapshot data changed, use Work N #14028565807: recover only its five
 If any newer C2, casualty, Kyiv or aux data exists, **do not restore old JSON or reset site-prod**. Preserve those bytes, recapture/reconcile a current Git-only package using the existing no-loss policy, and deploy only a matching-generation static index. A full source rollback is blocked until that reconciliation passes. Work P authority does not prove zero-loss restoration of an arbitrary later data state.
 
 No production operation, workflow enable, unlock, merge, C2/writer/source HTTP, Git publication, DST or casualty/WIP change was performed in Work S. The only remote changes are this requested coordination update in PR #78.
+

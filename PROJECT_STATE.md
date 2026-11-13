@@ -4,18 +4,17 @@
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Preserve historical records verbatim; root byte gate ≤12,288 B PASS. The observation below records execution under the owner's separate production GO; it does not claim an accepted cutover.
 
-## Current state and remaining gate
+## Current execution observation — Work S stopped before publication
 
-- Pinned production refs remain `main@d68e35e35c8d50954a77adf99a7dda668724734b` and `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839`.
-- Physical FINAL #14025629654, Work L #14020616892 and Work N #14028565807 ZIP digests match Work S. **56/56** current Git-blob/package/FINAL/casualty/aux/frontend identity checks pass. FINAL six hashes, 23 cities and generation `2026-11-13T10:08:11.334497+02:00` verified; current Git generation `2026-11-13T00:40:41.768144+02:00`. Existing publication gate passed all 23 historical receipts using the real clock. First expiry remains **14 November 2026, 12:40:40 Kyiv**. Work N remains byte-compatible; no new snapshot or L/M/N/O/P/Q/R run.
-- Prior Work S GO: protected `c6-neon-git-release` created (main only, owner review, no admin bypass), remains empty. Thirteen Netlify variables and 45-minute grant were installed then removed; Git grant never installed.
-- **Work T:** PR #123 merged to `main@1dbacef11367b97805c43be112cfeb2c23c12072`. Workflow registered on default main, identical to `site-prod` (blob `8dfee58688880811290722d93c7ca5823b9d22aa`); no dispatch, publication or deployment. Temporary release grants cleared.
-- Cleanup physically verified: Netlify grant and all 13 temporary repository variables absent; Git grant absent; release environment has no secrets or variables. Both production workflows manually disabled, publisher pause=true. Netlify original production **`6adb629bc3ebc570117d82e1`** remains ready/locked; unlock dialog was cancelled. No deployment, Git publication commit, C2/writer/source HTTP, casualty/WIP change or rollback occurred.
-- Production QA for the proposed release was **NOT RUN** because neither release stage started. Prior Work O/P evidence is retained within its original scope. [Execution receipt](docs/work-s-execution-2026-11-13.json).
+- **CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES.** Production owner GO was received. Actual refs remain `main@1dbacef11367b97805c43be112cfeb2c23c12072`, `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839`. Current release pins replace old `d68e35e3`; historical checkpoint refs below are retained verbatim.
+- At 18:26:56Z, exact production Netlify contract **EXACT_WORK_L_TO_WORK_M_NETLIFY_KPI_PASS**; physical C2/L/M/report artifacts, six FINAL hashes and 23 cities verified. Historical freshness 23/23 PASS with the real clock; 60/60 current data/rollback/casualty/aux/frontend identities PASS. Existing Work P operational rollback applies to unchanged bytes; no proof workflow repeated. First expiry remains **14 November 2026, 12:40:40 Kyiv**.
+- Installed and verified all 13 Netlify variables and a separate 45-minute Netlify owner grant; temporarily enabled Netlify workflow. Default-branch registration now works: **Run workflow** was available, ref `site-prod` selected, exact Work S inputs filled. Git grant and Git release flag were never installed; ordinary C2 stayed disabled.
+- **Automatic approval review rejected `Unlock published deploy`**, treating resumed Auto publishing as broader than one approved dispatch. No unlock, dispatch, release Actions run, new deployment or Git JSON publication occurred. Dialog cancelled; no bypass attempted. An earlier input-configuration rejection based on research-only permission flags was resolved by the exact production contract PASS; the later unlock rejection remains the blocker.
+- Cleanup: Netlify grant and all 13 temporary variables removed; both production workflows manually disabled; pause=true; Git environment remains empty. Netlify current **`6adb629bc3ebc570117d82e1`** ready/locked. Release production QA **NOT RUN**; rollback **NOT NEEDED**, production unchanged. No C2/writer/source HTTP, casualty/WIP or DST change. [Execution receipt](docs/work-s-final-execution-2026-11-13.json).
 
 ## Next
 
-**Next:** Re-pin Work S to `main@1dbacef1`; verify freshness, data, rollback and guards. Netlify-first proof before Git publication; freshness expires 14 Nov 12:40:40 Kyiv. Keep freeze; no release dispatch yet.
+Execution is stopped. Keep freeze and do not resume Git-only C2. Resolving the temporary Netlify unlock approval block is required before the same Work S sequence can resume; recheck refs, current data and real-clock freshness then. No new PR, Work task or proof rerun was created.
 
 ## Latest accepted checkpoint — full text
 
@@ -58,3 +57,4 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Preserv
 
 - [Archive index](docs/coordination-archive/README.md), [manifest](docs/coordination-archive/manifest.json), and [maintenance CLI](docs/coordination-maintenance.md) retain historical proofs; archive via a PR, no direct main push.
 - **DOC-AUTO-MAINTENANCE-MERGE-02:** [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged `main@3735f359`; [Actions #41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) PASS. Ten archived records indexed above. Bot archival PR permission unverified; not a Neon release.
+

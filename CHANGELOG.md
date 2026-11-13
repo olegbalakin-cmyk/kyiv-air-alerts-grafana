@@ -2,6 +2,11 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+## Work S final execution observation (2026-11-13; publication not executed)
+
+- Current pins `main@1dbacef1`, `site-prod@99648321`; exact Netlify production contract PASS, historical freshness 23/23, data/rollback identities 60/60 PASS. Registered dispatch UI worked; no release dispatch submitted.
+- Automatic approval review rejected the temporary Netlify unlock as broader than a single production dispatch. Stopped before unlock/publication; original Netlify `6adb629bc3ebc570117d82e1` and site-prod unchanged. Removed Netlify grant and all 13 temporary variables; Git grant/flag never installed; both workflows disabled, pause=true, Netlify locked. Production release QA not run; rollback unnecessary. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-final-execution-2026-11-13.json). Latest accepted Work T checkpoint below remains unchanged.
+
 ## Work S authorized execution observation (2026-11-13)
 
 - Separate owner production GO received; execution stopped before dispatch. Physical FINAL/L/N SHA and 56 identity/preservation checks PASS; historical gate 23/23 PASS at real clock. Protected `c6-neon-git-release` created for owner review/main only, admin bypass OFF. Netlify variables/grant were installed, then removed after the dispatch blocker.
@@ -50,3 +55,4 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Verified `main@712c9e35`, `site-prod@f0cfcbc8`, Work L/M/N artifacts and Netlify restored production unchanged; Work P rollback operational PASS. Work N publisher PR #119 Draft. Netlify Neon release requires successful C2 `update-netlify-site.yml` C6 preparation artifact absent from C2 #43321997695 (update-site job PASS, overall FAIL); isolated Work L #43390770985 does not satisfy. Scope one fail-closed Netlify recovery-proof contract fix; then separately approved merges, effective workflow rights/owner gate and fresh no-loss manifest. `FINAL_PREFLIGHT=FAIL; ROLLBACK_OPERATIONAL_READY=YES` (tested setup); `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
 <!-- coordination:history:end -->
+
