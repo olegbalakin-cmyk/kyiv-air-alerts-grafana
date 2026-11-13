@@ -1,0 +1,71 @@
+{
+  "schema": "casualty-three-source-workk-plan-v1",
+  "source_plan": "research/casualty_controlled_capture_preflight_2026_11_13/capture_plan.json",
+  "source_plan_blob_sha": "2f45d15b0e79cb11bf8ab605e314436dc0d3ed7c",
+  "scope": "EXACT_PR111_T03_T04_T05_PREPARE_ONLY",
+  "case_id": "oct22",
+  "attack_identity": "NOT_ESTABLISHED_WITHOUT_ORIGINAL_TEXT",
+  "prior_credit": "UNVERIFIED",
+  "possible_cumulative_sequence": "EARLIER_2_LATER_3_NOT_ADDITIVE_PENDING_ORIGINAL_REVIEW",
+  "targets": [
+    {
+      "target_id": "T03",
+      "case_id": "oct22",
+      "role": "publisher",
+      "url": "https://www.ukrinform.ua/amp/rubric-regions/4177207-armia-rf-zavdala-udaru-po-zaporizzu-zaginuli-dvoe-ludej.html",
+      "domain": "ukrinform.ua",
+      "candidate_ids": [
+        "7c3ac3280ba7ad4b9c10f3b1"
+      ],
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "previously_reported_claim": "earlier total 2",
+      "investigative_link_not_proven": false
+    },
+    {
+      "target_id": "T04",
+      "case_id": "oct22",
+      "role": "publisher",
+      "url": "https://mig.com.ua/vorozhyy-udar-po-pryvatnomu-budynku-v-zaporizhzhi-zahynuly-troye-lyudey/",
+      "domain": "mig.com.ua",
+      "candidate_ids": [
+        "dcdd2fe28fd1464e7fbabdc1"
+      ],
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "previously_reported_claim": "later cumulative 3",
+      "investigative_link_not_proven": false
+    },
+    {
+      "target_id": "T05",
+      "case_id": "oct22",
+      "role": "official",
+      "url": "https://zp.npu.gov.ua/news/na-zaporizhzhi-cherez-rosiiski-ataky-zahynulo-troie-liudei-shche-odna-otrymala-poranennia-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv",
+      "domain": "zp.npu.gov.ua",
+      "candidate_ids": [],
+      "source_type": "POLICE_PRIMARY",
+      "previously_reported_claim": "official final 3",
+      "investigative_link_not_proven": true
+    }
+  ],
+  "allowed_hosts": [
+    "mig.com.ua",
+    "ukrinform.ua",
+    "zp.npu.gov.ua"
+  ],
+  "limits": {
+    "max_initial_urls": 3,
+    "max_requests_total": 6,
+    "min_delay_seconds": 1,
+    "max_response_bytes": 1000000,
+    "timeout_seconds": 15,
+    "max_redirects_per_url": 3,
+    "retries": 0,
+    "authorization_max_hours": 24
+  },
+  "control_mode": "CONTROLLED_CAPTURE_DEFAULT_OFF",
+  "owner_authorization": "NOT_AUTHORIZED",
+  "independently_linked_official_incident": false,
+  "automatic_promote_allowed": false,
+  "publication_allowed": false,
+  "full_articles_persisted": false,
+  "automatic_workflow_enabled": false
+}
