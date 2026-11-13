@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-WORKM-FINALZIP-INDEPENDENT-PASS-01 — physical prepare-only and independent eight-file ZIP PASS (2026-11-13; accepted)
+
+- [Actions #43403595621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621) SUCCESS attempt 1 on PR #116 exact `9d846279`; only prepare job ran. [FINAL artifact #14025629654](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621/artifacts/14025629654) independently SHA-256 `f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed`; report #14025729121 SHA `f4f786b168d28f37bdf6a333d4e514b503e402e4fda25553d99ffa0a8d6a8648`; 8/8 final members, 6/6 JSON/sha, Work L 6/6 source sha, release binding/report PASS. No publication. Publisher original C2 prep contract and fresh rollback remain blocked: `FINAL_ZIP=PASS; ROLLBACK_READY=NO; CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ### C6-WORKM-OWNER-GRANT-NODISPATCH-01 — one prepare-only owner grant, not dispatched (2026-11-13; accepted)
 
 - Owner approved **one** prepare-only on exact PR [#116](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/116) SHA `9d846279b91b44b324a722ca00276a99956b4fca`. GitHub connector cannot enable workflow, configure repo variables/secret/environment or dispatch; one-shot permission **unconsumed**. Require `C6_GIT_ONLY_PUBLISHER_PAUSED=true` before any shared-workflow enable. Work M-specific CI, owner receipt, final ZIP and fresh rollback remain OPEN; no C2/writer/Git publish/Netlify/merge/cutover. `GLOBAL_CUTOVER=NO`.
