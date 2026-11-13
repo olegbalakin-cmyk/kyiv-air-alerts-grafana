@@ -9,6 +9,11 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
 
 <!-- coordination:history:start -->
+### C6-C3-WORKS-DISPATCH-DEFAULT-BRANCH-BLOCK-01 — verified dispatch prerequisite (2026-11-13; accepted)
+
+- `main` lacks Netlify workflow (404); `site-prod` has `workflow_dispatch`. GitHub requires the default-branch file; CLI/REST alone cannot unblock. Next: minimal separately approved registration PR to `main`, safe job/trigger guards, re-pin main SHA. No merge or production changes; `GLOBAL_CUTOVER=NO`.
+
+
 ### C6-C3-WORKS-OWNER-GATES-NOGO-01 — data/freshness/rollback PASS; production authorization setup pending (2026-11-13; accepted)
 
 - Merged SHA d68e35e3/99648321 confirmed; N/R code equals prior exact-head PASS. Physical FINAL #14025629654 SHA f2252da0…051ed and six hashes/23 cities verified; Work N backup #14028565807 remains current after code-only #120 (runtime, casualty, Kyiv, aux, frontend), Work P not repeated. Historical gate 23/23 PASS until **2026-11-14 12:40:40 Kyiv**. Pause=true, both workflows disabled, Netlify original ready/locked, five active/queued statuses 0. Missing `c6-neon-git-release` protected environment and new production grants/variables prevent execution. One minimal next action: distinct owner GO for pinned temporary gate setup and Netlify-first→Git sequence; [procedure](docs/work-s-release-2026-11-13.md), [receipt/templates](docs/work-s-release-2026-11-13.json). `FINAL_RELEASE_PREFLIGHT=FAIL; CUTOVER_READY=NO; ROLLBACK_READY=YES; ADMIN_FREEZE_VERIFIED=YES; GLOBAL_CUTOVER=NO`. Only requested coordination docs changed; no production actions.
