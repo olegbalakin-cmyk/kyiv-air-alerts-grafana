@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKN-LAUNCH-STATE-FIX-OFFLINE-PASS-01 — Work N offline PASS and safety fix on independent branch (2026-11-13)
+
+- [PR #127](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/127) `4ae85477`, [Actions #43507349125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43507349125) 68/68 PASS, both artifact ZIP hashes independently checked. Live test/launch file contradiction fixed in [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) `236d3d3a`, [CI #43508802671](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43508802671) 2/2 PASS incl 68/68 synthetic launch-present, ZIP #14076498074 SHA256 `2eb23ffc7fab82ee660f765becd147ca65609a24a1fc36f01a3b73d0ff3d5d84` checked. GET=0; new SHA-specific owner grant needed. No PROMOTE/production.
+
 ### CASUALTY-WORKM-PREHTTP-CI-FIX-OFFLINE-PASS-01 — Work M exact live-fixture pre-HTTP offline PASS (2026-11-13)
 
 - [PR #125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/125) `657fd705`, [CI #43504057015](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43504057015) 2 jobs SUCCESS, 68/68 PASS, 0 GET, 0 auto credits; [ZIP #14074633696](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43504057015/artifacts/14074633696) independently SHA256 `26e4b256a09d5f10d2307c2596c614cb1c12cca4dfe8a0e1f4c6e999c886016f`. Fixed `_pr102` and `_site` pinned fixture checkouts; new research-only code, no fresh launch. Earlier authorization consumed. New clean branch pin/preflight + owner GO still required before live T03–T05.
