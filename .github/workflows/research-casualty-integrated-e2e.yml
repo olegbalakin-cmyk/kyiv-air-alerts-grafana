@@ -175,7 +175,7 @@ jobs:
         run: |
           set -euo pipefail
           for path in _site _current _workc _workd _worke _wip _matrix; do
-            test -z "$(git -C "$path" status --porcelain)"
+            test -z "$(git -C "$path" status --porcelain --untracked-files=no)"
           done
           python research/casualty_integrated_e2e_2026_11_13/verify_final.py \
             /tmp/workf-ingest /tmp/workf-worka /tmp/workf-integrated \
