@@ -1,7 +1,7 @@
 name: CASUALTY Work O parser and evidence offline proof
 on:
   push:
-    branches: [research-casualty-worko-parser-evidence-2026-11-13]
+    branches: [research-casualty-workp-worko-runner-2026-11-14]
   workflow_dispatch:
 permissions:
   contents: read
@@ -109,6 +109,38 @@ jobs:
             -v 2>&1 | tee /tmp/worko/new.log
           python research/casualty_parser_evidence_worko_2026_11_13/run_worka_tests.py \
             2>&1 | tee /tmp/worko/work-a.log
+      - name: Work P integrated exact loaded Work O mock HTTP-to-JSON proof (zero real GET)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest research.casualty_workp_runner_integration_2026_11_14.test_workp -v 2>&1 | tee /tmp/worko/workp.log
+          python - <<'PY'
+          from pathlib import Path
+          from research.casualty_one_time_capture_2026_11_13 import run_capture as r
+          from research.casualty_one_time_capture_2026_11_13.test_workk import queue
+          import subprocess
+          r.check_scope(queue())
+          assert all(subprocess.check_output(['git', 'rev-parse', 'HEAD:'+p],text=True).strip()==sha for p,sha in r.BLOBS.items())
+          assert subprocess.check_output(['git','log','--format=%H','HEAD','--',r.LAUNCH_REL],text=True).strip()==''
+          assert not (r.HERE/'launch.json').exists()
+          print('WORKP_VERIFIED_LOADED_WORKO_BLOBS_AND_CLEAN_LAUNCH_HISTORY')
+          PY
+      - name: Synthetic launch-present suite restores file exactly (no HTTP)
+        shell: bash
+        run: |
+          set -euo pipefail
+          launch=research/casualty_one_time_capture_2026_11_13/launch.json
+          test ! -e "$launch"
+          echo '{"synthetic_offline_fixture":true}' > "$launch"
+          trap 'rm -f "$launch"' EXIT
+          bash research/casualty_workn_clean_rearm_2026_11_13/guarded_prehttp_regressions.sh 2>&1 | tee /tmp/worko/launch-restoration.log
+          test -f "$launch"
+          test "$(cat "$launch")" = '{"synthetic_offline_fixture":true}'
+          rm "$launch"
+          trap - EXIT
+          test ! -e "$launch"
+          git diff --exit-code
+
       - name: Pinned real-original 18 to 20 to 23 generator proof (no HTTP)
         shell: bash
         run: |
@@ -135,7 +167,7 @@ jobs:
           import hashlib, json, os, re, pathlib
           root=pathlib.Path('/tmp/worko')
           logs={}
-          for name in ['baseline.log','new.log','work-a.log']:
+          for name in ['baseline.log','new.log','work-a.log','workp.log']:
               p=root/name
               if not p.exists():
                   logs[name]={'status':'MISSING','tests':0,'fail':None,'skip':None}
