@@ -1,0 +1,37 @@
+name: Work R Netlify recovery contract offline
+on:
+  push:
+    branches:
+      - research-work-r-netlify-recovery-contract-2026-11-13
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-contract-offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile narrow release contract and tests
+        run: |
+          python -m py_compile scripts/c3_final_neon_kpi_contract.py tests/test_c3_work_r_netlify_recovery.py
+      - name: Check only default-OFF opt-in and no legacy removal
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          workflow = Path('.github/workflows/netlify-production.yml').read_text()
+          assert 'work_l_recovery_mode:' in workflow
+          assert "default: false" in workflow
+          assert 'C6_WORK_L_NETLIFY_RECOVERY_ENABLED' in workflow
+          assert 'C6_WORK_L_NETLIFY_OWNER_RELEASE_GRANT_JSON' in workflow
+          assert 'if [[ "$C6_WORK_L_RECOVERY_MODE" != "true" ]]; then' in workflow
+          assert "assert run['conclusion']=='success'" in workflow
+          assert 'python scripts/c3_final_neon_kpi_contract.py _approved_c6' in workflow
+          assert 'npx -y netlify-cli@latest deploy' in workflow
+          print('DEFAULT_OFF_AND_LEGACY_GUARDS_RETAINED')
+          PY
+      - name: Run Work R offline tests
+        run: python -m unittest discover -s tests -p 'test_c3_work_r_netlify_recovery.py' -v
