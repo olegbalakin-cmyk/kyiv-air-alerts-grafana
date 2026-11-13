@@ -1,9 +1,11 @@
 name: CASUALTY Work L offline launch-safety and evidence proof
 on:
   push:
-    branches: [research-casualty-workl-three-source-preflight-2026-11-13, research-casualty-workm-prehttp-ci-fix-2026-11-13]
+    branches: [research-casualty-workn-clean-rearm-2026-11-13]
     paths-ignore:
       - research/casualty_one_time_capture_2026_11_13/launch.json
+  pull_request:
+    branches: [research-casualty-workm-prehttp-ci-fix-2026-11-13]
 permissions:
   contents: read
   actions: read
@@ -162,6 +164,11 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/workm-prehttp
           python -m research.casualty_workm_prehttp_ci_fix_2026_11_13.verify_prehttp --output /tmp/workm-prehttp
+      - name: Work N clean branch and fresh owner-gate mock proof (zero GET)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m research.casualty_workn_clean_rearm_2026_11_13.verify_rearm --output /tmp/workm-prehttp
       - name: Verify immutable checkouts and no launch file
         if: always()
         shell: bash
@@ -182,6 +189,8 @@ jobs:
           name: casualty-workm-prehttp-exact-live-checkout
           path: |
             /tmp/workm-prehttp/workm-prehttp-proof.json
+            /tmp/workm-prehttp/workn-rearm-proof.json
+            research/casualty_workn_clean_rearm_2026_11_13/FINAL_REPORT.md
             /tmp/workm-prehttp/tests.log
             /tmp/workm-prehttp/workk-proof.json
             /tmp/workm-prehttp/workl-proof.json

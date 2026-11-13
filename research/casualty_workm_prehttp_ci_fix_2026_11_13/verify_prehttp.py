@@ -45,7 +45,8 @@ def check_fixtures():
         assert actual == sha, (directory, actual)
         assert "ref: " + sha + "\n          path: " + directory in workflow, directory
     assert not (r.HERE / "launch.json").exists(), "REAL_LAUNCH_NOT_ALLOWED"
-    assert "research-casualty-workl-three-source-preflight-2026-11-13" in workflow
+    assert "branches: [research-casualty-workn-clean-rearm-2026-11-13]" in workflow
+    assert "research-casualty-workl-three-source-preflight-2026-11-13" not in workflow
     assert "research-casualty-workm-prehttp-ci-fix-2026-11-13" not in workflow
     assert "One approved source-only pilot; no publication" in workflow
 
@@ -86,10 +87,18 @@ def verify_mock_gates():
              "NEW_OWNER_GRANT_SCOPE_INVALID", denied)
     expired = dict(grant, approved_at_utc="2020-01-01T00:00:00+00:00",
                    expires_at_utc="2020-01-01T01:00:00+00:00")
+    old_workl = dict(grant, authorization_id="CASUALTY-T03-T05-OWNER-20261113-2021Z-ONE-SHOT-01")
+    rejected("consumed_workl_authorization_id",
+             lambda: r.validate_launch(old_workl, template, queue, environ=synthetic_env()),
+             "NEW_OWNER_GRANT_SCOPE_INVALID", denied)
     rejected("expired_grant",
              lambda: r.validate_launch(expired, template, queue, environ=synthetic_env()),
              "SINGLE_USE_AUTHORIZATION_EXPIRED_OR_INVALID", denied)
     not_owner = dict(fixture.env(), GITHUB_ACTOR="not-owner")
+    old_branch_env = dict(synthetic_env(), GITHUB_REF="refs/heads/research-casualty-workl-three-source-preflight-2026-11-13")
+    rejected("old_branch_not_authorized",
+             lambda: r.validate_launch(grant, template, queue, environ=old_branch_env),
+             "FRESH_SINGLE_PUSH_OWNER_GRANT_REQUIRED", denied)
     rejected("wrong_actor",
              lambda: r.validate_one_launch_commit(grant, plan, environ=not_owner,
                                                    git_call=fixture.fakegit),
