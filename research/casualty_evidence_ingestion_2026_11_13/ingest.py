@@ -115,25 +115,35 @@ def source_class(url: str) -> str:
     return "UNRESOLVED"
 
 def _short_excerpts(text: str, totals: list[int]) -> list[dict]:
-    """Tiny, de-identified audit snippets; not a replacement for source bodies."""
-    pieces = re.split(r"(?<=[.!?])\s+|\n+", text)
+    """Retain complete, short fatality sentences; word numerals count too.
+
+    Evidence may be retained without a parseable total, but its claim_number
+    stays null. Never truncate away qualifications, denials or personal context.
+    The separate runner still applies the strict privacy filter before storage.
+    """
+    from casualty_auto_review import _fatal_total
+
+    wanted = set(totals)
     excerpts = []
-    for n in totals[:3]:
-        for sentence in pieces:
-            if not re.search(r"(?<!\d)" + re.escape(str(n)) + r"(?!\d)", sentence):
-                continue
-            if not re.search(r"загиб|загин|помер|смерт|дснс", sentence, re.I):
-                continue
-            short = re.sub(r"\s+", " ", sentence).strip()
-            short = re.sub(r"[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}", "[redacted]", short)
-            short = re.sub(r"\+?\d[\d ()-]{9,}\d", "[redacted]", short)
-            words = short.split()[:23]
-            short = " ".join(words)[:170]
-            if short and all(e["text"] != short for e in excerpts):
-                excerpts.append({"text": short, "excerpt_sha256": digest(short.encode("utf-8")),
-                                 "claim_number": n})
+    for sentence in re.split(r"(?<=[.!?])\s+|\n+", text):
+        short = re.sub(r"\s+", " ", sentence).strip()
+        if not short or not re.search(r"загиб|загин|помер|смерт", short, re.I):
+            continue
+        # A partial sentence can turn "probably died" into "died", or leave
+        # a person's name in storage. Keep the complete sentence or withhold.
+        if len(short) > 170:
+            continue
+        definite = _fatal_total(short.casefold())
+        if wanted and definite not in wanted:
+            continue
+        short = re.sub(r"[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}", "[redacted]", short)
+        short = re.sub(r"\+?\d[\d ()-]{9,}\d", "[redacted]", short)
+        if short and not any(e["text"] == short for e in excerpts):
+            excerpts.append({"text": short, "excerpt_sha256": digest(short.encode("utf-8")),
+                             "claim_number": definite if definite in wanted else None})
+        if len(excerpts) == 3:
             break
-    return excerpts[:3]
+    return excerpts
 
 def _article_receipts(original: dict) -> dict:
     records = original.get("receipts", [])
@@ -310,7 +320,8 @@ class _TextExtractor(HTMLParser):
         self.in_article, self.in_main = 0, 0
         self.title_depth, self.title_parts = 0, []
     def handle_starttag(self, tag, attrs):
-        if tag in {"script", "style", "nav", "footer", "aside", "form"}:
+        if tag in {"script", "style", "nav", "footer", "aside", "form",
+                   "noscript", "template", "iframe", "svg"}:
             self.skip_depth += 1
         if tag == "article":
             self.in_article += 1
@@ -319,7 +330,8 @@ class _TextExtractor(HTMLParser):
         if tag == "title":
             self.title_depth += 1
     def handle_endtag(self, tag):
-        if tag in {"script", "style", "nav", "footer", "aside", "form"}:
+        if tag in {"script", "style", "nav", "footer", "aside", "form",
+                   "noscript", "template", "iframe", "svg"}:
             self.skip_depth = max(0, self.skip_depth - 1)
         if tag == "article":
             self.in_article = max(0, self.in_article - 1)
@@ -341,7 +353,18 @@ class _TextExtractor(HTMLParser):
         if self.in_main:
             self.main.append(s)
     def body(self):
-        return " ".join(self.article or self.main or self.parts)
+        article = " ".join(self.article)
+        main = " ".join(self.main)
+        # A short unrelated <article> teaser must not hide a substantive
+        # <main> story. The capture gate already requires 180 characters.
+        if article and (len(article) >= 180 or not main):
+            self.content_scope = "article"
+            return article
+        if main:
+            self.content_scope = "main"
+            return main
+        self.content_scope = "fallback"
+        return article or " ".join(self.parts)
 
 def validate_capture_approval(approval: dict, enabled: bool, queue: list[dict],
                               now: datetime | None = None) -> dict:
@@ -517,6 +540,7 @@ def _capture_once(url: str, approval: dict, budget: dict, opener=None) -> tuple[
             parser = _TextExtractor()
             parser.feed(raw.decode("utf-8", "replace"))
             text = parser.body()
+            receipt["content_scope"] = parser.content_scope
             receipt["page_title"] = " ".join(parser.title_parts)[:180]
             if len(text) < 180 or re.search(r"captcha|access denied|enable javascript|sign in to read",
                                             text, flags=re.I):
@@ -612,8 +636,14 @@ def minimal_capture_facts(original: dict, queue: list[dict]) -> dict:
             if role == "official":
                 reasons.append("OFFICIAL_INCIDENT_MATCH_NOT_VERIFIED")
             if total is None:
-                reasons.append("NO_FATAL_CLAIM")
-            excerpts = _short_excerpts(raw, [total] if total else [])
+                reasons.append("FATAL_MENTION_TOTAL_UNCONFIRMED" if
+                               re.search(r"загиб|загин|помер|смерт", low)
+                               else "NO_FATAL_CLAIM")
+            excerpts = _short_excerpts(raw, [total] if total is not None else [])
+            if not excerpts:
+                reasons.append("SHORT_EVIDENCE_NO_COMPLETE_RELEVANT_SENTENCE")
+            elif total is None:
+                reasons.append("SHORT_EVIDENCE_RETAINED_COUNT_UNCONFIRMED")
             resolution = _cumulative_total_update(scope) if scope else None
             card = {
                 "schema": "casualty-minimal-source-facts-v1",

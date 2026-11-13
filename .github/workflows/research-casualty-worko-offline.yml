@@ -1,0 +1,178 @@
+name: CASUALTY Work O parser and evidence offline proof
+on:
+  push:
+    branches: [research-casualty-worko-parser-evidence-2026-11-13]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: 236d3d3af785ea89f44504995498bcd0915d2e10
+          path: _baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _baseline/_pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _baseline/_wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _baseline/_site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          path: _baseline/_matrix
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          path: _matrix
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43053796144
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: /tmp/casualty-original
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43261676781
+          name: casualty-zap11-approved-http-43261676781-1
+          path: /tmp/casualty-receipts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install offline parser test dependencies (no media GET)
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: No source grant, no launch, no source bodies, no production changes
+        run: |
+          set -euo pipefail
+          test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
+          test ! -e _baseline/research/casualty_one_time_capture_2026_11_13/launch.json
+          test "$(git -C _baseline rev-parse HEAD)" = 236d3d3af785ea89f44504995498bcd0915d2e10
+          test "$(git diff --name-only 236d3d3af785ea89f44504995498bcd0915d2e10 HEAD | grep -Ec '^(kyiv-air-alerts-grafana/data/|deploy/|site-prod|research/casualty_one_time_capture_2026_11_13/launch.json)' || true)" = 0
+      - name: Frozen baseline E G I J K L (68 offline safety tests)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/worko
+          (
+            cd _baseline
+            python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_ingest \
+              research.casualty_controlled_capture_preflight_2026_11_13.test_preflight \
+              research.casualty_strict_redirect_2026_11_13.test_redirect \
+              research.casualty_fact_retention_workj_2026_11_13.test_workj \
+              research.casualty_one_time_capture_2026_11_13.test_workk \
+              research.casualty_one_time_capture_2026_11_13.test_workl -v \
+              2>&1 | tee /tmp/worko/baseline.log
+          )
+      - name: Work O new code, Work A and Work J test paths (no source HTTP)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest research.casualty_parser_evidence_worko_2026_11_13.test_worko \
+            research.casualty_fact_retention_workj_2026_11_13.test_workj \
+            research.casualty_evidence_ingestion_2026_11_13.test_ingest \
+            -v 2>&1 | tee /tmp/worko/new.log
+          python research/casualty_parser_evidence_worko_2026_11_13/run_worka_tests.py \
+            2>&1 | tee /tmp/worko/work-a.log
+      - name: Pinned real-original 18 to 20 to 23 generator proof (no HTTP)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df  /tmp/casualty-original/evidence.json' | sha256sum -c -
+          echo '4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b  /tmp/casualty-receipts/capture_receipts.json' | sha256sum -c -
+          mkdir -p /tmp/worko/original /tmp/worko/generator
+          common=(
+            --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+            --evidence /tmp/casualty-original/evidence.json
+            --receipts /tmp/casualty-receipts/capture_receipts.json
+            --matrix _matrix/research/casualty_zaporizhzhia_additional_events_2026_11_12/verification_matrix.json
+          )
+          python research/casualty_evidence_ingestion_2026_11_13/ingest.py "${common[@]}" --output /tmp/worko/original             2>&1 | tee /tmp/worko/ingestion.log
+          python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}"             --revisions _site/kyiv-air-alerts-grafana/data/casualties/revisions.csv             --baseline research/casualty_automated_review_2026_11_10/baseline_coverage.json             --city-manifest _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json             --city-csv _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv             --generator _site/kyiv-air-alerts-grafana/scripts/update_casualties.py             --dashboard _site/kyiv-air-alerts-grafana/data/dashboard_data.json             --ingested-reports /tmp/worko/original/work_a_reports.json             --output /tmp/worko/generator 2>&1 | tee /tmp/worko/generator.log
+          python research/casualty_evidence_ingestion_2026_11_13/verify_proof.py             /tmp/worko/original /tmp/worko/generator 2>&1 | tee /tmp/worko/physical.log
+          grep -q 'PASS' /tmp/worko/physical.log
+      - name: Proof manifest and explicit zero publisher GET
+        shell: bash
+        if: always()
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, re, pathlib
+          root=pathlib.Path('/tmp/worko')
+          logs={}
+          for name in ['baseline.log','new.log','work-a.log']:
+              p=root/name
+              if not p.exists():
+                  logs[name]={'status':'MISSING','tests':0,'fail':None,'skip':None}
+                  continue
+              s=p.read_text(errors='replace')
+              matches=re.findall(r'Ran (\d+) tests? in',s)
+              logs[name]={
+                  'status':'PASS' if matches and re.search(r'^OK(?:\s|$)',s,re.M) else 'FAIL',
+                  'tests':int(matches[-1]) if matches else 0,
+                  'fail':len(re.findall(r'^FAIL:',s,re.M))+len(re.findall(r'^ERROR:',s,re.M)),
+                  'skip':len(re.findall(r'\.\.\. skipped ',s)),
+              }
+          physical=(root/'physical.log').read_text(errors='replace') if (root/'physical.log').exists() else ''
+          result={
+              'schema':'casualty-worko-offline-proof-v1',
+              'head_sha':os.environ.get('GITHUB_SHA'),
+              'baseline_sha':'236d3d3af785ea89f44504995498bcd0915d2e10',
+              'source_get':0,'source_get_basis':'No source-capture function is invoked by test workflow; only local fixtures and frozen offline baseline',
+              'publication_allowed':False,'automatic_credits':0,
+              'real_original_18_20_23_proof_log_present':bool(physical),
+              'real_original_18_20_23_proof_log_has_pass':bool(re.search(r'PASS',physical)),
+              'real_t03_t05_html_retested':False,'test_groups':logs}
+          (root/'proof.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.glob('*.log'))}
+          hashes['proof.json']=hashlib.sha256((root/'proof.json').read_bytes()).hexdigest()
+          (root/'manifest.json').write_text(json.dumps({'files_sha256':hashes},sort_keys=True,indent=2)+'\n')
+          assert all(x['status']=='PASS' for x in logs.values()),logs
+          assert result['real_original_18_20_23_proof_log_has_pass'],'PHYSICAL_GENERATOR_PROOF_NOT_PASSED'
+          print('WORKO_OFFLINE_TEST_GROUPS_PASS',logs)
+          PY
+      - name: Upload work O proof only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-worko-offline-parser-evidence-proof
+          path: |
+            /tmp/worko/*.json
+            /tmp/worko/*.log
+          retention-days: 30
+          if-no-files-found: warn

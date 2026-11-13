@@ -255,8 +255,11 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
             raise RuntimeError("FACT_NOT_FAIL_CLOSED")
         if not isinstance(card.get("document_sha256"), str) or len(card["document_sha256"]) != 64:
             card["reasons"] = sorted(set(card["reasons"] + ["DOCUMENT_SHA256_MISSING"]))
-        if card.get("claim_deaths") is not None and not card.get("excerpts"):
-            card["reasons"] = sorted(set(card["reasons"] + ["SHORT_EVIDENCE_NOT_EXTRACTED"]))
+        if not card.get("excerpts"):
+            privacy = "PRIVACY_REVIEW_EXCERPT_WITHHELD" in card.get("reasons", [])
+            reason = ("SHORT_EVIDENCE_PRIVACY_WITHHELD" if privacy else
+                      "SHORT_EVIDENCE_NOT_EXTRACTED")
+            card["reasons"] = sorted(set(card["reasons"] + [reason]))
         if any(len(x.get("text", "")) > 170 for x in card.get("excerpts", [])):
             raise RuntimeError("EXCERPT_OVER_170")
         if "text" in card or "body" in card:
