@@ -1,0 +1,41 @@
+name: C6 Work L recovery offline negative gates
+on:
+  push:
+    branches: [research-c6-work-l-recover-2026-11-13]
+  pull_request:
+    branches: [research-c6-postc2-append-only-2026-11-12]
+permissions:
+  contents: read
+jobs:
+  recovery-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recovery gate positive/negative tests (no remote API, no Neon)
+        run: python -m unittest discover -s tests -p 'test_c6_failed_c2_recovery_gate.py' -v
+      - name: Assert protected proof, no production release and pinned data
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          w=Path('.github/workflows/c6-neon-shadow-isolated-proof.yml').read_text()
+          g=Path('scripts/c6_failed_c2_recovery_gate.py').read_text()
+          assert 'environment: c6-neon-shadow-readonly' in w
+          assert "github.actor == 'olegbalakin-cmyk'" in w
+          assert "inputs.owner_approval == 'APPROVE_ONE_READONLY_PROOF'" in w
+          assert "github.sha == inputs.research_sha" in w
+          assert "C6_SHADOW_APPROVED_RESEARCH_SHA" in w
+          assert 'persist-credentials: false' in w
+          assert 'permissions:\n  contents: read\n  actions: read' in w
+          assert 'c6-neon-six-json-prepare' in g
+          assert 'C2_FAILURE_MAY_HAVE_EXECUTED' not in g
+          assert '43321997695' in g and '13991878472' in g
+          assert 'scripts.neon_json_shadow_physical_proof' in w
+          assert 'netlify deploy' not in w and 'git push' not in w
+          print('WORK_L_READONLY_OWNER_ENVIRONMENT_AND_NO_PUBLICATION_PASS')
+          PY
