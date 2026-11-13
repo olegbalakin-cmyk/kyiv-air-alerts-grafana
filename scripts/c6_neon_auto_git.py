@@ -172,7 +172,15 @@ def retains_keys(old, new):
         return isinstance(new, dict) and set(old) <= set(new) and all(
             retains_keys(value, new[key]) for key, value in old.items())
     if isinstance(old, list):
-        return isinstance(new, list) and len(new) >= len(old)
+        if not isinstance(new, list) or len(new) < len(old):
+            return False
+        # Exact old evidence must remain present; count alone is insufficient.
+        from collections import Counter
+        def fingerprint(value):
+            return json.dumps(value, ensure_ascii=False, sort_keys=True,
+                              separators=(",", ":"))
+        return not (Counter(map(fingerprint, old))
+                    - Counter(map(fingerprint, new)))
     return new is not None
 
 
@@ -248,9 +256,9 @@ def publish(checkout, delta, prepared, proof, *, repository,
     source_files = report.get("files", {})
     require(set(source_files) == set(candidate.FILES.values()), "SOURCE_FILE_SET")
     for name, path in candidate.FILES.items():
-        require(sha(safe_file(prepared / "candidate", path))
-                == source_files[path] if name != "historical-daily-kpi.json"
-                else sha(prepared / "candidate" / path) == source_files[path],
+        file = prepared / "candidate" / path
+        require(file.is_file() and not file.is_symlink()
+                and sha(file) == source_files[path],
                 "PREPARED_CANDIDATE_SHA_MISMATCH")
     with tempfile.TemporaryDirectory(prefix="c6-neon-auto-") as temp:
         final_dir = Path(temp) / "final"
