@@ -46,6 +46,9 @@ Fresh consent must specify exact three URLs, whether any exact redirect path is 
 
 ## CI and verdict
 
-**Pending exact-head physical Actions verification at report creation.** A successful workflow and independently verified artifact digest are required for `PARSER_DIAGNOSTIC_OFFLINE_PASS`; no early PASS is implied. Otherwise report `PARTIAL` or `BLOCKED_RECAPTURE_REQUIRED` with the failing checks.
+**Physical pre-report checkpoint: `PARSER_DIAGNOSTIC_OFFLINE_PASS` (offline only).** [Actions #43433516122](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43433516122) SUCCESS at tested implementation SHA `5d05960df2ba1fc5d11eb01606e0c673ac2566fc`: 45/45 Work E/G/I/J mock-only tests, separate inherited Work E 10/10, pinned retained original 18→20→23 generator +23, 1,682 WIP candidates with 1 AUTO_READY and 1,681 review-only, 5 previously blocked clusters unchanged, 0 new publisher/police HTTP GET. The offline extraction found two structured retained-source reports, one unique proposal; these are not two new death events. Source material for the ten live-pilot URLs is still absent.
+- [Physical ZIP artifact #14040696329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43433516122/artifacts/14040696329), 42,340 bytes, **GitHub API digest matches uploader log** `f2fa30b00a0a6de41c3c83f1f9cfac1f086fd1254d6cb4b9555eaa5ab64dc218` (ZIP **not** independently downloaded/rehashed here).
+- Report-only update changes the branch HEAD. Verify the final exact-head GitHub Actions run and its artifact separately; do not attribute previous SHA proof to a later commit.
+- Recapture analysis of any of the ten live HTTP articles remains `BLOCKED_RECAPTURE_REQUIRED` despite offline parser PASS.
 
 Publication false; October coverage incomplete, confirmed minimum >=23 from earlier independent proof only. No authorization for recapture or promotion.
