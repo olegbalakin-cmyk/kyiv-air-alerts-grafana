@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-13 C2 DATA PASS / C6 PREPARATION FAIL. GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF. Latest: C6-C2-ONESHOT-DATA-PASS-PREP-NOARTIFACT-01.**
+**2026-11-13 Work L C2 recovery offline PASS; physical proof PENDING. GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF. Latest: C6-WORKL-RECOVERY-OFFLINE-PASS-01.**
 
 Read main PROJECT_STATE.md/CHANGELOG.md first; newer PR #78 governs. Verify SHA, Actions and proof artifacts. Separate production, C2/Neon historical, casualty, backfill, DST. Past records below / [archive](docs/coordination-archive/README.md).
 
@@ -14,11 +14,15 @@ Read main PROJECT_STATE.md/CHANGELOG.md first; newer PR #78 governs. Verify SHA,
 
 ## Next
 
-Diagnose zero-step C6 failure without source HTTP/writer or second C2; consider separately gated read-only recovery from immutable bundle. No cutover until matching proof, FINAL ZIP and no-loss rollback pass. CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.
+Work L #113 reuses pinned C2 without a new writer: next authorize exact-HEAD protected read-only Work A proof. C6 scheduler root cause unknown; final-ZIP binding and no-loss rollback remain separate release gates. CUTOVER_PREFLIGHT_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WORKL-RECOVERY-OFFLINE-PASS-01 — exact C2 reuse gate PASS (2026-11-13)
+
+- [PR #113](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/113) `325669a4`, [CI #43389706624](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43389706624) SUCCESS: 20 tests and real C2 job/ZIP gate PASS. Inner SHA `3f53c7ca4a0bc1d0f25cd228dcde003cd45ac247ecab76747405f556f75e8030`; writer 33,315 (+48), 23/23. New owner/environment receipt required; six JSON/FINAL ZIP pending. NO CUTOVER.
+
 ## C6-C2-ONESHOT-DATA-PASS-PREP-NOARTIFACT-01 — C2 data PASS; C6 preparation FAIL (2026-11-13)
 
 - [#43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695), main@712c9e35 attempt 1: update-site SUCCESS; C6 preparation FAILURE (no steps), release jobs skipped; overall FAILURE. C2 artifact #13991878472 outer SHA-256 2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde verified. site-prod@f0cfcbc8 contains 23/23 run-bound capture checkpoints. C6 preparation artifact absent; no Work A/FINAL ZIP/rollback proof. Reset prep flag false; GLOBAL_CUTOVER=NO.
