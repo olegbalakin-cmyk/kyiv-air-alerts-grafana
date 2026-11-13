@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-13: physical Neon→6 JSON PASS; FINAL ZIP/rollback OPEN. GLOBAL_CUTOVER=NO; DST OFF. Latest: C6-WORKL-PHYSICAL-SIXJSON-PASS-01.**
+**2026-11-13: Work M prepare-only OWNER APPROVED, NOT DISPATCHED; FINAL ZIP/rollback OPEN. Latest: C6-WORKM-OWNER-GRANT-NODISPATCH-01. GLOBAL_CUTOVER=NO.**
 
 Read main docs first; newer PR #78 checkpoints govern. Verify exact SHA/runs; keep production, Neon, casualty and DST separate.
 
@@ -8,16 +8,20 @@ Read main docs first; newer PR #78 checkpoints govern. Verify exact SHA/runs; ke
 
 - **C2:** #43321997695 attempt 1: `update-site` SUCCESS (33,315 +48, 23/23); dependent C6 pre-run FAIL. No C2 rerun.
 - **Physical Work L:** [#43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985) SUCCESS at PR #113 `325669a4`. Artifact #14020616892; 18/18 SHA, 6/6 JSON, 23/23 historical freshness; Neon read-only, no writer, source HTTP or publication. Current alerts/DST not certified.
-- **Release blockers:** Original C2-run-bound preparation artifact absent; independent Work L proof is not a substitute. FINAL ZIP provenance owner gate and fresh rollback pending.
+- **Release blockers:** Original C2 prep artifact missing; Work M exact-SHA approval granted but dispatch inaccessible. No exact-head Work M CI/FINAL ZIP; fresh rollback pending.
 - **Production:** Netlify unchanged at last check; workflows paused; no cutover. Owner reports prep flag false.
 
 ## Next
 
-No new C2. Bind Work L proof to FINAL ZIP only through a separately approved exact provenance gate; fresh no-loss rollback and release authorization follow. GLOBAL_CUTOVER=NO.
+No C2. Owner/admin must securely satisfy Action gates; confirm C2 publisher paused **before** enabling shared workflow. One Work M dispatch only; approval unconsumed. GLOBAL_CUTOVER=NO.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WORKM-OWNER-GRANT-NODISPATCH-01 — prepare-only approved, not run (2026-11-13)
+
+- Owner authorized one exact [PR #116](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/116) SHA `9d846279b91b44b324a722ca00276a99956b4fca` prepare-only, **no C2/Neon writer/source HTTP/Git publication/Netlify/merge/cutover**. Connector cannot enable/dispatch workflow or manage repository Actions gates. No run created; permit unused. Require `C6_GIT_ONLY_PUBLISHER_PAUSED=true` before re-enabling scheduled workflow. Work M CI, FINAL ZIP and rollback OPEN. `GLOBAL_CUTOVER=NO`.
+
 ## C6-WORKL-PHYSICAL-SIXJSON-PASS-01 — physical Neon→6 JSON PASS (2026-11-13)
 
 - [Actions #43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985) SUCCESS attempt 1, PR #113 SHA `325669a4441f5cfaeed8327f08032c0ecf4449b9`; [artifact #14020616892](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985/artifacts/14020616892) independently hashed `79acb3017dccefdf19def7fe15bdaf2033b27d8c8a6d41f146d7b0e903bd3954`. Manifest 18/18, six JSON, historical 23/23 PASS; same C2 #43321997695 attempt 1; zero writer/source HTTP/publication. Current alert/DST unverified; C2 prep, FINAL ZIP and rollback OPEN. GLOBAL_CUTOVER=NO.
@@ -57,6 +61,5 @@ No new C2. Bind Work L proof to FINAL ZIP only through a separately approved exa
 
 ## Evidence and documentation maintenance
 
-- [Complete archive index and integrity](docs/coordination-archive/README.md): exact previous roots, original large historical blobs and dated snapshots; [machine manifest](docs/coordination-archive/manifest.json).
-- [Maintenance contract and CLI](docs/coordination-maintenance.md). CI verifies byte limits, exact historical record coverage and immutable archives. Automatic archival proposes a PR only; no direct main push or auto-merge.
-- **DOC-AUTO-MAINTENANCE-MERGE-02:** [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged at `main@3735f359d2bfa3310cc7f9fd46f9c8f3a2af0e8f`; [Actions 41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) SUCCESS on main (unit tests, byte gate, archive integrity and dry-run). Roots: PROJECT_STATE **7,990 B**, CHANGELOG **7,127 B** at merge; 10 records / 8 unique checkpoint IDs archived with hashes. Main-only PR-proposal job is now active but no over-threshold PR-creation attempt yet; bot permission remains unproven. No required status checks/rulesets; protection unchanged. CLI/patch fallback remains available. This documentation checkpoint is not a Neon release.
+- [Archive index](docs/coordination-archive/README.md), [manifest](docs/coordination-archive/manifest.json), and [maintenance CLI](docs/coordination-maintenance.md) retain historical proofs; archive via a PR, no direct main push.
+- **DOC-AUTO-MAINTENANCE-MERGE-02:** [PR #34](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/34) merged `main@3735f359`; [Actions #41202336197](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41202336197) PASS. Ten archived records indexed above. Bot archival PR permission unverified; not a Neon release.
