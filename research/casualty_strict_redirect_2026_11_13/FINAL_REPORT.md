@@ -32,3 +32,9 @@ Baseline Work G [Actions #43387015696](https://github.com/olegbalakin-cmyk/kyiv-
 Work I separate CI: `.github/workflows/research-casualty-strict-redirect-offline.yml`, runs the unchanged Work E tests, all 12 Work G tests (with self-loop expectation corrected), and 14 additional Work I safety tests. The workflow uploads test logs and `offline_proof.json`, whose SHA-256 source hashes bind the tested input package.
 
 **Final release gate:** declare `STRICT_REDIRECT_PREFLIGHT_PASS` only after an exact-HEAD GitHub Actions SUCCESS for all those offline tests, verified artifact and SHA-256. Until then: `PARTIAL — exact-HEAD proof pending`. A later PASS never authorizes media HTTP.
+
+## Physical GitHub Actions checkpoint (initial exact-head proof)
+
+- [Actions #43396876089](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43396876089): SUCCESS at code HEAD `b97865c57823a6b7eff2d3b932a79f20a26b45fc`, 36/36 offline tests PASS (Work E 10, Work G 12, Work I 14), zero publisher HTTP.
+- Artifact [#14023541047](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43396876089/artifacts/14023541047): GitHub-reported SHA-256 `f40e8bf8286d582aefbd21c946880be7db06d810a277c429a6e0c6eb83f8b895`. ZIP digest from GitHub metadata, not independently downloaded/recomputed.
+- **Offline technical decision: STRICT_REDIRECT_PREFLIGHT_PASS.** Authorization status remains NOT_AUTHORIZED, and the successful test provides **no** permission for live HTTP. This documentation-only addition must receive a fresh exact-head offline CI PASS before the final HEAD is handed off.
