@@ -1,0 +1,54 @@
+name: CASUALTY Work I strict redirect OFFLINE proof
+on:
+  push:
+    branches: [research-casualty-strict-redirect-worki-2026-11-13]
+permissions:
+  contents: read
+jobs:
+  redirect-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned offline test dependencies
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Run all Work E, Work G and Work I offline safety tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _pr102 rev-parse HEAD)" = bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          mkdir -p /tmp/casualty-worki
+          python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_ingest research.casualty_controlled_capture_preflight_2026_11_13.test_preflight research.casualty_strict_redirect_2026_11_13.test_redirect -v 2>&1 | tee /tmp/casualty-worki/tests.log
+      - name: Verify exact 10 URL authorization package without publisher GET
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/casualty_strict_redirect_2026_11_13/verify_offline.py /tmp/casualty-worki/offline_proof.json
+          grep -q '"decision": "STRICT_REDIRECT_PREFLIGHT_PASS"' /tmp/casualty-worki/offline_proof.json
+          grep -q '"publisher_http_requests": 0' /tmp/casualty-worki/offline_proof.json
+      - name: Upload offline-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-worki-strict-redirect-offline
+          path: |
+            /tmp/casualty-worki/tests.log
+            /tmp/casualty-worki/offline_proof.json
+          if-no-files-found: warn
+          retention-days: 30
