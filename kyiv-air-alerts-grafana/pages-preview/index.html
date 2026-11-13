@@ -255,8 +255,16 @@
         </div>
       </div>
       <article class="panel chart-card wide">
-        <h3>З чого складався час під тривогою</h3>
-        <p class="chart-subtitle">Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.</p>
+        <div class="time-profile-card-heading">
+          <div>
+            <h3>З чого складався час під тривогою</h3>
+            <p class="chart-subtitle">Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.</p>
+          </div>
+          <div class="control time-profile-compare-control">
+            <label for="kyivCausePeriod">Період</label>
+            <select id="kyivCausePeriod" aria-label="Період розподілу причин повітряних тривог у Києві"></select>
+          </div>
+        </div>
         <div class="chart-wrap kyiv-threat-causes-chart"><canvas id="kyivThreatCausesChart"></canvas></div>
       </article>
       <p id="kyivThreatCausesNote" class="source-note"></p>
@@ -602,6 +610,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="chart-share.js?v=20261019-share2-1"></script>
   <script src="kpi-range.js?v=20261021-interval-kpi-test1"></script>
-  <script src="app.js?v=20261112-daypart-time-test2"></script>
+  <script src="app.js?v=20261113-kyiv-causes-period-test1"></script>
 </body>
 </html>
