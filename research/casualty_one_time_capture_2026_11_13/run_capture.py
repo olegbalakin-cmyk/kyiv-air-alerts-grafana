@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 from datetime import datetime, timedelta, timezone
@@ -19,8 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 import sys
 sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
-EXPECTED_BASE = "a92e2ddb42060a77be966135c7fc0db9cca71c54"
-EXPECTED_BRANCH = "research-casualty-workk-three-source-runner-2026-11-13"
+EXPECTED_BASE = "69e7d023b4104c3583943eaf59f38b1d05ee32e5"
+EXPECTED_BRANCH = "research-casualty-workl-three-source-preflight-2026-11-13"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
@@ -146,6 +147,79 @@ def validate_launch(launch, template, queue, *, environ=None, now=None):
     return policy
 
 
+
+# Work L adds a one-commit gate to the unchanged Work K capture engine.
+# A special launch.json-only push is the sole permitted live trigger. All
+# other pushes/PRs remain strictly offline; no grant is in this repository.
+WORKK_HEAD = "69e7d023b4104c3583943eaf59f38b1d05ee32e5"
+LAUNCH_REL = "research/casualty_one_time_capture_2026_11_13/launch.json"
+
+
+def validate_one_launch_commit(launch, plan, *, environ=None, git_call=None):
+    """Fail before first GET unless this is the first exact approved launch commit."""
+    environ = os.environ if environ is None else environ
+    git_call = git if git_call is None else git_call
+    if not isinstance(launch, dict):
+        raise RuntimeError("WORKL_GRANT_INVALID")
+    previous = launch.get("expected_previous_commit_sha")
+    if (launch.get("expected_preflight_head_sha") != previous
+            or launch.get("workk_head_sha") != WORKK_HEAD
+            or launch.get("exact_urls") != [t["url"] for t in plan["targets"]]
+            or launch.get("allowed_hosts") != plan["allowed_hosts"]
+            or launch.get("limits") != LIMITS
+            or launch.get("approved_redirect_urls") != {t["target_id"]: [] for t in plan["targets"]}
+            or launch.get("production_write_allowed") is not False
+            or launch.get("source_fulltext_persistence_allowed") is not False
+            or launch.get("status") != "OWNER_APPROVED_SINGLE_LAUNCH"):
+        raise RuntimeError("WORKL_EXACT_OWNER_GRANT_NOT_MATCHED")
+    auth = launch.get("authorization_id", "")
+    if not isinstance(auth, str) or any(t in auth.upper() for t in ("SYNTHETIC", "EXAMPLE", "TEST")):
+        raise RuntimeError("WORKL_NOT_A_REAL_FRESH_GRANT")
+    if (environ.get("GITHUB_ACTOR") != "olegbalakin-cmyk"
+            or environ.get("GITHUB_REF") != "refs/heads/" + EXPECTED_BRANCH
+            or environ.get("GITHUB_EVENT_NAME") != "push"
+            or environ.get("GITHUB_RUN_ATTEMPT") != "1"
+            or environ.get("GITHUB_EVENT_BEFORE") != previous
+            or not environ.get("GITHUB_SHA")):
+        raise RuntimeError("WORKL_LAUNCH_IDENTITY_OR_ATTEMPT_REJECTED")
+    if (git_call("rev-parse", "HEAD") != environ["GITHUB_SHA"]
+            or git_call("rev-parse", "HEAD^") != previous):
+        raise RuntimeError("WORKL_EXACT_PARENT_OR_HEAD_REJECTED")
+    if git_call("diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD") != LAUNCH_REL:
+        raise RuntimeError("WORKL_LAUNCH_ONLY_COMMIT_REQUIRED")
+    if git_call("log", "--format=%H", "HEAD^", "--", LAUNCH_REL):
+        raise RuntimeError("WORKL_AUTHORIZATION_ALREADY_USED_IN_BRANCH_HISTORY")
+    try:
+        git_call("merge-base", "--is-ancestor", WORKK_HEAD, previous)
+    except (subprocess.CalledProcessError, RuntimeError) as exc:
+        raise RuntimeError("WORKL_WORKK_ANCESTRY_NOT_VERIFIED") from exc
+
+
+def withhold_unsafe_excerpts(card):
+    """Conservative evidence-output filter; Work J remains the only extractor."""
+    original = list(card.get("excerpts", []))
+    safe = []
+    for excerpt in original:
+        snippet = excerpt.get("text", "") if isinstance(excerpt, dict) else ""
+        if not isinstance(snippet, str) or not snippet or len(snippet) > 170:
+            continue
+        # Work J already redacts email/phone. Drop entire quote when other
+        # personal details or unreviewed proper names could remain.
+        tail = " ".join(snippet.split()[1:])
+        if (re.search(r"[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}", snippet)
+                or re.search(r"\+?\d[\d ()-]{9,}\d", snippet)
+                or re.search(r"\b(?:вулиця|вул\.?|будинок|буд\.?|квартира|кв\.?|"
+                             r"паспорт|адреса|телефон|прізвище|ім'я|по батькові)\b", snippet, re.I)
+                or re.search(r"\b[А-ЯЄІЇҐ][а-яєіїґ'’-]{2,}\b", tail)):
+            continue
+        safe.append(excerpt)
+    card["excerpts"] = safe
+    if len(safe) != len(original):
+        card["reasons"] = sorted(set(card.get("reasons", []) + [
+            "PRIVACY_REVIEW_EXCERPT_WITHHELD"]))
+    return card
+
+
 def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
     """Adapt PR #118 output writer, preserving Work J audit facts and reviewer gates."""
     if (len(plan["targets"]) != 3 or len(audit.get("targets", [])) > 3
@@ -154,7 +228,9 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
     output.mkdir(parents=True, exist_ok=True)
     receipts = [{"target_id": t["target_id"], "case_id": t["case_id"],
                  "role": t["role"], "candidate_ids": t["candidate_ids"],
-                 "receipt": record, "publication_allowed": False}
+                 "receipt": {k: v for k, v in record.items()
+                             if k not in ("page_title", "blocked_redirect_url")},
+                 "publication_allowed": False}
                 for t, record in zip(plan["targets"], audit["targets"])]
     # Required Work K integration: do NOT persist volatile original source bodies.
     facts = e.minimal_capture_facts(volatile, queue)
@@ -164,6 +240,7 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
         raise RuntimeError("WORKJ_PUBLICATION_GUARD_VIOLATED")
     roles = {x["receipt"].get("resolved_url"): x["role"] for x in receipts}
     for card in facts["facts"]:
+        withhold_unsafe_excerpts(card)
         url = card.get("source_url")
         if not url or roles.get(url) != card.get("source_role"):
             raise RuntimeError("FACT_WITHOUT_MATCHING_SOURCE_RECEIPT")
@@ -182,8 +259,9 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
         retained, rejected = e.work_a.anchored_articles(queue, volatile)
         diagnostics = {}
         reports = e.extract_cached_reports(queue, retained, diagnostics=diagnostics)
-        parser_errors = {"candidate_binding_issues": rejected,
-                         "workj_parser_diagnostics": diagnostics}
+        parser_errors = {"candidate_binding_issue_count": len(rejected),
+                         "workj_reason_counts": diagnostics.get("reason_counts", {}),
+                         "workj_stage_counts": diagnostics.get("stage_counts", {})}
         for report in reports:
             extracted.append({"candidate_ids": report.get("candidate_ids", []),
                               "incident": report.get("incident"),
@@ -263,7 +341,10 @@ def main():
     if not args.launch:
         raise RuntimeError("MISSING_SEPARATE_OWNER_GRANT")
     launch = json.loads(args.launch.read_text())
+    if not args.launch.is_file() or args.launch.resolve() != HERE / "launch.json":
+        raise RuntimeError("WORKL_LAUNCH_FILE_MUST_BE_EXACT_REPO_PATH")
     policy = validate_launch(launch, template, queue)
+    validate_one_launch_commit(launch, plan)
     output.mkdir(parents=True, exist_ok=True)
     try:
         volatile, audit = e.controlled_capture(policy, queue, enabled=True)
