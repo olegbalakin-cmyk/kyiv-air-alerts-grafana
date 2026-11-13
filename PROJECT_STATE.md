@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-13: Work Q FINAL PREFLIGHT FAIL (Netlify recovery-proof binding). Latest accepted: C6-C3-WORKQ-NETLIFY-CONTRACT-NOGO-01. ROLLBACK_OPERATIONAL_READY=YES (tested configuration); CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.**
+**2026-11-13: Work R Netlify recovery contract 16/16 offline PASS. Latest accepted: C6-C3-WORKR-NETLIFY-RECOVERY-OFFLINE-PASS-01. Merges/release NOT authorized; ROLLBACK_OPERATIONAL_READY=YES (tested), CUTOVER_READY=NO; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF.**
 
 Read main documentation first; PR #78 newer accepted checkpoints govern. Keep production, Neon, casualty and DST separate.
 
@@ -17,11 +17,15 @@ Read main documentation first; PR #78 newer accepted checkpoints govern. Keep pr
 
 ## Next
 
-Only narrow Netlify Neon recovery-provenance gate + negative tests. Then separately authorized PR #119/`site-prod` merges, owner receipt, effective Actions write/environment permissions, paused competing publishers and Netlify Auto publishing, plus current no-loss Git/C2/casualty/aux/freshness check. One explicit release GO required. No C2/writer/source HTTP/publish/merge/cutover now.
+Separate owner approval for merge of PR #119 (main) and PR #120 (site-prod); verify live Actions permissions and fresh C2/casualty/aux/freshness/rollback hashes. One explicit production GO required. No merge, deployment or cutover now.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-C3-WORKR-NETLIFY-RECOVERY-OFFLINE-PASS-01 — Netlify release contract offline PASS (2026-11-13)
+
+- [Draft PR #120](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/120) exact `ac32540fcb0074afaed20ec9f6849b32777dc9c7`: [Actions #43422122898](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43422122898) SUCCESS attempt 1. 16/16 focused fail-closed/legacy identity tests PASS; original Netlify path retained. Two fixes only to offline test assertions after #43421545056 FAIL and #43422060631 FAIL. The C2→Work L→Work M path remains default OFF, owner-gated; no real publish/merge. `NETLIFY_CONTRACT_READY=YES` (offline); `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
 ## C6-C3-WORKQ-NETLIFY-CONTRACT-NOGO-01 — static release gate mismatch (2026-11-13)
 
 - Verified unchanged `main@712c9e35`, `site-prod@f0cfcbc8`, Work L #43390770985 (23/23), Work M #43403595621 FINAL #14025629654 SHA `f2252da0…51ed`, Work N #43407785056, and restored Netlify production `6adb629bc3ebc570117d82e1`. Work P operational rollback PASS (tested setup); PR #119 remains Draft.
