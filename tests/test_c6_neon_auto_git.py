@@ -3,6 +3,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
 import unittest
+import io
+import subprocess
+from contextlib import redirect_stdout
+from unittest.mock import patch
 
 from scripts import c6_neon_auto_git as auto
 
@@ -132,6 +136,115 @@ class AutoGitOnlyTests(unittest.TestCase):
         self.assertFalse(auto.retains_keys({"a": 1}, {"b": 3}))
         self.assertFalse(auto.retains_keys([1, 2], [1]))
         self.assertFalse(auto.retains_keys([{"id": 1}], [{"id": 2}]))
+
+
+    def test_capture_reason_is_visible_without_raw_exception(self):
+        for exception, expected in (
+            (auto.Blocked("C2_WRITER_RECEIPT_NOT_PASS"), "C2_WRITER_RECEIPT_NOT_PASS"),
+            (auto.Blocked("C2_GENERATION_NOT_UPDATED"), "C2_GENERATION_NOT_UPDATED"),
+            (auto.Blocked("unsafe /tmp/secret=token"), "VALIDATION_BLOCKED"),
+            (auto.Blocked("NEON_DATABASE_URL_SECRET123"), "VALIDATION_BLOCKED"),
+            (auto.Blocked("UNKNOWN_CAPTURE_GUARD"), "VALIDATION_BLOCKED"),
+            (OSError("/tmp/private/connection"), "IO_FAILED"),
+            (KeyError("secret_key"), "INVALID_INPUT"),
+            (subprocess.CalledProcessError(1, ["git", "secret"]), "SUBPROCESS_FAILED"),
+        ):
+            self.assertEqual(auto.safe_block_reason(exception), expected)
+
+    def test_cli_unknown_uppercase_block_reason_is_redacted(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            with patch("sys.argv", [
+                "c6_neon_auto_git.py", "capture",
+                "--checkout", str(root), "--output", str(root / "out"),
+                "--status", str(root / "status.json"),
+                "--input-sha", "a" * 40, "--workflow-sha", "b" * 40,
+                "--run-id", "43510482714", "--run-attempt", "1",
+            ]), patch.object(auto, "capture", side_effect=auto.Blocked(
+                    "NEON_DATABASE_URL_SECRET123")):
+                out = io.StringIO()
+                with redirect_stdout(out):
+                    self.assertEqual(auto.main(), 2)
+                self.assertIn("C6_BLOCK_REASON=VALIDATION_BLOCKED", out.getvalue())
+                self.assertIn("ZERO_GIT_PUBLICATION_BY_THIS_RUN", out.getvalue())
+                self.assertNotIn("NEON_DATABASE_URL_SECRET123", out.getvalue())
+
+    def test_cli_capture_failure_reports_only_allowlisted_reason(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            with patch("sys.argv", [
+                "c6_neon_auto_git.py", "capture",
+                "--checkout", str(root), "--output", str(root / "out"),
+                "--status", str(root / "status.json"),
+                "--input-sha", "a" * 40, "--workflow-sha", "b" * 40,
+                "--run-id", "43510482714", "--run-attempt", "1",
+            ]), patch.object(auto, "capture", side_effect=auto.Blocked(
+                    "C2_GENERATION_NOT_UPDATED")):
+                out = io.StringIO()
+                with redirect_stdout(out):
+                    self.assertEqual(auto.main(), 2)
+                self.assertIn("C6_BLOCK_REASON=C2_GENERATION_NOT_UPDATED", out.getvalue())
+                self.assertIn("ZERO_GIT_PUBLICATION_BY_THIS_RUN", out.getvalue())
+
+    def test_cli_does_not_leak_sensitive_error_details(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            with patch("sys.argv", [
+                "c6_neon_auto_git.py", "capture",
+                "--checkout", str(root), "--output", str(root / "out"),
+                "--status", str(root / "status.json"),
+                "--input-sha", "a" * 40, "--workflow-sha", "b" * 40,
+                "--run-id", "43510482714", "--run-attempt", "1",
+            ]), patch.object(auto, "capture", side_effect=OSError(
+                    "private NEON_DATABASE_URL=secret")):
+                out = io.StringIO()
+                with redirect_stdout(out):
+                    self.assertEqual(auto.main(), 2)
+                self.assertIn("C6_BLOCK_REASON=IO_FAILED", out.getvalue())
+                self.assertNotIn("NEON_DATABASE_URL", out.getvalue())
+                self.assertNotIn("secret", out.getvalue())
+
+    def test_offline_capture_replay_with_valid_status_and_dirty_delta(self):
+        with TemporaryDirectory() as temp:
+            base = Path(temp)
+            checkout = base / "repo"
+            checkout.mkdir()
+            def run(*args):
+                return subprocess.check_output(
+                    ["git", "-C", str(checkout), *args], text=True).strip()
+            run("init", "-q")
+            run("checkout", "-q", "-b", "site-prod")
+            run("config", "user.name", "C6 offline")
+            run("config", "user.email", "c6@example.invalid")
+            dashboard = checkout / auto.PREFIX / "dashboard_data.json"
+            checkpoint = checkout / auto.PREFIX / "c2_history_capture_checkpoints.json"
+            dashboard.parent.mkdir(parents=True)
+            dashboard.write_text('{"old":true}\\n')
+            checkpoint.write_text('{"kyiv":{}}\\n')
+            run("add", ".")
+            run("commit", "-qm", "fixture baseline")
+            head = run("rev-parse", "HEAD")
+            dashboard.write_text('{"new":true}\\n')
+            checkpoint.write_text('{"kyiv":{"run":43510482714}}\\n')
+            status = base / "status.json"
+            status.write_text(json.dumps({
+                "canonical_persistence_status": "NEON_SUCCEEDED",
+                "canonical_receipt_validated": True,
+                "workflow_sha": "b" * 40,
+                "input_sha": head,
+            }))
+            output = base / "delta"
+            manifest = auto.capture(
+                checkout, output, input_sha=head,
+                workflow_sha="b" * 40, run_id=43510482714,
+                run_attempt=1, status_path=status)
+            self.assertEqual(set(manifest["files"]), {
+                auto.PREFIX + "dashboard_data.json",
+                auto.PREFIX + "c2_history_capture_checkpoints.json",
+            })
+            self.assertEqual(run("rev-parse", "HEAD"), head)
+            self.assertFalse((checkout / ".git" / "refs" / "remotes").exists())
+            self.assertTrue((output / "manifest.json").is_file())
 
 
 if __name__ == "__main__":

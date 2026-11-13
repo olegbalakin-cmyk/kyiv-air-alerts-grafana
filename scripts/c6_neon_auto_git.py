@@ -30,6 +30,22 @@ SCHEMA = "c6-neon-auto-c2-delta-v1"
 REPOSITORY = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
 NEON_BRANCH = "br-bold-mode-b5rub8pq"
 
+# Fixed capture() guard identifiers only; never echo arbitrary exception text.
+SAFE_CAPTURE_BLOCK_REASONS = frozenset({
+    "CAPTURE_ARGS_MISSING",
+    "C2_CHECKPOINTS_MISSING",
+    "C2_DELTA_TOO_MANY_FILES",
+    "C2_GENERATION_NOT_UPDATED",
+    "C2_INPUT_HEAD_MISMATCH",
+    "C2_WRITER_RECEIPT_NOT_PASS",
+    "DELETIONS_RENAMES_OR_CONFLICTS_BLOCKED",
+    "INVALID_C2_DELTA_FILE",
+    "INVALID_GIT_STATUS",
+    "OUTPUT_NOT_ISOLATED",
+    "OUTSIDE_C2_DATA_ALLOWLIST",
+    "UNEXPECTED_GIT_DATA_PATH",
+})
+
 
 class Blocked(ValueError):
     pass
@@ -335,6 +351,19 @@ def publish(checkout, delta, prepared, proof, *, repository,
                 "netlify_deployments_per_update": 0}
 
 
+
+def safe_block_reason(error):
+    """Expose only known capture guard identifiers, never raw exception data."""
+    if isinstance(error, (Blocked, candidate.Blocked)):
+        value = str(error)
+        return value if value in SAFE_CAPTURE_BLOCK_REASONS else "VALIDATION_BLOCKED"
+    if isinstance(error, subprocess.CalledProcessError):
+        return "SUBPROCESS_FAILED"
+    if isinstance(error, OSError):
+        return "IO_FAILED"
+    return "INVALID_INPUT"
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("operation", choices=["capture", "publish"])
@@ -366,8 +395,11 @@ def main():
                 enabled=os.getenv("C6_AUTO_NEON_GIT_ENABLED", ""),
                 zero_deploys=os.getenv("NETLIFY_DEPLOYMENTS_PER_UPDATE", ""))
     except (Blocked, candidate.Blocked, OSError, KeyError, TypeError,
-            ValueError, subprocess.CalledProcessError):
-        print("C6_AUTO_NEON_GIT_BLOCKED; ZERO_GIT_PUBLICATION_BY_THIS_RUN")
+            ValueError, subprocess.CalledProcessError) as error:
+        # The original pilot lost the exact guard reason. Do not log raw
+        # exceptions, file paths, C2 bytes, environment or subprocess output.
+        print("C6_AUTO_NEON_GIT_BLOCKED; ZERO_GIT_PUBLICATION_BY_THIS_RUN;"
+              f" C6_BLOCK_REASON={safe_block_reason(error)}")
         return 2
     print(json.dumps(result, sort_keys=True))
     return 0
