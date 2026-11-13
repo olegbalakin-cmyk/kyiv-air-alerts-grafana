@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-13. Work S authorized execution BLOCKED before production dispatch. GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF. Latest accepted remains C6-C3-WORKS-OWNER-GATES-NOGO-01.**
+**2026-11-13. Latest accepted: C6-C3-WORKS-DISPATCH-DEFAULT-BRANCH-BLOCK-01. Release BLOCKED before dispatch; GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Preserve historical records verbatim; root byte gate ≤12,288 B PASS. The observation below records execution under the owner's separate production GO; it does not claim an accepted cutover.
 
@@ -15,11 +15,16 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Preserv
 
 ## Next
 
-Provide an authenticated GitHub CLI/REST workflow-dispatch channel for the exact [Work S sequence](docs/work-s-release-2026-11-13.md) and [inputs](docs/work-s-release-2026-11-13.json). Resume the same authorized release only after current refs/data/freshness checks and temporary gate setup. Keep both workflows disabled and pause=true until execution; ordinary Git-only C2 must not resume after a Neon switch.
+**Default-branch dispatch blocker:** `workflow_dispatch` requires a file on default `main`; `netlify-production.yml` exists only on `site-prod`. CLI/REST authentication alone is insufficient. Next: separately authorize a minimal PR registering the unchanged workflow on `main` with default-OFF, `site-prod` job guard and no auto-deploy. Re-pin main SHA and freshness preflight. Keep freeze; `GLOBAL_CUTOVER=NO`.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-C3-WORKS-DISPATCH-DEFAULT-BRANCH-BLOCK-01 — manual dispatch blocked (2026-11-13)
+
+- `main@d68e35e3` lacks `.github/workflows/netlify-production.yml` (404); `site-prod@99648321` contains `workflow_dispatch`. [GitHub docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch) require a default-branch file. Small separate approved PR and new main SHA pins required before retry. No production action; `GLOBAL_CUTOVER=NO`.
+
+
 ## C6-C3-WORKS-OWNER-GATES-NOGO-01 — release bytes/freshness/rollback PASS; production gates not installed (2026-11-13)
 
 - Read-only Work S confirms `main@d68e35e35c8d50954a77adf99a7dda668724734b`, `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839`; merged N/R code equals exact previously passing research code. C2 exact failure-before-runner identity unchanged; Work L/M SUCCESS and pinned artifacts unexpired. FINAL #14025629654 physical ZIP SHA `f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed`; six final SHA, 23 cities, generation `2026-11-13T10:08:11.334497+02:00` verified.
