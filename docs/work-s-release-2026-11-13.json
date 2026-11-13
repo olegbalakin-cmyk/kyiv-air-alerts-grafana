@@ -1,22 +1,19 @@
 {
-  "schema": "work-s-final-release-preflight-v1",
-  "checkpoint": "C6-C3-WORKS-OWNER-GATES-NOGO-01",
-  "as_of_utc": "2026-11-13T15:58:18.565372+00:00",
-  "FINAL_RELEASE_PREFLIGHT": "FAIL",
-  "CUTOVER_READY": "NO",
+  "schema": "work-s-final-release-v2",
+  "checkpoint": "C6-C3-WORKS-NEON-CUTOVER-PASS-01",
+  "as_of_utc": "2026-11-13T20:19:32.888543+00:00",
+  "FINAL_RELEASE_PREFLIGHT": "PASS",
+  "CUTOVER_READY": "YES",
   "ROLLBACK_READY": "YES",
   "ADMIN_FREEZE_VERIFIED": "YES",
-  "GLOBAL_CUTOVER": "NO",
+  "GLOBAL_CUTOVER": "YES",
   "DST_CORRECTION": "OFF",
   "main_sha": "1dbacef11367b97805c43be112cfeb2c23c12072",
   "site_prod_sha": "99648321e64037a6dcf3ae0072d66eedcccc2839",
-  "production_deploy_id": "6adb629bc3ebc570117d82e1",
+  "production_deploy_id": "6af76b2d67c5074986728b62",
   "technical_data_and_merged_contract_checks": "PASS",
-  "release_blockers": [
-    "c6-neon-git-release protected environment does not exist (owner UI read).",
-    "Separate production release grants and required release variables are absent; prepare-only receipt is not production authorization."
-  ],
-  "minimal_unblock": "Separate owner production GO for the pinned Netlify-first then Git publication sequence, including temporary existing gates and new protected environment; no new data/code proof required while receipts stay valid and refs/data stay fixed.",
+  "release_blockers": [],
+  "minimal_unblock": null,
   "admin": {
     "pause": true,
     "netlify_workflow": "disabled_manually",
@@ -29,9 +26,10 @@
     "site_prod_protected": false,
     "netlify_auth_token_secret_name_present": true,
     "production_grant_secret_names_present": false,
-    "protected_release_environment_present": false,
+    "protected_release_environment_present": true,
     "secret_values_read": false,
-    "settings_changed": false
+    "settings_changed": true,
+    "temporary_release_settings_removed": true
   },
   "freshness": {
     "status": "PASS",
@@ -331,13 +329,62 @@
   "prohibited_actions_executed": [],
   "pins_updated_at_utc": "2026-11-13T19:40:45.019867+00:00",
   "latest_execution": {
-    "CUTOVER_RESULT": "BLOCKED",
-    "GLOBAL_CUTOVER": "NO",
-    "blocker": "AUTO_REVIEW_NETLIFY_UNLOCK_REJECTED",
-    "dispatch_available": true,
-    "dispatch_count": 0,
-    "production_unchanged": true,
-    "cleanup": "GRANTS_AND_13_TEMPORARY_VARIABLES_REMOVED",
+    "CUTOVER_RESULT": "PASS",
+    "GLOBAL_CUTOVER": "YES",
+    "netlify_run_id": 43496568449,
+    "git_run_id": 43497605769,
+    "netlify_deployment_id": "6af76b2d67c5074986728b62",
+    "git_publication_commit_sha": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+    "netlify_dispatch_count": 1,
+    "git_dispatch_count": 1,
+    "temporary_unlock_count": 1,
+    "approved_deployment_locked": true,
+    "production_qa": "PASS",
+    "cleanup": "ALL_TEMPORARY_GRANTS_AND_FLAGS_REMOVED",
+    "rollback_applied": false,
+    "automatic_git_only_c2_resumed": false,
     "receipt": "docs/work-s-final-execution-2026-11-13.json"
-  }
+  },
+  "historical_preflight_status": {
+    "schema": "work-s-final-release-preflight-v1",
+    "checkpoint": "C6-C3-WORKS-OWNER-GATES-NOGO-01",
+    "as_of_utc": "2026-11-13T15:58:18.565372+00:00",
+    "FINAL_RELEASE_PREFLIGHT": "FAIL",
+    "CUTOVER_READY": "NO",
+    "GLOBAL_CUTOVER": "NO",
+    "production_deploy_id": "6adb629bc3ebc570117d82e1",
+    "release_blockers": [
+      "c6-neon-git-release protected environment does not exist (owner UI read).",
+      "Separate production release grants and required release variables are absent; prepare-only receipt is not production authorization."
+    ],
+    "minimal_unblock": "Separate owner production GO for the pinned Netlify-first then Git publication sequence, including temporary existing gates and new protected environment; no new data/code proof required while receipts stay valid and refs/data stay fixed.",
+    "admin": {
+      "pause": true,
+      "netlify_workflow": "disabled_manually",
+      "c2_workflow": "disabled_manually",
+      "netlify_locked": true,
+      "active_queued_waiting_pending_requested": 0,
+      "actor_repository_permission": "admin",
+      "actions_policy": "allow_all",
+      "default_token_permission": "read; publisher job explicitly requests contents:write/actions:read",
+      "site_prod_protected": false,
+      "netlify_auth_token_secret_name_present": true,
+      "production_grant_secret_names_present": false,
+      "protected_release_environment_present": false,
+      "secret_values_read": false,
+      "settings_changed": false
+    },
+    "latest_execution": {
+      "CUTOVER_RESULT": "BLOCKED",
+      "GLOBAL_CUTOVER": "NO",
+      "blocker": "AUTO_REVIEW_NETLIFY_UNLOCK_REJECTED",
+      "dispatch_available": true,
+      "dispatch_count": 0,
+      "production_unchanged": true,
+      "cleanup": "GRANTS_AND_13_TEMPORARY_VARIABLES_REMOVED",
+      "receipt": "docs/work-s-final-execution-2026-11-13.json"
+    }
+  },
+  "CUTOVER_RESULT": "PASS",
+  "site_prod_sha_after": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb"
 }

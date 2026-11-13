@@ -1,24 +1,27 @@
 # Project State — coordination snapshot
 
-**2026-11-13. Latest accepted: C6-C3-WORKT-MERGE123-DISPATCH-REGISTERED-01. PR #123 merged; GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF.**
+**2026-11-13. Latest accepted: C6-C3-WORKS-NEON-CUTOVER-PASS-01. CUTOVER_RESULT=PASS; GLOBAL_CUTOVER=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF.**
 
-Read main documentation first; newer accepted PR #78 checkpoints govern. Preserve historical records verbatim; root byte gate ≤12,288 B PASS. The observation below records execution under the owner's separate production GO; it does not claim an accepted cutover.
+Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
-## Current execution observation — Work S stopped before publication
+## Current production
 
-- **CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES.** Production owner GO was received. Actual refs remain `main@1dbacef11367b97805c43be112cfeb2c23c12072`, `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839`. Current release pins replace old `d68e35e3`; historical checkpoint refs below are retained verbatim.
-- At 18:26:56Z, exact production Netlify contract **EXACT_WORK_L_TO_WORK_M_NETLIFY_KPI_PASS**; physical C2/L/M/report artifacts, six FINAL hashes and 23 cities verified. Historical freshness 23/23 PASS with the real clock; 60/60 current data/rollback/casualty/aux/frontend identities PASS. Existing Work P operational rollback applies to unchanged bytes; no proof workflow repeated. First expiry remains **14 November 2026, 12:40:40 Kyiv**.
-- Installed and verified all 13 Netlify variables and a separate 45-minute Netlify owner grant; temporarily enabled Netlify workflow. Default-branch registration now works: **Run workflow** was available, ref `site-prod` selected, exact Work S inputs filled. Git grant and Git release flag were never installed; ordinary C2 stayed disabled.
-- **Automatic approval review rejected `Unlock published deploy`**, treating resumed Auto publishing as broader than one approved dispatch. No unlock, dispatch, release Actions run, new deployment or Git JSON publication occurred. Dialog cancelled; no bypass attempted. An earlier input-configuration rejection based on research-only permission flags was resolved by the exact production contract PASS; the later unlock rejection remains the blocker.
-- Cleanup: Netlify grant and all 13 temporary variables removed; both production workflows manually disabled; pause=true; Git environment remains empty. Netlify current **`6adb629bc3ebc570117d82e1`** ready/locked. Release production QA **NOT RUN**; rollback **NOT NEEDED**, production unchanged. No C2/writer/source HTTP, casualty/WIP or DST change. [Execution receipt](docs/work-s-final-execution-2026-11-13.json).
+- One owner-approved historical Neon cutover completed before the deadline. Main `1dbacef11367b97805c43be112cfeb2c23c12072`; site-prod `54079326ae2b4e691e2bfcf7cd1a51c9705404eb` (parent `99648321e64037a6dcf3ae0072d66eedcccc2839`). Netlify production `6af76b2d67c5074986728b62`, ready/locked. Generation `2026-11-13T10:08:11.334497+02:00`; all six FINAL JSON verified through Git and live HTTP.
+- Netlify run [43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) SUCCESS, independently verified at 19:55:58Z; one temporary unlock, then approved deployment relocked before separate Git grant. Git run [43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769) SUCCESS, owner-reviewed environment; publication at 20:03:12Z. Freshness 23/23 and 60 data/rollback identities passed before release; no bypass.
+- Production QA PASS: 23 cities × 8 modes, 23 CSV/644 rows, rendered graphs/Kyiv causes/casualty, site JS errors 0. All 2,858 Kyiv source interval tuples, 12 casualty blobs and two audit auxiliaries preserved. Rollback not needed. [Full execution receipt](docs/work-s-final-execution-2026-11-13.json) retains the earlier stopped attempt.
+- Final safe state: Auto publishing OFF, independent `locked=true`; both production workflows disabled manually; pause=true; both owner grants, 13 temporary repository variables and Git release flag removed. Protected environment retained empty. No new C2/writer/source HTTP, proof rerun, merge, DST or casualty/WIP change.
 
 ## Next
 
-Execution is stopped. Keep freeze and do not resume Git-only C2. Resolving the temporary Netlify unlock approval block is required before the same Work S sequence can resume; recheck refs, current data and real-clock freshness then. No new PR, Work task or proof rerun was created.
+Keep the approved freeze. Do not resume automatic Git-only C2. This checkpoint certifies the completed historical snapshot cutover; recurring delivery and live alert status are not certified. Any later publication requires fresh applicable gates and owner scope.
 
-## Latest accepted checkpoint — full text
+## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-C3-WORKS-NEON-CUTOVER-PASS-01 — controlled historical Neon cutover (2026-11-13)
+
+- Separate owner production GO and one temporary unlock/relock approval executed. Netlify `6af76b2d67c5074986728b62` independently verified before Git publication `54079326ae2b4e691e2bfcf7cd1a51c9705404eb`; Actions #43496568449/#43497605769 SUCCESS. Freshness 23/23, data/rollback hashes, production QA and final administrative freeze PASS. Both grants/temporary flags removed; rollback not needed. `CUTOVER_RESULT=PASS; GLOBAL_CUTOVER=YES`. [Receipt](docs/work-s-final-execution-2026-11-13.json).
+
 ## C6-C3-WORKT-MERGE123-DISPATCH-REGISTERED-01 — approved PR #123 merge (2026-11-13)
 
 - Screenshots: publisher pause=true, both workflows Disabled manually; Netlify API locked/ready on `6adb629bc3ebc570117d82e1`. PR #123 `eeaca9f3`, two exact-head CI PASS, one workflow file matching site-prod. Squash-merged `main@1dbacef11367b97805c43be112cfeb2c23c12072`. Job remains site-prod-only, default-OFF; no publisher or cutover. `GLOBAL_CUTOVER=NO`.

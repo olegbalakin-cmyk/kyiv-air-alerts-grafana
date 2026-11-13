@@ -1,6 +1,16 @@
-# Work S: final release preflight, 13 November 2026
+# Work S: completed historical Neon release, 13 November 2026
 
-Current execution: **BLOCKED before publication by automatic approval review of temporary Netlify unlock**. Dispatch UI is registered and available; 13 variables/grant were installed and cleaned up. No dispatch or source switch. Current main pin is `1dbacef11367b97805c43be112cfeb2c23c12072`. See [final execution receipt](work-s-final-execution-2026-11-13.json). The original preflight findings below are historical; templates require a new actual expiry before any resumption.
+**CUTOVER_RESULT=PASS; GLOBAL_CUTOVER=YES.** Owner production GO and the separate one-time temporary Netlify unlock/relock approval were executed. Main release pin `1dbacef11367b97805c43be112cfeb2c23c12072` replaced the old main pin throughout current release inputs/grants.
+
+- Netlify Actions #43496568449 SUCCESS; actual production `6af76b2d67c5074986728b62`, canonical KPI/generation/23 cities verified at 19:55:58Z, then relocked before the Git grant. Independent final API: `locked=true`, ready; Auto publishing OFF.
+- Git Actions #43497605769 SUCCESS after owner environment review; one publication `54079326ae2b4e691e2bfcf7cd1a51c9705404eb` at 20:03:12Z, parent `99648321e64037a6dcf3ae0072d66eedcccc2839`. Six FINAL JSON match Git/live HTTP.
+- Production QA PASS: 23 cities/8 modes/184 views, 23 CSV/644 rows, rendered graphs/Kyiv causes/casualty, site JS errors0; Kyiv/casualty/aux preserved. Both stages completed before 14 November12:40:40 Kyiv. Both grants,13 temporary repository variables and Git release flag removed; both workflows disabled, pause=true. Rollback not needed; automatic Git-only C2 remains paused.
+
+[Final execution receipt](work-s-final-execution-2026-11-13.json) includes exact IDs, hashes, checks and the previous stopped attempt. This one-shot historical cutover does not certify recurring delivery or live alert status. Do not replay this procedure or its invalid templates.
+
+## Historical preflight and original release procedure
+
+The following describes the checked pre-execution baseline and former authorization blockers, which were resolved by the owner's production GO and additional unlock approval.
 
 `FINAL_RELEASE_PREFLIGHT=FAIL; CUTOVER_READY=NO; ROLLBACK_READY=YES; ADMIN_FREEZE_VERIFIED=YES; GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 
@@ -95,5 +105,5 @@ If no post-snapshot data changed, use Work N #14028565807: recover only its five
 
 If any newer C2, casualty, Kyiv or aux data exists, **do not restore old JSON or reset site-prod**. Preserve those bytes, recapture/reconcile a current Git-only package using the existing no-loss policy, and deploy only a matching-generation static index. A full source rollback is blocked until that reconciliation passes. Work P authority does not prove zero-loss restoration of an arbitrary later data state.
 
-No production operation, workflow enable, unlock, merge, C2/writer/source HTTP, Git publication, DST or casualty/WIP change was performed in Work S. The only remote changes are this requested coordination update in PR #78.
+The original preflight itself performed no production action. The completed Work S execution is recorded at the top and in the final execution receipt; the historical procedure above is retained as evidence.
 
