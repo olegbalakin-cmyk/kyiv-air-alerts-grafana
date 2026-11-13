@@ -1,0 +1,63 @@
+name: CASUALTY owner-approved one-time ten-source capture
+on:
+  push:
+    branches: [research-casualty-one-time-10-source-2026-11-13]
+    paths:
+      - "research/casualty_one_time_capture_2026_11_13/launch.json"
+permissions:
+  contents: read
+jobs:
+  single-use-read-only:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: casualty-one-time-owner-grant-20261113
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Recheck known-safe Work E/G/I code before HTTP
+        run: |
+          set -euo pipefail
+          python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+          python -m py_compile research/casualty_one_time_capture_2026_11_13/run_capture.py
+          python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_ingest research.casualty_controlled_capture_preflight_2026_11_13.test_preflight research.casualty_strict_redirect_2026_11_13.test_redirect -q
+      - name: Execute exactly one owner-authorized source-only pilot (no data writes)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/casualty-source-one-shot
+          python research/casualty_one_time_capture_2026_11_13/run_capture.py --launch research/casualty_one_time_capture_2026_11_13/launch.json --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json --output /tmp/casualty-source-one-shot
+      - name: Verify no checked-out sources were modified
+        if: always()
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          git -C _wip diff --exit-code
+          git -C _site diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-owner-authorized-ten-source-capture-receipts
+          path: /tmp/casualty-source-one-shot/*.json
+          if-no-files-found: warn
+          retention-days: 30
