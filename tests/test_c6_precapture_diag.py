@@ -71,8 +71,8 @@ class PreCaptureTests(unittest.TestCase):
         source = d.DATA + "/src name.json"
         dest = d.DATA + "/dst name.json"
         deleted = d.DATA + "/deleted.json"
-        self.write(source, "{}")
-        self.write(deleted, "{}")
+        self.write(source, '{"unique_source":"rename-me"}')
+        self.write(deleted, '{"unique_deleted":"delete-me"}')
         self.git("add", ".")
         self.git("commit", "-qm", "extra files")
         self.git("mv", source, dest)
