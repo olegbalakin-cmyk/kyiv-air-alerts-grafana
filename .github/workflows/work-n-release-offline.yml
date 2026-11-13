@@ -95,7 +95,7 @@ jobs:
             for name,digest in m["files"].items():
               assert hashlib.sha256(z.read("candidate/"+name)).hexdigest()==digest
             dash=json.loads(z.read("candidate/"+candidate.FILES["dashboard_data.json"]))
-            idx=json.loads(z.read("candidate/"+candidate.FILES["historical-daily-kpi.json"))
+            idx=json.loads(z.read("candidate/"+candidate.FILES["historical-daily-kpi.json"]))
             assert len(dash["multicity_meta"]["production_city_keys"])==23
             assert idx["meta"]["verified_count"]==23
             assert dash["historical_daily_kpi"]==idx
