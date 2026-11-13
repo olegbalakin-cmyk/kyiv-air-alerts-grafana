@@ -1,0 +1,66 @@
+name: Research casualty incomplete month offline
+on:
+  push:
+    branches: [research-casualty-incomplete-month-preview-2026-11-12]
+    paths:
+      - "research/casualty_incomplete_month_preview_2026_11_12/**"
+      - ".github/workflows/research-casualty-incomplete-month.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-offline:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Assert immutable production source and fixture-only edits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain)"
+          git diff --name-only 68629fdae5534ec3a136e666bcb7d5c84dcd05aa HEAD | tee changed_files.txt
+          if grep -Ev '^research/casualty_incomplete_month_preview_2026_11_12/|^\.github/workflows/research-casualty-incomplete-month\.yml$' changed_files.txt; then
+            echo "Protected files modified"; exit 1
+          fi
+      - name: Offline Node checks - no source HTTP, deployment or writer
+        run: |
+          set -euo pipefail
+          node --check research/casualty_incomplete_month_preview_2026_11_12/coverage-preview.js
+          node --check research/casualty_incomplete_month_preview_2026_11_12/local-fixture-loader.js
+          node research/casualty_incomplete_month_preview_2026_11_12/test_offline.js | tee CHECKS.txt
+          grep -q 'CHECKS_FAIL=0' CHECKS.txt
+      - name: Install browser dependencies (isolated CI runner)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1 chart.js@4.4.7
+          npx playwright install --with-deps chromium
+      - name: Assemble localhost copy of site-prod
+        run: |
+          python research/casualty_incomplete_month_preview_2026_11_12/prepare_local_preview.py --chart-js node_modules/chart.js/dist/chart.umd.js --output "$RUNNER_TEMP/casualty-preview"
+      - name: "Chromium QA: desktop, mobile, CSV, PNG, embed"
+        env:
+          PREVIEW_DIR: ${{ runner.temp }}/casualty-preview
+          PROOF_DIR: ${{ runner.temp }}/casualty-browser-proof
+        run: |
+          node research/casualty_incomplete_month_preview_2026_11_12/browser_qa.js | tee BROWSER_CHECKS.txt
+          grep -q 'BROWSER_CHECKS_FAIL=0' BROWSER_CHECKS.txt
+      - name: Generate sha256 evidence
+        run: |
+          sha256sum research/casualty_incomplete_month_preview_2026_11_12/{coverage-preview.js,local-fixture-loader.js,fixture.json,test_offline.js} | tee SHA256SUMS
+          git rev-parse HEAD | tee HEAD.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: casualty-incomplete-month-offline-proof
+          path: |
+            CHECKS.txt
+            SHA256SUMS
+            HEAD.txt
+            changed_files.txt
+            BROWSER_CHECKS.txt
+            ${{ runner.temp }}/casualty-browser-proof/**
+          retention-days: 14
