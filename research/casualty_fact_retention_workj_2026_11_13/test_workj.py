@@ -29,6 +29,8 @@ class ParserDiagnostics(unittest.TestCase):
         self.assertIsNone(_fatal_total("постраждали двоє людей"))
         self.assertIsNone(_fatal_total("ймовірно загинули двоє людей"))
         self.assertIsNone(_fatal_total("помер у лікарні після поранення"))
+        self.assertIsNone(_fatal_total("загинули ще двоє людей"))
+        self.assertIsNone(_fatal_total("ще двоє людей загинули"))
 
     def test_missing_text_reason(self):
         d = {}
