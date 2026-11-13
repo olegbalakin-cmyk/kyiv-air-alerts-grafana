@@ -13,6 +13,7 @@ const DATA_URL = RAW_DATA_BASE + "dashboard_data.json";
 const DERIVED_DATA_URL = RAW_DATA_BASE + "site_derived.json";
 const FEATURES_URL = "features.json";
 const KYIV_THREAT_MIX_URL = RAW_DATA_BASE + "kyiv_threat_mix.json";
+const KYIV_THREAT_MIX_PREVIEW_URL = "kyiv_threat_mix_preview.json";
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
@@ -2010,7 +2011,7 @@ function shortDateLabel(iso) {
 // Only offer periods fully available in that export; never infer 90-day or
 // annual cause history from the general alert series.
 function kyivCauseRangeRows(rows, period) {
-  return period === "7" || period === "14" ? rows.slice(-Number(period)) : rows;
+  return ["7", "14", "28"].includes(period) ? rows.slice(-Number(period)) : rows;
 }
 
 function kyivCausePeriodOptions(rows) {
@@ -2019,6 +2020,7 @@ function kyivCausePeriodOptions(rows) {
   const ranges = [
     ...(rows.length >= 7 ? ["7"] : []),
     ...(rows.length >= 14 ? ["14"] : []),
+    ...(rows.length >= 28 ? ["28"] : []),
     "all"
   ];
   const requested = select.dataset.requested || "";
@@ -2029,7 +2031,8 @@ function kyivCausePeriodOptions(rows) {
   select.innerHTML = [
     ...(rows.length >= 7 ? [`<option value="7">${tr("7 днів","7 days")}</option>`] : []),
     ...(rows.length >= 14 ? [`<option value="14">${tr("14 днів","14 days")}</option>`] : []),
-    `<option value="all">${rows.length} ${tr("днів (усі)","days (all)")}</option>`
+    ...(rows.length >= 28 ? [`<option value="28">${tr("28 днів","28 days")}</option>`] : []),
+    `<option value="all">${tr("За весь час","All available")} (${rows.length} ${tr("днів","days")})</option>`
   ].join("");
   select.value = selected;
   delete select.dataset.requested;
@@ -3618,14 +3621,29 @@ async function init() {
     console.warn("Production derived source temporarily unavailable", err);
   }
 
+  // A validated archival reconstruction is bundled only with the isolated preview.
+  // Production bundles omit this file, so they continue using their live Git source.
   try {
-    const threatResponse = await fetch(`${KYIV_THREAT_MIX_URL}?v=${Date.now()}`, { cache: "no-store" });
-    if (threatResponse.ok) {
-      const threatData = await threatResponse.json();
-      if (Array.isArray(threatData?.rows)) state.kyivThreatMix = threatData;
+    const preview = await fetch(`${KYIV_THREAT_MIX_PREVIEW_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (preview.ok) {
+      const payload = await preview.json();
+      if (payload?.meta?.preview_archival_proof === true && Array.isArray(payload.rows) && payload.rows.length >= 28) {
+        state.kyivThreatMix = payload;
+      }
     }
   } catch (err) {
-    console.warn("Kyiv alert-cause data unavailable", err);
+    console.warn("Kyiv cause archival preview unavailable; using Git source", err);
+  }
+  if (!state.kyivThreatMix) {
+    try {
+      const threatResponse = await fetch(`${KYIV_THREAT_MIX_URL}?v=${Date.now()}`, { cache: "no-store" });
+      if (threatResponse.ok) {
+        const threatData = await threatResponse.json();
+        if (Array.isArray(threatData?.rows)) state.kyivThreatMix = threatData;
+      }
+    } catch (err) {
+      console.warn("Kyiv alert-cause data unavailable", err);
+    }
   }
 
   if (attackEventFeaturesEnabled()) {
