@@ -23,10 +23,14 @@ The workflow is a restricted branch-push-only, read-only GitHub Actions job. Onl
 
 ## Verification status
 
-**Pending exact-head physical GitHub Actions result.** Until the final workflow succeeds, verdict is **BLOCKED**; early CI failures are not evidence of a frontend defect. No claim of current-browser PASS or downloaded proof ZIP hash is made before exact-head verification.
+**Result: CURRENT_FRONTEND_INTEGRATION_PASS (SHADOW ONLY).** Physical GitHub Actions [#43397364341](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43397364341) completed **SUCCESS** at code HEAD `57120451716da26aa6d0291889b8929cbba3fcc0`. Work F physical 18→20→23, Work C scratch REVIEW/PROMOTE +23 and second PROMOTE +0, unchanged current generator, Work D bridge and current JSON rebase all PASS. Existing Work D browser suite **42/42 PASS** (with one explicit test-only absent-month rollback compatibility adjustment), additional current frontend regressions **32/32 PASS**. No JS page errors, no external publisher requests, 23/23 alert city records and other 22 casualty cities unchanged, Sumy +1 retained, original current dashboard/frontend rollback PASS. Desktop, mobile 375 px, CSV, PNG, embed screenshots and trace evidence uploaded.
+
+Proof artifact [#14023477976](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43397364341/artifacts/14023477976), size 9,166,961 bytes. GitHub API reported ZIP SHA-256 `eb14f92eedcae31e37ce1679585e471ead4ab0acc525337a1bdba56956572971` (**API reported, ZIP not independently downloaded/rehashed**). Independent workflow manifest SHA-256 `d54e99167aa76c1ea8114cec1c81f145cdeb4823033d44c4770a9a07d0ee44ad`; screenshot concatenated proof digest `34b58c20766e34c63fddc60f23503317a3a20dfca567747a6558574206706f71`. The final report-only commit must also receive an exact-HEAD workflow PASS before coordinator acceptance.
+
+Earlier physical failures diagnosed **test adapter assumptions**, not new production failures: the generator adds city provenance metadata; missing October can appear as null rather than zero; and original Work D test rollback absolute /data/ would fetch the preview dashboard. The Work H isolated rollback routing now fetches the actual original /rollback/data/, while all production frontend/data files stay untouched. The test-only copy of Work D's 42-assertion script changes only the missing-month null/zero rollback assertion.
 
 ## Release boundary
 
 This test is not authorization to publish deaths. The 2026-10 Zaporizhzhia `≥23` remains a confirmed lower bound with incomplete source coverage. Five source-body-missing clusters remain blocked; historical credits and complete nationwide monitoring are not proven.
 
-**Proposed checkpoint only after exact-head physical PASS:** `CASUALTY-CURRENT-SITEPROD-FRONTEND-WORKH-01`.
+**Proposed coordinator checkpoint (subject to final exact-head Actions):** `CASUALTY-CURRENT-SITEPROD-FRONTEND-WORKH-01`.
