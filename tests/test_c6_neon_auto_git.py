@@ -82,6 +82,7 @@ class AutoGitOnlyTests(unittest.TestCase):
         self.assertTrue(auto.retains_keys({"a": 1}, {"a": 2, "b": 3}))
         self.assertFalse(auto.retains_keys({"a": 1}, {"b": 3}))
         self.assertFalse(auto.retains_keys([1, 2], [1]))
+        self.assertFalse(auto.retains_keys([{"id": 1}], [{"id": 2}]))
 
 
 if __name__ == "__main__":
