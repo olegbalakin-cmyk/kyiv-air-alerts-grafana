@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-WORKL-RECOVERY-OFFLINE-PASS-01 — immutable C2 reusable (2026-11-13; accepted)
+
+- [Draft PR #113](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/113) `325669a4`, [CI #43389706624](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43389706624) SUCCESS: 20/20 tests plus real run/job/ZIP gate PASS. C2 #43321997695 attempt 1, inner ZIP SHA `3f53c7ca4a0bc1d0f25cd228dcde003cd45ac247ecab76747405f556f75e8030`, writer 33,315 (+48), 23/23 receipts. Root cause unknown. Physical proof and FINAL ZIP still gated; no new C2/cutover.
+
 ### C6-C2-ONESHOT-DATA-PASS-PREP-NOARTIFACT-01 — C2 data PASS; C6 preparation FAIL (2026-11-13; accepted)
 
 - [#43321997695](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43321997695) attempt 1: update-site SUCCESS; C6 prep FAILURE without steps, overall FAILURE. C2 artifact #13991878472 outer SHA-256 2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde verified; site-prod@f0cfcbc8 23/23 capture checkpoints. No C6 prep artifact, new Work A, FINAL ZIP or rollback proof. Production unchanged; owner reset C6 flag false. GLOBAL_CUTOVER=NO.
