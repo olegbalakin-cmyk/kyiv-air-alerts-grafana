@@ -10,7 +10,7 @@ import hashlib
 import json
 import re
 from collections import Counter, defaultdict
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
@@ -18,7 +18,9 @@ from review_casualty_candidates import REVISION_FIELDS, _validate_confirmation
 
 FACTS = ('city_boundary', 'russian_air_attack', 'civilian')
 ALLOWED_HOSTS = {'suspilne.media', 'armyinform.com.ua', 'lb.ua', 'npu.gov.ua',
-                 'vechirniy.kyiv.ua', 'unian.ua', 'ua.korrespondent.net', 't.me'}
+                 'vechirniy.kyiv.ua', 'unian.ua', 'ua.korrespondent.net', 't.me',
+                 'zprz.city', 'zp.npu.gov.ua', 'ukrinform.ua', 'mig.com.ua',
+                 'interfax.com.ua', '1news.zp.ua', 'zabor.zp.ua'}
 MONTHS = {'січня': 1, 'лютого': 2, 'березня': 3, 'квітня': 4, 'травня': 5,
           'червня': 6, 'липня': 7, 'серпня': 8, 'вересня': 9, 'жовтня': 10,
           'листопада': 11, 'грудня': 12}
@@ -82,10 +84,12 @@ def text_hints(candidate):
 
 
 COUNT_WORDS = {'один': 1, 'одна': 1, 'дві': 2, 'двоє': 2,
-               'три': 3, 'троє': 3, 'чотири': 4, 'четверо': 4}
-COUNT_TOKEN = r'(?:\d+|один|одна|дві|двоє|три|троє|чотири|четверо)'
+               'три': 3, 'троє': 3, 'чотири': 4, 'четверо': 4,
+               'двох': 2, 'трьох': 3}
+COUNT_TOKEN = r'(?:\d+|один|одна|дві|двоє|три|троє|чотири|четверо|двох|трьох)'
 COUNT_NOUN = r'(?:люд\w*|цивільн\w*|мирн\w*|військовослужбов\w*)'
 CITY_FORMS = {
+    'zaporizhzhia': r'\bзапоріжж(?:я|і|ю|ям)\b',
     'dnipro': r'\bдніпр(?:о|і|а|у|ом)\b',
     'odesa': r'\bодес(?:а|і|у|ою)\b',
 }
@@ -126,7 +130,8 @@ def _cumulative_total_update(low):
     patterns = (rf'\bзагинул[аои]?\s+({COUNT_TOKEN})\s+{COUNT_NOUN}',
                 rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b',
                 rf'\b({COUNT_TOKEN})\s+загиблих\b',
-                rf'\bдо\s+({COUNT_TOKEN})\s+люд\w*\s+зросл\w*\s+кількіст\w*\s+загиблих\b')
+                rf'\bдо\s+({COUNT_TOKEN})\s+люд\w*\s+зросл\w*\s+кількіст\w*\s+загиблих\b',
+                rf'\bкількіст\w*\s+загиблих\s+(?:зросл\w*|збільшил\w*)\s+до\s+({COUNT_TOKEN})\b')
     claims = []
     for sentence in re.split(r'(?<=[.!?])\s+|\n+', low):
         if not sentence.strip():
@@ -186,6 +191,9 @@ def _fatal_total(low):
                 rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b')
     for pattern in patterns:
         nums.extend(_number(m[1]) for m in re.finditer(pattern, low))
+    # An explicitly cumulative formulation, never an increment to add.
+    nums.extend(_number(m[1]) for m in re.finditer(
+        rf'\bкількіст\w*\s+загиблих\s+(?:зросл\w*|збільшил\w*)\s+до\s+({COUNT_TOKEN})\b', low))
     if re.search(r'не загинул|без загиблих|не підтвердж|непідтвердж|спростув|'
                  r'ймовірн|попередн\w* даними|можлив\w* загиб', low):
         return None
@@ -313,7 +321,7 @@ def _origin_attribution(low):
     return 'unattributed', None
 
 
-def extract_cached_reports(queue, articles):
+def extract_cached_reports(queue, articles, *, diagnostics=None):
     """Extract evidence from retained article text, not synthetic fact labels.
 
     A unique city/date plus attack window or location anchors an incident.
@@ -323,17 +331,41 @@ def extract_cached_reports(queue, articles):
     """
     by_id = {c['candidate_id']: c for c in queue}
     parsed = []
+    trace = []
+    stage = {'articles_seen': len(articles), 'source_text_present': 0,
+             'unique_fatal_scope': 0, 'city_boundary_supported': 0,
+             'explicit_attack_date': 0, 'weapon_and_origin_supported': 0,
+             'dated_incident_anchors': 0, 'unique_incident_match': 0,
+             'structured_reports': 0}
+    def hold(article, reason, at):
+        trace.append({'candidate_id': article.get('candidate_id'),
+                      'source_url': article.get('url'), 'stage': at,
+                      'reason': reason, 'status': 'NEEDS_REVIEW'})
     for article in articles:
         c = by_id[article['candidate_id']]
         full_text = str(article.get('text') or '').casefold()
         if not full_text.strip():
+            hold(article, 'SOURCE_TEXT_NOT_RETAINED', 'source_text')
             continue
+        stage['source_text_present'] += 1
         # A whole article is not one incident: earlier/other attacks must
         # never donate their place, weapon, time, city or official origin.
         scopes = _incident_scopes(full_text)
         fatal_scopes = [part for part in scopes if _fatal_total(part) is not None]
         if len(fatal_scopes) != 1:
-            continue  # No unique fatal incident section: needs human review.
+            if len(fatal_scopes) > 1:
+                reason = 'MULTIPLE_POSSIBLE_INCIDENTS'
+            elif re.search(r'\b(?:ще|додатково)\s+\d+\s+люд', full_text):
+                reason = 'COUNT_IS_NOT_CUMULATIVE'
+            elif re.search(r'помер\w*.{0,45}лікарн|лікарн.{0,45}помер\w*', full_text):
+                reason = 'LATE_DEATH_OFFICIAL_CONFIRMATION_MISSING'
+            elif re.search(r'загиб|загин|помер', full_text):
+                reason = 'NO_PARSEABLE_FATAL_TOTAL'
+            else:
+                reason = 'NO_FATAL_CLAIM'
+            hold(article, reason, 'fatal_scope')
+            continue  # A number in a title is never enough.
+        stage['unique_fatal_scope'] += 1
         low = fatal_scopes[0]
         city_pattern = CITY_FORMS.get(c['city_key'], rf'\b{re.escape(c.get("city", "").casefold())}\b')
         city_present = bool(re.search(city_pattern, low))
@@ -369,12 +401,17 @@ def extract_cached_reports(queue, articles):
                        'total': total, 'status': _civilian_status(low, total),
                        'count_resolution': resolution,
                        'origin_id': origin_id, 'origin_name': origin_name})
+    stage['city_boundary_supported'] = sum(p['boundary'] is True for p in parsed)
+    stage['explicit_attack_date'] = sum(bool(p['day']) for p in parsed)
+    stage['weapon_and_origin_supported'] = sum(p['air'] is True for p in parsed)
     anchors = [p for p in parsed if p['day'] and (p['slot'] or p['place'])
                and p['weapon'] != 'unknown' and p['boundary'] is True
                and p['total'] is not None and p['air'] is True]
+    stage['dated_incident_anchors'] = len(anchors)
     reports = []
     for p in parsed:
         if p['total'] is None:
+            hold(p['article'], 'NO_PARSEABLE_FATAL_TOTAL', 'fatal_count')
             continue
         matches = []
         for a in anchors:
@@ -398,18 +435,30 @@ def extract_cached_reports(queue, articles):
             identities[key] = a
         # Multiple compatible concrete events are ambiguous, not permission to merge.
         if len(identities) != 1:
+            reason = ('CITY_BOUNDARY_UNCERTAIN' if p['boundary'] is not True
+                      else 'ATTACK_DATE_MISSING' if not p['day']
+                      else 'ATTACK_IDENTITY_AMBIGUOUS' if not (p['slot'] or p['place'])
+                      else 'WEAPON_ORIGIN_UNCONFIRMED' if p['air'] is not True
+                      else 'MULTIPLE_POSSIBLE_INCIDENTS' if len(identities) > 1
+                      else 'ATTACK_IDENTITY_AMBIGUOUS')
+            hold(p['article'], reason, 'incident_match')
             continue
         a = next(iter(identities.values()))
         # Do not attach a second, ambiguous city/day article by total alone.
         if p is not a and not (p['slot'] or p['place']):
+            hold(p['article'], 'ATTACK_IDENTITY_AMBIGUOUS', 'corroboration')
             continue
         if p['boundary'] is not True or not p['russian']:
+            hold(p['article'], 'CITY_BOUNDARY_UNCERTAIN' if p['boundary'] is not True
+                 else 'WEAPON_ORIGIN_UNCONFIRMED', 'city_origin')
             continue
         state = p['status']
         aerial = p['air'] is True or (p['weapon'] == 'unknown' and a['air'] is True
                                      and p['slot'] == a['slot'])
         if not aerial:
+            hold(p['article'], 'WEAPON_ORIGIN_UNCONFIRMED', 'attack_origin')
             continue
+        stage['unique_incident_match'] += 1
         incident = {'city_key': p['c']['city_key'], 'attack_date': a['day'],
                     'place': a['place'] or 'unlocated',
                     'attack_slot': a['slot'] or 'unknown',
@@ -451,6 +500,20 @@ def extract_cached_reports(queue, articles):
                 'later_attack_mentioned': bool(re.search(r'повторно.{0,35}атакув|'
                                                           r'повторно\s+атакував', p['low']))}
         })
+    stage['structured_reports'] = len(reports)
+    if diagnostics is not None:
+        for report in reports:
+            trace.append({'candidate_id': report['candidate_ids'][0],
+                          'source_url': report['sources'][0]['url'],
+                          'stage': 'structured_report',
+                          'reason': 'REPORT_EXTRACTED_NOT_AUTOMATICALLY_CONFIRMED',
+                          'status': 'EXTRACTED_NOT_PUBLISHED',
+                          'official_attribution': bool(report['sources'][0].get('contract'))})
+        diagnostics.update({'parser_version': 'casualty-auto-review-workj-v1',
+                            'stage_counts': stage,
+                            'source_decisions': trace,
+                            'reason_counts': dict(sorted(Counter(
+                                d['reason'] for d in trace).items()))})
     return reports
 
 
@@ -484,7 +547,11 @@ def validate_reports(queue, reports):
             raise ValueError('Unknown civilian status evidence state')
         if report.get('civilian_status') == 'civilian_ambiguous' and report.get('facts', {}).get('civilian') is True:
             raise ValueError('Ambiguous civilian evidence cannot claim clear status')
-        date.fromisoformat(report['observed_at'])
+        observed = str(report['observed_at'])
+        if len(observed) > 10:
+            datetime.fromisoformat(observed.replace('Z', '+00:00'))
+        else:
+            date.fromisoformat(observed)
         count = report.get('count', {})
         if count.get('kind') not in {'total', 'increment', 'unknown'}:
             raise ValueError('Explicit count semantics required')
