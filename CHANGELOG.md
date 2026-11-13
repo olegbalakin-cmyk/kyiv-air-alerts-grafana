@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-WORKM-OWNER-GRANT-NODISPATCH-01 — one prepare-only owner grant, not dispatched (2026-11-13; accepted)
+
+- Owner approved **one** prepare-only on exact PR [#116](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/116) SHA `9d846279b91b44b324a722ca00276a99956b4fca`. GitHub connector cannot enable workflow, configure repo variables/secret/environment or dispatch; one-shot permission **unconsumed**. Require `C6_GIT_ONLY_PUBLISHER_PAUSED=true` before any shared-workflow enable. Work M-specific CI, owner receipt, final ZIP and fresh rollback remain OPEN; no C2/writer/Git publish/Netlify/merge/cutover. `GLOBAL_CUTOVER=NO`.
+
 ### C6-WORKL-PHYSICAL-SIXJSON-PASS-01 — six JSON physically proven (2026-11-13; accepted)
 
 - [#43390770985](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985) SUCCESS at PR #113 `325669a4`; [artifact #14020616892](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43390770985/artifacts/14020616892) independently checked SHA `79acb3017dccefdf19def7fe15bdaf2033b27d8c8a6d41f146d7b0e903bd3954`, 18/18, 6/6 JSON, historical 23/23. Same original C2 attempt 1; zero writer, source HTTP or publication. Final ZIP original C2 prep missing; rollback/current alert/DST open. GLOBAL_CUTOVER=NO.
