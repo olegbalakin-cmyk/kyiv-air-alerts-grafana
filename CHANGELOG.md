@@ -3,6 +3,14 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-INTEGRATED-E2E-SHADOW-WORKF-01 — integrated saved-source E2E PASS only (2026-11-13)
+
+- PR [#112](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/112) `2274276`, [CI #43387209190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43387209190) SUCCESS; ZIP #14018663260 independently SHA256 `6416875ad6c618ff12fb3358392033e883085795e5e785d64525a8d42810a450`. 11+42 PASS, scratch REVIEW/PROMOTE→generator +23/replay 0→INCOMPLETE/≥23 chart. Current frontend untested; publication OFF.
+
+### CASUALTY-CONTROLLED-CAPTURE-PREFLIGHT-OFFLINE-01 — bounded source-capture preflight PASS only (2026-11-13)
+
+- PR [#111](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/111) `630c996`, [CI #43387015696](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43387015696) 12/12 PASS; ZIP #14019520132 independently SHA256 `a06147b9a566c372eca725fa083342e239ed229609c6c77939dbdd9021b7e71e`. 10 URLs/7 hosts/max 20 requests, 0 publisher HTTP; no owner consent. Same-host redirect-path guard must be fixed before pilot.
+
 ### CASUALTY-EVIDENCE-INGESTION-WORKE-01 — saved-source evidence ingestion offline PASS (2026-11-13)
 
 - [PR #110](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/110) `6b44b976` [CI #43320351570](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320351570) 10/10 PASS; [ZIP #13990550763](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320351570/artifacts/13990550763) independently SHA256 `5d313e372e53f4afd9c2d9f412e0b30c9b9f41880fae94e6f404fd4a1126b7e5`. 3/1682 texts, 2 reports, 1 +23 shadow; 5 PR102 clusters blocked, source HTTP/regular capture OFF; no merge/live publish. Next joint offline E2E then separately approved bounded capture.
