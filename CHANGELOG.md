@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-EVIDENCE-INGESTION-WORKE-01 — saved-source evidence ingestion offline PASS (2026-11-13)
+
+- [PR #110](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/110) `6b44b976` [CI #43320351570](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320351570) 10/10 PASS; [ZIP #13990550763](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320351570/artifacts/13990550763) independently SHA256 `5d313e372e53f4afd9c2d9f412e0b30c9b9f41880fae94e6f404fd4a1126b7e5`. 3/1682 texts, 2 reports, 1 +23 shadow; 5 PR102 clusters blocked, source HTTP/regular capture OFF; no merge/live publish. Next joint offline E2E then separately approved bounded capture.
+
 ### CASUALTY-GENERATOR-DISPLAY-WORKD-01 — generator→INCOMPLETE chart/exports isolated PASS (2026-11-12)
 
 - [PR #109](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/109) `62aef364`, [CI #43308531075](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43308531075) 42/42 PASS, [artifact #13985535590](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43308531075/artifacts/13985535590) ZIP SHA256 independently verified `86dff044fbe148fa4fe1d05eb24c3540f07e29d50a8d16f581527a59d2e7ca5a`. Real generator +23 -> qualified INCOMPLETE/≥23 chart, CSV/PNG/embed; rollback PASS; no live publication. Work E and joint release gate OPEN.
