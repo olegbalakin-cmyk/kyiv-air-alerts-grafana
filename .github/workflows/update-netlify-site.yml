@@ -794,16 +794,16 @@ jobs:
           assert a.get("decision")=="APPROVE_PREPARE_ONLY_NO_PUBLICATION"
           assert a.get("prepare_code_sha")==os.environ["GITHUB_SHA"]
           assert a.get("repository")==os.environ["GITHUB_REPOSITORY"]
-          from scripts.c6_neon_final_prepare import (
-              SCHEMA, RECOVERY_SCHEMA, RECOVERY_CONTRACT, RECOVERY_PINS)
+          # Checkout has not happened yet: no module import at this gate.
+          # The exact-pair hash/run/JOB validation runs after checkout.
+          RECOVERY_SCHEMA="c6-final-release-prepare-only-work-l-v1"
           if a.get("schema")==RECOVERY_SCHEMA:
-              assert a.get("provenance_contract")==RECOVERY_CONTRACT
+              assert a.get("provenance_contract")=="C2_FAILED_PRERUN_C6_WORKL_PHYSICAL_PROOF_V1"
               assert not os.environ.get("PREP_ARTIFACT_ID")
-              assert all(a.get(k)==v for k,v in RECOVERY_PINS.items())
               assert not a.get("c2_artifact_id")
               assert not a.get("c2_artifact_sha256")
           else:
-              assert a.get("schema")==SCHEMA
+              assert a.get("schema")=="c6-final-release-prepare-only-v1"
               assert os.environ["PREP_ARTIFACT_ID"].isdigit()
               assert a.get("c2_artifact_id")==int(os.environ["PREP_ARTIFACT_ID"])
           assert a.get("c2_bundle_artifact_id")==int(os.environ["C2_BUNDLE_ARTIFACT_ID"])
