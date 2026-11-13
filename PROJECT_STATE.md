@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-13. Latest accepted: C6-C3-WORKS-DISPATCH-DEFAULT-BRANCH-BLOCK-01. Release BLOCKED before dispatch; GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF.**
+**2026-11-13. Latest accepted: C6-C3-WORKT-MERGE123-DISPATCH-REGISTERED-01. PR #123 merged; GLOBAL_CUTOVER=NO; PRODUCTION_UNCHANGED=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Preserve historical records verbatim; root byte gate ≤12,288 B PASS. The observation below records execution under the owner's separate production GO; it does not claim an accepted cutover.
 
@@ -8,18 +8,23 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Preserv
 
 - Pinned production refs remain `main@d68e35e35c8d50954a77adf99a7dda668724734b` and `site-prod@99648321e64037a6dcf3ae0072d66eedcccc2839`.
 - Physical FINAL #14025629654, Work L #14020616892 and Work N #14028565807 ZIP digests match Work S. **56/56** current Git-blob/package/FINAL/casualty/aux/frontend identity checks pass. FINAL six hashes, 23 cities and generation `2026-11-13T10:08:11.334497+02:00` verified; current Git generation `2026-11-13T00:40:41.768144+02:00`. Existing publication gate passed all 23 historical receipts using the real clock. First expiry remains **14 November 2026, 12:40:40 Kyiv**. Work N remains byte-compatible; no new snapshot or L/M/N/O/P/Q/R run.
-- Owner production GO covers the exact Work S release and rollback. Protected `c6-neon-git-release` was created: owner `olegbalakin-cmyk` required reviewer, only branch `main`, zero tags, self-review allowed, admin bypass OFF. Thirteen exact Netlify variables and its separate 45-minute grant were installed. Git grant/flag were never installed.
-- **Execution blocker:** enabling Netlify workflow 360885508 exposed no `Run workflow` control; one reload confirmed absence. Repository default branch is `main`, whose exact tree lacks `.github/workflows/netlify-production.yml`. Connected GitHub tools expose no new workflow dispatch; local GitHub CLI has no authenticated account. No dispatch request was sent, no Actions release run exists, and no alternate workflow/default-branch/code path was introduced.
+- Prior Work S GO: protected `c6-neon-git-release` created (main only, owner review, no admin bypass), remains empty. Thirteen Netlify variables and 45-minute grant were installed then removed; Git grant never installed.
+- **Work T:** PR #123 merged to `main@1dbacef11367b97805c43be112cfeb2c23c12072`. Workflow registered on default main, identical to `site-prod` (blob `8dfee58688880811290722d93c7ca5823b9d22aa`); no dispatch, publication or deployment. Temporary release grants cleared.
 - Cleanup physically verified: Netlify grant and all 13 temporary repository variables absent; Git grant absent; release environment has no secrets or variables. Both production workflows manually disabled, publisher pause=true. Netlify original production **`6adb629bc3ebc570117d82e1`** remains ready/locked; unlock dialog was cancelled. No deployment, Git publication commit, C2/writer/source HTTP, casualty/WIP change or rollback occurred.
 - Production QA for the proposed release was **NOT RUN** because neither release stage started. Prior Work O/P evidence is retained within its original scope. [Execution receipt](docs/work-s-execution-2026-11-13.json).
 
 ## Next
 
-**Default-branch dispatch blocker:** `workflow_dispatch` requires a file on default `main`; `netlify-production.yml` exists only on `site-prod`. CLI/REST authentication alone is insufficient. Next: separately authorize a minimal PR registering the unchanged workflow on `main` with default-OFF, `site-prod` job guard and no auto-deploy. Re-pin main SHA and freshness preflight. Keep freeze; `GLOBAL_CUTOVER=NO`.
+**Next:** Re-pin Work S to `main@1dbacef1`; verify freshness, data, rollback and guards. Netlify-first proof before Git publication; freshness expires 14 Nov 12:40:40 Kyiv. Keep freeze; no release dispatch yet.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-C3-WORKT-MERGE123-DISPATCH-REGISTERED-01 — approved PR #123 merge (2026-11-13)
+
+- Screenshots: publisher pause=true, both workflows Disabled manually; Netlify API locked/ready on `6adb629bc3ebc570117d82e1`. PR #123 `eeaca9f3`, two exact-head CI PASS, one workflow file matching site-prod. Squash-merged `main@1dbacef11367b97805c43be112cfeb2c23c12072`. Job remains site-prod-only, default-OFF; no publisher or cutover. `GLOBAL_CUTOVER=NO`.
+
+
 ## C6-C3-WORKS-DISPATCH-DEFAULT-BRANCH-BLOCK-01 — manual dispatch blocked (2026-11-13)
 
 - `main@d68e35e3` lacks `.github/workflows/netlify-production.yml` (404); `site-prod@99648321` contains `workflow_dispatch`. [GitHub docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch) require a default-branch file. Small separate approved PR and new main SHA pins required before retry. No production action; `GLOBAL_CUTOVER=NO`.
