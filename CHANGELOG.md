@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C3-PREMERGE-GUARDS-UNVERIFIED-01 — cutover preparation read-only; admin locks unverified (2026-11-13; accepted)
+
+- Owner prep-only approval. `main@712c9e35`, `site-prod@f0cfcbc8`, PR #119/#120 Draft, CI 43407785056/43422122898 PASS, Work N rollback #14028565807 available, Netlify original `6adb629bc3ebc570117d82e1` live. **No switches changed**: GitHub repo pause variable and Netlify Actions workflow/Auto publishing cannot be configured via connected tools. Merging #119 risks C2 workflow push; merging #120 triggers GitHub Netlify `--prod` workflow push. Operator must verify pause/disable before separate merge authorization; release then needs new data/rollback proof, Netlify-first static KPI + independent owner GO. `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
+
 ### C6-C3-WORKR-NETLIFY-RECOVERY-OFFLINE-PASS-01 — Work R 16/16 offline PASS (2026-11-13; accepted)
 
 - Draft [PR #120](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/120) `ac32540fcb0074afaed20ec9f6849b32777dc9c7`, [exact-head CI #43422122898](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43422122898) SUCCESS 16/16 offline incl. legacy path, SHA/run/approval negatives; initial #43421545056/#43422060631 failures fixed by test assertion corrections only. No merge or production action. `NETLIFY_CONTRACT_READY=YES` offline; PR #119/120 merge and fresh publisher/Netlify gates require separate GO. `CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
