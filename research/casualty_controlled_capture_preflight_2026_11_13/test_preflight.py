@@ -170,8 +170,9 @@ class Preflight(unittest.TestCase):
         opener = FakeOpener([Response(302, url) for _ in range(4)])
         with patch.object(e.time, "sleep"):
             receipt, body = e._capture_once(url, live_shaped(), {"used": 0}, opener)
-        self.assertEqual(receipt["reason"], "REDIRECT_LIMIT")
-        self.assertEqual(len(opener.urls), 4)
+        # Strict Work I prevents repeating a GET even for self-redirects.
+        self.assertEqual(receipt["reason"], "REDIRECT_LOOP")
+        self.assertEqual(len(opener.urls), 1)
         self.assertEqual(body, "")
         opener = FakeOpener([])
         policy = live_shaped()

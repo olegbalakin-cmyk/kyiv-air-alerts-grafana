@@ -25,7 +25,10 @@ def main():
     assert plan["work_e_head"] == "6b44b9766fdbe2cd2d65a20413d08f4f5ca91916"
     assert a["authorization_id"] is None
     assert a["status"] == "NOT_AUTHORIZED"
-    assert a["targets"] == [{"url":t["url"],"role":t["role"],"candidate_ids":t["candidate_ids"]} for t in plan["targets"]]
+    assert a["targets"] == [{"url":t["url"],"role":t["role"],
+                             "candidate_ids":t["candidate_ids"],
+                             "approved_redirect_urls":[]} for t in plan["targets"]]
+    assert a["redirect_policy"] == "EXACT_PER_INITIAL_TARGET_DEFAULT_DENY"
     manifest = json.loads(manifest_path.read_text())
     with monthly_path.open() as fh:
         months = list(csv.DictReader(fh))
@@ -61,7 +64,7 @@ def main():
         },
         "limitations":[
             "No live publisher HTTP, body capture or fact-level proof in this preflight",
-            "Current Work E only checks redirected hosts, not exact redirect URL paths; stop and reassess unexpected same-host redirects",
+            "Work I blocks unapproved redirect paths before the next GET; live HTTP still NOT_AUTHORIZED",
             "Official articles are retained separately but not automatically incident-linked",
             "Work E controlled mode should not be used as a casualty-crediting or production pipeline",
             "Authorization template is intentionally invalid and default OFF",
