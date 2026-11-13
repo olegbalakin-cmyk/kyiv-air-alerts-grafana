@@ -1,7 +1,7 @@
 name: CASUALTY Work L offline launch-safety and evidence proof
 on:
   push:
-    branches: [research-casualty-workn-clean-rearm-2026-11-13]
+    branches: [research-casualty-workn-clean-rearm-2026-11-13, research-casualty-workn-prehttp-launch-state-fix-2026-11-13]
     paths-ignore:
       - research/casualty_one_time_capture_2026_11_13/launch.json
   pull_request:
@@ -164,6 +164,21 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/workm-prehttp
           python -m research.casualty_workm_prehttp_ci_fix_2026_11_13.verify_prehttp --output /tmp/workm-prehttp
+      - name: Simulate live pre-HTTP suite with synthetic launch present (zero HTTP)
+        shell: bash
+        run: |
+          set -euo pipefail
+          launch=research/casualty_one_time_capture_2026_11_13/launch.json
+          test ! -e "$launch"
+          printf '{"synthetic_offline_fixture":true}\n' > "$launch"
+          trap 'rm -f "$launch"' EXIT
+          bash research/casualty_workn_clean_rearm_2026_11_13/guarded_prehttp_regressions.sh
+          test -f "$launch"
+          rm -f "$launch"
+          trap - EXIT
+          test ! -e "$launch"
+          git diff --exit-code
+
       - name: Work N clean branch and fresh owner-gate mock proof (zero GET)
         shell: bash
         run: |

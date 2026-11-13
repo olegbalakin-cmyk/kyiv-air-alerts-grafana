@@ -21,7 +21,7 @@ import sys
 sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
 EXPECTED_BASE = "657fd70564bf5393d3fcd209e47d95fa986f3010"
-EXPECTED_BRANCH = "research-casualty-workn-clean-rearm-2026-11-13"
+EXPECTED_BRANCH = "research-casualty-workn-prehttp-launch-state-fix-2026-11-13"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
