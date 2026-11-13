@@ -314,11 +314,13 @@ def prepare(*, receipt, c2_run, work_a_run, artifacts, archives, output,
                 identity.get("input_sha") == receipt["c2_input_sha"] and
                 readback.get("c2_corpus_sha256") == receipt["c2_corpus_sha256"] and
                 original_binding.get("db_branch") == receipt["neon_branch"] and
-                original_binding.get("corpus_sha256") == receipt["c2_corpus_sha256"] and
-                original_binding.get("bundle_sha256") == receipt["c2_bundle_sha256"] and
-                original_binding.get("github_run_id") == c2_run["id"] and
-                original_binding.get("github_run_attempt") == c2_run["run_attempt"],
+                original_binding.get("corpus_sha256") == receipt["c2_corpus_sha256"],
                 "WORK_A_C2_PROVENANCE_MISMATCH")
+        if recovery:
+            require(original_binding.get("bundle_sha256") == receipt["c2_bundle_sha256"] and
+                    original_binding.get("github_run_id") == c2_run["id"] and
+                    original_binding.get("github_run_attempt") == c2_run["run_attempt"],
+                    "WORK_L_EXACT_BUNDLE_IDENTITY_MISMATCH")
         files = report.get("files")
         require(isinstance(files, dict) and
                 set(files) == set(candidate.FILES.values()),
