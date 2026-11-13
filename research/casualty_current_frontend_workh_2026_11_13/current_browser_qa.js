@@ -127,7 +127,7 @@ async function test(browser,base,mobile) {
    const errors=[];
    page.on("pageerror",e=>errors.push(String(e)));
    await page.route("**/*",route=>{
-     let u=new URL(route.request().url);
+     let u=new URL(route.request().url());
      if(u.protocol==="http:"&&u.hostname==="127.0.0.1")return route.continue();
      return route.abort();
    });
