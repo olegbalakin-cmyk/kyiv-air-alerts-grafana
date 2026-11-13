@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKN-FIRST-LAUNCH-PREHTTP-TEST-GATE-BLOCK-01 — separate PR #127 0-GET pre-HTTP failure; PR #128 live 3/3 proof stands (2026-11-13)
+
+- [PR #127 run #43512279660](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43512279660) attempt 1 FAILURE, 66/68 pre-HTTP, capture SKIPPED, 0 GET, authorization consumed. This later run on `f18af39f` is separate from [PR #128 success #43510162714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510162714) (`5e5628a8`, 3 HTTP200/3 GET). #128 already fixed the launch-present test contradiction. System next task remains Work O offline evidence extraction; no new HTTP approval.
+
 ### CASUALTY-WORKN-T03T05-HTTP200-FACT-EXTRACTION-BLOCKED-01 — T03–T05 live capture 3/3 PASS; parsing BLOCKED (2026-11-13)
 
 - Owner-approved [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) launch `5e5628a8`, [run #43510162714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510162714) SUCCESS 3/3 HTTP200, 3 GET, 0 redirects, 68/68 safety. [ZIP #14076819100](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510162714/artifacts/14076819100) SHA256 independently verified `dc7d1ba10d66e6b3e39f7f3a85fffbb7522e8930390117b139185e5eb6627da6`; all 4 JSON hashes match. 3 NEEDS_REVIEW cards, publisher parser reports 0 and no factual excerpts; police claims 3 without event link. 0 casualty credits/PROMOTE/publication. Single-use authorization consumed; no recapture until fresh owner approval.
