@@ -1,23 +1,27 @@
 # Project State — coordination snapshot
 
-**2026-11-13. Latest accepted: C6-C3-WORKS-NEON-CUTOVER-PASS-01. CUTOVER_RESULT=PASS; GLOBAL_CUTOVER=YES; ADMIN_FREEZE_VERIFIED=YES; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-C3-MERGE130-CAPTURE-DIAGNOSTIC-PASS-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
 ## Current production
 
-- One owner-approved historical Neon cutover completed before the deadline. Main `1dbacef11367b97805c43be112cfeb2c23c12072`; site-prod `54079326ae2b4e691e2bfcf7cd1a51c9705404eb` (parent `99648321e64037a6dcf3ae0072d66eedcccc2839`). Netlify production `6af76b2d67c5074986728b62`, ready/locked. Generation `2026-11-13T10:08:11.334497+02:00`; all six FINAL JSON verified through Git and live HTTP.
-- Netlify run [43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) SUCCESS, independently verified at 19:55:58Z; one temporary unlock, then approved deployment relocked before separate Git grant. Git run [43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769) SUCCESS, owner-reviewed environment; publication at 20:03:12Z. Freshness 23/23 and 60 data/rollback identities passed before release; no bypass.
-- Production QA PASS: 23 cities × 8 modes, 23 CSV/644 rows, rendered graphs/Kyiv causes/casualty, site JS errors 0. All 2,858 Kyiv source interval tuples, 12 casualty blobs and two audit auxiliaries preserved. Rollback not needed. [Full execution receipt](docs/work-s-final-execution-2026-11-13.json) retains the earlier stopped attempt.
-- Final safe state: Auto publishing OFF, independent `locked=true`; both production workflows disabled manually; pause=true; both owner grants, 13 temporary repository variables and Git release flag removed. Protected environment retained empty. No new C2/writer/source HTTP, proof rerun, merge, DST or casualty/WIP change.
+- Historical Neon cutover PASS; `GLOBAL_CUTOVER=YES`. Git `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb`; Netlify `6af76b2d67c5074986728b62` ready/locked. [Work S receipt](docs/work-s-final-execution-2026-11-13.json). No automatic updates or live-status certification.
+- Manual pilot [#43510482714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510482714) failed at step 46 `capture()`; C2 writer PASS: 33,444 episodes (+129), 23 cities, zero Git publication. Root cause unproven.
+- Diagnostic-only [PR #130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/130) merged `main@9576dd06beb6b905f5fc4001672e524ed0ba5d0b`; exact-head offline CI PASS, fixed reason allowlist. No physical fix proven.
+- Freeze: pause=true, auto OFF; both production workflows disabled (owner confirmation), Netlify locked. No new pilot or schedule authorization.
 
 ## Next
 
-Keep the approved freeze. Do not resume automatic Git-only C2. This checkpoint certifies the completed historical snapshot cutover; recurring delivery and live alert status are not certified. Any later publication requires fresh applicable gates and owner scope.
+Maintain freeze; future diagnostic pilot requires separate GO. Casualty/WIP/DST remain separate.
 
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-C3-MERGE130-CAPTURE-DIAGNOSTIC-PASS-01 — diagnostic merge (2026-11-14)
+
+- [PR #130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/130) squash-merged `main@9576dd06beb6b905f5fc4001672e524ed0ba5d0b` from exact HEAD `2920931f27bec8de3214ee6d83322626e44be9a5`; offline CI and coordination-docs checks PASS. [Pilot #43510482714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510482714) failed at capture step 46 after Neon writer PASS (+129), zero Git publication. Root cause unproven; diagnostic only. `site-prod@54079326`, locked Netlify `6af76b2d` unchanged. Auto OFF; no new pilot grant.
+
 ## C6-C3-WORKS-NEON-CUTOVER-PASS-01 — controlled historical Neon cutover (2026-11-13)
 
 - Separate owner production GO and one temporary unlock/relock approval executed. Netlify `6af76b2d67c5074986728b62` independently verified before Git publication `54079326ae2b4e691e2bfcf7cd1a51c9705404eb`; Actions #43496568449/#43497605769 SUCCESS. Freshness 23/23, data/rollback hashes, production QA and final administrative freeze PASS. Both grants/temporary flags removed; rollback not needed. `CUTOVER_RESULT=PASS; GLOBAL_CUTOVER=YES`. [Receipt](docs/work-s-final-execution-2026-11-13.json).
