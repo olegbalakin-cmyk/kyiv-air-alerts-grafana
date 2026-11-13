@@ -62,7 +62,10 @@ class WorkP(unittest.TestCase):
             preview = json.loads((Path(tmp)/'fact_preview_unverified.json').read_text())
             cards = result['facts']
             self.assertEqual([x['claim_deaths'] for x in cards], [2, 3, 3])
-            self.assertEqual(cards[1]['count_kind'], 'cumulative_correction')
+            # Two distinct source reports do not prove one corrected incident.
+            # Preserve the observed 2 -> 3 totals, never sum them to 5.
+            self.assertEqual(cards[1]['count_kind'], 'single_report_total')
+            self.assertNotIn(5, [x['claim_deaths'] for x in cards])
             self.assertTrue(all(x['decision'] == 'NEEDS_REVIEW' for x in cards))
             self.assertTrue(all(x['excerpts'] for x in cards))
             self.assertTrue(all(len(x['text']) <= 170 for c in cards for x in c['excerpts']))
