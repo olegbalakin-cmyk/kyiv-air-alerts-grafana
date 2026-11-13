@@ -28,7 +28,7 @@ jobs:
           assert 'C6_WORK_L_NETLIFY_RECOVERY_ENABLED' in workflow
           assert 'C6_WORK_L_NETLIFY_OWNER_RELEASE_GRANT_JSON' in workflow
           assert 'if [[ "$C6_WORK_L_RECOVERY_MODE" != "true" ]]; then' in workflow
-          assert "assert run['conclusion']=='success'" in workflow
+          assert "assert run['status']=='completed' and run['conclusion']=='success'" in workflow
           assert 'python scripts/c3_final_neon_kpi_contract.py _approved_c6' in workflow
           assert 'npx -y netlify-cli@latest deploy' in workflow
           print('DEFAULT_OFF_AND_LEGACY_GUARDS_RETAINED')
