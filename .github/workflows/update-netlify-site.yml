@@ -46,7 +46,7 @@ permissions:
 
 jobs:
   update-site:
-    if: ${{ (github.event_name != 'workflow_dispatch' || (!inputs.c6_neon_git_release && !inputs.c6_final_prepare_only)) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true' }}
+    if: ${{ (github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (vars.C6_AUTO_NEON_GIT_ENABLED != 'true' && (github.event_name != 'workflow_dispatch' || (!inputs.c6_neon_git_release && !inputs.c6_final_prepare_only)) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -501,7 +501,7 @@ jobs:
       # any export failure leaves the production Git publication path unchanged.
       - name: Check out same-workflow C2 bundle exporter
         id: c2_bundle_source
-        if: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
+        if: ${{ (vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' || vars.C6_AUTO_NEON_GIT_ENABLED == 'true') && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' }}
         continue-on-error: true
         uses: actions/checkout@v4
         with:
@@ -511,7 +511,7 @@ jobs:
 
       - name: Export verified same-run C2 shadow bundle
         id: c2_bundle_export
-        if: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' && steps.c2_bundle_source.outcome == 'success' }}
+        if: ${{ (vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' || vars.C6_AUTO_NEON_GIT_ENABLED == 'true') && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' && steps.c2_bundle_source.outcome == 'success' }}
         continue-on-error: true
         env:
           C2_SHADOW_BUNDLE_EXPORT_ENABLED: 'true'
@@ -528,7 +528,7 @@ jobs:
             --output "${RUNNER_TEMP}/c2-shadow-bundle"
 
       - name: Upload verified C2 shadow inputs
-        if: ${{ vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' && steps.c2_bundle_export.outcome == 'success' }}
+        if: ${{ (vars.C2_SHADOW_BUNDLE_EXPORT_ENABLED == 'true' || vars.C6_AUTO_NEON_GIT_ENABLED == 'true') && steps.canonical_publication.outputs.canonical_persistence_status == 'NEON_SUCCEEDED' && steps.c2_bundle_export.outcome == 'success' }}
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
@@ -539,7 +539,44 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Require C2 same-run Neon bundle in auto mode
+        if: ${{ vars.C6_AUTO_NEON_GIT_ENABLED == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.event_name }}" = "schedule"
+          test "${{ steps.canonical_publication.outputs.canonical_persistence_status }}" = "NEON_SUCCEEDED"
+          test "${{ steps.c2_bundle_source.outcome }}" = "success"
+          test "${{ steps.c2_bundle_export.outcome }}" = "success"
+          test -s "${RUNNER_TEMP}/c2-shadow-bundle/c2-shadow-inputs.zip"
+          test -s "${RUNNER_TEMP}/c2-shadow-bundle/c2-shadow-inputs.zip.sha256"
+
+      - name: Freeze same-run C2 checkpoint delta (no commit/push)
+        if: ${{ vars.C6_AUTO_NEON_GIT_ENABLED == 'true' }}
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.c6_neon_auto_git capture \
+            --checkout kyiv-air-alerts-grafana \
+            --status "${RUNNER_TEMP}/c2_publication_status.json" \
+            --input-sha "${PHASE1_INPUT_SHA}" \
+            --workflow-sha "${GITHUB_SHA}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --run-attempt "${GITHUB_RUN_ATTEMPT}" \
+            --output "${RUNNER_TEMP}/c2-neon-auto-delta"
+
+      - name: Upload same-run C2 delta for one Git-only commit
+        if: ${{ vars.C6_AUTO_NEON_GIT_ENABLED == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-neon-auto-delta-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/c2-neon-auto-delta/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Commit updated production data and verified UkraineAlarm bridge checkpoint
+        if: ${{ vars.C6_AUTO_NEON_GIT_ENABLED != 'true' }}
         working-directory: .
         shell: bash
         run: |
@@ -631,7 +668,7 @@ jobs:
   # Same-run Neon candidate preparation only; never changes existing Git delivery.
   c6-neon-six-json-prepare:
     needs: update-site
-    if: ${{ vars.C6_NEON_JSON_PREPARE_ENABLED == 'true' && needs.update-site.result == 'success' && (github.event_name != 'workflow_dispatch' || !inputs.c6_final_prepare_only) }}
+    if: ${{ (vars.C6_NEON_JSON_PREPARE_ENABLED == 'true' || vars.C6_AUTO_NEON_GIT_ENABLED == 'true') && needs.update-site.result == 'success' && (github.event_name != 'workflow_dispatch' || !inputs.c6_final_prepare_only) }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     permissions:
@@ -754,10 +791,59 @@ jobs:
           path: |
             c6-prepared/REPORT.json
             c6-prepared/candidate/**
-            c6-live-proof/verdict.json
-            c6-live-proof/sha256_manifest.json
+            c6-live-proof/**
           if-no-files-found: warn
           retention-days: 30
+
+  # Scheduled four-hour Git-only update, enabled by ONE default-OFF variable.
+  c6-neon-auto-git-publish:
+    needs: [update-site, c6-neon-six-json-prepare]
+    if: ${{ github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true' && needs.update-site.result == 'success' && needs.c6-neon-six-json-prepare.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out exact integration code without credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: integration
+          persist-credentials: false
+      - name: Check out live site-prod for the one Git update
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          fetch-depth: 0
+          path: live-site
+      - name: Download same-run C2 delta
+        uses: actions/download-artifact@v4
+        with:
+          name: c6-neon-auto-delta-${{ github.run_id }}-${{ github.run_attempt }}
+          path: c6-delta
+      - name: Download validated Neon readback and candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: c6-neon-git-preparation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: c6-prepared
+      - name: One atomic site-prod Git commit, zero Netlify calls
+        env:
+          PYTHONPATH: integration
+          C6_AUTO_NEON_GIT_ENABLED: ${{ vars.C6_AUTO_NEON_GIT_ENABLED }}
+          NETLIFY_DEPLOYMENTS_PER_UPDATE: '0'
+        run: |
+          set -euo pipefail
+          python -m scripts.c6_neon_auto_git publish \
+            --checkout live-site \
+            --delta c6-delta \
+            --prepared c6-prepared \
+            --proof c6-prepared/c6-live-proof \
+            --workflow-sha "${GITHUB_SHA}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --run-attempt "${GITHUB_RUN_ATTEMPT}" \
+            --repository "${GITHUB_REPOSITORY}"
+          echo "NETLIFY_DEPLOYMENTS_PER_UPDATE=0"
 
   # Release byte preparation is independent of normal C2 and the Git publisher.
   c6-neon-final-prepare-only:
