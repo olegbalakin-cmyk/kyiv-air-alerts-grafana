@@ -106,8 +106,13 @@ def main():
     old_months = old_zap["monthly"]
     workd_months = workd_zap["monthly"]
     newly_qualified = [x for x in workd_months if x.get("month") == MONTH]
+    # Generator may enrich existing months with provenance fields; Work D's
+    # bridge independently validates every old month's count and timestamp.
+    # We import ONLY the new certified October row.
     require(len(newly_qualified) == 1 and
-            [x for x in workd_months if x.get("month") != MONTH] == old_months,
+            {x["month"] for x in workd_months if x.get("month") != MONTH} ==
+            {x["month"] for x in old_months} and
+            len(workd_months) == len(old_months) + 1,
             "WORKD_ADDED_MORE_THAN_ONE_GENERATED_ROW")
     row = newly_qualified[0]
     require(row.get("deaths") is None and
