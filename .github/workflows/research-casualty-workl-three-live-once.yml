@@ -1,7 +1,7 @@
 name: CASUALTY Work L controlled three-source one-shot (inert without fresh launch)
 on:
   push:
-    branches: [research-casualty-workn-clean-rearm-2026-11-13]
+    branches: [research-casualty-workn-prehttp-launch-state-fix-2026-11-13]
     paths:
       - research/casualty_one_time_capture_2026_11_13/launch.json
 permissions:
@@ -61,11 +61,9 @@ jobs:
           PY
       - name: Install pinned extraction dependencies (not source capture)
         run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
-      - name: Recheck Work E G I J K and Work L offline safety
+      - name: Recheck all 68 offline safety tests with grant file restored before capture
         shell: bash
-        run: |
-          set -euo pipefail
-          python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_ingest research.casualty_controlled_capture_preflight_2026_11_13.test_preflight research.casualty_strict_redirect_2026_11_13.test_redirect research.casualty_fact_retention_workj_2026_11_13.test_workj research.casualty_one_time_capture_2026_11_13.test_workk research.casualty_one_time_capture_2026_11_13.test_workl -q
+        run: bash research/casualty_workn_clean_rearm_2026_11_13/guarded_prehttp_regressions.sh
       - name: One approved source-only pilot; no publication
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}

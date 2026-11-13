@@ -15,7 +15,7 @@ from research.casualty_one_time_capture_2026_11_13.test_workk import synthetic_e
 from research.casualty_one_time_capture_2026_11_13.test_workl import WorkL
 from review_casualty_candidates import load_queue
 
-BRANCH = "research-casualty-workn-clean-rearm-2026-11-13"
+BRANCH = "research-casualty-workn-prehttp-launch-state-fix-2026-11-13"
 WORKM = "657fd70564bf5393d3fcd209e47d95fa986f3010"
 PREVIOUS_LAUNCH = "e1f9c3af1dacd3fe77e2ba899df14afb6dd84858"
 
