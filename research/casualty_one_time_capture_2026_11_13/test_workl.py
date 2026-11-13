@@ -43,7 +43,8 @@ class WorkL(unittest.TestCase):
             return r.LAUNCH_REL
         if args == ("log", "--format=%H", "HEAD^", "--", r.LAUNCH_REL):
             return ""
-        if args == ("merge-base", "--is-ancestor", r.WORKK_HEAD, "a"*40):
+        if args in (("merge-base", "--is-ancestor", r.WORKK_HEAD, "a"*40),
+                    ("merge-base", "--is-ancestor", r.EXPECTED_BASE, "a"*40)):
             return ""
         raise AssertionError(("unexpected git", args))
 

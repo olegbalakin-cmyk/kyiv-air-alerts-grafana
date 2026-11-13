@@ -20,8 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 import sys
 sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
-EXPECTED_BASE = "69e7d023b4104c3583943eaf59f38b1d05ee32e5"
-EXPECTED_BRANCH = "research-casualty-workl-three-source-preflight-2026-11-13"
+EXPECTED_BASE = "657fd70564bf5393d3fcd209e47d95fa986f3010"
+EXPECTED_BRANCH = "research-casualty-workn-clean-rearm-2026-11-13"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
@@ -108,7 +108,10 @@ def check_scope(queue):
 def validate_launch(launch, template, queue, *, environ=None, now=None):
     environ = os.environ if environ is None else environ
     now = datetime.now(timezone.utc) if now is None else now
-    old_authorization = "CASUALTY-T01-T10-OWNER-20261113-ONE-SHOT-01"
+    consumed_authorizations = {
+        "CASUALTY-T01-T10-OWNER-20261113-ONE-SHOT-01",
+        "CASUALTY-T03-T05-OWNER-20261113-2021Z-ONE-SHOT-01",
+    }
     auth = launch.get("authorization_id")
     previous = launch.get("expected_previous_commit_sha")
     if (launch.get("scope") != SCOPE
@@ -117,7 +120,7 @@ def validate_launch(launch, template, queue, *, environ=None, now=None):
             or launch.get("automatic_promote_allowed") is not False
             or launch.get("repeat_allowed") is not False
             or not isinstance(auth, str) or not auth.startswith("CASUALTY-T03-T05-")
-            or auth == old_authorization
+            or auth in consumed_authorizations
             or not isinstance(launch.get("owner_approval_record"), str)
             or not launch["owner_approval_record"].strip()
             or not isinstance(previous, str) or len(previous) != 40
@@ -193,6 +196,10 @@ def validate_one_launch_commit(launch, plan, *, environ=None, git_call=None):
         git_call("merge-base", "--is-ancestor", WORKK_HEAD, previous)
     except (subprocess.CalledProcessError, RuntimeError) as exc:
         raise RuntimeError("WORKL_WORKK_ANCESTRY_NOT_VERIFIED") from exc
+    try:
+        git_call("merge-base", "--is-ancestor", EXPECTED_BASE, previous)
+    except (subprocess.CalledProcessError, RuntimeError) as exc:
+        raise RuntimeError("WORKN_WORKM_ANCESTRY_NOT_VERIFIED") from exc
 
 
 def withhold_unsafe_excerpts(card):
