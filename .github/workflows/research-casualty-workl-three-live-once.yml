@@ -25,6 +25,16 @@ jobs:
           ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
           path: _wip
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -73,6 +83,10 @@ jobs:
         run: |
           git diff --exit-code
           git -C _wip diff --exit-code
+          test "$(git -C _pr102 rev-parse HEAD)" = bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          git -C _pr102 diff --exit-code
+          git -C _site diff --exit-code
       - name: Store research-only audit JSON; never article bodies
         if: always()
         uses: actions/upload-artifact@v4
