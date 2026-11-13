@@ -1,0 +1,256 @@
+{
+  "schema": "casualty-controlled-capture-preflight-v1",
+  "work_e_head": "6b44b9766fdbe2cd2d65a20413d08f4f5ca91916",
+  "pr102_head": "bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee",
+  "pr102_receipts_sha256": "4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b",
+  "scope": "ONE_TIME_RESEARCH_PREPARATION_NO_HTTP",
+  "cases": {
+    "oct18": {
+      "attack_date": "2026-10-18",
+      "attack_location": "Запоріжжя, місто",
+      "classification": "one UAV strike; prior research: 1 killed",
+      "official_required": true,
+      "credit_gate": "UNPROVEN_NEW_EVENT_CREDIT"
+    },
+    "oct22": {
+      "attack_date": "2026-10-22",
+      "attack_location": "Запоріжжя, приватний будинок",
+      "classification": "one missile incident; earlier 2 -> later cumulative 3, NOT 5",
+      "official_required": true,
+      "credit_gate": "FINAL_TOTAL_AND_PRIOR_CREDIT_REQUIRED"
+    },
+    "sep26": {
+      "attack_date": "2026-09-26",
+      "attack_location": "Запоріжжя, місто",
+      "classification": "one early-morning drone strike; prior research: 2 killed",
+      "official_required": true,
+      "credit_gate": "SEPTEMBER_BASELINE_EVENT_ALLOCATION_UNKNOWN"
+    },
+    "sep27": {
+      "attack_date": "2026-09-27",
+      "attack_location": "Запоріжжя, Шевченківський район",
+      "classification": "one Shahed strike; prior research: 1 killed",
+      "official_required": true,
+      "credit_gate": "SEPTEMBER_BASELINE_EVENT_ALLOCATION_UNKNOWN"
+    },
+    "late05": {
+      "attack_date": "2026-10-05",
+      "attack_location": "Запоріжжя, багатоповерхівка",
+      "classification": "possible later death reported on 26 Oct, not 26 Oct strike",
+      "official_required": true,
+      "credit_gate": "LATER_OFFICIAL_CONFIRMATION_MISSING"
+    }
+  },
+  "targets": [
+    {
+      "target_id": "T01",
+      "case_id": "oct18",
+      "role": "publisher",
+      "url": "https://zprz.city/news/view/rosiyani-vdarili-dronami-po-zaporizhzhyu-zaginula-27richna-zhinka-poranilo-ditinu-ta-58richnu-zhitelku-foto",
+      "domain": "zprz.city",
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "candidate_ids": [
+        "43a268ae2e19123554d6d476"
+      ],
+      "linked_candidate_ids": [
+        "43a268ae2e19123554d6d476"
+      ],
+      "previously_reported_claim": "one killed",
+      "missing_evidence": "retained original body, location/date, direct death claim and identity",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": "T02",
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T02",
+      "case_id": "oct18",
+      "role": "official",
+      "url": "https://zp.npu.gov.ua/news/na-zaporizhzhi-unaslidok-vorozhykh-udariv-zahynula-zhinka-chetvero-liudei-otrymaly-poranennia-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv-rosiiskoi-armii",
+      "domain": "zp.npu.gov.ua",
+      "source_type": "POLICE_PRIMARY",
+      "candidate_ids": [],
+      "linked_candidate_ids": [
+        "43a268ae2e19123554d6d476"
+      ],
+      "previously_reported_claim": "official police corroboration",
+      "missing_evidence": "police body and explicit linkage to the 18 Oct city incident",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": null,
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T03",
+      "case_id": "oct22",
+      "role": "publisher",
+      "url": "https://www.ukrinform.ua/amp/rubric-regions/4177207-armia-rf-zavdala-udaru-po-zaporizzu-zaginuli-dvoe-ludej.html",
+      "domain": "ukrinform.ua",
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "candidate_ids": [
+        "7c3ac3280ba7ad4b9c10f3b1"
+      ],
+      "linked_candidate_ids": [
+        "7c3ac3280ba7ad4b9c10f3b1"
+      ],
+      "previously_reported_claim": "earlier total 2",
+      "missing_evidence": "original text, attack time and whether it is earlier count for same incident",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": "T05",
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T04",
+      "case_id": "oct22",
+      "role": "publisher",
+      "url": "https://mig.com.ua/vorozhyy-udar-po-pryvatnomu-budynku-v-zaporizhzhi-zahynuly-troye-lyudey/",
+      "domain": "mig.com.ua",
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "candidate_ids": [
+        "dcdd2fe28fd1464e7fbabdc1"
+      ],
+      "linked_candidate_ids": [
+        "dcdd2fe28fd1464e7fbabdc1"
+      ],
+      "previously_reported_claim": "later cumulative 3",
+      "missing_evidence": "retained source body, update chronology and definitive incident linkage",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": "T05",
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T05",
+      "case_id": "oct22",
+      "role": "official",
+      "url": "https://zp.npu.gov.ua/news/na-zaporizhzhi-cherez-rosiiski-ataky-zahynulo-troie-liudei-shche-odna-otrymala-poranennia-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv",
+      "domain": "zp.npu.gov.ua",
+      "source_type": "POLICE_PRIMARY",
+      "candidate_ids": [],
+      "linked_candidate_ids": [
+        "7c3ac3280ba7ad4b9c10f3b1",
+        "dcdd2fe28fd1464e7fbabdc1"
+      ],
+      "previously_reported_claim": "official final 3",
+      "missing_evidence": "police original body, isolate deaths inside Zaporizhzhia city, no 2+3 summation",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": null,
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T06",
+      "case_id": "sep26",
+      "role": "publisher",
+      "url": "https://interfax.com.ua/news/general/1210246.html",
+      "domain": "interfax.com.ua",
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "candidate_ids": [
+        "db8ada77be0650fbf7c686cd"
+      ],
+      "linked_candidate_ids": [
+        "db8ada77be0650fbf7c686cd"
+      ],
+      "previously_reported_claim": "two women killed",
+      "missing_evidence": "original body, attack date not publication date, prior credit reconciliation",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": "T07",
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T07",
+      "case_id": "sep26",
+      "role": "official",
+      "url": "https://zp.npu.gov.ua/news/pid-ranok-rosiiany-vdaryly-po-zaporizhzhiu-shakhedamy-zahynuly-dvi-zhinky-poraneni-cholovik-i-dytyna-politseiski-nadaly-dopomohu-postrazhdalym-ta-dokumentuiut-voiennyi-zlochyn",
+      "domain": "zp.npu.gov.ua",
+      "source_type": "POLICE_PRIMARY",
+      "candidate_ids": [],
+      "linked_candidate_ids": [
+        "db8ada77be0650fbf7c686cd"
+      ],
+      "previously_reported_claim": "official 2",
+      "missing_evidence": "police original body, attack identity and separate September credited allocation",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": null,
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T08",
+      "case_id": "sep27",
+      "role": "publisher",
+      "url": "https://1news.zp.ua/vorog-zapustyv-shahed-po-shevchenkivskomu-rayonu-zaporizhzhya-zagynula-lyudyna-shhe-odna-poranena-foto-video/",
+      "domain": "1news.zp.ua",
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "candidate_ids": [
+        "7f57e0e0e4743e98c8a88186"
+      ],
+      "linked_candidate_ids": [
+        "7f57e0e0e4743e98c8a88186"
+      ],
+      "previously_reported_claim": "one killed",
+      "missing_evidence": "publisher original body and separate identity from Sep 26",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": "T09",
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T09",
+      "case_id": "sep27",
+      "role": "official",
+      "url": "https://zp.npu.gov.ua/news/na-zaporizhzhi-odna-liudyna-zahynula-chotyry-poraneno-politsiia-dokumentuie-naslidky-voiennykh-zlochyniv-rf",
+      "domain": "zp.npu.gov.ua",
+      "source_type": "POLICE_PRIMARY",
+      "candidate_ids": [],
+      "linked_candidate_ids": [
+        "7f57e0e0e4743e98c8a88186"
+      ],
+      "previously_reported_claim": "official 1",
+      "missing_evidence": "police body, attack-time relationship to 27 Sep and Sep credited allocation",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": null,
+      "publication_allowed": false
+    },
+    {
+      "target_id": "T10",
+      "case_id": "late05",
+      "role": "publisher",
+      "url": "https://www.zabor.zp.ua/new/u-zaporizhzhi-pislya-udaru-po-bagatopoverkhivtsi-zaginuv-cholovik-kvartira-vigorila-vshchent",
+      "domain": "zabor.zp.ua",
+      "source_type": "PUBLISHER_ORIGINAL_OR_ATTRIBUTED_REPORT",
+      "candidate_ids": [
+        "103256b72707ad66d91f6aae",
+        "cb222eea2a20aa1db2d67d5d"
+      ],
+      "linked_candidate_ids": [
+        "103256b72707ad66d91f6aae",
+        "cb222eea2a20aa1db2d67d5d"
+      ],
+      "previously_reported_claim": "possible later hospital death, not officially verified",
+      "missing_evidence": "original body, death date, explicit official confirmation from an as-yet-UNKNOWN URL and 5 Oct prior credit; never infer from headline",
+      "independent_official_confirmation_required": true,
+      "official_confirmation_target_id": null,
+      "publication_allowed": false
+    }
+  ],
+  "limits": {
+    "initial_unique_https_urls": 10,
+    "max_initial_urls": 14,
+    "max_requests_total": 20,
+    "max_global_requests_ceiling": 30,
+    "min_delay_seconds": 1,
+    "max_response_bytes": 1000000,
+    "timeout_seconds": 15,
+    "max_redirects_per_url": 3,
+    "retries": 0
+  },
+  "allowed_hosts": [
+    "1news.zp.ua",
+    "interfax.com.ua",
+    "mig.com.ua",
+    "ukrinform.ua",
+    "zabor.zp.ua",
+    "zp.npu.gov.ua",
+    "zprz.city"
+  ],
+  "selection_explanation": "Four verified attack questions: one original publisher plus police each; for Oct 22 retain earlier two and final three as separate updates; one additional ZaBor original for late-death investigation without official confirmation. Five unselected PR102 candidate publications do not become negative evidence.",
+  "all_sources_are_existing_pr102_targets": true,
+  "no_google_news_or_ukrnet_targets": true,
+  "full_articles_public_github": false,
+  "automatic_credit_allowed": false
+}
