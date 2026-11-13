@@ -9,6 +9,11 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
 
 <!-- coordination:history:start -->
+### C6-C3-WORKT-MERGE123-DISPATCH-REGISTERED-01 — PR #123 merge under freeze (2026-11-13; accepted)
+
+- Owner screenshots confirmed pause=true and both workflows disabled; Netlify current locked and no competing runs. PR #123 exact workflow from site-prod, two CI PASS; merged `main@1dbacef11367b97805c43be112cfeb2c23c12072`. Default-branch registration resolved, no deploy/dispatch/cutover. Re-pin Work S, recheck freshness before release. `GLOBAL_CUTOVER=NO`.
+
+
 ### C6-C3-WORKS-DISPATCH-DEFAULT-BRANCH-BLOCK-01 — verified dispatch prerequisite (2026-11-13; accepted)
 
 - `main` lacks Netlify workflow (404); `site-prod` has `workflow_dispatch`. GitHub requires the default-branch file; CLI/REST alone cannot unblock. Next: minimal separately approved registration PR to `main`, safe job/trigger guards, re-pin main SHA. No merge or production changes; `GLOBAL_CUTOVER=NO`.
