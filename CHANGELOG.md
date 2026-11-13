@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKO-PARSER-EVIDENCE-PARTIAL-REAL-HTML-REQUIRED-01 — Work O 133 PASS, one historical SKIP; real HTML replay gated (2026-11-13)
+
+- [PR #129](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/129) `ff66bc6f`, [CI #43513881396](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513881396) exact SUCCESS 133 PASS/0 FAIL/1 SKIP, physical 18→20→23 +23 PASS. [ZIP #14079821808](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513881396/artifacts/14079821808) independent SHA256 `adf9cbc56c52e4c0f102035160a6ed10cddc2e3229a1e4dc3e7ddbf97326f8ff` and 7/7 internal hashes MATCH. Parser/short-evidence faults corrected offline; original T03/T04 HTML discarded, T05 identity unverified. Live runner pins original code; integrate safely offline first. No source GET or publication; future replay needs new owner authorization.
+
 ### CASUALTY-WORKN-FIRST-LAUNCH-PREHTTP-TEST-GATE-BLOCK-01 — separate PR #127 0-GET pre-HTTP failure; PR #128 live 3/3 proof stands (2026-11-13)
 
 - [PR #127 run #43512279660](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43512279660) attempt 1 FAILURE, 66/68 pre-HTTP, capture SKIPPED, 0 GET, authorization consumed. This later run on `f18af39f` is separate from [PR #128 success #43510162714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510162714) (`5e5628a8`, 3 HTTP200/3 GET). #128 already fixed the launch-present test contradiction. System next task remains Work O offline evidence extraction; no new HTTP approval.
