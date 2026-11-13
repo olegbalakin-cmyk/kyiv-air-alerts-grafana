@@ -35,3 +35,10 @@ Owner must separately explicitly approve (1) exact T03, T04, T05 URLs only, (2) 
 ## Checkpoint
 
 Provisional integration scope: `PARTIAL` until exact-head physical GitHub Actions succeeds, artifact content hashes are verified, and the synthetic report is checked. Following a successful proof only, use `THREE_SOURCE_RUNNER_OFFLINE_PASS`. No merge or coordination document changes.
+
+## First physical CI checkpoint (pre-final head)
+
+- [Actions #43438762996](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43438762996) **SUCCESS**, intermediate SHA `ada585977506a3775f9503b265be687b8a8a94f4`.
+- **59/59** Work E/G/I/J/K tests PASS, plus **10/10** inherited Work E PASS. Pinned real-original 18→20→23 generator +23 PASS. Mock three-card manifest proof PASS, **0** publisher/police GET.
+- Artifact [#14045845418](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43438762996/artifacts/14045845418), reported ZIP SHA-256 `ae3bd1232ea729dd74c94ff5ce48cd12181290fe7bdcf3c828d144947baeeb69` (GitHub artifact digest; not independently rehashed ZIP). Four internal JSON content hashes validated physically by the CI verifier.
+- **Exact final HEAD proof remains separately required** because this intermediate job predates this report checkpoint. Do not infer live source factual correctness from synthetic claims.
