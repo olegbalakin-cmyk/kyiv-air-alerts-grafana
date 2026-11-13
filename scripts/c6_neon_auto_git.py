@@ -30,6 +30,22 @@ SCHEMA = "c6-neon-auto-c2-delta-v1"
 REPOSITORY = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
 NEON_BRANCH = "br-bold-mode-b5rub8pq"
 
+# Fixed capture() guard identifiers only; never echo arbitrary exception text.
+SAFE_CAPTURE_BLOCK_REASONS = frozenset({
+    "CAPTURE_ARGS_MISSING",
+    "C2_CHECKPOINTS_MISSING",
+    "C2_DELTA_TOO_MANY_FILES",
+    "C2_GENERATION_NOT_UPDATED",
+    "C2_INPUT_HEAD_MISMATCH",
+    "C2_WRITER_RECEIPT_NOT_PASS",
+    "DELETIONS_RENAMES_OR_CONFLICTS_BLOCKED",
+    "INVALID_C2_DELTA_FILE",
+    "INVALID_GIT_STATUS",
+    "OUTPUT_NOT_ISOLATED",
+    "OUTSIDE_C2_DATA_ALLOWLIST",
+    "UNEXPECTED_GIT_DATA_PATH",
+})
+
 
 class Blocked(ValueError):
     pass
@@ -337,14 +353,10 @@ def publish(checkout, delta, prepared, proof, *, repository,
 
 
 def safe_block_reason(error):
-    """Expose only fixed-shape diagnostic codes, never exception text or data."""
+    """Expose only known capture guard identifiers, never raw exception data."""
     if isinstance(error, (Blocked, candidate.Blocked)):
         value = str(error)
-        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
-        if 3 <= len(value) <= 80 and value[0] in alphabet[:26] and all(
-                char in alphabet for char in value):
-            return value
-        return "VALIDATION_BLOCKED"
+        return value if value in SAFE_CAPTURE_BLOCK_REASONS else "VALIDATION_BLOCKED"
     if isinstance(error, subprocess.CalledProcessError):
         return "SUBPROCESS_FAILED"
     if isinstance(error, OSError):
