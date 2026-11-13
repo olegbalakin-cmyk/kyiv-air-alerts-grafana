@@ -31,3 +31,7 @@ Run `python scripts/coordination_docs.py verify --base-ref origin/main` to verif
 
 - [Project State snapshot](2026-10-31_PROJECT_STATE_55b562738dae7235.md): prior accepted publication checkpoint retained exactly.
 - [Changelog snapshot](2026-10-31_CHANGELOG_c09dc428f46904f7.md): complete recent transitions before retention trimming.
+
+## Administrative freeze archival (2026-11-13)
+
+- Exact pre-freeze coordination roots at `164cab2d3b90971a8235d84ebe3afd1e66bab2c2`: [PROJECT_STATE](2026-11-13_PROJECT_STATE_fce1d489f7187b12.md) and [CHANGELOG](2026-11-13_CHANGELOG_0063633bb63c1462.md). Six older records from each root retained verbatim; hashes and byte ranges recorded in the manifest.
