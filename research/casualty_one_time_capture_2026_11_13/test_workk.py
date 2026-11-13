@@ -209,7 +209,12 @@ class WorkK(unittest.TestCase):
             r.retain_results(queue(),p,original,audit,Path(td),authorization_id="SYNTHETIC")
             facts=json.loads((Path(td)/"minimal_capture_facts.json").read_text())["facts"]
             self.assertEqual(facts[0]["decision"],"NEEDS_REVIEW")
-            self.assertIn("SHORT_EVIDENCE_NOT_EXTRACTED",facts[0]["reasons"])
+            # Work O now retains a complete, safe word-numeral sentence.
+            self.assertNotIn("SHORT_EVIDENCE_NOT_EXTRACTED", facts[0]["reasons"])
+            self.assertEqual(facts[0]["claim_deaths"], 2)
+            self.assertEqual(facts[0]["excerpts"][0]["text"], "Загинули двоє людей.")
+            self.assertEqual(facts[0]["decision"], "NEEDS_REVIEW")
+            self.assertFalse(facts[0]["publication_allowed"])
 
     def test_13_aggregate_request_budget_enforced(self):
         p,original,audit,_=mock_inputs()
