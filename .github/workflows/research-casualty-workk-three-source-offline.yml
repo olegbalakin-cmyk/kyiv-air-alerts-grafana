@@ -1,0 +1,149 @@
+name: CASUALTY Work K offline three-source runner proof
+on:
+  push:
+    branches: [research-casualty-workk-three-source-runner-2026-11-13]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          path: _matrix
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43053796144
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: /tmp/casualty-original
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43261676781
+          name: casualty-zap11-approved-http-43261676781-1
+          path: /tmp/casualty-receipts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          ref: bb553f9285eaa5a9b55f8cf92b3dcb0bbbce97ee
+          path: _pr102
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned offline generator dependencies
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Offline input integrity and safety tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _wip rev-parse HEAD)" = 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          test "$(git -C _matrix rev-parse HEAD)" = 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          echo "84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df  /tmp/casualty-original/evidence.json" | sha256sum -c -
+          echo "4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b  /tmp/casualty-receipts/capture_receipts.json" | sha256sum -c -
+          python -m unittest discover -s research/casualty_evidence_ingestion_2026_11_13 -p test_ingest.py -v
+      - name: Strict Work E G I and Work J mock safety regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/workj
+          python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_ingest research.casualty_controlled_capture_preflight_2026_11_13.test_preflight research.casualty_strict_redirect_2026_11_13.test_redirect research.casualty_fact_retention_workj_2026_11_13.test_workj research.casualty_one_time_capture_2026_11_13.test_workk -v 2>&1 | tee /tmp/workj/tests.log
+          python research/casualty_strict_redirect_2026_11_13/verify_offline.py /tmp/workj/strict_redirect.json
+      - name: Ingestion and physical existing-generator proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/casualty-ingestion /tmp/casualty-worka
+          common=(
+            --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+            --evidence /tmp/casualty-original/evidence.json
+            --receipts /tmp/casualty-receipts/capture_receipts.json
+            --matrix _matrix/research/casualty_zaporizhzhia_additional_events_2026_11_12/verification_matrix.json
+          )
+          python research/casualty_evidence_ingestion_2026_11_13/ingest.py "${common[@]}" --output /tmp/casualty-ingestion
+          python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" \
+            --revisions _site/kyiv-air-alerts-grafana/data/casualties/revisions.csv \
+            --baseline research/casualty_automated_review_2026_11_10/baseline_coverage.json \
+            --city-manifest _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json \
+            --city-csv _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv \
+            --generator _site/kyiv-air-alerts-grafana/scripts/update_casualties.py \
+            --dashboard _site/kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --ingested-reports /tmp/casualty-ingestion/work_a_reports.json \
+            --output /tmp/casualty-worka
+          python research/casualty_evidence_ingestion_2026_11_13/verify_proof.py /tmp/casualty-ingestion /tmp/casualty-worka
+      - name: Verify fail-closed parser diagnostic and zero external publisher GET
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary=json.loads(Path('/tmp/casualty-ingestion/summary.json').read_text())
+          assert summary["external_publisher_http_requests"] == 0
+          assert summary["parsed_fact_reports"] >= 1
+          assert summary["parser_stage_counts"]["articles_seen"] >= 1
+          assert summary["publication_allowed"] is False
+          assert json.loads(Path('/tmp/workj/strict_redirect.json').read_text())['publisher_http_requests'] == 0
+          Path('/tmp/workj/workj-proof.json').write_text(json.dumps({
+            "decision":"PARSER_DIAGNOSTIC_OFFLINE_PASS",
+            "publisher_http_get":0,
+            "retained_original_offline_reports":summary["parsed_fact_reports"],
+            "parser_stage_counts":summary["parser_stage_counts"],
+            "parser_reason_counts":summary["parser_reason_counts"],
+            "publication_allowed":False},sort_keys=True,indent=2))
+          PY
+      - name: Work K guarded preflight and manifest-verified mock capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
+          test ! -e .github/workflows/research-casualty-one-time-capture-execute.yml
+          mkdir -p /tmp/workk/preflight /tmp/workk/synthetic
+          python -m py_compile research/casualty_one_time_capture_2026_11_13/run_capture.py
+          python research/casualty_one_time_capture_2026_11_13/run_capture.py --preflight-only \
+            --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json \
+            --output /tmp/workk/preflight
+          python -m research.casualty_one_time_capture_2026_11_13.verify_workk --output /tmp/workk/synthetic
+          grep -q '"authorization_status": "NOT_AUTHORIZED"' /tmp/workk/preflight/preflight.json
+          git diff --exit-code
+          git -C _wip diff --exit-code
+          git -C _site diff --exit-code
+          git -C _matrix diff --exit-code
+          git -C _pr102 diff --exit-code
+      - name: Store non-production derived evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workk-three-source-runner-offline-proof
+          path: |
+            /tmp/workk/workk-proof.json
+            /tmp/workk/preflight/*.json
+            /tmp/workk/synthetic/*.json
+            /tmp/workj/*.json
+            /tmp/workj/*.log
+            /tmp/casualty-ingestion/*.json
+            /tmp/casualty-worka/summary.json
+            /tmp/casualty-worka/attack_decisions.json
+            /tmp/casualty-worka/proposals.json
+            /tmp/casualty-worka/generator_probe.json
+            /tmp/casualty-worka/manifest.json
+          if-no-files-found: warn
+          retention-days: 30
