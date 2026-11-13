@@ -17,6 +17,13 @@ on:
       - "tests/test_c6_neon_final_prepare.py"
       - "tests/test_c6_neon_auto_git.py"
       - "scripts/c6_neon_auto_git.py"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/update-netlify-site.yml"
+      - ".github/workflows/c6-neon-git-integration-offline.yml"
+      - "scripts/c6_neon_auto_git.py"
+      - "tests/test_c6_neon_auto_git.py"
 permissions:
   contents: read
   actions: read
@@ -166,7 +173,7 @@ jobs:
           if-no-files-found: warn
 
   auto-neon-git-offline:
-    if: github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13') || (github.event_name == 'pull_request' && github.head_ref == 'research-c6-auto-neon-git-zero-netlify-2026-11-13')
     runs-on: ubuntu-latest
     permissions:
       contents: read
