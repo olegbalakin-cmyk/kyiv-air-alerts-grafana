@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01 — real launch CI failure before HTTP (2026-11-13)
+
+- Owner-approved Work L [run #43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) at `e1f9c3af` FAILED on missing `_pr102/.../capture_once.py` test fixture after owner-grant gate PASS; source capture SKIPPED, no artifact, 0 GET/0 casualty credit. One-time grant consumed, no retry; fix offline and seek fresh owner approval separately.
+
 ### CASUALTY-WORKL-THREE-SOURCE-LIVE-PREFLIGHT-OFFLINE-PASS-01 — Work L three-source pilot readiness PASS offline (2026-11-13)
 
 - [PR #124](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/124) exact `78fd1472`, [Actions #43500434087](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43500434087) 68/68 PASS; [ZIP #14072718715](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43500434087/artifacts/14072718715) independently SHA256 `f3d8742828897bda7c102ce7a4d9cb985db18b784ad9ca94eb46c93a86feb2e0`; four inner JSON hashes MATCH. T03/T04/T05 one-shot trigger prepared; no source GET, no owner grant, special workflow availability pending; no automatic credits/publication.
