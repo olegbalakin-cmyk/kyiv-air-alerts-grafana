@@ -581,6 +581,16 @@ jobs:
           path: c6-auto-integration
           persist-credentials: false
 
+      - name: Read-only redacted Git status before C6 capture
+        if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+        continue-on-error: true
+        working-directory: .
+        shell: bash
+        run: |
+          python c6-auto-integration/scripts/c6_precapture_diag.py \
+            --checkout "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --expected-head "${PHASE1_INPUT_SHA}"
+
       - name: Freeze same-run C2 checkpoint delta (no commit/push)
         if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
         working-directory: .
