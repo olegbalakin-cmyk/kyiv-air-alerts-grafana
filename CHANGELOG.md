@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-C3-WORKN-PUBLISHER-ROLLBACK-OFFLINE-PASS-01 — code and Git-only recovery offline PASS (2026-11-13; accepted)
+
+- [Draft PR #119](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/119) exact `bd2c7ec8`, [Actions #43407396191](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43407396191) SUCCESS: 20 publisher tests, physical C2/Work L/Work M source/final ZIP SHA PASS; original missing C2 prep not substituted, separate owner publication receipt still required. Fresh 23-city `site-prod@f0cfcbc8` Git-only rollback 18-file package and 8 no-loss cases PASS; artifact #14027727854 SHA `3817cb462904a37237cd6c48970bad576648c6c273093febe33b7ddfc55e4c43`. Physical Netlify production restoration authority unproven. `PUBLISHER_CODE_READY=YES; ROLLBACK_OFFLINE_READY=YES; ROLLBACK_OPERATIONAL_READY=NO; CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
+
+
 ### C6-WORKM-FINALZIP-INDEPENDENT-PASS-01 — physical prepare-only and independent eight-file ZIP PASS (2026-11-13; accepted)
 
 - [Actions #43403595621](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621) SUCCESS attempt 1 on PR #116 exact `9d846279`; only prepare job ran. [FINAL artifact #14025629654](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43403595621/artifacts/14025629654) independently SHA-256 `f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed`; report #14025729121 SHA `f4f786b168d28f37bdf6a333d4e514b503e402e4fda25553d99ffa0a8d6a8648`; 8/8 final members, 6/6 JSON/sha, Work L 6/6 source sha, release binding/report PASS. No publication. Publisher original C2 prep contract and fresh rollback remain blocked: `FINAL_ZIP=PASS; ROLLBACK_READY=NO; CUTOVER_READY=NO; GLOBAL_CUTOVER=NO`.
