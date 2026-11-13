@@ -103,7 +103,7 @@ jobs:
           DB_ENDPOINT: ${{ inputs.db_endpoint }}
         run: |
           set -euo pipefail
-          python research/scripts/c6_failed_c2_recovery_gate.py \
+          PYTHONPATH=research python research/scripts/c6_failed_c2_recovery_gate.py \
             --run "$RUNNER_TEMP/work-l/run.json" \
             --jobs "$RUNNER_TEMP/work-l/jobs.json" \
             --artifact "$RUNNER_TEMP/work-l/artifact.json" \
