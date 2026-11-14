@@ -22,9 +22,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git rev-parse HEAD^)" = "f67ee69903f8d223f701bf3958780dddc4de88c9"
+          test "$(git rev-parse HEAD~2)" = "f67ee69903f8d223f701bf3958780dddc4de88c9"
           for p in kyiv-air-alerts-grafana/data/dashboard_data.json kyiv-air-alerts-grafana/data/site_derived.json kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json kyiv-air-alerts-grafana/data/c2_history_capture_checkpoints.json; do
-            cmp <(git show HEAD^:"$p") "$p"
+            cmp <(git show f67ee69903f8d223f701bf3958780dddc4de88c9:"$p") "$p"
           done
           test -s kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q 'raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/' kyiv-air-alerts-grafana/pages-preview/app.js
