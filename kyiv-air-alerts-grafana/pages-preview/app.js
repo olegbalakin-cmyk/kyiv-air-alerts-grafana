@@ -2419,16 +2419,18 @@ function renderCity() {
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
   renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
   const labels = rows.map(r => periodDisplayLabel(r, period));
-  const forecastable = ["daily28", "calendarWeekly", "monthly", "allTime"].includes(period);
+  const rollingForecastable = ["rolling30","rolling90","rolling180"].includes(period);
+  const forecastable = rollingForecastable || ["daily28","calendarWeekly","monthly","allTime"].includes(period);
   const isCurrentRange = rows.length && allRows.length &&
     rows[rows.length - 1] === allRows[allRows.length - 1];
-  // The trend is explicitly opt-in; hide its control on unsupported modes or
-  // manually selected historical ranges, retaining the selection for other modes.
+  // Forecast only one future complete day and recalculate the rolling window.
+  const candidate = forecastable && isCurrentRange ?
+    (rollingForecastable
+      ? window.QuarterRollingPreview?.rollingForecast(allRows,period,state.historicalDaily?.cities?.[key],city)
+      : window.ForecastTrend?.build(allRows,period)) : null;
   const trendControl = $("showTrend")?.closest("label");
-  if (trendControl) trendControl.classList.toggle("hidden", !forecastable || !isCurrentRange);
-  // Never extrapolate a manually chosen historical range or a rolling window.
-  const previewForecast = forecastable && isCurrentRange && $("showTrend")?.checked && window.ForecastTrend
-    ? window.ForecastTrend.build(allRows, period) : null;
+  if (trendControl) trendControl.classList.toggle("hidden", !candidate);
+  const previewForecast = $("showTrend")?.checked ? candidate : null;
   const projectedRows = previewForecast?.forecasts || [];
   const forecastIndices = projectedRows.map((_, i) => labels.length + i);
   const chartRows = rows.concat(projectedRows);
@@ -3001,7 +3003,8 @@ function sharedRows(keys, period) {
     .map(t => ({ time: t, rows: maps.map(m => m.get(t)) }))
     .filter(item => period === "calendarWeekly"
       ? calendarWeekOverlapsRange(item.rows[0], range.from, range.to)
-      : dateKeyInRange(item.time, range.from, range.to));
+      : period === "quarterly" ? calendarQuarterOverlapsRange(item.rows[0],range.from,range.to)
+       : dateKeyInRange(item.time, range.from, range.to));
 }
 
 
@@ -3222,9 +3225,11 @@ function renderComparison() {
   const period = $("comparePeriod").value;
   const shared = sharedRows(keys, period);
   const labels = shared.map(x => period === "calendarWeekly" && x.rows[0]
-    ? calendarWeekLabel(x.rows[0]) : x.time);
+    ? calendarWeekLabel(x.rows[0]) : period === "quarterly" && x.rows[0]
+    ? x.rows[0].quarter : x.time);
   let countLabel=tr("періодів","periods");
   if(period==="monthly")countLabel=tr("міс.","months");
+  if(period==="quarterly")countLabel=tr("кварталів","quarters");
   if(period==="calendarWeekly")countLabel=tr("тиж.","weeks");
   if(period==="weekly")countLabel=tr("7-денних вікон","7-day windows");
   if(period==="rolling30")countLabel=tr("30-денних вікон","30-day windows");
@@ -3232,7 +3237,7 @@ function renderComparison() {
   if(period==="rolling180")countLabel=tr("180-денних вікон","180-day windows");
   if(period==="daily28")countLabel=tr("днів","days");
   const note=shared.length?tr(`Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length-1]} (${shared.length} ${countLabel}).`,`Common series for ${keys.length} cities: ${labels[0]} — ${labels[labels.length-1]} (${shared.length} ${countLabel}).`):tr("Немає спільних періодів для цієї комбінації.","No common periods are available for this combination.");
-  const partial = period === "calendarWeekly"
+  const partial = ["calendarWeekly","quarterly"].includes(period)
     ? shared.flatMap(item => item.rows).find(isPartialPeriod) : null;
   $("comparisonNote").textContent = note + (partial
     ? " " + tr("Неповний тиждень позначено пунктиром. ", "The incomplete week is dashed. ") + partialPeriodFooter(partial) + "."
@@ -3406,6 +3411,7 @@ function renderAllCitiesTable() {
     "30d":tr("30 днів","30 days"),
     "90d":tr("90 днів","90 days"),
     "180d":tr("180 днів","180 days"),
+    "quarter":tr("Останній повний квартал","Last complete quarter"),
     "year":tr("Рік","Year"),
     "common":tr("Від початку спільних даних","From start of common data"),
     "custom":tr("Довільний період","Custom period")
@@ -3413,6 +3419,7 @@ function renderAllCitiesTable() {
   const root = state.data.all_cities_table_test;
   const cities = root?.cities || {};
   const commonBounds = commonMonthlyDateBounds();
+  const latestQuarter = window.QuarterRollingPreview?.quarterRange(commonBounds?.max);
   // The producer does not supply an all-cities 180d aggregate. Derive it
   // from the verified per-day history, with one shared complete end date.
   const sharedEnd = cities?.[cityKeys()[0]]?.periods?.["90d"]?.range_end || "";
@@ -3448,6 +3455,18 @@ function renderAllCitiesTable() {
       };
     }
 
+    if (range === "quarter") {
+      const quarter=latestQuarter && periodRows(state.data.cities[key],"quarterly")
+        .find(row => !isPartialPeriod(row) &&
+          row.quarter_start===latestQuarter.from && row.quarter_end===latestQuarter.to);
+      return {
+        key,label:labelFor(key),alerts:quarter?.alerts_started ?? null,
+        hours:quarter?.total_alert_duration_hours ?? null,
+        duration:quarter?.avg_alert_duration_min ?? null,
+        coverage:coverageStart(key),
+        rangeStart:latestQuarter?.from || null,rangeEnd:latestQuarter?.to || null
+      };
+    }
     if (range === "180d") {
       const city = state.data.cities[key];
       const daily = state.historicalDaily?.cities?.[key];
@@ -3514,9 +3533,10 @@ function renderAllCitiesTable() {
       const sample = rows.find(r => r.rangeStart && r.rangeEnd);
       const dates = sample ? `${sample.rangeStart} — ${sample.rangeEnd}` : "—";
       const hasMissing180 = range === "180d" && rows.some(r => r.alerts == null);
+      const hasMissingQuarter = range === "quarter" && rows.some(r => r.alerts == null);
       note.textContent = tr(
-        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.${hasMissing180 ? " Недостатньо перевірених денних даних для окремих показників (—)." : ""}`,
-        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.${hasMissing180 ? " Some values lack verified daily coverage (—)." : ""}`
+        `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.${hasMissing180 ? " Недостатньо перевірених денних даних для окремих показників (—)." : ""}${hasMissingQuarter ? " Для окремих міст немає всіх трьох повних місяців кварталу (—)." : ""}`,
+        `${periodLabels[range]} · ${dates}. All 23 series use the same common time window.${hasMissing180 ? " Some values lack verified daily coverage (—)." : ""}${hasMissingQuarter ? " Some cities lack all three complete months of the quarter (—)." : ""}`
       );
     }
   }
@@ -3935,11 +3955,11 @@ async function init() {
   while (defaults.length < 3 && keys[defaults.length]) defaults.push(keys[defaults.length]);
 
   const cityDefault = validParam("city", keys, defaults[0] || keys[0]);
-  const periodDefault = validParam("period", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly", "allTime"], "monthly");
+  const periodDefault = validParam("period", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly", "quarterly", "allTime"], "monthly");
   const aDefault = validParam("a", keys, defaults[0] || keys[0]);
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");
-  const compareDefault = validParam("compare", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly"], "monthly");
+  const compareDefault = validParam("compare", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly", "quarterly"], "monthly");
   const heatmapDefault = validMultiParam("tod", HEATMAP_RANGES, ["30d"]);
   const timeOfDayBinDefault = validParam("todbin", TIME_OF_DAY_BIN_MINUTES.map(String), "15");
   const compareTimeOfDayDefault = validParam("ctod", HEATMAP_RANGES, "30d");
