@@ -1,0 +1,522 @@
+{
+  "schema": "work-s-final-execution-v3",
+  "checkpoint": "C6-C3-WORKS-NEON-CUTOVER-PASS-01",
+  "observed_at_utc": "2026-11-13T20:19:32.888543+00:00",
+  "owner_production_go_received": true,
+  "additional_owner_temporary_netlify_unlock_approval_received": true,
+  "CUTOVER_RESULT": "PASS",
+  "GLOBAL_CUTOVER": "YES",
+  "PRODUCTION_UNCHANGED": "NO",
+  "scope": "One controlled historical Neon JSON cutover; recurring Git-only C2 remains paused; no live-alert certification.",
+  "main_sha": "1dbacef11367b97805c43be112cfeb2c23c12072",
+  "site_prod_sha_before": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+  "site_prod_sha_after": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+  "netlify_deployment_before": "6adb629bc3ebc570117d82e1",
+  "netlify_deployment_after": "6af76b2d67c5074986728b62",
+  "git_publication_commit_sha": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+  "netlify_release_actions_run_id": 43496568449,
+  "git_release_actions_run_id": 43497605769,
+  "netlify_dispatch_count": 1,
+  "git_publication_dispatch_count": 1,
+  "netlify_temporary_unlock_count": 1,
+  "netlify_approved_deploy_relocked": true,
+  "deadline_utc": "2026-11-14T10:40:40+00:00",
+  "both_stages_before_deadline": true,
+  "technical_preflight": {
+    "before_unlock": "PASS: exact refs, 23/23 real-clock freshness, physical artifact and rollback hashes, administrative freeze, no competing publishers or pending newer production deployment.",
+    "before_git_publication": {
+      "as_of_utc": "2026-11-13T20:00:20.527938+00:00",
+      "main_sha": "1dbacef11367b97805c43be112cfeb2c23c12072",
+      "site_prod_sha": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+      "identity_checks_passed": 60,
+      "identity_checks_total": 60,
+      "production_contract": "PASS",
+      "fresh_cities": 23,
+      "oldest_age_hours": 21.327677640833333,
+      "queues": {
+        "in_progress": 0,
+        "queued": 0,
+        "waiting": 0,
+        "pending": 0,
+        "requested": 0
+      },
+      "checks": {
+        "rollback_inner": true,
+        "package/git-json/kyiv-air-alerts-grafana/data/alerts_combined.json": true,
+        "current/git-json/kyiv-air-alerts-grafana/data/alerts_combined.json": true,
+        "package/git-json/kyiv-air-alerts-grafana/data/dashboard_data.json": true,
+        "current/git-json/kyiv-air-alerts-grafana/data/dashboard_data.json": true,
+        "package/git-json/kyiv-air-alerts-grafana/data/kyiv_threat_mix.json": true,
+        "current/git-json/kyiv-air-alerts-grafana/data/kyiv_threat_mix.json": true,
+        "package/git-json/kyiv-air-alerts-grafana/data/sevastopol_events.json": true,
+        "current/git-json/kyiv-air-alerts-grafana/data/sevastopol_events.json": true,
+        "package/git-json/kyiv-air-alerts-grafana/data/site_derived.json": true,
+        "current/git-json/kyiv-air-alerts-grafana/data/site_derived.json": true,
+        "package/netlify/_site/app.js": true,
+        "frontend/netlify/_site/app.js": true,
+        "package/netlify/_site/brand-horizontal-en-dark.svg": true,
+        "frontend/netlify/_site/brand-horizontal-en-dark.svg": true,
+        "package/netlify/_site/brand-horizontal-uk-dark.svg": true,
+        "frontend/netlify/_site/brand-horizontal-uk-dark.svg": true,
+        "package/netlify/_site/brand-mark.svg": true,
+        "frontend/netlify/_site/brand-mark.svg": true,
+        "package/netlify/_site/chart-share.js": true,
+        "frontend/netlify/_site/chart-share.js": true,
+        "package/netlify/_site/data.json": true,
+        "package/netlify/_site/favicon-32.png": true,
+        "frontend/netlify/_site/favicon-32.png": true,
+        "package/netlify/_site/favicon.svg": true,
+        "frontend/netlify/_site/favicon.svg": true,
+        "package/netlify/_site/features.json": true,
+        "frontend/netlify/_site/features.json": true,
+        "package/netlify/_site/historical-daily-kpi.json": true,
+        "package/netlify/_site/index.html": true,
+        "frontend/netlify/_site/index.html": true,
+        "package/netlify/_site/kpi-range.js": true,
+        "frontend/netlify/_site/kpi-range.js": true,
+        "package/netlify/_site/styles.css": true,
+        "frontend/netlify/_site/styles.css": true,
+        "kyiv-air-alerts-grafana/data/casualties/baseline_monthly.csv": true,
+        "kyiv-air-alerts-grafana/data/casualties/cities/kherson/kherson_air_attack_deaths_monthly.csv": true,
+        "kyiv-air-alerts-grafana/data/casualties/cities/kherson/manifest.json": true,
+        "kyiv-air-alerts-grafana/data/casualties/cities/odesa/manifest.json": true,
+        "kyiv-air-alerts-grafana/data/casualties/cities/odesa/odesa_air_attack_deaths_monthly.csv": true,
+        "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json": true,
+        "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv": true,
+        "kyiv-air-alerts-grafana/data/casualties/master_20cities_manifest.json": true,
+        "kyiv-air-alerts-grafana/data/casualties/master_20cities_monthly_wide.csv": true,
+        "kyiv-air-alerts-grafana/data/casualties/review_queue.json": true,
+        "kyiv-air-alerts-grafana/data/casualties/revisions.csv": true,
+        "kyiv-air-alerts-grafana/data/casualties/source_state.json": true,
+        "aux/c2_history_capture_checkpoints.json": true,
+        "aux/dashboard_qa.json": true,
+        "final/historical-daily-kpi.json": true,
+        "final/kyiv-air-alerts-grafana/data/alerts_combined.json": true,
+        "final/kyiv-air-alerts-grafana/data/dashboard_data.json": true,
+        "final/kyiv-air-alerts-grafana/data/kyiv_threat_mix.json": true,
+        "final/kyiv-air-alerts-grafana/data/sevastopol_events.json": true,
+        "final/kyiv-air-alerts-grafana/data/site_derived.json": true,
+        "binding": true,
+        "embedded/casualties": true,
+        "embedded/casualties_by_city": true,
+        "city_count": true,
+        "generation": true
+      }
+    },
+    "production_contract": "EXACT_WORK_L_TO_WORK_M_NETLIFY_KPI_PASS",
+    "freshness_limit_hours": 36,
+    "freshness_gate_bypassed": false,
+    "freshness_first_expiry_utc": "2026-11-14T10:40:40.888431+00:00",
+    "physical_final_artifact_id": 14025629654,
+    "physical_final_zip_sha256": "f2252da0014ce4ed28d5d52a7164e077b8fcd8c99380dd752ee0650412b051ed",
+    "work_n_rollback_artifact_id": 14028565807,
+    "rollback_inner_zip_sha256": "79e6a1ba0339c9f02d4089933cd91f77db060221a572e49df3c7d11fb2d31ff5",
+    "existing_work_p_operational_rollback": "PASS for verified unchanged baseline; not rerun"
+  },
+  "netlify": {
+    "run": {
+      "id": 43496568449,
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+      "updated_at": "2026-11-13T19:55:33Z"
+    },
+    "deployment_id": "6af76b2d67c5074986728b62",
+    "published_at_utc": "2026-11-13T19:55:27.470Z",
+    "independent_canonical_http": {
+      "NETLIFY_HTTP_VERIFICATION": "PASS",
+      "observed_at_utc": "2026-11-13T19:55:58.533036+00:00",
+      "deployment_id": "6af76b2d67c5074986728b62",
+      "hashes": {
+        "historical-daily-kpi.json": "ce3cd92fb28e7bad1217d598b2350ac08700c29035e035e36afe702a672194d5",
+        "app.js": "6b6c116ca19069e172d391cb9a9e80a76ef6e5f77e292ee91717ca2ec615759a",
+        "kpi-range.js": "08835ec81cb5c6147b06a66ff085dae07d1af4c76cc07f4c8fe671f8905709c6"
+      },
+      "generation": "2026-11-13T10:08:11.334497+02:00",
+      "verified_cities": 23,
+      "city_keys": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kharkiv",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sevastopol",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zaporizhzhia",
+        "zhytomyr"
+      ],
+      "release_binding": "d09bde00bfe80182b19ac70640fc9b07a1fe3f7e4dcb9ecb84f5c6b827584ff7"
+    },
+    "deploy_state": "ready",
+    "locked": true,
+    "lock_proof": "Independent Netlify get-deploy API locked=true after relock and again at final readback; project currentDeploy is the same ID. Browser shows Unlock to start auto publishing.",
+    "no_unapproved_publication_observed": true,
+    "no_active_netlify_deploys_at_end": true,
+    "actions_artifact_id": 14071069912,
+    "actions_artifact_digest": "964698e1529e852ce7bfa837a0b19ae7c72ed1b40bc1050784212b854ad44b14"
+  },
+  "git_publication": {
+    "run": {
+      "id": 43497605769,
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "1dbacef11367b97805c43be112cfeb2c23c12072",
+      "updated_at": "2026-11-13T20:03:28Z"
+    },
+    "commit_at_utc": "2026-11-13T20:03:12Z",
+    "protected_environment": "c6-neon-git-release",
+    "owner_review_approved": true,
+    "publisher_job_id": 132134810685,
+    "publisher_job_conclusion": "success",
+    "ordinary_update_site_and_prepare_jobs": "SKIPPED",
+    "verification": {
+      "status": "PASS",
+      "head": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+      "parent": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+      "changed_files": [
+        "historical-daily-kpi.json",
+        "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "kyiv-air-alerts-grafana/data/dashboard_data.json",
+        "kyiv-air-alerts-grafana/data/site_derived.json"
+      ],
+      "six_final_git_blobs_verified": 6,
+      "casualty_hashes_preserved": 12,
+      "audit_aux_hashes_preserved": 2,
+      "old_kyiv_intervals": 2858,
+      "final_kyiv_intervals": 2858,
+      "Kyiv_interval_tuple_multiset_exact": true
+    },
+    "live_git_delivery_http": {
+      "as_of": "2026-11-13T20:05:15.402421+00:00",
+      "status": "PASS",
+      "head_sha": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+      "hashes": {
+        "historical-daily-kpi.json": "ce3cd92fb28e7bad1217d598b2350ac08700c29035e035e36afe702a672194d5",
+        "kyiv-air-alerts-grafana/data/alerts_combined.json": "633f713d801139ac638aebc6d20dfc867b7d4577a0dbcd1000efb904cdcbd01e",
+        "kyiv-air-alerts-grafana/data/dashboard_data.json": "1acd666dd2722e8fbc86a95df8e2d85e1a79067283a9a08b21d8d909f7839974",
+        "kyiv-air-alerts-grafana/data/kyiv_threat_mix.json": "6ba257e402638b7822edcb74d92e6e562736ba3761bdfbd30a0a04074b0f43af",
+        "kyiv-air-alerts-grafana/data/sevastopol_events.json": "5da726a5f95d3605f51725af5456360c0a9ee1c4de450271a01e98ecdfb7e6fe",
+        "kyiv-air-alerts-grafana/data/site_derived.json": "4fc0a6b1cd74ac3c880738036af98c14194a91b9ff2b767636fc4dbd1116dbf2"
+      },
+      "city_count": 23,
+      "generation": "2026-11-13T10:08:11.334497+02:00"
+    }
+  },
+  "production_qa": {
+    "result": "PASS",
+    "as_of_utc": "2026-11-13T20:17:10.474Z",
+    "city_count": 23,
+    "time_modes": 8,
+    "ui_view_checks": 184,
+    "view_checks": "Correct selected city/mode, nonempty primary KPI and positive chart dimensions in every view; representative graph images independently inspected.",
+    "csv": {
+      "result": "PASS",
+      "files": [
+        {
+          "city": "cherkasy",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "chernihiv",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "chernivtsi",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "dnipro",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "ivano_frankivsk",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "kharkiv",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "kherson",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "khmelnytskyi",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "kropyvnytskyi",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "kyiv",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "lutsk",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "lviv",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "mykolaiv",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "odesa",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "poltava",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "rivne",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "sevastopol",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "sumy",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "ternopil",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "uzhhorod",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "vinnytsia",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "zaporizhzhia",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        },
+        {
+          "city": "zhytomyr",
+          "rows": 28,
+          "first": "2026-10-17",
+          "last": "2026-11-13"
+        }
+      ],
+      "total_rows": 644,
+      "validation": "23 actual browser downloads; 28 unique daily periods each, expected headers and nonnegative numeric hours/counts."
+    },
+    "kyiv": "2858 source intervals before/after; exact multiset of (start,end,source); causes chart visually rendered.",
+    "casualty": "12 tracked blob identities and embedded casualty fields preserved; chart visually rendered.",
+    "auxiliary": "Both audit blob identities preserved; threat mix and Sevastopol FINAL bytes verified via Git and live HTTP.",
+    "site_js_errors": [],
+    "extension_console_errors_excluded": true,
+    "documented_empty_kpi_states": "Three zero-alert views have no mean duration with explicit explanation; five all-time views have no daily maximum without complete daily data, also explained.",
+    "ui_view_evidence_sha256": "0d2579b1216c9de769d82e37080ca28a193f4e8a1d5f8425e278ea2f93048572",
+    "csv_sha256": {
+      "cherkasy": "2a3c3233167bbf087cb3b8df62560d943d016375fcd640536bfd1b3b457e3661",
+      "chernihiv": "ab2c63b58ad1e443cd64afc23b96b504d0c3635139b808b006abc79cf58cbad5",
+      "chernivtsi": "ab2e2aa122a2101a8f54f225331efc9a5776b08eff06f23211828f763cbab3f7",
+      "dnipro": "b32c965f6650a8c39ec0661d01c7dd9dbe79f1746b39b9d1780b37d8264dad1a",
+      "ivano_frankivsk": "5a5392cec4d631caaecd1de4c06bc9369b9ae2808398e2974480bdaab153d92e",
+      "kharkiv": "18106ff875106582c32d796652fa4cff29a70757b29d29c29cf71f6209f51f09",
+      "kherson": "7ec3504880dd66ffbb7ce38ebe209f0df44233479514dc6d2647ef869620bc50",
+      "khmelnytskyi": "1731c78ba69b4cf7a2588fb25004d87e2d5bcd822249b4cee2d48ab5a451c440",
+      "kropyvnytskyi": "0abc8adb4a37b0ff0177501d2c499efa7a1717b1b3868a26b892a517d91830b6",
+      "kyiv": "ad953a660c284abf32f2d8051c21c8c0ca489b14b5807054f9acb1be54fd5c9c",
+      "lutsk": "aa147280e1b1962546a5d44a3ca87480523088a3ba8e8df0b4f0683fbba0a3d8",
+      "lviv": "0aadb166f1f8bd7a2fb2b7d2b611dbcb13d4bd37c9dc8c3be494c1de62c3b790",
+      "mykolaiv": "35544d83193d7fa39de5d116517cdd3b91a45e65253c6698dd718ce488d74c31",
+      "odesa": "c94667c3d7330e0eeb0a33716d59ac8a91208d97cc87417619af61ddd55add51",
+      "poltava": "050cf8fae7eb1febbe0fdaa950d4a314b78da4a904351770d052d1926b71b407",
+      "rivne": "08f6adfd8ee6bf0a324b237a900c54f939b5814ad31372cf92395e042994bc0b",
+      "sevastopol": "01e99d4b26a288ee34407e8e35dd88b62de2f44567d27d271b4f0e862a1549a9",
+      "sumy": "d6c86225c96edb09afb12c4f16e292ab1f55761fed16c3c5b2d5a78cf2489746",
+      "ternopil": "9212ade2441c0b03ae28c109e04192a59024922e0d764e7b0eecf790731520d9",
+      "uzhhorod": "aa540c90d3b7f9c0fa2b7a07e05af8610490cb2261ee99e67310d391f7aaeb04",
+      "vinnytsia": "5a06fe80677e29a616dd33ac0a07ec9e8b801f73f27696a6d8e91268766a1f4e",
+      "zaporizhzhia": "8d30561ed54563c22d19c4fa9b400b61b8d00b46e9b48ef3d3318f30e85c4d0f",
+      "zhytomyr": "bd4dde41470928a06076910e69e007dcc6e3365a700e9b31ce8b2c834d406601"
+    }
+  },
+  "cleanup": {
+    "netlify_owner_grant": "REMOVED",
+    "git_owner_grant": "REMOVED",
+    "temporary_repository_variables_removed": 13,
+    "git_environment_release_variable": "REMOVED",
+    "protected_environment": "Retained main-only, owner review required, admin bypass OFF; no secrets or variables.",
+    "both_production_workflows": "disabled_manually",
+    "publisher_pause": true,
+    "netlify_auto_publishing": "OFF",
+    "approved_deployment_locked": true,
+    "ordinary_git_only_c2_resumed": false,
+    "independent_actions_refs_and_queues": {
+      "as_of_utc": "2026-11-13T20:16:18.741049+00:00",
+      "workflows": {
+        "netlify_workflow": "disabled_manually",
+        "git_workflow": "disabled_manually"
+      },
+      "runs": {
+        "netlify_run": {
+          "id": 43496568449,
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+          "updated_at": "2026-11-13T19:55:33Z"
+        },
+        "git_run": {
+          "id": 43497605769,
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "1dbacef11367b97805c43be112cfeb2c23c12072",
+          "updated_at": "2026-11-13T20:03:28Z"
+        }
+      },
+      "refs": {
+        "main": "1dbacef11367b97805c43be112cfeb2c23c12072",
+        "site_prod": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+        "coord": "f06c7bfddf419a3535f9a0bc6cc9090bda59dfd9"
+      },
+      "active": {
+        "in_progress": 0,
+        "queued": 0,
+        "waiting": 0,
+        "pending": 0,
+        "requested": 0
+      }
+    },
+    "browser_cleanup_observed_at_utc": "2026-11-13T20:17:10.474Z"
+  },
+  "rollback": {
+    "applied": false,
+    "reason": "NOT_NEEDED; both production stages and QA PASS; approved no-loss rollback remains available against the verified baseline."
+  },
+  "new_c2_runs": 0,
+  "neon_writer_runs": 0,
+  "source_http_requests": 0,
+  "old_proof_workflows_rerun": 0,
+  "new_merges": 0,
+  "dst_correction": "OFF",
+  "casualty_wip_mutations": 0,
+  "prior_stopped_execution_observation": {
+    "schema": "work-s-execution-observation-v2",
+    "observed_at_utc": "2026-11-13T19:40:45.019867+00:00",
+    "owner_production_go_received": true,
+    "CUTOVER_RESULT": "BLOCKED",
+    "GLOBAL_CUTOVER": "NO",
+    "PRODUCTION_UNCHANGED": "YES",
+    "main_sha": "1dbacef11367b97805c43be112cfeb2c23c12072",
+    "site_prod_sha_before": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+    "site_prod_sha_after": "99648321e64037a6dcf3ae0072d66eedcccc2839",
+    "netlify_deployment_before": "6adb629bc3ebc570117d82e1",
+    "netlify_deployment_after": "6adb629bc3ebc570117d82e1",
+    "git_publication_commit_sha": null,
+    "netlify_release_actions_run_id": null,
+    "git_release_actions_run_id": null,
+    "release_dispatch_count": 0,
+    "technical_preflight": {
+      "freshness_23_of_23": "PASS",
+      "data_rollback_identity_checks": "60/60 PASS",
+      "netlify_release_contract": "EXACT_WORK_L_TO_WORK_M_NETLIFY_KPI_PASS",
+      "last_immediate_prepublication_gate_utc": "2026-11-13T18:26:56.256374+00:00",
+      "final_generation": "2026-11-13T10:08:11.334497+02:00",
+      "final_kpi_sha256": "ce3cd92fb28e7bad1217d598b2350ac08700c29035e035e36afe702a672194d5",
+      "freshness_deadline_utc": "2026-11-14T10:40:40.888431+00:00",
+      "rollback_work_p": "PASS, existing current configuration; not rerun"
+    },
+    "blocker": {
+      "code": "AUTO_REVIEW_NETLIFY_UNLOCK_REJECTED",
+      "action": "Temporary Unlock published deploy immediately before one production dispatch",
+      "reason": "Automatic approval review treated resuming automatic Netlify publishing as broader than the authorized single production dispatch and required keeping publishing locked.",
+      "unlock_executed": false,
+      "dispatch_executed": false,
+      "bypass_attempted": false,
+      "earlier_research_gate_review": "Dispatch-input configuration initially rejected because research harness reports production permission false; resolved by read-only exact production contract PASS and existing Work P proof; configuration then allowed."
+    },
+    "cleanup": {
+      "netlify_grant": "REMOVED",
+      "temporary_repository_variables_installed_then_removed": 13,
+      "git_grant": "NEVER_INSTALLED",
+      "git_environment_release_flag": "NEVER_INSTALLED",
+      "both_production_workflows": "disabled_manually",
+      "publisher_pause": true,
+      "netlify_auto_publishing": "LOCKED; unlock dialog cancelled",
+      "ordinary_git_only_c2_resumed": false,
+      "protected_environment": "retained unchanged and empty"
+    },
+    "production_qa": "NOT_RUN; neither production stage started",
+    "rollback": {
+      "applied": false,
+      "reason": "NOT_NEEDED_PRODUCTION_UNCHANGED"
+    },
+    "new_c2_runs": 0,
+    "neon_writer_runs": 0,
+    "source_http_requests": 0,
+    "new_merges": 0,
+    "dst_correction": "OFF",
+    "casualty_wip_mutations": 0,
+    "latest_accepted_checkpoint_unchanged": "C6-C3-WORKT-MERGE123-DISPATCH-REGISTERED-01"
+  }
+}
