@@ -15,7 +15,7 @@ class WorkAA(unittest.TestCase):
         text = ("22 жовтня ракета влучила у приватний будинок у Запоріжжі. "
                 "Загинули двоє людей.")
         got = r.retain_incident_review_clues(text)["evidence_mentions"]
-        self.assertTrue(any("Загинули двоє людей." == a.get("excerpt") for a in got))
+        self.assertTrue(any("Загинули двоє людей." == a.get("excerpt") for a in got), repr(got))
         self.assertTrue(all(a.get("context_status") == "COMPLETE" for a in got))
         self.assertEqual([a["article_sentence_order"] for a in got],sorted(a["article_sentence_order"] for a in got))
 
@@ -31,7 +31,7 @@ class WorkAA(unittest.TestCase):
                 "Увечері того ж дня інша ракета влучила у школу в Запоріжжі, загинула людина."
                 + " Довідковий контекст без нових фактів." * 24)
         m = r.retain_incident_review_clues(text)["evidence_mentions"]
-        self.assertEqual(len({z["article_segment_hint"] for z in m}), 2)
+        self.assertEqual(len({z["article_segment_hint"] for z in m}), 2, repr((r._review_sentences(text)[:3], m)))
         self.assertFalse(r.retain_incident_review_clues(text)["attack_identity_verified"])
 
     def test_two_to_three_sequence_preserved_as_unverified(self):
@@ -42,7 +42,7 @@ class WorkAA(unittest.TestCase):
         rev = r.retain_incident_review_clues(text)
         mentions=rev["evidence_mentions"]
         self.assertTrue(any("Спочатку" in (z.get("excerpt") or "") for z in mentions))
-        self.assertTrue(any("Пізніше" in (z.get("excerpt") or "") for z in mentions))
+        self.assertTrue(any("Пізніше" in (z.get("excerpt") or "") for z in mentions), repr(mentions))
         self.assertFalse(rev["direct_two_to_three_update_proven"])
 
     def test_publication_date_cannot_replace_missing_attack_date(self):
