@@ -307,7 +307,7 @@ def retain_incident_review_clues(text: str) -> dict:
     }
     candidates, segment, seen_attack = [], 1, False
     for order, sentence in enumerate(_review_sentences(text), 1):
-        if len(sentence) < 24:
+        if len(sentence) < 12:
             continue
         lower = sentence.casefold()
         kinds = [name for name, pattern in patterns if re.search(pattern, lower)]
