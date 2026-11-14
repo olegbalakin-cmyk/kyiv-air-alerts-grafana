@@ -78,20 +78,34 @@ def _bounded_excerpts(card: dict, reasons: set[str]) -> list[dict]:
 
 
 def _bounded_context(card: dict, reasons: set[str]) -> list[dict]:
-    """Work R mentions are UNVERIFIED clues; do not copy their text twice."""
+    """Copy only independently hash-checkable, privacy-screened Work R quotes.
+
+    Tags and hashes without the sentence are not reviewable event evidence.
+    Neither a quoted date nor a place mention is verified incident identity.
+    """
     review = card.get("incident_review") or {}
     result = []
     for x in (review.get("evidence_mentions") or [])[:8]:
         if not isinstance(x, dict):
+            reasons.add("MALFORMED_CONTEXT_MENTION")
             continue
-        if not _valid_sha(x.get("excerpt_sha256")):
-            reasons.add("CONTEXT_HASH_MISSING")
+        quote = x.get("excerpt")
+        want = x.get("excerpt_sha256")
+        if (not isinstance(quote, str) or not 1 <= len(quote) <= 170
+                or not _valid_sha(want) or _sha(quote) != want
+                or PRIVATE.search(quote)
+                or re.search(r"\b[А-ЯЄІЇҐ][а-яєіїґ'’-]{2,}\b",
+                             " ".join(quote.split()[1:]))):
+            reasons.add("CONTEXT_EXCERPT_UNSAFE_OR_HASH_MISMATCH")
             continue
         result.append({
             "sentence_order_not_event_time": x.get("article_sentence_order"),
             "unverified_tags": [str(t)[:50] for t in (x.get("tags") or [])[:5]],
-            "excerpt_sha256": x["excerpt_sha256"],
+            "excerpt": quote,
+            "excerpt_sha256": want,
         })
+    if not result:
+        reasons.add("REVIEWABLE_INCIDENT_CONTEXT_NOT_RETAINED")
     return result
 
 

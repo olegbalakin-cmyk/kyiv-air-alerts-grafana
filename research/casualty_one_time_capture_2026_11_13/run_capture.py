@@ -22,6 +22,8 @@ sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
 EXPECTED_BASE = "657fd70564bf5393d3fcd209e47d95fa986f3010"
 EXPECTED_BRANCH = "research-casualty-workr-identity-2026-11-14"
+WORKZ_BRANCH = "research-casualty-workz-source-evidence-2026-11-14"
+WORKX_HEAD = "b07a5957cb57ab8cf008d14373b15fa1db47b3af"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
@@ -52,6 +54,17 @@ LIMITS = {"max_initial_urls": 3, "max_requests_total": 6,
           "min_delay_seconds": 1, "max_response_bytes": 1000000,
           "timeout_seconds": 15, "max_redirects_per_url": 3,
           "retries": 0, "authorization_max_hours": 24}
+
+
+def _pilot_branch(launch: dict) -> str:
+    """Work Z needs an explicit new grant pinned to the reviewed Work X tree."""
+    if launch.get("workz_evidence_pilot") is True:
+        if launch.get("workx_head_sha") != WORKX_HEAD:
+            raise RuntimeError("WORKZ_WORKX_HEAD_MISMATCH")
+        return WORKZ_BRANCH
+    if "workz_evidence_pilot" in launch or "workx_head_sha" in launch:
+        raise RuntimeError("WORKZ_NOT_EXPLICITLY_AUTHORIZED")
+    return EXPECTED_BRANCH
 
 
 def check_scope(queue):
@@ -134,7 +147,7 @@ def validate_launch(launch, template, queue, *, environ=None, now=None):
             or not isinstance(previous, str) or len(previous) != 40
             or not all(c in "0123456789abcdef" for c in previous)):
         raise RuntimeError("NEW_OWNER_GRANT_SCOPE_INVALID")
-    if (environ.get("GITHUB_REF") != "refs/heads/" + EXPECTED_BRANCH
+    if (environ.get("GITHUB_REF") != "refs/heads/" + _pilot_branch(launch)
             or environ.get("GITHUB_RUN_ATTEMPT") != "1"
             or environ.get("GITHUB_EVENT_NAME") != "push"
             or environ.get("GITHUB_EVENT_BEFORE") != previous):
@@ -148,6 +161,8 @@ def validate_launch(launch, template, queue, *, environ=None, now=None):
             or not approved <= now < expires
             or not timedelta(0) < expires - approved <= timedelta(hours=24)):
         raise RuntimeError("SINGLE_USE_AUTHORIZATION_EXPIRED_OR_INVALID")
+    if _pilot_branch(launch) == WORKZ_BRANCH and expires - approved > timedelta(hours=1):
+        raise RuntimeError("WORKZ_GRANT_MUST_EXPIRE_WITHIN_ONE_HOUR")
     policy = dict(template)
     policy.update(authorization_id=auth, approved_at_utc=launch["approved_at_utc"],
                   expires_at_utc=launch["expires_at_utc"],
@@ -187,7 +202,7 @@ def validate_one_launch_commit(launch, plan, *, environ=None, git_call=None):
     if not isinstance(auth, str) or any(t in auth.upper() for t in ("SYNTHETIC", "EXAMPLE", "TEST")):
         raise RuntimeError("WORKL_NOT_A_REAL_FRESH_GRANT")
     if (environ.get("GITHUB_ACTOR") != "olegbalakin-cmyk"
-            or environ.get("GITHUB_REF") != "refs/heads/" + EXPECTED_BRANCH
+            or environ.get("GITHUB_REF") != "refs/heads/" + _pilot_branch(launch)
             or environ.get("GITHUB_EVENT_NAME") != "push"
             or environ.get("GITHUB_RUN_ATTEMPT") != "1"
             or environ.get("GITHUB_EVENT_BEFORE") != previous
@@ -208,6 +223,11 @@ def validate_one_launch_commit(launch, plan, *, environ=None, git_call=None):
         git_call("merge-base", "--is-ancestor", EXPECTED_BASE, previous)
     except (subprocess.CalledProcessError, RuntimeError) as exc:
         raise RuntimeError("WORKN_WORKM_ANCESTRY_NOT_VERIFIED") from exc
+    if _pilot_branch(launch) == WORKZ_BRANCH:
+        try:
+            git_call("merge-base", "--is-ancestor", WORKX_HEAD, previous)
+        except (subprocess.CalledProcessError, RuntimeError) as exc:
+            raise RuntimeError("WORKZ_WORKX_ANCESTRY_NOT_VERIFIED") from exc
 
 
 def withhold_unsafe_excerpts(card):
@@ -262,6 +282,7 @@ def retain_incident_review_clues(text: str) -> dict:
         ("TIME_MENTION_NOT_ATTACK_TIME", r"\b(?:о|близько|приблизно)\s+\d{1,2}[:.]\d{2}\b|\b(?:вночі|вранці|вдень|увечері|надвечір|під ранок)\b"),
         ("ATTACK_METHOD_OR_IMPACT_MENTION", r"\b(?:ракет\w*|дрон\w*|безпілот\w*|бпла|авіаудар\w*|авіабомб\w*|артилер\w*|обстріл\w*|удар\w*|влучан\w*)\b"),
         ("STRUCK_OBJECT_MENTION", r"\b(?:приватн\w*|житлов\w*)\s+будин\w*|\b(?:багатоповерхів\w*|підприємств\w*|інфраструктур\w*|автомобіл\w*|школ\w*|лікарн\w*)\b"),
+        ("FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL", r"\b(?:загин\w*|загиб\w*|помер\w*|смерт\w*)\b"),
         ("REPORT_SEQUENCE_MENTION_NOT_LINK", r"\b(?:пізніше|згодом|спочатку|раніше|перед тим|додатково|уточнил\w*|також|ще\s+одн\w*|зросл\w*)\b"),
         ("OFFICIAL_REFERENCE_MENTION", r"\b(?:поліці\w*|дснс|ова|військов\w*\s+адміністраці\w*)\b"),
     )
@@ -269,41 +290,56 @@ def retain_incident_review_clues(text: str) -> dict:
     # stand-alone sentence; do not retain article paragraphs or full source.
     sentences = re.split(r"(?<=[.!?])\s+", " ".join(text.split()))
     budget = min(650, len(text) // 4)
-    used, counts = 0, {}
+    # Work R previously stopped after the first eight mentions. That can
+    # discard later corrections and official-source context in a long article.
+    # Select diverse types of redacted source evidence first, without claiming
+    # that any mention establishes an incident or chronological update.
+    candidates = []
     for index, sentence in enumerate(sentences):
-        if len(result["evidence_mentions"]) >= 8:
-            break
         if not 24 <= len(sentence) <= 170:
             continue
         kinds = [name for name, pattern in patterns
-                 if counts.get(name, 0) < 2 and re.search(pattern, sentence.casefold())]
+                 if re.search(pattern, sentence.casefold())]
         if not kinds:
             continue
-        # City/oblast names are allowed as non-personal geographic mentions,
-        # but mask them in the quotation to prevent proper-name exceptions.
         excerpt = re.sub(r"\bзапоріж(?:жя|жі|жю)\b|\bзапорізьк\w*\b",
                          "[ГЕО]", sentence, flags=re.I)
-        # Keep generic object type as a tag, not its potentially identifying
-        # street-level reference or exact private location in quotation text.
         excerpt = re.sub(r"\bбудин\w*\b", "[ОБ'ЄКТ]", excerpt, flags=re.I)
-        if (re.search(r"[<>№]|https?://|\b(?:вулиц\w*|вул\.?|провул\w*|проспект\w*|"
-                      r"квартир\w*|паспорт\w*|адрес\w*|будинок\s*\d+)\b", excerpt, re.I)
-                or used + len(excerpt) > budget):
+        if re.search(r"[<>№]|https?://|\b(?:вулиц\w*|вул\.?|провул\w*|проспект\w*|"
+                     r"квартир\w*|паспорт\w*|адрес\w*|будинок\s*\d+)\b", excerpt, re.I):
             continue
         holder = {"excerpts": [{"text": excerpt}], "reasons": []}
         withhold_unsafe_excerpts(holder)
         if not holder["excerpts"]:
             continue
-        result["evidence_mentions"].append({
+        candidates.append((index, excerpt, kinds))
+    selected, used, counts, covered = [], 0, {}, set()
+    while len(selected) < 8:
+        eligible = []
+        for ix, quote, tags in candidates:
+            if used + len(quote) > budget:
+                continue
+            usable = [tag for tag in tags if counts.get(tag, 0) < 2]
+            if usable:
+                eligible.append((ix, quote, usable))
+        if not eligible:
+            break
+        index, excerpt, kinds = min(
+            eligible, key=lambda v: (-len(set(v[2]) - covered), v[0]))
+        selected.append({
             "article_sentence_order": index + 1,
             "tags": kinds,
             "excerpt": excerpt,
             "excerpt_sha256": sha_data(excerpt.encode("utf-8")),
             "decision": "NEEDS_REVIEW",
         })
+        candidates = [v for v in candidates if v[0] != index]
         used += len(excerpt)
-        for name in kinds:
-            counts[name] = counts.get(name, 0) + 1
+        covered.update(kinds)
+        for tag in kinds:
+            counts[tag] = counts.get(tag, 0) + 1
+    result["evidence_mentions"] = sorted(
+        selected, key=lambda v: v["article_sentence_order"])
     return result
 
 def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
