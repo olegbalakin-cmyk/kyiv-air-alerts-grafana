@@ -138,13 +138,60 @@ const comparisons=[...paired].map(([key,arr])=>{
    mae,baseline_mae:base,improvement:base?1-mae/base:null,
    improved_cities:cityImprovement.filter(x=>x>0).length,evaluated_cities:cityImprovement.length};
 }).sort((a,b)=>[a.period,a.type,a.metric,a.lead,a.model].join("|").localeCompare([b.period,b.type,b.metric,b.lead,b.model].join("|")));
+// Equal-city aggregate and paired run-rate comparison. Each stage is a fixed
+// number of observed days (rather than variable days remaining in a month).
+const stageSummary=[];
+const stages=[["week",2],["week",4],["week",5],["month",7],["month",14],["month",21],
+  ["quarter",14],["quarter",30],["quarter",60]];
+const stageSpecs=[...stages.map(([period,observed])=>({period,type:"current",observed})),
+  ...["week","month","quarter"].map(period=>({period,type:"full_next",observed:0})),
+  ...[30,90,180].flatMap(n=>[1,7,14].map(lead=>({period:"rolling"+n,type:"rolling",lead})))];
+for(const spec of stageSpecs)for(const metric of ["alerts","hours"]){
+  const rows=records.filter(x=>x.period===spec.period&&x.type===spec.type&&x.metric===metric&&
+    (spec.lead===undefined?x.observed===spec.observed:x.lead===spec.lead));
+  if(!rows.length)continue;
+  const models=[...new Set(rows.map(x=>x.model))];
+  const modelStats=[];
+  for(const model of models){
+    const x=rows.filter(v=>v.model===model);
+    const total=x.reduce((s,v)=>s+v.actual,0),err=x.reduce((s,v)=>s+Math.abs(v.pred-v.actual),0);
+    const perCity=new Map();
+    for(const q of x){if(!perCity.has(q.city))perCity.set(q.city,[]);perCity.get(q.city).push(q)}
+    const cityWape=[...perCity.values()].map(rs=>{
+      const actual=rs.reduce((s,v)=>s+v.actual,0),err=rs.reduce((s,v)=>s+Math.abs(v.pred-v.actual),0);
+      return actual>0?err/actual:null;
+    }).filter(x=>x!==null);
+    modelStats.push({model,n:x.length,cities:perCity.size,wape:total>0?err/total:null,
+      mae:err/x.length,city_equal_wape:cityWape.length?mean(cityWape):null});
+  }
+  // Compare only common exact forecast-origin observations when evaluating
+  // improvements, otherwise baseline-only sample selection would bias result.
+  const keys=new Map();
+  for(const x of rows){
+    const k=[x.city,x.cutoff,x.from,x.to].join("|");
+    if(!keys.has(k))keys.set(k,{});
+    keys.get(k)[x.model]=x;
+  }
+  const pairs=[];
+  for(const model of models.filter(x=>x!=="previous"&&x!=="run_rate"&&x!=="no_change")){
+    const comparative=[...keys.values()].filter(d=>d[model]&&(d.previous||d.run_rate||d.no_change));
+    if(!comparative.length)continue;
+    const actualErr=comparative.reduce((s,d)=>s+Math.abs(d[model].pred-d[model].actual),0);
+    const baseErr=comparative.reduce((s,d)=>s+Math.abs((d.previous||d.run_rate||d.no_change).pred-d[model].actual),0);
+    pairs.push({model,baseline:comparative[0].previous?"previous":comparative[0].run_rate?"run_rate":"no_change",
+      n:comparative.length,improvement_pct:baseErr>0?100*(baseErr-actualErr)/baseErr:null});
+  }
+  stageSummary.push({period:spec.period,type:spec.type,metric,observed_days:spec.observed??null,
+    forecast_days:spec.lead??null,models:modelStats,pairs});
+}
 const report={
  meta:{source:"site-prod",commit,verified_cities:cityNames.length,records:records.length,
    sample_kind:"walk-forward; no future data in feature calculation",quasi_repeated:"rolling evaluation origins seven days apart are correlated",
    metrics:"MAE absolute alerts or hours in period, WAPE pooled abs error / observed total",no_source_http:true},
- coverage,summaries,comparisons};
+ coverage,summaries,comparisons,stageSummary};
 fs.mkdirSync(require("node:path").dirname(output),{recursive:true});
 fs.writeFileSync(output,JSON.stringify(report,null,2)+"\n");
+for(const v of stageSummary){console.log("STAGE_RESULT",JSON.stringify(v))}
 console.log("BACKTEST_PASS",JSON.stringify({commit,cities:cityNames.length,records:records.length,
   groups:summaries.length,paired:comparisons.length,coverage:Object.values(coverage).map(x=>x.verified_days).reduce((a,b)=>a+b,0)}));
 for(const period of ["quarter","month","week","rolling30","rolling90","rolling180"])for(const type of ["full_next","current","rolling"]){
