@@ -283,6 +283,9 @@ def retain_incident_review_clues(text: str) -> dict:
         # but mask them in the quotation to prevent proper-name exceptions.
         excerpt = re.sub(r"\bзапоріж(?:жя|жі|жю)\b|\bзапорізьк\w*\b",
                          "[ГЕО]", sentence, flags=re.I)
+        # Keep generic object type as a tag, not its potentially identifying
+        # street-level reference or exact private location in quotation text.
+        excerpt = re.sub(r"\bбудин\w*\b", "[ОБ'ЄКТ]", excerpt, flags=re.I)
         if (re.search(r"[<>№]|https?://|\b(?:вулиц\w*|вул\.?|провул\w*|проспект\w*|"
                       r"квартир\w*|паспорт\w*|адрес\w*|будинок\s*\d+)\b", excerpt, re.I)
                 or used + len(excerpt) > budget):
