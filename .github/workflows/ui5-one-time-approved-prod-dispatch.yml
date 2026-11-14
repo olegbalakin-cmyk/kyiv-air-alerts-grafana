@@ -21,13 +21,16 @@ jobs:
         run: |
           set -euo pipefail
           REPO="$GITHUB_REPOSITORY"
-          APPROVED_SITE_SHA="e6a5dbc626f4ee7059b3355f23973fc2e3e499e5"
+          APPROVED_SITE_SHA="397125796252e17f1f7c856ebafdc0956678765e"
           APPROVED_UI5_HEAD="54776f11a875804b3ddfe65f5a81640e85a4035e"
           APPROVED_PROOF_RUN="43597235838"
           APPROVED_ARTIFACT="14114357934"
           test "$REPO" = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
           current="$(gh api "repos/$REPO/branches/site-prod" --jq '.commit.sha')"
           test "$current" = "$APPROVED_SITE_SHA" || { echo "BLOCKED: site-prod moved"; exit 2; }
+          enabled="$(gh api "repos/$REPO/actions/workflows/netlify-production.yml" --jq '.state')"
+          test "$enabled" = "active" || { echo "BLOCKED: Netlify workflow still disabled: $enabled"; exit 2; }
+          gh api "repos/$REPO/compare/e6a5dbc626f4ee7059b3355f23973fc2e3e499e5...397125796252e17f1f7c856ebafdc0956678765e" > /tmp/ui5-mobile-compare.json
           gh api "repos/$REPO/pulls/143" > /tmp/ui5-pr.json
           gh api "repos/$REPO/actions/runs/$APPROVED_PROOF_RUN" > /tmp/ui5-proof.json
           gh api "repos/$REPO/actions/artifacts/$APPROVED_ARTIFACT" > /tmp/ui5-artifact.json
@@ -38,9 +41,15 @@ jobs:
           import json,os
           from pathlib import Path
           get=lambda n: json.loads(Path("/tmp/ui5-"+n+".json").read_text())
-          target="e6a5dbc626f4ee7059b3355f23973fc2e3e499e5"
+          target="397125796252e17f1f7c856ebafdc0956678765e"
+          mobile=get("mobile-compare")
+          assert mobile["status"]=="ahead" and mobile["total_commits"]==1, "New production changes unreviewed"
+          assert sorted(x["filename"] for x in mobile["files"])==sorted([
+              "kyiv-air-alerts-grafana/pages-preview/index.html",
+              "kyiv-air-alerts-grafana/pages-preview/styles.css"
+          ]), "Unexpected production changes"
           pr=get("pr")
-          assert pr["merged"] is True and pr["merge_commit_sha"]==target, "PR143 merge mismatch"
+          assert pr["merged"] is True and pr["merge_commit_sha"]=="e6a5dbc626f4ee7059b3355f23973fc2e3e499e5", "PR143 merge mismatch"
           proof=get("proof")
           assert proof["id"]==43597235838 and proof["head_sha"]=="54776f11a875804b3ddfe65f5a81640e85a4035e"
           assert proof["status"]=="completed" and proof["conclusion"]=="success", "Integrated proof not PASS"
@@ -71,4 +80,4 @@ jobs:
           fi
           printf '%s' '{"ref":"site-prod","inputs":{"neon_release_mode":"false","work_l_recovery_mode":"false"}}' |
             gh api --method POST --input - "repos/$GITHUB_REPOSITORY/actions/workflows/netlify-production.yml/dispatches"
-          echo "EXISTING_PRODUCTION_WORKFLOW_DISPATCH_REQUESTED site-prod@e6a5dbc626f4ee7059b3355f23973fc2e3e499e5"
+          echo "EXISTING_PRODUCTION_WORKFLOW_DISPATCH_REQUESTED site-prod@397125796252e17f1f7c856ebafdc0956678765e"
