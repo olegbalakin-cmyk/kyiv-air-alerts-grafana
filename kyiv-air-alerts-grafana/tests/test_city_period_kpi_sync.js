@@ -3,7 +3,7 @@ const fs = require("node:fs"), vm = require("node:vm"), path = require("node:pat
 const KPI = require("../pages-preview/kpi-range.js");
 const code = fs.readFileSync(path.join(__dirname, "../pages-preview/app.js"), "utf8");
 const html = fs.readFileSync(path.join(__dirname, "../pages-preview/index.html"), "utf8");
-const marker = "\napplyStaticLanguage();\n\ninit().catch(err=>{";
+const marker = "\nif(!canonicalizeLanguagePath()){";
 assert.ok(code.includes(marker));
 assert.ok(code.includes('if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();'));
 assert.match(code,/const activeRange = syncDateRange\("cityDateFrom", "cityDateTo",\s*cityPeriodDateValues\(city, period, allRows\)\);/);
