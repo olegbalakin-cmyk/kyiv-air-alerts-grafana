@@ -31,14 +31,14 @@ for(const id of ["cityPeriod","comparePeriod"]){
 }
 assert(html.includes('id="allCitiesRange"')&&html.includes('value="quarter"'));
 assert(app.includes("root.QuarterRollingPreview = api"),"preview helper inlined into app.js to survive Netlify build");
-assert.equal((app.match(/_isForecast: true/g)||[]).length,2,"forecast datasets explicitly flagged");
-assert(app.includes("return !data.datasets[item.datasetIndex]?._isForecast;"),"legend must exclude forecast datasets");
-assert(app.includes("Boolean(context.dataset._isForecast) === forecastPoint"),"tooltip separates actual from forecasts");
+assert.equal((app.match(/_isForecast: true/g)||[]).length,0,"no next-period chart datasets");
+assert(app.includes("return !data.datasets[item.datasetIndex]?._isCompletion;"),"legend excludes completion overlays");
+assert(!app.includes("Boolean(context.dataset._isForecast) === forecastPoint"),"no next-period forecast tooltip");
 assert(app.includes("Number.isFinite(context.parsed?.y)"),"null cannot appear as zero tooltip");
-assert(app.includes("EWMA 0,3: останнє спостереження має вагу 30%"),"UA one-line explanation");
-assert(app.includes("EWMA 0.3: the latest observation has 30% weight"),"EN one-line explanation");
+assert(!app.includes("Останній штрихований стовпчик — експериментальний прогноз на наступний період"),"no next-period description");
+assert(!app.includes("The final outlined bar is an experimental forecast for the next period"),"no next-period English description");
 assert(!html.includes('src="quarterly-rolling-preview.js'),"preview has no missing standalone asset");
-for(const code of ["calendarQuarterOverlapsRange","periodRows(city, period)","quarterly", "QuarterRollingPreview?.rollingForecast",
+for(const code of ["calendarQuarterOverlapsRange","periodRows(city, period)","quarterly", 
   "QuarterRollingPreview?.quarterRange","hasMissingQuarter", "approvedNeonGitRelease","matchesDashboardGeneration"]){
   assert(app.includes(code),code)
 }

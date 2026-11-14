@@ -1,0 +1,105 @@
+name: Current period completion isolated preview and exact production forecast backtest
+on:
+  push:
+    branches: [research-current-period-completion-preview-2026-11-14]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: current-period-completion-preview-20261114
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/research-current-period-completion-preview-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify immutable historical source and offline regression
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          cmp <(git show c66b977930fbbbbe739efea60d474b04b2b002ea:kyiv-air-alerts-grafana/data/dashboard_data.json) kyiv-air-alerts-grafana/data/dashboard_data.json
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/current-period-completion.js
+          node kyiv-air-alerts-grafana/tests/test_current_period_completion.js
+          node kyiv-air-alerts-grafana/tests/test_forecast_trend.js
+          node kyiv-air-alerts-grafana/tests/test_quarter_rolling_preview.js
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_calendar_week.js
+          node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
+          node kyiv-air-alerts-grafana/tests/test_historical_max.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+          echo PERIOD_COMPLETION_OFFLINE_PASS
+      - name: Exact existing production forecast error — read-only walk-forward
+        run: |
+          set -euo pipefail
+          mkdir -p research/production_forecast_backtest
+          node kyiv-air-alerts-grafana/scripts/backtest_production_forecast.js \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            c66b977930fbbbbe739efea60d474b04b2b002ea \
+            research/production_forecast_backtest/report.json | tee production-forecast-backtest-log.txt
+          test -s research/production_forecast_backtest/report.json
+      - name: Build immutable Git-source isolated preview only
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          dashboard=json.loads(Path("kyiv-air-alerts-grafana/data/dashboard_data.json").read_text(encoding="utf-8"))
+          idx=dashboard["historical_daily_kpi"]
+          assert idx["meta"]["verified_count"]==23
+          assert len(idx["cities"])==23
+          assert idx["meta"]["source_dashboard_generated_at"]==dashboard["meta"]["generated_at"]
+          Path("historical-daily-kpi.json").write_text(json.dumps(idx,ensure_ascii=False,separators=(",",":"))+"\n",encoding="utf-8")
+          print("PINNED_EMBEDDED_HISTORICAL_INDEX_PASS",idx["meta"]["verified_count"],idx["meta"]["source_dashboard_generated_at"])
+          PY
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/kpi-range.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png historical-daily-kpi.json _site/
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          echo PERIOD_COMPLETION_PINNED_STATIC_BUNDLE_PASS
+      - name: Isolated Netlify draft — NOT PRODUCTION
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_site --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json > period-completion-draft.json
+          python - <<'PY'
+          import json
+          x=json.load(open("period-completion-draft.json",encoding="utf-8"))
+          url=x.get("deploy_url") or x.get("url")
+          assert url and "--ukraine-air-alerts.netlify.app" in url
+          print("PERIOD_COMPLETION_PREVIEW_URL",url)
+          PY
+      - name: Physical Chrome QA — actual versus estimated period, mobile
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/completion-puppeteer
+          npm --prefix /tmp/completion-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/completion-puppeteer/node_modules
+          export PREVIEW_URL="$(python - <<'PY'
+          import json
+          x=json.load(open("period-completion-draft.json",encoding="utf-8"))
+          print((x.get("deploy_url") or x.get("url")).replace("http://","https://",1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_current_period_completion.cjs
+      - name: Preserve physical proof, no publishing to production
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-period-preview-and-exact-forecast-backtest
+          path: |
+            period-completion-draft.json
+            period-completion-browser.json
+            period-completion-mobile.png
+            research/production_forecast_backtest/report.json
+            production-forecast-backtest-log.txt
+          if-no-files-found: ignore
