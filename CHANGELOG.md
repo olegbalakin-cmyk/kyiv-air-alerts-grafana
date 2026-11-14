@@ -2,7 +2,7 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-Current accepted: **C6-C3-MYKOLAIV-CSV-CROSSCHECK-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
+Current accepted: **C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
 
 ## Work S final execution observation (2026-11-13; publication not executed)
 
@@ -16,6 +16,11 @@ Current accepted: **C6-C3-MYKOLAIV-CSV-CROSSCHECK-01.** GLOBAL_CUTOVER=YES; PILO
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
 
 <!-- coordination:history:start -->
+### C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01 (2026-11-14)
+
+- Draft PR #136 exact-head `1924de20`; offline #43573370103/#43573370102/#43573370092 SUCCESS. Existing C2 #43523629106 archive validated; physical proof/delta artifact absent, current 23/23 freshness and no-loss release NOT certified. `RECOVERY_PACKAGE=BLOCKED`; zero C2 reruns, writes, push, merge or Netlify deployment.
+
+
 ### C6-C3-MYKOLAIV-CSV-CROSSCHECK-01 — owner CSV cross-check (2026-11-14)
 
 - Offline: alerts.in.ua exports 13/14 Nov contain 17+5 Mykolaivskyi-raion AIR records, 1 overlap, 21 unique completed. Official last checked `2026-11-12T22:59:25Z`; 14 Nov `regionHistory` returned 20 records, overlap false. CSV timing assumed Kyiv local; consistent with finite history window overflow, NOT proof of exact source parity or permission to override 21/21. No code, Neon, Git or Netlify writes.
