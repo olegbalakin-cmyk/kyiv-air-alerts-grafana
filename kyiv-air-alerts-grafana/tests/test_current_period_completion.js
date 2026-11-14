@@ -18,7 +18,9 @@ for(const mode of ["calendarWeekly","monthly","quarterly"]){
  assert(z,mode);assert(z.observed>=({calendarWeekly:2,monthly:7,quarterly:30}[mode]));
  assert(z.left>0&&z.days===z.left+z.observed);
  assert.equal(z.expectedAlerts,z.days*2);
- assert(Math.abs(z.expectedHours-z.days*2)<1e-6);
+ assert(Math.abs(z.expectedHours-z.actualHours-z.remainingHours)<1e-9);
+ assert(z.occupancyRate>=0&&z.occupancyRate<=1,"historical occupancy is a probability");
+ assert(z.remainingHours<=z.maximumRemainingHours+1e-9,"physical period remainder cap");
  assert.equal(z.periodRow.is_partial_period,true);
  assert.equal(z.periodRow.partial_through,"2026-11-13");
  assert.equal(z.periodRow.alerts_started,z.actualAlerts);
