@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01 — Work T static contract blocker and Work U live-readback boundary (2026-11-14)
+
+- `main@413d34ac` reviewer/operator cannot safely create new confirmed revisions accepted by `site-prod@2fa9044a` generator; five provenance fields are not passed, cumulative preview is naive. [PR #105 CI #43290975899](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43290975899) shadow SUCCESS only. Work U Git Zaporizhzhia `MATCH` (316, October absent), live Netlify frontend/Raw fetch `UNVERIFIED`; deploy `6af76b2d` ready/locked. Next separate offline contract repair and read-only live parity check; T03–T05 blocked. Docs-only: no production changes.
+
 ### CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 — one Work R source-only HTTP run PASS, incident match still held (2026-11-14)
 
 - [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) launch-only `b9d8d618` from `f2f3a922`, [Actions #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) attempt1 SUCCESS: owner/safety PASS, 3 GET/3 HTTP200, 0 redirects. [ZIP #14105343291](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160/artifacts/14105343291) independent SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b`, 4/4 manifest hashes PASS. T03 local 2/house, T04 later +1 woman 69 with earlier 2, T05 3 dead aged 37/38/69 near private sector. Identity/date remain unverified; 3 NEEDS_REVIEW, 0 auto credits/publication; grant consumed, next offline manual review, no repeat HTTP.
