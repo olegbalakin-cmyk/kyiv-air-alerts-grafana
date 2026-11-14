@@ -1,0 +1,144 @@
+{
+  "schema": "c6-sevastopol-migalka-offline-crosscheck-v1",
+  "review_date": "2026-11-14",
+  "scope": "READ_ONLY_OFFLINE",
+  "finding": "The 2026-11-04 17:14:45Z source-backed Sevastopol AIR start #25006 has a directly saved secondary-channel report of AIR all-clear by 2026-11-04 17:57:19Z, referring to sevinfo92/44936; canonical Git and Neon omit any closed interval starting at #25006. Exact primary all-clear timestamp is NOT independently established.",
+  "inputs": [
+    {
+      "file": "messages(6).html",
+      "telegram_channel_title": "Мониторинг Мигалки",
+      "bytes": 1331434,
+      "sha256": "622b83d8b255a9a44a8b336084ae4644f054967f18ee832de42552bed73f9f43",
+      "message_count": 1000,
+      "first_message_id": 191353,
+      "last_message_id": 192352,
+      "coverage_from": "2026-11-04 00:01:52 UTC+02:00",
+      "coverage_through": "2026-11-05 15:26:39 UTC+02:00"
+    },
+    {
+      "file": "messages2.html",
+      "telegram_channel_title": "Мониторинг Мигалки",
+      "bytes": 297576,
+      "sha256": "85a1e18f7ed7eaf2878660aa2578c3fce8445bac3e98050e311b1cb43ca319eb",
+      "message_count": 219,
+      "first_message_id": 192353,
+      "last_message_id": 192571,
+      "coverage_from": "2026-11-05 15:26:43 UTC+02:00",
+      "coverage_through": "2026-11-05 23:52:25 UTC+02:00"
+    }
+  ],
+  "unique_message_ids": 1219,
+  "stored_raw_in_git": false,
+  "selected_message_receipts": [
+    {
+      "id": 191409,
+      "published": "2026-11-04T05:18:22+02:00",
+      "meaning": "Morning official alert announced; already counted #24999–25000",
+      "source": "RSChS (named in automated bot, no directly linked primary)"
+    },
+    {
+      "id": 191412,
+      "published": "2026-11-04T05:29:03+02:00",
+      "meaning": "Morning official all-clear; already counted",
+      "source_urls": [
+        "https://t.me/sevinfo92/44911"
+      ]
+    },
+    {
+      "id": 191810,
+      "published": "2026-11-04T19:12:26+02:00",
+      "meaning": "Sevastopol AIR alert announcement with source refs; bot publication 139 seconds before Razvozhaev source #25006 (bot post later updated) so NOT an exact authoritative start",
+      "source_urls": [
+        "https://t.me/sevinfo92/44934",
+        "https://t.me/razvozhaev/25006"
+      ]
+    },
+    {
+      "id": 191834,
+      "published": "2026-11-04T19:57:19+02:00",
+      "observed_utc": "2026-11-04T17:57:19Z",
+      "exact_archived_text": "Отбой воздушной тревоги в Севастополе.",
+      "meaning": "Previously missing secondary-channel report of AIR all-clear within #25006–#25008 gap; posted end is an observational latest bound, not verified primary time",
+      "source_urls": [
+        "https://t.me/sevinfo92/44936"
+      ],
+      "source_is_archived_automated_aggregation": true
+    },
+    {
+      "id": 191835,
+      "published": "2026-11-04T19:57:39+02:00",
+      "meaning": "Bot forwards earlier PVO/attack report #25007, original primary timestamp 2026-11-04 17:52:14Z. Demonstrates aggregator ordering is not exact primary-source chronology",
+      "source_urls": [
+        "https://t.me/razvozhaev/25007"
+      ]
+    },
+    {
+      "id": 192051,
+      "published": "2026-11-05T02:31:46+02:00",
+      "meaning": "Nov 5 AIR start is existing #25008 (30s posting delay)",
+      "source_urls": [
+        "https://t.me/razvozhaev/25008"
+      ]
+    },
+    {
+      "id": 192058,
+      "published": "2026-11-05T03:00:23+02:00",
+      "meaning": "Nov 5 AIR all-clear is already counted #25009 (40s posting delay)",
+      "source_urls": [
+        "https://t.me/sevinfo92/44947"
+      ]
+    }
+  ],
+  "existing_primary_git": {
+    "site_prod_sha": "c980c3f70ed894d2583fc83ecdedd1f82c04afb1",
+    "source_file": "kyiv-air-alerts-grafana/data/sevastopol_events.json",
+    "blob_sha": "87a541c7876979aeb68c20728e1bbfc9c9dd780a",
+    "confirmed_complete_pairs": 577,
+    "listed_unpaired_start_id": 25006,
+    "listed_next_start_id": 25008,
+    "morning_pair": {
+      "start_id": 24999,
+      "start_at": "2026-11-04T03:17:44Z",
+      "end_id": 25000,
+      "end_at": "2026-11-04T03:28:52Z"
+    },
+    "next_pair": {
+      "start_id": 25008,
+      "start_at": "2026-11-05T00:31:16Z",
+      "end_id": 25009,
+      "end_at": "2026-11-05T00:59:43Z"
+    }
+  },
+  "neon_readonly": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "role": "c6_shared_reader_v2",
+    "sql": "SELECT city_key, legacy_episode_id, start_at, end_at, episode_state FROM public.alert_episodes WHERE city_key='sevastopol' AND start_at >= timestamptz '2026-11-04T00:00:00Z' AND start_at < timestamptz '2026-11-06T00:00:00Z' ORDER BY start_at",
+    "result_summary": "2 closed episodes, matching #24999–25000 and #25008–25009. 0 rows beginning #25006."
+  },
+  "assessment": {
+    "missing_source_reported_completed_episode": "HIGH_CONFIDENCE_SOURCE_BACKED_GAP",
+    "exact_end_at": "INSUFFICIENT_EVIDENCE",
+    "synthetic_end_at_prohibited": true,
+    "earliest_possible_end": "2026-11-04T17:14:45Z (strictly later than start)",
+    "latest_observed_secondary_all_clear_post": "2026-11-04T17:57:19Z",
+    "hypothetical_max_duration_seconds_from_bot_post_time": 2554,
+    "conditional_count_delta_if_primary_verified": 1,
+    "actual_duration_delta": "UNKNOWN",
+    "notes": "The secondary channel sources @sevinfo92/44934 for start and @sevinfo92/44936 for end. Original @sevinfo92/44936 timestamp/body not independently captured; do not assign Migalka's 19:57:19+02 as exact primary end. Earlier 2026-11-04 evening UAV threat bulletins do not mean official air alert persisted until late night. Morning Nov 4 and 02:31 Nov 5 already counted."
+  },
+  "safeguards": {
+    "no_source_http": true,
+    "no_neon_write": true,
+    "no_production_git_write": true,
+    "no_c2_writer": true,
+    "no_netlify_deploy": true,
+    "no_dst_change": true,
+    "no_merge": true
+  },
+  "references": {
+    "git_actions_first_restored_cycle": 43625014243,
+    "prior_research_pr": 157,
+    "current_coordination_checkpoint": "C6-AUTO-GIT-RESTORED-2026-11-14-01"
+  }
+}
