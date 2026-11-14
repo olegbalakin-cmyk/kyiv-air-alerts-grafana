@@ -55,6 +55,20 @@ for(const name of cityNames){
            const vals=history.map(x=>x[m]);
            const models={mean28:mean(vals),ewma03:ewma(vals),mean7:mean(vals.slice(-7))};
            if(lastPeriod)models.previous=mean(lastPeriod.map(x=>x[m]));
+           if(period==="quarter"){
+             // Model true quarter-level EWMA on consecutive certified
+             // complete quarters before the target. No target-period data.
+             const quarters=[];
+             let previousEnd=shift(from,-1);
+             for(let i=0;i<4;i++){
+               const [qa,qb]=periodBounds(previousEnd,"quarter"),p=at(qa,qb);
+               if(!p)break;
+               quarters.unshift(mean(p.map(x=>x[m])));
+               previousEnd=shift(qa,-1);
+             }
+             if(quarters.length>=2)models.quarter_ewma03=ewma(quarters);
+             if(quarters.length===4)models.same_quarter_last_year=quarters[0];
+           }
            for(const [model,daily] of Object.entries(models))
              records.push({city:name,period,type:"full_next",metric,lead:count,model,cutoff:shift(from,-1),
                from,to,observed:0,actual,pred:daily*count});
