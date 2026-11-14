@@ -1,0 +1,95 @@
+name: UI5 integrated five-feature test preview
+on:
+  push:
+    branches: [release-ui5-integrated-2026-11-14]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ui5-integrated-preview
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/release-ui5-integrated-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline regressions
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          node kyiv-air-alerts-grafana/tests/test_ui5_integrated.js
+          node kyiv-air-alerts-grafana/tests/test_forecast_trend.js
+          node kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js
+          node kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          node kyiv-air-alerts-grafana/tests/test_calendar_week.js
+          node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
+          node kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js
+          node kyiv-air-alerts-grafana/tests/test_historical_max.js
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_kpi_interval_windows.js
+          node kyiv-air-alerts-grafana/tests/test_all_time_period.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+          python kyiv-air-alerts-grafana/tests/test_kyiv_cause_archive.py
+          echo UI5_OFFLINE_PASS
+      - name: Assemble isolated historical preview
+        run: |
+          set -euo pipefail
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py --production-root kyiv-air-alerts-grafana --source-sha "$(git rev-parse HEAD)" --output historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          x=json.load(open("historical-daily-kpi.json",encoding="utf-8"))
+          assert x["meta"]["verified_count"]==23
+          assert len(x["cities"])==23
+          PY
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/kpi-range.js kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_archive.json kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png historical-daily-kpi.json _site/
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          echo UI5_DRAFT_BUNDLE_PASS
+      - name: Deploy preview, never production
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_site --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json > ui5-draft.json
+          python - <<'PY'
+          import json
+          x=json.load(open("ui5-draft.json",encoding="utf-8"))
+          print("UI5_DRAFT_URL",x.get("deploy_url") or x.get("url"))
+          assert x.get("deploy_url") or x.get("url")
+          PY
+      - name: Physical browser test
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/ui5-puppeteer
+          npm --prefix /tmp/ui5-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/ui5-puppeteer/node_modules
+          export PREVIEW_URL="$(python - <<'PY'
+          import json
+          x=json.load(open("ui5-draft.json",encoding="utf-8"))
+          print((x.get("deploy_url") or x.get("url")).replace("http://","https://",1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_ui5_integrated.cjs
+          node kyiv-air-alerts-grafana/tests/smoke_forecast_preview.cjs
+      - name: Preserve preview evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui5-integrated-proof
+          path: |
+            ui5-draft.json
+            ui5-browser.json
+            ui5-browser.png
+            forecast-browser.json
+            forecast-browser.png
+          if-no-files-found: ignore

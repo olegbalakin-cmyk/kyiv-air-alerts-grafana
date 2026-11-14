@@ -1,0 +1,16 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const app=fs.readFileSync("kyiv-air-alerts-grafana/pages-preview/app.js","utf8");
+const html=fs.readFileSync("kyiv-air-alerts-grafana/pages-preview/index.html","utf8");
+const flow=fs.readFileSync(".github/workflows/netlify-production.yml","utf8");
+const data=JSON.parse(fs.readFileSync("kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_archive.json","utf8"));
+for(const id of ["showTrend","burdenYear","extremesYear","kyivCausePeriod"])assert(html.includes('id="'+id+'"'),id);
+for(const fragment of ["const approvedNeonGitRelease","matchesDashboardGeneration","KYIV_THREAT_MIX_ARCHIVE_URL","window.ForecastTrend.build","live_overlay: true","dates.set(row.date, row)","durationMinutes: band.durationMinutes","explorationYearOptions(\"extremesYear\"","kyivCausePeriodOptions(rows)"])assert(app.includes(fragment),fragment);
+assert(app.includes('publication_allowed === true'));
+assert(!app.includes('KYIV_THREAT_MIX_PREVIEW_URL'));
+assert(html.includes('app.js?v=20261114-ui5-integrated'));
+assert(flow.includes('pages-preview/kyiv_threat_mix_archive.json'));
+assert(flow.includes('test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13'));
+assert(data.rows.length===64);
+assert(data.meta.archive_provenance.overlap_conflicts===0);
+console.log("UI5_INTEGRATED_STATIC_PASS");
