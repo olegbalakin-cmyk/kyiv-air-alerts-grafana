@@ -1,0 +1,73 @@
+name: Release current-period completion preflight (temporary)
+on:
+  push:
+    branches: [release-current-period-completion-ui-2026-11-14]
+permissions:
+  contents: read
+concurrency:
+  group: release-current-period-completion-preflight
+  cancel-in-progress: true
+jobs:
+  preflight:
+    if: github.ref == 'refs/heads/release-current-period-completion-ui-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify current production data preserved and no unrelated file changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD^)" = "f67ee69903f8d223f701bf3958780dddc4de88c9"
+          for p in kyiv-air-alerts-grafana/data/dashboard_data.json kyiv-air-alerts-grafana/data/site_derived.json kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json kyiv-air-alerts-grafana/data/c2_history_capture_checkpoints.json; do
+            cmp <(git show HEAD^:"$p") "$p"
+          done
+          test -s kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
+          grep -q 'name="robots" content="index,follow,max-snippet:-1"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'rel="canonical" href="https://ukraine-air-alerts.netlify.app/"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'chart-share.js?v=20261019-share2-1' kyiv-air-alerts-grafana/pages-preview/index.html
+          echo PRESERVED_CURRENT_PROD_DATA_PASS
+      - name: Complete prod tests plus new completion regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in kyiv-air-alerts-grafana/pages-preview/{chart-share,app,kpi-range,current-period-completion}.js; do
+            node --check "$file"
+          done
+          for test in test_chart_share test_calendar_week test_daily28_rollover test_dynamic_city_kpi test_historical_max test_city_period_kpi_sync test_kpi_interval_windows test_all_time_period test_live_history_binding test_forecast_trend test_quarter_rolling_preview test_current_period_completion; do
+            node "kyiv-air-alerts-grafana/tests/$test.js"
+          done
+          echo RELEASE_FRONTEND_TESTS_PASS
+      - name: Build 23/23 index from current production data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/tests/test_monthly_seconds.py
+          python kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py \
+            --production-root kyiv-air-alerts-grafana \
+            --source-sha "$(git rev-parse HEAD)" \
+            --output historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          with open("historical-daily-kpi.json", encoding="utf-8") as f:
+              d=json.load(f)
+          assert d["meta"]["verified_count"] == 23
+          assert d["meta"]["expected_cities"] == 23
+          assert len(d["cities"]) == 23
+          assert all(x["status"] == "verified" for x in d["cities"].values())
+          print("RELEASE_INDEX_23_OF_23_PASS")
+          PY
+      - name: Retain offline preflight evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-current-period-completion-offline-preflight
+          path: historical-daily-kpi.json
+          if-no-files-found: ignore
