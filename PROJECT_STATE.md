@@ -1,8 +1,8 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-14. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01**: PR #145, run #43609731091. 3/3 HTTP200; identity 0/3, T03–T05 NEEDS_REVIEW. GET spent, credits 0.
+**Date:** 2026-11-14. **Casualty scope: PROMOTE=OFF.** C6 current historical status follows newer accepted `main:C6-AUTO-GIT-RESTORED-2026-11-14-01` (`GLOBAL_CUTOVER=YES`, stabilization open); old C6 checkpoints here are historical.
+Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
+Latest casualty: **CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01**: PR #160 exact CI #43643850083 PASS; T03–T05 still unlinked, 0 credits.
 
 ## Working instructions
 
@@ -22,20 +22,22 @@ Latest casualty: **CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01**: PR #145, run #4
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / casualty:** Work V/W/X offline PASS, Work Z physical capture PARTIAL; incident identity and credits BLOCKED.
+- **Operational WIP / casualty:** Work Y integrated in main via PR #147, PROMOTE hard-OFF. Work X/AA research-only; T03–T05 PARTIAL, credits OFF.
 
 ## Concrete next tasks
 
-1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
-2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
-3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty H/I: PRs #114/#115 PASS offline, no release.
-5. Casualty next: owner-controlled Work W transfer (PROMOTE OFF); Work Z offline excerpt quality on saved proof only. No repeat GET; unsaved text UNKNOWN.
-6. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
+1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
+2. Casualty H/I: PRs #114/#115 PASS offline, no release.
+3. Casualty next: Work Y already in main, PROMOTE OFF. Independent source discovery and evidence retention (Work X/AA) need gated read-only/shadow integration; T03–T05 lack saved primary context. No HTTP without new owner GO.
+4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 (2026-11-14)
+
+- [PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160) `38b444dff0e9f1e363593aaa42dec4dc278743e0`, [Actions #43643850083](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43643850083) SUCCESS, proof #14132887476 (SHA in log). 183 executed/1 SKIP; Work Z-derived index 1,683→3, broken T04 flagged incomplete. All 3 incident pairs INSUFFICIENT_EVIDENCE, no HTTP or credits. PR #160 research-only, no merge. Work Y PR #147 already merged to main, PROMOTE hard-OFF.
+
 ## CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
 
 - [PR #145](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/145), [run #43609731091](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43609731091): 3 GET/HTTP200, three unproven pairs, 0 credits. GET grant spent. Saved excerpts only; absent text cannot be recovered offline.
