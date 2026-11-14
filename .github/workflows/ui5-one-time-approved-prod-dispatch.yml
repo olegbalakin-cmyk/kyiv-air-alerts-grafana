@@ -1,0 +1,74 @@
+name: UI5 owner-approved one-shot existing production dispatcher
+on:
+  push:
+    branches: [release-ui5-integrated-2026-11-14]
+    paths: [.github/workflows/ui5-one-time-approved-prod-dispatch.yml]
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: ui5-once-existing-netlify-dispatch-20261114
+  cancel-in-progress: false
+jobs:
+  dispatch-existing:
+    if: github.ref == 'refs/heads/release-ui5-integrated-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify owner-approved source, exact release and no competing production jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REPO="$GITHUB_REPOSITORY"
+          APPROVED_SITE_SHA="e6a5dbc626f4ee7059b3355f23973fc2e3e499e5"
+          APPROVED_UI5_HEAD="54776f11a875804b3ddfe65f5a81640e85a4035e"
+          APPROVED_PROOF_RUN="43597235838"
+          APPROVED_ARTIFACT="14114357934"
+          test "$REPO" = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          current="$(gh api "repos/$REPO/branches/site-prod" --jq '.commit.sha')"
+          test "$current" = "$APPROVED_SITE_SHA" || { echo "BLOCKED: site-prod moved"; exit 2; }
+          gh api "repos/$REPO/pulls/143" > /tmp/ui5-pr.json
+          gh api "repos/$REPO/actions/runs/$APPROVED_PROOF_RUN" > /tmp/ui5-proof.json
+          gh api "repos/$REPO/actions/artifacts/$APPROVED_ARTIFACT" > /tmp/ui5-artifact.json
+          gh api "repos/$REPO/actions/runs?status=in_progress&per_page=100" > /tmp/ui5-active.json
+          gh api "repos/$REPO/actions/runs?status=queued&per_page=100" > /tmp/ui5-queued.json
+          gh api "repos/$REPO/actions/workflows/netlify-production.yml/runs?branch=site-prod&per_page=40" > /tmp/ui5-deploy-runs.json
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          get=lambda n: json.loads(Path("/tmp/ui5-"+n+".json").read_text())
+          target="e6a5dbc626f4ee7059b3355f23973fc2e3e499e5"
+          pr=get("pr")
+          assert pr["merged"] is True and pr["merge_commit_sha"]==target, "PR143 merge mismatch"
+          proof=get("proof")
+          assert proof["id"]==43597235838 and proof["head_sha"]=="54776f11a875804b3ddfe65f5a81640e85a4035e"
+          assert proof["status"]=="completed" and proof["conclusion"]=="success", "Integrated proof not PASS"
+          artifact=get("artifact")
+          assert artifact["id"]==14114357934 and artifact["workflow_run"]["id"]==43597235838 and not artifact["expired"],"Evidence missing"
+          blocked={"Deploy Netlify production site","Update Ukraine air-alert production data","Update Kyiv air-alert data"}
+          for kind in ["active","queued"]:
+              for run in get(kind).get("workflow_runs",[]):
+                  if str(run["id"])!=os.environ["GITHUB_RUN_ID"] and run["name"] in blocked:
+                      raise SystemExit("BLOCKED: concurrent "+run["name"]+" #"+str(run["id"]))
+          already=[x for x in get("deploy-runs").get("workflow_runs",[])
+              if x.get("head_sha")==target and x.get("event")=="workflow_dispatch"]
+          if already:
+              print("ALREADY_DISPATCHED",already[0]["id"])
+              Path("/tmp/ui5-skip").write_text("1")
+          else:
+              print("UI5_PRE_DISPATCH_GATES_PASS",target)
+          PY
+      - name: One-time dispatch of EXISTING production Netlify workflow (Git mode only)
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if test -e /tmp/ui5-skip; then
+            echo "SKIPPED_DUPLICATE"
+            exit 0
+          fi
+          printf '%s' '{"ref":"site-prod","inputs":{"neon_release_mode":"false","work_l_recovery_mode":"false"}}' |
+            gh api --method POST --input - "repos/$GITHUB_REPOSITORY/actions/workflows/netlify-production.yml/dispatches"
+          echo "EXISTING_PRODUCTION_WORKFLOW_DISPATCH_REQUESTED site-prod@e6a5dbc626f4ee7059b3355f23973fc2e3e499e5"
