@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-14. Latest accepted: C6-C3-MYKOLAIV-CSV-CROSSCHECK-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
@@ -22,6 +22,11 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Histori
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01 (2026-11-14)
+
+- Draft PR #136 `1924de20` exact failed-run archive recovery code; exact-head offline Actions #43573370103/#43573370102/#43573370092 SUCCESS. C2 #43523629106 writer PASS, 23 archived receipts; physical six-JSON proof and delta artifact NOT RUN. `RECOVERY_PACKAGE=BLOCKED`; at-use freshness, 262 retained rows and no-loss candidate remain unverified. No merge, writer, push or deploy.
+
+
 ## C6-C3-MYKOLAIV-CSV-CROSSCHECK-01 — independent alerts.in.ua CSV cross-check, read-only (2026-11-14)
 
 - Owner CSV exports 13/14 Nov: Mykolaivskyi raion AIR 17+5 rows, 1 exact duplicate = 21 distinct completed alerts. Prior official checkpoint `2026-11-12T22:59:25Z`; failed 14 Nov poll `~07:15Z` returned 20 completed AIR rows with no overlap. Assuming local Kyiv CSV timestamps, a bounded 20-row response can miss the previous checkpoint. This corroborates, but does not prove, exact cross-source event parity or authorize manual continuity. Offline match/provenance required; keep 21/21 fail-closed and live pilots paused.
