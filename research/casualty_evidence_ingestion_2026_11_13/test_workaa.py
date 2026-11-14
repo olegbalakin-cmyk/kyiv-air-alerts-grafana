@@ -28,7 +28,8 @@ class WorkAA(unittest.TestCase):
 
     def test_multi_attack_segments_are_distinct_hints(self):
         text = ("Вранці ракета влучила у приватний будинок у Запоріжжі, загинули двоє людей. "
-                "Увечері того ж дня інша ракета влучила у школу в Запоріжжі, загинула людина.")
+                "Увечері того ж дня інша ракета влучила у школу в Запоріжжі, загинула людина."
+                + " Довідковий контекст без нових фактів." * 24)
         m = r.retain_incident_review_clues(text)["evidence_mentions"]
         self.assertEqual(len({z["article_segment_hint"] for z in m}), 2)
         self.assertFalse(r.retain_incident_review_clues(text)["attack_identity_verified"])
