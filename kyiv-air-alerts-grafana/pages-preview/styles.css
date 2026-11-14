@@ -36,6 +36,8 @@
 /* Preview-only insight blocks */
 .insight-section-heading{align-items:flex-end}
 .insight-year-control{min-width:150px;width:150px;flex:0 0 150px}
+.insight-card-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:12px}
+.insight-card-heading h3{min-width:0;margin-bottom:0}
 .inline-check{display:flex;align-items:center;gap:8px;margin:8px 0 10px;color:#b8c4cf;font-size:13px;cursor:pointer;width:max-content}
 .inline-check input{width:16px;height:16px;margin:0;accent-color:#62a0ea}
 .insight-chart{height:390px}
@@ -44,6 +46,7 @@
 @media(max-width:760px){
   .insight-section-heading{align-items:stretch}
   .insight-year-control{width:100%;min-width:100%;flex-basis:auto}
+  .insight-card-heading{align-items:stretch;flex-direction:column;gap:12px}
   .insight-chart{height:330px}
 }
 
@@ -138,3 +141,21 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 
 /* Selected-range KPI provenance and coverage note. */
 .kpi-range-note{margin:-8px 0 18px;color:#9cb0c1;font-size:12px;line-height:1.6}
+
+/* One compact right-aligned group: Trend, CSV, Share, Embed. */
+.chart-export-row[data-csv-chart="cityIntensityChart"]{
+  justify-content:flex-end;
+  gap:8px;
+}
+.chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control{
+  margin:0;
+  white-space:nowrap;
+  min-height:28px;
+}
+.chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control.hidden{display:none}
+
+/* Allow Chart.js canvas and chart actions to shrink on narrow viewports. */
+.chart-grid > .chart-card{min-width:0}
+.chart-grid .chart-wrap{min-width:0;max-width:100%}
+.chart-grid .chart-wrap canvas{max-width:100%}
+.chart-export-row[data-csv-chart="cityIntensityChart"]{min-width:0}

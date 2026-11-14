@@ -292,9 +292,9 @@ jobs:
         run: |
           rm -rf _site
           mkdir -p _site
-          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_archive.json kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
           cp kyiv-air-alerts-grafana/pages-preview/kpi-range.js historical-daily-kpi.json _site/
-          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 12
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13
           if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
             cmp historical-daily-kpi.json _site/historical-daily-kpi.json
             test "$(sha256sum _site/historical-daily-kpi.json | cut -d ' ' -f1)" = "${{ inputs.approved_kpi_sha256 }}"
