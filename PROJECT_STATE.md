@@ -27,6 +27,10 @@ Latest accepted C6: **C6-AUTO-GIT-RESTORED-2026-11-14-01**. Browser delivery sti
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-DST-UTC-GUARD-STAGED-2026-11-14
+
+- Owner-approved [PR #161](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/161) → `site-prod@66a5120a`, offline [#43645246989](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43645246989) PASS. UTC union fix only; historical 4-case Neon/JSON repair NOT proven. `DST_CORRECTION=OFF`; current 4-hour pipeline unchanged.
+
 ## C6-AUTO-GIT-RESTORED-2026-11-14-01 — cutover and first scheduled Git-only cycle PASS (2026-11-14)
 
 - Earlier owner-approved historical cutover `C6-C3-WORKS-NEON-CUTOVER-PASS-01` (PR #78) physically published via [Netlify #43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) and [Git #43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769), both SUCCESS: historical 23-city QA PASS, `GLOBAL_CUTOVER=YES` (not live-active alerts).
