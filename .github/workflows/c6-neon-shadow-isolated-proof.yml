@@ -204,9 +204,9 @@ jobs:
           Path('evidence/artifacts.json').write_text(json.dumps(a,sort_keys=True))
           PY
           for id in 14086255755 14085756162; do
-            curl --fail --silent --show-error --location --retry 3 \\
-              -H "Authorization: Bearer $GH_TOKEN" \\
-              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" \\
+            curl --fail --silent --show-error --location --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" \
               -o "evidence/$id.zip"
           done
       - name: Restore archived five-file C2 delta in isolated original checkout
@@ -216,12 +216,12 @@ jobs:
         run: |
           set -euo pipefail
           git -C pinned-site switch -c site-prod
-          python -m scripts.c6_neon_archive_recovery \\
-            --outer evidence/14086255755.zip \\
-            --status-outer evidence/14085756162.zip \\
-            --run evidence/run.json --jobs evidence/jobs.json \\
-            --artifacts evidence/artifacts.json \\
-            --checkout pinned-site --delta evidence/c6-delta \\
+          python -m scripts.c6_neon_archive_recovery \
+            --outer evidence/14086255755.zip \
+            --status-outer evidence/14085756162.zip \
+            --run evidence/run.json --jobs evidence/jobs.json \
+            --artifacts evidence/artifacts.json \
+            --checkout pinned-site --delta evidence/c6-delta \
             --receipt-output evidence/reconstruction-receipt.json
       - name: Extract already-verified inner C2 archive for the existing reader
         shell: bash
@@ -231,8 +231,8 @@ jobs:
       - name: Preserve exact PR93 parser contract in the existing reader
         shell: bash
         run: |
-          python integration/scripts/c6_pr93_generator_compat.py \\
-            --generator reader/scripts/neon_json_shadow_generator.py \\
+          python integration/scripts/c6_pr93_generator_compat.py \
+            --generator reader/scripts/neon_json_shadow_generator.py \
             --site-parser pinned-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
       - name: Install existing pinned reader dependencies
         run: python -m pip install -r reader/research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
@@ -243,14 +243,14 @@ jobs:
           NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          python -m scripts.neon_json_shadow_physical_proof \\
-            --site ../pinned-site/kyiv-air-alerts-grafana \\
-            --bundle ../evidence/extracted-c2/c2-shadow-inputs.zip \\
-            --bundle-sha256 9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493 \\
-            --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 \\
-            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \\
-            --db-branch br-bold-mode-b5rub8pq \\
-            --db-endpoint ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech \\
+          python -m scripts.neon_json_shadow_physical_proof \
+            --site ../pinned-site/kyiv-air-alerts-grafana \
+            --bundle ../evidence/extracted-c2/c2-shadow-inputs.zip \
+            --bundle-sha256 9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493 \
+            --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 \
+            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \
+            --db-branch br-bold-mode-b5rub8pq \
+            --db-endpoint ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech \
             --c2-run-id 43523629106 --output ../c6-live-proof
       - name: Fail closed on exact corpus, 23 receipts, at-use freshness and six hashes
         shell: bash
@@ -258,16 +258,16 @@ jobs:
           PYTHONPATH: integration
         run: |
           set -euo pipefail
-          python -m scripts.c6_neon_publication_gate \\
+          python -m scripts.c6_neon_publication_gate \
             --proof-dir c6-live-proof --report evidence/proof-gate.json
-          python -m scripts.c6_neon_git_candidate \\
-            --proof c6-live-proof --site pinned-site/kyiv-air-alerts-grafana \\
-            --output c6-prepared \\
-            --c2-corpus 123c515db11e0a22ede051c7b638df0242404190f553fb2daf292585731e1f00 \\
-            --db-branch br-bold-mode-b5rub8pq \\
-            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \\
-            --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 \\
-            --run-id 43523629106 --run-attempt 1 \\
+          python -m scripts.c6_neon_git_candidate \
+            --proof c6-live-proof --site pinned-site/kyiv-air-alerts-grafana \
+            --output c6-prepared \
+            --c2-corpus 123c515db11e0a22ede051c7b638df0242404190f553fb2daf292585731e1f00 \
+            --db-branch br-bold-mode-b5rub8pq \
+            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \
+            --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 \
+            --run-id 43523629106 --run-attempt 1 \
             --bundle-sha256 9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493
           python - <<'PY'
           import json
