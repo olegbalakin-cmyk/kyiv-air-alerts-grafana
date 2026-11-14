@@ -1,6 +1,6 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-11. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
+**Date:** 2026-11-14. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
@@ -14,7 +14,7 @@ Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [
 
 ## Current tracks and open release gates
 
-- **Production:** Git JSON updated and remote publication confirmed in C2 #43055353190 (`site-prod@cf960d7c`); frontend/source still Git, no Neon cutover. Netlify deployment not independently verified.
+- **Production UI:** owner-approved frontend-only quarterly/rolling release LIVE via PR #148, `site-prod@c66b9779`, Netlify `6af8808e75d3ca5d1aef8d8e`, Actions #43611233805 SUCCESS with HTTP parity 23/23. Git data source unchanged, Neon OFF. **Next:** owner re-lock Netlify auto-publishing; Git 4-hour data updates remain separate.
 - **Neon reader / historical parity:** frozen 23-city [proof 741f277f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03), 0 unexplained diffs; no current full continuity PASS.
 - **Live writer / provenance:** C2 #43055353190 `NEON_SUCCEEDED`, 33,135 episodes (69 inserted), 23/23 checkpoints match run/attempt/workflow SHA. Sevastopol checkpoint advanced; its historical alert `25006→25008` remains unresolved.
 - **23-city generator / publication:** first real post-merge same-run export PASS (`C2 ZIP SHA-256=ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, artifact `13873291895`, manifest SHA `f6462093...3e433`); no `CAPTURE_NAIVE_TIMESTAMP`. Independent Neon→JSON readback still OPEN.
@@ -32,6 +32,13 @@ Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-QUARTER-ROLLING-PROD-2026-11-14 — frontend-only release PASS (2026-11-14)
+
+- Owner-approved [PR #148](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/148) merged to `site-prod@c66b977930fbbbbe739efea60d474b04b2b002ea`. [Production Actions #43611233805](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43611233805) SUCCESS, published static Git-only frontend and verified served `app.js` parity, HTTP 200, KPI 23/23. Netlify deploy `6af8808e75d3ca5d1aef8d8e` READY. Deploy artifact #14120062823, SHA-256 `0a328711d187cf2f9483b03a19eb522ac297e28ba419292de7668652dc479511`.
+- User-approved quarterly city/comparison/all-cities modes, opt-in rolling 30/90/180 one-day forecast, clean legend/tooltip, and EWMA 0.3 explanation. Exact draft regression [#43611072521](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43611072521) SUCCESS at `2de7326f` (artifact #14120002788). C2, casualty, source and Neon tracks unchanged. `GLOBAL_CUTOVER=NO`.
+- **Next:** owner re-lock Netlify automatic publishing in Deploys; 4-hour Git data refresh remains enabled independently. This accepted UI release is not a C6/Neon acceptance.
+
+
 ## C6-POSTMERGE-C2-EXPORT-23-01 — physical same-run export and checkpoints PASS (2026-11-11)
 
 - [Actions #43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) scheduled C2 SUCCESS (16:08:40–16:36:22 UTC), after Work A `main@fe4ab1c1` and Work B `site-prod@6de49e3b`. `NEON_SUCCEEDED`: 33,135 canonical episodes (+69), 23-city QA, Git JSON publication `site-prod@cf960d7c` PASS.
