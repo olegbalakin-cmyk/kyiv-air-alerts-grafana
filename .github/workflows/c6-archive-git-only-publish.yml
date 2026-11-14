@@ -1,0 +1,171 @@
+name: C6 one-shot archive Git-only publication (default OFF)
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_verified_archive:
+        description: "Owner-approved Git-only publication of artifact #14106191796 (default OFF)"
+        type: boolean
+        required: true
+        default: false
+      exact_main_sha:
+        description: "Full reviewed main HEAD after separately approved PR merge"
+        type: string
+        required: true
+      owner_approval:
+        description: "Separate owner GO: APPROVE_ONE_GIT_ONLY_PUSH_14106191796"
+        type: string
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: update-netlify-site
+  cancel-in-progress: false
+
+jobs:
+  git-only:
+    if: >-
+      github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' &&
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor == 'olegbalakin-cmyk' &&
+      inputs.publish_verified_archive &&
+      inputs.owner_approval == 'APPROVE_ONE_GIT_ONLY_PUSH_14106191796' &&
+      github.sha == inputs.exact_main_sha &&
+      vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' &&
+      vars.C6_AUTO_NEON_GIT_ENABLED != 'true'
+    environment: c6-neon-git-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      C6_AUTO_NEON_GIT_ENABLED: 'true'
+      NETLIFY_DEPLOYMENTS_PER_UPDATE: '0'
+      PYTHONPATH: integration
+    steps:
+      - name: Checkout exact integration without push token
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: integration
+          persist-credentials: false
+
+      - name: Checkout exact site-prod for one fast-forward push
+        uses: actions/checkout@v4
+        with:
+          ref: 54079326ae2b4e691e2bfcf7cd1a51c9705404eb
+          path: live-site
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Acquire ONLY immutable recovery artifact; verify run, attempt and SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/43574571743" > "$RUNNER_TEMP/source-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14106191796" > "$RUNNER_TEMP/source-artifact.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])
+          run=json.loads((root/'source-run.json').read_text())
+          artifact=json.loads((root/'source-artifact.json').read_text())
+          assert (run['id'],run['run_attempt'],run['conclusion'],run['status']) == (43574571743,2,'success','completed')
+          assert (run['head_branch'],run['head_sha']) == (
+              'research-c6-fast-archive-recovery-2026-11-14',
+              '1924de20a3c382aa862a00c0a882579c4a43c996')
+          assert run['repository']['full_name']=='olegbalakin-cmyk/kyiv-air-alerts-grafana'
+          assert artifact['id']==14106191796
+          assert artifact['name']=='c6-archive-recovery-43574571743-2'
+          assert artifact['expired'] is False
+          assert artifact['digest']=='sha256:911c6d773904dffec7d872b6435a4642d830553c514bfd78bdbf2988f0e68ab1'
+          assert artifact['workflow_run']['id']==43574571743
+          PY
+          curl --fail --silent --show-error --location --retry 2 -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/14106191796/zip" -o "$RUNNER_TEMP/recovery.zip"
+          echo "911c6d773904dffec7d872b6435a4642d830553c514bfd78bdbf2988f0e68ab1  $RUNNER_TEMP/recovery.zip" | sha256sum --check --status
+          unzip -q "$RUNNER_TEMP/recovery.zip" -d .
+
+      - name: Verify exact clean remote HEAD and no competing production jobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C live-site rev-parse HEAD)" = '54079326ae2b4e691e2bfcf7cd1a51c9705404eb'
+          test -z "$(git -C live-site status --porcelain)"
+          test "$(git -C live-site ls-remote origin refs/heads/site-prod | cut -f1)" = '54079326ae2b4e691e2bfcf7cd1a51c9705404eb'
+          git -C live-site switch -C site-prod
+          python - <<'PY'
+          import json,os,subprocess
+          competing={'.github/workflows/update-netlify-site.yml',
+                     '.github/workflows/netlify-production.yml',
+                     '.github/workflows/c6-archive-git-only-publish.yml'}
+          for status in ('in_progress','queued','waiting','pending','requested'):
+              rows=json.loads(subprocess.check_output([
+                  'gh','api',f'repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs',
+                  '-f','per_page=100','-f',f'status={status}','--method','GET'],text=True))
+              assert rows['total_count'] < 100, 'RUN_LIST_TRUNCATED'
+              assert not [r for r in rows['workflow_runs']
+                  if r['id']!=int(os.environ['GITHUB_RUN_ID']) and r.get('path') in competing], 'COMPETING_PRODUCTION_JOB'
+          print('EXACT_SITE_PROD_CLEAN_AND_COMPETING_JOBS_ZERO')
+          PY
+
+      - name: Verify current-UTC C6 proof, immutable delta, and original identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.c6_neon_publication_gate --proof-dir c6-live-proof
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.c6_neon_auto_git import verify_capture,load,sha
+          from scripts import c6_neon_publication_gate as gate
+          from datetime import datetime,timezone
+          assert sha('evidence/c6-delta/manifest.json')=='5653813c1d2f2d78e4df4f6235ba61de4bacd56720671533e713d261a037acd5'
+          assert sha('c6-final/RELEASE_MANIFEST.json')=='ecdf3749cc8dcc688006859123fbfa1e2dd0df5abc192bd6cf966e8338275e39'
+          assert sha('c6-final/RELEASE_BINDING.json')=='d18836634f47ab1d563adef91501eecc2116f39b7bdaba9fda7cdeb4f4699c01'
+          gate.inspect(Path('c6-live-proof'),as_of=datetime.now(timezone.utc))
+          verify_capture(Path('evidence/c6-delta'),load('c6-prepared/REPORT.json'),
+               workflow_sha='5606147a955b64e17474688c6a13596b21d93580',
+               run_id=43523629106,run_attempt=1)
+          PY
+
+      - name: Independently freeze actual auto release binding and FINAL six SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from scripts import c6_neon_release_binding as rb
+          from scripts import c6_neon_auto_git as pub
+          expected={
+            'historical-daily-kpi.json':'19c285d6226ce3e39bd0642df634a46a3e26d38a68379a25c06a2f25ef6d477b',
+            'kyiv-air-alerts-grafana/data/alerts_combined.json':'930806e4122c6320b87d4d7eda8b952de7474b7c6f5dbc3f61e6829fb73344e0',
+            'kyiv-air-alerts-grafana/data/dashboard_data.json':'734d35b144172d30593df725ba7844d62b7836ddd40e634dab4b88fe2a33db47',
+            'kyiv-air-alerts-grafana/data/kyiv_threat_mix.json':'e63fd740b186adb027b6cf66cbcd9f64bc4e55a0006129291b0e102af1149f36',
+            'kyiv-air-alerts-grafana/data/sevastopol_events.json':'16af076b51c8ef0ffc97699e905f9e2735e3a42437fc24119d2418b225e28f34',
+            'kyiv-air-alerts-grafana/data/site_derived.json':'ad78cbf7fcb77074ac74932902ae7561db9913217283d04963ea7e18179af847',
+          }
+          r=rb.release_candidate(Path('c6-prepared'),pub.load('c6-prepared/REPORT.json'),
+             repository='olegbalakin-cmyk/kyiv-air-alerts-grafana',
+             release_id='auto-43523629106-1',output=Path('c6-owner-pinned-final'))
+          assert r['files']==expected, 'PUBLISH_FINAL_SHA_DRIFT'
+          assert r['release_manifest_sha256']=='37ed6503261e5c85e3d5e96ce73e7ae82a4357ec5a9ee6cf765b69dfc2b07ebd'
+          assert pub.sha('c6-owner-pinned-final/RELEASE_MANIFEST.json')=='d4284fd720ba6359ef63ef24361b8786ea074cdd1a8c4622c52ad15c0aacb869'
+          pub.verify_embedded(
+            pub.load('c6-owner-pinned-final/candidate/kyiv-air-alerts-grafana/data/dashboard_data.json'),
+            pub.load('c6-owner-pinned-final/candidate/historical-daily-kpi.json'),
+            pub.load('c6-owner-pinned-final/RELEASE_MANIFEST.json'))
+          print('PINNED_SIX_FINAL_SHA_AND_EMBEDDED_KPI_CONTRACT_PASS')
+          PY
+
+      - name: One existing Git-only publisher; one fast-forward commit; no Netlify
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.c6_neon_auto_git publish --checkout live-site --delta evidence/c6-delta --prepared c6-prepared --proof c6-live-proof --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 --run-id 43523629106 --run-attempt 1 --repository "$GITHUB_REPOSITORY"
+          echo 'NETLIFY_DEPLOYMENTS=0'
