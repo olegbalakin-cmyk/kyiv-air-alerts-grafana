@@ -1,8 +1,14 @@
 name: CASUALTY E2E shadow proof (offline)
 on:
   push:
-    branches: [research-casualty-e2e-shadow-2026-11-12]
-    paths: [".github/workflows/research-casualty-e2e-shadow.yml", "research/casualty_e2e_shadow_2026_11_12/**"]
+    branches:
+      - research-casualty-e2e-shadow-2026-11-12
+      - research-casualty-workv-revision-contract-2026-11-14
+    paths:
+      - ".github/workflows/research-casualty-e2e-shadow.yml"
+      - "research/casualty_e2e_shadow_2026_11_12/**"
+      - "kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/casualty_review_operator.py"
 permissions:
   contents: read
   actions: read
@@ -75,6 +81,24 @@ jobs:
           python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" --output /tmp/casualty-first
           python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" --previous-proposals /tmp/casualty-first/proposals.json --output /tmp/casualty-repeat
           python research/casualty_e2e_shadow_2026_11_12/verify_proof.py /tmp/casualty-first /tmp/casualty-repeat
+      - name: Work V physical reviewer-to-generator contract proof (research branch only)
+        if: github.ref == 'refs/heads/research-casualty-workv-revision-contract-2026-11-14'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/casualty-workv
+          python research/casualty_e2e_shadow_2026_11_12/workv_contract_e2e.py \
+            --site _site --proposal /tmp/casualty-first/proposals.json \
+            --output /tmp/casualty-workv
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('/tmp/casualty-workv')
+          result=json.loads((p/'result.json').read_text())
+          checks=json.loads((p/'sha256_manifest.json').read_text())
+          assert result['status']=='PASS'
+          assert hashlib.sha256((p/'result.json').read_bytes()).hexdigest()==checks['result.json']
+          print('WORKV_PHYSICAL_E2E=PASS SHA256='+checks['result.json'])
+          PY
       - name: Upload evidence decisions and safety report
         if: always()
         uses: actions/upload-artifact@v4
@@ -84,5 +108,6 @@ jobs:
             /tmp/casualty-first/*.json
             /tmp/casualty-repeat/*.json
             /tmp/casualty-verdict.json
+            /tmp/casualty-workv/*.json
           if-no-files-found: warn
           retention-days: 30
