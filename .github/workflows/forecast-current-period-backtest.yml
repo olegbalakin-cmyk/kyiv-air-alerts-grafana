@@ -1,0 +1,45 @@
+name: Forecast - quarters & current period read-only backtest
+on:
+  push:
+    branches: [research-quarterly-current-period-backtest-2026-11-14]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: forecast-current-period-backtest-20261114
+  cancel-in-progress: true
+jobs:
+  evaluate:
+    if: github.ref == 'refs/heads/research-quarterly-current-period-backtest-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify immutable production source and fail-closed evaluation contract
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/scripts/backtest_period_completion.js
+          test "$(git rev-parse --verify HEAD)" = "${GITHUB_SHA}"
+          test -s kyiv-air-alerts-grafana/data/dashboard_data.json
+          test -n "$(git rev-parse c66b977930fbbbbe739efea60d474b04b2b002ea^{commit})"
+          cmp <(git show c66b977930fbbbbe739efea60d474b04b2b002ea:kyiv-air-alerts-grafana/data/dashboard_data.json) kyiv-air-alerts-grafana/data/dashboard_data.json
+          echo FORECAST_SOURCE_IMMUTABLE_PASS
+      - name: Physical read-only 23 city backtest
+        run: |
+          set -euo pipefail
+          node kyiv-air-alerts-grafana/scripts/backtest_period_completion.js \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            c66b977930fbbbbe739efea60d474b04b2b002ea \
+            research/forecast_current_period_2026_11_14/report.json | tee research-forecast-log.txt
+          test -s research/forecast_current_period_2026_11_14/report.json
+      - name: Save full per-model evidence (no production publishing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forecast-current-period-backtest-evidence
+          path: |
+            research/forecast_current_period_2026_11_14/report.json
+            research-forecast-log.txt
+          if-no-files-found: ignore
