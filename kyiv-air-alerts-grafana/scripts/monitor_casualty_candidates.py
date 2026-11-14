@@ -41,6 +41,7 @@ FOLLOWUP_HOURS = [
 ]
 MAX_EPISODES_PER_CITY = 250
 GOOGLE_NEWS_URL = "https://news.google.com/rss/search"
+HTTP_REQUESTS_THIS_RUN = 0
 
 CITY_CONFIG = {
     "kyiv": {"label": "Київ", "alert_key": "kyiv", "scope": "exact_city"},
@@ -402,6 +403,8 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
         f"{GOOGLE_NEWS_URL}?q={quote_plus(query)}"
         "&hl=uk&gl=UA&ceid=UA:uk"
     )
+    global HTTP_REQUESTS_THIS_RUN
+    HTTP_REQUESTS_THIS_RUN += 1
     response = requests.get(
         url,
         headers={
@@ -478,26 +481,61 @@ def due_checks(state: dict, now: datetime) -> dict[str, list[tuple[dict, dict]]]
     return out
 
 
+def plan_source_scans(
+    state: dict, due: dict, now: datetime, *, independent: bool = False
+) -> dict[str, dict]:
+    """Plan existing RSS searches without touching sources or mutable cursors.
+
+    The 8-day window is compatible with the existing when:8d RSS query.
+    On subsequent successful scans overlap the last cursor by 48 hours;
+    only a successful source request may advance the cursor. No completed
+    alert is required for the explicitly selected independent mode.
+    """
+    if not independent:
+        return {}
+    plans = {}
+    for city in CITY_CONFIG:
+        cstate = (state.get("cities") or {}).get(city) or {}
+        last = parse_dt(cstate.get("last_independent_source_scan_at"))
+        floor = now - timedelta(days=8)
+        start = max(floor, last - timedelta(hours=48)) if last else floor
+        for episode, _ in due.get(city, []):
+            alert_start = parse_dt(episode.get("alert_start"))
+            if alert_start:
+                start = max(floor, min(start, alert_start))
+        plans[city] = {"earliest": start, "independent": True}
+    return plans
+
+
 def add_news_candidates(
     queue: list[dict],
     city_key: str,
     rows: list[dict],
     due: list[tuple[dict, dict]],
     now: datetime,
+    *, independent: bool = False,
 ) -> int:
     by_id = {
         str(item.get("candidate_id")): item
         for item in queue
         if isinstance(item, dict) and item.get("candidate_id")
     }
+    by_url = {(str(item.get("url")), str(item.get("city_key"))): item
+              for item in queue if isinstance(item, dict) and item.get("url")}
     episode_ids = sorted({episode["episode_id"] for episode, _ in due})
     check_labels = sorted({check["label"] for _, check in due})
     added = 0
 
     for row in rows:
         cid = candidate_id(city_key, row["url"], row["title"])
-        existing = by_id.get(cid)
+        # A changed RSS title must not create a second candidate for the same
+        # exact publication. This is a *source* dedup, not an incident merge.
+        existing = by_id.get(cid) or by_url.get((row["url"], city_key))
         if existing:
+            if independent:
+                existing["discovery_triggers"] = sorted(set(
+                    existing.get("discovery_triggers") or []
+                ) | {"independent_source_scan"})
             existing_ids = set(existing.get("trigger_episode_ids") or [])
             existing["trigger_episode_ids"] = sorted(existing_ids | set(episode_ids))
             existing_checks = set(existing.get("trigger_check_labels") or [])
@@ -522,6 +560,8 @@ def add_news_candidates(
             "last_seen_at": iso(now),
             "trigger_episode_ids": episode_ids,
             "trigger_check_labels": check_labels,
+            "discovery_triggers": (["independent_source_scan"] if independent
+                                   else ["completed_alert_followup"]),
             "note": (
                 "Automatically discovered after a completed alert episode. "
                 "Do not add to confirmed deaths without manual validation of "
@@ -530,6 +570,7 @@ def add_news_candidates(
         }
         queue.append(item)
         by_id[cid] = item
+        by_url[(row["url"], city_key)] = item
         added += 1
     return added
 
@@ -630,12 +671,23 @@ def main() -> None:
         help="Use cached alert stores only. Intended for safe bootstrap/testing.",
     )
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--independent-source-check", action="store_true",
+                        help="Plan independent 23-city RSS overlap; requires --source-http for live requests.")
+    parser.add_argument("--source-http", action="store_true",
+                        help="Explicit opt-in to RSS GET only; DEFAULT OFF. No article GET.")
+    parser.add_argument("--retained-facts", type=Path,
+                        help="Already captured minimal Work J/R fact cards only; no HTTP.")
+    parser.add_argument("--retained-index", type=Path,
+                        help="Output privacy-filtered Work X/AA shadow evidence index.")
     args = parser.parse_args()
 
     if args.self_test:
         self_test()
         return
-
+    if bool(args.retained_facts) != bool(args.retained_index):
+        parser.error("--retained-facts and --retained-index must be supplied together")
+    global HTTP_REQUESTS_THIS_RUN
+    HTTP_REQUESTS_THIS_RUN = 0
     started = now_utc()
     state = ensure_state()
     queue = load_json(QUEUE_FILE, [])
@@ -667,30 +719,57 @@ def main() -> None:
     searches = {}
     new_candidates = 0
     due = due_checks(state, started)
-    for city_key, city_due in sorted(due.items()):
-        earliest = min(
-            parse_dt(ep["alert_start"]) or started
-            for ep, _ in city_due
-        )
-        try:
-            rows, query_url = search_city_news(city_key, earliest, started)
-            added = add_news_candidates(queue, city_key, rows, city_due, started)
-            new_candidates += added
+    independent_plans = plan_source_scans(
+        state, due, started, independent=args.independent_source_check)
+    # Existing completed-alert checks stay visible, and are never advanced
+    # on dry runs or failed network retrieval. Research source HTTP is OFF
+    # unless explicitly enabled. No new requests from scheduled production.
+    planned_cities = sorted(set(due) | set(independent_plans))
+    if args.source_http and not args.local_only:
+        for city_key in planned_cities:
+            city_due = due.get(city_key, [])
+            independent = city_key in independent_plans
+            starts = [parse_dt(ep.get("alert_start")) or started
+                      for ep, _ in city_due]
+            if independent:
+                starts.append(independent_plans[city_key]["earliest"])
+            earliest = min(starts) if starts else started - timedelta(days=8)
+            earliest = max(earliest, started - timedelta(days=8))
+            try:
+                rows, query_url = search_city_news(city_key, earliest, started)
+                added = add_news_candidates(queue, city_key, rows, city_due,
+                                            started, independent=independent)
+                new_candidates += added
+                searches[city_key] = {
+                    "due_checks": len(city_due),
+                    "independent": independent,
+                    "overlap_from": iso(earliest),
+                    "results_after_filter": len(rows),
+                    "new_candidates": added,
+                    "query_url": query_url,
+                }
+                if independent:
+                    city_state = state["cities"].setdefault(city_key, {})
+                    city_state["last_independent_source_scan_at"] = iso(started)
+                for _, check in city_due:
+                    check["checked_at"] = iso(started)
+                    check["new_candidates"] = added
+            except Exception as exc:
+                message = f"{type(exc).__name__}: {exc}"
+                errors[f"search:{city_key}"] = message
+                searches[city_key] = {
+                    "due_checks": len(city_due),
+                    "independent": independent,
+                    "error": message,
+                }
+    else:
+        # A local-only run may inspect cached alert episodes but never fetch
+        # external RSS; it must not claim to have completed any source scan.
+        for city_key in planned_cities:
             searches[city_key] = {
-                "due_checks": len(city_due),
-                "results_after_filter": len(rows),
-                "new_candidates": added,
-                "query_url": query_url,
-            }
-            for _, check in city_due:
-                check["checked_at"] = iso(started)
-                check["new_candidates"] = added
-        except Exception as exc:
-            message = f"{type(exc).__name__}: {exc}"
-            errors[f"search:{city_key}"] = message
-            searches[city_key] = {
-                "due_checks": len(city_due),
-                "error": message,
+                "due_checks": len(due.get(city_key, [])),
+                "independent": city_key in independent_plans,
+                "status": "SOURCE_HTTP_DEFAULT_OFF",
             }
 
     queue.sort(
@@ -710,10 +789,24 @@ def main() -> None:
         "finished_at": iso(now_utc()),
         "mode": state["last_run_mode"],
         "city_count": len(CITY_CONFIG),
+        "planned_city_count": len(planned_cities),
         "polled_city_count": len([k for k, v in polled.items() if v]),
         "bootstrapped_cities": bootstrapped,
         "new_alert_episodes": new_episodes,
-        "cities_searched": sorted(searches),
+        "cities_searched": sorted(k for k, v in searches.items() if v.get("query_url")),
+        "cities_successfully_fetched": sum(bool(v.get("query_url")) for v in searches.values()),
+        "cities_with_source_errors": sorted(k for k, v in searches.items() if v.get("error")),
+        "rss_http_requests_this_run": HTTP_REQUESTS_THIS_RUN,
+        "last_successful_scan_by_city": {
+            city: ((state.get("cities") or {}).get(city) or {}).get("last_independent_source_scan_at")
+            for city in CITY_CONFIG
+        },
+        "automatic_credits": 0,
+        "PROMOTE": "OFF",
+        "source_pages_http_enabled": False,
+        "cities_planned": planned_cities,
+        "source_http_enabled": bool(args.source_http and not args.local_only),
+        "independent_source_scan_enabled": bool(args.independent_source_check),
         "searches": searches,
         "new_review_candidates": new_candidates,
         "pruned_geo_false_positives": pruned_candidates,
@@ -724,6 +817,27 @@ def main() -> None:
 
     atomic_json(STATE_FILE, state)
     atomic_json(QUEUE_FILE, queue)
+    # Work X/AA receives ONLY already-retained Work J/R cards; no article GET.
+    # The existing one-shot Work Z HTTP authorization is never loaded or reused.
+    if args.retained_facts:
+        import casualty_workx_evidence as evidence
+        saved_facts = load_json(args.retained_facts, {})
+        evidence_index = evidence.build_review_index(
+            saved_facts, queue=queue, include_unretained=False)
+        if evidence_index["summary"]["automatic_credits"] != 0:
+            raise RuntimeError("WORKAB_AUTO_CREDIT_GUARD")
+        if evidence_index["publication_allowed"] is not False:
+            raise RuntimeError("WORKAB_PUBLICATION_GUARD")
+        atomic_json(args.retained_index, evidence_index)
+        report["evidence_cards"] = evidence_index["summary"]["total"]
+        report["evidence_with_excerpts"] = evidence_index["summary"]["source_evidence_cards_with_excerpts"]
+        report["evidence_needs_review"] = evidence_index["summary"]["needs_review"]
+        report["evidence_replay_duplicates"] = evidence_index["summary"]["duplicate_source_replay"]
+    else:
+        report["evidence_cards"] = 0
+        report["evidence_with_excerpts"] = 0
+        report["evidence_needs_review"] = 0
+        report["evidence_replay_duplicates"] = 0
     atomic_json(LAST_RUN_FILE, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
 

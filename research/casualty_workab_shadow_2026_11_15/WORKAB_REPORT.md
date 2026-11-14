@@ -1,0 +1,19 @@
+# Work AB — offline integration candidate (no live shadow enablement)
+
+Source basis: Work X PR #142 / monitor diff; Work AA PR #160 / Work X index, Work AA saved-card recheck, sentence/context helpers. Clean copy onto the current WIP commit; **no research commit history**, no spent Work Z launch.json.
+
+- Existing WIP monitor keeps completed-alert follow-up scans and adds independent 23-city source planning; RSS requires explicit --source-http and is OFF by default. 48-hour cursor overlap; eight-day Google News query bound. Errors never advance successful scan cursor; URL title changes do not add candidates.
+- Existing source-capture fact-card schema is consumed only after retention via --retained-facts / --retained-index. Index is privacy-filtered, hash-verified, does not reconstruct missing HTML or create incident identity/revisions. Work AA context helpers are copied without Work Z one-time authorization or any HTTP logic.
+- **Important gate:** live full-page source capture is **not** connected here. Work K/Z capture included research-only one-shot authorization and cannot be activated as a new recurring grant. Do not claim RSS-only scanning produced source-fact cards. A separate reviewed, bounded reusable page-capture adapter is needed for a complete live-shadow evidence GO.
+- Current main workflow .github/workflows/casualty-monitor-wip.yml is unchanged, cron remains 45 */4 * * *, checkout WIP unchanged. Live enablement would require separate owner-approved, guarded edits. No site-prod, main, WIP, deaths, Neon, C2, Netlify changes from this branch.
+- WIP's original --local-only **does call RSS** on due followups. In this candidate, both independent and followup RSS require --source-http; after an owner GO, the original followup searches must explicitly receive that opt-in too.
+- Test job reuses existing **test-explosion-monitor-wip.yml** test-only workflow, gated to this integration branch. It checks out no credentials, consumes only immutable saved Work Z GitHub artifact, mocks every source GET, uses scratch copies of WIP state/queue, executes 3 four-hour cycles (including failure and recovery), and emits SHA-256 manifest. The existing explosion test only runs on original WIP ref.
+
+## Draft live shadow changes only (not applied)
+1. Pin tested candidate code into WIP through a separately approved PR; retain original WIP SHA as rollback pointer. Do not merge this draft without acceptance.
+2. On main's existing casualty-monitor-wip.yml, keep cron at 45 */4 * * * and WIP checkout, add independent source opt-in only after separate owner GO and first-cycle rollback checks.
+3. Network policies to approve **separately**: (a) 23 Google News RSS feeds, max 23 GET/cycle, per-request timeout 15s (current Work X 45s, must reduce), no retries or maximum 1 bounded retry for 429/5xx; (b) original publisher pages, allowlisted hosts and HTTPS only, maximum 10 total GET/cycle, 8s connect/20s total timeout, no redirects to off-allowlist, ≤2MiB/body transient in memory, no storage of HTML; (c) write only bounded evidence cards into named WIP paths, no full article/private data. Stop on hostile redirects, unexpected domain, repeated 429/403, excessive timeout or budget exhaustion; advance only successful source cursor. If it is a planned/offline-only scan, report success=0 real fetched.
+4. Expose per-cycle report counters, source failures, exact 23 last-success cursors; keep zero credits and PROMOTE hard-OFF. A page-capture adapter must pass offline proof before permitting (b) and (c).
+5. WIP rollback: disable new opt-in flags first (or revert only Work AB WIP code changes to pre-GO SHA); preserve live queue/state via separately pinned snapshot; do not force-push/rewind unrelated commits. Restore only approved workflow diff if enabled. Never re-use Work Z launch.json.
+
+**Decision pending exact-head CI.** Research fixture results are not real network coverage; T03–T05 remain INSUFFICIENT_EVIDENCE.
