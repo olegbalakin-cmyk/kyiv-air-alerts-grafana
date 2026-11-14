@@ -14,7 +14,7 @@ Latest UI: **UI-CURRENT-PERIOD-COMPLETION-PROD-2026-11-14**; C6: **C6-POSTMERGE-
 
 ## Current tracks and open release gates
 
-- **Production UI:** owner-approved opt-in completion of current day/week/month/quarter LIVE via PR #152, `site-prod@c980c3f7`, Netlify `6af8b9cd9e5cf4983bbb407e`, Actions #43633525080 SUCCESS, HTTP parity/index 23/23. No next-period bar. **Next:** owner re-lock Netlify auto-publishing; Git 4-hour updates remain separate.
+- **Production UI:** PR #152 LIVE (`site-prod@c980c3f7`), Actions #43633525080 SUCCESS. Netlify `6af8b9cd9e5cf4983bbb407e` READY, **`locked=true`** confirmed. Next UI deployment requires owner unlock; 4-hour Git updater unchanged.
 - **Neon reader / historical parity:** frozen 23-city [proof 741f277f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03), 0 unexplained diffs; no current full continuity PASS.
 - **Live writer / provenance:** C2 #43055353190 `NEON_SUCCEEDED`, 33,135 episodes (69 inserted), 23/23 checkpoints match run/attempt/workflow SHA. Sevastopol checkpoint advanced; its historical alert `25006→25008` remains unresolved.
 - **23-city generator / publication:** first real post-merge same-run export PASS (`C2 ZIP SHA-256=ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, artifact `13873291895`, manifest SHA `f6462093...3e433`); no `CAPTURE_NAIVE_TIMESTAMP`. Independent Neon→JSON readback still OPEN.
@@ -32,6 +32,10 @@ Latest UI: **UI-CURRENT-PERIOD-COMPLETION-PROD-2026-11-14**; C6: **C6-POSTMERGE-
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-NETLIFY-LOCK-CONFIRMED-2026-11-14
+
+- Owner locked publishing; Netlify read-only deploy confirms `locked=true`, current deploy `6af8b9cd9e5cf4983bbb407e` READY. Git 4-hour workflow `cron: 15 */4 * * *` unchanged; last scheduled [Actions #43625014243](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43625014243) SUCCESS. No changes to data, C2, Neon or casualty. Next UI release requires separate owner unlock.
+
 ## UI-CURRENT-PERIOD-COMPLETION-PROD-2026-11-14 — owner GO, served Netlify PASS
 
 - Owner-approved [PR #152](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/152) → `site-prod@c980c3f70ed894d2583fc83ecdedd1f82c04afb1` (base `f67ee699`), **six frontend/test files only**, current Git data unchanged. Opt-in trend estimates completion of today (28-day), current calendar week, month, quarter as measured + hatched remaining time using 28 complete days, source clock and real Kyiv hours cap. No next-period bars; actual KPI unchanged.
