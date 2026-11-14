@@ -72,7 +72,8 @@ def restore(*, outer, status_outer, run, jobs, artifact_metadata, checkout,
         status = json.loads(z.read("status.json"))
         receipt = json.loads(z.read("receipt.json"))
         archived_data = {n: z.read("site_data/" + n) for n in NAMES}
-    require(m == manifest and json.loads(status_bytes) == status,\n            "RECOVERY_EXTERNAL_STATUS_MISMATCH")
+    require(m == manifest and json.loads(status_bytes) == status,
+            "RECOVERY_EXTERNAL_STATUS_MISMATCH")
     auto.verify_exact_failed_c2_archive(
         run, jobs, artifact_metadata, manifest, status, receipt)
     checkout = Path(checkout).resolve()
