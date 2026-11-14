@@ -9,7 +9,7 @@ assert.match(source,/setOptionText\("cityPeriod","allTime","За весь час
 assert.match(source,/validParam\("period",\s*\[[^\]]*"allTime"\]/);
 assert.match(source,/if \(\["daily28", "allTime"\]\.includes\(\$\("cityPeriod"\)\.value\)\) resetCityDisplayRange\(\);/);
 assert.match(source,/if \(\$\("cityPeriod"\)\.value === "allTime"\) resetCityDisplayRange\(\);/);
-const marker="\napplyStaticLanguage();\n\ninit().catch(err=>{";
+const marker="\nif(!canonicalizeLanguagePath()){";
 assert.ok(source.includes(marker));
 const frozen=JSON.parse(fs.readFileSync(path.join(__dirname,
   "fixtures/daily28_20261020_live.json"),"utf8"));
