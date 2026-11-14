@@ -97,8 +97,39 @@ assert.equal(highResult.actualHours-lateResult.actualHours,22,
 assert.equal(highResult.modelHours,"observed_28d_hour_fraction");
 assert.equal(lateResult.modelHours,"observed_28d_hour_fraction");
 
+// Last of 28 days: observed partial day and forecasted remainder are separate,
+// with source time verification. The same observed day is never duplicated.
+const partialToday={date:"2026-11-14",is_partial_period:true,
+ partial_through:"2026-11-14T21:00:00+02:00",
+ total_alert_duration_hours:1,alerts_started:1};
+const todayForecast=F.estimateToday(history,"2026-11-14",partialToday,"2026-11-14T21:02:00+02:00");
+assert(todayForecast,"timestamped current-day source supports one-bar completion");
+assert.equal(todayForecast.days,1);
+assert.equal(todayForecast.start,"2026-11-14");
+assert.equal(todayForecast.end,"2026-11-14");
+assert.equal(todayForecast.maximumRemainingHours,3);
+assert.equal(todayForecast.actualHours,1);
+assert.equal(todayForecast.actualAlerts,1);
+assert(todayForecast.remainingHours>=0&&todayForecast.remainingHours<3);
+assert(Math.abs(todayForecast.expectedHours-(1+todayForecast.remainingHours))<1e-9);
+assert.equal(todayForecast.periodRow.date,"2026-11-14");
+assert.equal(todayForecast.periodRow.total_alert_duration_hours,1);
+assert.equal(todayForecast.periodRow.partial_through,partialToday.partial_through);
+assert.equal(todayForecast.modelHours,"observed_28d_hour_fraction");
+assert.equal(F.estimateToday(history,"2026-11-14",{...partialToday,partial_through:"2026-11-14"},"2026-11-14T21:02:00+02:00"),null,
+ "date-only marker must not count as elapsed 21 hours");
+assert.equal(F.estimateToday(history,"2026-11-14",partialToday,"2026-11-15T06:02:00+02:00"),null,
+ "stale source must not become false calm time");
+assert.equal(F.estimateToday(history,"2026-11-14",{...partialToday,total_alert_duration_hours:23},"2026-11-14T21:02:00+02:00"),null,
+ "physically impossible current-day alert hours blocked");
+assert.equal(F.estimateToday({...history,end:"2026-11-12"},"2026-11-14",partialToday,"2026-11-14T21:02:00+02:00"),null,
+ "requires a completed yesterday");
+assert.equal(F.estimateToday({...history,verified_metric_months:[],verified_metric_days:[]},"2026-11-14",partialToday,"2026-11-14T21:02:00+02:00"),null,
+ "requires verified 28-day baseline");
+
 assert(app.includes('window.PeriodCompletionPreview?.estimate('));
-assert(app.includes('const completionPeriod = ["calendarWeekly","monthly","quarterly"]'));
+assert(app.includes('const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"]'));
+assert(app.includes("window.PeriodCompletionPreview?.estimateToday("),"daily chart uses verified current day");
 assert(app.includes('trendControl.classList.toggle("hidden", !completionVisible)'),"trend only on current calendar periods");
 assert(!app.includes("QuarterRollingPreview?.rollingForecast("),"no rolling next-period forecast invocation");
 assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period forecast invocation");
