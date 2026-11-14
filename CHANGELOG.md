@@ -1,17 +1,21 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 — TECHNICAL PASS / EVIDENCE PARTIAL (2026-11-14)
+
+- [Draft PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160) `38b444dff0e9f1e363593aaa42dec4dc278743e0`; [Actions #43643850083](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43643850083) SUCCESS, 183 executed/1 expected skip, artifact #14132887476 SHA256 `3cb896fd323aabad663ba6955404b1c6930a40e03603a3a26b107f927d0cfc06` (independently rehashed by executor, 15/15 inner PASS). Index 1,683→3; incomplete T04 flagged; all T03–T05 pairs unlinked, 0 HTTP/credits. No AA merge or PROMOTE.
+
 ### CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
 
-- PR #145; [run #43609731091](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43609731091) PASS, artifact #14119860789 SHA256 `ea32abf6eaab69656608b891b272eef6f54ee286844d1f9f2fba217e64e117b8` independently verified. 3 GET/200; links 0/3, credits 0. Grant consumed; next offline proof selection, no new HTTP.
+- [PR #145](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/145), [run #43609731091](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43609731091) PASS, artifact #14119860789 independently verified ZIP SHA `ea32abf6eaab69656608b891b272eef6f54ee286844d1f9f2fba217e64e117b8`. 3 HTTP200, all 3 pairs unlinked, 0 credits. One-shot owner grant spent.
 
-### CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 — Work W offline integration PASS (2026-11-14)
+### CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 (2026-11-14)
 
-- [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) exact `4e083db7a1f5f050c5a4bdeaab5803cffc48703d`; [Actions #43589692637](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637) SUCCESS, [artifact #14111553746](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637/artifacts/14111553746) uploader SHA-256 `30e704d6e25d21b150620fa5a60cd61dce73ed2ad8fe9b169dffd509cb92a809` (independent rehash pending). Offline 18→20→23=23, replay +0, T03–T05 held. Operator hard-OFF, legacy generator blocked, old casualty step OFF. Six-file research Draft, 0 production writes. Owner GO required before transfer or PROMOTE.
+- [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) `4e083db7`, [Actions #43589692637](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637) PASS, artifact #14111553746 (SHA in PR). Offline 18→20→23=23/replay 0, operator hard-OFF, no credit. Work Y PR #147 later merged code to main, PROMOTE still OFF.
 
-### CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01 — Work X offline PASS (2026-11-14)
+### CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01 (2026-11-14)
 
-- [Draft PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) exact `b07a5957cb57ab8cf008d14373b15fa1db47b3af`; [Actions #43589727392](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589727392) SUCCESS 169 PASS/1 expected SKIP; [artifact #14111089895](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589727392/artifacts/14111089895) uploader ZIP SHA `ba66b10189e2ef75b6a823c0a6ab49149118151c8e1e7e1d8338342ed9e7c192`, independent rehash pending. 23-city RSS independent 48h overlap and retained excerpt index offline-tested, 3 T03–T05 cards NEEDS_REVIEW, 0 credits; synthetic cases not real incident proof. No WIP schedule change, source GET, PROMOTE or production write. Further pilot requires separate owner grant and demonstrated new evidence-retention gain.
+- [PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) `b07a5957cb57ab8cf008d14373b15fa1db47b3af`; [Actions #43589727392](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589727392) SUCCESS, 169 PASS/1 SKIP; artifact #14111089895 (SHA in PR). Independent 23-city 48h source discovery and excerpts offline-tested, 3 T03–T05 NEEDS_REVIEW, 0 credits, source HTTP OFF.
 
 ### CASUALTY-WORKV-REVIEWER-OPERATOR-OFFLINE-E2E-PASS-01 — Work V exact-head physical offline E2E PASS (2026-11-14)
 
