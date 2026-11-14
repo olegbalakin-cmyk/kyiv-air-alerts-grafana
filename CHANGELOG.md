@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKR-IDENTITY-REVIEW-PREFLIGHT-SOURCE-REVIEW-REQUIRED-01 — Work R 153 PASS, source identity still unresolved (2026-11-14)
+
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) `f2f3a922`, [Actions #43573408615](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43573408615) exact SUCCESS 153 PASS/0 FAIL/1 SKIP; [ZIP #14104883690](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43573408615/artifacts/14104883690) SHA256 `6ab3d7ec12d6973f8ea3f63bc6fe572364dba0c48eb514ff39b7e3ecfba8d76b` and 11/11 hashes independently verified. Ages 37/38 and 69 overlap across T03/T04/T05; all pair identities INSUFFICIENT_EVIDENCE, SOURCE_REVIEW_REQUIRED. Deidentified bounded review clues ready in research only; 0 GET/credits/PROMOTE. New explicit one-shot owner approval required before HTTP.
+
 ### CASUALTY-WORKQ-REAL-EXCERPTS-AUXCI-OFFLINE-PARTIAL-01 — Work Q offline PASS; real source totals still unverified (2026-11-14)
 
 - [PR #135](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/135) `858e255e`, [Actions #43571952329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329) 145 PASS/0 FAIL/1 SKIP; [ZIP #14104761484](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329/artifacts/14104761484) SHA256 `90ec4ef12c967facc743914316da41e99b6d9d0237350b16437cd820bad451d5`, 10/10 inner PASS independently verified. Local T03 2, T04 additional death (69 age), T05 3 unbound; no full-article total or auto credits. Aux Work O launch-only CI fixed; 18→20→23 PASS, 5 blocked; no new HTTP, merge/deploy/publication.
