@@ -1,0 +1,93 @@
+name: Quarterly and rolling forecast isolated preview (no production)
+on:
+  push:
+    branches: [research-quarterly-rolling-forecast-preview-2026-11-14]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quarterly-rolling-preview-20261114
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/research-quarterly-rolling-forecast-preview-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline and UI regression
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/quarterly-rolling-preview.js
+          node kyiv-air-alerts-grafana/tests/test_quarter_rolling_preview.js
+          node kyiv-air-alerts-grafana/tests/test_forecast_trend.js
+          node kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js
+          node kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          node kyiv-air-alerts-grafana/tests/test_calendar_week.js
+          node kyiv-air-alerts-grafana/tests/test_daily28_rollover.js
+          node kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js
+          node kyiv-air-alerts-grafana/tests/test_historical_max.js
+          node kyiv-air-alerts-grafana/tests/test_kpi_interval_windows.js
+          node kyiv-air-alerts-grafana/tests/test_all_time_period.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+          test "$(grep -o 'value="quarterly"' kyiv-air-alerts-grafana/pages-preview/index.html | wc -l)" -eq 2
+          grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
+          echo QUARTERLY_ROLLING_OFFLINE_PASS
+      - name: Build isolated preview and verified historical daily evidence
+        run: |
+          set -euo pipefail
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py --production-root kyiv-air-alerts-grafana --source-sha "$(git rev-parse HEAD)" --output historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          x=json.load(open("historical-daily-kpi.json",encoding="utf-8"))
+          assert x["meta"]["verified_count"]==23
+          assert len(x["cities"])==23
+          PY
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/quarterly-rolling-preview.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/kpi-range.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png historical-daily-kpi.json _site/
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 13
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          echo QUARTERLY_ROLLING_PREVIEW_BUNDLE_PASS
+      - name: Publish isolated Netlify deploy preview only
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_site --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json > quarter-rolling-draft.json
+          python - <<'PY'
+          import json
+          x=json.load(open("quarter-rolling-draft.json",encoding="utf-8"))
+          url=x.get("deploy_url") or x.get("url")
+          assert url and "--ukraine-air-alerts.netlify.app" in url
+          print("QUARTERLY_ROLLING_DRAFT_URL",url)
+          PY
+      - name: Physical Chrome test - 23 cities and 3 quarter selectors
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/quarter-puppeteer
+          npm --prefix /tmp/quarter-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/quarter-puppeteer/node_modules
+          export PREVIEW_URL="$(python - <<'PY'
+          import json
+          x=json.load(open("quarter-rolling-draft.json",encoding="utf-8"))
+          print((x.get("deploy_url") or x.get("url")).replace("http://","https://",1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_quarter_rolling_preview.cjs
+      - name: Save exact evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarterly-rolling-preview-proof
+          path: |
+            quarter-rolling-draft.json
+            quarter-rolling-browser.json
+            quarter-rolling-browser.png
+          if-no-files-found: ignore
