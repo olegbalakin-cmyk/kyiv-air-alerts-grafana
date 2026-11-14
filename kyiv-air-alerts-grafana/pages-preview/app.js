@@ -2731,23 +2731,12 @@ function renderCity() {
     rows = [...rows,completion.periodRow];
   }
   const labels = rows.map(r => periodDisplayLabel(r, period));
-  const rollingForecastable = ["rolling30","rolling90","rolling180"].includes(period);
-  const forecastable = rollingForecastable || ["daily28","allTime"].includes(period);
-  const isCurrentRange = rows.length && allRows.length &&
-    rows[rows.length - 1] === allRows[allRows.length - 1];
-  // Forecast only one future complete day and recalculate the rolling window.
-  const candidate = forecastable && isCurrentRange ?
-    (rollingForecastable
-      ? window.QuarterRollingPreview?.rollingForecast(allRows,period,state.historicalDaily?.cities?.[key],city)
-      : window.ForecastTrend?.build(allRows,period)) : null;
+  // Consistent meaning on every mode: only estimate completion of the
+  // currently unfinished calendar week, month or quarter. No next-period
+  // extrapolation for daily, rolling 7/30/90/180, or all-time views.
   const trendControl = $("showTrend")?.closest("label");
-  if (trendControl) trendControl.classList.toggle("hidden", !(completionVisible||candidate));
-  const previewForecast = $("showTrend")?.checked ? candidate : null;
-  const projectedRows = previewForecast?.forecasts || [];
-  const forecastIndices = projectedRows.map((_, i) => labels.length + i);
-  const chartRows = rows.concat(projectedRows);
-  const chartLabels = labels.concat(projectedRows.map(r =>
-    tr("Прогноз: ", "Forecast: ") + periodDisplayLabel(r, period)));
+  if (trendControl) trendControl.classList.toggle("hidden", !completionVisible);
+  const chartLabels = labels;
   const dashed = type === "raion_proxy";
 
   const intensityDatasets = [
@@ -2803,44 +2792,6 @@ function renderCity() {
       _exportRows:rows
     });
   }
-  if (projectedRows.length) {
-    // Forecast data are separate datasets: no fabricated actual observations.
-    intensityDatasets[0].data = intensityDatasets[0].data.concat(projectedRows.map(() => null));
-    intensityDatasets[0].backgroundColor = intensityDatasets[0].backgroundColor.concat(projectedRows.map(() => "transparent"));
-    intensityDatasets[0].borderColor = intensityDatasets[0].borderColor.concat(projectedRows.map(() => "transparent"));
-    intensityDatasets[0].borderWidth = intensityDatasets[0].borderWidth.concat(projectedRows.map(() => 0));
-    intensityDatasets[1].data = intensityDatasets[1].data.concat(projectedRows.map(() => null));
-    intensityDatasets[1].pointRadius = intensityDatasets[1].pointRadius.concat(projectedRows.map(() => 0));
-    intensityDatasets[1].pointHoverRadius = intensityDatasets[1].pointHoverRadius.concat(projectedRows.map(() => 0));
-    intensityDatasets.push({
-      type: "bar",
-      label: tr("Прогноз · години / добу (EWMA 0,3)", "Forecast · hours / day (EWMA 0.3)"),
-      _isForecast: true,
-      data: rows.map(() => null).concat(projectedRows.map(r => r.avg_daily_alert_hours)),
-      yAxisID: "yHours",
-      backgroundColor: "#62a0ea55",
-      borderColor: "#c5e1fa",
-      borderWidth: 0,
-      _exportRows: chartRows
-    });
-    intensityDatasets.push({
-      type: "line",
-      label: tr("Прогноз · тривоги / день (EWMA 0,3)", "Forecast · alerts / day (EWMA 0.3)"),
-      _isForecast: true,
-      data: rows.map(() => null).concat(projectedRows.map(r => r.alerts_per_day)),
-      yAxisID: "yAlerts",
-      borderColor: "#b8ffc5",
-      backgroundColor: "#b8ffc522",
-      borderWidth: 2,
-      borderDash: [5, 5],
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      spanGaps: false,
-      tension: 0,
-      _exportRows: chartRows
-    });
-  }
-
   if (period === "daily28" && explosion?.strict_daily) {
     intensityDatasets.push({
       type: "line",
@@ -2882,21 +2833,13 @@ function renderCity() {
       "The hatched part of the final bar estimates the remaining period from verified completed days. Observed data are unchanged. This is not a warning of attacks. Data through "+completion.through+"."
     );
   }
-  if (intensitySubtitle && projectedRows.length) {
-    intensitySubtitle.textContent += " " + tr(
-      "Останній штрихований стовпчик — експериментальний прогноз на наступний період. EWMA 0,3: останнє спостереження має вагу 30%, попередня згладжена оцінка — 70%. Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
-      "The final outlined bar is an experimental forecast for the next period. EWMA 0.3: the latest observation has 30% weight, the previous smoothed estimate 70%. This is not a warning of future attacks. Incomplete periods are excluded from the calculation."
-    );
-  }
-
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
     data: {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin, ...(completion ? [periodCompletionHatchPlugin] : []),
-      ...(projectedRows.length ? [window.ForecastTrend.barPlugin] : [])],
+    plugins: [partialPeriodBarPlugin, ...(completion ? [periodCompletionHatchPlugin] : [])],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -2909,19 +2852,16 @@ function renderCity() {
             // Forecast is identified by its outline and point tooltip, not
             // by a separate legend control for a single forecast observation.
             filter(item, data) {
-              return !data.datasets[item.datasetIndex]?._isForecast &&
-                !data.datasets[item.datasetIndex]?._isCompletion;
+              return !data.datasets[item.datasetIndex]?._isCompletion;
             }
           }
         },
         tooltip: {
           mode: "index",
           intersect: false,
-          // Prevent forecast-null entries appearing as zeros on actual dates.
+          // Never show a missing source value as a numeric zero.
           filter(context) {
-            const forecastPoint = context.dataIndex >= rows.length;
-            return Boolean(context.dataset._isForecast) === forecastPoint &&
-              Number.isFinite(context.parsed?.y);
+            return Number.isFinite(context.parsed?.y);
           },
           callbacks: {
             label(context) {
@@ -2935,20 +2875,12 @@ function renderCity() {
               if (completion && i===rows.length-1)
                 return tr("Факт: "+completion.observed+" з "+completion.days+" днів · оцінка до "+completion.end,
                   "Observed: "+completion.observed+" of "+completion.days+" days · estimate through "+completion.end);
-              if (i >= rows.length && projectedRows.length) {
-                return tr("Експериментальна оцінка, не фактична тривога",
-                          "Experimental estimate, not an actual alert");
-              }
               return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
                 : partialPeriodFooter(rows[i]);
             }
           }
         },
         partialPeriodBar: { rows, datasetIndices: [0] },
-        forecastPreview: {
-          datasetIndex: projectedRows.length ? intensityDatasets.findIndex(d => d.type === "bar" && d.label.includes("EWMA")) : -1,
-          indices: forecastIndices
-        },
         periodCompletionHatch:{
           datasetIndex:completion?intensityDatasets.findIndex(d=>d._isCompletion&&d.type==="bar"):-1,
           index:completion?rows.length-1:-1
