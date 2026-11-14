@@ -1,0 +1,80 @@
+name: C3 G2 minimal Git-only rollback offline proof
+on:
+  push:
+    branches: [research-c3-g2-minimal-git-only-rollback-2026-11-12]
+    paths:
+      - ".github/workflows/c3-g2-minimal-rollback-offline.yml"
+      - "research/c3_g2_git_only_rollback_2026_11_12/**"
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned Git-only site-prod without writing
+        uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: pinned-site
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout exact PR100 frontend (offline test only)
+        uses: actions/checkout@v4
+        with:
+          ref: 19446ba9b9513ec962be08a128b4132de3f1912c
+          path: pinned-frontend
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout exact PR104 Netlify Git-only workflow (offline test only)
+        uses: actions/checkout@v4
+        with:
+          ref: a18e20295a7aa148c57fce4c5913ad68c3bd4c34
+          path: pinned-netlify
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate and prepare immutable offline-only rollback package
+        run: |
+          set -euo pipefail
+          python research/c3_g2_git_only_rollback_2026_11_12/prepare.py \
+            --site pinned-site \
+            --frontend pinned-frontend \
+            --netlify pinned-netlify \
+            --out /tmp/g2-proof
+          cat /tmp/g2-proof/REPORT.json
+          cd /tmp/g2-proof
+          sha256sum -c package.sha256
+          python - <<'PY'
+          import json, pathlib, zipfile
+          base=pathlib.Path('.')
+          manifest=json.loads((base/'manifest.json').read_text())
+          report=json.loads((base/'REPORT.json').read_text())
+          assert report['state']=='PASS_OFFLINE_ONLY'
+          assert report['ROLLBACK_OPERATIONAL_READY']=='NO'
+          assert manifest['cutover_time_fresh'] is False
+          assert manifest['netlify_authority_proven'] is False
+          with zipfile.ZipFile(base/'git-only-rollback-package.zip') as z:
+              for member, meta in manifest['package_entries'].items():
+                  import hashlib
+                  assert hashlib.sha256(z.read(member)).hexdigest()==meta['sha256']
+          print('G2_OFFLINE_IMMUTABLE_PACKAGE_PASS')
+          PY
+      - name: Verify offline-only and no live publish
+        run: |
+          set -euo pipefail
+          test -z "${NETLIFY_AUTH_TOKEN:-}"
+          test -z "${NEON_DATABASE_URL:-}"
+          test -z "${PHASE1_PROD_SHADOW_DATABASE_URL:-}"
+          git diff --exit-code
+          echo "NO_GIT_WRITES_NO_NETLIFY_DEPLOY_NO_C2_NO_NEON"
+      - name: Upload immutable G2 offline proof package
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-g2-minimal-git-only-rollback-offline
+          path: /tmp/g2-proof/
+          if-no-files-found: error
+          retention-days: 30
