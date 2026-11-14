@@ -352,7 +352,7 @@ def retain_incident_review_clues(text: str) -> dict:
             "sentence_sha256": sha_data(quote.encode("utf-8")),
             "excerpt": None if incomplete else quote,
         })
-    budget = min(650, len(text) // 4)
+    budget = min(650, max(170, len(text) // 4))
     selected, covered, used = [], set(), 0
     while candidates and len(selected) < 8:
         eligible = [x for x in candidates if used + len(x["excerpt"] or "") <= budget]
