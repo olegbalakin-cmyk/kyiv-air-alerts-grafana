@@ -1,7 +1,7 @@
 name: CASUALTY Work O parser and evidence offline proof
 on:
   push:
-    branches: [research-casualty-workp-worko-runner-2026-11-14, research-casualty-workq-real-excerpts-2026-11-14, research-casualty-workr-identity-2026-11-14, research-casualty-workx-reliable-evidence-2026-11-14, research-casualty-workz-source-evidence-2026-11-14]
+    branches: [research-casualty-workp-worko-runner-2026-11-14, research-casualty-workq-real-excerpts-2026-11-14, research-casualty-workr-identity-2026-11-14, research-casualty-workx-reliable-evidence-2026-11-14, research-casualty-workz-source-evidence-2026-11-14, research-casualty-workaa-offline-context-2026-11-14]
     paths-ignore:
       - research/casualty_one_time_capture_2026_11_13/launch.json
   workflow_dispatch:
@@ -138,7 +138,7 @@ jobs:
           set -euo pipefail
           python -m unittest research.casualty_workr_identity_2026_11_14.test_workr -v 2>&1 | tee /tmp/worko/workr.log
       - name: Work X download already retained Work P and Work V proof (no publisher HTTP)
-        if: github.ref == 'refs/heads/research-casualty-workx-reliable-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workz-source-evidence-2026-11-14'
+        if: github.ref == 'refs/heads/research-casualty-workx-reliable-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workz-source-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workaa-offline-context-2026-11-14'
         uses: actions/download-artifact@v4
         with:
           run-id: 43521321878
@@ -146,7 +146,7 @@ jobs:
           path: /tmp/workx-workp
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Work X restore frozen Work V result (no publisher HTTP)
-        if: github.ref == 'refs/heads/research-casualty-workx-reliable-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workz-source-evidence-2026-11-14'
+        if: github.ref == 'refs/heads/research-casualty-workx-reliable-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workz-source-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workaa-offline-context-2026-11-14'
         uses: actions/download-artifact@v4
         with:
           run-id: 43587369075
@@ -154,7 +154,7 @@ jobs:
           path: /tmp/workx-workv
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Work X independent discovery and existing retained source-index proof
-        if: github.ref == 'refs/heads/research-casualty-workx-reliable-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workz-source-evidence-2026-11-14'
+        if: github.ref == 'refs/heads/research-casualty-workx-reliable-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workz-source-evidence-2026-11-14' || github.ref == 'refs/heads/research-casualty-workaa-offline-context-2026-11-14'
         shell: bash
         run: |
           set -euo pipefail
@@ -204,6 +204,42 @@ jobs:
           out.write_text(json.dumps(proof,ensure_ascii=False,sort_keys=True,indent=2)+'\n')
           print('WORKX_SOURCE_BASED_PROOF',proof)
           PY
+      - name: Work AA restore immutable Work Z proof only (no publisher requests)
+        if: github.ref == 'refs/heads/research-casualty-workaa-offline-context-2026-11-14'
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43609731091
+          name: casualty-workl-approved-three-source-research-only
+          path: /tmp/workaa-workz
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Work AA saved evidence and synthetic context regression
+        if: github.ref == 'refs/heads/research-casualty-workaa-offline-context-2026-11-14'
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORKAA_Z_DIRECTORY=/tmp/workaa-workz python -m unittest research.casualty_evidence_ingestion_2026_11_13.test_workaa -v 2>&1 | tee /tmp/worko/workaa.log
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('/tmp/workaa-workz')
+          manifest=json.loads((root/'manifest.json').read_text())
+          for name,expected in manifest['files_sha256'].items():
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==expected,name
+          print('WORKAA_WORKZ_SAVED_INNER_HASHES_PASS')
+          PY
+          python -m research.casualty_evidence_ingestion_2026_11_13.workaa_offline \
+            --zip-sha ea32abf6eaab69656608b891b272eef6f54ee286844d1f9f2fba217e64e117b8 \
+            --facts /tmp/workaa-workz/minimal_capture_facts.json \
+            --receipts /tmp/workaa-workz/capture_receipts.json \
+            --manifest /tmp/workaa-workz/manifest.json \
+            --out /tmp/worko/workaa.json
+          python - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path('/tmp/worko/workaa.json').read_text())
+          assert p['source_get']==0 and p['production_mutations']==0
+          assert p['evidence_index']['summary']['total']==3
+          assert set(p['pair_decisions'].values())=={'INSUFFICIENT_EVIDENCE'}
+          print('WORKAA_NO_SOURCE_HTTP_NO_CREDITS_NO_PROMOTE_PASS')
+          PY
       - name: Synthetic launch-present suite restores file exactly (no HTTP)
         shell: bash
         run: |
@@ -246,7 +282,7 @@ jobs:
           import hashlib, json, os, re, pathlib
           root=pathlib.Path('/tmp/worko')
           logs={}
-          for name in (['baseline.log','new.log','work-a.log','workp.log','workq.log','workr.log'] + (['workx.log'] if (os.environ.get('GITHUB_REF','').endswith('/research-casualty-workx-reliable-evidence-2026-11-14') or os.environ.get('GITHUB_REF','').endswith('/research-casualty-workz-source-evidence-2026-11-14')) else [])):
+          for name in (['baseline.log','new.log','work-a.log','workp.log','workq.log','workr.log'] + (['workaa.log'] if os.environ.get('GITHUB_REF','').endswith('/research-casualty-workaa-offline-context-2026-11-14') else []) + (['workx.log'] if (os.environ.get('GITHUB_REF','').endswith('/research-casualty-workx-reliable-evidence-2026-11-14') or os.environ.get('GITHUB_REF','').endswith('/research-casualty-workz-source-evidence-2026-11-14') or os.environ.get('GITHUB_REF','').endswith('/research-casualty-workaa-offline-context-2026-11-14')) else [])):
               p=root/name
               if not p.exists():
                   logs[name]={'status':'MISSING','tests':0,'fail':None,'skip':None}
@@ -272,6 +308,8 @@ jobs:
           (root/'proof.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
           hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.glob('*.log'))}
           hashes['proof.json']=hashlib.sha256((root/'proof.json').read_bytes()).hexdigest()
+          if (root/'workaa.json').exists():
+              hashes['workaa.json']=hashlib.sha256((root/'workaa.json').read_bytes()).hexdigest()
           if (root/'workx.json').exists():
               hashes['workx.json']=hashlib.sha256((root/'workx.json').read_bytes()).hexdigest()
           (root/'manifest.json').write_text(json.dumps({'files_sha256':hashes},sort_keys=True,indent=2)+'\n')
