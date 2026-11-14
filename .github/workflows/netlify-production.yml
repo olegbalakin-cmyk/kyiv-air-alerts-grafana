@@ -294,6 +294,11 @@ jobs:
           mkdir -p _site
           cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
           cp kyiv-air-alerts-grafana/pages-preview/kpi-range.js historical-daily-kpi.json _site/
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          test -s _site/en/index.html
+          grep -q 'rel="canonical" href="https://ukraine-air-alerts.netlify.app/en/"' _site/en/index.html
+          grep -q 'hreflang="uk"' _site/index.html
+          grep -q 'hreflang="en"' _site/en/index.html
           test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 12
           if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
             cmp historical-daily-kpi.json _site/historical-daily-kpi.json

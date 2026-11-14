@@ -1,0 +1,88 @@
+name: Bilingual static SEO isolated preview
+on:
+  push:
+    branches: [test-bilingual-static-seo-2026-11-15]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bilingual-static-seo-preview
+  cancel-in-progress: true
+jobs:
+  isolated-preview:
+    if: github.ref == 'refs/heads/test-bilingual-static-seo-2026-11-15'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Offline test source and generated HTML
+        run: |
+          set -euo pipefail
+          python3 kyiv-air-alerts-grafana/tests/test_bilingual_static_seo.py
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          node --check kyiv-air-alerts-grafana/tests/smoke_bilingual_static_seo.cjs
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+
+      - name: Assemble only an isolated deploy preview
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/kpi-range.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          test -s _site/index.html
+          test -s _site/en/index.html
+          test -s _site/styles.css
+          test -s _site/app.js
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          echo BILINGUAL_ISOLATED_BUNDLE_PASS
+
+      - name: Deploy nonproduction preview alias only
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json > bilingual-preview.json
+          python3 - <<'PY'
+          import json
+          from urllib.parse import urlparse
+          x=json.load(open("bilingual-preview.json",encoding="utf-8"))
+          url=(x.get("deploy_url") or x.get("url") or "").replace("http://","https://",1)
+          p=urlparse(url)
+          assert p.scheme=="https" and p.hostname.endswith(".netlify.app"),url
+          assert p.hostname!="ukraine-air-alerts.netlify.app",url
+          print("BILINGUAL_PREVIEW_URL",url)
+          PY
+
+      - name: Mobile browser and URL parity checks
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/bilingual-puppeteer
+          npm --prefix /tmp/bilingual-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/bilingual-puppeteer/node_modules
+          export PREVIEW_URL="$(python3 - <<'PY'
+          import json
+          x=json.load(open("bilingual-preview.json",encoding="utf-8"))
+          print((x.get("deploy_url") or x.get("url")).replace("http://","https://",1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_bilingual_static_seo.cjs
+
+      - name: Preserve immutable preview evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilingual-static-seo-preview-proof
+          path: |
+            bilingual-preview.json
+            bilingual-browser.json
+          if-no-files-found: ignore

@@ -639,7 +639,7 @@ const TABLE_SORT_COLUMNS = [
 const LANGUAGE_STORAGE_KEY="air-alerts-language-v1";
 const CITY_LABELS_EN={kyiv:"Kyiv",kharkiv:"Kharkiv",zaporizhzhia:"Zaporizhzhia",cherkasy:"Cherkasy (Cherkasy District)",zhytomyr:"Zhytomyr (Zhytomyr District)",dnipro:"Dnipro (Dnipro District)",khmelnytskyi:"Khmelnytskyi (Khmelnytskyi District)",poltava:"Poltava (Poltava District)",rivne:"Rivne (Rivne District)",sumy:"Sumy (Sumy District)",vinnytsia:"Vinnytsia (Vinnytsia District)",kropyvnytskyi:"Kropyvnytskyi (Kropyvnytskyi District)",lviv:"Lviv (Lviv District)",chernihiv:"Chernihiv (Chernihiv District)",odesa:"Odesa (Odesa District)",kherson:"Kherson (Kherson District)",mykolaiv:"Mykolaiv (Mykolaiv District)",lutsk:"Lutsk (Lutsk District)",uzhhorod:"Uzhhorod (Uzhhorod District)",ivano_frankivsk:"Ivano-Frankivsk (Ivano-Frankivsk District)","ivano-frankivsk":"Ivano-Frankivsk (Ivano-Frankivsk District)",ternopil:"Ternopil (Ternopil District)",chernivtsi:"Chernivtsi (Chernivtsi District)",sevastopol:"Sevastopol (signals from the occupation administration)"};
 const DISTRICT_LABELS_EN={cherkasy:"Cherkasy District",zhytomyr:"Zhytomyr District",dnipro:"Dnipro District",khmelnytskyi:"Khmelnytskyi District",poltava:"Poltava District",rivne:"Rivne District",sumy:"Sumy District",vinnytsia:"Vinnytsia District",kropyvnytskyi:"Kropyvnytskyi District",lviv:"Lviv District",chernihiv:"Chernihiv District",odesa:"Odesa District",kherson:"Kherson District",mykolaiv:"Mykolaiv District",lutsk:"Lutsk District",uzhhorod:"Uzhhorod District",ivano_frankivsk:"Ivano-Frankivsk District","ivano-frankivsk":"Ivano-Frankivsk District",ternopil:"Ternopil District",chernivtsi:"Chernivtsi District"};
-function initialLanguage(){const q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="uk")return q;try{const s=localStorage.getItem(LANGUAGE_STORAGE_KEY);if(s==="en"||s==="uk")return s;}catch{}return"uk";}
+function initialLanguage(){const q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="uk")return q;return /^\/en(?:\/|$)/.test(location.pathname)?"en":"uk";}
 let currentLanguage=initialLanguage();
 function tr(uk,en){return currentLanguage==="en"?en:uk;}
 function localeCode(){return currentLanguage==="en"?"en":"uk";}
@@ -693,7 +693,7 @@ function applyStaticLanguage(){
  const fs=document.querySelectorAll("footer span");if(fs[0])fs[0].innerHTML=tr('Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>','Data and code: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>');if(fs[1])fs[1].textContent=tr("Зауваження до даних: @olbalakin у Telegram","Data corrections: @olbalakin on Telegram");setLocalizedAttr("#tourClose","aria-label","Закрити тур","Close tour");setLocalizedText("#tourPrev","Назад","Back");setLocalizedText("#tourSkip","Пропустити","Skip");setLocalizedText("#tourNext","Далі","Next");
 }
 function renderGeneratedAt(){if(!state.data)return;const g=state.data.meta?.generated_at||state.data.cities?.kyiv?.meta?.generated_at;$("updatedAt").textContent=g?tr(`Дані згенеровано ${String(g).replace("T"," ").slice(0,19)}`,`Data generated ${String(g).replace("T"," ").slice(0,19)}`):"";}
-function setLanguage(lang,persist=true){const next=lang==="en"?"en":"uk";if(next!==currentLanguage){const p=new URLSearchParams(location.search);p.set("lang",next);location.search=p.toString();return;}if(persist){try{localStorage.setItem(LANGUAGE_STORAGE_KEY,next);}catch{}}}
+function setLanguage(lang,persist=true){const next=lang==="en"?"en":"uk";const target=next==="en"?"/en/":"/";if(next!==currentLanguage||location.pathname!==target){const url=new URL(location.href);url.pathname=target;url.searchParams.delete("lang");location.assign(url.toString());return;}if(persist){try{localStorage.setItem(LANGUAGE_STORAGE_KEY,next);}catch{}}}
 function bindLanguageSwitch(){$("langUk")?.addEventListener("click",()=>setLanguage("uk"));$("langEn")?.addEventListener("click",()=>setLanguage("en"));}
 
 function $(id) { return document.getElementById(id); }
@@ -2015,7 +2015,7 @@ function syncCompareCasualtyYearOptions(keys) {
 
 function updateUrl() {
   const params = new URLSearchParams();
-  params.set("lang", currentLanguage);
+  // Language is determined by / or /en/; share links preserve this pathname.
   params.set("city", $("citySelect").value);
   params.set("period", $("cityPeriod").value);
   params.set("a", $("compareA").value);
@@ -4230,7 +4230,7 @@ function bind() {
 
   setupTableSorting();
   bindIntroTour();
-  bindLanguageSwitch();
+  // The language controls are bound eagerly, before any async data fetch.
   $("copyLink").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
@@ -4479,10 +4479,25 @@ async function init() {
   }
 }
 
-applyStaticLanguage();
+// Legacy ?lang=en/uk links retain every filter and fragment on their new route.
+// Only the exact site entrypoints are canonicalized, never embed/other paths.
+function canonicalizeLanguagePath(){
+ const path=location.pathname;
+ if(!["/","/index.html","/en","/en/","/en/index.html"].includes(path))return false;
+ const langParam=new URLSearchParams(location.search).get("lang");
+ const next=langParam==="en"?"en":langParam==="uk"?"uk":(/^\/en(?:\/|$)/.test(path)?"en":"uk");
+ const pathname=next==="en"?"/en/":"/";
+ if(path===pathname&&!langParam)return false;
+ const url=new URL(location.href);url.pathname=pathname;url.searchParams.delete("lang");
+ location.replace(url.toString());return true;
+}
+if(!canonicalizeLanguagePath()){
+ applyStaticLanguage();
+ bindLanguageSwitch();
 
 init().catch(err=>{
   console.error(err);
   $("freshnessBanner").textContent=tr(`Не вдалося завантажити сайт: ${err.message}`,`Failed to load the site: ${err.message}`);
   $("freshnessBanner").classList.remove("hidden");
 });
+}
