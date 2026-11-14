@@ -401,11 +401,13 @@ def match_static_event(api_rows: list[dict], static_rows: list[Alert]) -> dict |
 
 
 def union_alerts(alerts: list[Alert], source: str) -> list[Alert]:
+    # Python compares aware datetimes by wall time when they share a tzinfo.
+    # Sort and compare UTC instants across the repeated autumn DST hour.
     merged: list[list[datetime]] = []
-    for alert in sorted(alerts, key=lambda a: a.start):
-        if not merged or alert.start > merged[-1][1]:
+    for alert in sorted(alerts, key=lambda a: a.start.astimezone(UTC)):
+        if not merged or alert.start.astimezone(UTC) > merged[-1][1].astimezone(UTC):
             merged.append([alert.start, alert.end])
-        elif alert.end > merged[-1][1]:
+        elif alert.end.astimezone(UTC) > merged[-1][1].astimezone(UTC):
             merged[-1][1] = alert.end
     return [Alert(start=s, end=e, source=source) for s, e in merged]
 
