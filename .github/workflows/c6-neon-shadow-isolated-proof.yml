@@ -2,6 +2,11 @@ name: C6 isolated read-only Neon shadow proof (manual, non-publishing)
 on:
   workflow_dispatch:
     inputs:
+      archive_recovery:
+        description: "Exact #43523629106 archive-only recovery; no C2, writer, push or deploy"
+        required: true
+        type: boolean
+        default: false
       research_sha:
         description: Owner-approved exact full SHA on research-c6-unblock-shadow-proof-2026-11-01
         required: true
@@ -49,6 +54,7 @@ jobs:
     if: >-
       github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' &&
       github.event_name == 'workflow_dispatch' &&
+      !inputs.archive_recovery &&
       github.actor == 'olegbalakin-cmyk' &&
       inputs.owner_approval == 'APPROVE_ONE_READONLY_PROOF' &&
       github.ref == 'refs/heads/research-c6-unblock-shadow-proof-2026-11-01' &&
@@ -132,3 +138,179 @@ jobs:
           path: research-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  recovery-proof:
+    # Branch- and owner-scoped use of the EXISTING read-only C6 proof workflow.
+    # This is not the normal C2 workflow, a publisher, or a production release.
+    if: >-
+      github.repository == 'olegbalakin-cmyk/kyiv-air-alerts-grafana' &&
+      github.event_name == 'workflow_dispatch' &&
+      github.actor == 'olegbalakin-cmyk' &&
+      inputs.archive_recovery &&
+      inputs.owner_approval == 'APPROVE_ONE_READONLY_PROOF' &&
+      github.ref == 'refs/heads/research-c6-fast-archive-recovery-2026-11-14' &&
+      github.sha == inputs.research_sha &&
+      inputs.c2_artifact_run_id == '43523629106' &&
+      inputs.c2_artifact_name == 'c2-shadow-inputs-43523629106-1' &&
+      inputs.bundle_sha256 == '9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493' &&
+      inputs.writer_workflow_sha == '5606147a955b64e17474688c6a13596b21d93580' &&
+      inputs.input_sha == '54079326ae2b4e691e2bfcf7cd1a51c9705404eb' &&
+      inputs.db_branch == 'br-bold-mode-b5rub8pq' &&
+      inputs.db_endpoint == 'ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech'
+    environment: c6-neon-shadow-readonly
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact recovery verification code (no push token)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: integration
+          persist-credentials: false
+      - name: Checkout original C2 source Git baseline (no push token)
+        uses: actions/checkout@v4
+        with:
+          ref: 54079326ae2b4e691e2bfcf7cd1a51c9705404eb
+          path: pinned-site
+          persist-credentials: false
+      - name: Checkout existing physical C6 reader (no push token)
+        uses: actions/checkout@v4
+        with:
+          ref: 82a7cc775ed2f2a6fd0134440db709690f0c04d1
+          path: reader
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch only the two immutable C2 artifacts and GitHub run metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/43523629106" > evidence/run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/43523629106/jobs?per_page=100" > evidence/jobs.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14086255755" > evidence/bundle-metadata.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14085756162" > evidence/status-metadata.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a={key:json.loads(Path('evidence/'+key+'-metadata.json').read_text())
+             for key in ('bundle','status')}
+          Path('evidence/artifacts.json').write_text(json.dumps(a,sort_keys=True))
+          PY
+          for id in 14086255755 14085756162; do
+            curl --fail --silent --show-error --location --retry 3 \\
+              -H "Authorization: Bearer $GH_TOKEN" \\
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" \\
+              -o "evidence/$id.zip"
+          done
+      - name: Restore archived five-file C2 delta in isolated original checkout
+        shell: bash
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          git -C pinned-site switch -c site-prod
+          python -m scripts.c6_neon_archive_recovery \\
+            --outer evidence/14086255755.zip \\
+            --status-outer evidence/14085756162.zip \\
+            --run evidence/run.json --jobs evidence/jobs.json \\
+            --artifacts evidence/artifacts.json \\
+            --checkout pinned-site --delta evidence/c6-delta \\
+            --receipt-output evidence/reconstruction-receipt.json
+      - name: Extract already-verified inner C2 archive for the existing reader
+        shell: bash
+        run: |
+          mkdir -p evidence/extracted-c2
+          unzip -p evidence/14086255755.zip c2-shadow-inputs.zip > evidence/extracted-c2/c2-shadow-inputs.zip
+      - name: Preserve exact PR93 parser contract in the existing reader
+        shell: bash
+        run: |
+          python integration/scripts/c6_pr93_generator_compat.py \\
+            --generator reader/scripts/neon_json_shadow_generator.py \\
+            --site-parser pinned-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+      - name: Install existing pinned reader dependencies
+        run: python -m pip install -r reader/research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
+      - name: Run exactly one physical read-only Neon snapshot and six-JSON proof
+        shell: bash
+        working-directory: reader
+        env:
+          NEON_JSON_SHADOW_READONLY_DATABASE_URL: ${{ secrets.NEON_JSON_SHADOW_READONLY_DATABASE_URL }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m scripts.neon_json_shadow_physical_proof \\
+            --site ../pinned-site/kyiv-air-alerts-grafana \\
+            --bundle ../evidence/extracted-c2/c2-shadow-inputs.zip \\
+            --bundle-sha256 9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493 \\
+            --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 \\
+            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \\
+            --db-branch br-bold-mode-b5rub8pq \\
+            --db-endpoint ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech \\
+            --c2-run-id 43523629106 --output ../c6-live-proof
+      - name: Fail closed on exact corpus, 23 receipts, at-use freshness and six hashes
+        shell: bash
+        env:
+          PYTHONPATH: integration
+        run: |
+          set -euo pipefail
+          python -m scripts.c6_neon_publication_gate \\
+            --proof-dir c6-live-proof --report evidence/proof-gate.json
+          python -m scripts.c6_neon_git_candidate \\
+            --proof c6-live-proof --site pinned-site/kyiv-air-alerts-grafana \\
+            --output c6-prepared \\
+            --c2-corpus 123c515db11e0a22ede051c7b638df0242404190f553fb2daf292585731e1f00 \\
+            --db-branch br-bold-mode-b5rub8pq \\
+            --input-sha 54079326ae2b4e691e2bfcf7cd1a51c9705404eb \\
+            --workflow-sha 5606147a955b64e17474688c6a13596b21d93580 \\
+            --run-id 43523629106 --run-attempt 1 \\
+            --bundle-sha256 9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.c6_neon_auto_git import verify_capture
+          r=json.loads(Path("c6-prepared/REPORT.json").read_text())
+          verify_capture(Path("evidence/c6-delta"),r,
+              workflow_sha="5606147a955b64e17474688c6a13596b21d93580",
+              run_id=43523629106,run_attempt=1)
+          verdict=json.loads(Path("c6-live-proof/verdict.json").read_text())
+          assert verdict["episode_count"] == 33450
+          assert verdict["c2_corpus_sha256"] == "123c515db11e0a22ede051c7b638df0242404190f553fb2daf292585731e1f00"
+          assert verdict["neon_writes"] == verdict["upstream_http_gets"] == verdict["production_file_writes"] == 0
+          PY
+      - name: Build immutable six JSON release binding without publication
+        shell: bash
+        env:
+          PYTHONPATH: integration
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.c6_neon_release_binding import release_candidate
+          root=Path("c6-prepared")
+          report=json.loads((root/"REPORT.json").read_text())
+          result=release_candidate(root,report,
+              repository="olegbalakin-cmyk/kyiv-air-alerts-grafana",
+              release_id="archive-43523629106-1",output=Path("c6-final"))
+          assert len(result["files"]) == 6
+          assert (Path("c6-final")/"RELEASE_MANIFEST.json").is_file()
+          print("C6_ARCHIVE_RECOVERY_RELEASE_BYTES_PREPARED_NOT_PUBLISHED")
+          PY
+      - name: Upload evidence, full physical proof, original-identity delta and prepared bytes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c6-archive-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            evidence/reconstruction-receipt.json
+            evidence/c6-delta/**
+            evidence/proof-gate.json
+            c6-live-proof/**
+            c6-prepared/**
+            c6-final/**
+          if-no-files-found: warn
+          retention-days: 30
