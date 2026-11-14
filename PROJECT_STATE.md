@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-14. Latest accepted: C6-C3-MERGE134-CHECKOUT-ROOT-FIX-STAGED-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
@@ -13,13 +13,20 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Histori
 - Owner-approved [PR #133](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/133) merged `main@5606147a955b64e17474688c6a13596b21d93580`, offline CI PASS; pre-capture redacted Git status added. Physical second pilot [#43523629106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43523629106) C2/Neon PASS, capture FAIL: `C6_BLOCK_REASON=C2_CHECKPOINTS_MISSING`, despite checkpoint blob at site-prod Git root nested data path. Pre-capture reported correct HEAD/branch but scoped changes 0 / checkpoint missing. No Git publication; static production unchanged.
 - Root cause for second failure proven: `capture()` used nested checkout instead of repository root. [PR #134](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/134) source `cc1ab14fda62b441883792b39d721230d0e2e165`, exact-head three CI PASS, squash-merged to `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`. Two script invocations now use `$GITHUB_WORKSPACE` with regression coverage; no physical Git publication yet.
 
+- Third owner-triggered [Actions #43568691823](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568691823) FAILED at UkraineAlarm bridge validation, before C2 canonical Neon writer, capture or Git publication. Mykolaiv (region 98) was the only unverified row (20/21); poll overlap false after 20 history rows. No current writer commit proved in this run; production unchanged.
+
 ## Next
 
-- Keep both production workflows disabled, legacy publisher paused, AUTO flag OFF and Netlify locked. PR #134 is merged, but physical Neon→Git publication remains unproven. One-time pilot grant was consumed: require fresh owner GO and fresh gates before a new manual pilot; no automatic schedule and no unrelated casualty/WIP/DST changes.
+- Keep updater and Netlify production workflows disabled, legacy publisher paused, AUTO flag OFF and Netlify locked. No new physical C2 pilot until narrow offline investigation of Mykolaiv region 98 bridge continuity gap (history no longer reaches previous poll), and separate owner GO. Do not bypass 21/21, rewrite production records or mix casualty/WIP/DST tracks.
 
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01 — third manual pilot blocked before Neon writer (2026-11-14)
+
+- Owner manual [Actions #43568691823](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568691823), attempt 1 on `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`, FAILED at step 25, `Validate verified UkraineAlarm bridge checkpoint`: `ValueError: bridge continuity is not fully verified`. Bridge fetch printed 20/21 continuous regions; `mykolaiv`, region 98, `continuous=False history=20 static_match=False poll_overlap=False`. Existing `apply_ukrainealarm_bridge.py` classifies this case as `history_window_no_longer_reaches_previous_poll`. No evidence of C2 canonical Neon writer, `capture()`, Git JSON publication; following jobs SKIPPED.
+- Independent post-run `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb` unchanged and current Netlify deployment `6af76b2d67c5074986728b62` ready/locked. `GLOBAL_CUTOVER=YES; PILOT3=FAIL; AUTO_NEON_GIT=OFF; GIT_PUBLICATION=ZERO`. One-shot grant consumed. Do not rerun C2 or weaken 21/21. Next task: isolate Mykolaiv bridge gap offline, using existing checkpoint/evidence; new run only after separate GO.
+
 ## C6-C3-MERGE134-CHECKOUT-ROOT-FIX-STAGED-01 — approved checkout-root fix merged; publication still pending (2026-11-14)
 
 - Owner screenshot confirms `Update Ukraine air-alert production data` manually disabled after failed pilot. Other prior gates: legacy publisher pause=true, new AUTO flag absent, Netlify workflow manually disabled; current Netlify ID `6af76b2d67c5074986728b62` independently ready/locked, `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb` unchanged. No active/queued/waiting/pending/requested Actions at pre-merge gate.
