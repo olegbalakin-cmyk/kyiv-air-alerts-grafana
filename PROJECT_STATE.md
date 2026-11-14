@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-14. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01** (2026-11-14). Work T read-only verified `main@413d34ac` reviewer legacy 10-column CSV (`cf65d85c`), manual operator `740b985b` with old pin `57c67af1`, vs `site-prod@2fa9044a` dedup generator `f5840c20` requiring five additional incident/proof fields. Operator preview naively sums cumulative observations. Work U Git Zaporizhzhia object MATCH (316 deaths; Oct absent); actual Netlify-served frontend/HTTP data UNVERIFIED. Current Netlify deploy `6af76b2d` ready/locked. T03–T05 still `BLOCKED_PENDING_EVIDENCE`; zero new casualty credits or publication.
+Latest casualty: **CASUALTY-WORKV-REVIEWER-OPERATOR-OFFLINE-E2E-PASS-01** — [PR #140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/140) `663f3eeb`, CI #43587369075 PASS offline. Scratch 18→20→23 = 23, replay +0; unknown proof BLOCKED. No operational transfer; T03–T05 NEEDS_REVIEW, live JSON UNVERIFIED.
 
 ## Working instructions
 
@@ -22,7 +22,7 @@ Latest casualty: **CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01** (2026-11-14
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill:** separate. **Casualty:** Work C/D/E and joint F/H PASS in isolated research; I strict redirects PASS; owner-authorized one-time #118 transport 10/10 HTTP 200, but fact parser 0 reports and no claim excerpts saved. WIP, site-prod casualty ledger, scheduled ingestion and publication unchanged. No more HTTP authorized.
+- **Operational WIP / casualty:** separate. Work V offline E2E PASS; scheduled collector/source verification still incomplete. No live casualty revisions, PROMOTE or publication.
 
 ## Concrete next tasks
 
@@ -30,12 +30,16 @@ Latest casualty: **CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01** (2026-11-14
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 4. Casualty Work H: PR #114 current site-prod frontend compatibility accepted in isolated browser (no merge/production). Work I PR #115 strict redirects accepted offline. Monitor exact site-prod baseline before future release.
-5. Casualty next: minimal offline reviewer→revisions→generator contract and cumulative-preview fix, then physical scratch E2E proof: 18→20→23 applies +23 once, replay +0, Sumy and 22 other cities unchanged, T03–T05 blocked. No approval for HTTP, PROMOTE, main/site-prod pin changes or publication.
+5. Casualty next: controlled offline integration preflight for Work V reviewer/operator and generator pin; verify primary-source incident identity and prior credit. Separate owner approval before operational code transfer, PROMOTE or publication.
 6. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKV-REVIEWER-OPERATOR-OFFLINE-E2E-PASS-01 — physical offline chain PASS (2026-11-14)
+
+- [PR #140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/140) exact `663f3eeb`, [Actions #43587369075](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43587369075) SUCCESS; artifact #14110980955 (uploader SHA in CHANGELOG; independent ZIP hash pending). Scratch reviewer/operator→generator 18→20→23 = 23, replay +0, unknown proofs BLOCKED, Sumy +1/22 cities unchanged. T03–T05 NEEDS_REVIEW; 0 live HTTP, PROMOTE or publication.
+
 ## CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01 — Work T code mismatch verified; Work U live parity unresolved (2026-11-14)
 
 - Exact Git blobs: `main@413d34ac` reviewer `cf65d85c`, operator `740b985b`, workflow `3771a501`; `site-prod@2fa9044a` generator `f5840c20`. The reviewer does not emit generator's incident/proof fields; operator preview calculates a raw delta sum, not the cumulative effective credit. PR #105 [shadow Actions #43290975899](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43290975899) SUCCESS does not prove scheduled operation. No new code deployed.
