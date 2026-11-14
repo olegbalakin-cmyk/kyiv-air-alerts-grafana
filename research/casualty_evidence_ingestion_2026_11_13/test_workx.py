@@ -186,6 +186,62 @@ class WorkXRetainedEvidence(unittest.TestCase):
         self.assertEqual(source["production_mutations"], 0)
 
 
+    def test_17_workr_text_is_retained_by_workx_with_matching_sha(self):
+        quote = "Вранці 22 жовтня в [ГЕО] зафіксовано наслідки удару."
+        c = fact()
+        c["incident_review"]["evidence_mentions"] = [{
+            "article_sentence_order": 7,
+            "tags": ["DATE_MENTION_NOT_ATTACK_DATE"],
+            "excerpt": quote, "excerpt_sha256": x._sha(quote),
+        }]
+        row = index([c])["cards"][0]
+        self.assertEqual(row["unverified_context"][0]["excerpt"], quote)
+        self.assertEqual(row["unverified_context"][0]["excerpt_sha256"], x._sha(quote))
+        self.assertEqual(row["decision"], "NEEDS_REVIEW")
+        self.assertIsNone(row["incident_id"])
+
+    def test_18_bad_context_hash_and_private_context_fail_closed(self):
+        c = fact()
+        c["incident_review"]["evidence_mentions"] = [{
+            "article_sentence_order": 1, "tags": ["DATE_MENTION_NOT_ATTACK_DATE"],
+            "excerpt": "Про місце удару повідомила поліція.",
+            "excerpt_sha256": "a" * 64,
+        }]
+        row = index([c])["cards"][0]
+        self.assertEqual(row["unverified_context"], [])
+        self.assertIn("CONTEXT_EXCERPT_UNSAFE_OR_HASH_MISMATCH", row["reasons"])
+        self.assertEqual(row["automatic_credits"], 0)
+
+    def test_19_new_one_shot_branch_requires_explicit_workx_grant(self):
+        from research.casualty_one_time_capture_2026_11_13 import run_capture as r
+        self.assertEqual(r.EXPECTED_BRANCH, "research-casualty-workr-identity-2026-11-14")
+        with self.assertRaisesRegex(RuntimeError, "WORKZ_WORKX_HEAD_MISMATCH"):
+            r._pilot_branch({"workz_evidence_pilot": True})
+        with self.assertRaisesRegex(RuntimeError, "WORKZ_NOT_EXPLICITLY_AUTHORIZED"):
+            r._pilot_branch({"workx_head_sha": r.WORKX_HEAD})
+        self.assertEqual(
+            r._pilot_branch({"workz_evidence_pilot": True,
+                             "workx_head_sha": r.WORKX_HEAD}), r.WORKZ_BRANCH)
+
+    def test_20_in_memory_context_keeps_later_correction(self):
+        from research.casualty_one_time_capture_2026_11_13 import run_capture as r
+        text = ("Удень 22 жовтня російська ракета влучила у приватний будинок у Запоріжжі. "
+                "Спочатку повідомили про двох загиблих людей. "
+                + "Повідомлення про наслідки удару уточнюється. " * 16
+                + "Пізніше стало відомо, що загинула також 69-річна жінка. "
+                "Поліція повідомила про трьох загиблих людей.")
+        proof = r.retain_incident_review_clues(text)
+        mentions = proof["evidence_mentions"]
+        tags = {t for m in mentions for t in m["tags"]}
+        self.assertIn("DATE_MENTION_NOT_ATTACK_DATE", tags)
+        self.assertIn("REPORT_SEQUENCE_MENTION_NOT_LINK", tags)
+        self.assertIn("FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL", tags)
+        self.assertTrue(any("Пізніше стало" in m["excerpt"] for m in mentions))
+        self.assertLessEqual(len(mentions), 8)
+        self.assertEqual(proof["status"], "INSUFFICIENT_EVIDENCE")
+        self.assertFalse(proof["independent_police_link_proven"])
+
+
 class WorkXIndependentDiscovery(unittest.TestCase):
     def test_13_all_cities_when_no_new_alerts_but_http_not_enabled(self):
         from monitor_casualty_candidates import CITY_CONFIG, plan_source_scans
