@@ -30,7 +30,8 @@ for(const id of ["cityPeriod","comparePeriod"]){
   assert(match);assert(match[1].includes('value="quarterly"'));
 }
 assert(html.includes('id="allCitiesRange"')&&html.includes('value="quarter"'));
-assert(html.indexOf('quarterly-rolling-preview.js')<html.indexOf('src="app.js'));
+assert(app.includes("root.QuarterRollingPreview = api"),"preview helper inlined into app.js to survive Netlify build");
+assert(!html.includes('src="quarterly-rolling-preview.js'),"preview has no missing standalone asset");
 for(const code of ["calendarQuarterOverlapsRange","periodRows(city, period)","quarterly", "QuarterRollingPreview?.rollingForecast",
   "QuarterRollingPreview?.quarterRange","hasMissingQuarter", "approvedNeonGitRelease","matchesDashboardGeneration"]){
   assert(app.includes(code),code)
