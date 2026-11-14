@@ -325,7 +325,9 @@ def retain_incident_review_clues(text: str) -> dict:
         if not eligible:
             break
         index, excerpt, kinds = min(
-            eligible, key=lambda v: (-len(set(v[2]) - covered), v[0]))
+            eligible, key=lambda v: (-len(set(v[2]) - covered),
+                                 -int(bool(re.search(r"\b(?:пізніше|згодом|уточнил\w*|також)\b",
+                                                     v[1], re.I))), v[0]))
         selected.append({
             "article_sentence_order": index + 1,
             "tags": kinds,
