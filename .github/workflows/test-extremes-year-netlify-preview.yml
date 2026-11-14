@@ -1,0 +1,118 @@
+name: Isolated extremes-year selector Netlify preview
+
+on:
+  push:
+    branches:
+      - test-extremes-year-selector-2026-11-12
+    paths:
+      - ".github/workflows/test-extremes-year-netlify-preview.yml"
+      - "kyiv-air-alerts-grafana/pages-preview/index.html"
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/pages-preview/styles.css"
+      - "kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js"
+      - "kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js"
+      - "kyiv-air-alerts-grafana/tests/test_kyiv_cause_archive.py"
+      - "kyiv-air-alerts-grafana/scripts/build_kyiv_threat_mix.py"
+      - "kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_preview.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-extremes-year-netlify-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/test-extremes-year-selector-2026-11-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact test branch commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify isolated UI bundle
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          node --check kyiv-air-alerts-grafana/pages-preview/kpi-range.js
+          grep -q 'id="extremesYear"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'id="burdenYear"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'explorationYearOptions("extremesYear", key, true)' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'labels: extremesLabels' kyiv-air-alerts-grafana/pages-preview/app.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          node kyiv-air-alerts-grafana/tests/test_daypart_absolute_tooltip.js
+          node kyiv-air-alerts-grafana/tests/test_kyiv_cause_period.js
+          python kyiv-air-alerts-grafana/tests/test_kyiv_cause_archive.py
+          echo "PREVIEW_ONLY_FRONTEND_QA_PASS"
+
+      - name: Build read-only historical KPI index
+        run: |
+          set -euo pipefail
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/scripts/build_preview_historical_daily.py \
+            --production-root kyiv-air-alerts-grafana \
+            --source-sha "$(git rev-parse HEAD)" \
+            --output historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          with open("historical-daily-kpi.json", encoding="utf-8") as file:
+              index = json.load(file)
+          assert index["meta"]["verified_count"] == 23
+          assert len(index["cities"]) == 23
+          print("PREVIEW_HISTORICAL_INDEX_23_23_PASS")
+          PY
+
+      - name: Assemble static preview without writer or source HTTP
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html \
+             kyiv-air-alerts-grafana/pages-preview/styles.css \
+             kyiv-air-alerts-grafana/pages-preview/app.js \
+             kyiv-air-alerts-grafana/pages-preview/features.json \
+             kyiv-air-alerts-grafana/pages-preview/chart-share.js \
+             kyiv-air-alerts-grafana/pages-preview/kpi-range.js \
+             kyiv-air-alerts-grafana/pages-preview/brand-mark.svg \
+             kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg \
+             kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg \
+             kyiv-air-alerts-grafana/pages-preview/favicon.svg \
+             kyiv-air-alerts-grafana/pages-preview/favicon-32.png \
+             historical-daily-kpi.json _site/
+          cp kyiv-air-alerts-grafana/pages-preview/kyiv_threat_mix_preview.json _site/
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 14
+          echo "PREVIEW_STATIC_BUNDLE_PASS"
+
+      - name: Publish non-production draft URL only
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NETLIFY_AUTH_TOKEN:-}" ]; then
+            echo "BLOCKED: NETLIFY_AUTH_TOKEN unavailable"
+            exit 2
+          fi
+          npx -y netlify-cli@latest deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json | tee netlify-test-deploy.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          record = json.loads(Path("netlify-test-deploy.json").read_text())
+          assert record.get("deploy_url") or record.get("deployUrl"), "Missing draft deploy URL"
+          print("NETLIFY_DRAFT_DEPLOY_PASS")
+          PY
+
+      - name: Upload non-sensitive draft deploy receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extremes-year-netlify-preview-receipt
+          path: netlify-test-deploy.json
+          if-no-files-found: ignore

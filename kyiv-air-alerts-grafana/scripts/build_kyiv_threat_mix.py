@@ -126,7 +126,8 @@ def main():
 
     last_completed = datetime.now(TZ).date() - timedelta(days=1)
     last_visible = min(last_day, last_completed)
-    visible_start = max(first_day, last_visible - timedelta(days=27))
+    # Keep every source-verified completed day, not just a rolling 28-day window.
+    visible_start = first_day
 
     rows = []
     day = visible_start
