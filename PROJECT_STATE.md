@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-14. Latest accepted: C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-PR136-OWNER-SQUASH-MERGE-PASS-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
@@ -17,11 +17,17 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Histori
 
 ## Next
 
+- PR #136 code merged only. Obtain separate approval for one manual physical read-only Neon → six-JSON proof on preserved recovery branch; do not infer a publication grant or freshness PASS. 
 - Keep updater and Netlify production workflows disabled, legacy publisher paused, AUTO flag OFF and Netlify locked. No new physical C2 pilot until narrow offline investigation of Mykolaiv region 98 bridge continuity gap (history no longer reaches previous poll), and separate owner GO. Do not bypass 21/21, rewrite production records or mix casualty/WIP/DST tracks.
 
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-PR136-OWNER-SQUASH-MERGE-PASS-01 (2026-11-14)
+
+- Owner-approved PR #136 exact head `1924de20a3c382aa862a00c0a882579c4a43c996`; exact-head CI #43573370103, #43573370102, #43573370092 SUCCESS; enforced main ruleset check PASS, bypass NONE. Native squash merge returned `main@5c9684c2f953eeb71b4e273906ba8bc6d5f9cdb1`; PR merged. Recovery proof branch retained at approved HEAD.
+- Post-merge site-prod `54079326ae2b4e691e2bfcf7cd1a51c9705404eb` unchanged; Netlify `6af76b2d67c5074986728b62` ready/locked. Only code merge authorized; no C2, Neon write, physical proof, Git JSON publication, Netlify deploy/unlock or schedule. `RECOVERY_PACKAGE=BLOCKED` pending separately approved one read-only proof and immutable delta.
+
 ## C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01 (2026-11-14)
 
 - Draft PR #136 `1924de20` exact failed-run archive recovery code; exact-head offline Actions #43573370103/#43573370102/#43573370092 SUCCESS. C2 #43523629106 writer PASS, 23 archived receipts; physical six-JSON proof and delta artifact NOT RUN. `RECOVERY_PACKAGE=BLOCKED`; at-use freshness, 262 retained rows and no-loss candidate remain unverified. No merge, writer, push or deploy.
