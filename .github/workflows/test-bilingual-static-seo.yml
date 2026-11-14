@@ -42,7 +42,7 @@ jobs:
 
       - name: Deploy nonproduction preview alias only
         env:
-          NETLIFY_AUTH_TOKEN: $\{{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         run: |
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN"
