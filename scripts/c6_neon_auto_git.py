@@ -30,6 +30,29 @@ SCHEMA = "c6-neon-auto-c2-delta-v1"
 REPOSITORY = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
 NEON_BRANCH = "br-bold-mode-b5rub8pq"
 
+# One immutable, independently verified exception. No generic failed-run bypass.
+RECOVERY_PINS = {
+    "run_id": 43523629106,
+    "run_attempt": 1,
+    "workflow_sha": "5606147a955b64e17474688c6a13596b21d93580",
+    "input_sha": "54079326ae2b4e691e2bfcf7cd1a51c9705404eb",
+    "bundle_artifact_id": 14086255755,
+    "bundle_outer_sha256": "b4af6197078ccb980dabc4e1c4fa3cd3c5ce9029599650ace727930a536847da",
+    "bundle_inner_sha256": "9f4a7ccbb9f7468aa72b612cad512ecd0eb19ea8fd484146915ac07a08333493",
+    "status_artifact_id": 14085756162,
+    "status_outer_sha256": "59e684643489585cae1d52abf424aeb9f553d7417fa4d36ad24cfd5f5f49ad70",
+    "corpus_sha256": "123c515db11e0a22ede051c7b638df0242404190f553fb2daf292585731e1f00",
+    "writer_run_uuid": "90061757-b44b-4389-9fd0-8440d2af367d",
+    "db_endpoint": "ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech",
+}
+RECOVERY_JOB_CONCLUSIONS = {
+    "update-site": "failure",
+    "c6-neon-six-json-prepare": "skipped",
+    "c6-neon-auto-git-publish": "skipped",
+    "c6-neon-final-prepare-only": "skipped",
+    "c6-neon-owner-gated-git-release": "skipped",
+}
+
 # Fixed capture() guard identifiers only; never echo arbitrary exception text.
 SAFE_CAPTURE_BLOCK_REASONS = frozenset({
     "CAPTURE_ARGS_MISSING",
@@ -180,6 +203,103 @@ def verify_capture(delta, report, *, workflow_sha, run_id, run_attempt):
         require(sha(safe_file(delta / "files", path)) == digest,
                 "C2_DELTA_SHA_MISMATCH")
     return hashes
+
+
+
+def verify_exact_failed_c2_archive(run, jobs, artifacts, manifest, status, receipt):
+    """Allow ONLY the fixed 43523629106 failed-run archive, never another.
+
+    The real Neon proof and freshness gates remain separate and mandatory.
+    A reconstructed delta is not evidence of the original lost Git status.
+    This function does no HTTP, Neon, Git operation or publication.
+    """
+    p = RECOVERY_PINS
+    require(isinstance(run, dict) and run.get("id") == p["run_id"]
+            and run.get("run_attempt") == p["run_attempt"]
+            and run.get("head_sha") == p["workflow_sha"]
+            and run.get("head_branch") == "main"
+            and run.get("path") == ".github/workflows/update-netlify-site.yml"
+            and run.get("status") == "completed"
+            and run.get("conclusion") == "failure"
+            and run.get("repository", {}).get("full_name") == REPOSITORY,
+            "UNAPPROVED_FAILED_C2_RUN")
+    require(isinstance(jobs, dict) and
+            jobs.get("total_count") == len(RECOVERY_JOB_CONCLUSIONS)
+            and isinstance(jobs.get("jobs"), list)
+            and len(jobs["jobs"]) == len(RECOVERY_JOB_CONCLUSIONS),
+            "RECOVERY_JOB_COUNT_MISMATCH")
+    indexed = {j.get("name"): j for j in jobs["jobs"]}
+    require(len(indexed) == len(RECOVERY_JOB_CONCLUSIONS)
+            and set(indexed) == set(RECOVERY_JOB_CONCLUSIONS),
+            "RECOVERY_JOB_SET_MISMATCH")
+    for name, expected in RECOVERY_JOB_CONCLUSIONS.items():
+        job = indexed[name]
+        require(job.get("run_id") == p["run_id"]
+                and job.get("status") == "completed"
+                and job.get("conclusion") == expected,
+                "RECOVERY_JOB_CONCLUSION_MISMATCH")
+    steps = {step.get("name"): step.get("conclusion")
+             for step in indexed["update-site"].get("steps", [])}
+    require(steps.get("Validate verified UkraineAlarm bridge checkpoint") == "success"
+            and steps.get("Run multicity canonical DB shadow") == "success"
+            and steps.get("Upload C2 canonical publication status") == "success"
+            and steps.get("Export verified same-run C2 shadow bundle") == "success"
+            and steps.get("Upload verified C2 shadow inputs") == "success"
+            and steps.get("Freeze same-run C2 checkpoint delta (no commit/push)") == "failure"
+            and steps.get("Upload same-run C2 delta for one Git-only commit") == "skipped"
+            and steps.get("Commit updated production data and verified UkraineAlarm bridge checkpoint") == "skipped",
+            "RECOVERY_WRITER_AND_CAPTURE_STEPS_NOT_PINNED")
+    require(isinstance(artifacts, dict)
+            and set(artifacts) == {"bundle", "status"},
+            "RECOVERY_ARTIFACT_SET_MISMATCH")
+    for key, artifact_id, name, digest in (
+        ("bundle", p["bundle_artifact_id"],
+         "c2-shadow-inputs-43523629106-1", p["bundle_outer_sha256"]),
+        ("status", p["status_artifact_id"],
+         "c2-publication-status-43523629106-1", p["status_outer_sha256"]),
+    ):
+        artifact = artifacts[key]
+        require(artifact.get("id") == artifact_id
+                and artifact.get("name") == name
+                and artifact.get("digest") == "sha256:" + digest
+                and artifact.get("expired") is False
+                and artifact.get("workflow_run", {}).get("id") == p["run_id"],
+                "RECOVERY_ARTIFACT_IDENTITY_MISMATCH")
+    require(manifest.get("github_run_id") == p["run_id"]
+            and manifest.get("github_run_attempt") == p["run_attempt"]
+            and manifest.get("workflow_sha") == p["workflow_sha"]
+            and manifest.get("input_sha") == p["input_sha"]
+            and manifest.get("db_branch") == NEON_BRANCH
+            and manifest.get("db_endpoint") == p["db_endpoint"]
+            and manifest.get("canonical_run_id") == p["writer_run_uuid"]
+            and manifest.get("corpus_sha256") == p["corpus_sha256"]
+            and len(manifest.get("historical_capture_receipts", {})
+                    .get("complete_cities", [])) == 23
+            and len(set(manifest["historical_capture_receipts"]["complete_cities"])) == 23,
+            "RECOVERY_C2_MANIFEST_NOT_PINNED")
+    require(status.get("canonical_persistence_status") == "NEON_SUCCEEDED"
+            and status.get("canonical_db_commit") == "CONFIRMED"
+            and status.get("canonical_receipt_validated") is True
+            and status.get("input_sha") == p["input_sha"]
+            and status.get("workflow_sha") == p["workflow_sha"],
+            "RECOVERY_WRITER_STATUS_NOT_PASS")
+    require(receipt.get("run_id") == p["writer_run_uuid"]
+            and receipt.get("status") == "succeeded"
+            and receipt.get("persistence_status") == "persisted"
+            and receipt.get("workflow_sha") == p["workflow_sha"]
+            and receipt.get("input_sha") == p["input_sha"]
+            and receipt.get("corpus_sha256") == p["corpus_sha256"]
+            and receipt.get("db_branch") == NEON_BRANCH
+            and receipt.get("canonical_episode_count") == 33450
+            and receipt.get("episodes_inserted") == 6
+            and receipt.get("episodes_updated") == 0
+            and receipt.get("city_count") == 23
+            and receipt.get("production_output_mutation") is False,
+            "RECOVERY_WRITER_RECEIPT_NOT_PINNED")
+    return {"status": "EXACT_FAILED_C2_ARCHIVE_PASS",
+            "c2_run_id": p["run_id"], "c2_run_attempt": p["run_attempt"],
+            "corpus_sha256": p["corpus_sha256"], "cities": 23,
+            "episode_count": 33450, "publication_allowed": False}
 
 
 def retains_keys(old, new):
