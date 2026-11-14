@@ -91,6 +91,19 @@ def _bounded_context(card: dict, reasons: set[str]) -> list[dict]:
             continue
         quote = x.get("excerpt")
         want = x.get("excerpt_sha256")
+        if x.get("context_status") == "CONTEXT_INCOMPLETE":
+            if not _valid_sha(x.get("sentence_sha256")):
+                reasons.add("INCOMPLETE_CONTEXT_HASH_MISSING")
+                continue
+            reasons.add("CONTEXT_INCOMPLETE")
+            result.append({
+                "sentence_order_not_event_time": x.get("article_sentence_order"),
+                "article_segment_hint_unverified": x.get("article_segment_hint"),
+                "context_status": "CONTEXT_INCOMPLETE",
+                "sentence_sha256": x["sentence_sha256"],
+                "excerpt": None,
+            })
+            continue
         if (not isinstance(quote, str) or not 1 <= len(quote) <= 170
                 or not _valid_sha(want) or _sha(quote) != want
                 or PRIVATE.search(quote)
@@ -100,6 +113,8 @@ def _bounded_context(card: dict, reasons: set[str]) -> list[dict]:
             continue
         result.append({
             "sentence_order_not_event_time": x.get("article_sentence_order"),
+            "article_segment_hint_unverified": x.get("article_segment_hint"),
+            "context_status": x.get("context_status", "UNVERIFIED_LEGACY"),
             "unverified_tags": [str(t)[:50] for t in (x.get("tags") or [])[:5]],
             "excerpt": quote,
             "excerpt_sha256": want,
@@ -110,7 +125,8 @@ def _bounded_context(card: dict, reasons: set[str]) -> list[dict]:
 
 
 def build_review_index(facts: dict, queue: list[dict] | None = None,
-                       previous: list[dict] | None = None) -> dict:
+                       previous: list[dict] | None = None,
+                       *, include_unretained: bool = True) -> dict:
     """Enrich *retained* Work J/R cards. Never manufacture a link or total.
 
     Exact same URL+body SHA is a repeated publication, not a new fatality.
@@ -210,6 +226,8 @@ def build_review_index(facts: dict, queue: list[dict] | None = None,
             "source_type": source_type(source),
             "feed_url": _source_url(candidate.get("url")),
             "publication_date_claimed": publication,
+            "source_capture_time_utc": card.get("source_capture_time_utc"),
+            "attack_date_status": ("UNVERIFIED_CLAIM" if claimed_attack_date else "UNKNOWN"),
             "attack_date_claimed_not_verified": claimed_attack_date,
             "city_key_candidate_not_verified": candidate.get("city_key") or card.get("city_key_candidate_not_verified"),
             "attack_time_verified": review.get("attack_time_verified"),
@@ -238,7 +256,7 @@ def build_review_index(facts: dict, queue: list[dict] | None = None,
     # Retain an explicit blocked record even when the original page text was
     # never captured; news titles, RSS snippets and HTTP200 are not death facts.
     for cid, candidate in by_id.items():
-        if cid in included:
+        if not include_unretained or cid in included:
             continue
         rows.append({
             "candidate_id": cid, "source_role": "publisher",
