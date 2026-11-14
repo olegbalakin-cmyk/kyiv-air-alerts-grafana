@@ -2,7 +2,7 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-Current accepted: **C6-PR136-OWNER-SQUASH-MERGE-PASS-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
+Current accepted: **C6-C3-ARCHIVE-GIT-ONLY-PUBLISH-PASS-01.** GLOBAL_CUTOVER=YES; GIT_ONLY_PUBLICATION=PASS; AUTO_NEON_GIT=OFF. Git JSON advanced; Netlify deployment remains locked/current. Earlier failed pilots are historical.
 
 ## Work S final execution observation (2026-11-13; publication not executed)
 
@@ -14,6 +14,10 @@ Current accepted: **C6-PR136-OWNER-SQUASH-MERGE-PASS-01.** GLOBAL_CUTOVER=YES; P
 - Separate owner production GO received; execution stopped before dispatch. Physical FINAL/L/N SHA and 56 identity/preservation checks PASS; historical gate 23/23 PASS at real clock. Protected `c6-neon-git-release` created for owner review/main only, admin bypass OFF. Netlify variables/grant were installed, then removed after the dispatch blocker.
 - Enabled Netlify workflow has no `Run workflow` control, including after reload; default `main` lacks that workflow file. Connected tools have no new dispatch operation and local CLI has no authenticated account. **Zero release dispatches/runs, zero deployments and zero Git publication commits.** No new code/default-branch change or merge.
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
+
+## C6-C3-ARCHIVE-GIT-ONLY-PUBLISH-PASS-01 — accepted Git-only publication (2026-11-14)
+
+- [Actions #43578315871](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43578315871) SUCCESS on `main@413d34ac`, one fast-forward `site-prod@54079326` → [`2fa9044ad`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/2fa9044ad498391e5d995140af5f4096f0d4a2aa), only five JSON. Exact recovered archive, 23/23 at-use gates PASS; Netlify `6af76b2d` current/ready/locked, no new deploy observed. Browser HTTP display not certified. Next: resolve Mykolaiv 20/21 current bridge and run one separately approved controlled C2 → Neon → Git cycle before four-hour schedule; historical audit parallel. No automatic enablement grant.
 
 ## PR #136 owner-approved code-only merge (2026-11-14)
 
