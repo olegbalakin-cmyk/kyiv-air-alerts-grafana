@@ -1,3 +1,243 @@
+/* Research-only exact-time completion estimate. Only source-certified intraday
+   observations may advance the cutoff beyond the last verified complete day.
+   No wall-clock imputation, API fetch, production write, or active-alert claim. */
+(function(root,factory){
+  "use strict";
+  const api=factory();
+  if(typeof module==="object"&&module.exports)module.exports=api;
+  if(root)root.PeriodCompletionPreview=api;
+})(typeof globalThis!=="undefined"?globalThis:this,function(){
+  "use strict";
+  const MS=86400000,HOUR=3600000,MIN=Object.freeze({calendarWeekly:2,monthly:7,quarterly:30});
+  const MAX_SOURCE_AGE_HOURS=8;
+  const valid=d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&
+    Number.isFinite(Date.parse(d+"T00:00:00Z"))&&new Date(d+"T00:00:00Z").toISOString().slice(0,10)===d;
+  const dayNumber=d=>Date.parse(d+"T00:00:00Z");
+  const add=(d,n)=>valid(d)?new Date(dayNumber(d)+n*MS).toISOString().slice(0,10):null;
+  const nDays=(a,b)=>Math.round((dayNumber(b)-dayNumber(a))/MS)+1;
+  const sum=values=>values.reduce((s,x)=>s+x,0);
+  const mean=values=>sum(values)/values.length;
+  const ewma=values=>values.reduce((s,v,i)=>i?s*.7+v*.3:v,0);
+  const clamp=(v,max)=>Math.max(0,Math.min(max,v));
+  const kyivFormatter=new Intl.DateTimeFormat("en-GB",{
+    timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit",
+    hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"
+  });
+  const kyivParts=t=>{
+    const parts=kyivFormatter.formatToParts(new Date(t));
+    const part=name=>Number(parts.find(x=>x.type===name)?.value);
+    return {year:part("year"),month:part("month"),day:part("day"),
+      hour:part("hour"),minute:part("minute"),second:part("second")};
+  };
+  function kyivLocalDay(t){
+    if(!Number.isFinite(t))return null;
+    const p=kyivParts(t);
+    return p.year+"-"+String(p.month).padStart(2,"0")+"-"+String(p.day).padStart(2,"0");
+  }
+  // Kyiv's UTC offset may change on transition days. Derive each LOCAL
+  // midnight in real UTC time, so 23/25-hour DST days get correct hard caps.
+  function kyivMidnightUtc(day){
+    if(!valid(day))return null;
+    const guess=dayNumber(day),parts=kyivParts(guess);
+    const localAtGuess=Date.UTC(parts.year,parts.month-1,parts.day,
+      parts.hour,parts.minute,parts.second);
+    const timestamp=guess-(localAtGuess-guess);
+    return kyivLocalDay(timestamp)===day&&kyivLocalDay(timestamp-1000)!==day?timestamp:null;
+  }
+  function bounds(today,period){
+    if(!valid(today)||!Object.hasOwn(MIN,period))return null;
+    const d=new Date(dayNumber(today)),year=d.getUTCFullYear(),month=d.getUTCMonth()+1;
+    if(period==="calendarWeekly"){
+      const monday=add(today,-((d.getUTCDay()+6)%7));
+      return {start:monday,end:add(monday,6),key:add(monday,6),days:7};
+    }
+    const firstMonth=period==="quarterly"?1+3*Math.floor((month-1)/3):month;
+    const lastMonth=period==="quarterly"?firstMonth+2:month;
+    const lastDay=new Date(Date.UTC(year,lastMonth,0)).getUTCDate();
+    const start=year+"-"+String(firstMonth).padStart(2,"0")+"-01";
+    const end=year+"-"+String(lastMonth).padStart(2,"0")+"-"+String(lastDay).padStart(2,"0");
+    return {start,end,days:nDays(start,end),
+      key:period==="quarterly"?String(year)+"-Q"+Math.ceil(month/3):start.slice(0,7)};
+  }
+  function certifiedPartial(row,today,nowTimestamp){
+    if(!row||row.date!==today||row.is_partial_period!==true)return null;
+    const through=row.partial_through;
+    // Date-only marker means "partial, clock unknown", NOT a whole day's
+    // verified calm observation. Fall back to completed days only.
+    if(through===today)return null;
+    if(typeof through!=="string"||
+      !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(through))return false;
+    const at=Date.parse(through);
+    if(!Number.isFinite(at)||kyivLocalDay(at)!==today||at>nowTimestamp+120000||
+       nowTimestamp-at>MAX_SOURCE_AGE_HOURS*HOUR)return false;
+    const start=kyivMidnightUtc(today),end=kyivMidnightUtc(add(today,1));
+    if(start===null||end===null||at<=start||at>=end)return false;
+    const elapsed=(at-start)/HOUR;
+    const hours=row.total_alert_duration_hours,alerts=row.alerts_started;
+    if(typeof hours!=="number"||!Number.isFinite(hours)||hours<0||
+       hours>elapsed+0.002||!Number.isInteger(alerts)||alerts<0)return false;
+    return {at,sourceTimestamp:through,date:today,hours,alerts,elapsed,dayHours:(end-start)/HOUR,
+      dayFraction:(at-start)/(end-start)};
+  }
+  function estimate(index,period,today,partialDay=null,nowInstant=new Date()){
+    if(index?.status!=="verified"||!Object.hasOwn(MIN,period))return null;
+    const info=bounds(today,period);
+    if(!info||!valid(index.start)||!valid(index.end)||index.end!==add(today,-1))return null;
+    const {start,end,days,key}=info,through=index.end;
+    if(through<start||through>=end||start<index.start)return null;
+    const completed=nDays(start,through),leftDays=days-completed;
+    if(completed<MIN[period]||leftDays<1)return null;
+    const totalDays=nDays(index.start,index.end);
+    if(totalDays<28||totalDays>36600||
+      !Array.isArray(index.counts)||!Array.isArray(index.daily_total_alert_duration_seconds)||
+      index.counts.length!==totalDays||index.daily_total_alert_duration_seconds.length!==totalDays)return null;
+    const verifiedMonths=new Set(index.verified_metric_months||[]);
+    const verifiedDays=new Set(index.verified_metric_days||[]);
+    const get=d=>{
+      if(!valid(d)||d<index.start||d>index.end||
+        !verifiedMonths.has(d.slice(0,7))&&!verifiedDays.has(d))return null;
+      const i=nDays(index.start,d)-1,n=index.counts[i],seconds=index.daily_total_alert_duration_seconds[i];
+      return Number.isInteger(n)&&n>=0&&typeof seconds==="number"&&Number.isFinite(seconds)&&
+        seconds>=0&&seconds<=90010?{alerts:n,hours:seconds/3600}:null;
+    };
+    const actual=[],last28=[];
+    for(let d=start;d<=through;d=add(d,1)){const row=get(d);if(!row)return null;actual.push(row)}
+    for(let i=27;i>=0;i--){const row=get(add(through,-i));if(!row)return null;last28.push(row)}
+    const nowTimestamp=nowInstant instanceof Date?nowInstant.getTime():Date.parse(nowInstant);
+    if(!Number.isFinite(nowTimestamp))return null;
+    // If a timestamped source exists but fails validation, show NO current
+    // estimate rather than silently treating stale hours as observed calm.
+    const observedPartial=certifiedPartial(partialDay,today,nowTimestamp);
+    if(observedPartial===false)return null;
+    let observedHours=sum(actual.map(x=>x.hours)),observedAlerts=sum(actual.map(x=>x.alerts));
+    let observedDaysEquivalent=completed,remainingDaysEquivalent=leftDays;
+    let cutoff=kyivMidnightUtc(today),asOf=through,asOfIsIntraday=false;
+    if(observedPartial){
+      observedHours+=observedPartial.hours;
+      observedAlerts+=observedPartial.alerts;
+      observedDaysEquivalent+=observedPartial.dayFraction;
+      remainingDaysEquivalent-=observedPartial.dayFraction;
+      cutoff=observedPartial.at;
+      asOf=observedPartial.sourceTimestamp;
+      asOfIsIntraday=true;
+    }
+    const periodStartUtc=kyivMidnightUtc(start),periodEndUtc=kyivMidnightUtc(add(end,1));
+    if(periodStartUtc===null||periodEndUtc===null||cutoff===null||
+      cutoff<periodStartUtc||cutoff>=periodEndUtc)return null;
+    const maximumRemainingHours=(periodEndUtc-cutoff)/HOUR;
+    const observedPhysicalHours=(cutoff-periodStartUtc)/HOUR;
+    if(observedHours>observedPhysicalHours+0.01||maximumRemainingHours<=0||
+       remainingDaysEquivalent<=0)return null;
+    // Physical, clock-scaled occupancy baseline: estimate ONLY the real
+    // hours that have not yet elapsed. Do not extrapolate today's partial
+    // alarm load (or the whole quarter's past high rate) into the final hour.
+    // Holdout validation in #43630913174 showed hourly curves did not
+    // materially beat the simpler 28-day rate over 6/12/24-hour windows.
+    const trailingA=last28.map(x=>x.alerts),trailingH=last28.map(x=>x.hours);
+    const baselineStart=kyivMidnightUtc(add(through,-27));
+    const baselineEnd=kyivMidnightUtc(today);
+    if(baselineStart===null||baselineEnd===null||baselineEnd<=baselineStart)return null;
+    const baselinePhysicalHours=(baselineEnd-baselineStart)/HOUR;
+    const baselineAlertHours=sum(trailingH);
+    if(!Number.isFinite(baselinePhysicalHours)||baselinePhysicalHours<24*27||
+       baselineAlertHours<0||baselineAlertHours>baselinePhysicalHours+0.01)return null;
+    const occupancyRate=clamp(baselineAlertHours/baselinePhysicalHours,1);
+    // A physical occupancy fraction (0–1), not an attempt to hit an old
+    // predicted total. The remaining alert time naturally approaches 0
+    // as the verified observation cutoff approaches the calendar end.
+    const remainingHours=occupancyRate*maximumRemainingHours;
+    const remainingAlerts=Math.max(0,mean(trailingA)*maximumRemainingHours/24);
+    const modelAlerts="mean28_per_24h",modelHours="observed_28d_hour_fraction";
+    const periodRow={
+      time:start+"T00:00:00",alerts_started:observedAlerts,
+      avg_daily_alert_hours:observedHours/observedDaysEquivalent,
+      alerts_per_day:observedAlerts/observedDaysEquivalent,
+      is_partial_period:true,partial_through:asOf,
+      _verified_completion_source:true
+    };
+    if(period==="calendarWeekly")Object.assign(periodRow,{week_start:start,week_end:end,interval_mode:"calendar_week"});
+    else if(period==="monthly")Object.assign(periodRow,{month:key});
+    else Object.assign(periodRow,{quarter:key,quarter_start:start,quarter_end:end,
+      quarter_calendar_end:end,days_observed:completed,interval_mode:"calendar_quarter"});
+    return {period,start,end,key,through,asOf,asOfIsIntraday,observed:completed,days,
+      observedDaysEquivalent,remainingDaysEquivalent,left:leftDays,
+      actualAlerts:observedAlerts,actualHours:observedHours,
+      remainingAlerts,remainingHours,maximumRemainingHours,occupancyRate,baselinePhysicalHours,
+      expectedAlerts:observedAlerts+remainingAlerts,
+      expectedHours:observedHours+remainingHours,
+      modelAlerts,modelHours,periodRow};
+  }
+  // Current day uses the same measured-portion-plus-remainder semantics as
+  // other calendar periods, but requires a source-timestamped *partial* day.
+  // Never create a 29th date or count the same observed hours twice.
+  function estimateToday(index,today,partialDay,nowInstant=new Date()){
+    if(index?.status!=="verified"||!valid(today)||
+       index.end!==add(today,-1)||!valid(index.start)||!valid(index.end))return null;
+    const nowTimestamp=nowInstant instanceof Date?nowInstant.getTime():Date.parse(nowInstant);
+    if(!Number.isFinite(nowTimestamp))return null;
+    const observed=certifiedPartial(partialDay,today,nowTimestamp);
+    if(!observed)return null; // no intraday timestamp: no reliable estimate
+    const totalDays=nDays(index.start,index.end),yesterday=index.end;
+    if(totalDays<28||totalDays>36600||
+       !Array.isArray(index.counts)||!Array.isArray(index.daily_total_alert_duration_seconds)||
+       index.counts.length!==totalDays||
+       index.daily_total_alert_duration_seconds.length!==totalDays)return null;
+    const verifiedMonths=new Set(index.verified_metric_months||[]);
+    const verifiedDays=new Set(index.verified_metric_days||[]);
+    const counts=[],hours=[];
+    for(let i=27;i>=0;i--){
+      const date=add(yesterday,-i);
+      if(!date||date<index.start||
+         !verifiedDays.has(date)&&!verifiedMonths.has(date.slice(0,7)))return null;
+      const j=nDays(index.start,date)-1;
+      const n=index.counts[j],seconds=index.daily_total_alert_duration_seconds[j];
+      const start=kyivMidnightUtc(date),end=kyivMidnightUtc(add(date,1));
+      if(start===null||end===null||!Number.isInteger(n)||n<0||
+         !Number.isFinite(seconds)||seconds<0||seconds>(end-start)/1000+7)return null;
+      counts.push(n);hours.push(seconds/3600);
+    }
+    const first=kyivMidnightUtc(add(yesterday,-27));
+    const todayStart=kyivMidnightUtc(today),tomorrow=kyivMidnightUtc(add(today,1));
+    if(first===null||todayStart===null||tomorrow===null||
+       observed.at<=todayStart||observed.at>=tomorrow)return null;
+    const elapsedBaselineHours=(todayStart-first)/HOUR;
+    const knownAlertHours=sum(hours);
+    if(elapsedBaselineHours<=0||knownAlertHours>elapsedBaselineHours+0.01)return null;
+    const occupancyRate=clamp(knownAlertHours/elapsedBaselineHours,1);
+    const maximumRemainingHours=(tomorrow-observed.at)/HOUR;
+    if(maximumRemainingHours<=0)return null;
+    const remainingHours=occupancyRate*maximumRemainingHours;
+    const remainingAlerts=mean(counts)*maximumRemainingHours/24;
+    const periodRow={
+      ...partialDay,
+      time:partialDay.time||today+"T00:00:00",
+      date:today,is_partial_period:true,
+      partial_through:observed.sourceTimestamp,
+      alerts_started:observed.alerts,
+      total_alert_duration_hours:observed.hours,
+      avg_daily_alert_hours:observed.hours,
+      alerts_per_day:observed.alerts,
+      _verified_completion_source:true
+    };
+    return {
+      period:"daily28",start:today,end:today,key:today,through:yesterday,
+      asOf:observed.sourceTimestamp,asOfIsIntraday:true,
+      observed:0,days:1,left:1,
+      observedDaysEquivalent:observed.dayFraction,
+      remainingDaysEquivalent:1-observed.dayFraction,
+      actualHours:observed.hours,actualAlerts:observed.alerts,
+      remainingHours,remainingAlerts,maximumRemainingHours,
+      occupancyRate,baselinePhysicalHours:elapsedBaselineHours,
+      expectedHours:observed.hours+remainingHours,
+      expectedAlerts:observed.alerts+remainingAlerts,
+      modelHours:"observed_28d_hour_fraction",modelAlerts:"mean28_per_24h",
+      periodRow
+    };
+  }
+  return {estimate,estimateToday,bounds,add,kyivMidnightUtc,kyivLocalDay,certifiedPartial};
+});
+
+
 /* Preview-only quarter aggregation and one-day rolling-window projection. */
 (function(root, factory) {
   "use strict";
@@ -1030,6 +1270,26 @@ const partialPeriodBarPlugin = {
         ctx.strokeStyle = border || TEXT;
         ctx.strokeRect(left, top, width, height);
       }
+    }
+    ctx.restore();
+  }
+};
+
+const periodCompletionHatchPlugin = {
+  id:"periodCompletionHatch",
+  afterDatasetsDraw(chart,_args,options){
+    if(!Number.isInteger(options?.datasetIndex)||options.datasetIndex<0||options.index<0)return;
+    const element=chart.getDatasetMeta(options.datasetIndex)?.data?.[options.index];
+    if(!element||element.skip)return;
+    const {x,y,base,width}=element.getProps(["x","y","base","width"],true);
+    if(![x,y,base,width].every(Number.isFinite))return;
+    const top=Math.min(y,base),height=Math.abs(base-y);
+    if(height<2)return;
+    const ctx=chart.ctx;ctx.save();ctx.beginPath();ctx.rect(x-width/2,top,width,height);ctx.clip();
+    ctx.strokeStyle="#c5e1fa";ctx.lineWidth=1.5;
+    for(let z=-height;z<width+height;z+=9){
+      ctx.beginPath();ctx.moveTo(x-width/2+z,top+height);
+      ctx.lineTo(x-width/2+z+height,top);ctx.stroke();
     }
     ctx.restore();
   }
@@ -2586,29 +2846,44 @@ function renderCity() {
   // Other intervals continue using historical bounds and selected dates.
   const activeRange = syncDateRange("cityDateFrom", "cityDateTo",
     cityPeriodDateValues(city, period, allRows));
-  const rows = allRows.filter(row => period === "calendarWeekly"
+  let rows = allRows.filter(row => period === "calendarWeekly"
     ? calendarWeekOverlapsRange(row, activeRange.from, activeRange.to)
     : period === "quarterly" ? calendarQuarterOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
   renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
+  // One display logic: observed hours and estimated remaining clock-time.
+  // For daily28, the existing observed partial-day bar already occupies the
+  // last of 28 dates. Do not append a new date or duplicate its actual values.
+  const calendarToday=kyivCalendarToday();
+  const partialDay=city?.daily28?.at(-1);
+  const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"].includes(period);
+  const completionCandidate = !completionPeriod ? null :
+    period==="daily28"
+      ? window.PeriodCompletionPreview?.estimateToday(
+          state.historicalDaily?.cities?.[key],calendarToday,partialDay)
+      : window.PeriodCompletionPreview?.estimate(
+          state.historicalDaily?.cities?.[key],period,calendarToday,partialDay);
+  const completionVisible = completionCandidate &&
+    (period==="daily28"
+      ? rows.length===28 && rows.at(-1)?.date===calendarToday &&
+        isPartialPeriod(rows.at(-1)) &&
+        (!activeRange.from||activeRange.from<=calendarToday) &&
+        (!activeRange.to||activeRange.to>=calendarToday)
+      : (!activeRange.from || activeRange.from<=completionCandidate.start) &&
+        (!activeRange.to || activeRange.to>=completionCandidate.through));
+  const completion = completionVisible && $("showTrend")?.checked ? completionCandidate : null;
+  if (completion && period!=="daily28") {
+    rows = rows.filter(row => !(isPartialPeriod(row) &&
+      (period==="calendarWeekly" ? row.week_start===completion.start :
+       period==="monthly" ? row.month===completion.key : row.quarter===completion.key)));
+    rows = [...rows,completion.periodRow];
+  }
   const labels = rows.map(r => periodDisplayLabel(r, period));
-  const rollingForecastable = ["rolling30","rolling90","rolling180"].includes(period);
-  const forecastable = rollingForecastable || ["daily28","calendarWeekly","monthly","allTime"].includes(period);
-  const isCurrentRange = rows.length && allRows.length &&
-    rows[rows.length - 1] === allRows[allRows.length - 1];
-  // Forecast only one future complete day and recalculate the rolling window.
-  const candidate = forecastable && isCurrentRange ?
-    (rollingForecastable
-      ? window.QuarterRollingPreview?.rollingForecast(allRows,period,state.historicalDaily?.cities?.[key],city)
-      : window.ForecastTrend?.build(allRows,period)) : null;
+  // Consistent meaning: estimate completion of the unfinished current day,
+  // week, month or quarter. Never extrapolate new rolling or future periods.
   const trendControl = $("showTrend")?.closest("label");
-  if (trendControl) trendControl.classList.toggle("hidden", !candidate);
-  const previewForecast = $("showTrend")?.checked ? candidate : null;
-  const projectedRows = previewForecast?.forecasts || [];
-  const forecastIndices = projectedRows.map((_, i) => labels.length + i);
-  const chartRows = rows.concat(projectedRows);
-  const chartLabels = labels.concat(projectedRows.map(r =>
-    tr("Прогноз: ", "Forecast: ") + periodDisplayLabel(r, period)));
+  if (trendControl) trendControl.classList.toggle("hidden", !completionVisible);
+  const chartLabels = labels;
   const dashed = type === "raion_proxy";
 
   const intensityDatasets = [
@@ -2640,44 +2915,30 @@ function renderCity() {
     }
   ];
 
-  if (projectedRows.length) {
-    // Forecast data are separate datasets: no fabricated actual observations.
-    intensityDatasets[0].data = intensityDatasets[0].data.concat(projectedRows.map(() => null));
-    intensityDatasets[0].backgroundColor = intensityDatasets[0].backgroundColor.concat(projectedRows.map(() => "transparent"));
-    intensityDatasets[0].borderColor = intensityDatasets[0].borderColor.concat(projectedRows.map(() => "transparent"));
-    intensityDatasets[0].borderWidth = intensityDatasets[0].borderWidth.concat(projectedRows.map(() => 0));
-    intensityDatasets[1].data = intensityDatasets[1].data.concat(projectedRows.map(() => null));
-    intensityDatasets[1].pointRadius = intensityDatasets[1].pointRadius.concat(projectedRows.map(() => 0));
-    intensityDatasets[1].pointHoverRadius = intensityDatasets[1].pointHoverRadius.concat(projectedRows.map(() => 0));
+  if (completion) {
+    const i=rows.length-1;
+    // Both parts use the full-calendar denominator; no future day is labelled actual.
+    intensityDatasets[0].data[i]=completion.actualHours/completion.days;
+    intensityDatasets[1].data[i]=completion.actualAlerts/completion.days;
+    intensityDatasets[0].backgroundColor[i]=COLORS[0]+"99";
+    intensityDatasets[0].borderWidth[i]=0;
+    intensityDatasets[0].stack="completion";
     intensityDatasets.push({
-      type: "bar",
-      label: tr("Прогноз · години / добу (EWMA 0,3)", "Forecast · hours / day (EWMA 0.3)"),
-      _isForecast: true,
-      data: rows.map(() => null).concat(projectedRows.map(r => r.avg_daily_alert_hours)),
-      yAxisID: "yHours",
-      backgroundColor: "#62a0ea55",
-      borderColor: "#c5e1fa",
-      borderWidth: 0,
-      _exportRows: chartRows
+      type:"bar",_isCompletion:true,stack:"completion",
+      label:tr("Оцінка решти · години / добу","Estimated remainder · hours/day"),
+      data:rows.map((_,j)=>j===i?completion.remainingHours/completion.days:null),
+      yAxisID:"yHours",backgroundColor:"#a7d7fa44",borderColor:"#c5e1fa",
+      borderWidth:0,_exportRows:rows
     });
     intensityDatasets.push({
-      type: "line",
-      label: tr("Прогноз · тривоги / день (EWMA 0,3)", "Forecast · alerts / day (EWMA 0.3)"),
-      _isForecast: true,
-      data: rows.map(() => null).concat(projectedRows.map(r => r.alerts_per_day)),
-      yAxisID: "yAlerts",
-      borderColor: "#b8ffc5",
-      backgroundColor: "#b8ffc522",
-      borderWidth: 2,
-      borderDash: [5, 5],
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      spanGaps: false,
-      tension: 0,
-      _exportRows: chartRows
+      type:"line",_isCompletion:true,
+      label:tr("Оцінка підсумку · тривоги / день","Estimated total · alerts/day"),
+      data:rows.map((_,j)=>j===i?completion.expectedAlerts/completion.days:null),
+      yAxisID:"yAlerts",borderColor:"#b8ffc5",borderDash:[5,4],
+      pointRadius:5,pointHoverRadius:6,showLine:false,spanGaps:false,
+      _exportRows:rows
     });
   }
-
   if (period === "daily28" && explosion?.strict_daily) {
     intensityDatasets.push({
       type: "line",
@@ -2713,20 +2974,19 @@ function renderCity() {
         );
   }
 
-  if (intensitySubtitle && projectedRows.length) {
+  if (intensitySubtitle && completion) {
     intensitySubtitle.textContent += " " + tr(
-      "Останній штрихований стовпчик — експериментальний прогноз на наступний період. EWMA 0,3: останнє спостереження має вагу 30%, попередня згладжена оцінка — 70%. Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
-      "The final outlined bar is an experimental forecast for the next period. EWMA 0.3: the latest observation has 30% weight, the previous smoothed estimate 70%. This is not a warning of future attacks. Incomplete periods are excluded from the calculation."
+      "Штрихована частина — оцінка лише ще не спостережених годин за часткою часу під тривогою в попередні 28 завершених днів. Чим менше часу залишається, тим менший можливий додатковий час під тривогою. Це не попередження про атаки. Дані станом на "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+".",
+      "The hatched part estimates only remaining unobserved hours using the alert-time share of the last 28 complete verified days. Less time left means less possible additional alert time. This is not a warning of attacks. Data as of "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+"."
     );
   }
-
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
     data: {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin, ...(projectedRows.length ? [window.ForecastTrend.barPlugin] : [])],
+    plugins: [partialPeriodBarPlugin, ...(completion ? [periodCompletionHatchPlugin] : [])],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -2739,18 +2999,16 @@ function renderCity() {
             // Forecast is identified by its outline and point tooltip, not
             // by a separate legend control for a single forecast observation.
             filter(item, data) {
-              return !data.datasets[item.datasetIndex]?._isForecast;
+              return !data.datasets[item.datasetIndex]?._isCompletion;
             }
           }
         },
         tooltip: {
           mode: "index",
           intersect: false,
-          // Prevent forecast-null entries appearing as zeros on actual dates.
+          // Never show a missing source value as a numeric zero.
           filter(context) {
-            const forecastPoint = context.dataIndex >= rows.length;
-            return Boolean(context.dataset._isForecast) === forecastPoint &&
-              Number.isFinite(context.parsed?.y);
+            return Number.isFinite(context.parsed?.y);
           },
           callbacks: {
             label(context) {
@@ -2761,24 +3019,24 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              if (i >= rows.length && projectedRows.length) {
-                return tr("Експериментальна оцінка, не фактична тривога",
-                          "Experimental estimate, not an actual alert");
-              }
+              if (completion && i===rows.length-1)
+                return tr("Факт: "+completion.observed+" з "+completion.days+" днів · оцінка до "+completion.end,
+                  "Observed: "+completion.observed+" of "+completion.days+" days · estimate through "+completion.end);
               return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
                 : partialPeriodFooter(rows[i]);
             }
           }
         },
         partialPeriodBar: { rows, datasetIndices: [0] },
-        forecastPreview: {
-          datasetIndex: projectedRows.length ? intensityDatasets.findIndex(d => d.type === "bar" && d.label.includes("EWMA")) : -1,
-          indices: forecastIndices
+        periodCompletionHatch:{
+          datasetIndex:completion?intensityDatasets.findIndex(d=>d._isCompletion&&d.type==="bar"):-1,
+          index:completion?rows.length-1:-1
         }
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
         yHours: {
+          stacked:Boolean(completion),
           position: "left",
           beginAtZero: true,
           ticks: { color: TEXT, callback: value => formatDurationHours(value) },
