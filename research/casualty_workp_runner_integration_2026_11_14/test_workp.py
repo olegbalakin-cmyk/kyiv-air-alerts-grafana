@@ -25,9 +25,9 @@ class WorkP(unittest.TestCase):
     def test_01_real_loaded_modules_are_pinned_and_tamper_is_blocked(self):
         r.check_scope(queue())
         self.assertEqual(r.BLOBS['research/casualty_evidence_ingestion_2026_11_13/ingest.py'],
-                         '86bc17b1112da1027fca4f0317534c322329b04f')
+                         'ef2bf3b83bcab8d579105865659c58b4ee009b44')
         self.assertEqual(r.BLOBS['kyiv-air-alerts-grafana/scripts/casualty_auto_review.py'],
-                         '76518b35009615b5c29a4455bf0b9c3a3933cab7')
+                         '4d4a8a5ce4b206f6735680b5644826a2cb7318fb')
         for path in r.BLOBS:
             with self.subTest(path=path), patch.object(r, 'git', side_effect=lambda *args: '0'*40):
                 with self.assertRaisesRegex(RuntimeError, 'PINNED_SOURCE_BLOB_DRIFT'):

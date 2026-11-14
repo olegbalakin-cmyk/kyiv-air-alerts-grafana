@@ -597,7 +597,7 @@ def minimal_capture_facts(original: dict, queue: list[dict]) -> dict:
     """
     from casualty_auto_review import (_fatal_total, _date_signals, _attack_slot,
                                       _incident_scopes, _origin_attribution,
-                                      _cumulative_total_update)
+                                      _cumulative_total_update, _fatal_issue)
     candidates = {c["candidate_id"]: c for c in queue}
     cards, decisions = [], []
     for role, articles in (("publisher", original.get("articles", [])),
@@ -626,6 +626,12 @@ def minimal_capture_facts(original: dict, queue: list[dict]) -> dict:
                                else "NO_PARSEABLE_FATAL_TOTAL")
             scope = fatal_scopes[0] if len(fatal_scopes) == 1 else ""
             total = _fatal_total(scope) if scope else None
+            issue = _fatal_issue(low) if total is None else None
+            if issue in {"ADDITIONAL_DEATH_REPORTED", "CONFLICTING_FATAL_TOTALS",
+                         "MULTIPLE_POSSIBLE_INCIDENTS",
+                         "UNCONFIRMED_OR_NEGATED_FATAL_CLAIM",
+                         "TOTAL_CONTEXT_UNRESOLVED"}:
+                reasons.append(issue)
             published = c.get("published_at")
             day, _ = _date_signals(scope, published) if scope else (None, None)
             if not day:
@@ -659,11 +665,14 @@ def minimal_capture_facts(original: dict, queue: list[dict]) -> dict:
                 "excerpts": excerpts,
                 "document_sha256": source_sha,
                 "extracted_text_sha256": digest(raw.encode("utf-8")),
-                "parser_version": "casualty-auto-review-workj-v1",
+                "parser_version": "casualty-auto-review-workq-v1",
+                "fatal_total_diagnostic": issue,
                 "attack_slot_hint_not_identity": _attack_slot(scope) if scope else None,
                 "decision": "NEEDS_REVIEW",
                 "reasons": sorted(set(reasons + ["NO_AUTOMATIC_CREDIT"])),
                 "publication_allowed": False}
+            if issue == "ADDITIONAL_DEATH_REPORTED":
+                card["claim_type"] = "ADDITIONAL_DEATH_REPORTED"
             cards.append(card)
             decisions.append({"candidate_id": cid, "source_url": url,
                               "role": role, "reason": "SOURCE_FACTS_CAPTURED_NOT_CONFIRMED",

@@ -88,6 +88,12 @@ COUNT_WORDS = {'один': 1, 'одна': 1, 'дві': 2, 'двоє': 2,
                'двох': 2, 'трьох': 3}
 COUNT_TOKEN = r'(?:\d+|один|одна|дві|двоє|три|троє|чотири|четверо|двох|трьох)'
 COUNT_NOUN = r'(?:люд\w*|цивільн\w*|мирн\w*|військовослужбов\w*)'
+# Diagnostic guard: an additional death never establishes the complete total.
+ADDITIONAL_DEATH_PATTERN = (
+    r'\b(?:загинул[аои]?|загинув|померл[аои]?|помер)\s+(?:також|ще)\b'
+    r'|\b(?:також|ще|додатково)\s+(?:загинул[аои]?|загинув|померл[аои]?|помер)\b'
+)
+
 CITY_FORMS = {
     'zaporizhzhia': r'\bзапоріжж(?:я|і|ю|ям)\b',
     'dnipro': r'\bдніпр(?:о|і|а|у|ом)\b',
@@ -192,6 +198,10 @@ def _fatal_total(low):
                  rf'{COUNT_TOKEN}\s+{COUNT_NOUN}\s+загинул\w*'
                  rf'|\bзагинул\w*\s+(?:ще|додатково)\s+{COUNT_TOKEN}\b', low):
         return None
+    # An otherwise parseable earlier total is not the final total when a
+    # later death is explicitly added without a new cumulative total.
+    if re.search(ADDITIONAL_DEATH_PATTERN, low):
+        return None
     nums = []
     patterns = (rf'\bзагинул[аои]?\s+({COUNT_TOKEN})\s+{COUNT_NOUN}',
                 rf'\b({COUNT_TOKEN})\s+{COUNT_NOUN}\s+загинул[аои]?\b')
@@ -279,6 +289,31 @@ def _incident_scopes(low):
                 r'(?:раніше|також|окремо|напередодні|до цього|перед тим|того ж дня)\b'
                 r'[^\n.!?]{0,160}\b(?:атакув\w*|удар\w*|вдарил\w*|обстрілял\w*|влуч\w*)\b)')
     return [part.strip() for part in re.split(boundary, low) if part.strip()]
+
+
+def _fatal_issue(low):
+    """Safe reason code only. Never infer an event total from local sentences."""
+    scopes = _incident_scopes(low)
+    # Fatal claims in separately introduced attacks cannot form one total,
+    # even when their numbers happen to agree.
+    if sum(bool(re.search(r'загиб|загин|помер|смерт', p)) for p in scopes) > 1:
+        return 'MULTIPLE_POSSIBLE_INCIDENTS'
+    if _fatal_total(low) is not None:
+        return 'PARSEABLE_FATAL_TOTAL'
+    if re.search(r'не загинул|без загиблих|не підтвердж|непідтвердж|спростув|'
+                 r'ймовірн|попередн\w* даними|можлив\w* загиб', low):
+        return 'UNCONFIRMED_OR_NEGATED_FATAL_CLAIM'
+    if re.search(ADDITIONAL_DEATH_PATTERN, low):
+        return 'ADDITIONAL_DEATH_REPORTED'
+    # A single local sentence may contain a definite count while the complete
+    # source remains contradictory or qualified. Do not promote that count.
+    values = {_fatal_total(p.strip()) for p in re.split(r'(?<=[.!?])\s+|\n+', low)}
+    values.discard(None)
+    if len(values) > 1:
+        return 'CONFLICTING_FATAL_TOTALS'
+    if values:
+        return 'TOTAL_CONTEXT_UNRESOLVED'
+    return 'NO_PARSEABLE_FATAL_TOTAL'
 
 
 def _civilian_status(low, total):
@@ -374,7 +409,8 @@ def extract_cached_reports(queue, articles, *, diagnostics=None):
             elif re.search(r'помер\w*.{0,45}лікарн|лікарн.{0,45}помер\w*', full_text):
                 reason = 'LATE_DEATH_OFFICIAL_CONFIRMATION_MISSING'
             elif re.search(r'загиб|загин|помер', full_text):
-                reason = 'NO_PARSEABLE_FATAL_TOTAL'
+                issue = _fatal_issue(full_text)
+                reason = issue if issue != 'PARSEABLE_FATAL_TOTAL' else 'NO_PARSEABLE_FATAL_TOTAL'
             else:
                 reason = 'NO_FATAL_CLAIM'
             hold(article, reason, 'fatal_scope')

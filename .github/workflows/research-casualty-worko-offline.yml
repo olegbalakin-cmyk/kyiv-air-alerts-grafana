@@ -1,7 +1,9 @@
 name: CASUALTY Work O parser and evidence offline proof
 on:
   push:
-    branches: [research-casualty-workp-worko-runner-2026-11-14]
+    branches: [research-casualty-workp-worko-runner-2026-11-14, research-casualty-workq-real-excerpts-2026-11-14]
+    paths-ignore:
+      - research/casualty_one_time_capture_2026_11_13/launch.json
   workflow_dispatch:
 permissions:
   contents: read
@@ -125,6 +127,11 @@ jobs:
           assert not (r.HERE/'launch.json').exists()
           print('WORKP_VERIFIED_LOADED_WORKO_BLOBS_AND_CLEAN_LAUNCH_HISTORY')
           PY
+      - name: Work Q saved real excerpts and CI path simulation (no HTTP)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest research.casualty_workq_real_excerpts_2026_11_14.test_workq -v 2>&1 | tee /tmp/worko/workq.log
       - name: Synthetic launch-present suite restores file exactly (no HTTP)
         shell: bash
         run: |
@@ -167,7 +174,7 @@ jobs:
           import hashlib, json, os, re, pathlib
           root=pathlib.Path('/tmp/worko')
           logs={}
-          for name in ['baseline.log','new.log','work-a.log','workp.log']:
+          for name in ['baseline.log','new.log','work-a.log','workp.log','workq.log']:
               p=root/name
               if not p.exists():
                   logs[name]={'status':'MISSING','tests':0,'fail':None,'skip':None}

@@ -25,8 +25,8 @@ EXPECTED_BRANCH = "research-casualty-workp-worko-runner-2026-11-14"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
-    "research/casualty_evidence_ingestion_2026_11_13/ingest.py": "86bc17b1112da1027fca4f0317534c322329b04f",
-    "kyiv-air-alerts-grafana/scripts/casualty_auto_review.py": "76518b35009615b5c29a4455bf0b9c3a3933cab7",
+    "research/casualty_evidence_ingestion_2026_11_13/ingest.py": "ef2bf3b83bcab8d579105865659c58b4ee009b44",
+    "kyiv-air-alerts-grafana/scripts/casualty_auto_review.py": "4d4a8a5ce4b206f6735680b5644826a2cb7318fb",
     "research/casualty_controlled_capture_preflight_2026_11_13/capture_plan.json": "2f45d15b0e79cb11bf8ab605e314436dc0d3ed7c",
 }
 import research.casualty_evidence_ingestion_2026_11_13.ingest as e
