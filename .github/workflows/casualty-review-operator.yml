@@ -2,6 +2,15 @@ name: Human casualty review operator (protected manual)
 
 # Production-intended ONLY. Remains isolated until a separately authorized cutover.
 on:
+  push:
+    branches: [research-casualty-workw-integration-2026-11-14]
+    paths:
+      - ".github/workflows/casualty-review-operator.yml"
+      - ".github/workflows/update.yml"
+      - "kyiv-air-alerts-grafana/scripts/casualty_review_operator.py"
+      - "kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/update_casualties.py"
+      - "research/casualty_workw_integration_2026_11_14/**"
   workflow_dispatch:
     inputs:
       mode:
@@ -79,6 +88,11 @@ jobs:
           mkdir -p "$RUNNER_TEMP/casualty-operator"
           git show "$wip:$QUEUE_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/queue.json"
           git show "$prod:$REVISIONS_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/revisions.csv"
+          # Exact production generator is read-only and SHA-pinned; no main fallback.
+          gen_blob=$(git rev-parse "$prod:kyiv-air-alerts-grafana/scripts/update_casualties.py")
+          test "$gen_blob" = "f5840c201c850b5312db611896b491a69f10e6ec"
+          git show "$prod:kyiv-air-alerts-grafana/scripts/update_casualties.py" > "$RUNNER_TEMP/casualty-operator/pinned_generator.py"
+          echo "GENERATOR_PATH=$RUNNER_TEMP/casualty-operator/pinned_generator.py" >> "$GITHUB_ENV"
           echo "WIP_HEAD=$wip" >> "$GITHUB_ENV"
           echo "PROD_HEAD=$prod" >> "$GITHUB_ENV"
           echo "QUEUE_BLOB=$queue" >> "$GITHUB_ENV"
@@ -90,6 +104,7 @@ jobs:
           python kyiv-air-alerts-grafana/scripts/casualty_review_operator.py preview \
             --queue "$RUNNER_TEMP/casualty-operator/queue.json" \
             --revisions "$RUNNER_TEMP/casualty-operator/revisions.csv" \
+            --generator "$GENERATOR_PATH" \
             --snapshot "$RUNNER_TEMP/casualty-operator/approved-preview.json" \
             --wip-head "$WIP_HEAD" --site-prod-head "$PROD_HEAD" \
             --queue-blob-sha "$QUEUE_BLOB" --revisions-blob-sha "$REVISIONS_BLOB"
@@ -106,7 +121,9 @@ jobs:
     needs: preflight
     # Hard fail-closed rollout flag, independent of the GitHub environment.
     # An administrator must deliberately enable it only AFTER proving required reviewers.
+    # Work W hard block; owner GO and new approval require separate authorized change.
     if: >-
+      false &&
       github.event_name == 'workflow_dispatch' &&
       github.ref == 'refs/heads/main' &&
       inputs.mode != 'INSPECT' &&
@@ -147,6 +164,11 @@ jobs:
           test "$pinned" = "57c67af1ce108222c9a8dc0fefe34d67f9d0e23e"
           git show "$wip:$QUEUE_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/queue.json"
           git show "$prod:$REVISIONS_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/revisions.csv"
+          # Exact production generator is read-only and SHA-pinned; no main fallback.
+          gen_blob=$(git rev-parse "$prod:kyiv-air-alerts-grafana/scripts/update_casualties.py")
+          test "$gen_blob" = "f5840c201c850b5312db611896b491a69f10e6ec"
+          git show "$prod:kyiv-air-alerts-grafana/scripts/update_casualties.py" > "$RUNNER_TEMP/casualty-operator/pinned_generator.py"
+          echo "GENERATOR_PATH=$RUNNER_TEMP/casualty-operator/pinned_generator.py" >> "$GITHUB_ENV"
           echo "WIP_HEAD=$wip" >> "$GITHUB_ENV"
           echo "PROD_HEAD=$prod" >> "$GITHUB_ENV"
           echo "QUEUE_BLOB=$queue" >> "$GITHUB_ENV"
@@ -158,6 +180,7 @@ jobs:
           python kyiv-air-alerts-grafana/scripts/casualty_review_operator.py apply \
             --queue "$RUNNER_TEMP/casualty-operator/queue.json" \
             --revisions "$RUNNER_TEMP/casualty-operator/revisions.csv" \
+            --generator "$GENERATOR_PATH" \
             --snapshot "$RUNNER_TEMP/casualty-operator/approved-preview.json" \
             --wip-head "$WIP_HEAD" --site-prod-head "$PROD_HEAD" \
             --queue-blob-sha "$QUEUE_BLOB" --revisions-blob-sha "$REVISIONS_BLOB"
@@ -194,3 +217,131 @@ jobs:
           git commit -m "Human casualty $mode: approved run $GITHUB_RUN_ID"
           # Never force, rebase, merge, amend, or retry by updating to a newer head.
           git push origin "HEAD:refs/heads/$target_branch"
+
+  offline_contract:
+    name: Work W physical offline reviewer-operator-generator contract
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-workw-integration-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/checkout@v4
+        with:
+          ref: 5e8c161735e46d56e16300fd208350a69483dd92
+          path: _site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: b1d7a133472d2c619e0cff1f6808fe544a80ed70
+          path: _wip
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43290975899
+          name: casualty-e2e-shadow-proof
+          path: /tmp/casualty-pr105-proven
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Verify snapshot SHAs and production-write safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 413d34acd3bf664aebb821ffe3c0b022906299e0
+          test "$(git -C _site rev-parse HEAD)" = 5e8c161735e46d56e16300fd208350a69483dd92
+          test "$(git -C _wip rev-parse HEAD)" = b1d7a133472d2c619e0cff1f6808fe544a80ed70
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py)" = 8de66c70ed648c961c05dccdaf0097a465982be0
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/casualty_review_operator.py)" = 83c73ae38ec2fec044085c3b156f5ba45521a594
+          test "$(git -C _site rev-parse HEAD:kyiv-air-alerts-grafana/scripts/update_casualties.py)" = f5840c201c850b5312db611896b491a69f10e6ec
+          test "$(git -C _site rev-parse HEAD:kyiv-air-alerts-grafana/data/casualties/revisions.csv)" = 8d7a2e2540bf4bf0f8c6227023821390bf82ce13
+          test "$(git -C _wip rev-parse HEAD:kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json)" = 8ce21876d000332f47b405f6927484c89d76bbe8
+          python - <<'PY'
+          from pathlib import Path
+          import importlib.util, tempfile
+          wf=Path(".github/workflows/casualty-review-operator.yml").read_text()
+          old=Path(".github/workflows/update.yml").read_text()
+          assert "      false &&" in wf
+          assert "vars.CASUALTY_OPERATOR_APPROVAL_VERIFIED == 'true'" in wf
+          assert wf.count('test "$gen_blob" = "f5840c201c850b5312db611896b491a69f10e6ec"') == 2
+          assert wf.count('--generator "$GENERATOR_PATH"') == 2
+          assert "if: $" + "{{ false }}" in old
+          assert 'if: github.event_name == ' + "'workflow_dispatch'" + ' && github.ref == ' + "'refs/heads/main'" in wf
+          legacy=Path("kyiv-air-alerts-grafana/scripts/update_casualties.py")
+          spec=importlib.util.spec_from_file_location("workw_legacy_guard",legacy)
+          mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+          with tempfile.TemporaryDirectory(prefix="workw-legacy-deny-") as td:
+              p=Path(td)/"revisions.csv"
+              p.write_text("record_id,city_key,observed_at,attack_date,deaths_delta,status,incident_id,count_kind,baseline_credited,identity_proof,credited_proof\n",encoding="utf-8")
+              mod.REVISIONS_FILE=p
+              try: mod.load_revisions()
+              except RuntimeError as exc: assert "LEGACY_CASUALTY_GENERATOR_BLOCKED" in str(exc)
+              else: raise AssertionError("Legacy generator incorrectly allowed incident-aware schema")
+          print("WORKW_PIN_WIRED_AND_MUTATION_HARD_OFF=PASS; LEGACY_FAIL_CLOSED=PASS")
+          PY
+      - name: Physical REVIEW, staged PROMOTE, cumulative dedup, actual production CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          proposal=$(find /tmp/casualty-pr105-proven -type f -path '*/casualty-first/proposals.json' -print -quit)
+          if [ -z "$proposal" ]; then
+            proposal=$(find /tmp/casualty-pr105-proven -type f -name proposals.json -print -quit)
+          fi
+          test -s "$proposal"
+          mkdir -p /tmp/casualty-workw
+          python research/casualty_workw_integration_2026_11_14/workv_contract_e2e.py \
+            --site _site --proposal "$proposal" --output /tmp/casualty-workw
+          python - <<'PY'
+          import json,hashlib,pathlib,subprocess
+          out=pathlib.Path('/tmp/casualty-workw')
+          data=json.loads((out/'result.json').read_text())
+          assert data['status']=='PASS' and data['latest_total']==23
+          assert data['replay_increment']==0 and data['other_22_cities_unchanged']
+          assert data['production_mutations']==0 and data['external_http_requests']==0
+          assert all(x['result']=='BLOCKED' for x in data['blocked'].values())
+          assert data['legacy_sumy_unchanged'] and data['generator_invoked']
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          assert json.loads((out/'sha256_manifest.json').read_text())['result.json']==sha(out/'result.json')
+          git=lambda *args:subprocess.check_output(['git',*args],text=True).strip()
+          proof={
+            'status':'PASS','scope':'OFFLINE_SIMULATION_ONLY',
+            'integration_head':git('rev-parse','HEAD'),
+            'base_main_head':git('rev-parse','HEAD^'),
+            'site_prod_head':git('-C','_site','rev-parse','HEAD'),
+            'wip_head':git('-C','_wip','rev-parse','HEAD'),
+            'production_generator_blob':git('-C','_site','rev-parse','HEAD:kyiv-air-alerts-grafana/scripts/update_casualties.py'),
+            'wip_queue_blob':git('-C','_wip','rev-parse','HEAD:kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json'),
+            'site_revisions_blob':git('-C','_site','rev-parse','HEAD:kyiv-air-alerts-grafana/data/casualties/revisions.csv'),
+            'operator_blob':git('rev-parse','HEAD:kyiv-air-alerts-grafana/scripts/casualty_review_operator.py'),
+            'reviewer_blob':git('rev-parse','HEAD:kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py'),
+            'effective_progression':data['effective_progression'],
+            'replay_increment':0,'missing_proof_and_baseline':'BLOCKED',
+            'T03_T05':'NEEDS_REVIEW_NO_REAL_CREDIT',
+            'sumy_plus_1_preserved':True,'other_22_cities_unchanged':True,
+            'update_yml_legacy_casualty_step':'DISABLED',
+            'main_legacy_incident_schema':'FAIL_CLOSED',
+            'protected_mutation':'HARD_DISABLED',
+            'source_http_requests':0,'production_mutations':0,
+            'workv_result_sha256':sha(out/'result.json')
+          }
+          (out/'integration_result.json').write_text(json.dumps(proof,indent=2,sort_keys=True)+'\n')
+          files=['result.json','integration_result.json']
+          (out/'sha256_manifest.json').write_text(json.dumps({p:sha(out/p) for p in files},indent=2,sort_keys=True)+'\n')
+          assert all(sha(out/p)==v for p,v in json.loads((out/'sha256_manifest.json').read_text()).items())
+          print('WORKW_PHYSICAL_OFFLINE_INTEGRATION=PASS',sha(out/'integration_result.json'))
+          PY
+      - name: Upload offline proof and SHA manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workw-integration-proof
+          path: /tmp/casualty-workw/*.json
+          if-no-files-found: error
+          retention-days: 30

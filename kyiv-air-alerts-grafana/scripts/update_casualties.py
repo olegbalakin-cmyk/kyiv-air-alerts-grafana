@@ -153,6 +153,15 @@ def load_revisions() -> list[dict]:
     seen_ids = set()
     with REVISIONS_FILE.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
+        # Work W: this legacy generator must never sum incident-aware revisions.
+        if set(reader.fieldnames or ()) & {
+            "incident_id", "count_kind", "baseline_credited",
+            "identity_proof", "credited_proof",
+        }:
+            raise RuntimeError(
+                "LEGACY_CASUALTY_GENERATOR_BLOCKED: incident-aware revisions require "
+                "the separately approved pinned production generator"
+            )
         for row in reader:
             record_id = (row.get("record_id") or "").strip()
             if not record_id:
