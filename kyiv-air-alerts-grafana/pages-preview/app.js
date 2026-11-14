@@ -2652,6 +2652,7 @@ function renderCity() {
     intensityDatasets.push({
       type: "bar",
       label: tr("Прогноз · години / добу (EWMA 0,3)", "Forecast · hours / day (EWMA 0.3)"),
+      _isForecast: true,
       data: rows.map(() => null).concat(projectedRows.map(r => r.avg_daily_alert_hours)),
       yAxisID: "yHours",
       backgroundColor: "#62a0ea55",
@@ -2662,6 +2663,7 @@ function renderCity() {
     intensityDatasets.push({
       type: "line",
       label: tr("Прогноз · тривоги / день (EWMA 0,3)", "Forecast · alerts / day (EWMA 0.3)"),
+      _isForecast: true,
       data: rows.map(() => null).concat(projectedRows.map(r => r.alerts_per_day)),
       yAxisID: "yAlerts",
       borderColor: "#b8ffc5",
@@ -2713,8 +2715,8 @@ function renderCity() {
 
   if (intensitySubtitle && projectedRows.length) {
     intensitySubtitle.textContent += " " + tr(
-      "Останній штрихований стовпчик — експериментальний прогноз на наступний період (EWMA 0,3). Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
-      "The final outlined bar is an experimental forecast for the next period (EWMA 0.3), not a warning of future attacks. Incomplete periods are excluded from the calculation."
+      "Останній штрихований стовпчик — експериментальний прогноз на наступний період. EWMA 0,3: останнє спостереження має вагу 30%, попередня згладжена оцінка — 70%. Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
+      "The final outlined bar is an experimental forecast for the next period. EWMA 0.3: the latest observation has 30% weight, the previous smoothed estimate 70%. This is not a warning of future attacks. Incomplete periods are excluded from the calculation."
     );
   }
 
@@ -2731,10 +2733,25 @@ function renderCity() {
       animation: false,
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        legend: {
+          labels: {
+            color: TEXT, boxWidth: 14, usePointStyle: true,
+            // Forecast is identified by its outline and point tooltip, not
+            // by a separate legend control for a single forecast observation.
+            filter(item, data) {
+              return !data.datasets[item.datasetIndex]?._isForecast;
+            }
+          }
+        },
         tooltip: {
           mode: "index",
           intersect: false,
+          // Prevent forecast-null entries appearing as zeros on actual dates.
+          filter(context) {
+            const forecastPoint = context.dataIndex >= rows.length;
+            return Boolean(context.dataset._isForecast) === forecastPoint &&
+              Number.isFinite(context.parsed?.y);
+          },
           callbacks: {
             label(context) {
               if (context.dataset.yAxisID === "yHours") {
