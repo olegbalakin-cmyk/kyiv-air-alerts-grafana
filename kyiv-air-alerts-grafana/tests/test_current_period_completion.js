@@ -31,6 +31,12 @@ assert.equal(F.estimate(history,"quarterly","2026-10-14"),null); // 13 complete 
 assert.equal(F.estimate(history,"calendarWeekly","2026-11-10"),null); // index is not yesterday
 assert(app.includes('window.PeriodCompletionPreview?.estimate('));
 assert(app.includes('const completionPeriod = ["calendarWeekly","monthly","quarterly"]'));
+assert(app.includes('trendControl.classList.toggle("hidden", !completionVisible)'),"trend only on current calendar periods");
+assert(!app.includes("QuarterRollingPreview?.rollingForecast("),"no rolling next-period forecast invocation");
+assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period forecast invocation");
+assert(!app.includes("projectedRows"),"no additional future bar");
+assert(!app.includes("_isForecast: true"),"no future-period dataset");
+assert(!app.includes("forecastIndices"),"no extra forecast axis labels");
 assert(app.includes('if (completion) {'));
 assert(app.includes('periodCompletionHatchPlugin'));
 assert(app.includes('stacked:Boolean(completion)'));
