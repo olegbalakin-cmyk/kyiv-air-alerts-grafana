@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-14. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
+Latest UI: **UI-CURRENT-PERIOD-COMPLETION-PROD-2026-11-14**; C6: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
 
 ## Working instructions
 
@@ -14,7 +14,7 @@ Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [
 
 ## Current tracks and open release gates
 
-- **Production UI:** owner-approved frontend-only quarterly/rolling release LIVE via PR #148, `site-prod@c66b9779`, Netlify `6af8808e75d3ca5d1aef8d8e`, Actions #43611233805 SUCCESS with HTTP parity 23/23. Git data source unchanged, Neon OFF. **Next:** owner re-lock Netlify auto-publishing; Git 4-hour data updates remain separate.
+- **Production UI:** owner-approved opt-in completion of current day/week/month/quarter LIVE via PR #152, `site-prod@c980c3f7`, Netlify `6af8b9cd9e5cf4983bbb407e`, Actions #43633525080 SUCCESS, HTTP parity/index 23/23. No next-period bar. **Next:** owner re-lock Netlify auto-publishing; Git 4-hour updates remain separate.
 - **Neon reader / historical parity:** frozen 23-city [proof 741f277f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03), 0 unexplained diffs; no current full continuity PASS.
 - **Live writer / provenance:** C2 #43055353190 `NEON_SUCCEEDED`, 33,135 episodes (69 inserted), 23/23 checkpoints match run/attempt/workflow SHA. Sevastopol checkpoint advanced; its historical alert `25006→25008` remains unresolved.
 - **23-city generator / publication:** first real post-merge same-run export PASS (`C2 ZIP SHA-256=ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, artifact `13873291895`, manifest SHA `f6462093...3e433`); no `CAPTURE_NAIVE_TIMESTAMP`. Independent Neon→JSON readback still OPEN.
@@ -32,6 +32,11 @@ Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-CURRENT-PERIOD-COMPLETION-PROD-2026-11-14 — owner GO, served Netlify PASS
+
+- Owner-approved [PR #152](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/152) → `site-prod@c980c3f70ed894d2583fc83ecdedd1f82c04afb1` (base `f67ee699`), **six frontend/test files only**, current Git data unchanged. Opt-in trend estimates completion of today (28-day), current calendar week, month, quarter as measured + hatched remaining time using 28 complete days, source clock and real Kyiv hours cap. No next-period bars; actual KPI unchanged.
+- Current-data offline [#43633376211](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43633376211) SUCCESS (12 JS tests, 23/23 index, data parity); production [Actions #43633525080](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43633525080) SUCCESS, artifact #14128579418 SHA-256 `8417981d8cc5c8e0467ba6a923aa12842c8f52f78e1555db53e3ddb027c9b383`, Netlify `6af8b9cd9e5cf4983bbb407e` READY, served JS parity and historical index 23/23. Source C2/Neon/casualty untouched. **Next:** owner re-lock Netlify auto publishing; keep Git 4-hour updates.
+
 ## UI-QUARTER-ROLLING-PROD-2026-11-14 — frontend-only release PASS (2026-11-14)
 
 - Owner-approved [PR #148](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/148) merged to `site-prod@c66b977930fbbbbe739efea60d474b04b2b002ea`. [Production Actions #43611233805](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43611233805) SUCCESS, published static Git-only frontend and verified served `app.js` parity, HTTP 200, KPI 23/23. Netlify deploy `6af8808e75d3ca5d1aef8d8e` READY. Deploy artifact #14120062823, SHA-256 `0a328711d187cf2f9483b03a19eb522ac297e28ba419292de7668652dc479511`.
