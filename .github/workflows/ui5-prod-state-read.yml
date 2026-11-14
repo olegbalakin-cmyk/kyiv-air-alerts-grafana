@@ -1,0 +1,20 @@
+name: UI5 read-only production workflow state
+on:
+  push:
+    branches: [release-ui5-integrated-2026-11-14]
+    paths: [.github/workflows/ui5-prod-state-read.yml]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read disabled production workflow and exact site-prod SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/netlify-production.yml" --jq '{id,name,path,state}'
+          gh api "repos/$GITHUB_REPOSITORY/branches/site-prod" --jq '.commit.sha'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=site-prod&per_page=3" --jq '[.workflow_runs[]|{id,name,status,conclusion,head_sha}]'
