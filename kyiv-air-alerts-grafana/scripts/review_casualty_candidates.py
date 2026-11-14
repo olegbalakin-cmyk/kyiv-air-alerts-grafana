@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -26,6 +27,11 @@ REVISION_FIELDS = [
     "source_url",
     "note",
     "candidate_ids",
+    "incident_id",
+    "count_kind",
+    "baseline_credited",
+    "identity_proof",
+    "credited_proof",
 ]
 
 
@@ -40,10 +46,13 @@ def atomic_write_csv(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     with tmp.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=REVISION_FIELDS)
+        # Preserve unfamiliar future columns rather than silently erasing them.
+        fields = list(REVISION_FIELDS)
+        fields.extend(sorted({key for row in rows for key in row if key not in fields}))
+        writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            writer.writerow({field: row.get(field, "") for field in REVISION_FIELDS})
+            writer.writerow({field: row.get(field, "") for field in fields})
     tmp.replace(path)
 
 
@@ -71,7 +80,13 @@ def load_revision_rows(path: Path) -> list[dict]:
             if record_id in seen:
                 raise RuntimeError(f"Duplicate casualty revision record_id: {record_id}")
             seen.add(record_id)
+            if None in raw:
+                raise RuntimeError("Malformed casualty revision CSV: excess unnamed columns")
             row = {field: (raw.get(field) or "").strip() for field in REVISION_FIELDS}
+            # Existing extra fields must survive a later PROMOTE rewrite intact.
+            for field in reader.fieldnames or ():
+                if field not in row:
+                    row[field] = raw.get(field) or ""
             rows.append(row)
     return rows
 
@@ -87,12 +102,55 @@ def _validate_source(source_name: str | None, source_url: str | None) -> tuple[s
     return name, url
 
 
+
+_DEDUP_ID = re.compile(r"incident:[a-z0-9][a-z0-9:_-]{7,119}\Z")
+_DEDUP_PROOF = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\\s]+)\Z")
+_BASELINE = re.compile(r"(?:0|[1-9][0-9]*)\Z")
+
+
+def _validate_dedup_contract(
+    incident_id: str | None,
+    count_kind: str | None,
+    baseline_credited: str | int | None,
+    identity_proof: str | None,
+    credited_proof: str | None,
+) -> dict:
+    """Require the exact evidence contract for every NEW confirmation.
+
+    Proof handles are NOT verification of the underlying source facts.
+    A reviewer must independently establish identity and prior credit.
+    """
+    incident = str(incident_id or "").strip()
+    kind = str(count_kind or "").strip()
+    baseline = str(baseline_credited) if baseline_credited is not None else ""
+    identity = str(identity_proof or "").strip()
+    credit = str(credited_proof or "").strip()
+    if not _DEDUP_ID.fullmatch(incident):
+        raise ValueError("confirmed disposition requires valid incident_id")
+    if kind not in {"cumulative", "delta"}:
+        raise ValueError("confirmed disposition requires count_kind cumulative/delta")
+    if not _BASELINE.fullmatch(baseline):
+        raise ValueError("confirmed disposition requires documented baseline_credited")
+    if not _DEDUP_PROOF.fullmatch(identity):
+        raise ValueError("confirmed disposition requires immutable identity_proof")
+    if not _DEDUP_PROOF.fullmatch(credit):
+        raise ValueError("confirmed disposition requires immutable credited_proof")
+    return {"incident_id": incident, "count_kind": kind,
+            "baseline_credited": baseline, "identity_proof": identity,
+            "credited_proof": credit}
+
+
 def _validate_confirmation(
     record_id: str | None,
     attack_date: str | None,
     deaths_delta: int | str | None,
     source_name: str | None,
     source_url: str | None,
+    incident_id: str | None = None,
+    count_kind: str | None = None,
+    baseline_credited: str | int | None = None,
+    identity_proof: str | None = None,
+    credited_proof: str | None = None,
 ) -> dict:
     canonical_id = (record_id or "").strip()
     if not canonical_id:
@@ -115,6 +173,8 @@ def _validate_confirmation(
         "deaths_delta": delta,
         "source_name": source,
         "source_url": url,
+        **_validate_dedup_contract(incident_id, count_kind, baseline_credited,
+                                   identity_proof, credited_proof),
     }
 
 
@@ -129,6 +189,11 @@ def review_candidate(
     deaths_delta: int | str | None = None,
     source_name: str | None = None,
     source_url: str | None = None,
+    incident_id: str | None = None,
+    count_kind: str | None = None,
+    baseline_credited: str | int | None = None,
+    identity_proof: str | None = None,
+    credited_proof: str | None = None,
     note: str | None = None,
     reviewed_at: str | None = None,
     reviewed_by: str | None = None,
@@ -179,6 +244,8 @@ def review_candidate(
                 deaths_delta,
                 source_name,
                 source_url,
+                incident_id, count_kind, baseline_credited,
+                identity_proof, credited_proof,
             )
         )
 
@@ -282,6 +349,9 @@ def _validated_confirmed_disposition(candidate: dict) -> dict:
         disposition.get("deaths_delta"),
         disposition.get("source_name"),
         disposition.get("source_url"),
+        disposition.get("incident_id"), disposition.get("count_kind"),
+        disposition.get("baseline_credited"), disposition.get("identity_proof"),
+        disposition.get("credited_proof"),
     )
     validated["candidate_id"] = candidate_id
     validated["city_key"] = city_key
@@ -337,6 +407,9 @@ def promote_reviewed(
                 "source_url": reviewed["source_url"],
                 "note": reviewed["note"],
                 "candidate_ids": reviewed["candidate_id"],
+                **{key: reviewed[key] for key in (
+                    "incident_id", "count_kind", "baseline_credited",
+                    "identity_proof", "credited_proof")},
             }
             rows.append(row)
             by_record[record_id] = row
@@ -350,6 +423,9 @@ def promote_reviewed(
             "attack_date": reviewed["attack_date"],
             "deaths_delta": str(reviewed["deaths_delta"]),
             "status": "confirmed",
+            **{key: reviewed[key] for key in (
+                "incident_id", "count_kind", "baseline_credited",
+                "identity_proof", "credited_proof")},
         }
         conflicts = {
             field: (existing.get(field), expected)
@@ -397,6 +473,9 @@ def parse_args() -> argparse.Namespace:
     review.add_argument("--deaths-delta", type=int)
     review.add_argument("--source-name")
     review.add_argument("--source-url")
+    for field in ("incident-id", "count-kind", "baseline-credited",
+                  "identity-proof", "credited-proof"):
+        review.add_argument("--" + field)
     review.add_argument("--note")
 
     sub.add_parser(
@@ -419,6 +498,11 @@ def main() -> None:
             deaths_delta=args.deaths_delta,
             source_name=args.source_name,
             source_url=args.source_url,
+            incident_id=args.incident_id,
+            count_kind=args.count_kind,
+            baseline_credited=args.baseline_credited,
+            identity_proof=args.identity_proof,
+            credited_proof=args.credited_proof,
             note=args.note,
         )
     else:

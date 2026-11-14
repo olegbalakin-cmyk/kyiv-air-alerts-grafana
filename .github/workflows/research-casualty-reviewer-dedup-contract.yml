@@ -1,0 +1,58 @@
+name: CASUALTY reviewer dedup contract (offline only)
+on:
+  push:
+    branches: [research-casualty-reviewer-dedup-contract-2026-11-12]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/casualty_review_operator.py"
+      - "research/casualty_reviewer_dedup_contract_2026_11_12/**"
+      - ".github/workflows/research-casualty-reviewer-dedup-contract.yml"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  exact-head-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43290975899
+          name: casualty-e2e-shadow-proof
+          path: /tmp/casualty-worka-proof
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pinned code and syntax (no collector / publisher HTTP)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          python -m py_compile kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py kyiv-air-alerts-grafana/scripts/casualty_review_operator.py
+          python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Actual Work A proposal through protected review and generator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/casualty_reviewer_dedup_contract_2026_11_12/test_contract.py \
+            --artifact /tmp/casualty-worka-proof \
+            --site _site/kyiv-air-alerts-grafana \
+            --report /tmp/casualty-workc-proof
+          test -z "$(git status --porcelain --untracked-files=no)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-reviewer-dedup-contract-proof
+          path: /tmp/casualty-workc-proof/
+          if-no-files-found: warn
+          retention-days: 30
