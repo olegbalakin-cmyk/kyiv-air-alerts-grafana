@@ -1,0 +1,203 @@
+name: CASUALTY Work F integrated shadow proof (offline)
+on:
+  push:
+    branches: [research-casualty-integrated-e2e-workf-2026-11-13]
+    paths:
+      - ".github/workflows/research-casualty-integrated-e2e.yml"
+      - "research/casualty_integrated_e2e_2026_11_13/**"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  integrated-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 6b44b9766fdbe2cd2d65a20413d08f4f5ca91916
+          path: _worke
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fb3dcb7ad96f4265c7ee6455812ea53fdde0cf17
+          path: _workc
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 62aef3645c4bdc89940bc1ba05abe23c08d23142
+          path: _workd
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          path: _wip
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          path: _site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: f0cfcbc862ca3dbf1b853e72de07ffcf6042856f
+          path: _current
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          path: _matrix
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43053796144
+          name: casualty-three-new-original-publisher-excerpts-one-shot
+          path: /tmp/workf-original
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43261676781
+          name: casualty-zap11-approved-http-43261676781-1
+          path: /tmp/workf-receipts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Pins, original evidence and component regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _worke rev-parse HEAD)" = 6b44b9766fdbe2cd2d65a20413d08f4f5ca91916
+          test "$(git -C _workc rev-parse HEAD)" = fb3dcb7ad96f4265c7ee6455812ea53fdde0cf17
+          test "$(git -C _workd rev-parse HEAD)" = 62aef3645c4bdc89940bc1ba05abe23c08d23142
+          test "$(git -C _site rev-parse HEAD)" = d0a7d22de2828c93236562cccc9d2e68c6a66e3d
+          test "$(git -C _current rev-parse HEAD)" = f0cfcbc862ca3dbf1b853e72de07ffcf6042856f
+          test "$(git -C _wip rev-parse HEAD)" = 43b580491d54d1df3bd84a0ae59a6987f8ea4d03
+          test "$(git -C _matrix rev-parse HEAD)" = 34bc539d0c7abb8af4f699b2e2c9ecec4b668397
+          echo "84ffea1315d41b8ec67b55a07273d6bbd7d6e8e14191801402168f7fddf4e5df  /tmp/workf-original/evidence.json" | sha256sum -c -
+          echo "4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b  /tmp/workf-receipts/capture_receipts.json" | sha256sum -c -
+          python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+          python -m unittest discover -s _worke/research/casualty_evidence_ingestion_2026_11_13 -p test_ingest.py -v
+          python -m unittest discover -s _worke/research/casualty_e2e_shadow_2026_11_12 -p test_pipeline.py -v
+          python -m py_compile _workc/kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py _workc/kyiv-air-alerts-grafana/scripts/casualty_review_operator.py
+          python -m py_compile research/casualty_integrated_e2e_2026_11_13/promote_generator.py
+      - name: Physical original text -> Work E -> Work A
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/workf-ingest /tmp/workf-worka
+          common=(
+            --queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+            --evidence /tmp/workf-original/evidence.json
+            --receipts /tmp/workf-receipts/capture_receipts.json
+            --matrix _matrix/research/casualty_zaporizhzhia_additional_events_2026_11_12/verification_matrix.json
+          )
+          python _worke/research/casualty_evidence_ingestion_2026_11_13/ingest.py "${common[@]}" --output /tmp/workf-ingest
+          python _worke/research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" \
+            --revisions _site/kyiv-air-alerts-grafana/data/casualties/revisions.csv \
+            --baseline _worke/research/casualty_automated_review_2026_11_10/baseline_coverage.json \
+            --city-manifest _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json \
+            --city-csv _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv \
+            --generator _site/kyiv-air-alerts-grafana/scripts/update_casualties.py \
+            --dashboard _site/kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --ingested-reports /tmp/workf-ingest/work_a_reports.json \
+            --output /tmp/workf-worka
+          python _worke/research/casualty_evidence_ingestion_2026_11_13/verify_proof.py /tmp/workf-ingest /tmp/workf-worka
+      - name: Actual Work C guarded scratch REVIEW/PROMOTE -> unchanged generator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/casualty_integrated_e2e_2026_11_13/promote_generator.py \
+            --proposals /tmp/workf-worka/proposals.json \
+            --fact-cards /tmp/workf-ingest/fact_cards.json \
+            --candidate-decisions /tmp/workf-worka/candidate_decisions.json \
+            --summary /tmp/workf-worka/summary.json \
+            --wip-queue _wip/kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json \
+            --site-root _site/kyiv-air-alerts-grafana \
+            --current-root _current/kyiv-air-alerts-grafana \
+            --workc-root _workc/kyiv-air-alerts-grafana \
+            --city-manifest _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json \
+            --city-csv _site/kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv \
+            --output /tmp/workf-integrated
+      - name: Work C software safety scenarios again on integrated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/workf-workc-regression
+          python _workc/research/casualty_reviewer_dedup_contract_2026_11_12/test_contract.py \
+            --artifact /tmp/workf-worka \
+            --site _site/kyiv-air-alerts-grafana \
+            --report /tmp/workf-workc-regression
+          grep -q 'VERDICT=REVIEWER_CONTRACT_PASS' /tmp/workf-workc-regression/CHECKS.txt
+      - name: Work D bridge from post-PROMOTE generator (not Work A fixture)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python _workd/research/casualty_generator_display_2026_11_12/bridge.py \
+            --dashboard _site/kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --generator-probe /tmp/workf-integrated/generator_probe_after_promote.json \
+            --proposals /tmp/workf-worka/proposals.json \
+            --decision _workd/research/casualty_generator_display_2026_11_12/coverage_decision.json \
+            --generator _site/kyiv-air-alerts-grafana/scripts/update_casualties.py \
+            --revisions _site/kyiv-air-alerts-grafana/data/casualties/revisions.csv \
+            --output /tmp/workf-qualified.json \
+            --proof /tmp/workf-display-bridge.json
+          python _workd/research/casualty_generator_display_2026_11_12/test_bridge.py \
+            /tmp/workf-qualified.json \
+            /tmp/workf-display-bridge.json \
+            /tmp/workf-integrated/generator_probe_after_promote.json
+      - name: Local-only desktop/mobile Chromium display and exports
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.64.1 chart.js@4.4.7
+          npx playwright install --with-deps chromium
+          python _workd/research/casualty_generator_display_2026_11_12/prepare_local_preview.py \
+            --site-root _site/kyiv-air-alerts-grafana \
+            --chart-js node_modules/chart.js/dist/chart.umd.js \
+            --shadow-dashboard /tmp/workf-qualified.json \
+            --preview /tmp/workf-preview \
+            --rollback /tmp/workf-rollback
+          PREVIEW_DIR=/tmp/workf-preview \
+          ROLLBACK_DIR=/tmp/workf-rollback \
+          PROOF_DIR=/tmp/workf-browser \
+          node _workd/research/casualty_generator_display_2026_11_12/browser_qa.js \
+            | tee /tmp/workf-browser-checks.txt
+          grep -q 'BROWSER_CHECKS_FAIL=0' /tmp/workf-browser-checks.txt
+      - name: Immutable snapshots and compact result hash manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in _site _current _workc _workd _worke _wip _matrix; do
+            test -z "$(git -C "$path" status --porcelain --untracked-files=no)"
+          done
+          python research/casualty_integrated_e2e_2026_11_13/verify_final.py \
+            /tmp/workf-ingest /tmp/workf-worka /tmp/workf-integrated \
+            /tmp/workf-qualified.json /tmp/workf-display-bridge.json \
+            /tmp/workf-browser-checks.txt /tmp/workf-workc-regression \
+            /tmp/workf-proof-manifest.json
+          sha256sum /tmp/workf-proof-manifest.json
+      - name: Upload actual integrated proof only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workf-integrated-shadow-proof
+          path: |
+            /tmp/workf-ingest/*.json
+            /tmp/workf-worka/{summary,proposals,attack_decisions,generator_probe,manifest}.json
+            /tmp/workf-integrated/*.json
+            /tmp/workf-integrated/promoted_revisions.csv
+            /tmp/workf-display-bridge.json
+            /tmp/workf-qualified.json
+            /tmp/workf-browser-checks.txt
+            /tmp/workf-browser/**
+            /tmp/workf-workc-regression/**
+            /tmp/workf-proof-manifest.json
+          if-no-files-found: warn
+          retention-days: 30
