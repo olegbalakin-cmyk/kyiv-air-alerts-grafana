@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-14. Latest accepted: C6-C3-PILOT2-CHECKOUT-ROOT-FAIL-PROVEN-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-C3-MERGE134-CHECKOUT-ROOT-FIX-STAGED-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
@@ -9,17 +9,23 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Histori
 - Historical Neon cutover PASS; `GLOBAL_CUTOVER=YES`. Git `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb`; Netlify `6af76b2d67c5074986728b62` ready/locked. [Work S receipt](docs/work-s-final-execution-2026-11-13.json). No automatic updates or live-status certification.
 - Manual pilot [#43510482714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510482714) failed at step 46 `capture()`; C2 writer PASS: 33,444 episodes (+129), 23 cities, zero Git publication. Root cause unproven.
 - Diagnostic-only [PR #130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/130) merged `main@9576dd06beb6b905f5fc4001672e524ed0ba5d0b`; exact-head offline CI PASS, fixed reason allowlist. No physical fix proven.
-- Freeze: legacy pause=true and AUTO flag OFF at owner preflight; Netlify workflow disabled and production deploy locked. Updater was temporarily enabled for pilot; its present disabled state requires owner UI confirmation. Manual pilot authorization consumed; no repeat and no auto-schedule grant.
+- Freeze: legacy pause=true, AUTO flag OFF; owner screenshot confirmed updater disabled manually after second pilot, Netlify workflow disabled and current production deploy locked. One-time pilot authorization consumed; no repeat or auto-schedule grant.
 - Owner-approved [PR #133](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/133) merged `main@5606147a955b64e17474688c6a13596b21d93580`, offline CI PASS; pre-capture redacted Git status added. Physical second pilot [#43523629106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43523629106) C2/Neon PASS, capture FAIL: `C6_BLOCK_REASON=C2_CHECKPOINTS_MISSING`, despite checkpoint blob at site-prod Git root nested data path. Pre-capture reported correct HEAD/branch but scoped changes 0 / checkpoint missing. No Git publication; static production unchanged.
-- Root cause for second failure proven: capture used `$GITHUB_WORKSPACE/kyiv-air-alerts-grafana` instead of `$GITHUB_WORKSPACE`, although script `PREFIX` expects repo-root-relative nested path. Minimal correction staged only in [Draft PR #134](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/134), HEAD `cc1ab14fda62b441883792b39d721230d0e2e165`; C6 offline and timestamp CI PASS; not merged.
+- Root cause for second failure proven: `capture()` used nested checkout instead of repository root. [PR #134](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/134) source `cc1ab14fda62b441883792b39d721230d0e2e165`, exact-head three CI PASS, squash-merged to `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`. Two script invocations now use `$GITHUB_WORKSPACE` with regression coverage; no physical Git publication yet.
 
 ## Next
 
-- Stop all live pilots: one-time grant consumed. Owner should verify `Update Ukraine air-alert production data` manually DISABLED after the run. Keep legacy publisher paused, AUTO flag OFF, Netlify locked and its deployment workflow disabled. Review PR #134 offline tests/coordination CI and only then consider separately authorized merge; physical repilot requires a new explicit owner GO. Casualty/WIP/DST separate.
+- Keep both production workflows disabled, legacy publisher paused, AUTO flag OFF and Netlify locked. PR #134 is merged, but physical Neon→Git publication remains unproven. One-time pilot grant was consumed: require fresh owner GO and fresh gates before a new manual pilot; no automatic schedule and no unrelated casualty/WIP/DST changes.
 
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-C3-MERGE134-CHECKOUT-ROOT-FIX-STAGED-01 — approved checkout-root fix merged; publication still pending (2026-11-14)
+
+- Owner screenshot confirms `Update Ukraine air-alert production data` manually disabled after failed pilot. Other prior gates: legacy publisher pause=true, new AUTO flag absent, Netlify workflow manually disabled; current Netlify ID `6af76b2d67c5074986728b62` independently ready/locked, `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb` unchanged. No active/queued/waiting/pending/requested Actions at pre-merge gate.
+- [PR #134](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/134) source `cc1ab14fda62b441883792b39d721230d0e2e165` squash-merged, independent `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`. Exact-head [C6 offline #43568003654](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568003654), [timestamp #43568003594](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568003594), [coordination #43568003564](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568003564) SUCCESS. Only C6 diagnostic and capture checkout arguments changed from nested `$GITHUB_WORKSPACE/kyiv-air-alerts-grafana` to repository root `$GITHUB_WORKSPACE`; narrow offline regression and existing offline workflow gate updated. Fail-closed guards and publisher unchanged.
+- Post-merge: no Actions runs for merge SHA on initial independent readback; `site-prod@54079326` and locked Netlify production `6af76b2d` unchanged. `GLOBAL_CUTOVER=YES; MERGE_134=YES; PILOT2=FAIL; NEXT_PILOT=NOT_RUN; AUTO_NEON_GIT=OFF`. No live writer/source HTTP, Git JSON publication, deployment/unlock or casualty/WIP/DST changes. New manual pilot requires separate owner GO.
+
 ## C6-C3-PILOT2-CHECKOUT-ROOT-FAIL-PROVEN-01 — second physical pilot failed; Git checkout-root mismatch proven (2026-11-14)
 
 - Manual one-time [Actions #43523629106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43523629106) attempt 1 on `main@5606147a955b64e17474688c6a13596b21d93580`: `update-site` FAIL at pre-Git `capture()` after canonical persistence `NEON_SUCCEEDED` and same-run C2 export. `C6_BLOCK_REASON=C2_CHECKPOINTS_MISSING`, exit 2. Safe `C6_PRECAPTURE_DIAG` showed `head=54079326ae2b4e691e2bfcf7cd1a51c9705404eb`, branch `site-prod`, `head_matches_expected=true`, `checkpoint_file_regular=false`, `scoped_changes=0`. Same-run C2 artifact #14086255755 and status #14085756162 saved. `site-prod` remained `54079326ae2b4e691e2bfcf7cd1a51c9705404eb`; Netlify `6af76b2d67c5074986728b62` ready/locked and current. No Git publication.
