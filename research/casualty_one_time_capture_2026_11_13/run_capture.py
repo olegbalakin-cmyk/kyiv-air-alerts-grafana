@@ -256,20 +256,33 @@ def withhold_unsafe_excerpts(card):
 
 
 
-def retain_incident_review_clues(text: str) -> dict:
-    """Retain bounded evidence mentions for a human, never infer attack identity.
+def _review_sentences(text: str) -> list[str]:
+    """Never split a legal abbreviation such as '(ч. 2 ст. 438)' into a quote."""
+    parts = re.split(r"(?<=[.!?])\s+", " ".join(text.split()))
+    result, pending = [], ""
+    for part in parts:
+        pending = (pending + " " + part).strip() if pending else part
+        if (pending.count("(") > pending.count(")")
+                or re.search(r"\b(?:ч|ст|р|ім|п|вул)\.$", pending, re.I)):
+            continue
+        result.append(pending)
+        pending = ""
+    if pending:
+        result.append(pending)
+    return result
 
-    This is a Work R output adapter for the existing in-memory capture, not
-    an incident parser or a cross-source matching decision.
+
+def retain_incident_review_clues(text: str) -> dict:
+    """Select bounded, complete, redacted context; never verify event identity.
+
+    Segments are article-reading hints, not proven incident links. Long sentences
+    retain only a hash and CONTEXT_INCOMPLETE, never a misleading partial quote.
     """
     result = {
         "status": "INSUFFICIENT_EVIDENCE",
-        "attack_identity_verified": False,
-        "attack_date_verified": None,
-        "attack_time_verified": None,
-        "locality_verified": None,
-        "struck_object_verified": None,
-        "direct_two_to_three_update_proven": False,
+        "attack_identity_verified": False, "attack_date_verified": None,
+        "attack_time_verified": None, "locality_verified": None,
+        "struck_object_verified": None, "direct_two_to_three_update_proven": False,
         "independent_police_link_proven": False,
         "chronology_is_source_sentence_order_only": True,
         "evidence_mentions": [],
@@ -280,69 +293,91 @@ def retain_incident_review_clues(text: str) -> dict:
         ("DATE_MENTION_NOT_ATTACK_DATE", r"\b(?:[12]?\d|3[01])\s+(?:січня|лютого|березня|квітня|травня|червня|липня|серпня|вересня|жовтня|листопада|грудня)\b|\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b"),
         ("PLACE_MENTION_NOT_LOCALITY_PROOF", r"\b(?:у|в|на)\s+запоріжжі\b|\bзапоріжжя\b|\bзапорізьк\w*\s+област\w*\b"),
         ("TIME_MENTION_NOT_ATTACK_TIME", r"\b(?:о|близько|приблизно)\s+\d{1,2}[:.]\d{2}\b|\b(?:вночі|вранці|вдень|увечері|надвечір|під ранок)\b"),
-        ("ATTACK_METHOD_OR_IMPACT_MENTION", r"\b(?:ракет\w*|дрон\w*|безпілот\w*|бпла|авіаудар\w*|авіабомб\w*|артилер\w*|обстріл\w*|удар\w*|влучан\w*)\b"),
+        ("ATTACK_METHOD_OR_IMPACT_MENTION", r"\b(?:ракет\w*|дрон\w*|безпілот\w*|бпла|авіаудар\w*|авіабомб\w*|артилер\w*|обстріл\w*|удар\w*|влучан\w*|атак\w*)\b"),
         ("STRUCK_OBJECT_MENTION", r"\b(?:приватн\w*|житлов\w*)\s+будин\w*|\b(?:багатоповерхів\w*|підприємств\w*|інфраструктур\w*|автомобіл\w*|школ\w*|лікарн\w*)\b"),
-        ("FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL", r"\b(?:загин\w*|загиб\w*|помер\w*|смерт\w*)\b"),
+        ("FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL", r"\b(?:загин\w*|загиб\w*|помер\w*|смерт\w*|жертв\w*)\b"),
         ("REPORT_SEQUENCE_MENTION_NOT_LINK", r"\b(?:пізніше|згодом|спочатку|раніше|перед тим|додатково|уточнил\w*|також|ще\s+одн\w*|зросл\w*)\b"),
         ("OFFICIAL_REFERENCE_MENTION", r"\b(?:поліці\w*|дснс|ова|військов\w*\s+адміністраці\w*)\b"),
     )
-    # The full extracted body exists only in memory. Each output is a short,
-    # stand-alone sentence; do not retain article paragraphs or full source.
-    sentences = re.split(r"(?<=[.!?])\s+", " ".join(text.split()))
-    budget = min(650, len(text) // 4)
-    # Work R previously stopped after the first eight mentions. That can
-    # discard later corrections and official-source context in a long article.
-    # Select diverse types of redacted source evidence first, without claiming
-    # that any mention establishes an incident or chronological update.
-    candidates = []
-    for index, sentence in enumerate(sentences):
-        if not 24 <= len(sentence) <= 170:
+    score_weight = {
+        "DATE_MENTION_NOT_ATTACK_DATE": 2, "PLACE_MENTION_NOT_LOCALITY_PROOF": 2,
+        "TIME_MENTION_NOT_ATTACK_TIME": 1, "ATTACK_METHOD_OR_IMPACT_MENTION": 3,
+        "STRUCK_OBJECT_MENTION": 3, "FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL": 5,
+        "REPORT_SEQUENCE_MENTION_NOT_LINK": 4, "OFFICIAL_REFERENCE_MENTION": 1,
+    }
+    candidates, segment, seen_attack = [], 1, False
+    for order, sentence in enumerate(_review_sentences(text), 1):
+        if len(sentence) < 24:
             continue
-        kinds = [name for name, pattern in patterns
-                 if re.search(pattern, sentence.casefold())]
+        lower = sentence.casefold()
+        kinds = [name for name, pattern in patterns if re.search(pattern, lower)]
         if not kinds:
             continue
-        excerpt = re.sub(r"\bзапоріж(?:жя|жі|жю)\b|\bзапорізьк\w*\b",
-                         "[ГЕО]", sentence, flags=re.I)
-        excerpt = re.sub(r"\bбудин\w*\b", "[ОБ'ЄКТ]", excerpt, flags=re.I)
+        # Explicit new-impact language starts a distinct *unverified* text
+        # segment. Updates ("згодом", "пізніше") do NOT start a new event.
+        new_attack = bool(re.search(
+            r"^\s*(?:окремо|інша атака|під час іншого|інший обстріл|"
+            r"(?:увечері|вночі|вранці|вдень)\s+того\s+ж\s+дня)",
+            lower))
+        if new_attack and seen_attack and "ATTACK_METHOD_OR_IMPACT_MENTION" in kinds:
+            segment += 1
+        if "ATTACK_METHOD_OR_IMPACT_MENTION" in kinds:
+            seen_attack = True
+        quote = re.sub(r"\bзапоріж(?:жя|жі|жю)\b|\bзапорізьк\w*\b",
+                       "[ГЕО]", sentence, flags=re.I)
+        quote = re.sub(r"\bбудин\w*\b", "[ОБ'ЄКТ]", quote, flags=re.I)
         if re.search(r"[<>№]|https?://|\b(?:вулиц\w*|вул\.?|провул\w*|проспект\w*|"
-                     r"квартир\w*|паспорт\w*|адрес\w*|будинок\s*\d+)\b", excerpt, re.I):
+                     r"квартир\w*|паспорт\w*|адрес\w*|будинок\s*\d+)\b", quote, re.I):
             continue
-        holder = {"excerpts": [{"text": excerpt}], "reasons": []}
-        withhold_unsafe_excerpts(holder)
-        if not holder["excerpts"]:
-            continue
-        candidates.append((index, excerpt, kinds))
-    selected, used, counts, covered = [], 0, {}, set()
-    while len(selected) < 8:
-        eligible = []
-        for ix, quote, tags in candidates:
-            if used + len(quote) > budget:
+        incomplete = len(quote) > 170
+        if not incomplete:
+            holder = {"excerpts": [{"text": quote}], "reasons": []}
+            withhold_unsafe_excerpts(holder)
+            if not holder["excerpts"]:
                 continue
-            usable = [tag for tag in tags if counts.get(tag, 0) < 2]
-            if usable:
-                eligible.append((ix, quote, usable))
+        tags = set(kinds)
+        score = sum(score_weight[k] for k in kinds)
+        if {"FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL",
+            "ATTACK_METHOD_OR_IMPACT_MENTION"} <= tags:
+            score += 5
+        if {"FATALITY_MENTION_NOT_A_CONFIRMED_TOTAL",
+            "REPORT_SEQUENCE_MENTION_NOT_LINK"} <= tags:
+            score += 5
+        if {"STRUCK_OBJECT_MENTION", "ATTACK_METHOD_OR_IMPACT_MENTION"} <= tags:
+            score += 3
+        candidates.append({
+            "article_sentence_order": order, "article_segment_hint": segment,
+            "unverified_segment_only": True, "tags": kinds, "_score": score,
+            "context_status": "CONTEXT_INCOMPLETE" if incomplete else "COMPLETE",
+            "sentence_sha256": sha_data(quote.encode("utf-8")),
+            "excerpt": None if incomplete else quote,
+        })
+    selected, covered, used = [], set(), 0
+    while candidates and len(selected) < 8:
+        eligible = [x for x in candidates if used + len(x["excerpt"] or "") <= 650]
         if not eligible:
             break
-        index, excerpt, kinds = min(
-            eligible, key=lambda v: (-len(set(v[2]) - covered),
-                                 -int(bool(re.search(r"\b(?:пізніше|згодом|уточнил\w*|також)\b",
-                                                     v[1], re.I))), v[0]))
-        selected.append({
-            "article_sentence_order": index + 1,
-            "tags": kinds,
-            "excerpt": excerpt,
-            "excerpt_sha256": sha_data(excerpt.encode("utf-8")),
-            "decision": "NEEDS_REVIEW",
-        })
-        candidates = [v for v in candidates if v[0] != index]
-        used += len(excerpt)
-        covered.update(kinds)
-        for tag in kinds:
-            counts[tag] = counts.get(tag, 0) + 1
+        chosen = min(eligible, key=lambda x: (
+            -x["_score"], -len(set(x["tags"]) - covered),
+            x["article_sentence_order"]))
+        candidates.remove(chosen)
+        quote = chosen.pop("excerpt")
+        chosen.pop("_score")
+        if quote is not None:
+            chosen["excerpt"] = quote
+            chosen["excerpt_sha256"] = sha_data(quote.encode("utf-8"))
+            used += len(quote)
+        else:
+            chosen["decision_reason"] = "CONTEXT_INCOMPLETE"
+        chosen["decision"] = "NEEDS_REVIEW"
+        selected.append(chosen)
+        covered.update(chosen["tags"])
     result["evidence_mentions"] = sorted(
-        selected, key=lambda v: v["article_sentence_order"])
+        selected, key=lambda x: x["article_sentence_order"])
+    result["article_segments_unverified"] = len(set(
+        x["article_segment_hint"] for x in selected))
     return result
+
 
 def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
     """Adapt PR #118 output writer, preserving Work J audit facts and reviewer gates."""
@@ -363,6 +398,8 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
             or facts.get("official_incidents_automatically_matched") != 0):
         raise RuntimeError("WORKJ_PUBLICATION_GUARD_VIOLATED")
     roles = {x["receipt"].get("resolved_url"): x["role"] for x in receipts}
+    capture_at = {x["receipt"].get("resolved_url"): x["receipt"].get("capture_time_utc")
+                  for x in receipts}
     volatile_texts = {(item.get("url"), role): str(item.get("text") or "")
                       for role, key in (("publisher", "articles"), ("official", "official_articles"))
                       for item in volatile.get(key, [])}
@@ -371,6 +408,7 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
         card["incident_review"] = retain_incident_review_clues(
             volatile_texts.get((card.get("source_url"), card.get("source_role")), ""))
         url = card.get("source_url")
+        card["source_capture_time_utc"] = capture_at.get(url)
         if not url or roles.get(url) != card.get("source_role"):
             raise RuntimeError("FACT_WITHOUT_MATCHING_SOURCE_RECEIPT")
         if card.get("decision") != "NEEDS_REVIEW" or card.get("publication_allowed") is not False:
@@ -408,7 +446,7 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
     # Work X consumes only already-redacted Work J/R fact cards. It never
     # opens sources, grants incident identity, links police claims, or credits.
     from research.casualty_evidence_ingestion_2026_11_13 import workx_evidence
-    facts["workx_review_index"] = workx_evidence.build_review_index(facts, queue)
+    facts["workx_review_index"] = workx_evidence.build_review_index(facts, queue, include_unretained=False)
     if (facts["workx_review_index"]["summary"]["automatic_credits"] != 0
             or facts["workx_review_index"]["publication_allowed"] is not False):
         raise RuntimeError("WORKX_AUTO_CREDIT_GUARD")
