@@ -62,6 +62,7 @@ jobs:
           echo "4c21321b8a75d57f60efc97f581e89604eaa03289bb64bfba26e491ac83a203b  /tmp/casualty-receipts/capture_receipts.json" | sha256sum -c -
           python -m unittest discover -s research/casualty_e2e_shadow_2026_11_12 -p test_pipeline.py -v
       - name: Real source-backed shadow plus idempotency replay
+        if: github.ref == 'refs/heads/research-casualty-e2e-shadow-2026-11-12'
         shell: bash
         run: |
           set -euo pipefail
@@ -81,14 +82,29 @@ jobs:
           python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" --output /tmp/casualty-first
           python research/casualty_e2e_shadow_2026_11_12/pipeline.py "${common[@]}" --previous-proposals /tmp/casualty-first/proposals.json --output /tmp/casualty-repeat
           python research/casualty_e2e_shadow_2026_11_12/verify_proof.py /tmp/casualty-first /tmp/casualty-repeat
+      - name: Restore immutable PR105 source-backed proposal (no parser or HTTP)
+        if: github.ref == 'refs/heads/research-casualty-workv-revision-contract-2026-11-14'
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43290975899
+          name: casualty-e2e-shadow-proof
+          path: /tmp/casualty-pr105-proven
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Work V physical reviewer-to-generator contract proof (research branch only)
         if: github.ref == 'refs/heads/research-casualty-workv-revision-contract-2026-11-14'
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/casualty-workv
+          echo 'PR105 restored proof file inventory:'
+          find /tmp/casualty-pr105-proven -maxdepth 3 -type f -name proposals.json
+          proposal=$(find /tmp/casualty-pr105-proven -type f -path '*/casualty-first/proposals.json' -print -quit)
+          if [ -z "$proposal" ]; then
+            proposal=$(find /tmp/casualty-pr105-proven -type f -name proposals.json -print -quit)
+          fi
+          test -s "$proposal"
           python research/casualty_e2e_shadow_2026_11_12/workv_contract_e2e.py \
-            --site _site --proposal /tmp/casualty-first/proposals.json \
+            --site _site --proposal "$proposal" \
             --output /tmp/casualty-workv
           python - <<'PY'
           import hashlib,json,pathlib
