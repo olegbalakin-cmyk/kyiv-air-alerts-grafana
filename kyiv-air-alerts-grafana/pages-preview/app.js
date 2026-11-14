@@ -1035,6 +1035,26 @@ const partialPeriodBarPlugin = {
   }
 };
 
+const periodCompletionHatchPlugin = {
+  id:"periodCompletionHatch",
+  afterDatasetsDraw(chart,_args,options){
+    if(!Number.isInteger(options?.datasetIndex)||options.datasetIndex<0||options.index<0)return;
+    const element=chart.getDatasetMeta(options.datasetIndex)?.data?.[options.index];
+    if(!element||element.skip)return;
+    const {x,y,base,width}=element.getProps(["x","y","base","width"],true);
+    if(![x,y,base,width].every(Number.isFinite))return;
+    const top=Math.min(y,base),height=Math.abs(base-y);
+    if(height<2)return;
+    const ctx=chart.ctx;ctx.save();ctx.beginPath();ctx.rect(x-width/2,top,width,height);ctx.clip();
+    ctx.strokeStyle="#c5e1fa";ctx.lineWidth=1.5;
+    for(let z=-height;z<width+height;z+=9){
+      ctx.beginPath();ctx.moveTo(x-width/2+z,top+height);
+      ctx.lineTo(x-width/2+z+height,top);ctx.stroke();
+    }
+    ctx.restore();
+  }
+};
+
 function seriesDataset(label, values, color, dashed = false, rows = null) {
   return {
     label,
@@ -2586,14 +2606,29 @@ function renderCity() {
   // Other intervals continue using historical bounds and selected dates.
   const activeRange = syncDateRange("cityDateFrom", "cityDateTo",
     cityPeriodDateValues(city, period, allRows));
-  const rows = allRows.filter(row => period === "calendarWeekly"
+  let rows = allRows.filter(row => period === "calendarWeekly"
     ? calendarWeekOverlapsRange(row, activeRange.from, activeRange.to)
     : period === "quarterly" ? calendarQuarterOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
   renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
+  // Verified complete-day estimate only; other graphs, KPIs and historical data remain unchanged.
+  const completionPeriod = ["calendarWeekly","monthly","quarterly"].includes(period);
+  const completionCandidate = completionPeriod
+    ? window.PeriodCompletionPreview?.estimate(state.historicalDaily?.cities?.[key],period,kyivCalendarToday())
+    : null;
+  const completionVisible = completionCandidate &&
+    (!activeRange.from || activeRange.from<=completionCandidate.start) &&
+    (!activeRange.to || activeRange.to>=completionCandidate.through);
+  const completion = completionVisible && $("showTrend")?.checked ? completionCandidate : null;
+  if (completion) {
+    rows = rows.filter(row => !(isPartialPeriod(row) &&
+      (period==="calendarWeekly" ? row.week_start===completion.start :
+       period==="monthly" ? row.month===completion.key : row.quarter===completion.key)));
+    rows = [...rows,completion.periodRow];
+  }
   const labels = rows.map(r => periodDisplayLabel(r, period));
   const rollingForecastable = ["rolling30","rolling90","rolling180"].includes(period);
-  const forecastable = rollingForecastable || ["daily28","calendarWeekly","monthly","allTime"].includes(period);
+  const forecastable = rollingForecastable || ["daily28","allTime"].includes(period);
   const isCurrentRange = rows.length && allRows.length &&
     rows[rows.length - 1] === allRows[allRows.length - 1];
   // Forecast only one future complete day and recalculate the rolling window.
@@ -2602,7 +2637,7 @@ function renderCity() {
       ? window.QuarterRollingPreview?.rollingForecast(allRows,period,state.historicalDaily?.cities?.[key],city)
       : window.ForecastTrend?.build(allRows,period)) : null;
   const trendControl = $("showTrend")?.closest("label");
-  if (trendControl) trendControl.classList.toggle("hidden", !candidate);
+  if (trendControl) trendControl.classList.toggle("hidden", !(completionVisible||candidate));
   const previewForecast = $("showTrend")?.checked ? candidate : null;
   const projectedRows = previewForecast?.forecasts || [];
   const forecastIndices = projectedRows.map((_, i) => labels.length + i);
@@ -2640,6 +2675,30 @@ function renderCity() {
     }
   ];
 
+  if (completion) {
+    const i=rows.length-1;
+    // Both parts use the full-calendar denominator; no future day is labelled actual.
+    intensityDatasets[0].data[i]=completion.actualHours/completion.days;
+    intensityDatasets[1].data[i]=completion.actualAlerts/completion.days;
+    intensityDatasets[0].backgroundColor[i]=COLORS[0]+"99";
+    intensityDatasets[0].borderWidth[i]=0;
+    intensityDatasets[0].stack="completion";
+    intensityDatasets.push({
+      type:"bar",_isCompletion:true,stack:"completion",
+      label:tr("Оцінка решти · години / добу","Estimated remainder · hours/day"),
+      data:rows.map((_,j)=>j===i?completion.remainingHours/completion.days:null),
+      yAxisID:"yHours",backgroundColor:"#a7d7fa44",borderColor:"#c5e1fa",
+      borderWidth:0,_exportRows:rows
+    });
+    intensityDatasets.push({
+      type:"line",_isCompletion:true,
+      label:tr("Оцінка підсумку · тривоги / день","Estimated total · alerts/day"),
+      data:rows.map((_,j)=>j===i?completion.expectedAlerts/completion.days:null),
+      yAxisID:"yAlerts",borderColor:"#b8ffc5",borderDash:[5,4],
+      pointRadius:5,pointHoverRadius:6,showLine:false,spanGaps:false,
+      _exportRows:rows
+    });
+  }
   if (projectedRows.length) {
     // Forecast data are separate datasets: no fabricated actual observations.
     intensityDatasets[0].data = intensityDatasets[0].data.concat(projectedRows.map(() => null));
@@ -2713,6 +2772,12 @@ function renderCity() {
         );
   }
 
+  if (intensitySubtitle && completion) {
+    intensitySubtitle.textContent += " " + tr(
+      "Штрихована частина останнього стовпчика — оцінка решти поточного періоду за перевіреними завершеними днями. Факт не змінено. Це не попередження про майбутні атаки. Дані до "+completion.through+".",
+      "The hatched part of the final bar estimates the remaining period from verified completed days. Observed data are unchanged. This is not a warning of attacks. Data through "+completion.through+"."
+    );
+  }
   if (intensitySubtitle && projectedRows.length) {
     intensitySubtitle.textContent += " " + tr(
       "Останній штрихований стовпчик — експериментальний прогноз на наступний період. EWMA 0,3: останнє спостереження має вагу 30%, попередня згладжена оцінка — 70%. Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
@@ -2726,7 +2791,8 @@ function renderCity() {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin, ...(projectedRows.length ? [window.ForecastTrend.barPlugin] : [])],
+    plugins: [partialPeriodBarPlugin, ...(completion ? [periodCompletionHatchPlugin] : []),
+      ...(projectedRows.length ? [window.ForecastTrend.barPlugin] : [])],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -2739,7 +2805,8 @@ function renderCity() {
             // Forecast is identified by its outline and point tooltip, not
             // by a separate legend control for a single forecast observation.
             filter(item, data) {
-              return !data.datasets[item.datasetIndex]?._isForecast;
+              return !data.datasets[item.datasetIndex]?._isForecast &&
+                !data.datasets[item.datasetIndex]?._isCompletion;
             }
           }
         },
@@ -2761,6 +2828,9 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
+              if (completion && i===rows.length-1)
+                return tr("Факт: "+completion.observed+" з "+completion.days+" днів · оцінка до "+completion.end,
+                  "Observed: "+completion.observed+" of "+completion.days+" days · estimate through "+completion.end);
               if (i >= rows.length && projectedRows.length) {
                 return tr("Експериментальна оцінка, не фактична тривога",
                           "Experimental estimate, not an actual alert");
@@ -2774,11 +2844,16 @@ function renderCity() {
         forecastPreview: {
           datasetIndex: projectedRows.length ? intensityDatasets.findIndex(d => d.type === "bar" && d.label.includes("EWMA")) : -1,
           indices: forecastIndices
+        },
+        periodCompletionHatch:{
+          datasetIndex:completion?intensityDatasets.findIndex(d=>d._isCompletion&&d.type==="bar"):-1,
+          index:completion?rows.length-1:-1
         }
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
         yHours: {
+          stacked:Boolean(completion),
           position: "left",
           beginAtZero: true,
           ticks: { color: TEXT, callback: value => formatDurationHours(value) },
