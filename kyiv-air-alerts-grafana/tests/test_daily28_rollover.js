@@ -4,7 +4,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const code = fs.readFileSync(path.join(__dirname, "../pages-preview/app.js"), "utf8");
-const marker = "\napplyStaticLanguage();\n\ninit().catch(err=>{";
+const marker = "\nif(!canonicalizeLanguagePath()){";
 assert.ok(code.includes(marker), "expected guarded browser entrypoint");
 const context = {
   URLSearchParams, Date, Intl, console,
