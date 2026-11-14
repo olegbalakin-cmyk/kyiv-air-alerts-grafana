@@ -206,12 +206,31 @@ def run(args):
         october = [m for m in after_dashboard["casualties_by_city"]["zaporizhzhia"]["monthly"]
                    if m["month"] == "2026-10"]
         assert len(october) == 1 and october[0]["deaths"] == 23
-        unchanged = [city for city in before_dashboard["casualties_by_city"]
+
+        # Compare against the same production generator's NO-REVISION baseline
+        # from the identical snapshot, not a possibly stale committed dashboard.
+        baseline_root = scratch / "baseline-without-workv-revisions"
+        shutil.copytree(original / "data", baseline_root / "data")
+        (baseline_root / "scripts").mkdir(parents=True)
+        shutil.copy2(original_generator, baseline_root / "scripts" / "update_casualties.py")
+        subprocess.run(
+            [sys.executable, str(baseline_root / "scripts" / "update_casualties.py"),
+             "--no-network"], cwd=str(baseline_root), env=env,
+            capture_output=True, text=True, timeout=120, check=True)
+        baseline_dashboard = json.loads(
+            (baseline_root / "data" / "dashboard_data.json").read_text(encoding="utf-8"))
+        unchanged = [city for city in baseline_dashboard["casualties_by_city"]
                      if city != "zaporizhzhia"]
         assert len(unchanged) == 22
-        assert all(before_dashboard["casualties_by_city"][c] ==
-                   after_dashboard["casualties_by_city"][c] for c in unchanged)
-        assert before_dashboard["casualties_by_city"]["sumy"] == after_dashboard["casualties_by_city"]["sumy"]
+        for city in unchanged:
+            before_city = json.loads(json.dumps(baseline_dashboard["casualties_by_city"][city]))
+            after_city = json.loads(json.dumps(after_dashboard["casualties_by_city"][city]))
+            # Kyiv generation time may differ; the data and all other metadata must match.
+            if city == "kyiv":
+                before_city["meta"].pop("generated_at", None)
+                after_city["meta"].pop("generated_at", None)
+            assert before_city == after_city, "Unexpected non-Zap city mutation: " + city
+        assert baseline_dashboard["casualties_by_city"]["sumy"] == after_dashboard["casualties_by_city"]["sumy"]
         independent = set(before_dashboard) - {"casualties", "casualties_by_city"}
         assert all(before_dashboard[k] == after_dashboard[k] for k in independent)
         assert all(sha(path) == originals[name] for name,path in {
