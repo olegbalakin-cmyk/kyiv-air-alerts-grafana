@@ -367,6 +367,13 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
     except Exception as exc:
         parser_errors = {"reason": "NEEDS_REVIEW_PARSER_EXCEPTION",
                          "work_a_error_type": type(exc).__name__}
+    # Work X consumes only already-redacted Work J/R fact cards. It never
+    # opens sources, grants incident identity, links police claims, or credits.
+    from research.casualty_evidence_ingestion_2026_11_13 import workx_evidence
+    facts["workx_review_index"] = workx_evidence.build_review_index(facts, queue)
+    if (facts["workx_review_index"]["summary"]["automatic_credits"] != 0
+            or facts["workx_review_index"]["publication_allowed"] is not False):
+        raise RuntimeError("WORKX_AUTO_CREDIT_GUARD")
     source_decisions = []
     retained_urls = {x.get("source_url") for x in facts["facts"]}
     for item in receipts:
