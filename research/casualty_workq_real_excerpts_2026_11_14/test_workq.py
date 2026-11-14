@@ -4,8 +4,8 @@ import re
 import unittest
 from pathlib import Path
 
-from casualty_auto_review import _fatal_total, _fatal_issue, extract_cached_reports
 from research.casualty_evidence_ingestion_2026_11_13 import ingest as e
+from casualty_auto_review import _fatal_total, _fatal_issue, extract_cached_reports
 from research.casualty_fact_retention_workj_2026_11_13.test_workj import candidate, article
 from research.casualty_one_time_capture_2026_11_13 import run_capture as runner
 
