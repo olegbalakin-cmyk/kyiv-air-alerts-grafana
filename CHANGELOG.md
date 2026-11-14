@@ -3,6 +3,11 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-QUARTER-ROLLING-PROD-2026-11-14 — approved frontend LIVE (2026-11-14)
+
+- Owner-approved PR #148 → `site-prod@c66b9779`. Production [Actions #43611233805](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43611233805) SUCCESS; Netlify `6af8808e75d3ca5d1aef8d8e` READY, HTTP asset parity/KPI 23/23. Quarters in three selectors, rolling 30/90/180 next-day prediction, tidy forecast legend/tooltips and EWMA definition. Preview [#43611072521](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43611072521) SUCCESS. Git data source unchanged; Neon OFF. **Next:** owner re-lock Netlify auto-publishing, without disabling 4-hour data updates.
+
+
 ### C6-POSTMERGE-C2-EXPORT-23-01 — real C2 bundle and 23/23 checkpoints PASS (2026-11-11)
 
 - [Scheduled C2 #43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED`, 33,135 episodes (+69), 23-city QA/Git JSON PASS (`site-prod@cf960d7c`). Real [artifact #13873291895](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190/artifacts/13873291895), ZIP SHA-256 `ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, manifest SHA `f64620936677b3a329a5e7823d3f4d52e4bc60c5b6a29bb8da6ff943adf3e433`; checkpoint 23/23 updated, Sevastopol event `25006` still unresolved. Independent exact-run readback/Neon→JSON parity remains OPEN; `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
