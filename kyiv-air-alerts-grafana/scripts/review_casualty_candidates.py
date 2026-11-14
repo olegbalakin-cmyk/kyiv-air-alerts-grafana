@@ -3,7 +3,11 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import importlib.util
 import json
+import re
+import tempfile
 from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -26,7 +30,61 @@ REVISION_FIELDS = [
     "source_url",
     "note",
     "candidate_ids",
+    "incident_id",
+    "count_kind",
+    "baseline_credited",
+    "identity_proof",
+    "credited_proof",
 ]
+
+# Immutable current site-prod source pin; no fallback to the older main generator.
+GENERATOR_BLOB_PIN = "f5840c201c850b5312db611896b491a69f10e6ec"
+INCIDENT_FORMAT = re.compile(r"incident:[a-z0-9][a-z0-9:_-]{7,119}\Z")
+PROOF_FORMAT = re.compile(r"(?:sha256:[0-9a-f]{64}|git:[0-9a-f]{40}:[^\s]+)\Z")
+
+
+def _validate_provenance(
+    incident_id: str | None, count_kind: str | None,
+    baseline_credited: int | str | None, identity_proof: str | None,
+    credited_proof: str | None,
+) -> dict:
+    incident = str(incident_id or "").strip()
+    kind = str(count_kind or "").strip().lower()
+    credit = "" if baseline_credited is None or isinstance(baseline_credited, bool) else str(baseline_credited).strip()
+    if not INCIDENT_FORMAT.fullmatch(incident):
+        raise ValueError("confirmed disposition requires valid incident_id")
+    if kind not in {"cumulative", "delta"}:
+        raise ValueError("confirmed disposition requires count_kind=cumulative|delta")
+    if not re.fullmatch(r"(?:0|[1-9][0-9]*)", credit):
+        raise ValueError("confirmed disposition requires known baseline_credited")
+    identity = str(identity_proof or "").strip()
+    credited = str(credited_proof or "").strip()
+    if not PROOF_FORMAT.fullmatch(identity):
+        raise ValueError("confirmed disposition requires immutable identity_proof")
+    if not PROOF_FORMAT.fullmatch(credited):
+        raise ValueError("confirmed disposition requires immutable credited_proof")
+    return {
+        "incident_id": incident, "count_kind": kind,
+        "baseline_credited": credit, "identity_proof": identity,
+        "credited_proof": credited,
+    }
+
+
+def validate_against_production_generator(
+    revisions_path: Path, generator_path: Path | None,
+) -> list[dict]:
+    """Run unchanged SHA-pinned production reconciliation before any write."""
+    if generator_path is None or not generator_path.is_file():
+        raise ValueError("Pinned production generator must be supplied for PROMOTE")
+    content = generator_path.read_bytes()
+    blob = hashlib.sha1(b"blob " + str(len(content)).encode() + b"\0" + content).hexdigest()
+    if blob != GENERATOR_BLOB_PIN:
+        raise ValueError("Production generator blob pin mismatch")
+    spec = importlib.util.spec_from_file_location("casualty_pinned_prod", generator_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.REVISIONS_FILE = revisions_path
+    return module.reconcile_confirmed_revisions(module.load_revisions())
 
 
 def atomic_write_json(path: Path, value) -> None:
@@ -93,6 +151,11 @@ def _validate_confirmation(
     deaths_delta: int | str | None,
     source_name: str | None,
     source_url: str | None,
+    incident_id: str | None = None,
+    count_kind: str | None = None,
+    baseline_credited: int | str | None = None,
+    identity_proof: str | None = None,
+    credited_proof: str | None = None,
 ) -> dict:
     canonical_id = (record_id or "").strip()
     if not canonical_id:
@@ -115,6 +178,10 @@ def _validate_confirmation(
         "deaths_delta": delta,
         "source_name": source,
         "source_url": url,
+        **_validate_provenance(
+            incident_id, count_kind, baseline_credited,
+            identity_proof, credited_proof,
+        ),
     }
 
 
@@ -129,6 +196,11 @@ def review_candidate(
     deaths_delta: int | str | None = None,
     source_name: str | None = None,
     source_url: str | None = None,
+    incident_id: str | None = None,
+    count_kind: str | None = None,
+    baseline_credited: int | str | None = None,
+    identity_proof: str | None = None,
+    credited_proof: str | None = None,
     note: str | None = None,
     reviewed_at: str | None = None,
     reviewed_by: str | None = None,
@@ -179,6 +251,11 @@ def review_candidate(
                 deaths_delta,
                 source_name,
                 source_url,
+                incident_id,
+                count_kind,
+                baseline_credited,
+                identity_proof,
+                credited_proof,
             )
         )
 
@@ -282,6 +359,11 @@ def _validated_confirmed_disposition(candidate: dict) -> dict:
         disposition.get("deaths_delta"),
         disposition.get("source_name"),
         disposition.get("source_url"),
+        disposition.get("incident_id"),
+        disposition.get("count_kind"),
+        disposition.get("baseline_credited"),
+        disposition.get("identity_proof"),
+        disposition.get("credited_proof"),
     )
     validated["candidate_id"] = candidate_id
     validated["city_key"] = city_key
@@ -301,6 +383,7 @@ def promote_reviewed(
     revisions_path: Path,
     *,
     allowed_city_keys: set[str] | None = None,
+    generator_path: Path | None = None,
 ) -> dict:
     queue = load_queue(queue_path)
     rows = load_revision_rows(revisions_path)
@@ -337,6 +420,9 @@ def promote_reviewed(
                 "source_url": reviewed["source_url"],
                 "note": reviewed["note"],
                 "candidate_ids": reviewed["candidate_id"],
+                **{field: reviewed[field] for field in (
+                    "incident_id", "count_kind", "baseline_credited",
+                    "identity_proof", "credited_proof")},
             }
             rows.append(row)
             by_record[record_id] = row
@@ -350,6 +436,9 @@ def promote_reviewed(
             "attack_date": reviewed["attack_date"],
             "deaths_delta": str(reviewed["deaths_delta"]),
             "status": "confirmed",
+            **{field: reviewed[field] for field in (
+                "incident_id", "count_kind", "baseline_credited",
+                "identity_proof", "credited_proof")},
         }
         conflicts = {
             field: (existing.get(field), expected)
@@ -369,6 +458,11 @@ def promote_reviewed(
             changed = True
 
     if changed:
+        # Never persist a ledger the exact site-prod reconciliation rejects.
+        with tempfile.TemporaryDirectory(prefix="casualty-revisions-preflight-") as tmp:
+            staged = Path(tmp) / "revisions.csv"
+            atomic_write_csv(staged, rows)
+            validate_against_production_generator(staged, generator_path)
         atomic_write_csv(revisions_path, rows)
 
     return {
@@ -386,6 +480,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--queue", type=Path, default=DEFAULT_QUEUE_FILE)
     parser.add_argument("--revisions", type=Path, default=DEFAULT_REVISIONS_FILE)
+    parser.add_argument("--generator", type=Path, help="Explicit SHA-pinned site-prod generator")
     sub = parser.add_subparsers(dest="command", required=True)
 
     review = sub.add_parser("review", help="Change exactly one needs_review candidate")
@@ -397,6 +492,11 @@ def parse_args() -> argparse.Namespace:
     review.add_argument("--deaths-delta", type=int)
     review.add_argument("--source-name")
     review.add_argument("--source-url")
+    review.add_argument("--incident-id")
+    review.add_argument("--count-kind", choices=("cumulative", "delta"))
+    review.add_argument("--baseline-credited")
+    review.add_argument("--identity-proof")
+    review.add_argument("--credited-proof")
     review.add_argument("--note")
 
     sub.add_parser(
@@ -428,10 +528,15 @@ def main() -> None:
             deaths_delta=args.deaths_delta,
             source_name=args.source_name,
             source_url=args.source_url,
+            incident_id=args.incident_id,
+            count_kind=args.count_kind,
+            baseline_credited=args.baseline_credited,
+            identity_proof=args.identity_proof,
+            credited_proof=args.credited_proof,
             note=args.note,
         )
     else:
-        result = promote_reviewed(args.queue, args.revisions)
+        result = promote_reviewed(args.queue, args.revisions, generator_path=args.generator)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
