@@ -1,7 +1,7 @@
 name: C6 default-OFF Neon Git integration offline
 on:
   push:
-    branches: [research-c6-neon-git-integration-off-2026-11-12, research-c6-auto-neon-git-zero-netlify-2026-11-13, research-c6-neon-pilot-capture-offline-2026-11-13, fix-c6-pre-capture-readonly-diagnostics-2026-11-14, fix-c6-capture-checkout-root-2026-11-14]
+    branches: [research-c6-neon-git-integration-off-2026-11-12, research-c6-auto-neon-git-zero-netlify-2026-11-13, research-c6-neon-pilot-capture-offline-2026-11-13, fix-c6-pre-capture-readonly-diagnostics-2026-11-14, fix-c6-capture-checkout-root-2026-11-14, research-c6-fast-archive-recovery-2026-11-14]
     paths:
       - ".github/workflows/update-netlify-site.yml"
       - ".github/workflows/c6-neon-git-integration-offline.yml"
@@ -17,6 +17,9 @@ on:
       - "tests/test_c6_neon_final_prepare.py"
       - "tests/test_c6_neon_auto_git.py"
       - "scripts/c6_neon_auto_git.py"
+      - "scripts/c6_neon_archive_recovery.py"
+      - "tests/test_c6_neon_archive_recovery.py"
+      - ".github/workflows/c6-neon-shadow-isolated-proof.yml"
       - "scripts/c6_precapture_diag.py"
       - "tests/test_c6_precapture_diag.py"
   pull_request:
@@ -177,7 +180,7 @@ jobs:
           if-no-files-found: warn
 
   auto-neon-git-offline:
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.ref == 'refs/heads/research-c6-neon-pilot-capture-offline-2026-11-13' || github.ref == 'refs/heads/fix-c6-pre-capture-readonly-diagnostics-2026-11-14' || github.ref == 'refs/heads/fix-c6-capture-checkout-root-2026-11-14')) || (github.event_name == 'pull_request' && (github.head_ref == 'research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.head_ref == 'research-c6-neon-pilot-capture-offline-2026-11-13' || github.head_ref == 'fix-c6-pre-capture-readonly-diagnostics-2026-11-14' || github.head_ref == 'fix-c6-capture-checkout-root-2026-11-14'))
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.ref == 'refs/heads/research-c6-neon-pilot-capture-offline-2026-11-13' || github.ref == 'refs/heads/fix-c6-pre-capture-readonly-diagnostics-2026-11-14' || github.ref == 'refs/heads/fix-c6-capture-checkout-root-2026-11-14' || github.ref == 'refs/heads/research-c6-fast-archive-recovery-2026-11-14')) || (github.event_name == 'pull_request' && (github.head_ref == 'research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.head_ref == 'research-c6-neon-pilot-capture-offline-2026-11-13' || github.head_ref == 'fix-c6-pre-capture-readonly-diagnostics-2026-11-14' || github.head_ref == 'fix-c6-capture-checkout-root-2026-11-14' || github.head_ref == 'research-c6-fast-archive-recovery-2026-11-14'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -192,6 +195,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_c6_neon_auto_git.py -v
       - name: Read-only pre-capture diagnostic offline regression
         run: python -m unittest discover -s tests -p test_c6_precapture_diag.py -v
+      - name: Exact failed-run archive recovery regression (no C2 or Neon)
+        run: python -m unittest discover -s tests -p test_c6_neon_archive_recovery.py -v
       - name: Existing C6 fail-closed publication regression
         run: python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
       - name: Inspect workflow YAML structure without executing any publisher
