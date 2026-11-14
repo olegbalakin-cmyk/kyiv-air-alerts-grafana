@@ -2,7 +2,7 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-Current accepted: **C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
+Current accepted: **C6-PR136-OWNER-SQUASH-MERGE-PASS-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
 
 ## Work S final execution observation (2026-11-13; publication not executed)
 
@@ -14,6 +14,10 @@ Current accepted: **C6-ARCHIVE-RECOVERY-STAGED-BLOCKED-01.** GLOBAL_CUTOVER=YES;
 - Separate owner production GO received; execution stopped before dispatch. Physical FINAL/L/N SHA and 56 identity/preservation checks PASS; historical gate 23/23 PASS at real clock. Protected `c6-neon-git-release` created for owner review/main only, admin bypass OFF. Netlify variables/grant were installed, then removed after the dispatch blocker.
 - Enabled Netlify workflow has no `Run workflow` control, including after reload; default `main` lacks that workflow file. Connected tools have no new dispatch operation and local CLI has no authenticated account. **Zero release dispatches/runs, zero deployments and zero Git publication commits.** No new code/default-branch change or merge.
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
+
+## PR #136 owner-approved code-only merge (2026-11-14)
+
+- Exact-head `1924de20a3c382aa862a00c0a882579c4a43c996`; CI #43573370103/#43573370102/#43573370092 SUCCESS; ruleset enforced with no bypass. Native squash merge to `main@5c9684c2f953eeb71b4e273906ba8bc6d5f9cdb1`; branch retained. Production Git `site-prod@54079326` and Netlify `6af76b2d67c5074986728b62` ready/locked unchanged. No C2, Neon write, proof, data publication, Netlify deployment or scheduling. `RECOVERY_PACKAGE=BLOCKED`: one separate read-only proof and delta artifact still required.
 
 ## Accepted archive recovery staging observation
 
