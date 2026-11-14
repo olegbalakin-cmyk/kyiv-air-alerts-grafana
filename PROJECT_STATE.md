@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-14. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01**: PR #142 `b07a5957`, CI #43589727392 169 PASS/1 SKIP; offline RSS/evidence PASS, T03–T05 held; live OFF.
+Latest casualty: **CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01**: PR #141 CI #43589692637 PASS (offline). No real PROMOTE.
 
 ## Working instructions
 
@@ -22,20 +22,24 @@ Latest casualty: **CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01**: P
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / casualty:** Work V/X offline PASS; live collector, casualty credits and publication blocked.
+- **Operational WIP / casualty:** Work V/W/X offline PASS. Live verification and credits blocked.
 
 ## Concrete next tasks
 
 1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty Work H/I: PRs #114/#115 accepted offline, no production promotion.
-5. Casualty next: Work W operator integration and Work X real-source proof. Separate owner approval before source GET, PROMOTE, production changes or publication.
+4. Casualty H/I: PRs #114/#115 PASS offline, no release.
+5. Casualty next: owner-controlled Work W code transfer (PROMOTE OFF); independent incident/credit proof required before live updates.
 6. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 (2026-11-14)
+
+- [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) `4e083db7` / CI #43589692637 PASS. Protected write OFF; research only, zero production changes.
+
 ## CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01 — offline PASS (2026-11-14)
 
 - [PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) `b07a5957`, Actions #43589727392 169 PASS/1 SKIP, artifact #14111089895 (SHA in CHANGELOG). 23-city independent RSS plan and retained cards tested; 3/3 T03–T05 NEEDS_REVIEW. No live HTTP, credits, merge or deployment.
