@@ -43,6 +43,21 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("unsafe 
    out.push({mode,eligible:true,...measured});
    await page.click("#showTrend");
  }
+ const unsupported=[];
+ for(const mode of ["daily28","weekly","rolling30","rolling90","rolling180","allTime"]){
+   await page.select("#cityPeriod",mode);
+   const current=await page.evaluate(()=>{
+     const control=document.querySelector("#showTrend");
+     const chart=window.Chart.getChart(document.querySelector("#cityIntensityChart"));
+     return {hidden:control.closest("label").classList.contains("hidden"),
+       completion:chart.data.datasets.filter(x=>x._isCompletion).length,
+       futures:chart.data.datasets.filter(x=>x._isForecast).length,
+       forecastLabels:chart.data.labels.filter(x=>String(x).includes("Прогноз:")).length};
+   });
+   if(!current.hidden||current.completion!==0||current.futures!==0||current.forecastLabels!==0)
+     errors.push("UNIFIED_TREND_"+mode+" "+JSON.stringify(current));
+   unsupported.push({mode,...current});
+ }
  await page.setViewport({width:375,height:812});
  await page.select("#cityPeriod","quarterly");
  const mobile=await page.evaluate(()=>{
@@ -54,7 +69,7 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("unsafe 
  if(mobile.width!==375||!mobile.noCompletion||!mobile.quarterOption)errors.push("MOBILE "+JSON.stringify(mobile));
  await page.screenshot({path:"period-completion-mobile.png",fullPage:false});
  await page.setViewport({width:1280,height:850});
- const report={url,cityCount:23,modes:out,mobile,errors,http};
+ const report={url,cityCount:23,modes:out,unsupported,mobile,errors,http};
  fs.writeFileSync("period-completion-browser.json",JSON.stringify(report,null,2));
  console.log("PERIOD_COMPLETION_BROWSER "+JSON.stringify(report));
  await browser.close();
