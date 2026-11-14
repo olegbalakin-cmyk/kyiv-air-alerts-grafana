@@ -62,11 +62,12 @@ jobs:
                       raise SystemExit("BLOCKED: concurrent "+run["name"]+" #"+str(run["id"]))
           already=[x for x in get("deploy-runs").get("workflow_runs",[])
               if x.get("head_sha")==target and x.get("event")=="workflow_dispatch"]
-          if already:
-              print("ALREADY_DISPATCHED",already[0]["id"])
-              Path("/tmp/ui5-skip").write_text("1")
-          else:
-              print("UI5_PRE_DISPATCH_GATES_PASS",target)
+          # Owner unlocked the Netlify production lock after run #43607708200
+          # physically failed before publication; permit exactly one retry.
+          assert len(already)==1, "Expected exactly one previous production dispatch"
+          prior=already[0]
+          assert prior["id"]==43607708200 and prior["status"]=="completed" and prior["conclusion"]=="failure", "Previous deploy not eligible for a single retry"
+          print("UI5_ONE_SAFE_RETRY_AFTER_OWNER_NETLIFY_UNLOCK_PASS",target)
           PY
       - name: One-time dispatch of EXISTING production Netlify workflow (Git mode only)
         if: success()
