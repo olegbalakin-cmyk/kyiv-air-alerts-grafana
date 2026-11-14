@@ -2,7 +2,7 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-Current accepted: **C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
+Current accepted: **C6-C3-MYKOLAIV-CSV-CROSSCHECK-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
 
 ## Work S final execution observation (2026-11-13; publication not executed)
 
@@ -16,6 +16,10 @@ Current accepted: **C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01.** GLOBAL_CUTOVER=YES; 
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
 
 <!-- coordination:history:start -->
+### C6-C3-MYKOLAIV-CSV-CROSSCHECK-01 — owner CSV cross-check (2026-11-14)
+
+- Offline: alerts.in.ua exports 13/14 Nov contain 17+5 Mykolaivskyi-raion AIR records, 1 overlap, 21 unique completed. Official last checked `2026-11-12T22:59:25Z`; 14 Nov `regionHistory` returned 20 records, overlap false. CSV timing assumed Kyiv local; consistent with finite history window overflow, NOT proof of exact source parity or permission to override 21/21. No code, Neon, Git or Netlify writes.
+
 ### C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01 — manual pilot halted by Mykolaiv continuity guard (2026-11-14)
 
 - Owner [#43568691823](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568691823), `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`, FAIL at `Validate verified UkraineAlarm bridge checkpoint`; 20/21 rows continuous. Mykolaiv region 98 `continuous=False; history=20; poll_overlap=False`: fetched history did not reach previous verified poll, so the existing fail-closed validator rejected it. Stopped before C2 canonical Neon writer, `capture()` and Git publication. `site-prod@54079326` and Netlify `6af76b2d` ready/locked unchanged. `GLOBAL_CUTOVER=YES; PILOT3=FAIL; AUTO_NEON_GIT=OFF`. New pilot requires separate GO; investigate only this gap offline, without weakening 21/21.
