@@ -76,6 +76,25 @@ assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",null,
  "2026-11-30T23:02:00+02:00").asOfIsIntraday,false,
  "missing exact clock keeps completed-days-only estimate");
 
+
+assert(lateResult.occupancyRate>=0&&lateResult.occupancyRate<=1);
+assert(Math.abs(lateResult.remainingHours-lateResult.occupancyRate*lateResult.maximumRemainingHours)<1e-10);
+assert(Math.abs(earlyResult.remainingHours-earlyResult.occupancyRate*earlyResult.maximumRemainingHours)<1e-10);
+assert.equal(lateResult.occupancyRate,earlyResult.occupancyRate,
+  "remaining-hour intensity must not increase to meet an old period total");
+assert(lateResult.remainingHours<=1,"one hour remains at 23:00");
+assert(Math.abs(earlyResult.remainingHours/lateResult.remainingHours-15)<1e-6,
+  "09:00 to 23:00 forecast scales exactly with time remaining");
+const highCurrent={...late,total_alert_duration_hours:22};
+const highResult=F.estimate(monthIndex,"monthly","2026-11-30",highCurrent,
+  "2026-11-30T23:02:00+02:00");
+assert(highResult&&Math.abs(highResult.remainingHours-lateResult.remainingHours)<1e-10,
+  "a high partial-day load does not imply a 100-percent-alert final hour");
+assert.equal(highResult.actualHours-lateResult.actualHours,22,
+  "observed alert hours are still fully counted as fact");
+assert.equal(highResult.modelHours,"observed_28d_hour_fraction");
+assert.equal(lateResult.modelHours,"observed_28d_hour_fraction");
+
 assert(app.includes('window.PeriodCompletionPreview?.estimate('));
 assert(app.includes('const completionPeriod = ["calendarWeekly","monthly","quarterly"]'));
 assert(app.includes('trendControl.classList.toggle("hidden", !completionVisible)'),"trend only on current calendar periods");

@@ -128,31 +128,26 @@
     const observedPhysicalHours=(cutoff-periodStartUtc)/HOUR;
     if(observedHours>observedPhysicalHours+0.01||maximumRemainingHours<=0||
        remainingDaysEquivalent<=0)return null;
+    // Physical, clock-scaled occupancy baseline: estimate ONLY the real
+    // hours that have not yet elapsed. Do not extrapolate today's partial
+    // alarm load (or the whole quarter's past high rate) into the final hour.
+    // Holdout validation in #43630913174 showed hourly curves did not
+    // materially beat the simpler 28-day rate over 6/12/24-hour windows.
     const trailingA=last28.map(x=>x.alerts),trailingH=last28.map(x=>x.hours);
-    const rateA=observedAlerts/observedDaysEquivalent,rateH=observedHours/observedDaysEquivalent;
-    const trailingMeanA=mean(trailingA),trailingMeanH=mean(trailingH);
-    const lastEwmaA=ewma(trailingA),lastEwmaH=ewma(trailingH);
-    let modelAlerts="mean28",modelHours="mean28";
-    let rateFutureAlerts=trailingMeanA,rateFutureHours=trailingMeanH;
-    if(period==="monthly"&&completed>=14&&completed<21){
-      modelAlerts=modelHours="blend50";
-      rateFutureAlerts=(rateA+lastEwmaA)/2;
-      rateFutureHours=(rateH+lastEwmaH)/2;
-    }else if(period==="monthly"&&completed>=21){
-      modelHours="run_rate";
-      rateFutureHours=rateH;
-    }else if(period==="quarterly"){
-      modelAlerts=modelHours="run_rate";
-      rateFutureAlerts=rateA;rateFutureHours=rateH;
-      if(completed>=60){modelHours="blend50";rateFutureHours=(rateH+lastEwmaH)/2}
-    }
-    rateFutureAlerts=Math.max(0,rateFutureAlerts);
-    rateFutureHours=clamp(rateFutureHours,24);
-    const remainingAlerts=remainingDaysEquivalent*rateFutureAlerts;
-    // Fundamental physical invariant: forecasted alert time cannot exceed
-    // *unobserved real hours* between certified cutoff and calendar end.
-    const remainingHours=Math.min(maximumRemainingHours,
-      remainingDaysEquivalent*rateFutureHours);
+    const baselineStart=kyivMidnightUtc(add(through,-27));
+    const baselineEnd=kyivMidnightUtc(today);
+    if(baselineStart===null||baselineEnd===null||baselineEnd<=baselineStart)return null;
+    const baselinePhysicalHours=(baselineEnd-baselineStart)/HOUR;
+    const baselineAlertHours=sum(trailingH);
+    if(!Number.isFinite(baselinePhysicalHours)||baselinePhysicalHours<24*27||
+       baselineAlertHours<0||baselineAlertHours>baselinePhysicalHours+0.01)return null;
+    const occupancyRate=clamp(baselineAlertHours/baselinePhysicalHours,1);
+    // A physical occupancy fraction (0–1), not an attempt to hit an old
+    // predicted total. The remaining alert time naturally approaches 0
+    // as the verified observation cutoff approaches the calendar end.
+    const remainingHours=occupancyRate*maximumRemainingHours;
+    const remainingAlerts=Math.max(0,mean(trailingA)*maximumRemainingHours/24);
+    const modelAlerts="mean28_per_24h",modelHours="observed_28d_hour_fraction";
     const periodRow={
       time:start+"T00:00:00",alerts_started:observedAlerts,
       avg_daily_alert_hours:observedHours/observedDaysEquivalent,
@@ -167,7 +162,7 @@
     return {period,start,end,key,through,asOf,asOfIsIntraday,observed:completed,days,
       observedDaysEquivalent,remainingDaysEquivalent,left:leftDays,
       actualAlerts:observedAlerts,actualHours:observedHours,
-      remainingAlerts,remainingHours,maximumRemainingHours,
+      remainingAlerts,remainingHours,maximumRemainingHours,occupancyRate,baselinePhysicalHours,
       expectedAlerts:observedAlerts+remainingAlerts,
       expectedHours:observedHours+remainingHours,
       modelAlerts,modelHours,periodRow};
@@ -2903,8 +2898,8 @@ function renderCity() {
 
   if (intensitySubtitle && completion) {
     intensitySubtitle.textContent += " " + tr(
-      "Штрихована частина останнього стовпчика — оцінка ще не спостереженого часу. Фактичні години включають лише підтверджені дані; залишок обмежено реальними годинами до кінця періоду. Це не попередження про атаки. Дані станом на "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+".",
-      "The hatched part estimates only unobserved time, capped by real hours left in the period. Observed hours are source-verified, not inferred from the viewer clock. This is not a warning of attacks. Data as of "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+"."
+      "Штрихована частина — оцінка лише ще не спостережених годин за часткою часу під тривогою в попередні 28 завершених днів. Чим менше часу залишається, тим менший можливий додатковий час під тривогою. Це не попередження про атаки. Дані станом на "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+".",
+      "The hatched part estimates only remaining unobserved hours using the alert-time share of the last 28 complete verified days. Less time left means less possible additional alert time. This is not a warning of attacks. Data as of "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+"."
     );
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
