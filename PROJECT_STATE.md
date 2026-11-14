@@ -2,16 +2,16 @@
 
 **Date:** 2026-11-14. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
 Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01**: PR #141 CI #43589692637 PASS (offline). No real PROMOTE.
+Latest casualty: **CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01**: PR #145, run #43609731091. 3/3 HTTP200; identity 0/3, T03–T05 NEEDS_REVIEW. GET spent, credits 0.
 
 ## Working instructions
 
-1. Read this root file and [CHANGELOG.md](CHANGELOG.md) before repository work. This file governs current coordination; newer accepted repository checkpoints govern older chat memory.
-2. Verify the relevant immutable commits, actual Actions runs and proof artifacts before technical action. A successful research job does not prove production deployment or a release PASS.
-3. Keep production, development/WIP, historical reference, backfill, casualty and Neon/persistence tracks separate. Do not overwrite another worker's commits, force-push shared branches, expose credentials or infer a production change from research.
-4. Keep unresolved blockers, track status and next tasks **outside** the history markers below. Put detailed accepted checkpoints inside them, newest first; retain the latest checkpoint. Prepend brief accepted transitions inside CHANGELOG's markers. Full evidence belongs in immutable archives or proof files.
-5. Aim for **5–8 KiB** here and **5–10 recent transitions** in CHANGELOG. UTF-8 byte gate: ≤12,288 PASS; 12,289–16,384 WARNING; >16,384 FAIL. Before an oversized update, run `python scripts/coordination_docs.py archive --dry-run`, then `archive` on a separate branch. See [maintenance instructions](docs/coordination-maintenance.md).
-6. Never load entire historical archives, large JSON/SQL dumps or full Actions logs into Work context. Search an exact checkpoint ID and read bounded lines. Save reproducible work promptly; recover interrupted commits before new research.
+1. Read both root documents first; newer accepted checkpoints govern old memory.
+2. Verify exact commits, Actions and artifacts; research PASS does not imply production.
+3. Separate production, WIP, history, backfill, casualty and Neon; no overwritten commits, force pushes or leaked credentials.
+4. Keep live blockers/status/next tasks outside history markers; accepted checkpoints inside, newest first, full evidence in archives.
+5. Aim for 5–8 KiB state and 5–10 changelog entries; ≤12,288 B PASS, ≤16,384 WARNING, above FAIL. Before oversize, use [maintenance CLI](docs/coordination-maintenance.md) dry-run then archive on a separate branch.
+6. Search checkpoint IDs and read bounded lines; avoid bulk JSON/SQL, archives and full logs. Preserve reproducible work; recover interrupted commits first.
 
 ## Current tracks and open release gates
 
@@ -22,7 +22,7 @@ Latest casualty: **CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01**: PR #141 CI #435
 - **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
 - **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
 - **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / casualty:** Work V/W/X offline PASS. Live verification and credits blocked.
+- **Operational WIP / casualty:** Work V/W/X offline PASS, Work Z physical capture PARTIAL; incident identity and credits BLOCKED.
 
 ## Concrete next tasks
 
@@ -30,12 +30,16 @@ Latest casualty: **CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01**: PR #141 CI #435
 2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
 3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
 4. Casualty H/I: PRs #114/#115 PASS offline, no release.
-5. Casualty next: owner-controlled Work W code transfer (PROMOTE OFF); independent incident/credit proof required before live updates.
+5. Casualty next: owner-controlled Work W transfer (PROMOTE OFF); Work Z offline excerpt quality on saved proof only. No repeat GET; unsaved text UNKNOWN.
 6. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
+
+- [PR #145](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/145), [run #43609731091](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43609731091): 3 GET/HTTP200, three unproven pairs, 0 credits. GET grant spent. Saved excerpts only; absent text cannot be recovered offline.
+
 ## CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 (2026-11-14)
 
 - [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) `4e083db7` / CI #43589692637 PASS. Protected write OFF; research only, zero production changes.
