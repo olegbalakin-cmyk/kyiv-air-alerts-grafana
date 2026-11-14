@@ -1,0 +1,41 @@
+name: Intraday remainder calibration read-only backtest
+on:
+  push:
+    branches: [research-current-period-completion-preview-2026-11-14]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: intraday-remainder-backtest-20261114
+  cancel-in-progress: true
+jobs:
+  backtest:
+    if: github.ref == 'refs/heads/research-current-period-completion-preview-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify frozen source and script
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          cmp <(git show c66b977930fbbbbe739efea60d474b04b2b002ea:kyiv-air-alerts-grafana/data/alerts_combined.json) kyiv-air-alerts-grafana/data/alerts_combined.json
+          node --check kyiv-air-alerts-grafana/scripts/backtest_intraday_remainder.js
+      - name: Run immutable hourly walk-forward evaluation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p proof
+          node kyiv-air-alerts-grafana/scripts/backtest_intraday_remainder.js kyiv-air-alerts-grafana/data/alerts_combined.json proof/late-period-remainder-20261114.json | tee proof/late-period-remainder-log.txt
+          test -s proof/late-period-remainder-20261114.json
+      - name: Preserve research evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: intraday-remainder-calibration-20261114
+          path: proof/late-period-remainder*
+          if-no-files-found: ignore
