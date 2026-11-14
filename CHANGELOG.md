@@ -1,8 +1,10 @@
-# Changelog — recent accepted transitions
-
-Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
+# Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
+
+- PR #145; [run #43609731091](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43609731091) PASS, artifact #14119860789 SHA256 `ea32abf6eaab69656608b891b272eef6f54ee286844d1f9f2fba217e64e117b8` independently verified. 3 GET/200; links 0/3, credits 0. Grant consumed; next offline proof selection, no new HTTP.
+
 ### CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 — Work W offline integration PASS (2026-11-14)
 
 - [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) exact `4e083db7a1f5f050c5a4bdeaab5803cffc48703d`; [Actions #43589692637](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637) SUCCESS, [artifact #14111553746](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637/artifacts/14111553746) uploader SHA-256 `30e704d6e25d21b150620fa5a60cd61dce73ed2ad8fe9b169dffd509cb92a809` (independent rehash pending). Offline 18→20→23=23, replay +0, T03–T05 held. Operator hard-OFF, legacy generator blocked, old casualty step OFF. Six-file research Draft, 0 production writes. Owner GO required before transfer or PROMOTE.
