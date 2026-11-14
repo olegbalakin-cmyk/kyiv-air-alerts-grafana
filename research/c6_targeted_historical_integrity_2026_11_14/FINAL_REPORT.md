@@ -1,3 +1,22 @@
+## ADDENDUM — direct Razvozhaev Telegram HTML export from owner (2026-11-14; highest priority for homogeneous source policy)
+
+The owner supplied the **direct Telegram Desktop export of the Razvozhaev channel**, `messages(7).html`. Local offline read and SHA-256 verification: **71,600 bytes; SHA-256 `b54f95f09813f50bbbe2df2785244a1fb07ff6520bbfd384e639b8cc720ee9ce`**. Extract contains **23 consecutive Telegram message IDs 24999–25021**, with no numeric ID gaps. Export timezone is explicitly **UTC+02:00**; convert to canonical UTC by subtracting two hours. Exact timestamp/value provenance is pinned in `SEVASTOPOL_RAZVOZHAEV_PRIMARY_EXPORT.json`.
+
+| Primary Telegram ID | Original timezone (UTC+02:00) | Event | Existing Git/Neon |
+|---|---|---|---|
+| 24999 | Nov 4 05:17:44 | AIR start | Present, paired with 25000 |
+| 25000 | Nov 4 05:28:52 | AIR end | Present |
+| 25006 | Nov 4 19:14:45 | AIR start, 17:14:45Z | **Absent as completed interval** |
+| 25007 | Nov 4 19:52:14 | PVO attack update, **not** an AIR all-clear | Context only |
+| 25008 | Nov 5 02:31:16 | New AIR start | Present, paired with 25009 |
+| 25009 | Nov 5 02:59:43 | AIR end | Present |
+
+**Crucial finding:** there is **no original Razvozhaev Telegram AIR all-clear between #25006 and #25008 in this export**, and the Telegram ID sequence contains no missing integer. This does **not** prove deletion of a post or absence of an announcement on another platform; avoid deletion claims. The separate `Migalka #191834` archival report citing `sevinfo92/44936` is valid secondary evidence for an all-clear at or before Nov 4 17:57:19Z, but source hierarchy means this is **not** a verified time-exact Razvozhaev Telegram endpoint. The indexed STV cross-platform repost likewise supports that an official-source all-clear circulated, but original forwarded-post metadata/seconds have not been pinned. The false implication that the new Razvozhaev export directly confirms an end must be avoided.
+
+**Decision unchanged for production:** `SV-25006 = INSUFFICIENT_EVIDENCE` **for exact timestamp and owner-primary-source endpoint**; there is strong independent evidence the air alert ended, plus an exact first-party start; one likely omitted closed alert, but no safe exact-duration correction as yet. Continue to prefer the owner's high-weight Razvozhaev source, and use secondary citations only if the owner explicitly approves an accepted fallback/precision policy for this one episode. Do not introduce a synthetic all-clear, count an open interval as a completed episode, touch Neon, or impact the four-hour workflow.
+
+---
+
 ## ADDENDUM — 2026-11-14, two newly supplied Migalka HTML exports (supersedes previous SV-25006 evidence assessment)
 
 New user-held archival data in `messages(6).html` (1,000 posts; SHA-256 `622b83d8b255a9a44a8b336084ae4644f054967f18ee832de42552bed73f9f43`) and `messages2.html` (219 posts; SHA-256 `85a1e18f7ed7eaf2878660aa2578c3fce8445bac3e98050e311b1cb43ca319eb`) provides an event-specific end *report* for the unresolved Sevastopol source start `25006`. Raw exports remain user-uploaded only; neither uploaded HTML was put into Git. Evidence manifest: `SEVASTOPOL_MIGALKA_2026_11_04_05.json`, with full Telegram IDs and timestamp receipts.
