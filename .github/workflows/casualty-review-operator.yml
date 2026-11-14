@@ -230,7 +230,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          fetch-depth: 2
+          fetch-depth: 0
       - uses: actions/checkout@v4
         with:
           ref: 5e8c161735e46d56e16300fd208350a69483dd92
@@ -255,7 +255,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = 413d34acd3bf664aebb821ffe3c0b022906299e0
+          test "$(git merge-base HEAD 413d34acd3bf664aebb821ffe3c0b022906299e0)" = 413d34acd3bf664aebb821ffe3c0b022906299e0
           test "$(git -C _site rev-parse HEAD)" = 5e8c161735e46d56e16300fd208350a69483dd92
           test "$(git -C _wip rev-parse HEAD)" = b1d7a133472d2c619e0cff1f6808fe544a80ed70
           test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py)" = 8de66c70ed648c961c05dccdaf0097a465982be0
@@ -270,8 +270,8 @@ jobs:
           old=Path(".github/workflows/update.yml").read_text()
           assert "      false &&" in wf
           assert "vars.CASUALTY_OPERATOR_APPROVAL_VERIFIED == 'true'" in wf
-          assert wf.count('test "$gen_blob" = "f5840c201c850b5312db611896b491a69f10e6ec"') == 2
-          assert wf.count('--generator "$GENERATOR_PATH"') == 2
+          assert wf.count('test "$gen_blob" = "f5840c201c850b5312db611896b491a69f10e6ec"') == 3
+          assert wf.count('--generator "$GENERATOR_PATH"') == 3
           assert "if: $" + "{{ false }}" in old
           assert 'if: github.event_name == ' + "'workflow_dispatch'" + ' && github.ref == ' + "'refs/heads/main'" in wf
           legacy=Path("kyiv-air-alerts-grafana/scripts/update_casualties.py")
@@ -313,7 +313,7 @@ jobs:
           proof={
             'status':'PASS','scope':'OFFLINE_SIMULATION_ONLY',
             'integration_head':git('rev-parse','HEAD'),
-            'base_main_head':git('rev-parse','HEAD^'),
+            'base_main_head':git('merge-base','HEAD','413d34acd3bf664aebb821ffe3c0b022906299e0'),
             'site_prod_head':git('-C','_site','rev-parse','HEAD'),
             'wip_head':git('-C','_wip','rev-parse','HEAD'),
             'production_generator_blob':git('-C','_site','rev-parse','HEAD:kyiv-air-alerts-grafana/scripts/update_casualties.py'),
