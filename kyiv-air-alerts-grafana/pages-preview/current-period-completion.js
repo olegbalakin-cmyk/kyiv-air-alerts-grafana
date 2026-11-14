@@ -22,7 +22,7 @@
     if(!valid(today)||!Object.hasOwn(MIN,period))return null;
     const d=new Date(dayNumber(today)),year=d.getUTCFullYear(),month=d.getUTCMonth()+1;
     if(period==="calendarWeekly"){
-      const monday=add(today,-(d.getUTCDay()+6)%7);
+      const monday=add(today,-((d.getUTCDay()+6)%7));
       return {start:monday,end:add(monday,6),key:add(monday,6),days:7};
     }
     const firstMonth=period==="quarterly"?1+3*Math.floor((month-1)/3):month;
