@@ -32,7 +32,7 @@ for(const id of ["cityPeriod","comparePeriod"]){
 assert(html.includes('id="allCitiesRange"')&&html.includes('value="quarter"'));
 assert(app.includes("root.QuarterRollingPreview = api"),"preview helper inlined into app.js to survive Netlify build");
 assert.equal((app.match(/_isForecast: true/g)||[]).length,2,"forecast datasets explicitly flagged");
-assert(app.includes("return !data.datasets[item.datasetIndex]?._isForecast;"),"legend must exclude forecast datasets");
+assert(app.includes("return !data.datasets[item.datasetIndex]?._isForecast &&") && app.includes("!data.datasets[item.datasetIndex]?._isCompletion;"),"legend must exclude forecast and completion datasets");
 assert(app.includes("Boolean(context.dataset._isForecast) === forecastPoint"),"tooltip separates actual from forecasts");
 assert(app.includes("Number.isFinite(context.parsed?.y)"),"null cannot appear as zero tooltip");
 assert(app.includes("EWMA 0,3: останнє спостереження має вагу 30%"),"UA one-line explanation");
