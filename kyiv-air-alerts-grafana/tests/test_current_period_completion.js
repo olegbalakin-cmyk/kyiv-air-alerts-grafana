@@ -29,6 +29,53 @@ assert.equal(F.estimate({...history,verified_metric_months:[],verified_metric_da
 assert.equal(F.estimate({...history,counts:[...history.counts.slice(0,-1),-1]},"monthly","2026-11-14"),null);
 assert.equal(F.estimate(history,"quarterly","2026-10-14"),null); // 13 complete days, threshold 30
 assert.equal(F.estimate(history,"calendarWeekly","2026-11-10"),null); // index is not yesterday
+
+// Exact source-observed clock: 23:00 Kyiv means only one hour remains
+// in the last calendar day, even with 24h/day model expectations.
+assert.equal((F.kyivMidnightUtc("2026-03-30")-F.kyivMidnightUtc("2026-03-29"))/3600000,23,
+  "DST spring-forward is 23 real hours");
+assert.equal((F.kyivMidnightUtc("2026-10-26")-F.kyivMidnightUtc("2026-10-25"))/3600000,25,
+  "DST fall-back is 25 real hours");
+const endMonth="2026-11-29",mStart="2026-09-01",mN=Math.round((Date.parse(endMonth)-Date.parse(mStart))/86400000)+1;
+const mDates=Array.from({length:mN},(_,i)=>F.add(mStart,i));
+const monthIndex={status:"verified",start:mStart,end:endMonth,counts:mDates.map(()=>2),
+ daily_total_alert_duration_seconds:mDates.map(()=>7200),
+ verified_metric_months:[...new Set(mDates.map(d=>d.slice(0,7)))],verified_metric_days:[]};
+const late={date:"2026-11-30",is_partial_period:true,
+ partial_through:"2026-11-30T23:00:00+02:00",
+ total_alert_duration_hours:0,alerts_started:0};
+const early={...late,partial_through:"2026-11-30T09:00:00+02:00"};
+const lateResult=F.estimate(monthIndex,"monthly","2026-11-30",late,"2026-11-30T23:02:00+02:00");
+const earlyResult=F.estimate(monthIndex,"monthly","2026-11-30",early,"2026-11-30T09:02:00+02:00");
+assert(lateResult&&earlyResult,"both fresh certified cutoffs must be supported");
+assert.equal(lateResult.asOfIsIntraday,true);
+assert.equal(lateResult.maximumRemainingHours,1);
+assert.equal(earlyResult.maximumRemainingHours,15);
+assert(lateResult.remainingHours<=1+1e-12,"late-day physical limit");
+assert(lateResult.remainingHours<earlyResult.remainingHours,
+  "quiet 23:00 observation must reduce estimate vs quiet 09:00");
+assert.equal(lateResult.actualHours,29*2);
+assert(lateResult.remainingDaysEquivalent>0&&lateResult.remainingDaysEquivalent<1/20,
+  "last-day remaining is fractional");
+assert.equal(lateResult.periodRow.partial_through,late.partial_through);
+assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",
+ {...late,partial_through:"2026-11-30"}, "2026-11-30T23:02:00+02:00").asOfIsIntraday,false,
+ "date-only source is not treated as time-aware evidence");
+assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",late,"2026-12-01T09:05:00+02:00"),null,
+ "stale source clock must block estimate");
+assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",
+ {...late,total_alert_duration_hours:23.5},"2026-11-30T23:02:00+02:00"),null,
+ "impossible hours before clock must be blocked");
+assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",
+ {...late,partial_through:"2026-11-30T23:00:00Z"},"2026-11-30T23:02:00+02:00"),null,
+ "source timestamp with incorrect local date must be blocked");
+assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",
+ {...late,partial_through:"2026-11-30T23:30:00+02:00"},"2026-11-30T23:00:00+02:00"),null,
+ "future timestamp must be blocked");
+assert.equal(F.estimate(monthIndex,"monthly","2026-11-30",null,
+ "2026-11-30T23:02:00+02:00").asOfIsIntraday,false,
+ "missing exact clock keeps completed-days-only estimate");
+
 assert(app.includes('window.PeriodCompletionPreview?.estimate('));
 assert(app.includes('const completionPeriod = ["calendarWeekly","monthly","quarterly"]'));
 assert(app.includes('trendControl.classList.toggle("hidden", !completionVisible)'),"trend only on current calendar periods");
