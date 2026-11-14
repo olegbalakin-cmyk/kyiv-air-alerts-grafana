@@ -74,6 +74,9 @@ jobs:
         run: python scripts/apply_ukrainealarm_bridge.py
 
       - name: Update Kyiv casualty series and review queue
+        # Work W: old main generator cannot handle incident-level cumulative totals.
+        # Keep alert updates intact; activate revised casualty generation only after owner GO.
+        if: ${{ false }}
         run: python scripts/update_casualties.py
 
       - name: Finalize single admin/public dashboard

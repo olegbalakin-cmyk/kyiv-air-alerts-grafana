@@ -8,6 +8,7 @@ owns explicit authority-branch transport and fast-forward-only commits.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import html
 import json
@@ -15,13 +16,14 @@ import os
 import re
 import shutil
 import tempfile
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from review_casualty_candidates import (
     _validate_confirmation, _validated_confirmed_disposition,
     hold_candidate, load_queue, load_revision_rows, promote_reviewed,
     reopen_held_candidate, review_candidate,
+    validate_against_production_generator,
 )
 
 # Accepted current production city set. Unknown city identifiers fail closed.
@@ -73,8 +75,10 @@ def allowed_city(city_key: str) -> str:
     return city_key
 
 
-def _revision_effect(revisions: list[dict], reviewed: dict) -> dict:
-    """Preview of the exact canonical invariant check used by production."""
+def _revision_effect(
+    revisions: list[dict], reviewed: dict, generator_path: Path | None,
+) -> dict:
+    """Physical preview using exact pinned production reconciliation, not a raw sum."""
     record_id = reviewed["record_id"]
     existing = next((row for row in revisions if row["record_id"] == record_id), None)
     invariant = {
@@ -82,6 +86,9 @@ def _revision_effect(revisions: list[dict], reviewed: dict) -> dict:
         "attack_date": reviewed["attack_date"],
         "deaths_delta": str(reviewed["deaths_delta"]),
         "status": "confirmed",
+        **{k: reviewed[k] for k in (
+            "incident_id", "count_kind", "baseline_credited",
+            "identity_proof", "credited_proof")},
     }
     if existing:
         conflict = {field: (existing.get(field), value) for field, value
@@ -89,18 +96,44 @@ def _revision_effect(revisions: list[dict], reviewed: dict) -> dict:
         if conflict:
             raise ValueError("Conflicting canonical record_id: " + repr(conflict))
     month = reviewed["attack_date"][:7]
-    current = sum(int(row["deaths_delta"]) for row in revisions
-                  if row["city_key"] == reviewed["city_key"]
-                  and row["attack_date"].startswith(month)
-                  and row["status"] == "confirmed")
-    increment = 0 if existing else reviewed["deaths_delta"]
+    with tempfile.TemporaryDirectory(prefix="casualty-preview-") as scratch:
+        ledger = Path(scratch) / "revisions.csv"
+        fields = list(dict.fromkeys(
+            [key for row in revisions + [reviewed] for key in row]
+        ))
+        def actual_effect(rows):
+            with ledger.open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=fields)
+                writer.writeheader()
+                writer.writerows({k: r.get(k, "") for k in fields} for r in rows)
+            return validate_against_production_generator(ledger, generator_path)
+        before = actual_effect(revisions)
+        candidate_row = {
+            **reviewed, "city_key": reviewed["city_key"],
+            "observed_at": reviewed["reviewed_at"],
+            "status": "confirmed",
+            "candidate_ids": reviewed["candidate_id"],
+        }
+        after = actual_effect(revisions if existing else revisions + [candidate_row])
+
+    def monthly_effect(items):
+        return sum(int(row["deaths_delta"]) for row in items
+                   if row["city_key"] == reviewed["city_key"]
+                   and row["attack_date"].strftime("%Y-%m") == month)
+    previous = monthly_effect(before)
+    projected = monthly_effect(after)
+    increment = projected - previous
+    if increment < 0:
+        raise ValueError("Preview cannot silently remove previously credited deaths")
     return {
         "canonical_id_exists": bool(existing),
         "projected_revision_increment": increment,
         "month": month,
-        "existing_monthly_revision_deaths": current,
-        "projected_monthly_revision_deaths": current + increment,
+        "existing_monthly_revision_deaths": previous,
+        "projected_monthly_revision_deaths": projected,
         "existing_source_preserved": bool(existing),
+        "count_kind": reviewed["count_kind"],
+        "incident_id": reviewed["incident_id"],
     }
 
 
@@ -142,7 +175,7 @@ def _evidence(candidate: dict) -> dict:
 
 def build_preview(*, mode: str, candidate_id: str, decision: str,
                   payload: dict, queue_path: Path, revisions_path: Path,
-                  state: dict) -> dict:
+                  state: dict, generator_path: Path | None = None) -> dict:
     verify_inputs(queue_path, revisions_path, state)
     mode, decision = mode.upper(), decision.upper()
     if mode not in {"INSPECT", "REVIEW", "PROMOTE"}:
@@ -205,10 +238,20 @@ def build_preview(*, mode: str, candidate_id: str, decision: str,
                 raise ValueError("deaths_delta must be a positive whole number")
             confirmed = _validate_confirmation(
                 payload.get("record_id"), payload.get("attack_date"),
-                value, payload.get("source_name"), payload.get("source_url"))
+                value, payload.get("source_name"), payload.get("source_url"),
+                payload.get("incident_id"), payload.get("count_kind"),
+                payload.get("baseline_credited"), payload.get("identity_proof"),
+                payload.get("credited_proof"))
+            # First preview sets immutable observation time; verify/apply reuse it.
+            at = payload.get("reviewed_at") or datetime.now(timezone.utc).isoformat()
+            parsed_at = datetime.fromisoformat(str(at))
+            if parsed_at.tzinfo is None or parsed_at.utcoffset() is None:
+                raise ValueError("reviewed_at must have timezone")
             clean.update(confirmed)
-            reviewed = {**confirmed, "city_key": city}
-            preview["effect"] = _revision_effect(revisions, reviewed)
+            clean["reviewed_at"] = at
+            reviewed = {**confirmed, "city_key": city,
+                        "candidate_id": candidate_id, "reviewed_at": at}
+            preview["effect"] = _revision_effect(revisions, reviewed, generator_path)
             preview["warnings"] = _warnings(queue, candidate, revisions, reviewed)
         else:
             preview["effect"] = {"projected_revision_increment": 0,
@@ -221,13 +264,14 @@ def build_preview(*, mode: str, candidate_id: str, decision: str,
         reviewed = _validated_confirmed_disposition(candidate)
         allowed_city(reviewed["city_key"])
         preview["payload"] = reviewed
-        preview["effect"] = _revision_effect(revisions, reviewed)
+        preview["effect"] = _revision_effect(revisions, reviewed, generator_path)
         preview["warnings"] = _warnings(queue, candidate, revisions, reviewed)
     return preview
 
 
 def verify_preview(preview: dict, *, queue_path: Path,
-                   revisions_path: Path, current_state: dict) -> None:
+                   revisions_path: Path, current_state: dict,
+                   generator_path: Path | None = None) -> None:
     if preview.get("format_version") != 1 or preview.get("mode") == "INSPECT":
         raise ValueError("Only reviewed non-INSPECT previews can be applied")
     verify_inputs(queue_path, revisions_path, current_state)
@@ -245,20 +289,20 @@ def verify_preview(preview: dict, *, queue_path: Path,
         decision=preview.get("decision", ""), payload=preview["payload"]
                 if preview["mode"] == "REVIEW" else {},
         queue_path=queue_path, revisions_path=revisions_path,
-        state=current_state)
+        state=current_state, generator_path=generator_path)
     if fresh["effect"] != preview["effect"]:
         raise RefStaleError("Expected canonical effect changed")
 
 
 def apply_preview(preview: dict, *, queue_path: Path, revisions_path: Path,
                   current_state: dict, reviewed_by: str,
-                  workflow_run_id: str) -> dict:
+                  workflow_run_id: str, generator_path: Path | None = None) -> dict:
     actor = str(reviewed_by or "").strip()
     run_id = str(workflow_run_id or "").strip()
     if not actor or actor.endswith("[bot]") or not run_id:
         raise PermissionError("A named human GitHub actor and run ID are mandatory")
     verify_preview(preview, queue_path=queue_path, revisions_path=revisions_path,
-                   current_state=current_state)
+                   current_state=current_state, generator_path=generator_path)
     mode, candidate_id = preview["mode"], preview["candidate_id"]
     if mode == "REVIEW":
         payload = preview["payload"]
@@ -274,7 +318,9 @@ def apply_preview(preview: dict, *, queue_path: Path, revisions_path: Path,
                 **common,
                 **({key: payload[key] for key in (
                     "record_id", "attack_date", "deaths_delta", "source_name",
-                    "source_url")} if decision == "CONFIRM" else {}))
+                    "source_url", "incident_id", "count_kind",
+                    "baseline_credited", "identity_proof", "credited_proof",
+                    "reviewed_at")} if decision == "CONFIRM" else {}))
         elif decision == "HOLD":
             result = hold_candidate(queue_path, **common)
         elif decision == "REOPEN":
@@ -296,7 +342,8 @@ def apply_preview(preview: dict, *, queue_path: Path, revisions_path: Path,
         tmp_queue.write_text(json.dumps([selected], ensure_ascii=False), encoding="utf-8")
         shutil.copyfile(revisions_path, tmp_revisions)
         result = promote_reviewed(tmp_queue, tmp_revisions,
-                                  allowed_city_keys=set(ALLOWED_CITY_KEYS))
+                                  allowed_city_keys=set(ALLOWED_CITY_KEYS),
+                                  generator_path=generator_path)
         if result["ledger_changed"]:
             staged = revisions_path.with_name(revisions_path.name + ".operator.tmp")
             shutil.copyfile(tmp_revisions, staged)
@@ -324,6 +371,8 @@ def main() -> None:
     parser.add_argument("action", choices=("preview", "apply"))
     parser.add_argument("--queue", type=Path, required=True)
     parser.add_argument("--revisions", type=Path, required=True)
+    parser.add_argument("--generator", type=Path, required=True,
+                        help="Exact SHA-pinned site-prod generator (read only)")
     parser.add_argument("--snapshot", type=Path, required=True)
     parser.add_argument("--wip-head", required=True)
     parser.add_argument("--site-prod-head", required=True)
@@ -345,7 +394,8 @@ def main() -> None:
         preview = build_preview(
             mode=args.mode, candidate_id=args.candidate_id,
             decision=args.decision, payload=payload,
-            queue_path=args.queue, revisions_path=args.revisions, state=state)
+            queue_path=args.queue, revisions_path=args.revisions, state=state,
+            generator_path=args.generator)
         args.snapshot.write_text(json.dumps(preview, indent=2, ensure_ascii=False)
                                  + "\n", encoding="utf-8")
         if os.environ.get("GITHUB_STEP_SUMMARY"):
@@ -358,7 +408,8 @@ def main() -> None:
         result = apply_preview(preview, queue_path=args.queue,
                                revisions_path=args.revisions, current_state=state,
                                reviewed_by=args.reviewed_by,
-                               workflow_run_id=args.workflow_run_id)
+                               workflow_run_id=args.workflow_run_id,
+                               generator_path=args.generator)
         print(json.dumps(result, ensure_ascii=False))
 
 
