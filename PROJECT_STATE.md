@@ -1,12 +1,12 @@
 # Project State — coordination snapshot
 
-**2026-11-14. Latest accepted: C6-PR136-OWNER-SQUASH-MERGE-PASS-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-C3-ARCHIVE-GIT-ONLY-PUBLISH-PASS-01. GLOBAL_CUTOVER=YES; GIT_ONLY_PUBLICATION=PASS; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
 ## Current production
 
-- Historical Neon cutover PASS; `GLOBAL_CUTOVER=YES`. Git `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb`; Netlify `6af76b2d67c5074986728b62` ready/locked. [Work S receipt](docs/work-s-final-execution-2026-11-13.json). No automatic updates or live-status certification.
+- Historical Neon cutover PASS; `GLOBAL_CUTOVER=YES`. One Git-only archive publication [#43578315871](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43578315871) SUCCESS: `site-prod@2fa9044ad498391e5d995140af5f4096f0d4a2aa` (five JSON, one fast-forward commit). Netlify `6af76b2d67c5074986728b62` still READY/locked/current. Public browser HTTP display not independently certified; automatic 4-hour updates and live-status certification remain OFF.
 - Manual pilot [#43510482714](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43510482714) failed at step 46 `capture()`; C2 writer PASS: 33,444 episodes (+129), 23 cities, zero Git publication. Root cause unproven.
 - Diagnostic-only [PR #130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/130) merged `main@9576dd06beb6b905f5fc4001672e524ed0ba5d0b`; exact-head offline CI PASS, fixed reason allowlist. No physical fix proven.
 - Freeze: legacy pause=true, AUTO flag OFF; owner screenshot confirmed updater disabled manually after second pilot, Netlify workflow disabled and current production deploy locked. One-time pilot authorization consumed; no repeat or auto-schedule grant.
@@ -17,12 +17,17 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Histori
 
 ## Next
 
-- PR #136 code merged only. Obtain separate approval for one manual physical read-only Neon → six-JSON proof on preserved recovery branch; do not infer a publication grant or freshness PASS. 
+- Next: independently confirm public HTTP/browser generation, investigate the current Mykolaiv region 98 bridge overlap/continuity 20/21 and restore 21/21 before a separate owner-approved controlled C2 → Neon → Git-only cycle. Enable 4-hour automation only after that cycle and a separate owner GO. Historical 23-city read-only audit can run in parallel. 
 - Keep updater and Netlify production workflows disabled, legacy publisher paused, AUTO flag OFF and Netlify locked. No new physical C2 pilot until narrow offline investigation of Mykolaiv region 98 bridge continuity gap (history no longer reaches previous poll), and separate owner GO. Do not bypass 21/21, rewrite production records or mix casualty/WIP/DST tracks.
 
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-C3-ARCHIVE-GIT-ONLY-PUBLISH-PASS-01 (2026-11-14)
+
+- Owner-approved [Actions #43578315871](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43578315871) attempt 1 completed SUCCESS at `main@413d34acd3bf664aebb821ffe3c0b022906299e0`, after PR #138 squash merge. Physical publisher at-use SHA/freshness/23-city checks and one fast-forward Git publication PASS: `site-prod@54079326ae2b4e691e2bfcf7cd1a51c9705404eb` → `2fa9044ad498391e5d995140af5f4096f0d4a2aa`, exactly five JSON changed. Recovery archive #14106191796 reused; no new C2, Neon writer, source HTTP or production Netlify job.
+- Independent readback: Netlify deployment `6af76b2d67c5074986728b62` remains current READY/locked, no new deploy established. Public website/browser generation not HTTP-certified. `GIT_ONLY_PUBLICATION=PASS; AUTO_NEON_GIT=OFF`; Mykolaiv current-source bridge 20/21 remains unresolved, separate from 23/23 historical recovery proof. Next: narrow current continuity + one approved controlled automatic-cycle pilot; 23-city historical audit parallel.
+
 ## C6-PR136-OWNER-SQUASH-MERGE-PASS-01 (2026-11-14)
 
 - Owner-approved PR #136 exact head `1924de20a3c382aa862a00c0a882579c4a43c996`; exact-head CI #43573370103, #43573370102, #43573370092 SUCCESS; enforced main ruleset check PASS, bypass NONE. Native squash merge returned `main@5c9684c2f953eeb71b4e273906ba8bc6d5f9cdb1`; PR merged. Recovery proof branch retained at approved HEAD.
