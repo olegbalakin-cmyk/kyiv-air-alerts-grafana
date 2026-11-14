@@ -30,7 +30,7 @@
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261019-logo12-1">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261019-logo12-1">
-  <link rel="stylesheet" href="styles.css?v=20261021-kpi-test1">
+  <link rel="stylesheet" href="styles.css?v=20261112-trend-in-toolbar">
 </head>
 <body>
   <header class="page-header">
@@ -136,6 +136,12 @@
       <article class="panel chart-card wide">
         <h3>Інтенсивність тривог</h3>
         <p class="chart-subtitle">Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.</p>
+        <div class="chart-export-row" data-csv-chart="cityIntensityChart">
+          <label class="inline-check forecast-control" for="showTrend">
+            <input id="showTrend" type="checkbox">
+            <span id="showTrendLabel">Показати тренд</span>
+          </label>
+        </div>
         <div class="chart-wrap"><canvas id="cityIntensityChart"></canvas></div>
       </article>
       <article class="panel chart-card wide">
@@ -594,6 +600,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="chart-share.js?v=20261019-share2-1"></script>
   <script src="kpi-range.js?v=20261021-interval-kpi-test1"></script>
-  <script src="app.js?v=20261023-daily28-allcities180-prod1"></script>
+  <script src="app.js?v=20261112-show-trend-opt-in"></script>
 </body>
 </html>

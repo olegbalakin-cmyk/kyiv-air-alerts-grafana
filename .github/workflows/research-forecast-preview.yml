@@ -1,0 +1,98 @@
+name: Research EWMA opt-in preview (non-production)
+
+on:
+  push:
+    branches: [research-forecast-bars-preview-2026-11-11]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-ewma-preview
+  cancel-in-progress: true
+
+jobs:
+  validate-and-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout research commit
+        uses: actions/checkout@v4
+
+      - name: JS syntax and forecast unit tests
+        run: |
+          node --check kyiv-air-alerts-grafana/pages-preview/forecast-trend.js
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --test kyiv-air-alerts-grafana/tests/test_forecast_trend.js
+
+      - name: Validate research branch
+        shell: bash
+        run: |
+          test "$GITHUB_REF_NAME" = "research-forecast-bars-preview-2026-11-11"
+          grep -q 'ForecastTrend = api' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'app.js?v=20261112-show-trend-opt-in' kyiv-air-alerts-grafana/pages-preview/index.html
+          echo "Preview branch only; no production write or source switch"
+
+      - name: Prepare isolated static draft preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/{index.html,styles.css,app.js,features.json,chart-share.js,kpi-range.js,forecast-trend.js,brand-mark.svg,brand-horizontal-uk-dark.svg,brand-horizontal-en-dark.svg,favicon.svg,favicon-32.png} _site/
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+
+      - name: Deploy unpromoted Netlify draft
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --message="research-EWMA-opt-in-$GITHUB_SHA" \
+            --json > netlify-forecast-preview.json
+          python - <<'PY'
+          import json
+          x = json.load(open("netlify-forecast-preview.json", encoding="utf-8"))
+          print("DRAFT_PREVIEW_URL", x.get("deploy_url") or x.get("url") or "unavailable")
+          PY
+
+      - name: Browser smoke against public Netlify draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/forecast-puppeteer
+          npm --prefix /tmp/forecast-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/forecast-puppeteer/node_modules
+          export PREVIEW_URL="$(python - <<'PY'
+          import json
+          x=json.load(open('netlify-forecast-preview.json',encoding='utf-8'))
+          url=x.get('deploy_url') or x.get('url') or ''
+          if not url: raise SystemExit('Netlify draft deploy URL unavailable')
+          print(url.replace('http://','https://',1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_forecast_preview.cjs
+
+      - name: Upload browser evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-ewma-browser-proof
+          path: |
+            forecast-browser.json
+            forecast-browser.png
+          if-no-files-found: ignore
+
+      - name: Upload non-production deploy receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-ewma-preview-receipt
+          path: netlify-forecast-preview.json
+          if-no-files-found: ignore

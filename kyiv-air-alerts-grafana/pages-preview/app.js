@@ -1,3 +1,122 @@
+/* Research preview only. A flat EWMA level is not a predictive air-raid warning. */
+(function (root, factory) {
+  "use strict";
+  const api = factory();
+  if (typeof module === "object" && module.exports) module.exports = api;
+  if (root) root.ForecastTrend = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+  const ALPHA = 0.3;
+  const MIN_HISTORY = Object.freeze({daily28: 10, calendarWeekly: 8, monthly: 6, allTime: 6});
+  const MS_DAY = 86400000;
+
+  function toDay(date) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) return null;
+    const parsed = new Date(String(date) + "T00:00:00Z");
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date ? parsed : null;
+  }
+  function plusDays(day, count) {
+    const date = toDay(day);
+    if (!date) return null;
+    date.setUTCDate(date.getUTCDate() + count);
+    return date.toISOString().slice(0, 10);
+  }
+  function plusMonths(month, count) {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(String(month))) return null;
+    const date = new Date(String(month) + "-01T00:00:00Z");
+    date.setUTCMonth(date.getUTCMonth() + count);
+    return date.toISOString().slice(0, 7);
+  }
+  function keyOf(row, period) {
+    if (period === "daily28") return String(row.date || row.time || "").slice(0, 10);
+    if (period === "calendarWeekly") return String(row.week_end || "").slice(0, 10);
+    return String(row.month || row.time || "").slice(0, 7);
+  }
+  function consecutive(prev, next, period) {
+    if (period === "daily28") return plusDays(prev, 1) === next;
+    if (period === "calendarWeekly") return plusDays(prev, 7) === next;
+    return plusMonths(prev, 1) === next;
+  }
+  function nextPeriod(last, period, step) {
+    if (period === "daily28") {
+      const date = plusDays(keyOf(last, period), step);
+      return date ? {date, time: date + "T00:00:00"} : null;
+    }
+    if (period === "calendarWeekly") {
+      const week_start = plusDays(keyOf(last, period), 1 + 7 * (step - 1));
+      const week_end = week_start && plusDays(week_start, 6);
+      return week_end ? {week_start, week_end, time: week_end + "T00:00:00"} : null;
+    }
+    const month = plusMonths(keyOf(last, period), step);
+    return month ? {month, time: month + "-01T00:00:00"} : null;
+  }
+  function ewma(rows, field) {
+    let level = null;
+    for (const row of rows) {
+      const value = row[field];
+      if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return null;
+      level = level === null ? value : ALPHA * value + (1 - ALPHA) * level;
+    }
+    return level;
+  }
+  function build(rows, period) {
+    if (!Object.hasOwn(MIN_HISTORY, period) || !Array.isArray(rows) || !rows.length) return null;
+    const completed = rows.filter(row => row && !row.is_partial_period);
+    const min = MIN_HISTORY[period];
+    if (completed.length < min) return null;
+    const tail = completed.slice(-min);
+    for (let i = 1; i < tail.length; i++) {
+      if (!consecutive(keyOf(tail[i - 1], period), keyOf(tail[i], period), period)) return null;
+    }
+    const hours = ewma(completed, "avg_daily_alert_hours");
+    const alerts = ewma(completed, "alerts_per_day");
+    if (hours === null || alerts === null) return null;
+    const anchor = rows[rows.length - 1];
+    const first = nextPeriod(anchor, period, 1);
+    if (!first) return null;
+    const forecastValue = {
+      avg_daily_alert_hours: Math.max(0, Math.min(24, hours)),
+      alerts_per_day: Math.max(0, alerts),
+      is_forecast: true
+    };
+    return {
+      alpha: ALPHA,
+      model: "EWMA_LEVEL",
+      completedPeriods: completed.length,
+      excludedIncompletePeriods: rows.length - completed.length,
+      forecasts: [Object.assign(first, forecastValue)]
+    };
+  }
+
+  const barPlugin = {
+    id: "forecastPreview",
+    afterDatasetsDraw(chart, _args, options) {
+      if (!options || !Number.isInteger(options.datasetIndex) || !Array.isArray(options.indices)) return;
+      const meta = chart.getDatasetMeta(options.datasetIndex);
+      if (!meta || meta.hidden) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#c5e1fa";
+      ctx.setLineDash([5, 4]);
+      for (const index of options.indices) {
+        const el = meta.data && meta.data[index];
+        if (!el || el.skip) continue;
+        const {x, y, base, width} = el.getProps(["x", "y", "base", "width"], true);
+        if (![x, y, base, width].every(Number.isFinite)) continue;
+        const top = Math.min(y, base);
+        const height = Math.abs(y - base);
+        if (height < 1) continue;
+        ctx.strokeRect(x - width / 2 + 1, top + 1, Math.max(0, width - 2), Math.max(0, height - 2));
+      }
+      ctx.restore();
+    }
+  };
+
+  return {build, ewma, plusDays, plusMonths, barPlugin};
+});
+
+
 const state = {
   data: null,
   features: { attack_events: false },
@@ -140,7 +259,7 @@ function applyStaticLanguage(){
  document.querySelector('meta[name="description"]')?.setAttribute("content",md);document.querySelector('meta[property="og:locale"]')?.setAttribute("content",currentLanguage==="en"?"en_US":"uk_UA");document.querySelector('meta[property="og:site_name"]')?.setAttribute("content",tr("Повітряні тривоги — міста України","Air alerts — Ukrainian cities"));document.querySelector('meta[property="og:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[property="og:description"]')?.setAttribute("content",md);document.querySelector('meta[name="twitter:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[name="twitter:description"]')?.setAttribute("content",md);
  setLocalizedText(".header-copy .eyebrow","Відкриті дані · міста України","Open data · Ukrainian cities");setLocalizedText(".header-copy h1","Повітряні тривоги","Air alerts");setLocalizedText(".header-copy .subtitle","Історичні дані про повітряні тривоги в обласних центрах України. Там, де тривога не оголошується окремо для міста, використовуються дані відповідного адміністративного району — це завжди явно позначено.","Historical air-alert data for Ukrainian regional centres. Where alerts are not issued separately for a city, the corresponding administrative district is used and clearly labelled.");
  setLocalizedAttr("#languageSwitch","aria-label","Мова","Language");$("langUk")?.setAttribute("aria-pressed",currentLanguage==="uk"?"true":"false");$("langEn")?.setAttribute("aria-pressed",currentLanguage==="en"?"true":"false");setLocalizedText("#showTour","Показати тур","Show tour");setLocalizedText("#copyLink","Скопіювати посилання","Copy link");
- setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","allTime","За весь час","All time");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
+ setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText("#showTrendLabel","Показати тренд","Show trend");setLocalizedText('label[for="cityPeriod"]',"Інтервал","Interval");setOptionText("cityPeriod","daily28","Останні 28 днів","Last 28 days");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","allTime","За весь час","All time");setOptionText("cityPeriod","calendarWeekly","Тижні","Weeks");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");setOptionText("cityPeriod","rolling180","Ковзні 180 днів","Rolling 180 days");
  for(const id of ["cityDateFrom","rolling7dDateFrom","shortDateFrom","compareDateFrom","tableDateFrom"])setLocalizedText(`label[for="${id}"]`,"Від","From");
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
  for(const picker of document.querySelectorAll(".date-picker-native")) {
@@ -619,12 +738,17 @@ function setupCsvExports() {
     const canvas = $(chartId);
     const card = canvas?.closest(".chart-card");
     const wrap = canvas?.closest(".chart-wrap");
-    if (!canvas || !card || !wrap || card.querySelector(`[data-csv-chart="${chartId}"]`)) continue;
-    const row = document.createElement("div");
-    row.className = "chart-export-row";
-    row.dataset.csvChart = chartId;
-    row.appendChild(makeCsvButton(() => exportChartCsv(chartId)));
-    card.insertBefore(row, wrap);
+    if (!canvas || !card || !wrap) continue;
+    let row = card.querySelector(`[data-csv-chart="${chartId}"]`);
+    if (!row) {
+      row = document.createElement("div");
+      row.className = "chart-export-row";
+      row.dataset.csvChart = chartId;
+      card.insertBefore(row, wrap);
+    }
+    if (!row.querySelector(".csv-export-button")) {
+      row.appendChild(makeCsvButton(() => exportChartCsv(chartId)));
+    }
   }
 
   const tablePanel = $("allCitiesTable")?.closest(".table-panel");
@@ -2231,6 +2355,21 @@ function renderCity() {
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
   renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
   const labels = rows.map(r => periodDisplayLabel(r, period));
+  const forecastable = ["daily28", "calendarWeekly", "monthly", "allTime"].includes(period);
+  const isCurrentRange = rows.length && allRows.length &&
+    rows[rows.length - 1] === allRows[allRows.length - 1];
+  // The trend is explicitly opt-in; hide its control on unsupported modes or
+  // manually selected historical ranges, retaining the selection for other modes.
+  const trendControl = $("showTrend")?.closest("label");
+  if (trendControl) trendControl.classList.toggle("hidden", !forecastable || !isCurrentRange);
+  // Never extrapolate a manually chosen historical range or a rolling window.
+  const previewForecast = forecastable && isCurrentRange && $("showTrend")?.checked && window.ForecastTrend
+    ? window.ForecastTrend.build(allRows, period) : null;
+  const projectedRows = previewForecast?.forecasts || [];
+  const forecastIndices = projectedRows.map((_, i) => labels.length + i);
+  const chartRows = rows.concat(projectedRows);
+  const chartLabels = labels.concat(projectedRows.map(r =>
+    tr("Прогноз: ", "Forecast: ") + periodDisplayLabel(r, period)));
   const dashed = type === "raion_proxy";
 
   const intensityDatasets = [
@@ -2261,6 +2400,42 @@ function renderCity() {
       spanGaps: true
     }
   ];
+
+  if (projectedRows.length) {
+    // Forecast data are separate datasets: no fabricated actual observations.
+    intensityDatasets[0].data = intensityDatasets[0].data.concat(projectedRows.map(() => null));
+    intensityDatasets[0].backgroundColor = intensityDatasets[0].backgroundColor.concat(projectedRows.map(() => "transparent"));
+    intensityDatasets[0].borderColor = intensityDatasets[0].borderColor.concat(projectedRows.map(() => "transparent"));
+    intensityDatasets[0].borderWidth = intensityDatasets[0].borderWidth.concat(projectedRows.map(() => 0));
+    intensityDatasets[1].data = intensityDatasets[1].data.concat(projectedRows.map(() => null));
+    intensityDatasets[1].pointRadius = intensityDatasets[1].pointRadius.concat(projectedRows.map(() => 0));
+    intensityDatasets[1].pointHoverRadius = intensityDatasets[1].pointHoverRadius.concat(projectedRows.map(() => 0));
+    intensityDatasets.push({
+      type: "bar",
+      label: tr("Прогноз · години / добу (EWMA 0,3)", "Forecast · hours / day (EWMA 0.3)"),
+      data: rows.map(() => null).concat(projectedRows.map(r => r.avg_daily_alert_hours)),
+      yAxisID: "yHours",
+      backgroundColor: "#62a0ea55",
+      borderColor: "#c5e1fa",
+      borderWidth: 0,
+      _exportRows: chartRows
+    });
+    intensityDatasets.push({
+      type: "line",
+      label: tr("Прогноз · тривоги / день (EWMA 0,3)", "Forecast · alerts / day (EWMA 0.3)"),
+      data: rows.map(() => null).concat(projectedRows.map(r => r.alerts_per_day)),
+      yAxisID: "yAlerts",
+      borderColor: "#b8ffc5",
+      backgroundColor: "#b8ffc522",
+      borderWidth: 2,
+      borderDash: [5, 5],
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      spanGaps: false,
+      tension: 0,
+      _exportRows: chartRows
+    });
+  }
 
   if (period === "daily28" && explosion?.strict_daily) {
     intensityDatasets.push({
@@ -2297,13 +2472,20 @@ function renderCity() {
         );
   }
 
+  if (intensitySubtitle && projectedRows.length) {
+    intensitySubtitle.textContent += " " + tr(
+      "Останній штрихований стовпчик — експериментальний прогноз на наступний період (EWMA 0,3). Це не попередження про майбутні атаки. Неповний період не використовується для розрахунку.",
+      "The final outlined bar is an experimental forecast for the next period (EWMA 0.3), not a warning of future attacks. Incomplete periods are excluded from the calculation."
+    );
+  }
+
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
     data: {
-      labels,
+      labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin],
+    plugins: [partialPeriodBarPlugin, ...(projectedRows.length ? [window.ForecastTrend.barPlugin] : [])],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -2323,12 +2505,20 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
+              if (i >= rows.length && projectedRows.length) {
+                return tr("Експериментальна оцінка, не фактична тривога",
+                          "Experimental estimate, not an actual alert");
+              }
               return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
                 : partialPeriodFooter(rows[i]);
             }
           }
         },
-        partialPeriodBar: { rows, datasetIndices: [0] }
+        partialPeriodBar: { rows, datasetIndices: [0] },
+        forecastPreview: {
+          datasetIndex: projectedRows.length ? intensityDatasets.findIndex(d => d.type === "bar" && d.label.includes("EWMA")) : -1,
+          indices: forecastIndices
+        }
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
@@ -3433,6 +3623,7 @@ function bind() {
     if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();
     renderCity();
   });
+  $("showTrend")?.addEventListener("change", () => renderCity());
   document.querySelectorAll(".time-of-day-range-option").forEach(option => {
     option.addEventListener("change", () => {
       if (!selectedTimeOfDayRanges().length) option.checked = true;
@@ -3521,9 +3712,29 @@ async function init() {
   state.features = await loadPreviewFeatures();
   applyPreviewFeatureVisibility();
 
-  const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
-  state.data = await response.json();
+  // A draft preview must remain usable if raw.githubusercontent.com is
+  // unavailable or temporarily returns an error. Keep the exact bundled
+  // site-prod JSON as a last-resort snapshot; never synthesize values.
+  let dashboardLoadError = null;
+  for (const source of [DATA_URL, "data.json"]) {
+    try {
+      const response = await fetch(`${source}?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!data?.cities || Object.keys(data.cities).length !== 23) {
+        throw new Error("Incomplete 23-city dashboard JSON");
+      }
+      state.data = data;
+      if (source === "data.json") {
+        console.warn("Research preview using bundled site-prod snapshot", dashboardLoadError);
+      }
+      break;
+    } catch (error) {
+      dashboardLoadError = error;
+      console.warn("Research preview dashboard source unavailable", source, error);
+    }
+  }
+  if (!state.data) throw new Error("Neither live site-prod nor bundled preview data loaded");
   // Production data are refreshed independently of frontend deployments.
   // Prefer the index generated atomically with dashboard_data.json; only
   // fall back to the verified static release snapshot for older data.
@@ -3662,6 +3873,8 @@ async function init() {
   fillSelect($("compareB"), keys, bDefault);
   fillSelect($("compareC"), keys, cDefault, true);
   $("cityPeriod").value = periodDefault;
+  // Always start with actual observations only, including fresh page loads.
+  if ($("showTrend")) $("showTrend").checked = false;
   $("comparePeriod").value = compareDefault;
   setSelectedTimeOfDayRanges(heatmapDefault);
   if ($("timeOfDayBin")) $("timeOfDayBin").value = timeOfDayBinDefault;
