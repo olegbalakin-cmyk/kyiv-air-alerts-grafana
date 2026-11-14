@@ -1,0 +1,31 @@
+name: C6 DST UTC union offline regression (research)
+
+on:
+  push:
+    branches: [research-c6-dst-utc-guard-2026-11-14]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py"
+      - "kyiv-air-alerts-grafana/tests/test_c6_dst_utc_union.py"
+      - ".github/workflows/c6-dst-utc-offline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    if: github.ref == 'refs/heads/research-c6-dst-utc-guard-2026-11-14'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install existing parser requirements
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Four-case DST UTC union regression (no source HTTP, Neon, Git push or Netlify)
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m unittest discover -s tests -p test_c6_dst_utc_union.py -v
