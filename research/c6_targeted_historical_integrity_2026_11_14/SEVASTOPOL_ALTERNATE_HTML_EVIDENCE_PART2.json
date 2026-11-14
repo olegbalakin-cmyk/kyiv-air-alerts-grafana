@@ -1,0 +1,96 @@
+{
+  "schema": "c6-alternate-html-evidence-part2-v1",
+  "review_date": "2026-11-14",
+  "source_description": "User-provided Telegram Desktop HTML export of 'Республика Крым, Севастополь Оповещения, тревоги' for 2026-11-05; forwarded messages marked Lpr 1 are third-party updates, not an authenticated Razvozhaev all-clear",
+  "raw_file_basename": "messages(5).html",
+  "raw_sha256": "2c1be8b682dd6a3e12f1c5b6be6289278a9b451730ed60498749be6287944e8e",
+  "raw_bytes": 82707,
+  "raw_file_committed_to_repository": false,
+  "message_count": 71,
+  "first_message": {
+    "id": 52725,
+    "at": "2026-11-05T00:08:47+02:00"
+  },
+  "last_message": {
+    "id": 52799,
+    "at": "2026-11-05T23:59:07+02:00"
+  },
+  "export_timezone": "UTC+02:00 (Telegram export timezone; not claimed to be Sevastopol civil timezone)",
+  "overlap_with_prior_file": {
+    "other_file": "messages(4).html",
+    "other_sha256": "ab86f890bde6aec7c2333bd8cc111587b9d2239d923e08d6a2388d7e200e1dcb",
+    "shared_message_id": 52725,
+    "unique_messages_across_both": 223
+  },
+  "exact_messages": [
+    {
+      "id": 52733,
+      "export_time": "2026-11-05T02:07:04+02:00",
+      "utc": "2026-11-05T00:07:04Z",
+      "text": "Севастополь, тревога по БПЛА",
+      "meaning": "Unpaired secondary-source UAV-warning message; does not prove an official fresh air-alert interval or close #25006"
+    },
+    {
+      "id": 52736,
+      "export_time": "2026-11-05T02:31:36+02:00",
+      "utc": "2026-11-05T00:31:36Z",
+      "text": "Севастополь, тревога по БПЛА",
+      "meaning": "20 seconds after confirmed official Razvozhaev #25008 start"
+    },
+    {
+      "id": 52739,
+      "export_time": "2026-11-05T03:02:02+02:00",
+      "utc": "2026-11-05T01:02:02Z",
+      "text": "Севастополь, отбой тревоги по БПЛА. Переход в режим повышенного внимания.",
+      "meaning": "139 seconds after official #25009 end, likely confirms same #25008–25009 interval; NOT eligible as #25006 closing time"
+    },
+    {
+      "id": 52764,
+      "export_time": "2026-11-05T15:14:01+02:00",
+      "utc": "2026-11-05T13:14:01Z",
+      "text": "Республика Крым Севастополь Отбой беспилотной опасности по ранее объявленным Режим повышенного внимания сохраняем",
+      "meaning": "Generic UAV danger all-clear for previously announced warnings many hours later; cannot assign as end of Razvozhaev #25006"
+    },
+    {
+      "id": 52782,
+      "export_time": "2026-11-05T19:51:15+02:00",
+      "utc": "2026-11-05T17:51:15Z",
+      "text": "Республика Крым и Севастополь ... Отбой ракетной опасности по ПКР Нептун",
+      "meaning": "Missile-specific warning, not Sevastopol air-alert endpoint"
+    },
+    {
+      "id": 52793,
+      "export_time": "2026-11-05T23:37:31+02:00",
+      "utc": "2026-11-05T21:37:31Z",
+      "text": "Севастополь Кача Бельбек и близлежащие Опасность по БПЛА",
+      "meaning": "Additional secondary UAV risk notice; outside unresolved #25006 window"
+    }
+  ],
+  "official_reference": {
+    "unpaired_start": {
+      "id": 25006,
+      "url": "https://t.me/razvozhaev/25006",
+      "utc": "2026-11-04T17:14:45Z"
+    },
+    "next_complete_pair": {
+      "start_id": 25008,
+      "start_utc": "2026-11-05T00:31:16Z",
+      "end_id": 25009,
+      "end_utc": "2026-11-05T00:59:43Z",
+      "git_blob_sha": "87a541c7876979aeb68c20728e1bbfc9c9dd780a",
+      "neon_readonly_count_in_target_window": 1
+    }
+  },
+  "verdict": {
+    "for_25008_25009": "ALREADY_RESOLVED: independently corroborated by secondary channel with 20s start and 139s end lag",
+    "for_25006": "INSUFFICIENT_EVIDENCE: no direct, unambiguous all-clear for 2026-11-04 17:14:45Z",
+    "data_only_patch_authorized": false,
+    "change_to_published_stats": false
+  },
+  "guardrails": [
+    "Do not treat Telegram export timezone as civil Sevastopol timezone",
+    "Do not treat UAV/missile-warning bulletins as equivalent to official Razvozhaev AIR alert unless mapping independently proven",
+    "Neither external source HTTP nor Neon mutation performed",
+    "No broad re-audit; only exact targeted comparison"
+  ]
+}

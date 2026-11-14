@@ -1,0 +1,120 @@
+{
+  "schema": "c6-targeted-historical-integrity-evidence-v1",
+  "as_of_utc": "2026-11-14T19:59:00Z",
+  "scope": "READ_ONLY_OFFLINE",
+  "main_sha": "b98bfb15f86098818bb3ce44cad4e6a39b17f99b",
+  "site_prod_sha": "c980c3f70ed894d2583fc83ecdedd1f82c04afb1",
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "read_role": "c6_shared_reader_v2",
+    "query_class": "SELECT only",
+    "results": {
+      "sevastopol_25006_matching_start": 0,
+      "sevastopol_25008_25009_matching_complete_pair": 1,
+      "mykolaiv_legacy_83013a6187472fb447198a17": 1,
+      "mykolaiv_pre_2023_episode_rows": 0
+    }
+  },
+  "git_files": [
+    {
+      "path": "kyiv-air-alerts-grafana/data/sevastopol_events.json",
+      "blob_sha": "87a541c7876979aeb68c20728e1bbfc9c9dd780a"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/sevastopol_event_corrections.json",
+      "blob_sha": "d017d164243351819479db3c8300d97c16fda6d0"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/mykolaiv_exact_city_audit.json",
+      "blob_sha": "6e9a8dcf58af3b8c4d446b33b531e8c3d3a2a40f"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/c2_history_capture_checkpoints.json",
+      "blob_sha": "7624bf851c4940d92d59141d4d97ac1cac0f05ab"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/dashboard_qa.json",
+      "blob_sha": "bf4694c77a04500d9183b21e8942fd7697d3c4b3"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/owner_accepted_air_corrections.json",
+      "blob_sha": "c6c371d9c8eb18b866cda59bcc05424e184945aa"
+    }
+  ],
+  "proofs": [
+    {
+      "run": 43625014243,
+      "status": "success",
+      "artifact_id": 14126747544,
+      "name": "c2-shadow-inputs-43625014243-1",
+      "github_zip_digest": "sha256:a6432b673faf541793b42afe0f8e37e4b658495658ffee71f4b5ad8a44c36611"
+    },
+    {
+      "run": 43625014243,
+      "status": "success",
+      "artifact_id": 14126028497,
+      "name": "c6-neon-git-preparation-43625014243-1",
+      "github_zip_digest": "sha256:3541c0c26b70f06362213d971629e0acd5cbb94ae7be85f1d25c0b51775b49c6"
+    },
+    {
+      "run": 43055353190,
+      "artifact_id": 13873291895,
+      "github_zip_digest": "sha256:0bbbe59ba6d4066a949f071a1bbf61f7c3a21a4ba487cb9e3d1dcadd297c2922",
+      "inner_zip_sha256_from_prior_report": "ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d"
+    },
+    {
+      "run": 43113822169,
+      "artifact_id": 13898408282,
+      "github_zip_digest": "sha256:123c8b17c8f51aa8740bc9b4f7c9cd4ebb5359dcbeec1673c67c4887460c4531"
+    },
+    {
+      "run": 43172960738,
+      "artifact_id": 13923503919,
+      "github_zip_digest": "sha256:38bce6f2d9c33b6908ccac47e8278e48666e5da0d42563483fc32efb9a0f7b30"
+    },
+    {
+      "run": 43262387718,
+      "artifact_id": 13967335571,
+      "github_zip_digest": "sha256:9f4168c12795977505f5a6cbbf836c1bb7c9a632286bb62de19d532612e2841e"
+    },
+    {
+      "run": 43321997695,
+      "artifact_id": 13991878472,
+      "github_zip_digest": "sha256:2686f1c54e77e630fd7f8c920f4d88d05f6048b68be26f11f5e3fa03745bebde"
+    },
+    {
+      "run": 43510482714,
+      "artifact_id": 14079597881,
+      "github_zip_digest": "sha256:c38cb72e23688e62f1ea2ba9bcab82e20465b8679bda41fa2ee7066a7889b01f"
+    },
+    {
+      "run": 43523629106,
+      "artifact_id": 14086255755,
+      "github_zip_digest": "sha256:b4af6197078ccb980dabc4e1c4fa3cd3c5ce9029599650ace727930a536847da"
+    },
+    {
+      "run": 43286060405,
+      "artifact_id": 13974134720,
+      "reported_digest": "sha256:84e324228e41a8f8767eaefae730ded730cc21c0708111ceb535b18e75779f41"
+    }
+  ],
+  "source_reports": [
+    {
+      "pr": 74,
+      "blob": "f2ef7bb7820ac4fae5110f26b2514ea19cd527c4",
+      "path": "research/c6_work_b_exact_corpus_2026_11_11/FINAL_REPORT.md"
+    },
+    {
+      "pr": 74,
+      "blob": "958bc6e679a77d7145d76ab713858f2e2b335319",
+      "path": "research/c6_work_b_exact_corpus_2026_11_11/STALE_262_EPISODES.csv"
+    }
+  ],
+  "limitations": [
+    "147/147 across seven C2 ZIPs is a prior report, but exact 147-row matrix and independent inner bytes were not reconstructed",
+    "Git huge dashboard/derived JSON not re-fetched at single event level",
+    "GitHub artifact ZIP digests from API describe outer artifacts; they are not a claim of fresh local downloaded ZIP SHA verification",
+    "No historic-source HTTP or production mutation"
+  ]
+}
