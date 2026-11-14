@@ -167,7 +167,74 @@
       expectedHours:observedHours+remainingHours,
       modelAlerts,modelHours,periodRow};
   }
-  return {estimate,bounds,add,kyivMidnightUtc,kyivLocalDay,certifiedPartial};
+  // Current day uses the same measured-portion-plus-remainder semantics as
+  // other calendar periods, but requires a source-timestamped *partial* day.
+  // Never create a 29th date or count the same observed hours twice.
+  function estimateToday(index,today,partialDay,nowInstant=new Date()){
+    if(index?.status!=="verified"||!valid(today)||
+       index.end!==add(today,-1)||!valid(index.start)||!valid(index.end))return null;
+    const nowTimestamp=nowInstant instanceof Date?nowInstant.getTime():Date.parse(nowInstant);
+    if(!Number.isFinite(nowTimestamp))return null;
+    const observed=certifiedPartial(partialDay,today,nowTimestamp);
+    if(!observed)return null; // no intraday timestamp: no reliable estimate
+    const totalDays=nDays(index.start,index.end),yesterday=index.end;
+    if(totalDays<28||totalDays>36600||
+       !Array.isArray(index.counts)||!Array.isArray(index.daily_total_alert_duration_seconds)||
+       index.counts.length!==totalDays||
+       index.daily_total_alert_duration_seconds.length!==totalDays)return null;
+    const verifiedMonths=new Set(index.verified_metric_months||[]);
+    const verifiedDays=new Set(index.verified_metric_days||[]);
+    const counts=[],hours=[];
+    for(let i=27;i>=0;i--){
+      const date=add(yesterday,-i);
+      if(!date||date<index.start||
+         !verifiedDays.has(date)&&!verifiedMonths.has(date.slice(0,7)))return null;
+      const j=nDays(index.start,date)-1;
+      const n=index.counts[j],seconds=index.daily_total_alert_duration_seconds[j];
+      const start=kyivMidnightUtc(date),end=kyivMidnightUtc(add(date,1));
+      if(start===null||end===null||!Number.isInteger(n)||n<0||
+         !Number.isFinite(seconds)||seconds<0||seconds>(end-start)/1000+7)return null;
+      counts.push(n);hours.push(seconds/3600);
+    }
+    const first=kyivMidnightUtc(add(yesterday,-27));
+    const todayStart=kyivMidnightUtc(today),tomorrow=kyivMidnightUtc(add(today,1));
+    if(first===null||todayStart===null||tomorrow===null||
+       observed.at<=todayStart||observed.at>=tomorrow)return null;
+    const elapsedBaselineHours=(todayStart-first)/HOUR;
+    const knownAlertHours=sum(hours);
+    if(elapsedBaselineHours<=0||knownAlertHours>elapsedBaselineHours+0.01)return null;
+    const occupancyRate=clamp(knownAlertHours/elapsedBaselineHours,1);
+    const maximumRemainingHours=(tomorrow-observed.at)/HOUR;
+    if(maximumRemainingHours<=0)return null;
+    const remainingHours=occupancyRate*maximumRemainingHours;
+    const remainingAlerts=mean(counts)*maximumRemainingHours/24;
+    const periodRow={
+      ...partialDay,
+      time:partialDay.time||today+"T00:00:00",
+      date:today,is_partial_period:true,
+      partial_through:observed.sourceTimestamp,
+      alerts_started:observed.alerts,
+      total_alert_duration_hours:observed.hours,
+      avg_daily_alert_hours:observed.hours,
+      alerts_per_day:observed.alerts,
+      _verified_completion_source:true
+    };
+    return {
+      period:"daily28",start:today,end:today,key:today,through:yesterday,
+      asOf:observed.sourceTimestamp,asOfIsIntraday:true,
+      observed:0,days:1,left:1,
+      observedDaysEquivalent:observed.dayFraction,
+      remainingDaysEquivalent:1-observed.dayFraction,
+      actualHours:observed.hours,actualAlerts:observed.alerts,
+      remainingHours,remainingAlerts,maximumRemainingHours,
+      occupancyRate,baselinePhysicalHours:elapsedBaselineHours,
+      expectedHours:observed.hours+remainingHours,
+      expectedAlerts:observed.alerts+remainingAlerts,
+      modelHours:"observed_28d_hour_fraction",modelAlerts:"mean28_per_24h",
+      periodRow
+    };
+  }
+  return {estimate,estimateToday,bounds,add,kyivMidnightUtc,kyivLocalDay,certifiedPartial};
 });
 
 
@@ -2784,25 +2851,36 @@ function renderCity() {
     : period === "quarterly" ? calendarQuarterOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
   renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
-  // Verified complete-day estimate only; other graphs, KPIs and historical data remain unchanged.
-  const completionPeriod = ["calendarWeekly","monthly","quarterly"].includes(period);
-  const completionCandidate = completionPeriod
-    ? window.PeriodCompletionPreview?.estimate(state.historicalDaily?.cities?.[key],period,kyivCalendarToday(),city?.daily28?.at(-1))
-    : null;
+  // One display logic: observed hours and estimated remaining clock-time.
+  // For daily28, the existing observed partial-day bar already occupies the
+  // last of 28 dates. Do not append a new date or duplicate its actual values.
+  const calendarToday=kyivCalendarToday();
+  const partialDay=city?.daily28?.at(-1);
+  const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"].includes(period);
+  const completionCandidate = !completionPeriod ? null :
+    period==="daily28"
+      ? window.PeriodCompletionPreview?.estimateToday(
+          state.historicalDaily?.cities?.[key],calendarToday,partialDay)
+      : window.PeriodCompletionPreview?.estimate(
+          state.historicalDaily?.cities?.[key],period,calendarToday,partialDay);
   const completionVisible = completionCandidate &&
-    (!activeRange.from || activeRange.from<=completionCandidate.start) &&
-    (!activeRange.to || activeRange.to>=completionCandidate.through);
+    (period==="daily28"
+      ? rows.length===28 && rows.at(-1)?.date===calendarToday &&
+        isPartialPeriod(rows.at(-1)) &&
+        (!activeRange.from||activeRange.from<=calendarToday) &&
+        (!activeRange.to||activeRange.to>=calendarToday)
+      : (!activeRange.from || activeRange.from<=completionCandidate.start) &&
+        (!activeRange.to || activeRange.to>=completionCandidate.through));
   const completion = completionVisible && $("showTrend")?.checked ? completionCandidate : null;
-  if (completion) {
+  if (completion && period!=="daily28") {
     rows = rows.filter(row => !(isPartialPeriod(row) &&
       (period==="calendarWeekly" ? row.week_start===completion.start :
        period==="monthly" ? row.month===completion.key : row.quarter===completion.key)));
     rows = [...rows,completion.periodRow];
   }
   const labels = rows.map(r => periodDisplayLabel(r, period));
-  // Consistent meaning on every mode: only estimate completion of the
-  // currently unfinished calendar week, month or quarter. No next-period
-  // extrapolation for daily, rolling 7/30/90/180, or all-time views.
+  // Consistent meaning: estimate completion of the unfinished current day,
+  // week, month or quarter. Never extrapolate new rolling or future periods.
   const trendControl = $("showTrend")?.closest("label");
   if (trendControl) trendControl.classList.toggle("hidden", !completionVisible);
   const chartLabels = labels;
