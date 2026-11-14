@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 — Work W offline integration PASS (2026-11-14)
+
+- [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) exact `4e083db7a1f5f050c5a4bdeaab5803cffc48703d`; [Actions #43589692637](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637) SUCCESS, [artifact #14111553746](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589692637/artifacts/14111553746) uploader SHA-256 `30e704d6e25d21b150620fa5a60cd61dce73ed2ad8fe9b169dffd509cb92a809` (independent rehash pending). Offline 18→20→23=23, replay +0, T03–T05 held. Operator hard-OFF, legacy generator blocked, old casualty step OFF. Six-file research Draft, 0 production writes. Owner GO required before transfer or PROMOTE.
+
 ### CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01 — Work X offline PASS (2026-11-14)
 
 - [Draft PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) exact `b07a5957cb57ab8cf008d14373b15fa1db47b3af`; [Actions #43589727392](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589727392) SUCCESS 169 PASS/1 expected SKIP; [artifact #14111089895](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589727392/artifacts/14111089895) uploader ZIP SHA `ba66b10189e2ef75b6a823c0a6ab49149118151c8e1e7e1d8338342ed9e7c192`, independent rehash pending. 23-city RSS independent 48h overlap and retained excerpt index offline-tested, 3 T03–T05 cards NEEDS_REVIEW, 0 credits; synthetic cases not real incident proof. No WIP schedule change, source GET, PROMOTE or production write. Further pilot requires separate owner grant and demonstrated new evidence-retention gain.
