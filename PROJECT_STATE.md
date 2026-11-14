@@ -1,6 +1,6 @@
 # Project State — coordination snapshot
 
-**2026-11-14. Latest accepted: C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
+**2026-11-14. Latest accepted: C6-C3-MYKOLAIV-CSV-CROSSCHECK-01. GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF; DST_CORRECTION=OFF.**
 
 Read main documentation first; newer accepted PR #78 checkpoints govern. Historical records below remain verbatim; root byte gate ≤12,288 B PASS.
 
@@ -22,6 +22,10 @@ Read main documentation first; newer accepted PR #78 checkpoints govern. Histori
 ## Latest accepted checkpoints
 
 <!-- coordination:history:start -->
+## C6-C3-MYKOLAIV-CSV-CROSSCHECK-01 — independent alerts.in.ua CSV cross-check, read-only (2026-11-14)
+
+- Owner CSV exports 13/14 Nov: Mykolaivskyi raion AIR 17+5 rows, 1 exact duplicate = 21 distinct completed alerts. Prior official checkpoint `2026-11-12T22:59:25Z`; failed 14 Nov poll `~07:15Z` returned 20 completed AIR rows with no overlap. Assuming local Kyiv CSV timestamps, a bounded 20-row response can miss the previous checkpoint. This corroborates, but does not prove, exact cross-source event parity or authorize manual continuity. Offline match/provenance required; keep 21/21 fail-closed and live pilots paused.
+
 ## C6-C3-PILOT3-MYKOLAIV-BRIDGE-NOGO-01 — third manual pilot blocked before Neon writer (2026-11-14)
 
 - Owner manual [Actions #43568691823](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43568691823), attempt 1 on `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`, FAILED at step 25, `Validate verified UkraineAlarm bridge checkpoint`: `ValueError: bridge continuity is not fully verified`. Bridge fetch printed 20/21 continuous regions; `mykolaiv`, region 98, `continuous=False history=20 static_match=False poll_overlap=False`. Existing `apply_ukrainealarm_bridge.py` classifies this case as `history_window_no_longer_reaches_previous_poll`. No evidence of C2 canonical Neon writer, `capture()`, Git JSON publication; following jobs SKIPPED.
