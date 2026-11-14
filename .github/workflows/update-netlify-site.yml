@@ -588,7 +588,7 @@ jobs:
         shell: bash
         run: |
           python c6-auto-integration/scripts/c6_precapture_diag.py \
-            --checkout "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --checkout "$GITHUB_WORKSPACE" \
             --expected-head "${PHASE1_INPUT_SHA}"
 
       - name: Freeze same-run C2 checkpoint delta (no commit/push)
@@ -598,7 +598,7 @@ jobs:
         run: |
           set -euo pipefail
           PYTHONPATH=c6-auto-integration python c6-auto-integration/scripts/c6_neon_auto_git.py capture \
-            --checkout "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --checkout "$GITHUB_WORKSPACE" \
             --status "${RUNNER_TEMP}/c2_publication_status.json" \
             --input-sha "${PHASE1_INPUT_SHA}" \
             --workflow-sha "${GITHUB_SHA}" \

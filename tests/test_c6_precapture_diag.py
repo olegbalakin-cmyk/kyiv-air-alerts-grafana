@@ -117,6 +117,17 @@ class PreCaptureTests(unittest.TestCase):
         self.assertNotIn(str(self.root), output.getvalue())
         self.assertNotIn("SECRET", output.getvalue())
 
+    def test_root_checkout_vs_nested_site_checkout(self):
+        # Production checkout is the Git root; data lives in a nested folder.
+        # Passing that nested folder as --checkout makes the pathspec empty.
+        self.write(d.DASHBOARD, '{"changed":true}')
+        correct = d.inspect(self.repo, self.head)
+        self.assertTrue(correct["checkpoint_file_regular"])
+        self.assertEqual(correct["scoped_changes"], 1)
+        nested = d.inspect(self.repo / "kyiv-air-alerts-grafana", self.head)
+        self.assertFalse(nested["checkpoint_file_regular"])
+        self.assertEqual(nested["scoped_changes"], 0)
+
     def test_workflow_immediate_pre_capture_gating_and_identity(self):
         text = (ROOT / ".github/workflows/update-netlify-site.yml").read_text()
         name = "      - name: Read-only redacted Git status before C6 capture\n"
@@ -126,7 +137,12 @@ class PreCaptureTests(unittest.TestCase):
         self.assertIn("continue-on-error: true", between)
         self.assertIn("working-directory: .", between)
         self.assertIn("c6-auto-integration/scripts/c6_precapture_diag.py", between)
-        self.assertIn('--checkout "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"', between)
+        self.assertIn('--checkout "$GITHUB_WORKSPACE"', between)
+        capture_step = text.split(capture, 1)[1].split(
+            "      - name: Upload same-run C2 delta", 1)[0]
+        self.assertIn('--checkout "$GITHUB_WORKSPACE"', capture_step)
+        self.assertNotIn('--checkout "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"',
+                         between + capture_step)
         self.assertIn('--expected-head "' + '$' + '{PHASE1_INPUT_SHA}"', between)
         a = re.search(r"^        if: (.+)$", between, re.MULTILINE)
         b = re.search(r"^        if: (.+)$", text.split(capture, 1)[1], re.MULTILINE)

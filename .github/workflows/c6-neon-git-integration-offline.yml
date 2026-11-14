@@ -1,7 +1,7 @@
 name: C6 default-OFF Neon Git integration offline
 on:
   push:
-    branches: [research-c6-neon-git-integration-off-2026-11-12, research-c6-auto-neon-git-zero-netlify-2026-11-13, research-c6-neon-pilot-capture-offline-2026-11-13, fix-c6-pre-capture-readonly-diagnostics-2026-11-14]
+    branches: [research-c6-neon-git-integration-off-2026-11-12, research-c6-auto-neon-git-zero-netlify-2026-11-13, research-c6-neon-pilot-capture-offline-2026-11-13, fix-c6-pre-capture-readonly-diagnostics-2026-11-14, fix-c6-capture-checkout-root-2026-11-14]
     paths:
       - ".github/workflows/update-netlify-site.yml"
       - ".github/workflows/c6-neon-git-integration-offline.yml"
@@ -177,7 +177,7 @@ jobs:
           if-no-files-found: warn
 
   auto-neon-git-offline:
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.ref == 'refs/heads/research-c6-neon-pilot-capture-offline-2026-11-13' || github.ref == 'refs/heads/fix-c6-pre-capture-readonly-diagnostics-2026-11-14')) || (github.event_name == 'pull_request' && (github.head_ref == 'research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.head_ref == 'research-c6-neon-pilot-capture-offline-2026-11-13' || github.head_ref == 'fix-c6-pre-capture-readonly-diagnostics-2026-11-14'))
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.ref == 'refs/heads/research-c6-neon-pilot-capture-offline-2026-11-13' || github.ref == 'refs/heads/fix-c6-pre-capture-readonly-diagnostics-2026-11-14' || github.ref == 'refs/heads/fix-c6-capture-checkout-root-2026-11-14')) || (github.event_name == 'pull_request' && (github.head_ref == 'research-c6-auto-neon-git-zero-netlify-2026-11-13' || github.head_ref == 'research-c6-neon-pilot-capture-offline-2026-11-13' || github.head_ref == 'fix-c6-pre-capture-readonly-diagnostics-2026-11-14' || github.head_ref == 'fix-c6-capture-checkout-root-2026-11-14'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
