@@ -4230,7 +4230,7 @@ function bind() {
 
   setupTableSorting();
   bindIntroTour();
-  bindLanguageSwitch();
+  // The language controls are bound eagerly, before any async data fetch.
   $("copyLink").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
@@ -4493,6 +4493,7 @@ function canonicalizeLanguagePath(){
 }
 if(!canonicalizeLanguagePath()){
  applyStaticLanguage();
+ bindLanguageSwitch();
 
 init().catch(err=>{
   console.error(err);
