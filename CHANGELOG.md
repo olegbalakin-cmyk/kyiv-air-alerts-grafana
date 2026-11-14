@@ -2,7 +2,7 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
-Current accepted: **C6-C3-PILOT2-CHECKOUT-ROOT-FAIL-PROVEN-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
+Current accepted: **C6-C3-MERGE134-CHECKOUT-ROOT-FIX-STAGED-01.** GLOBAL_CUTOVER=YES; PILOT=FAIL; AUTO_NEON_GIT=OFF. Production unchanged. Earlier cutover PASS and stopped observations remain historical.
 
 ## Work S final execution observation (2026-11-13; publication not executed)
 
@@ -16,6 +16,10 @@ Current accepted: **C6-C3-PILOT2-CHECKOUT-ROOT-FAIL-PROVEN-01.** GLOBAL_CUTOVER=
 - Final refs remain d68e35e3/99648321; Netlify before=after `6adb629bc3ebc570117d82e1`, ready/locked. Both workflows disabled, pause=true, all 13 temporary variables and Netlify grant removed; Git grant never installed. Protected environment retained empty. Casualty/aux unchanged; release production QA and rollback not run. `CUTOVER_RESULT=BLOCKED; GLOBAL_CUTOVER=NO`. [Receipt](docs/work-s-execution-2026-11-13.json). Latest accepted checkpoint below remains unchanged.
 
 <!-- coordination:history:start -->
+### C6-C3-MERGE134-CHECKOUT-ROOT-FIX-STAGED-01 — approved PR #134 merge; manual pilot still required (2026-11-14)
+
+- Screenshot confirms `Update Ukraine air-alert production data` manually disabled following second failed pilot; legacy pause=true, AUTO flag absent, Netlify workflow disabled at prior owner gate. [PR #134](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/134) source `cc1ab14fda62b441883792b39d721230d0e2e165` merged `main@50a5be9ee78dfa2b25977393916e0a57a3571df5`; exact-head offline #43568003654, timestamp #43568003594, coordination #43568003564 SUCCESS. Changed only pre-capture diagnostic and `capture()` checkout arguments to repository root `$GITHUB_WORKSPACE` with regression test; existing fail-closed logic unchanged. Independent postmerge `site-prod@54079326` and Netlify `6af76b2d` ready/locked unchanged; zero production Actions on new merge SHA initial readback. `GLOBAL_CUTOVER=YES; MERGE_134=YES; NEXT_PILOT=NOT_RUN; AUTO_NEON_GIT=OFF`. Previous one-time pilot grant consumed; new physical pilot requires new owner GO. No Git publication, C2/writer, Netlify deployment or casualty/WIP/DST change.
+
 ### C6-C3-PILOT2-CHECKOUT-ROOT-FAIL-PROVEN-01 — physical pilot FAIL, checkout-root mismatch proven (2026-11-14)
 
 - Owner-triggered manual [#43523629106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43523629106) at `main@5606147a955b64e17474688c6a13596b21d93580`: C2 writer `NEON_SUCCEEDED`, bundle #14086255755 and status #14085756162; `capture()` exit 2, `C6_BLOCK_REASON=C2_CHECKPOINTS_MISSING`. Redacted diagnostic confirmed correct `site-prod@54079326` HEAD, branch site-prod, but 0 scoped changes/checkpoint missing. Checkpoint Git blob actually exists at nested repository path. Proven mismatch: caller passed nested `$GITHUB_WORKSPACE/kyiv-air-alerts-grafana` while script expects root `$GITHUB_WORKSPACE`. Git publication 0, current locked Netlify `6af76b2d` unchanged. Minimal root-only correction staged [Draft PR #134](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/134) HEAD `cc1ab14fda62b441883792b39d721230d0e2e165`, offline CI #43568003654/#43568003594 SUCCESS; not merged, no pilot repeat. Owner to confirm updater disabled; AUTO OFF, Netlify locked. `GLOBAL_CUTOVER=YES; PILOT2=FAIL; ROOT_CAUSE=CHECKOUT_ROOT_MISMATCH; AUTO_NEON_GIT=OFF`.
