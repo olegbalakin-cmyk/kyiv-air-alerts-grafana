@@ -11,7 +11,7 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("unsafe 
  await page.goto(url,{waitUntil:"domcontentloaded",timeout:60000});
  await page.waitForFunction(()=>document.querySelector("#citySelect")?.options?.length===23 &&
    window.Chart?.getChart(document.querySelector("#cityIntensityChart")),{timeout:110000});
- const modes=["calendarWeekly","monthly","quarterly"],out=[];
+ const modes=["daily28","calendarWeekly","monthly","quarterly"],out=[];
  for(const mode of modes){
    await page.select("#cityPeriod",mode);
    const initial=await page.evaluate(()=>{
@@ -33,8 +33,11 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("unsafe 
        completion:c.data.datasets.filter(d=>d._isCompletion).length,
        nextForecast:c.data.datasets.filter(d=>d._isForecast).length,
        legend:c.legend.legendItems.map(x=>x.text),
-       subtitle,chartRows:c.data.labels.length};
+       subtitle,chartRows:c.data.labels.length,
+       lastDate:c.data.labels.at(-1)};
    });
+   if(mode==="daily28"&&measured.chartRows!==28)
+     errors.push("DAILY28_COUNT_"+JSON.stringify(measured));
    if(measured.completion!==2||measured.nextForecast||!measured.stacked||
      !Number.isFinite(measured.actual)||!Number.isFinite(measured.remaining)||!Number.isFinite(measured.green)||
      measured.remaining<0||measured.green<0||!measured.subtitle.includes("Штрихована частина")||
@@ -44,7 +47,7 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("unsafe 
    await page.click("#showTrend");
  }
  const unsupported=[];
- for(const mode of ["daily28","weekly","rolling30","rolling90","rolling180","allTime"]){
+ for(const mode of ["weekly","rolling30","rolling90","rolling180","allTime"]){
    await page.select("#cityPeriod",mode);
    const current=await page.evaluate(()=>{
      const control=document.querySelector("#showTrend");
