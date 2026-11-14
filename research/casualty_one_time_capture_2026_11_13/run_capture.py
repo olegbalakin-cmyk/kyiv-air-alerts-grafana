@@ -21,7 +21,7 @@ import sys
 sys.path.insert(0, str(ROOT))
 HERE = Path(__file__).resolve().parent
 EXPECTED_BASE = "657fd70564bf5393d3fcd209e47d95fa986f3010"
-EXPECTED_BRANCH = "research-casualty-workp-worko-runner-2026-11-14"
+EXPECTED_BRANCH = "research-casualty-workr-identity-2026-11-14"
 PLAN_PATH = HERE / "capture_plan.json"
 TEMPLATE_PATH = HERE / "authorization_template.json"
 BLOBS = {
@@ -235,6 +235,74 @@ def withhold_unsafe_excerpts(card):
     return card
 
 
+
+def retain_incident_review_clues(text: str) -> dict:
+    """Retain bounded evidence mentions for a human, never infer attack identity.
+
+    This is a Work R output adapter for the existing in-memory capture, not
+    an incident parser or a cross-source matching decision.
+    """
+    result = {
+        "status": "INSUFFICIENT_EVIDENCE",
+        "attack_identity_verified": False,
+        "attack_date_verified": None,
+        "attack_time_verified": None,
+        "locality_verified": None,
+        "struck_object_verified": None,
+        "direct_two_to_three_update_proven": False,
+        "independent_police_link_proven": False,
+        "chronology_is_source_sentence_order_only": True,
+        "evidence_mentions": [],
+    }
+    if not isinstance(text, str) or not text.strip():
+        return result
+    patterns = (
+        ("DATE_MENTION_NOT_ATTACK_DATE", r"\b(?:[12]?\d|3[01])\s+(?:січня|лютого|березня|квітня|травня|червня|липня|серпня|вересня|жовтня|листопада|грудня)\b|\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b"),
+        ("PLACE_MENTION_NOT_LOCALITY_PROOF", r"\b(?:у|в|на)\s+запоріжжі\b|\bзапоріжжя\b|\bзапорізьк\w*\s+област\w*\b"),
+        ("TIME_MENTION_NOT_ATTACK_TIME", r"\b(?:о|близько|приблизно)\s+\d{1,2}[:.]\d{2}\b|\b(?:вночі|вранці|вдень|увечері|надвечір|під ранок)\b"),
+        ("ATTACK_METHOD_OR_IMPACT_MENTION", r"\b(?:ракет\w*|дрон\w*|безпілот\w*|бпла|авіаудар\w*|авіабомб\w*|артилер\w*|обстріл\w*|удар\w*|влучан\w*)\b"),
+        ("STRUCK_OBJECT_MENTION", r"\b(?:приватн\w*|житлов\w*)\s+будин\w*|\b(?:багатоповерхів\w*|підприємств\w*|інфраструктур\w*|автомобіл\w*|школ\w*|лікарн\w*)\b"),
+        ("REPORT_SEQUENCE_MENTION_NOT_LINK", r"\b(?:пізніше|згодом|спочатку|раніше|перед тим|додатково|уточнил\w*|також|ще\s+одн\w*|зросл\w*)\b"),
+        ("OFFICIAL_REFERENCE_MENTION", r"\b(?:поліці\w*|дснс|ова|військов\w*\s+адміністраці\w*)\b"),
+    )
+    # The full extracted body exists only in memory. Each output is a short,
+    # stand-alone sentence; do not retain article paragraphs or full source.
+    sentences = re.split(r"(?<=[.!?])\s+", " ".join(text.split()))
+    budget = min(650, len(text) // 4)
+    used, counts = 0, {}
+    for index, sentence in enumerate(sentences):
+        if len(result["evidence_mentions"]) >= 8:
+            break
+        if not 24 <= len(sentence) <= 170:
+            continue
+        kinds = [name for name, pattern in patterns
+                 if counts.get(name, 0) < 2 and re.search(pattern, sentence.casefold())]
+        if not kinds:
+            continue
+        # City/oblast names are allowed as non-personal geographic mentions,
+        # but mask them in the quotation to prevent proper-name exceptions.
+        excerpt = re.sub(r"\bзапоріж(?:жя|жі|жю)\b|\bзапорізьк\w*\b",
+                         "[ГЕО]", sentence, flags=re.I)
+        if (re.search(r"[<>№]|https?://|\b(?:вулиц\w*|вул\.?|провул\w*|проспект\w*|"
+                      r"квартир\w*|паспорт\w*|адрес\w*|будинок\s*\d+)\b", excerpt, re.I)
+                or used + len(excerpt) > budget):
+            continue
+        holder = {"excerpts": [{"text": excerpt}], "reasons": []}
+        withhold_unsafe_excerpts(holder)
+        if not holder["excerpts"]:
+            continue
+        result["evidence_mentions"].append({
+            "article_sentence_order": index + 1,
+            "tags": kinds,
+            "excerpt": excerpt,
+            "excerpt_sha256": sha_data(excerpt.encode("utf-8")),
+            "decision": "NEEDS_REVIEW",
+        })
+        used += len(excerpt)
+        for name in kinds:
+            counts[name] = counts.get(name, 0) + 1
+    return result
+
 def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
     """Adapt PR #118 output writer, preserving Work J audit facts and reviewer gates."""
     if (len(plan["targets"]) != 3 or len(audit.get("targets", [])) > 3
@@ -254,8 +322,13 @@ def retain_results(queue, plan, volatile, audit, output, *, authorization_id):
             or facts.get("official_incidents_automatically_matched") != 0):
         raise RuntimeError("WORKJ_PUBLICATION_GUARD_VIOLATED")
     roles = {x["receipt"].get("resolved_url"): x["role"] for x in receipts}
+    volatile_texts = {(item.get("url"), role): str(item.get("text") or "")
+                      for role, key in (("publisher", "articles"), ("official", "official_articles"))
+                      for item in volatile.get(key, [])}
     for card in facts["facts"]:
         withhold_unsafe_excerpts(card)
+        card["incident_review"] = retain_incident_review_clues(
+            volatile_texts.get((card.get("source_url"), card.get("source_role")), ""))
         url = card.get("source_url")
         if not url or roles.get(url) != card.get("source_role"):
             raise RuntimeError("FACT_WITHOUT_MATCHING_SOURCE_RECEIPT")
