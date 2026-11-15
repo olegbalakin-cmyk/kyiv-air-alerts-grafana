@@ -342,10 +342,17 @@ jobs:
           # then locks it; unlike unlocking, this never enables auto publishing.
           locked = api("/deploys/" + deploy_id + "/lock", "POST")
           assert locked["id"] == deploy_id and locked["site_id"] == site, "LOCK_WRONG_DEPLOY"
-          current = api("/sites/" + site)
-          assert current["published_deploy"]["id"] == deploy_id, "DEPLOY_NOT_PUBLISHED"
-          assert api("/deploys/" + deploy_id).get("locked") is True, "AUTO_PUBLISH_NOT_LOCKED"
-          print("EXACT_BILINGUAL_NETLIFY_PUBLISHED_AND_LOCKED", deploy_id)
+          import time
+          for attempt in range(30):
+              current = api("/sites/" + site)
+              on_site = current.get("published_deploy") or {}
+              live = api("/deploys/" + deploy_id)
+              if on_site.get("id") == deploy_id and live.get("locked") is True:
+                  print("EXACT_BILINGUAL_NETLIFY_PUBLISHED_AND_LOCKED", deploy_id)
+                  break
+              time.sleep(2)
+          else:
+              raise AssertionError("NEW_DEPLOY_NOT_PUBLISHED_AND_LOCKED")
           PY
 
       - name: Verify production HTTP KPI assets after publication
