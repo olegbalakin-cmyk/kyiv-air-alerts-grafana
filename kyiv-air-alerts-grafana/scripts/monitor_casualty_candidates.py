@@ -113,6 +113,7 @@ CASUALTY_TERMS = (
     "померл",
     "смерт",
 )
+# Retrieval terms only; these do not certify an incident or casualty count.
 AERIAL_TERMS = (
     "дрон",
     "бпла",
@@ -389,6 +390,35 @@ def relevant_news(text: str) -> bool:
     )
 
 
+
+def classify_source_news(city_key: str, text: str) -> str:
+    """Conservative candidate routing; NEVER establishes deaths or city attribution.
+
+    Region-only and multi-city titles are held at source-result level and must
+    NOT be added to a city's queue without reading the article.
+    """
+    low = " ".join((text or "").casefold().replace("’", "'").split())
+    if any(term in low for term in (
+        "зведення генштабу", "втрати рф", "втрати росії",
+        "знищено окупантів", "ліквідовано окупантів")):
+        return "OUT_OF_SCOPE"
+    killed = any(term in low for term in CASUALTY_TERMS + ("жертв",))
+    struck = any(term in low for term in AERIAL_TERMS + (
+        "обстр", "влучан", "приліт", "бомб"))
+    if not killed and not struck:
+        return "OUT_OF_SCOPE"
+    cities = [key for key in CITY_CONFIG if city_mentioned(key, low)]
+    if cities != [city_key]:
+        return "NEEDS_ARTICLE_CITY_CHECK"
+    if any(term in low for term in ("річниц", "роковин", "вшанувал", "спогад")):
+        return "HISTORICAL_CONTEXT_NEEDS_REVIEW"
+    if killed and struck:
+        return "FATAL_ATTACK_CANDIDATE"
+    if struck:
+        return "ATTACK_FOLLOWUP_CANDIDATE"
+    return "NEEDS_ARTICLE_CAUSALITY_CHECK"
+
+
 def google_news_query(city_label: str) -> str:
     return (
         f'"{city_label}" '
@@ -460,9 +490,8 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime, *,
         if published and not (lower_bound <= published <= upper_bound):
             continue
         combined = f"{title} {description}"
-        if not city_mentioned(city_key, combined):
-            continue
-        if not relevant_news(combined):
+        routing_status = classify_source_news(city_key, combined)
+        if routing_status == "OUT_OF_SCOPE":
             continue
 
         rows.append(
@@ -477,6 +506,9 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime, *,
                 "rss_guid_is_permalink": guid_is_permalink,
                 "published_at": iso(published) if published else None,
                 "snippet": description[:1200],
+                "routing_status": routing_status,
+                "routing_city_key": (None if routing_status == "NEEDS_ARTICLE_CITY_CHECK"
+                                     else city_key),
             }
         )
 
@@ -557,6 +589,9 @@ def add_news_candidates(
     added = 0
 
     for row in rows:
+        if row.get("routing_status") in ("NEEDS_ARTICLE_CITY_CHECK", "OUT_OF_SCOPE"):
+            # No arbitrary attribution of oblast or multiple-city news.
+            continue
         cid = candidate_id(city_key, row["url"], row["title"])
         # A changed RSS title must not create a second candidate for the same
         # exact publication. This is a *source* dedup, not an incident merge.
@@ -590,6 +625,7 @@ def add_news_candidates(
             "city": CITY_CONFIG[city_key]["label"],
             "alert_trigger_scope": CITY_CONFIG[city_key]["scope"],
             "status": "needs_review",
+            "routing_status": row.get("routing_status") or "LEGACY_UNCLASSIFIED",
             "source": row.get("source") or "Google News RSS",
             "discovered_feeds": ([row["source_feed_url"]]
                                  if row.get("source_feed_url") else []),

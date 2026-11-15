@@ -32,6 +32,10 @@ ALLOWED_HOSTS = frozenset({
     "suspilne.media", "zprz.city", "ukrinform.ua", "www.ukrinform.ua",
     "mig.com.ua", "zabor.zp.ua", "shelter.in.ua", "radiosvoboda.org",
     "interfax.com.ua", "1news.zp.ua", "spravzhne.media", "zp.npu.gov.ua",
+    # Work AE saved RSS item metadata: these four exact publisher hostnames.
+    # Syntax allowlist ONLY. Network still requires separate explicit owner GO.
+    "www.radiosvoboda.org", "www.pravda.com.ua",
+    "en.interfax.com.ua", "hromadske.radio",
 })
 MAX_ARTICLE_GETS = 10
 MAX_BYTES = 2 * 1024 * 1024
@@ -122,6 +126,11 @@ class PinnedHTTPS(http.client.HTTPSConnection):
         addresses = _public_dns(self.host, self.deadline)
         last_error = None
         for family, typ, proto, _, sockaddr in addresses:
+            # Recheck the selected pinned socket address immediately pre-connect.
+            check_ip = ipaddress.ip_address(sockaddr[0])
+            if not check_ip.is_global or (getattr(check_ip, "ipv4_mapped", None) and
+                                        not check_ip.ipv4_mapped.is_global):
+                raise CaptureBlocked("NONPUBLIC_DNS_IP")
             remaining = self.deadline - time.monotonic()
             if remaining <= 0:
                 raise CaptureBlocked("TOTAL_DEADLINE")
