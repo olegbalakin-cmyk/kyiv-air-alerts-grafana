@@ -79,6 +79,21 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
      }
      await page.click("#showTrend");
      const on=await snapshot();
+     if(!on.checked){
+       const debug=await page.evaluate(()=>({
+         checkbox:{checked:document.querySelector("#showTrend")?.checked,
+           disabled:document.querySelector("#showTrend")?.disabled,
+           title:document.querySelector("#showTrend")?.title,
+           html:document.querySelector("#showTrend")?.closest("label")?.outerHTML},
+         selector:document.querySelector("#cityPeriod")?.value,
+         updatedAt:document.querySelector("#updatedAt")?.textContent,
+         selectedCity:document.querySelector("#citySelect")?.value,
+         now:new Date().toISOString(),
+         historicalEnd:window.state?.historicalDaily?.cities?.[document.querySelector("#citySelect")?.value]?.end,
+         partialDate:window.state?.data?.cities?.[document.querySelector("#citySelect")?.value]?.daily28?.at(-1)?.date
+       }));
+       console.error("TREND_CONTROL_DEBUG",JSON.stringify({mode,off,on,debug}));
+     }
      assert.equal(on.checked,true,mode+" ON expected");
      assert.deepEqual(on.values,off.values,mode+" FACT CHANGED WHEN TREND ON");
      assert.deepEqual(on.labels,off.labels,mode+" labels moved");
