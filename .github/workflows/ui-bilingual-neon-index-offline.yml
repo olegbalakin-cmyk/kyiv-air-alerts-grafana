@@ -1,0 +1,53 @@
+name: Bilingual Netlify Neon KPI exact-source offline gate
+
+on:
+  push:
+    branches: [release-bilingual-neon-kpi-2026-11-15]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py"
+      - "kyiv-air-alerts-grafana/tests/test_export_verified_neon_historical_kpi.py"
+      - ".github/workflows/netlify-production.yml"
+      - ".github/workflows/ui-bilingual-neon-index-offline.yml"
+  pull_request:
+    branches: [site-prod]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py"
+      - "kyiv-air-alerts-grafana/tests/test_export_verified_neon_historical_kpi.py"
+      - ".github/workflows/netlify-production.yml"
+      - ".github/workflows/ui-bilingual-neon-index-offline.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-neon-index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact verified Neon KPI exporter unit tests
+        run: python -m unittest discover -s kyiv-air-alerts-grafana/tests -p test_export_verified_neon_historical_kpi.py -v
+      - name: Production Neon generation 23/23 and same-run check (no HTTP)
+        run: |
+          python kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py \
+            --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --output /tmp/historical-daily-kpi.json
+      - name: Existing bilingual HTML SEO contracts
+        run: |
+          python3 kyiv-air-alerts-grafana/tests/test_bilingual_static_seo.py
+          mkdir -p /tmp/bilingual-candidate
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html \
+            --output-dir /tmp/bilingual-candidate
+          test -s /tmp/bilingual-candidate/en/index.html
+          grep -q 'hreflang="en"' /tmp/bilingual-candidate/index.html
+          grep -q 'hreflang="uk"' /tmp/bilingual-candidate/en/index.html
+      - name: No Netlify changes or requests in offline proof
+        run: |
+          echo 'OFFLINE_ONLY=YES'
+          echo 'NETLIFY_DEPLOYMENTS=0'
