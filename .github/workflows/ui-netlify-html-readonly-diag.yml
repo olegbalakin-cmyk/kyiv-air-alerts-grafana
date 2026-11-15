@@ -43,4 +43,16 @@ jobs:
                   print(lang,'BYTE_MISMATCH_AT',at,'served_context',repr(served[max(0,at-35):at+80]),'expected_context',repr(expected[max(0,at-35):at+80]))
               else:
                   print(lang,'BYTE_PARITY_PASS')
+              import re
+              if served != expected:
+                  prefix, suffix=expected.rsplit(b'</body>',1)
+                  ending=b'</body>'+suffix
+                  assert served.startswith(prefix) and served.endswith(ending), lang+':UNEXPECTED_HTML_CHANGE'
+                  injected=served[len(prefix):-len(ending)]
+                  assert re.fullmatch(
+                      rb'\s*<script async id="netlify-rum-container" '
+                      rb'src="/\.netlify/scripts/rum"[^>]*></script>\s*',
+                      injected,
+                  ), lang+':UNKNOWN_INJECTION'
+              print(lang,'EXACT_EXCEPT_NETLIFY_RUM_PASS')
           PY
