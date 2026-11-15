@@ -1275,6 +1275,46 @@ const partialPeriodBarPlugin = {
   }
 };
 
+// A hatched DIFFERENCE between the unchanged factual bar and the forecast.
+// If the estimated full-period daily mean is lower, hatch INSIDE the bar;
+// if higher, hatch the extension ABOVE it. Never rebase the factual bar.
+const periodForecastDeltaHatchPlugin = {
+  id:"periodForecastDeltaHatch",
+  afterDatasetsDraw(chart,_args,options){
+    const i=options?.index,actual=options?.observedHoursPerDay,
+      expected=options?.forecastHoursPerDay;
+    if(!Number.isInteger(i)||i<0||!Number.isFinite(actual)||actual<0||
+       !Number.isFinite(expected)||expected<0)return;
+    const el=chart.getDatasetMeta(0)?.data?.[i],axis=chart.scales?.yHours;
+    if(!el||el.skip||!axis||!chart.chartArea)return;
+    const p=el.getProps(["x","y","base","width"],true);
+    if(![p.x,p.y,p.base,p.width].every(Number.isFinite)||p.width<3)return;
+    const ya=axis.getPixelForValue(actual),yf=axis.getPixelForValue(expected);
+    if(!Number.isFinite(ya)||!Number.isFinite(yf))return;
+    const top=Math.min(ya,yf),bottom=Math.max(ya,yf),height=bottom-top,
+      left=p.x-p.width/2+1,right=p.x+p.width/2-1,width=right-left;
+    if(width<2)return;
+    const ctx=chart.ctx,area=chart.chartArea;
+    ctx.save();
+    ctx.beginPath();ctx.rect(area.left,area.top,area.right-area.left,area.bottom-area.top);ctx.clip();
+    if(height>=1){
+      ctx.save();
+      ctx.beginPath();ctx.rect(left,top,width,height);ctx.clip();
+      ctx.fillStyle=expected>actual?"rgba(155,210,248,0.33)":"rgba(10,24,39,0.58)";
+      ctx.fillRect(left,top,width,height);
+      ctx.strokeStyle="#d6eaff";ctx.lineWidth=1.7;
+      for(let off=-height;off<width+height;off+=9){
+        ctx.beginPath();ctx.moveTo(left+off,bottom);
+        ctx.lineTo(left+off+height,top);ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.strokeStyle="#dcefff";ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(left,yf);ctx.lineTo(right,yf);ctx.stroke();
+    ctx.restore();
+  }
+};
+
 function seriesDataset(label, values, color, dashed = false, rows = null) {
   return {
     label,
@@ -2904,19 +2944,8 @@ function renderCity() {
 
   if (completion) {
     const i=rows.length-1;
-    // The forecast is an annotation, NOT a replacement for the actual bar
-    // or a stack: future period averages may be BELOW observed averages.
-    intensityDatasets.push({
-      type:"line",_isCompletion:true,
-      label:tr("Прогноз за весь період · годин / добу",
-               "Full-period forecast · hours/day"),
-      data:rows.map((_,j)=>j===i?completion.expectedHours/completion.days:null),
-      yAxisID:"yHours",borderColor:"#e7f3ff",
-      pointStyle:"line",pointRadius:13,pointHoverRadius:15,
-      pointBorderColor:"#e7f3ff",pointBorderWidth:3,
-      pointBackgroundColor:"transparent",showLine:false,spanGaps:false,
-      _exportRows:rows
-    });
+    // The hours forecast is hatching on the unchanged bar, not another dataset.
+    // The alert-frequency forecast remains a separate hollow green diamond.
     intensityDatasets.push({
       type:"line",_isCompletion:true,
       label:tr("Прогноз за весь період · тривоги / день",
@@ -3005,7 +3034,7 @@ function renderCity() {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin],
+    plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -3063,7 +3092,11 @@ function renderCity() {
           }
         },
         partialPeriodBar: { rows, datasetIndices: [0] },
-        // The forecast is presented by non-additive markers only.
+        periodForecastDeltaHatch: {
+          index:completion ? rows.length-1 : -1,
+          observedHoursPerDay:completion ? rows.at(-1)?.avg_daily_alert_hours : null,
+          forecastHoursPerDay:completion ? completion.expectedHours/completion.days : null
+        },
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
