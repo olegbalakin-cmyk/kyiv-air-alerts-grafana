@@ -8,7 +8,8 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("Expecte
     args:["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]});
   const page=await browser.newPage();
   const baseline=await browser.newPage();
-  const baselineUrl="https://ukraine-air-alerts.netlify.app/";
+  // Immutable production deploy from before this test; original metrics are the oracle.
+  const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.app/";
   const faults=[],report={url,baselineUrl,cases:[],faults};
   page.on("pageerror",e=>faults.push("JS "+String(e)));
   page.on("response",r=>{if(r.status()>=400)faults.push("HTTP "+r.status()+" "+r.url().slice(0,160))});
@@ -38,14 +39,28 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("Expecte
   try{
     await page.setViewport({width:375,height:812,deviceScaleFactor:1});
     await baseline.setViewport({width:375,height:812,deviceScaleFactor:1});
-    await Promise.all([
-      page.goto(url,{waitUntil:"domcontentloaded",timeout:60000}),
-      baseline.goto(baselineUrl,{waitUntil:"domcontentloaded",timeout:60000})
-    ]);
-    await Promise.all([page,baseline].map(target=>target.waitForFunction(()=>
-      document.querySelector("#citySelect")?.options?.length>=23 &&
-      window.Chart?.getChart(document.querySelector("#cityIntensityChart")),
-      {timeout:120000})));
+    // Sequential page loading keeps both historical source fetches from
+    // competing and surfaces which page cannot reach 23-city readiness.
+    const ready=async(target,name)=>{
+      await target.goto(name==="original"?baselineUrl:url,
+        {waitUntil:"domcontentloaded",timeout:60000});
+      try{
+        await target.waitForFunction(()=>
+          document.querySelector("#citySelect")?.options?.length>=23 &&
+          window.Chart?.getChart(document.querySelector("#cityIntensityChart")),
+          {timeout:50000});
+      }catch(e){
+        const diagnostics=await target.evaluate(()=>({
+          title:document.title,readyState:document.readyState,
+          options:document.querySelector("#citySelect")?.options?.length,
+          chartJs:!!window.Chart,chart:!!window.Chart?.getChart(document.querySelector("#cityIntensityChart")),
+          updatedAt:document.querySelector("#updatedAt")?.textContent
+        }));
+        throw new Error(name+" baseline readiness failed: "+JSON.stringify(diagnostics)+" / "+String(e));
+      }
+    };
+    await ready(page,"draft");
+    await ready(baseline,"original");
     for(const period of ["quarterly","monthly","calendarWeekly","daily28"]){
       await page.select("#cityPeriod",period);
       await baseline.select("#cityPeriod",period);
