@@ -1,6 +1,10 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 — offline PASS, live shadow BLOCKED (2026-11-15)
+
+- [Draft PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) exact `1cd3e85f72f8c80dadd2b53d2b9ce2bb0b0984cf`, [Actions #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) SUCCESS 17/17 (7 AB +10 AC), [artifact #14154303167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023/artifacts/14154303167) ZIP uploader SHA256 `c45ae98be3dd0ab4e5bd0ffc9b23d31777032d2bb9b39e150c635bbd531695d9` (independent ZIP rehash not done), 3/3 inner SHA PASS. 23 RSS/10 publisher budget and secure article capture mocked PASS; zero external HTTP, WIP writes or casualties. Google News original URLs unresolved, `claim_deaths=null` without Work J count/scope. No operator PROMOTE, no live GO.
+
 ### CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 — Work AB offline integration PASS, live shadow BLOCKED (2026-11-15)
 
 - [Draft PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) `4604004bd7399975c7b4d4cc87c0a43fcb4cd403` based on WIP `e30f1098`; [Actions #43646987342](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342) SUCCESS 7/7, [artifact #14133897958](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342/artifacts/14133897958), ZIP SHA256 `7e7e1474f1dfd6c40ae336fead3045fd818413b0eaff8109f11fa52a5349c818` (independent ZIP and 2 inner SHA verified by executor). Mock 23→22→23 cities over 3 four-hour cycles; 48h overlap, Zaporizhzhia retry, replay +0; scratch WIP queue 1707→1708 synthetic. T03–T05 three NEEDS_REVIEW. No real source GET/automatic credits/WIP writes. Live capture absent and 23-RSS/10-publisher budgets not enforced. Next Work AC bounded capture adapter + offline proof; owner GO separately required.
@@ -29,25 +33,25 @@
 
 - Work T: old main reviewer/operator contract mismatched production generator `f5840c20`; PR #105 shadow CI #43290975899 is not a live operator proof. Work V/Y later fixed this. Work U: Git Zaporizhzhia total 316, last validated September; live Netlify casualty JSON parity UNVERIFIED. T03–T05 no credits.
 
-### CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 — one Work R source-only HTTP run PASS, incident match still held (2026-11-14)
+### CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 (2026-11-14)
 
-- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) launch-only `b9d8d618` from `f2f3a922`, [Actions #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) attempt1 SUCCESS: owner/safety PASS, 3 GET/3 HTTP200, 0 redirects. [ZIP #14105343291](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160/artifacts/14105343291) independent SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b`, 4/4 manifest hashes PASS. T03 local 2/house, T04 later +1 woman 69 with earlier 2, T05 3 dead aged 37/38/69 near private sector. Identity/date remain unverified; 3 NEEDS_REVIEW, 0 auto credits/publication; grant consumed, next offline manual review, no repeat HTTP.
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137), [Actions #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) PASS, ZIP #14105343291 SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b` independent/4 inner PASS. 3 GET/HTTP200, T03 2, T04 later +1 aged 69, T05 3 aged 37/38/69. Incident identity unverified, 0 credits; owner grant spent.
 
 ### CASUALTY-WORKR-IDENTITY-REVIEW-PREFLIGHT-SOURCE-REVIEW-REQUIRED-01 — Work R 153 PASS, source identity still unresolved (2026-11-14)
 
 - [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) `f2f3a922`, [Actions #43573408615](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43573408615) exact SUCCESS 153 PASS/0 FAIL/1 SKIP; [ZIP #14104883690](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43573408615/artifacts/14104883690) SHA256 `6ab3d7ec12d6973f8ea3f63bc6fe572364dba0c48eb514ff39b7e3ecfba8d76b` and 11/11 hashes independently verified. Ages 37/38 and 69 overlap across T03/T04/T05; all pair identities INSUFFICIENT_EVIDENCE, SOURCE_REVIEW_REQUIRED. Deidentified bounded review clues ready in research only; 0 GET/credits/PROMOTE. New explicit one-shot owner approval required before HTTP.
 
-### CASUALTY-WORKQ-REAL-EXCERPTS-AUXCI-OFFLINE-PARTIAL-01 — Work Q offline PASS; real source totals still unverified (2026-11-14)
+### CASUALTY-WORKQ-REAL-EXCERPTS-AUXCI-OFFLINE-PARTIAL-01 (2026-11-14)
 
-- [PR #135](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/135) `858e255e`, [Actions #43571952329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329) 145 PASS/0 FAIL/1 SKIP; [ZIP #14104761484](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329/artifacts/14104761484) SHA256 `90ec4ef12c967facc743914316da41e99b6d9d0237350b16437cd820bad451d5`, 10/10 inner PASS independently verified. Local T03 2, T04 additional death (69 age), T05 3 unbound; no full-article total or auto credits. Aux Work O launch-only CI fixed; 18→20→23 PASS, 5 blocked; no new HTTP, merge/deploy/publication.
+- [PR #135](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/135), [Actions #43571952329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329) 145 PASS/1 SKIP, ZIP #14104761484 SHA256 `90ec4ef12c967facc743914316da41e99b6d9d0237350b16437cd820bad451d5`, independent/10 inner PASS. T03 2, T04 additional age 69, T05 3 unbound; 18→20→23 PASS, 0 credits or new HTTP.
 
 ### CASUALTY-WORKP-T03T05-HTTP200-EXCERPTS-PASS-TOTALS-PARTIAL-01 — Work P live 3/3 GET + four evidence excerpts, totals PARTIAL (2026-11-14)
 
 - [PR #132](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/132) `e0be1f3d`, [run #43521321878](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43521321878) first-attempt SUCCESS: 3 HTTP200/3 GET, 4 excerpts, T03/T04 totals NULL, T05 3 unmatched, 0 credits/PROMOTE/publication. [ZIP #14082589637](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43521321878/artifacts/14082589637) independently SHA256 `67133a7b2e94fdcdf8c1a4bf3871788b691e35b3666430b976e082355675b99f`, 4/4 inner hashes PASS; source text hashes 3/3 equal previous capture. Auxiliary [offline #43521321898](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43521321898) failed due launch.json-presence check; live safety PASS. Grant used, next parser diagnosis and auxiliary CI fix offline only.
 
-### CASUALTY-WORKO-PARSER-EVIDENCE-PARTIAL-REAL-HTML-REQUIRED-01 — Work O 133 PASS, one historical SKIP; real HTML replay gated (2026-11-13)
+### CASUALTY-WORKO-PARSER-EVIDENCE-PARTIAL-REAL-HTML-REQUIRED-01 (2026-11-13)
 
-- [PR #129](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/129) `ff66bc6f`, [CI #43513881396](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513881396) exact SUCCESS 133 PASS/0 FAIL/1 SKIP, physical 18→20→23 +23 PASS. [ZIP #14079821808](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513881396/artifacts/14079821808) independent SHA256 `adf9cbc56c52e4c0f102035160a6ed10cddc2e3229a1e4dc3e7ddbf97326f8ff` and 7/7 internal hashes MATCH. Parser/short-evidence faults corrected offline; original T03/T04 HTML discarded, T05 identity unverified. Live runner pins original code; integrate safely offline first. No source GET or publication; future replay needs new owner authorization.
+- [PR #129](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/129), [Actions #43513881396](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43513881396) 133 PASS/1 SKIP, ZIP #14079821808 SHA256 `adf9cbc56c52e4c0f102035160a6ed10cddc2e3229a1e4dc3e7ddbf97326f8ff`, independent/7 inner PASS. Parser fixes; T03/T04 raw HTML missing, T05 identity unverified. No live HTTP or publication.
 
 ### CASUALTY-WORKN-FIRST-LAUNCH-PREHTTP-TEST-GATE-BLOCK-01 — separate PR #127 0-GET pre-HTTP failure; PR #128 live 3/3 proof stands (2026-11-13)
 
