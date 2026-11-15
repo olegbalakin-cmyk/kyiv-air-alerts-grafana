@@ -206,6 +206,15 @@ class ArticleFirstAG(unittest.TestCase):
             capture.analyze_direct_article(
                 URLS["ukrinform"], offline_html=html_page("ukrinform"),
                 fetch=lambda _: self.fail("network"))
+    def test_17_one_shot_runner_remains_hard_off(self):
+        import article_oneshot
+        for env in ({}, {"CASUALTY_ARTICLE_NETWORK": "OWNER_APPROVED_ONE_SHOT",
+                         "GITHUB_RUN_ATTEMPT": "2",
+                         "GITHUB_SHA": "a" * 40}):
+            with patch.object(socket, "socket", side_effect=AssertionError("NETWORK")):
+                with self.assertRaises(article_oneshot.PilotBlocked):
+                    article_oneshot.validate_environment(env)
+
     def test_16_retained_real_html_not_claimed(self):
         # This is an evidence-availability classification, not a fabricated
         # real fixture. Existing P/Q/R/Z cards contain excerpts but not HTML.
