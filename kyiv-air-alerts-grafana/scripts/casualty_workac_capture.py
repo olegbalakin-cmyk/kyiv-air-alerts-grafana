@@ -200,7 +200,7 @@ def get_html(url: str, *, total_timeout: int = TOTAL_TIMEOUT,
         if 300 <= status < 400:
             raise CaptureBlocked("REDIRECT_BLOCKED")
         if status != 200:
-            raise CaptureBlocked("HTTP_STATUS_NOT_200")
+            raise CaptureBlocked("HTTP_STATUS_NOT_200_"+str(status))
         kind = response.getheader("Content-Type", "")
         expected_types = (r"^(?:application/(?:rss\+xml|atom\+xml|xml)|text/xml)(?:\s*;|$)"
                           if expect_xml else r"^(?:text/html|application/xhtml\+xml)(?:\s*;|$)")
@@ -541,7 +541,8 @@ def analyze_direct_article(url: str, *, offline_html: bytes | None = None,
         raw, content_type, status, encoding = (fetch or get_html)(url)
     if status != 200 or not re.match(
             r"^(?:text/html|application/xhtml\+xml)(?:\s*;|$)", content_type, re.I):
-        raise CaptureBlocked("ARTICLE_RESPONSE_UNUSABLE")
+        raise CaptureBlocked("HTTP_STATUS_NOT_200_"+str(status) if status != 200
+                             else "UNEXPECTED_CONTENT_TYPE")
     stamp = now or datetime.now(UTC)
     candidate = {"candidate_id": candidate_id or "article-" +
                  hashlib.sha256(url.encode("utf-8")).hexdigest()[:20],
