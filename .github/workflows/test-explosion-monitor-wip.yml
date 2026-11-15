@@ -322,10 +322,10 @@ jobs:
           set -euo pipefail
           test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
           python -m unittest discover -s research/casualty_workab_shadow_2026_11_15 -p 'test_workab.py' -v
-          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15" || "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15" || "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" || "$GITHUB_REF" == "refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15" ]]; then
             WORKAC_OUT=/tmp/workac python -m unittest discover -s research/casualty_workac_shadow_2026_11_15 -p 'test_workac.py' -v
           fi
-          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" || "$GITHUB_REF" == "refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15" ]]; then
             WORKAD_OUT=/tmp/workad python -m unittest discover -s research/casualty_workad_shadow_2026_11_15 -p "test_workad.py" -v
           fi
           git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
@@ -345,12 +345,12 @@ jobs:
 
           for p in root.glob("*.json"):
               assert all(k not in p.read_text() for k in ("<html","<!DOCTYPE html","launch.json"))
-          if os.environ.get("GITHUB_REF","").endswith(("integration-casualty-workac-bounded-shadow-off-2026-11-15","integration-casualty-workad-url-facts-offline-2026-11-15")):
+          if os.environ.get("GITHUB_REF","").endswith(("integration-casualty-workac-bounded-shadow-off-2026-11-15","integration-casualty-workad-url-facts-offline-2026-11-15","research-casualty-workae-direct-rss-offline-2026-11-15")):
               ac=json.loads(pathlib.Path("/tmp/workac/cycles.json").read_text())
               assert ac["external_http"]==0 and ac["automatic_credits"]==0
               assert ac["cards"]==1 and len(ac["cycles"])==3
               (root/"workac_cycles.json").write_text(json.dumps(ac,sort_keys=True,indent=2))
-          if os.environ.get("GITHUB_REF","").endswith("integration-casualty-workad-url-facts-offline-2026-11-15"):
+          if os.environ.get("GITHUB_REF","").endswith(("integration-casualty-workad-url-facts-offline-2026-11-15","research-casualty-workae-direct-rss-offline-2026-11-15")):
               ad=json.loads(pathlib.Path("/tmp/workad/workad_results.json").read_text())
               assert ad["exact_head"]==os.environ["GITHUB_SHA"]
               assert ad["source_http_gets"]==0 and ad["automatic_credits"]==0
