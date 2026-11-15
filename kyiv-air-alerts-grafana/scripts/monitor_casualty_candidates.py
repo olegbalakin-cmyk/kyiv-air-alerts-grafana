@@ -42,6 +42,8 @@ FOLLOWUP_HOURS = [
 MAX_EPISODES_PER_CITY = 250
 GOOGLE_NEWS_URL = "https://news.google.com/rss/search"
 HTTP_REQUESTS_THIS_RUN = 0
+MAX_RSS_GETS = 23
+RSS_TIMEOUT_SECONDS = 15
 
 CITY_CONFIG = {
     "kyiv": {"label": "Київ", "alert_key": "kyiv", "scope": "exact_city"},
@@ -404,15 +406,20 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
         "&hl=uk&gl=UA&ceid=UA:uk"
     )
     global HTTP_REQUESTS_THIS_RUN
-    HTTP_REQUESTS_THIS_RUN += 1
+    if HTTP_REQUESTS_THIS_RUN >= MAX_RSS_GETS:
+        raise RuntimeError("RSS_REQUEST_BUDGET_EXCEEDED")
+    HTTP_REQUESTS_THIS_RUN += 1  # Count attempts including failures.
     response = requests.get(
         url,
         headers={
             "User-Agent": "ukraine-air-alerts-casualty-monitor/1.0",
             "Accept-Language": "uk,en;q=0.7",
         },
-        timeout=45,
+        timeout=RSS_TIMEOUT_SECONDS,
+        allow_redirects=False,
     )
+    if 300 <= response.status_code < 400:
+        raise RuntimeError("RSS_REDIRECT_BLOCKED")
     response.raise_for_status()
     root = ET.fromstring(response.content)
 
@@ -451,8 +458,7 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
 
     dedup = {}
     for row in rows:
-        key = (row["url"], row["title"])
-        dedup[key] = row
+        dedup[row["url"]] = row
     return list(dedup.values()), url
 
 
@@ -675,6 +681,14 @@ def main() -> None:
                         help="Plan independent 23-city RSS overlap; requires --source-http for live requests.")
     parser.add_argument("--source-http", action="store_true",
                         help="Explicit opt-in to RSS GET only; DEFAULT OFF. No article GET.")
+    parser.add_argument("--article-http", action="store_true",
+                        help="Separate opt-in for bounded allowlisted article GET; OFF by default.")
+    parser.add_argument("--wip-evidence-writes", action="store_true",
+                        help="Explicit opt-in to persist only bounded Work X evidence.")
+    parser.add_argument("--evidence-state", type=Path,
+                        default=CASUALTY_DIR / "candidate_article_capture_state.json")
+    parser.add_argument("--evidence-index", type=Path,
+                        default=CASUALTY_DIR / "candidate_evidence_index.json")
     parser.add_argument("--retained-facts", type=Path,
                         help="Already captured minimal Work J/R fact cards only; no HTTP.")
     parser.add_argument("--retained-index", type=Path,
@@ -684,6 +698,8 @@ def main() -> None:
     if args.self_test:
         self_test()
         return
+    if args.article_http and (not args.source_http or args.local_only or not args.wip_evidence_writes):
+        parser.error("--article-http requires live --source-http and --wip-evidence-writes")
     if bool(args.retained_facts) != bool(args.retained_index):
         parser.error("--retained-facts and --retained-index must be supplied together")
     global HTTP_REQUESTS_THIS_RUN
@@ -725,6 +741,8 @@ def main() -> None:
     # on dry runs or failed network retrieval. Research source HTTP is OFF
     # unless explicitly enabled. No new requests from scheduled production.
     planned_cities = sorted(set(due) | set(independent_plans))
+    if len(planned_cities) > MAX_RSS_GETS:
+        raise RuntimeError("RSS_CITY_BUDGET_EXCEEDED")
     if args.source_http and not args.local_only:
         for city_key in planned_cities:
             city_due = due.get(city_key, [])
@@ -803,7 +821,7 @@ def main() -> None:
         },
         "automatic_credits": 0,
         "PROMOTE": "OFF",
-        "source_pages_http_enabled": False,
+        "source_pages_http_enabled": bool(args.article_http),
         "cities_planned": planned_cities,
         "source_http_enabled": bool(args.source_http and not args.local_only),
         "independent_source_scan_enabled": bool(args.independent_source_check),
@@ -815,10 +833,23 @@ def main() -> None:
         "confirmed_series_modified": False,
     }
 
+    # The spent Work Z authorization is never loaded or reused.
+    if args.article_http:
+        import casualty_workac_capture as capture
+        cs = load_json(args.evidence_state, {})
+        ix = load_json(args.evidence_index, {})
+        cs, ix, capture_report = capture.capture_cycle(queue, cs, ix, started, enabled=True)
+        if capture_report["automatic_credits"] != 0 or capture_report["PROMOTE"] != "OFF":
+            raise RuntimeError("WORKAC_CREDIT_GUARD")
+        atomic_json(args.evidence_state, cs)
+        atomic_json(args.evidence_index, ix)
+        report["article_capture"] = capture_report
+    else:
+        report["article_capture"] = {"article_gets": 0, "evidence_new": 0,
+                                     "automatic_credits": 0, "PROMOTE": "OFF", "mode": "OFF"}
     atomic_json(STATE_FILE, state)
     atomic_json(QUEUE_FILE, queue)
-    # Work X/AA receives ONLY already-retained Work J/R cards; no article GET.
-    # The existing one-shot Work Z HTTP authorization is never loaded or reused.
+    # Index of previously captured Work J/R cards remains available.
     if args.retained_facts:
         import casualty_workx_evidence as evidence
         saved_facts = load_json(args.retained_facts, {})
