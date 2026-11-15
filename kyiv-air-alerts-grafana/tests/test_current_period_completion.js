@@ -182,13 +182,26 @@ assert(app.includes('completionPotential ? completionPotential.expectedHours/com
   "hours axis stays stable regardless of trend toggle");
 assert(app.includes('completionPotential ? completionPotential.expectedAlerts/completionPotential.days : 0'),
   "alerts axis stays stable regardless of trend toggle");
-assert(app.includes('pointStyle:"line"'),"hours forecast is a separate tick");
+assert(app.includes('const periodForecastDeltaHatchPlugin = {'),"hatched forecast delta renderer exists");
+assert(app.includes('id:"periodForecastDeltaHatch"'),"hatch plugin registered by stable ID");
+assert(app.includes('plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin]'),
+  "hatch renderer used only on city intensity chart");
+assert(app.includes('observedHoursPerDay:completion ? rows.at(-1)?.avg_daily_alert_hours : null'),
+  "hatch compares current forecast to the ORIGINAL factual mean");
+assert(app.includes('forecastHoursPerDay:completion ? completion.expectedHours/completion.days : null'),
+  "hatch forecast uses full period denominator");
+assert(app.includes('const top=Math.min(ya,yf),bottom=Math.max(ya,yf)'),
+  "hatched interval is bounded by actual and forecast for either direction");
+assert(app.includes('ctx.fillStyle=expected>actual?'),
+  "forecast above and below actual must have visibly distinct hatch infill");
+assert(!app.includes('pointStyle:"line",pointRadius:13'),
+  "old detached white tick has been replaced by in-bar hatching");
 assert(app.includes('pointStyle:"rectRot"'),"alert forecast is a separate diamond");
 assert(app.includes('trendControl.classList.toggle("hidden", !completionPotential)'),
   "trend hidden if the original factual period has no matching source period");
-assert(app.includes('Це різні зрізи, не додавати їх один до одного.'),
+assert(app.includes('Штрихування не додається до факту.'),
   "Ukrainian explanation must distinguish fact/forecast cutoffs");
-assert(app.includes('These are different cutoffs, not additive.'),
+assert(app.includes('Hatching is not additive.'),
   "English explanation must distinguish fact/forecast cutoffs");
 assert(app.includes('factualRow?.quarter_end'),
   "quarterly factual cutoff is the original completed-month endpoint");
