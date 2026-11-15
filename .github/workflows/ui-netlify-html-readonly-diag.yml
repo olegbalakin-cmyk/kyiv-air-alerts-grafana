@@ -19,6 +19,7 @@ jobs:
           persist-credentials: false
       - name: Compare the exact built Ukrainian/English entrypoints with public Netlify HTML
         run: |
+          echo 'READ_ONLY_RECHECK_NEW_DEPLOY=6af9a134186a8e5d83bb3cdf'
           set -euo pipefail
           mkdir -p /tmp/generated-bilingual
           python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
