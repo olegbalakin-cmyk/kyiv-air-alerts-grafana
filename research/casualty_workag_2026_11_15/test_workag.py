@@ -101,8 +101,9 @@ class ArticleFirstAG(unittest.TestCase):
     def test_04_explicit_cumulative_update(self):
         claim = ("У Запоріжжі після удару кількість загиблих зросла до п'яти. ")
         result = offline(sentence=claim)
-        # Conservative bounded parser may leave a word-form update as UNKNOWN;
-        # do not claim it is proven without exact extraction.
+        self.assertEqual(result["source_fact"]["claim_deaths"], 5)
+        self.assertEqual(result["source_fact"]["count_kind"], "cumulative")
+        self.assertEqual(result["card"]["fatal_total_claimed_not_credited"], 5)
         self.assertEqual(result["PROMOTE"], "OFF")
         self.assertIsNone(result["card"]["incident_id"])
 
