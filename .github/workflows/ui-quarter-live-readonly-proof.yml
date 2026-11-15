@@ -1,0 +1,52 @@
+name: UI quarter fact public HTTP read-only proof
+on:
+  push:
+    branches: [research-ui-quarter-live-http-proof-2026-11-15]
+permissions:
+  contents: read
+jobs:
+  public-readonly-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify current live JS byte parity and both locale pages
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import time
+          import urllib.request
+
+          base="https://ukraine-air-alerts.netlify.app"
+          pin="fe866411ff41c85f2c9fd4b2f227d1d9b892ff05"
+          raw="https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/"+pin+"/kyiv-air-alerts-grafana/pages-preview/app.js"
+          def get(url):
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url,headers={"Cache-Control":"no-cache","User-Agent":"C6-safe-readonly-proof"}),timeout=25) as response:
+                          assert response.status==200,(url,response.status)
+                          return response.read()
+                  except Exception:
+                      if attempt==2: raise
+                      time.sleep(2)
+          source=get(raw)
+          live=get(base+"/app.js")
+          assert source==live,("LIVE_APP_JS_DIFFERS_FROM_PINNED_SHA",hashlib.sha256(source).hexdigest(),hashlib.sha256(live).hexdigest())
+          js=live.decode("utf-8")
+          for token in ("intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;",
+              "intensityDatasets[1].data[i]=completion.periodRow.alerts_per_day;",
+              "completion.expectedHours/completion.days","completion.expectedAlerts/completion.days",
+              'stacked:false', "фактична середня за "):
+              assert token in js,("LIVE_PATCH_TOKEN_MISSING",token)
+          for token in ("intensityDatasets[0].data[i]=completion.actualHours/completion.days;",
+              'stacked:Boolean(completion)', 'stack="completion"'):
+              assert token not in js,("STALE_MISLEADING_AVERAGE",token)
+          for path,canonical in (("/",'href="https://ukraine-air-alerts.netlify.app/"'),("/en/",'href="https://ukraine-air-alerts.netlify.app/en/"')):
+              html=get(base+path).decode("utf-8")
+              assert canonical in html,("LOCALE_CANONICAL_MISSING",path)
+          print("LIVE_OBSERVED_VS_FULL_PERIOD_AVERAGE_JS_EXACT_SHA_PASS",hashlib.sha256(live).hexdigest())
+          print("LIVE_UA_EN_HTTP_200_PASS")
+          print("NO_DEPLOY_NO_WRITES")
+          PY
