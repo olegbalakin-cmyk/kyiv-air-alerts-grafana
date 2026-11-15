@@ -146,44 +146,56 @@ assert.equal(q4.periodRow.alerts_per_day,2);
 assert.equal(q4.actualHours/q4.observedDaysEquivalent,2);
 assert(q4.actualHours/q4.days<1,"dividing actual by 92 is not observed intensity");
 assert(Math.abs(q4.expectedHours-q4.actualHours-q4.remainingHours)<1e-9);
-const observedIndex=app.indexOf('const completionPotential=completionVisible?completionCandidate:null;');
-const selectedIndex=app.indexOf('const completion=completionPotential && $("showTrend")?.checked');
-assert(observedIndex>=0&&selectedIndex>observedIndex,
-  "observed row must be selected regardless of trend checkbox");
-const observedCode=app.slice(observedIndex,selectedIndex);
-assert(observedCode.includes('rows=[...rows,completionPotential.periodRow];'),
-  "observed period row is in both OFF and ON charts");
-assert(!observedCode.includes('$("showTrend")'),
-  "observed period selection must not depend on toggle");
+// Independent baseline: raw periodRows() must remain exactly as it is on
+// site-prod. Even selecting the verified newer forecast source may NOT
+// change a factual October-only Q4 into an October+November Q4.
+assert(app.includes('const currentObservedRow=rows.at(-1);'),
+  "actuals must be anchored to the original period rows");
+assert(app.includes('const currentObservedPeriodMatches=Boolean('),
+  "forecast can be added only to its matching calendar period");
+assert(app.includes('const completionPotential=completionVisible && currentObservedPeriodMatches'),
+  "forecast candidate is distinct from original actual period");
+assert(app.includes('const completion=completionPotential && $("showTrend")?.checked'),
+  "toggle affects only forecast overlay, not fact");
+assert(!app.includes('rows=[...rows,completionPotential.periodRow]'),
+  "trend cannot replace original factual rows with a newer partial day");
+assert(!app.includes('rows = [...rows,completion.periodRow]'),
+  "regression: original production replaced actual Q4 on trend ON");
 assert(app.includes('data: rows.map(r => r.avg_daily_alert_hours)'),
-  "actual bar always comes from one identical factual row");
+  "actual bars remain original-source values");
 assert(app.includes('data: rows.map(r => r.alerts_per_day)'),
-  "actual line always comes from one identical factual row");
+  "actual line remains original-source values");
 assert(!app.includes('intensityDatasets[0].data[i]='),
-  "trend cannot rewrite the observed bar");
+  "trend cannot overwrite observed hours");
 assert(!app.includes('intensityDatasets[1].data[i]='),
-  "trend cannot rewrite the observed line");
+  "trend cannot overwrite observed alert rate");
 assert(app.includes('completion.expectedHours/completion.days'),
-  "forecast hours uses the full period and only a line marker");
+  "forecast-only hours uses all calendar days");
 assert(app.includes('completion.expectedAlerts/completion.days'),
-  "forecast alerts uses the full period and only a line marker");
+  "forecast-only alerts uses all calendar days");
 assert(!app.includes('type:"bar",_isCompletion:true'),
-  "no second forecast bar that may overlap or change the actual");
-assert(!app.includes('stack:"completion"'),"no misleading full-period stacked observed facts");
-assert(app.includes('stacked:false'),"fact bar never changes stacking mode");
-assert(!app.includes('periodCompletionHatchPlugin'),"no forecast hatch over actual bar");
+  "no forecast bar should be confused with the observed bar");
+assert(!app.includes('stack:"completion"'),"forecast-only markers are not additive to fact");
+assert(app.includes('stacked:false'),"actual bar retains original stacking semantics");
+assert(!app.includes('periodCompletionHatchPlugin'),"no misleading hatch on actual");
 assert(app.includes('completionPotential ? completionPotential.expectedHours/completionPotential.days : 0'),
-  "hours axis reserves forecast extent even with trend switched off");
+  "hours axis stays stable regardless of trend toggle");
 assert(app.includes('completionPotential ? completionPotential.expectedAlerts/completionPotential.days : 0'),
-  "alert axis reserves forecast extent even with trend switched off");
-assert(app.includes('pointStyle:"line"'),"forecast hours visibly separate from factual bar");
-assert(app.includes('pointStyle:"rectRot"'),"forecast alerts visibly separate from factual circle");
-assert(app.includes('Прогноз не додається до факту'),
-  "Ukrainian subtitle distinguishes non-additive forecast");
-assert(app.includes('Forecast is not added to fact'),
-  "English subtitle distinguishes non-additive forecast");
+  "alerts axis stays stable regardless of trend toggle");
+assert(app.includes('pointStyle:"line"'),"hours forecast is a separate tick");
+assert(app.includes('pointStyle:"rectRot"'),"alert forecast is a separate diamond");
+assert(app.includes('trendControl.classList.toggle("hidden", !completionPotential)'),
+  "trend hidden if the original factual period has no matching source period");
+assert(app.includes('Це різні зрізи, не додавати їх один до одного.'),
+  "Ukrainian explanation must distinguish fact/forecast cutoffs");
+assert(app.includes('These are different cutoffs, not additive.'),
+  "English explanation must distinguish fact/forecast cutoffs");
+assert(app.includes('factualRow?.quarter_end'),
+  "quarterly factual cutoff is the original completed-month endpoint");
+assert(app.includes('completionPotential.asOf'),
+  "forecast carries its own independently verified cutoff");
 
 assert(app.includes('approvedNeonGitRelease'));
 assert(app.includes('matchesDashboardGeneration'));
 assert(!app.includes('netlify deploy --prod'));
-console.log("CURRENT_PERIOD_FACT_INVARIANCE_OFFLINE_PASS: verified 3 modes, 23/25h DST, stable observed values, forecast-only markers");
+console.log("CURRENT_PERIOD_ORIGINAL_FACT_METHOD_PASS: original quarter/month/week rows unchanged, forecast-only markers and two source cutoffs, DST 23/25h");
