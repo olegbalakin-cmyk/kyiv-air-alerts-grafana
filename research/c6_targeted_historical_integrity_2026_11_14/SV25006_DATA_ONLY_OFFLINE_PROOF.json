@@ -1,0 +1,56 @@
+{
+  "schema": "sv25006-owner-approved-secondary-minute-correction-offline-v1",
+  "source_baseline_site_prod": "c980c3f70ed894d2583fc83ecdedd1f82c04afb1",
+  "source_blob_sevastopol_events": "87a541c7876979aeb68c20728e1bbfc9c9dd780a",
+  "source_blob_existing_corrections": "d017d164243351819479db3c8300d97c16fda6d0",
+  "owner_approval": "2026-11-14 user explicitly requested secondary-source missing all-clear correction",
+  "source_raw_sha256": {
+    "messages(6).html": "622b83d8b255a9a44a8b336084ae4644f054967f18ee832de42552bed73f9f43",
+    "messages(7).html": "b54f95f09813f50bbbe2df2785244a1fb07ff6520bbfd384e639b8cc720ee9ce"
+  },
+  "corrected": {
+    "start_id": 25006,
+    "start": "2026-11-04T17:14:45+00:00",
+    "end": "2026-11-04T17:56:00+00:00",
+    "end_precision": "minute",
+    "end_semantics": "reported media repost minute under UTC+03 timezone interpretation, not precise observed siren stop",
+    "duration_min": 41.25
+  },
+  "supporting_receipts": [
+    {
+      "id": 191834,
+      "telegram_export_at": "2026-11-04T19:57:19+02:00",
+      "utc": "2026-11-04T17:57:19Z",
+      "source_url": "https://t.me/sevinfo92/44936",
+      "text": "Отбой воздушной тревоги в Севастополе."
+    },
+    {
+      "source": "STV MAX archival index",
+      "url": "https://mxstat.me/channel/%40stv92ru",
+      "listed_time": "2026-11-04 20:56 (display timezone assumed +03:00)",
+      "caption": "Repost from Razvozhaev; Отбой воздушной тревоги"
+    }
+  ],
+  "test": {
+    "verdict": "PASS_OFFLINE_DATA_CONTRACT_ONLY",
+    "checks": 15,
+    "source_complete_pairs_before": 577,
+    "after_if_applied": 578,
+    "count_delta": 1,
+    "total_duration_delta_min": 41.25,
+    "existing_pairs_24999_25000_and_25008_25009_preserved": true,
+    "no_duplicate_or_overlap": true,
+    "idempotent_2nd_cycle": true,
+    "correction_id_23887_preserved": true,
+    "full_23city_generator_run": false,
+    "real_neon_write": false,
+    "real_production_publication": false
+  },
+  "scope": "Data-only addition in established kyiv-air-alerts-grafana/data/sevastopol_event_corrections.json via site-prod PR, no generated JSON direct edits; scheduled C2 would apply via unchanged add_sevastopol_exact.py",
+  "limitations": [
+    "20:56 STV repost index timestamp is not an immutable raw forward metadata proving second-precision end; end :00 denotes minute precision",
+    "No exact source-backed end in Razvozhaev Telegram export",
+    "An actual C2 and same-run Neon→Git proof is required to certify publication"
+  ],
+  "changes_to_pipeline": false
+}
