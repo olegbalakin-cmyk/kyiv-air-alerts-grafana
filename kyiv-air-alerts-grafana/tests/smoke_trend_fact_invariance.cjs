@@ -48,7 +48,7 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("Expecte
         await target.waitForFunction(()=>
           document.querySelector("#citySelect")?.options?.length>=23 &&
           window.Chart?.getChart(document.querySelector("#cityIntensityChart")),
-          {timeout:50000});
+          {timeout:20000});
       }catch(e){
         const diagnostics=await target.evaluate(()=>({
           title:document.title,readyState:document.readyState,
@@ -56,6 +56,15 @@ if(!/^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/.test(url||""))throw Error("Expecte
           chartJs:!!window.Chart,chart:!!window.Chart?.getChart(document.querySelector("#cityIntensityChart")),
           updatedAt:document.querySelector("#updatedAt")?.textContent
         }));
+        // GitHub-hosted Chromium sometimes times out in its isolated
+        // waitForFunction realm after the normal DOM has already completed.
+        // Only accept recovery when independent main-page DOM proves BOTH
+        // 23 city options and a physically instantiated Chart.js chart.
+        if(diagnostics.options>=23 && diagnostics.chartJs && diagnostics.chart &&
+            diagnostics.updatedAt){
+          console.log("PAGE_READY_AFTER_WAIT_RACE",name,JSON.stringify(diagnostics));
+          return;
+        }
         throw new Error(name+" baseline readiness failed: "+JSON.stringify(diagnostics)+" / "+String(e));
       }
     };
