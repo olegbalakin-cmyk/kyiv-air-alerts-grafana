@@ -2869,7 +2869,7 @@ function renderCity() {
   // Consistent meaning: estimate completion of the unfinished current day,
   // week, month or quarter. Never extrapolate new rolling or future periods.
   const trendControl = $("showTrend")?.closest("label");
-  if (trendControl) trendControl.classList.toggle("hidden", !completionVisible);
+  if (trendControl) trendControl.classList.toggle("hidden", !completionPotential);
   const chartLabels = labels;
   const dashed = type === "raion_proxy";
 
@@ -2969,7 +2969,12 @@ function renderCity() {
     const factUntil=factualRow?.partial_through ||
       (period==="quarterly" ? factualRow?.quarter_end :
        period==="calendarWeekly" ? factualRow?.week_end :
-       period==="monthly" ? (factualRow?.month || "")+"-01" :
+       period==="monthly" ? (() => {
+         const month=factualRow?.month;
+         return /^\d{4}-(0[1-9]|1[0-2])$/.test(month||"")
+           ? new Date(Date.UTC(+month.slice(0,4),+month.slice(5,7),0)).toISOString().slice(0,10)
+           : month;
+       })() :
        factualRow?.date) || "";
     const forecastAsOfUk=completionPotential.asOfIsIntraday
       ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completionPotential.asOf))
