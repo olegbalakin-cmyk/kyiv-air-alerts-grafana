@@ -1,13 +1,17 @@
 # Changelog
 
 <!-- coordination:history:start -->
-### CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 — offline PASS, live shadow BLOCKED (2026-11-15)
+### CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 — technical PASS / readiness PARTIAL (2026-11-15)
 
-- [Draft PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) exact `1cd3e85f72f8c80dadd2b53d2b9ce2bb0b0984cf`, [Actions #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) SUCCESS 17/17 (7 AB +10 AC), [artifact #14154303167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023/artifacts/14154303167) ZIP uploader SHA256 `c45ae98be3dd0ab4e5bd0ffc9b23d31777032d2bb9b39e150c635bbd531695d9` (independent ZIP rehash not done), 3/3 inner SHA PASS. 23 RSS/10 publisher budget and secure article capture mocked PASS; zero external HTTP, WIP writes or casualties. Google News original URLs unresolved, `claim_deaths=null` without Work J count/scope. No operator PROMOTE, no live GO.
+- [Draft PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170) `a502616d5264d7fd5dfe649d6a256f1a984e67cb`; [CI #43697942529](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529) SUCCESS 34/34 (AB7/AC10/AD17), [artifact #14155356566](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529/artifacts/14155356566), ZIP SHA256 from uploader `99fe9eaad0ca0941caf693fe0c7ee2bc801d46f2073bd5909251446f5acc9510` (no independent ZIP rehash); 4/4 inner PASS. Synthetic URLs: 2 resolved, 1 unresolved, 1 blocked. Work J cumulative/delta/scope, dedup, HTTP security budgets PASS offline. No real Google News direct-link coverage proof; T03–T05 unlinked. Zero live HTTP/WIP writes/credits/PROMOTE; owner GO required for bounded pilot.
 
-### CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 — Work AB offline integration PASS, live shadow BLOCKED (2026-11-15)
+### CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [Draft PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) `4604004bd7399975c7b4d4cc87c0a43fcb4cd403` based on WIP `e30f1098`; [Actions #43646987342](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342) SUCCESS 7/7, [artifact #14133897958](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342/artifacts/14133897958), ZIP SHA256 `7e7e1474f1dfd6c40ae336fead3045fd818413b0eaff8109f11fa52a5349c818` (independent ZIP and 2 inner SHA verified by executor). Mock 23→22→23 cities over 3 four-hour cycles; 48h overlap, Zaporizhzhia retry, replay +0; scratch WIP queue 1707→1708 synthetic. T03–T05 three NEEDS_REVIEW. No real source GET/automatic credits/WIP writes. Live capture absent and 23-RSS/10-publisher budgets not enforced. Next Work AC bounded capture adapter + offline proof; owner GO separately required.
+- [PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) `1cd3e85f`, [Actions #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) 17/17 PASS, artifact #14154303167 uploader ZIP SHA256 `c45ae98be3dd0ab4e5bd0ffc9b23d31777032d2bb9b39e150c635bbd531695d9`, 3/3 inner PASS. Mock secure article capture/budgets PASS, 0 source GET/WIP credits; opaque links unresolved. Work AD adds Work J counts in research only.
+
+### CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
+
+- [PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) `4604004b`, [Actions #43646987342](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342) 7/7 PASS, artifact #14133897958 ZIP SHA256 `7e7e1474f1dfd6c40ae336fead3045fd818413b0eaff8109f11fa52a5349c818` independently verified. Three mocked 23→22→23 city cycles, cursor recovery, replay +0, 3 T03–T05 NEEDS_REVIEW. No real HTTP, credits, live GO.
 
 ### CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 — TECHNICAL PASS / EVIDENCE PARTIAL (2026-11-14)
 
