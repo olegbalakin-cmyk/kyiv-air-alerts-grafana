@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01** — PR #173 `37cf0b19`, offline #43702948168 PASS. Article pilot and operational GO safety BLOCKED.
+Latest casualty: **CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01**: PR #174 `4d20b5f0`, CI #43706844061 20/20 offline PASS; real article / GO blocked.
 
 ## Working instructions
 
@@ -16,33 +16,37 @@ Latest casualty: **CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** AB–AF only in research, PROMOTE OFF. AF broadened RSS triage and staged four article hosts. Synthetic GO-tag race PASS; legacy jobs still unguarded. City-uncertain hits not yet persisted.
+- **Operational WIP / casualty:** AB–AG research only, PROMOTE OFF. AG parses 4 synthetic HTML layouts, not real sites. Work X stores 3 exact T03–T05 URLs; article GET absent. Numeric/de-dup evidence PARTIAL, legacy GO bypass unresolved.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: make shared GO gate mandatory for ONE designated research network executor; block legacy unguarded paths. Then owner GO for 1–3 RSS metadata GET retaining exact URLs; later distinct article GO. No media HTTP/WIP mutation/PROMOTE meanwhile; T03–T05 NEEDS_REVIEW.
+3. Casualty next: wire atomic GO to ONE guarded research article runner and disable legacy bypass; exact-head offline proof. Then request new owner GO for up to 3 known Work X T03–T05 URLs (no RSS recapture). 0 WIP writes, credits or PROMOTE; T03–T05 NEEDS_REVIEW.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
+
+- [PR #174](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/174) exact `4d20b5f0c09418d8253560f4222008925c637f6e`, [Actions #43706844061](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061) 20/20 PASS, [artifact #14159030801](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061/artifacts/14159030801), ZIP SHA in changelog; inner hash PASS. 4 synthetic HTML bodies, 0 real publisher HTML. Work X [PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) has 3 exact T03/T04/T05 URLs; no new RSS needed. Numeric facts and incident de-dup PARTIAL; guarded runner not active, legacy GO bypass. 0 source GET/WIP writes/credits; PROMOTE OFF, `GO_SAFETY=BLOCKED`, `ARTICLE_PILOT=BLOCKED`.
+
 ## CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
 - [PR #173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/173) `37cf0b19`, [CI #43702948168](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43702948168) 12/12 PASS, artifact #14157426485; GitHub tag one-winner/rerun blocked. Four exact article hosts staged, unknown-city candidates not persisted. Old network workflows unguarded, source article URLs unavailable. `GO_SAFETY=BLOCKED`, `ARTICLE_PILOT=BLOCKED`; media GET 0, credits 0, PROMOTE OFF.
 
 ## CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
-- Two independent owner-GO RSS jobs: [#43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) `1f5b8f9e` / [PR #172](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/172), artifact #14156356307; [#43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) `1ee89a11`, artifact #14156048863. Both SUCCESS with 6 GET each = **12 total against one GO for 6**. Both: 5/6 HTTP200, 115 direct publisher links, Espreso 403; Work AD city+topic 1 Odesa hit vs broad keyword 6. PR #172: 30/115 article links allowlisted; real deaths/GN increment unverified. 0 article GET, WIP writes, credits. Stop further GET; shared GO lease required.
+- Owner six-GET GO was used twice: [A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) and [B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130): **12 vs 6 approved**. Both 5/6 RSS200 and 115 direct publisher links, Espreso 403. A city-filter hit 1 vs B broad filter 6 (non-comparable). [PR #172](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/172) 30/115 hosts allowlisted. No article GET/credits; shared spent-GO required.
 
 ## CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 (2026-11-15)
 
-- [Work AE PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, offline #43699168963 40/40 PASS. Owner-go [one-shot #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) on `1ee89a11`, proof #14156048863 (SHA in CHANGELOG): six RSS GET, five HTTP200, Espreso 403. 115 direct publisher-site HTTPS links; six title/summary keyword candidates (Radio Svoboda 3, Pravda 1, Hromadske Radio 2). No articles, retries, redirects, WIP writes or credits. No comparable Google News sample; live shadow NOT authorized.
+- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b` offline 40/40 PASS, [Actions #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) six GET, five RSS200/115 direct links, six broad keyword hits; artifact #14156048863 SHA in changelog. Also run A above; no article GET, credits or live shadow.
 
 ## CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 (2026-11-15)
 
-- [Draft PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170) exact `a502616d5264d7fd5dfe649d6a256f1a984e67cb`, [Actions #43697942529](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529) SUCCESS 7 AB + 10 AC + 17 AD = 34/34 offline, proof #14155356566 (ZIP SHA in CHANGELOG), 4/4 inner PASS. RSS direct/permalink guarded; opaque Google News links unresolved. Pinned Work J count/delta/scope PASS on synthetic fixtures only. No real source HTTP, WIP writes, credits, deployments or PROMOTE. T03–T05 NEEDS_REVIEW. `TECHNICAL=PASS`, `SHADOW_READINESS=PARTIAL`.
+- [PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170) `a502616d`, [CI #43697942529](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529) 34/34 PASS; artifact #14155356566 SHA in changelog, 4/4 inner PASS. Work J count/delta/scope synthetic PASS; opaque GN links unresolved, T03–T05 NEEDS_REVIEW; 0 live HTTP/credits.
 
 ## CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (archived evidence)
 
