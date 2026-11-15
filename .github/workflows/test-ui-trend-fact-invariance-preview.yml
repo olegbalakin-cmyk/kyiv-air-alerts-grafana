@@ -32,7 +32,8 @@ jobs:
           python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
           python3 kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py \
             --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json \
-            --output historical-daily-kpi.json
+            --output /tmp/trend-historical-daily-kpi.json
+          mv /tmp/trend-historical-daily-kpi.json historical-daily-kpi.json
           python3 - <<'PY'
           import json
           x=json.load(open("historical-daily-kpi.json",encoding="utf-8"))
