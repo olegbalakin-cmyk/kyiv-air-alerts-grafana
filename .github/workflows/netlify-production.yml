@@ -408,8 +408,8 @@ jobs:
                   # Netlify injects an optional, single real-user-monitoring tag
                   # before the closing body tag. No other HTML drift is allowed.
                   assert re.fullmatch(
-                      rb'\\s*<script async id="netlify-rum-container" '
-                      rb'src="/\\.netlify/scripts/rum"[^>]*></script>\\s*',
+                      rb'\s*<script async id="netlify-rum-container" '
+                      rb'src="/\.netlify/scripts/rum"[^>]*></script>\s*',
                       injected,
                   ), locale + ':UNKNOWN_HTML_INJECTION'
               print(locale, 'PUBLISHED_HTML_EXACT_EXCEPT_NETLIFY_RUM_PASS')
