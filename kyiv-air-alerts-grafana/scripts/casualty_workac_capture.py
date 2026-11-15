@@ -161,17 +161,23 @@ def _read_bounded(response, conn: PinnedHTTPS, deadline: float) -> bytes:
     return bytes(chunks)
 
 
-def get_html(url: str) -> tuple[bytes, str, int, str]:
-    """Exactly one HTTP GET, redirects OFF, no cookies/proxy/auth/retries."""
+def get_html(url: str, *, total_timeout: int = TOTAL_TIMEOUT,
+             expect_xml: bool = False) -> tuple[bytes, str, int, str]:
+    """One pinned HTTPS GET, no redirects, cookies, proxy, auth or retries.
+
+    expect_xml only extends the existing secure transport to direct RSS;
+    article callers retain the previous HTML and 20-second defaults.
+    """
     allowed_article_url(url)
     p = urlsplit(url)
-    deadline = time.monotonic() + TOTAL_TIMEOUT
+    deadline = time.monotonic() + min(TOTAL_TIMEOUT, total_timeout)
     conn = PinnedHTTPS(p.hostname, deadline)
     path = (p.path or "/") + (("?" + p.query) if p.query else "")
     try:
         conn.request("GET", path, headers={
             "User-Agent": "ukraine-air-alerts-casualty-shadow/1.0",
-            "Accept": "text/html,application/xhtml+xml",
+            "Accept": ("application/rss+xml,application/atom+xml,application/xml,text/xml"
+                       if expect_xml else "text/html,application/xhtml+xml"),
             "Accept-Encoding": "gzip,deflate,identity",
             "Connection": "close",
         })
@@ -187,7 +193,9 @@ def get_html(url: str) -> tuple[bytes, str, int, str]:
         if status != 200:
             raise CaptureBlocked("HTTP_STATUS_NOT_200")
         kind = response.getheader("Content-Type", "")
-        if not re.match(r"^(?:text/html|application/xhtml\+xml)(?:\s*;|$)", kind, re.I):
+        expected_types = (r"^(?:application/(?:rss\+xml|atom\+xml|xml)|text/xml)(?:\s*;|$)"
+                          if expect_xml else r"^(?:text/html|application/xhtml\+xml)(?:\s*;|$)")
+        if not re.match(expected_types, kind, re.I):
             raise CaptureBlocked("UNEXPECTED_CONTENT_TYPE")
         encoding = response.getheader("Content-Encoding", "identity").lower().strip()
         if encoding not in ("", "identity", "gzip", "deflate"):
