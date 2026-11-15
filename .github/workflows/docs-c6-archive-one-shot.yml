@@ -1,0 +1,37 @@
+name: C6 documentation archive one-shot (branch only)
+on:
+  push:
+    branches: [docs-c6-dst-reader-pin-accepted-2026-11-15]
+    paths: [".github/workflows/docs-c6-archive-one-shot.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    if: github.ref == 'refs/heads/docs-c6-dst-reader-pin-accepted-2026-11-15'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Lossless archive with immutable before-root snapshots
+        run: |
+          set -euo pipefail
+          python scripts/coordination_docs.py archive --dry-run --date 2026-11-15 --source-ref "$GITHUB_SHA"
+          python scripts/coordination_docs.py archive --date 2026-11-15 --source-ref "$GITHUB_SHA"
+          python scripts/coordination_docs.py verify --base-ref "$GITHUB_SHA"
+          python scripts/coordination_docs.py check
+      - name: Commit only archival document files on isolated documentation branch
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/docs-c6-dst-reader-pin-accepted-2026-11-15'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add PROJECT_STATE.md CHANGELOG.md docs/coordination-archive
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: archive unchanged C6 checkpoint history with immutable snapshots"
+          git push origin HEAD:refs/heads/docs-c6-dst-reader-pin-accepted-2026-11-15
