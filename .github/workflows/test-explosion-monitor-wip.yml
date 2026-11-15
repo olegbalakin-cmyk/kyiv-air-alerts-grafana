@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15, research-casualty-workaf-filter-allowlist-go-offline-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -21,6 +21,8 @@ on:
       - "research/casualty_workad_shadow_2026_11_15/**"
       - "research/casualty_workae_direct_rss_2026_11_15/**"
       - "kyiv-air-alerts-grafana/scripts/casualty_workj_rules.py"
+      - "kyiv-air-alerts-grafana/scripts/casualty_go_guard.py"
+      - "research/casualty_workaf_2026_11_15/**"
   workflow_dispatch:
 
 permissions:
@@ -421,5 +423,79 @@ jobs:
         with:
           name: casualty-workab-workac-workad-offline
           path: /tmp/workab/
+          if-no-files-found: warn
+          retention-days: 30
+
+  casualty_workaf_offline:
+    if: github.ref == 'refs/heads/research-casualty-workaf-filter-allowlist-go-offline-2026-11-15'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing RSS dependencies (no media HTTP)
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Restore previous physical Work AE A proof, no media requests
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43700780104
+          name: casualty-workae-six-rss-one-shot
+          path: /tmp/workaf/ae-a
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore previous physical Work AE B proof, no media requests
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43700806130
+          name: casualty-workae-owner-six-rss-once
+          path: /tmp/workaf/ae-b
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify routing, exact hosts, saved RSS receipts, mock concurrent GO
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s research/casualty_workaf_2026_11_15 -p 'test_workaf.py' -v
+          python -m unittest discover -s research/casualty_workae_direct_rss_2026_11_15 -p 'test_workae.py' -v
+      - name: Physical atomic GitHub ref collision on synthetic GO only
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python research/casualty_workaf_2026_11_15/github_atomic_proof.py
+      - name: Proof SHA256 and unchanged casualty data
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          out=Path('/tmp/workaf')
+          names=['github_atomic_proof.json']
+          summary={
+            'head':os.environ['GITHUB_SHA'],'source_http_gets':0,
+            'article_gets':0,'active_wip_writes':0,'automatic_credits':0,
+            'PROMOTE':'OFF','publication_allowed':False,
+            'rss_get_budget':23,'article_get_budget':10,
+            'test_corpus':'synthetic + verified saved Work AE receipts',
+          }
+          (out/'offline_proof.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
+          names.append('offline_proof.json')
+          manifest={n:hashlib.sha256((out/n).read_bytes()).hexdigest() for n in names}
+          (out/'sha256_manifest.json').write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+          for n,d in manifest.items():
+            assert hashlib.sha256((out/n).read_bytes()).hexdigest()==d
+          print('WORKAF_PROOF_SHA256_OK',manifest)
+          PY
+          git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-workaf-offline-proof
+          path: |
+            /tmp/workaf/offline_proof.json
+            /tmp/workaf/github_atomic_proof.json
+            /tmp/workaf/sha256_manifest.json
           if-no-files-found: warn
           retention-days: 30
