@@ -146,7 +146,7 @@ assert.equal(q4.actualAlerts,88);
 assert.equal(q4.periodRow.avg_daily_alert_hours,2);
 assert.equal(q4.periodRow.alerts_per_day,2);
 assert(q4.actualHours/q4.days<1,"old wrong 92-day fact divisor dilutes actual");
-assert.equal(q4.expectedHours/q4.days,2,"full-period forecast uses 92 days");
+assert(Math.abs(q4.expectedHours/q4.days-2)<0.01,"full-period forecast uses 92 days (DST-safe physical baseline)");
 assert.equal(q4.expectedAlerts/q4.days,2);
 assert(app.includes("intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;"),
   "observed bar must use observed-day mean");
