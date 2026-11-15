@@ -32,7 +32,7 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
  async function snapshot(){
    return page.evaluate(()=>{
      const c=window.Chart?.getChart(document.querySelector("#cityIntensityChart"));
-     assertInside=!!c;if(!assertInside)throw Error("no physical Chart.js chart");
+     if(!c)throw Error("no physical Chart.js chart");
      const main=c.data.datasets.slice(0,2);
      const values=main.map(d=>d.data.map(x=>Number.isFinite(x)?x:null));
      const canvas=main.map((d,i)=>c.getDatasetMeta(i).data.map(e=>{
@@ -48,7 +48,7 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        labels:[...c.data.labels],values,canvas,
        axis:{hours:c.scales.yHours.max,alerts:c.scales.yAlerts.max},
        options:c.options.plugins.periodForecastDeltaHatch||null,
-       registeredPlugin:!!c.config.plugins.find(p=>p.id==="periodForecastDeltaHatch"),
+       registeredPlugin:Array.isArray(c.config.plugins)&&c.config.plugins.some(p=>p.id==="periodForecastDeltaHatch"),
        forecast,
        checked:document.querySelector("#showTrend").checked,
        visible:!document.querySelector("#showTrend").closest("label").classList.contains("hidden")};
