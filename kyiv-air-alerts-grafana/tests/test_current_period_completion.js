@@ -191,7 +191,7 @@ assert(app.includes('const currentObservedPeriodMatches=Boolean('),
   "forecast can be added only to its matching calendar period");
 assert(app.includes('const completionPotential=completionVisible && currentObservedPeriodMatches'),
   "forecast candidate is distinct from original actual period");
-assert(app.includes('const completion=completionPotential && $("showTrend")?.checked'),
+assert(app.includes('const completion=completionPotential && trendToggle?.checked'),
   "toggle affects only forecast overlay, not fact");
 assert(!app.includes('rows=[...rows,completionPotential.periodRow]'),
   "trend cannot replace original factual rows with a newer partial day");
