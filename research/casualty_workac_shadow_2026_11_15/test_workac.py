@@ -163,6 +163,25 @@ class WorkAC(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 monitor.search_city_news("kyiv",NOW-timedelta(days=8),NOW)
 
+    def test_11_joint_rss_candidate_article_card_index_replay(self):
+        # Feed -> existing queue function -> transient direct publisher GET -> Work X.
+        q = []
+        feed = [{"title": "У Запоріжжі загинули після ракетного удару",
+                 "url": URL, "publisher": "mock direct source",
+                 "published_at": "2026-11-14T20:00:00Z", "snippet": "synthetic"}]
+        self.assertEqual(monitor.add_news_candidates(
+            q, "zaporizhzhia", feed, [], NOW, independent=True), 1)
+        self.assertEqual(len(q),1)
+        self.assertEqual(monitor.add_news_candidates(
+            q, "zaporizhzhia", [{**feed[0], "title": "Інший заголовок"}],
+            [], NOW+timedelta(hours=4), independent=True), 0)
+        state,index,stats=ac.capture_cycle(q, {}, {}, NOW, enabled=True, fetch=fake)
+        self.assertEqual((stats["evidence_new"],len(index["cards"])),(1,1))
+        self.assertIsNone(index["cards"][0]["incident_id"])
+        state,index,stats=ac.capture_cycle(q,state,index,NOW+timedelta(hours=4),
+                                           enabled=True,fetch=fake)
+        self.assertEqual((stats["evidence_new"],stats["evidence_replay_duplicates"]),(0,1))
+
     def test_10_no_raw_html_in_stored_artifacts(self):
         state,index,_=ac.capture_cycle([candidate(1)],{},{},NOW,enabled=True,fetch=fake)
         saved=json.dumps({"state":state,"index":index},ensure_ascii=False)
