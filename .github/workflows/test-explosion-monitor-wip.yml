@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -28,6 +28,53 @@ permissions:
   actions: read
 
 jobs:
+  casualty_workae_one_shot:
+    # NO scheduled execution, reruns, or later push. This exact commit message
+    # is a single-use trigger that MUST NOT be reused.
+    if: >-
+      ${{ github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-workae-six-rss-live-2026-11-15' && github.event.head_commit.message == 'go(casualty): RUN WORKAE SIX RSS ONE SHOT ONCE 2026-11-15' && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout pilot-only research head
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencies for existing Work AC modules
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Exactly six read-only RSS GET using Work AC pinned TLS
+        env:
+          WORKAE_GO_APPROVED: yes-one-shot-6-feeds
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          WORKAE_PILOT_OUT: /tmp/workae-rss-pilot
+        run: |
+          set -euo pipefail
+          python research/casualty_workae_direct_rss_2026_11_15/oneshot_rss_probe.py
+          test -f /tmp/workae-rss-pilot/sha256_manifest.json
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('/tmp/workae-rss-pilot')
+          report=json.loads((p/'pilot_receipt.json').read_text())
+          manifest=json.loads((p/'sha256_manifest.json').read_text())
+          assert hashlib.sha256((p/'pilot_receipt.json').read_bytes()).hexdigest()==manifest['pilot_receipt.json']
+          assert report['get_attempts']<=6
+          assert report['article_gets']==report['active_wip_writes']==report['automatic_credits']==0
+          assert report['PROMOTE']=='OFF' and report['publication_allowed'] is False
+          print('WORKAE_ONE_SHOT_PROOF_REHASH_PASS',manifest['pilot_receipt.json'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-workae-six-rss-one-shot
+          path: /tmp/workae-rss-pilot
+          retention-days: 30
+          if-no-files-found: warn
   smoke:
     if: github.ref == 'refs/heads/multicity-wip-2026-09-16'
     runs-on: ubuntu-latest
