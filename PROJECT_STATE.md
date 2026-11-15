@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-14. **Casualty scope: PROMOTE=OFF.** C6 current historical status follows newer accepted `main:C6-AUTO-GIT-RESTORED-2026-11-14-01` (`GLOBAL_CUTOVER=YES`, stabilization open); old C6 checkpoints here are historical.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01**: PR #169 `1cd3e85f`, Actions #43696226023 17/17 offline PASS. Live shadow BLOCKED.
+Latest casualty: **CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01**: PR #170 `a502616d`, CI #43697942529 34/34 offline PASS. Real-source readiness PARTIAL, live GO withheld.
 
 ## Working instructions
 
@@ -16,18 +16,22 @@ Latest casualty: **CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01*
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** Work Y merged to main (PROMOTE hard-OFF); Work AB/AC RSS→article→evidence PASS on mocked input. Direct Google News publisher links and counted claims unresolved; 0 credits. Active WIP workflow unchanged.
+- **Operational WIP / casualty:** Work Y in main, PROMOTE hard-OFF. Work AB–AD RSS→article→Work J facts→Work X index PASS offline, real Google News original-URL availability unproven; credits OFF.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: Work AD narrow source-URL resolution and Work J count/scope integration, plus exact-head offline E2E. Check current WIP HEAD before transfer. No live HTTP or WIP writes before owner GO; T03–T05 NEEDS_REVIEW.
+3. Casualty next: request separate owner GO for bounded real RSS-only link-coverage pilot, then minimal source-capture shadow; or verify available first-party direct feeds. Reconcile current WIP HEAD first. No live GET/WIP write/PROMOTE before explicit GO; T03–T05 NEEDS_REVIEW.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 (2026-11-15)
+
+- [Draft PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170) exact `a502616d5264d7fd5dfe649d6a256f1a984e67cb`, [Actions #43697942529](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529) SUCCESS 7 AB + 10 AC + 17 AD = 34/34 offline, proof #14155356566 (ZIP SHA in CHANGELOG), 4/4 inner PASS. RSS direct/permalink guarded; opaque Google News links unresolved. Pinned Work J count/delta/scope PASS on synthetic fixtures only. No real source HTTP, WIP writes, credits, deployments or PROMOTE. T03–T05 NEEDS_REVIEW. `TECHNICAL=PASS`, `SHADOW_READINESS=PARTIAL`.
+
 ## CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
 - [PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) `1cd3e85f72f8c80dadd2b53d2b9ce2bb0b0984cf`; [Actions #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) SUCCESS 7 Work AB + 10 Work AC offline tests; proof #14154303167 (uploader ZIP digest in CHANGELOG), 3/3 inner SHA PASS. 23 RSS/10 publisher GET budgets, secure article capture and three mocked cycles PASS. 0 real HTTP, WIP writes or death credits. Opaque Google News URLs remain unresolved and `claim_deaths=null` without Work J counts. No active workflow changes, PROMOTE OFF; `READY_FOR_SHADOW_GO=BLOCKED`.
@@ -61,9 +65,9 @@ Latest casualty: **CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01*
 - Exact Git blobs: `main@413d34ac` reviewer `cf65d85c`, operator `740b985b`, workflow `3771a501`; `site-prod@2fa9044a` generator `f5840c20`. The reviewer does not emit generator's incident/proof fields; operator preview calculates a raw delta sum, not the cumulative effective credit. PR #105 [shadow Actions #43290975899](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43290975899) SUCCESS does not prove scheduled operation. No new code deployed.
 - Work U: Zaporizhzhia Git JSON compared against PR #139, 316 deaths, September last validated month, October absent. Current Netlify deploy `6af76b2d` is READY/locked, but the actual served frontend/data fetch was not captured; `LIVE_PARITY=UNVERIFIED`. Live site may fetch GitHub Raw directly; do not equate locked deploy with frozen JSON. T03–T05 remains blocked, death credits 0.
 
-## CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 — one physical Work R source capture PASS, event identity reviewer-only (2026-11-14)
+## CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 (2026-11-14)
 
-- Owner-authorized one-shot [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) launch `b9d8d6183f882fbe5108f0641f80b16e3821d4a4`, exact prelaunch `f2f3a922bfe193a66680d8bf64f29a80be17dc9a`, launch.json-only diff; [Actions #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) first-attempt SUCCESS, owner/ancestry and 68 safety checks PASS, 3/3 T03/T04/T05 HTTP200, 3 GET, 0 redirects/retries. [Artifact #14105343291](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160/artifacts/14105343291) ZIP SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b` independently MATCH and 4/4 manifest hashes PASS, five JSON files only, full bodies absent. New bounded clues: T03 strike on Zaporizhzhia private house + local 2; T04 earlier 2 then count rose, later deceased aged 69; T05 evening missile near private sector and 3 dead aged 37/38/69. Supports same-incident 2→3 hypothesis but attack date/location identity NOT independently verified; article-wide T03/T04 totals NULL, T05 3 unbound. All NEEDS_REVIEW, 0 automatic links/credits, no PROMOTE/production publication. Authorization `CASUALTY-T03-T05-OWNER-20261114081321838-WORKR-ONCE` CONSUMED; next offline human review, no repeat GET.
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) launch `b9d8d618`, [run #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) PASS (3 GET/HTTP200); [artifact #14105343291](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160/artifacts/14105343291) ZIP SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b`, independent/4 inner PASS. T03 2 ages 37/38; T04 later +1 age 69; T05 3 ages 37/38/69. Same-incident hypothesis unverified, NEEDS_REVIEW, 0 credits, one-shot grant spent. Full proof in PR/artifact.
 
 ## CASUALTY-WORKR-IDENTITY-REVIEW-PREFLIGHT-SOURCE-REVIEW-REQUIRED-01 — source identity research PASS offline, full event link pending (2026-11-14)
 
