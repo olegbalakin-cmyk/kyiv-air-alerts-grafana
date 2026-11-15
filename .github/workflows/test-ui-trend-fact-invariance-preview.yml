@@ -1,0 +1,91 @@
+name: TEST ONLY trend factual invariance Netlify draft
+on:
+  push:
+    branches: [test-ui-trend-fact-invariant-2026-11-15]
+permissions:
+  contents: read
+jobs:
+  isolated-preview-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Offline JS and factual-invariance regressions
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/tests/smoke_trend_fact_invariance.cjs
+          node kyiv-air-alerts-grafana/tests/test_current_period_completion.js
+          node kyiv-air-alerts-grafana/tests/test_quarter_rolling_preview.js
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          python3 kyiv-air-alerts-grafana/tests/test_bilingual_static_seo.py
+      - name: Generate exact same-source 23-city historical index for isolated draft
+        run: |
+          set -euo pipefail
+          python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python3 kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py \
+            --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --output historical-daily-kpi.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open("historical-daily-kpi.json",encoding="utf-8"))
+          assert x["meta"]["verified_count"]==23 and len(x["cities"])==23
+          assert x["cities"]["kyiv"]["status"]=="verified"
+          print("HISTORICAL_INDEX_23_OF_23_PASS")
+          PY
+      - name: Build isolated bilingual preview bundle
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/kpi-range.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png historical-daily-kpi.json _site/
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          test -s _site/en/index.html && test -s _site/app.js
+          echo ISOLATED_BUILD_ONLY_NO_PRODUCTION_MUTATION=YES
+      - name: Deploy immutable draft only, NEVER production
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_site --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json > trend-test-draft.json
+          python3 - <<'PY'
+          import json
+          from urllib.parse import urlparse
+          x=json.load(open("trend-test-draft.json",encoding="utf-8"))
+          u=(x.get("deploy_url") or x.get("url") or "").replace("http://","https://",1)
+          p=urlparse(u)
+          assert p.scheme=="https" and p.hostname.endswith(".netlify.app") and p.hostname!="ukraine-air-alerts.netlify.app",u
+          print("TEST_ONLY_DRAFT_URL",u)
+          PY
+      - name: Physical 375px Chrome OFF/ON/OFF invariance
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/trend-test-browser
+          npm --prefix /tmp/trend-test-browser install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/trend-test-browser/node_modules
+          export PREVIEW_URL="$(python3 - <<'PY'
+          import json
+          x=json.load(open("trend-test-draft.json"))
+          print((x.get("deploy_url") or x.get("url")).replace("http://","https://",1))
+          PY
+          )"
+          node kyiv-air-alerts-grafana/tests/smoke_trend_fact_invariance.cjs
+      - name: Preserve browser evidence and nonproduction preview URL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trend-fact-invariant-isolated-proof
+          if-no-files-found: ignore
+          path: |
+            trend-test-draft.json
+            trend-fact-invariance-browser.json
+            trend-fact-invariance-mobile.png
