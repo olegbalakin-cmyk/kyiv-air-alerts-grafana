@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -16,6 +16,8 @@ on:
       - "kyiv-air-alerts-grafana/scripts/casualty_workaa_context.py"
       - "kyiv-air-alerts-grafana/scripts/casualty_workaa_offline.py"
       - "research/casualty_workab_shadow_2026_11_15/**"
+      - "kyiv-air-alerts-grafana/scripts/casualty_workac_capture.py"
+      - "research/casualty_workac_shadow_2026_11_15/**"
   workflow_dispatch:
 
 permissions:
@@ -262,7 +264,7 @@ jobs:
           PY
 
   casualty_workab_offline:
-    if: github.ref == 'refs/heads/integration-casualty-workab-shadow-off-2026-11-15'
+    if: github.ref == 'refs/heads/integration-casualty-workab-shadow-off-2026-11-15' || github.ref == 'refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -292,6 +294,9 @@ jobs:
           set -euo pipefail
           test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
           python -m unittest discover -s research/casualty_workab_shadow_2026_11_15 -p 'test_workab.py' -v
+          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15" ]]; then
+            WORKAC_OUT=/tmp/workac python -m unittest discover -s research/casualty_workac_shadow_2026_11_15 -p 'test_workac.py' -v
+          fi
           git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
           test ! -e /tmp/workab/launch.json
           python - <<'PY'
@@ -306,16 +311,28 @@ jobs:
           assert a["cycles"][2]["new_candidates"]==0
           assert b["source_index_summary"]["total"]==3
           assert b["automatic_credits"]==0
+
           for p in root.glob("*.json"):
               assert all(k not in p.read_text() for k in ("<html","<!DOCTYPE html","launch.json"))
+          if os.environ.get("GITHUB_REF","").endswith("integration-casualty-workac-bounded-shadow-off-2026-11-15"):
+              ac=json.loads(pathlib.Path("/tmp/workac/cycles.json").read_text())
+              assert ac["external_http"]==0 and ac["automatic_credits"]==0
+              assert ac["cards"]==1 and len(ac["cycles"])==3
+              (root/"workac_cycles.json").write_text(json.dumps(ac,sort_keys=True,indent=2))
           hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.glob("*.json")}
           (root/"sha256_manifest.json").write_text(json.dumps(hashes,indent=2,sort_keys=True)+"\n")
+          verified=json.loads((root/"sha256_manifest.json").read_text())
+          assert len(verified)>=3
+          for name,want in verified.items():
+              assert (root/name).is_file()
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==want,name
+          print("WORKAC_INNER_MANIFEST_REHASH_PASS",len(verified))
           print("WORKAB_EXACT_HEAD_OFFLINE_PASS",os.environ["GITHUB_SHA"],hashes)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: casualty-workab-two-cycle-offline
+          name: casualty-workab-workac-offline
           path: /tmp/workab/
           if-no-files-found: warn
           retention-days: 30
