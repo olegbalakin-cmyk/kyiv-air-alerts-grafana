@@ -773,7 +773,8 @@ jobs:
           set -euo pipefail
           python integration/scripts/c6_pr93_generator_compat.py \
             --generator reader/scripts/neon_json_shadow_generator.py \
-            --site-parser pinned-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py
+            --site-parser pinned-site/kyiv-air-alerts-grafana/scripts/add_sevastopol_exact.py \
+            --site-bridge pinned-site/kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py
           cp -a same-run-inputs/site_data/. pinned-site/kyiv-air-alerts-grafana/data/
       - name: Install accepted read-only reader dependencies
         run: python -m pip install -r reader/research/neon_json_shadow_frontend_2026_10_31/offline_proof/requirements.lock.txt
