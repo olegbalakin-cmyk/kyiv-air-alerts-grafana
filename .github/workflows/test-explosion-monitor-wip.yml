@@ -31,7 +31,8 @@ jobs:
   casualty_workae_one_shot:
     # NO scheduled execution, reruns, or later push. This exact commit message
     # is a single-use trigger that MUST NOT be reused.
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-workae-six-rss-live-2026-11-15' && github.event.head_commit.message == 'go(casualty): RUN WORKAE SIX RSS ONE SHOT ONCE 2026-11-15' && github.run_attempt == 1 }}
+    if: >-
+      ${{ github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-workae-six-rss-live-2026-11-15' && github.event.head_commit.message == 'go(casualty): RUN WORKAE SIX RSS ONE SHOT ONCE 2026-11-15' && github.run_attempt == 1 }}
     runs-on: ubuntu-latest
     timeout-minutes: 9
     permissions:
