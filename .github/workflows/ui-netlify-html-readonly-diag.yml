@@ -1,0 +1,46 @@
+name: Bilingual published Netlify read-only HTML diagnostics
+
+on:
+  push:
+    branches: [research-netlify-html-smoke-2026-11-15]
+    paths:
+      - ".github/workflows/ui-netlify-html-readonly-diag.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compare the exact built Ukrainian/English entrypoints with public Netlify HTML
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/generated-bilingual
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html \
+            --output-dir /tmp/generated-bilingual
+          python3 - <<'PY'
+          import hashlib, urllib.request
+          from pathlib import Path
+          root=Path('/tmp/generated-bilingual')
+          for lang,path in [('uk',''),('en','en/')]:
+              url='https://ukraine-air-alerts.netlify.app/'+path
+              req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','User-Agent':'c6-readonly-ui-qa'})
+              with urllib.request.urlopen(req,timeout=15) as resp:
+                  served=resp.read()
+                  print(lang,'HTTP',resp.status,'final_url',resp.url)
+              expected=(root / ('index.html' if lang=='uk' else 'en/index.html')).read_bytes()
+              print(lang,'bytes',len(served),'expected',len(expected),'sha256',hashlib.sha256(served).hexdigest(),'expected_sha256',hashlib.sha256(expected).hexdigest())
+              for name,tag in [('canonical-en',b'rel="canonical" href="https://ukraine-air-alerts.netlify.app/en/"'),('hreflang-uk',b'hreflang="uk"'),('hreflang-en',b'hreflang="en"')]:
+                  print(lang,name,tag in served)
+              if served!=expected:
+                  at=next((i for i,(a,b) in enumerate(zip(served,expected)) if a!=b),min(len(served),len(expected)))
+                  print(lang,'BYTE_MISMATCH_AT',at,'served_context',repr(served[max(0,at-35):at+80]),'expected_context',repr(expected[max(0,at-35):at+80]))
+              else:
+                  print(lang,'BYTE_PARITY_PASS')
+          PY
