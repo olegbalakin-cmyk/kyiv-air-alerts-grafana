@@ -130,7 +130,7 @@ assert.equal(F.estimateToday({...history,verified_metric_months:[],verified_metr
 assert(app.includes('window.PeriodCompletionPreview?.estimate('));
 assert(app.includes('const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"]'));
 assert(app.includes("window.PeriodCompletionPreview?.estimateToday("),"daily chart uses verified current day");
-assert(app.includes('trendControl.classList.toggle("hidden", !completionVisible)'),"trend only on current calendar periods");
+assert(app.includes('trendControl.classList.toggle("hidden", !completionPotential)'),"trend only if original factual period matches the certified forecast");
 assert(!app.includes("QuarterRollingPreview?.rollingForecast("),"no rolling next-period forecast invocation");
 assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period forecast invocation");
 assert(!app.includes("projectedRows"),"no additional future bar");
