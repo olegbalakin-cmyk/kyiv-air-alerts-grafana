@@ -1,0 +1,31 @@
+name: C6 current physical DST calculation selection offline
+
+on:
+  push:
+    branches: [research-c6-dst-current-readonly-2026-11-15]
+    paths:
+      - "research/c6_dst_current_selection_2026_11_15/**"
+      - ".github/workflows/c6-dst-current-selection-offline.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact physical 3+8 DST witness regression, network independent
+        run: |
+          python -m unittest -v research.c6_dst_current_selection_2026_11_15.test_dst_select
+          echo 'DST_PROJECTION_RESEARCH_ONLY=YES'
+          echo 'NEON_WRITES=0'
+          echo 'C2_RUNS=0'
+          echo 'PUBLICATION=0'
+          echo 'NETLIFY_DEPLOYS=0'
