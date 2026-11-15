@@ -68,6 +68,8 @@ def allowed_article_url(url: str) -> str:
             raise CaptureBlocked("NOT_EXACT_HTTPS_ALLOWLIST")
         if ipaddress.ip_address(host).is_global is False:
             raise CaptureBlocked("NONPUBLIC_IP")
+    except CaptureBlocked:
+        raise  # Never swallow our own security rejection (ValueError subclass).
     except ValueError as exc:
         # A ValueError from ipaddress for a DNS name is expected; one from
         # urlsplit/port is not.
