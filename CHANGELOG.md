@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-DST-CANONICAL-DISPLAY-VERIFIED-2026-11-15-01 — same-run 23-city Git projection already excludes stale DST parents
+
+- Live physical readback proof [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819), artifact #14159523883: 33,911 raw closed AIR rows, 33,646 exact C2 canonical lineages/23 cities, eight correct Oct 25 DST witnesses in the four city calculations, three wrong merged physical parent UIDs absent from lineage. Published at site-prod@048af474, six data blobs unchanged through site-prod@901dab2f; frontend reads Git JSON. No second correction required: leave `DST_CORRECTION=OFF`, preserve three physical legacy records; PR #182 selector would block if enabled on already clean current canonical input. Scheduled stabilization still OPEN; no data, workflow, Neon, C2, source HTTP or Netlify changes.
+
 ### UI-BILINGUAL-LIVE-LOCKED-2026-11-15-01 — published EN and Ukrainian, Netlify locked; post-smoke CI remains red
 
 - Owner-approved bilingual PR #164–166 code already merged. PR #178/#179 use **current same-generation Git-stored Neon historical 23/23 KPI**, not independent stale source re-derivation. PR #180/#181 refine HTTP RUM and guarded one-shot Netlify unlock→deploy→relock. `site-prod@901dab2f`, production deploy **6af9a134186a8e5d83bb3cdf** live, `locked=true` via read-only Netlify, independent Actions #43712522543 served `/` + `/en/` with correct locale metadata and RUM-only difference PASS. Production Actions #43712415014 had 23-city KPI HTTP PASS, but overall **FAIL** on overly strict post-deploy HTML check. Next: reconcile QA harness, not live availability; no C2/Neon writes.
