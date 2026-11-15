@@ -169,7 +169,7 @@ assert(app.includes('Показати тренд')||app.includes('showTrend'));
 
 assert(app.includes('if (completion) {'));
 assert(app.includes('periodCompletionHatchPlugin'));
-assert(app.includes('stacked:Boolean(completion)'));
+assert(!app.includes('stacked:Boolean(completion)'),"two averages must never be stacked");
 assert(app.includes('approvedNeonGitRelease'));
 assert(app.includes('matchesDashboardGeneration'));
 assert(!app.includes('netlify deploy --prod'));
