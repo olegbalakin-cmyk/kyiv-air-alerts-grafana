@@ -136,54 +136,54 @@ assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period
 assert(!app.includes("projectedRows"),"no additional future bar");
 assert(!app.includes("_isForecast: true"),"no future-period dataset");
 assert(!app.includes("forecastIndices"),"no extra forecast axis labels");
-// Accepted PR #151/#152: a single, additive stacked completion bar.
-// The solid segment is the observed contribution to the whole-period mean,
-// the hatched segment is the remaining contribution. The tooltip must show
-// the actual observed-day mean so the solid segment cannot be misconstrued as
-// 45-day daily fact; only one full-period alert forecast dot is drawn.
-const q4Index={...history,end:"2026-11-13"};
-const q4=F.estimate(q4Index,"quarterly","2026-11-14");
+// The trend toggle must NEVER change any actual input, scale or value.
+// All observed daily averages use the verified source's observed-day divisor;
+// a forecast uses full calendar-period days and is only an annotation.
+const q4=F.estimate(history,"quarterly","2026-11-14");
 assert(q4&&q4.days===92&&q4.observed===44);
-assert.equal(q4.actualHours,88);
-assert.equal(q4.actualAlerts,88);
 assert.equal(q4.periodRow.avg_daily_alert_hours,2);
 assert.equal(q4.periodRow.alerts_per_day,2);
-assert(q4.actualHours/q4.days<1,"observed contribution is not an observed-day mean");
-assert(Math.abs((q4.actualHours+q4.remainingHours)/q4.days-q4.expectedHours/q4.days)<1e-12);
-assert(Math.abs(q4.expectedHours/q4.days-2)<0.01,"DST-safe physical baseline");
-assert.equal(q4.expectedAlerts/q4.days,2);
-assert(app.includes("intensityDatasets[0].data[i]=completion.actualHours/completion.days;"),
-  "stacked fact segment retains common full-period denominator");
-assert(app.includes("completion.remainingHours/completion.days"),
-  "hatched segment is only projected remaining alert-hours");
-assert(app.includes("intensityDatasets[0].stack=\"completion\";"),
-  "observed hours and remaining hours must share the same stack");
-assert(app.includes('stack:"completion"'),"estimated remainder shares one stack");
-assert(app.includes('stacked:Boolean(completion)'),"chart renders one additive completion bar");
-assert(app.includes("completion.actualHours/observedDays"),
-  "tooltip gives true observed-day hours rather than whole-period contribution");
-assert(app.includes("completion.actualAlerts/observedDays"),
-  "tooltip gives true observed alert frequency");
-assert(app.includes('period==="daily28"'),"current-day observations keep their existing count");
-assert(app.includes('period==="daily28"\n      ? completion.actualAlerts/completion.days : null'),
-  "quarterly chart hides a misleading second actual frequency point");
-assert(app.includes("completion.expectedAlerts/completion.days"),
-  "one hollow expected full-period frequency dot remains");
-assert(app.includes("pointBackgroundColor:\"#101820\""),
-  "forecast-only marker remains visibly hollow");
-assert(app.includes('Разом — прогноз підсумку періоду.'),
-  "UA subtitle explains stacked forecast completion, not independent averages");
-assert(app.includes('Together they give the full-period estimate.'),
-  "EN subtitle explains stacked forecast completion");
-assert(!app.includes('intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;'),
-  "PR #185 non-additive adjacent bar regression removed");
-assert(!app.includes('type:"bar",_isCompletion:true,skipNull:true'),
-  "PR #185 second non-additive bar removed");
+assert.equal(q4.actualHours/q4.observedDaysEquivalent,2);
+assert(q4.actualHours/q4.days<1,"dividing actual by 92 is not observed intensity");
+assert(Math.abs(q4.expectedHours-q4.actualHours-q4.remainingHours)<1e-9);
+const observedIndex=app.indexOf('const completionPotential=completionVisible?completionCandidate:null;');
+const selectedIndex=app.indexOf('const completion=completionPotential && $("showTrend")?.checked');
+assert(observedIndex>=0&&selectedIndex>observedIndex,
+  "observed row must be selected regardless of trend checkbox");
+const observedCode=app.slice(observedIndex,selectedIndex);
+assert(observedCode.includes('rows=[...rows,completionPotential.periodRow];'),
+  "observed period row is in both OFF and ON charts");
+assert(!observedCode.includes('$("showTrend")'),
+  "observed period selection must not depend on toggle");
+assert(app.includes('data: rows.map(r => r.avg_daily_alert_hours)'),
+  "actual bar always comes from one identical factual row");
+assert(app.includes('data: rows.map(r => r.alerts_per_day)'),
+  "actual line always comes from one identical factual row");
+assert(!app.includes('intensityDatasets[0].data[i]='),
+  "trend cannot rewrite the observed bar");
+assert(!app.includes('intensityDatasets[1].data[i]='),
+  "trend cannot rewrite the observed line");
+assert(app.includes('completion.expectedHours/completion.days'),
+  "forecast hours uses the full period and only a line marker");
+assert(app.includes('completion.expectedAlerts/completion.days'),
+  "forecast alerts uses the full period and only a line marker");
+assert(!app.includes('type:"bar",_isCompletion:true'),
+  "no second forecast bar that may overlap or change the actual");
+assert(!app.includes('stack:"completion"'),"no misleading full-period stacked observed facts");
+assert(app.includes('stacked:false'),"fact bar never changes stacking mode");
+assert(!app.includes('periodCompletionHatchPlugin'),"no forecast hatch over actual bar");
+assert(app.includes('completionPotential ? completionPotential.expectedHours/completionPotential.days : 0'),
+  "hours axis reserves forecast extent even with trend switched off");
+assert(app.includes('completionPotential ? completionPotential.expectedAlerts/completionPotential.days : 0'),
+  "alert axis reserves forecast extent even with trend switched off");
+assert(app.includes('pointStyle:"line"'),"forecast hours visibly separate from factual bar");
+assert(app.includes('pointStyle:"rectRot"'),"forecast alerts visibly separate from factual circle");
+assert(app.includes('Прогноз не додається до факту'),
+  "Ukrainian subtitle distinguishes non-additive forecast");
+assert(app.includes('Forecast is not added to fact'),
+  "English subtitle distinguishes non-additive forecast");
 
-assert(app.includes('if (completion) {'));
-assert(app.includes('periodCompletionHatchPlugin'));
-assert(app.includes('stacked:Boolean(completion)'),"accepted one stacked completion bar");
 assert(app.includes('approvedNeonGitRelease'));
 assert(app.includes('matchesDashboardGeneration'));
 assert(!app.includes('netlify deploy --prod'));
-console.log("CURRENT_PERIOD_COMPLETION_OFFLINE_PASS: verified source, calendar bounds, 3 modes, no future leakage, legend/stack/tooltip guards");
+console.log("CURRENT_PERIOD_FACT_INVARIANCE_OFFLINE_PASS: verified 3 modes, 23/25h DST, stable observed values, forecast-only markers");
