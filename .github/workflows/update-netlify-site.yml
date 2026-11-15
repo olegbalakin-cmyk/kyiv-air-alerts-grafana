@@ -553,6 +553,7 @@ jobs:
           AUTO_ENABLED: ${{ vars.C6_AUTO_NEON_GIT_ENABLED }}
           FINAL_PREPARE_INPUT: ${{ inputs.c6_final_prepare_only }}
           LEGACY_RELEASE_INPUT: ${{ inputs.c6_neon_git_release }}
+          OWNER_ONESHOT_APPROVED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true' }}
         run: |
           set -euo pipefail
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
@@ -563,6 +564,10 @@ jobs:
             test "$AUTO_ENABLED" != "true"
             test "$FINAL_PREPARE_INPUT" != "true"
             test "$LEGACY_RELEASE_INPUT" != "true"
+          elif [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            test "$GITHUB_REF" = "refs/heads/main"
+            test "$AUTO_ENABLED" = "true"
+            test "$OWNER_ONESHOT_APPROVED" = "true"
           else
             test "$GITHUB_EVENT_NAME" = "schedule"
             test "$AUTO_ENABLED" = "true"
