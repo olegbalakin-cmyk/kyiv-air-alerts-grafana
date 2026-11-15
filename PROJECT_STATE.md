@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-14. **Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour C6 Neon→Git restored (first scheduled cycle PASS); stabilization OPEN.** `DST_CORRECTION=OFF`; live active-alert status not certified.
-Latest accepted C6: **C6-AUTO-GIT-RESTORED-2026-11-14-01**. Browser delivery still uses static Git/Netlify JSON generated from Neon, not direct database access.
+**Date:** 2026-11-15. **Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour C6 Neon→Git restored (first scheduled cycle PASS); stabilization OPEN.** `DST_CORRECTION=OFF`; live active-alert status not certified.
+Latest accepted C6: **C6-DST-READER-PIN-MERGED-2026-11-15-01**. No successful scheduled Neon→Git after the pin fix yet; browser delivery stays Git JSON.
 
 ## Working instructions
 
@@ -15,7 +15,7 @@ Latest accepted C6: **C6-AUTO-GIT-RESTORED-2026-11-14-01**. Browser delivery sti
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted `C6-C3-WORKS-NEON-CUTOVER-PASS-01`; owner-gated [Netlify #43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) and [Git #43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769) SUCCESS, 23-city historical KPI/CSV/browser QA PASS. `GLOBAL_CUTOVER=YES` applies to historical JSON only.
-- **Scheduled C2/C6:** owner enabled `C6_AUTO_NEON_GIT_ENABLED=true`. One-shot [#43588351374](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43588351374), attempt 3, PASS. First restored four-hour [scheduled #43625014243](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43625014243) SUCCESS: 21/21 bridge continuity, `NEON_SUCCEEDED`, 23/23 same-run receipts/readback, Git-only `site-prod@f67ee699`, zero Netlify calls. Multi-cycle stability not yet proven.
+- **Scheduled C2/C6:** first four-hour Neon→Git #43625014243 PASS (21/21, 23/23, Git-only). Next two #43655729191/#43686460909: writer PASS, Neon readback blocked by exact DST builder hash. PR #167 fixed reader pin on `main@47efa3a8`; next scheduled cycle not yet proven. `C6_STABILIZATION=OPEN`; Netlify not part of data refresh.
 - **Netlify/UI:** owner confirms another executor verified auto-publishing re-locked; this note is not an independent lock readback. Latest UI PR #152, [Actions #43633525080](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43633525080) PASS, `site-prod@c980c3f7` and Netlify `6af8b9cd9e5cf4983bbb407e` LIVE. Keep UI releases separate from C2 data refresh.
 - **Independent open work:** full historical completeness (including Sevastopol `25006→25008`), DST/active-alert semantics, casualty, WIP and backfill retain their separate gates; `DST_CORRECTION=OFF`. Cutover rollback was prepared, not exercised in the successful release.
 
@@ -27,6 +27,10 @@ Latest accepted C6: **C6-AUTO-GIT-RESTORED-2026-11-14-01**. Browser delivery sti
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-DST-READER-PIN-MERGED-2026-11-15-01 — exact code compatibility accepted (2026-11-15)
+
+- Failed C2 #43655729191/#43686460909: `BUILDER_CODE_DRIFT:apply_ukrainealarm_bridge.py` after approved UTC DST source fix `66a5120a`. [PR #167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/167) merged `main@47efa3a8`; exact-head offline [#43692555311](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43692555311) PASS, unknown blob still rejected. Scheduled C2→Neon→six JSON→Git publication **PENDING**. No Netlify deploy or manual C2.
+
 ## C6-AUTO-GIT-RESTORED-2026-11-14-01 — cutover and first scheduled Git-only cycle PASS (2026-11-14)
 
 - Earlier owner-approved historical cutover `C6-C3-WORKS-NEON-CUTOVER-PASS-01` (PR #78) physically published via [Netlify #43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) and [Git #43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769), both SUCCESS: historical 23-city QA PASS, `GLOBAL_CUTOVER=YES` (not live-active alerts).
