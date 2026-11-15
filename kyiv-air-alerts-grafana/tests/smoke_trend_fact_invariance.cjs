@@ -47,7 +47,7 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        generation:document.querySelector("#updatedAt")?.textContent,
        labels:[...c.data.labels],values,canvas,
        axis:{hours:c.scales.yHours.max,alerts:c.scales.yAlerts.max},
-       options:c.options.plugins.periodForecastDeltaHatch||null,
+       options:c.config.options?.plugins?.periodForecastDeltaHatch||null,
        registeredPlugin:Array.isArray(c.config.plugins)&&c.config.plugins.some(p=>p.id==="periodForecastDeltaHatch"),
        forecast,
        checked:document.querySelector("#showTrend").checked,
