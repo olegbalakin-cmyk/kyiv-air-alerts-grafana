@@ -137,7 +137,8 @@ jobs:
           python kyiv-air-alerts-grafana/tests/test_monthly_seconds.py
           python kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py \
             --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json \
-            --output historical-daily-kpi.json
+            --output /tmp/neon-verified-historical-daily-kpi.json
+          mv /tmp/neon-verified-historical-daily-kpi.json historical-daily-kpi.json
           python - <<'PY'
           import json
           with open("historical-daily-kpi.json", encoding="utf-8") as f:
