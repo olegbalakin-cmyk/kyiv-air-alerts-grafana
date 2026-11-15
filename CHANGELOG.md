@@ -3,6 +3,13 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-BILINGUAL-LIVE-LOCKED-2026-11-15-01 — published EN and Ukrainian, Netlify locked; post-smoke CI remains red
+
+- Owner-approved bilingual PR #164–166 code already merged. PR #178/#179 use **current same-generation Git-stored Neon historical 23/23 KPI**, not independent stale source re-derivation. PR #180/#181 refine HTTP RUM and guarded one-shot Netlify unlock→deploy→relock. `site-prod@901dab2f`, production deploy **6af9a134186a8e5d83bb3cdf** live, `locked=true` via read-only Netlify, independent Actions #43712522543 served `/` + `/en/` with correct locale metadata and RUM-only difference PASS. Production Actions #43712415014 had 23-city KPI HTTP PASS, but overall **FAIL** on overly strict post-deploy HTML check. Next: reconcile QA harness, not live availability; no C2/Neon writes.
+
+### C6-OWNER-ONESHOT-GIT-PASS-2026-11-15-01 — physical manual C2→Neon→Git; scheduled stabilization remains open
+
+- Owner-approved exact one-shot Actions #43706909819 SUCCESS: Neon writer, 23/23 readback, site-prod Git-only `048af474`, no Netlify. Temporary trigger PR #175 merged for the one run and removed by PR #176 (`main@63a614ca`); not a successful scheduled post-pin proof. `C6_STABILIZATION=OPEN`; await 1–2 regular four-hour cycles. DST code PR #161/#167 merged but three physical stale Oct-25 overlapping parents remain; `DST_CORRECTION=OFF`. Draft research PR #182 offline #43712682104 PASS for current exact-UID calculation selector only; no active correction or Neon deletion.
 ### C6-DST-READER-PIN-MERGED-2026-11-15-01 — code fix, live cycle pending
 
 - Two failed scheduled C2 (#43655729191/#43686460909): writer PASS, reader rejected UTC DST bridge blob. Owner-requested fix [PR #167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/167) merged `main@47efa3a8`; exact-head offline #43692555311 PASS, strict blob gate retained. No production data or Netlify change; next scheduled Neon→Git proof outstanding.
