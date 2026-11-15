@@ -6,6 +6,7 @@ runner must explicitly claim before a GET; older branches do not inherit it.
 """
 from __future__ import annotations
 import hashlib
+import copy
 import ipaddress
 import json
 import re
@@ -121,16 +122,20 @@ def claim_grant(grant: dict, *, approved_digest: str, head: str,
 
 class ClaimedGo:
     def __init__(self,grant,ref):
-        self.grant,self.spent_ref=grant,ref
+        self.grant,self.spent_ref=copy.deepcopy(grant),ref
         self.attempts={"rss":0,"article":0}
+        self.seen_urls={"rss":set(),"article":set()}
     def authorize_get(self,kind,url,*,method="GET"):
         if kind not in KINDS or method != "GET":
             raise GoBlocked("REQUEST_TYPE_OR_METHOD_BLOCKED")
         if url not in self.grant["allowed_urls"][kind]:
             raise GoBlocked("URL_NOT_APPROVED")
+        if url in self.seen_urls[kind]:
+            raise GoBlocked("URL_ALREADY_ATTEMPTED")
         if self.attempts[kind]>=self.grant[kind+"_get_budget"]:
             raise GoBlocked("GET_BUDGET_SPENT")
         self.attempts[kind]+=1  # Consume before the attempt, even if it fails.
+        self.seen_urls[kind].add(url)
 
 def lookup_spent_ref(*,repo,token,owner_go_id):
     # Readback only for proof; NEVER a check-before-create lock.
