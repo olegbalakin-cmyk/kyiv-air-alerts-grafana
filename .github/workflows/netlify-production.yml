@@ -317,6 +317,37 @@ jobs:
             --auth="$NETLIFY_AUTH_TOKEN" \
             --json | tee netlify-production-deploy.json
 
+      - name: Lock exact new Netlify deploy without opening auto publishing
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, re, urllib.request
+          from pathlib import Path
+          site = "b5aafc46-7468-4070-baf1-db80a4d30501"
+          meta = json.loads(Path("netlify-production-deploy.json").read_text())
+          deploy_id = meta.get("deploy_id") or meta.get("id")
+          assert isinstance(deploy_id, str) and re.fullmatch(r"[a-zA-Z0-9-]{12,80}", deploy_id), "BAD_DEPLOY_ID"
+          token = os.environ["NETLIFY_AUTH_TOKEN"]
+          headers = {"Authorization": "Bearer " + token, "Accept": "application/json"}
+          def api(url, method="GET"):
+              request = urllib.request.Request("https://api.netlify.com/api/v1" + url,
+                                               headers=headers, method=method)
+              with urllib.request.urlopen(request, timeout=25) as response:
+                  return json.load(response)
+          d = api("/deploys/" + deploy_id)
+          assert d["site_id"] == site and d["state"] == "ready", "DEPLOY_NOT_READY_OR_NOT_SITE"
+          # Netlify lockDeploy publishes the target deploy if it is not current,
+          # then locks it; unlike unlocking, this never enables auto publishing.
+          locked = api("/deploys/" + deploy_id + "/lock", "POST")
+          assert locked["id"] == deploy_id and locked["site_id"] == site, "LOCK_WRONG_DEPLOY"
+          current = api("/sites/" + site)
+          assert current["published_deploy"]["id"] == deploy_id, "DEPLOY_NOT_PUBLISHED"
+          assert api("/deploys/" + deploy_id).get("locked") is True, "AUTO_PUBLISH_NOT_LOCKED"
+          print("EXACT_BILINGUAL_NETLIFY_PUBLISHED_AND_LOCKED", deploy_id)
+          PY
+
       - name: Verify production HTTP KPI assets after publication
         run: |
           set -euo pipefail
@@ -339,6 +370,21 @@ jobs:
           assert all(row["status"]=="verified" for row in h["cities"].values())
           print("PASS: served production KPI JS and historical index, HTTP 200, 23/23 cities")
           PY
+
+      - name: Verify both published Ukrainian and English static entrypoints
+        run: |
+          set -euo pipefail
+          SITE="https://ukraine-air-alerts.netlify.app"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "$SITE/" -o /tmp/served-uk.html
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "$SITE/en/" -o /tmp/served-en.html
+          grep -q 'hreflang="uk"' /tmp/served-uk.html
+          grep -q 'hreflang="en"' /tmp/served-uk.html
+          grep -q 'rel="canonical" href="https://ukraine-air-alerts.netlify.app/en/"' /tmp/served-en.html
+          grep -q 'hreflang="uk"' /tmp/served-en.html
+          grep -q 'hreflang="en"' /tmp/served-en.html
+          cmp _site/index.html /tmp/served-uk.html
+          cmp _site/en/index.html /tmp/served-en.html
+          echo 'PUBLISHED_BILINGUAL_HTTP_BYTE_PARITY_PASS'
 
       - name: Upload deploy metadata
         uses: actions/upload-artifact@v4
