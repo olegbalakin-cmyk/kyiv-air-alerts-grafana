@@ -390,9 +390,30 @@ jobs:
           grep -q 'rel="canonical" href="https://ukraine-air-alerts.netlify.app/en/"' /tmp/served-en.html
           grep -q 'hreflang="uk"' /tmp/served-en.html
           grep -q 'hreflang="en"' /tmp/served-en.html
-          cmp _site/index.html /tmp/served-uk.html
-          cmp _site/en/index.html /tmp/served-en.html
-          echo 'PUBLISHED_BILINGUAL_HTTP_BYTE_PARITY_PASS'
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          for locale, expected_path, served_path in (
+              ('uk', '_site/index.html', '/tmp/served-uk.html'),
+              ('en', '_site/en/index.html', '/tmp/served-en.html'),
+          ):
+              expected = Path(expected_path).read_bytes()
+              served = Path(served_path).read_bytes()
+              if served != expected:
+                  prefix, suffix = expected.rsplit(b'</body>', 1)
+                  ending = b'</body>' + suffix
+                  assert served.startswith(prefix) and served.endswith(ending), (
+                      locale + ':HTML_UNEXPECTED_CHANGE')
+                  injected = served[len(prefix):-len(ending)]
+                  # Netlify injects an optional, single real-user-monitoring tag
+                  # before the closing body tag. No other HTML drift is allowed.
+                  assert re.fullmatch(
+                      rb'\\s*<script async id="netlify-rum-container" '
+                      rb'src="/\\.netlify/scripts/rum"[^>]*></script>\\s*',
+                      injected,
+                  ), locale + ':UNKNOWN_HTML_INJECTION'
+              print(locale, 'PUBLISHED_HTML_EXACT_EXCEPT_NETLIFY_RUM_PASS')
+          PY
 
       - name: Upload deploy metadata
         uses: actions/upload-artifact@v4
