@@ -215,6 +215,39 @@ class ArticleFirstAG(unittest.TestCase):
                 with self.assertRaises(article_oneshot.PilotBlocked):
                     article_oneshot.validate_environment(env)
 
+    def test_18_explicit_attack_date_separate_from_publication(self):
+        row = offline(sentence=(
+            "22 жовтня 2026 року атакували Запоріжжя ракетою. "
+            "У Запоріжжі після ракетного удару загинули троє людей. "))
+        self.assertEqual(row["source_fact"]["attack_date_explicit"], "2026-10-22")
+        self.assertEqual(row["source_fact"]["publication_date"], "2026-11-15T07:00:00Z")
+        self.assertEqual(row["card"]["attack_date_status"], "UNVERIFIED_CLAIM")
+
+    def test_19_english_article_not_mistakenly_credited(self):
+        english = ("A strike in Zaporizhzhia killed three civilians. "
+                   "The local officials announced that an investigation is ongoing. "
+                   "The latest report covers casualties in the municipality. "
+                   "Details are being checked against the primary sources. ")
+        row = offline(sentence=english, language="en")
+        self.assertEqual(row["source_fact"]["article_language_claimed"], "en")
+        self.assertIsNone(row["card"]["fatal_total_claimed_not_credited"])
+        self.assertEqual(row["card"]["decision"], "NEEDS_REVIEW")
+
+    def test_20_eighteen_twenty_twentythree_not_sixtyone(self):
+        previous = []
+        for total, publisher in zip((18, 20, 23), URLS):
+            url = URLS[publisher]
+            html = html_page(publisher,
+                             f"У Запоріжжі після ракетного удару загинули {total} людей. ")
+            row = capture.analyze_direct_article(
+                url, offline_html=html, previous=previous,
+                city_key="zaporizhzhia", now=NOW)
+            previous.append(row["card"])
+        self.assertEqual([c["fatal_total_claimed_not_credited"] for c in previous],
+                         [18, 20, 23])
+        self.assertEqual(sum(c["automatic_credits"] for c in previous), 0)
+        self.assertTrue(all(c["incident_id"] is None for c in previous))
+
     def test_16_retained_real_html_not_claimed(self):
         # This is an evidence-availability classification, not a fabricated
         # real fixture. Existing P/Q/R/Z cards contain excerpts but not HTML.
