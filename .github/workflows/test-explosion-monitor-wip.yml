@@ -321,6 +321,12 @@ jobs:
               (root/"workac_cycles.json").write_text(json.dumps(ac,sort_keys=True,indent=2))
           hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.glob("*.json")}
           (root/"sha256_manifest.json").write_text(json.dumps(hashes,indent=2,sort_keys=True)+"\n")
+          verified=json.loads((root/"sha256_manifest.json").read_text())
+          assert len(verified)>=3
+          for name,want in verified.items():
+              assert (root/name).is_file()
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==want,name
+          print("WORKAC_INNER_MANIFEST_REHASH_PASS",len(verified))
           print("WORKAB_EXACT_HEAD_OFFLINE_PASS",os.environ["GITHUB_SHA"],hashes)
           PY
       - uses: actions/upload-artifact@v4
