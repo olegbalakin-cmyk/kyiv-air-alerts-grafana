@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact, local PR #93 collector-blob pin for the accepted C6 generator.
+"""Exact PR #93 and DST-UTC collector blob pins for the accepted C6 generator.
 
 This changes only the generator's immutable allowlist in its isolated checkout.
 It cannot fetch a source, run Neon, write site data, or publish Git.
@@ -12,6 +12,7 @@ from pathlib import Path
 
 BASE_GENERATOR_GIT_BLOB = "34d8fa1dc0b25d0a88de2d6dcc73061cfe0771da"
 MERGED_PR93_PARSER_GIT_BLOB = "d31c5ac43ac9e76491ee38033f9a46838c5abfbb"
+MERGED_DST_UTC_BRIDGE_GIT_BLOB = "1e3860df58d229b566ff0383409dd7527ad25576"
 ANCHOR = """C6_SEVASTOPOL_CHECKPOINT_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '6698ec743b6efcd9aeb059dd81b51cc05ae93493'),
 }
@@ -21,10 +22,17 @@ EXTRA = """
 C6_SEVASTOPOL_PR93_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', 'd31c5ac43ac9e76491ee38033f9a46838c5abfbb'),
 }
+
+# Exact source union-only UTC fix: site-prod@66a5120a (Actions #43645246989 PASS).
+# Preserve every existing accepted hash; do not permit arbitrary collector drift.
+C6_DST_UTC_BRIDGE_BLOBS = {
+ 'scripts/apply_ukrainealarm_bridge.py': ('8b95c4b508b9a473240889603f593e399cf8815d', '1e3860df58d229b566ff0383409dd7527ad25576'),
+}
 """
 ORIGINAL_PREDICATE = "            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual))"
 PATCHED_PREDICATE = ("            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual) or\n"
-                     "            C6_SEVASTOPOL_PR93_BLOBS.get(path) == (expected, actual))")
+                     "            C6_SEVASTOPOL_PR93_BLOBS.get(path) == (expected, actual) or\n"
+                     "            C6_DST_UTC_BRIDGE_BLOBS.get(path) == (expected, actual))")
 
 
 class PinBlocked(ValueError):
@@ -35,11 +43,14 @@ def git_blob(raw: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
 
 
-def patched_bytes(raw: bytes, parser_raw: bytes) -> bytes:
+def patched_bytes(raw: bytes, parser_raw: bytes,
+                  bridge_raw: bytes | None = None) -> bytes:
     if git_blob(raw) != BASE_GENERATOR_GIT_BLOB:
         raise PinBlocked("PINNED_GENERATOR_BLOB_MISMATCH")
     if git_blob(parser_raw) != MERGED_PR93_PARSER_GIT_BLOB:
         raise PinBlocked("PR93_PARSER_BLOB_MISMATCH")
+    if bridge_raw is not None and git_blob(bridge_raw) != MERGED_DST_UTC_BRIDGE_GIT_BLOB:
+        raise PinBlocked("DST_UTC_BRIDGE_BLOB_MISMATCH")
     original = raw.decode("utf-8")
     if original.count(ANCHOR) != 1 or original.count(ORIGINAL_PREDICATE) != 1:
         raise PinBlocked("PINNED_GENERATOR_CONTRACT_CHANGED")
@@ -49,8 +60,9 @@ def patched_bytes(raw: bytes, parser_raw: bytes) -> bytes:
     return changed.encode("utf-8")
 
 
-def pin(generator: Path, parser: Path) -> str:
-    modified = patched_bytes(generator.read_bytes(), parser.read_bytes())
+def pin(generator: Path, parser: Path, bridge: Path | None = None) -> str:
+    modified = patched_bytes(generator.read_bytes(), parser.read_bytes(),
+                             bridge.read_bytes() if bridge is not None else None)
     generator.write_bytes(modified)
     return hashlib.sha256(modified).hexdigest()
 
@@ -59,9 +71,11 @@ def main():
     cli = argparse.ArgumentParser()
     cli.add_argument("--generator", type=Path, required=True)
     cli.add_argument("--site-parser", type=Path, required=True)
+    cli.add_argument("--site-bridge", type=Path,
+                     help="Exact same-run site-prod UTC bridge (required by live C6 workflow)")
     args = cli.parse_args()
     try:
-        digest = pin(args.generator, args.site_parser)
+        digest = pin(args.generator, args.site_parser, args.site_bridge)
     except (PinBlocked, OSError, UnicodeError, SyntaxError):
         print("C6_GENERATOR_PIN_BLOCKED")
         return 2

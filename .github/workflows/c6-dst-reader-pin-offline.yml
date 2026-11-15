@@ -1,0 +1,63 @@
+name: C6 exact DST bridge reader pin (offline, no publication)
+
+on:
+  push:
+    branches: [fix-c6-dst-reader-pin-2026-11-15]
+    paths:
+      - "scripts/c6_pr93_generator_compat.py"
+      - "tests/test_c6_dst_reader_pin.py"
+      - ".github/workflows/c6-dst-reader-pin-offline.yml"
+      - ".github/workflows/update-netlify-site.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/c6_pr93_generator_compat.py"
+      - "tests/test_c6_dst_reader_pin.py"
+      - ".github/workflows/c6-dst-reader-pin-offline.yml"
+      - ".github/workflows/update-netlify-site.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout proposed integration code without credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout accepted exact C6 reader
+        uses: actions/checkout@v4
+        with:
+          ref: 82a7cc775ed2f2a6fd0134440db709690f0c04d1
+          path: reader
+          persist-credentials: false
+      - name: Checkout exact observed failed-run production input
+        uses: actions/checkout@v4
+        with:
+          ref: 097d785a9c6f345ab038b4c5e0fcdea3b102fd1d
+          path: site-current
+          persist-credentials: false
+      - name: Checkout prior approved version for regression
+        uses: actions/checkout@v4
+        with:
+          ref: c980c3f70ed894d2583fc83ecdedd1f82c04afb1
+          path: site-prior
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact bridge and negative drift tests (no HTTP, Neon, data writes or Git push)
+        run: python -m unittest discover -s tests -p test_c6_dst_reader_pin.py -v
+      - name: Verify production workflow only passes the exact bridge to the gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path(".github/workflows/update-netlify-site.yml").read_text()
+          assert s.count("--site-bridge pinned-site/kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py")==1
+          assert "ref: 82a7cc775ed2f2a6fd0134440db709690f0c04d1" in s
+          assert "needs: [update-site, c6-neon-six-json-prepare]" in s
+          print("C6_READBACK_PIN_WORKFLOW_STATIC_PASS")
+          PY
