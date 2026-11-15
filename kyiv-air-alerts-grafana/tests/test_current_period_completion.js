@@ -163,9 +163,9 @@ assert(app.includes('if(!completionPotential)trendToggle.checked=false'),
  "stale selected trend must clear when projection is unavailable");
 assert(app.includes('intensitySubtitle.textContent+=" "+trendReason'),
  "unavailable state is explained in the UI");
-assert(app.includes('window.PeriodCompletionPreview?.estimate('));
+assert(app.includes('completionModel?.estimate('),"trend uses established verified completion estimator");
 assert(app.includes('const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"]'));
-assert(app.includes("window.PeriodCompletionPreview?.estimateToday("),"daily chart uses verified current day");
+assert(app.includes("completionModel?.estimateToday("),"daily chart uses verified current day");
 assert(app.includes('trendToggle.disabled=!completionPotential'),"trend disabled unless the original factual period has a certified forecast");
 assert(!app.includes("QuarterRollingPreview?.rollingForecast("),"no rolling next-period forecast invocation");
 assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period forecast invocation");
