@@ -2851,16 +2851,20 @@ function renderCity() {
         (!activeRange.to||activeRange.to>=calendarToday)
       : (!activeRange.from || activeRange.from<=completionCandidate.start) &&
         (!activeRange.to || activeRange.to>=completionCandidate.through));
-  // Verified observations must be identical with trend OFF and ON.
-  // Both use the same current-period source cutoff when available.
-  const completionPotential=completionVisible?completionCandidate:null;
-  if (completionPotential && period!=="daily28") {
-    rows=rows.filter(row=>!(isPartialPeriod(row) &&
-      (period==="calendarWeekly"?row.week_start===completionPotential.start:
-       period==="monthly"?row.month===completionPotential.key:row.quarter===completionPotential.key)));
-    rows=[...rows,completionPotential.periodRow];
-  }
-  const completion=completionPotential && $("showTrend")?.checked ? completionPotential:null;
+  // Methodological invariant: "Show trend" must NEVER replace or rebase
+  // the factual periodRows() used when trend is OFF. For example, the
+  // existing Q4 bar may represent completed October only, while the
+  // completion forecast sees newer certified observations in November.
+  // Those are different cutoffs; they must never silently become one "fact".
+  const currentObservedRow=rows.at(-1);
+  const currentObservedPeriodMatches=Boolean(currentObservedRow && completionCandidate &&
+    (period==="daily28" ? currentObservedRow.date===completionCandidate.start :
+     period==="calendarWeekly" ? currentObservedRow.week_start===completionCandidate.start :
+     period==="monthly" ? currentObservedRow.month===completionCandidate.key :
+     period==="quarterly" ? currentObservedRow.quarter===completionCandidate.key : false));
+  const completionPotential=completionVisible && currentObservedPeriodMatches
+    ? completionCandidate : null;
+  const completion=completionPotential && $("showTrend")?.checked ? completionPotential : null;
   const labels = rows.map(r => periodDisplayLabel(r, period));
   // Consistent meaning: estimate completion of the unfinished current day,
   // week, month or quarter. Never extrapolate new rolling or future periods.
@@ -2875,8 +2879,7 @@ function renderCity() {
       label: tr("Годин під тривогою / добу","Hours under alert / day"),
       data: rows.map(r => r.avg_daily_alert_hours),
       yAxisID: "yHours",
-      backgroundColor: rows.map((r,j) => completionPotential && j===rows.length-1
-        ? COLORS[0] + "99" : isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
+      backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
       borderColor: rows.map(() => COLORS[0]),
       borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
       _exportRows: rows
@@ -2962,23 +2965,34 @@ function renderCity() {
   }
 
   if (intensitySubtitle && completionPotential) {
-    const observedDaysText=completionPotential.asOfIsIntraday
-      ? fmt(completionPotential.observedDaysEquivalent,1) : String(completionPotential.observed);
-    const asOfUk=completionPotential.asOfIsIntraday
+    const factualRow=rows.at(-1);
+    const factUntil=factualRow?.partial_through ||
+      (period==="quarterly" ? factualRow?.quarter_end :
+       period==="calendarWeekly" ? factualRow?.week_end :
+       period==="monthly" ? (factualRow?.month || "")+"-01" :
+       factualRow?.date) || "";
+    const forecastAsOfUk=completionPotential.asOfIsIntraday
       ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completionPotential.asOf))
       : completionPotential.through;
-    const asOfEn=completionPotential.asOfIsIntraday
+    const forecastAsOfEn=completionPotential.asOfIsIntraday
       ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completionPotential.asOf))
       : completionPotential.through;
-    const observedUk=period==="daily28"?"за спостережену частину сьогодні":"за "+observedDaysText+" спостережених днів";
-    const observedEn=period==="daily28"?"for today's observed portion":"across "+observedDaysText+" observed day equivalents";
+    const factUntilText=String(factUntil).slice(0,10);
+    const actualNoteUk=period==="quarterly" && Number.isInteger(factualRow?.days_observed)
+      ? " ("+factualRow.days_observed+" календарних днів)" : "";
+    const actualNoteEn=period==="quarterly" && Number.isInteger(factualRow?.days_observed)
+      ? " ("+factualRow.days_observed+" calendar days)" : "";
     intensitySubtitle.textContent=completion
-      ? tr("Стовпчик і зелена лінія — незмінний факт "+observedUk+
-           ". Біла риска — прогноз годин/добу, зелений порожній ромб — прогноз тривог/день. Прогноз не додається до факту. Дані станом на "+asOfUk+".",
-           "Solid bar and green line: unchanged actual values "+observedEn+
-           ". White tick: forecast hours/day; hollow green diamond: forecast alerts/day. Forecast is not added to fact. Data as of "+asOfEn+".")
-      : tr("Стовпчик і зелена лінія — факт "+observedUk+". Дані станом на "+asOfUk+".",
-           "Bar and green line: actual values "+observedEn+". Data as of "+asOfEn+".");
+      ? tr("Факт — незмінні стовпчик і зелена лінія за вихідним рядом до "+factUntilText+
+           actualNoteUk+". Біла риска і порожній ромб — прогнози середнього за повний період, "+
+           "обчислені за даними до "+forecastAsOfUk+". Це різні зрізи, не додавати їх один до одного.",
+           "Actual: unchanged bar and green line from the original series through "+factUntilText+
+           actualNoteEn+". White tick and hollow diamond: full-period average forecasts based on data through "+
+           forecastAsOfEn+". These are different cutoffs, not additive.")
+      : tr("Факт за вихідним рядом до "+factUntilText+actualNoteUk+
+           ". Тренд не змінює фактичні дані.",
+           "Actual from the original series through "+factUntilText+actualNoteEn+
+           ". The trend does not alter factual data.");
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
@@ -3026,11 +3040,18 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              if (completion && i===rows.length-1)
-                return tr("Спостережено: "+(completion.asOfIsIntraday?fmt(completion.observedDaysEquivalent,1):completion.observed)+
-                    " з "+completion.days+" днів · оцінка до "+completion.end,
-                  "Observed: "+(completion.asOfIsIntraday?fmt(completion.observedDaysEquivalent,1):completion.observed)+
-                    " of "+completion.days+" days · estimate through "+completion.end);
+              if (completion && i===rows.length-1) {
+                const factual=rows[i];
+                const factualCutoff=String(factual?.partial_through ||
+                    factual?.quarter_end || factual?.week_end || factual?.date ||
+                    factual?.month || "").slice(0,10);
+                const modelCutoff=completion.asOfIsIntraday
+                  ? completion.asOf : completion.through;
+                return tr("Факт до "+factualCutoff+" · прогноз на "+completion.end+
+                    " за даними до "+modelCutoff,
+                  "Actual through "+factualCutoff+" · forecast to "+completion.end+
+                    " using source through "+modelCutoff);
+              }
               return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
                 : partialPeriodFooter(rows[i]);
             }
