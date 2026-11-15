@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-15. **Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour C6 Neon→Git restored (first scheduled cycle PASS); stabilization OPEN.** `DST_CORRECTION=OFF`; live active-alert status not certified.
-Latest accepted C6: **C6-DST-READER-PIN-MERGED-2026-11-15-01**. No successful scheduled Neon→Git after the pin fix yet; browser delivery stays Git JSON.
+**Date:** 2026-11-15. **Historical Neon cutover `GLOBAL_CUTOVER=YES`; C6 owner-approved one-shot Neon→Git #43706909819 PASS; scheduled four-hour stabilization OPEN.** `DST_CORRECTION=OFF`; live active-alert status not certified. **English `/en/` LIVE, Netlify production locked.** Final Netlify workflow's post-deploy HTML assertion FAILED; independent public HTTP bilingual proof PASS. Browser historical data remains Git JSON.
+Latest accepted transition: **UI-BILINGUAL-LIVE-LOCKED-2026-11-15-01**; latest prior C6 code pin **C6-DST-READER-PIN-MERGED-2026-11-15-01**.
 
 ## Working instructions
 
@@ -15,21 +15,24 @@ Latest accepted C6: **C6-DST-READER-PIN-MERGED-2026-11-15-01**. No successful sc
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted `C6-C3-WORKS-NEON-CUTOVER-PASS-01`; owner-gated [Netlify #43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) and [Git #43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769) SUCCESS, 23-city historical KPI/CSV/browser QA PASS. `GLOBAL_CUTOVER=YES` applies to historical JSON only.
-- **Scheduled C2/C6:** first four-hour Neon→Git #43625014243 PASS (21/21, 23/23, Git-only). Next two #43655729191/#43686460909: writer PASS, Neon readback blocked by exact DST builder hash. PR #167 fixed reader pin on `main@47efa3a8`; next scheduled cycle not yet proven. `C6_STABILIZATION=OPEN`; Netlify not part of data refresh.
-- **Netlify/UI:** owner confirms another executor verified auto-publishing re-locked; this note is not an independent lock readback. Latest UI PR #152, [Actions #43633525080](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43633525080) PASS, `site-prod@c980c3f7` and Netlify `6af8b9cd9e5cf4983bbb407e` LIVE. Keep UI releases separate from C2 data refresh.
-- **Independent open work:** full historical completeness (including Sevastopol `25006→25008`), DST/active-alert semantics, casualty, WIP and backfill retain their separate gates; `DST_CORRECTION=OFF`. Cutover rollback was prepared, not exercised in the successful release.
+- **Scheduled C2/C6:** first four-hour Neon→Git #43625014243 PASS. Next two #43655729191/#43686460909: writer PASS, reader hash blocked. PR #167 fixed pin on main. Owner-approved one-shot [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819) SUCCESS, C2 Neon receipt, 23/23 readback, [Git-only `site-prod@048af474`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/048af474d98c953bbac351936092ee2bd08c6fad), zero Netlify. Temporary one-shot trigger removed via PR #176 (`main@63a614ca`). **Still no successful scheduled post-pin cycle; C6_STABILIZATION=OPEN**.
+- **Netlify/UI:** owner-authorized bilingual `/` + `/en/` code PR #164–166; production KPI root initially blocked (19/23 legacy recomputation), PR #178 replaced it with exact same-generation Git-stored Neon 23/23 index; PR #179 fixed file staging, PR #180 restricted RUM-only HTML injection, PR #181 added guarded unlock/publish/relock. **`site-prod@901dab2f`, Netlify `6af9a134186a8e5d83bb3cdf` is LIVE and `locked=true`** (read-only Netlify readback); independent public HTML read-only Actions #43712522543 SUCCESS for both languages, `23/23` production KPI HTTP PASS. Production [#43712415014](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43712415014) overall FAILURE only on its stricter post-deploy HTML assertion; investigate this remaining QA harness discrepancy separately. **Do not claim workflow PASS.**
+- **Independent open work:** full historical completeness, DST/active-alert semantics, casualty, WIP and backfill retain separate gates. `DST_CORRECTION=OFF`: three stale overlapping Neon physical parents coexist with eight exact accepted correct witnesses; no physical rows deleted. Draft [PR #182](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/182) offline exact-UID calculation selector #43712682104 PASS but NOT integrated, not 23-city physical proof, not publication. Keep automatic C2 intact.
 
 ## Concrete next tasks
 
-1. Check 1–2 further scheduled C2→Neon→Git cycles: 21/21 continuity, writer, 23/23 readback, Git publication, no unintended Netlify production deploy.
-2. Mark migration CLOSED after repeat-cycle stability; continue historical audit/DST/casualty separately.
+1. Check 1–2 **scheduled** post-pin C2→Neon→Git cycles: 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
+2. DST: independently rebind exact 3-old/8-witness v2 selection (draft PR #182) to actual pinned reader and same-run 23-city read-only proof, then separately authorize production correction. No direct SQL edits, no premature switch.
+3. UI: preserve bilingual live+locked Netlify; reconcile remaining standard post-deploy HTML QA harness failure before the next frontend release. No extra UI deploy just for documentation.
+4. Mark C6 stabilization CLOSED only after repeat-cycle proof; keep casualty/backfill separate.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## C6-DST-READER-PIN-MERGED-2026-11-15-01 — exact code compatibility accepted (2026-11-15)
+## UI-BILINGUAL-LIVE-LOCKED-2026-11-15-01 — physically published, independent public HTTP proof PASS, workflow post-smoke FAIL
 
-- Failed C2 #43655729191/#43686460909: `BUILDER_CODE_DRIFT:apply_ukrainealarm_bridge.py` after approved UTC DST source fix `66a5120a`. [PR #167](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/167) merged `main@47efa3a8`; exact-head offline [#43692555311](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43692555311) PASS, unknown blob still rejected. Scheduled C2→Neon→six JSON→Git publication **PENDING**. No Netlify deploy or manual C2.
+- Owner-approved bilingual UI at `site-prod@901dab2f`. Netlify production `6af9a134186a8e5d83bb3cdf` published and read back `locked=true`; independent read-only [HTTP Actions #43712522543](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43712522543) PASS for `/`, `/en/`, exact HTML except Netlify-injected RUM and locale metadata. Production [#43712415014](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43712415014) 23-city static historical KPI and published assets PASS, **overall FAILURE at remaining stricter HTML post-smoke**; do not report production workflow green. Neon/Git data unchanged by Netlify.
+- One-shot C2→Neon→Git [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819) SUCCESS, `site-prod@048af474`; temporary trigger removed, scheduled stabilization pending. Historical DST source UTC code PR #161/#167 merged, but physical three old parents still present; `DST_CORRECTION=OFF`. Draft PR #182 offline guarded projection only. No physical correction or scheduled activation claimed.
 
 <!-- coordination:history:end -->
 
