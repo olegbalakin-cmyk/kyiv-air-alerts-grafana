@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-owner-rss-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -374,5 +374,39 @@ jobs:
         with:
           name: casualty-workab-workac-workad-offline
           path: /tmp/workab/
+          if-no-files-found: warn
+          retention-days: 30
+
+
+  casualty_workae_owner_one_shot:
+    # Exactly one authorized push: base before==last offline proof; reruns do not GET.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-workae-owner-rss-2026-11-15' && github.run_attempt == 1 && github.event.before == '53c48f0b6b3ed515df34eb13c01a0872d9e65d32'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact owner-authorized ancestry and test without source HTTP
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = '53c48f0b6b3ed515df34eb13c01a0872d9e65d32'
+          python research/casualty_workae_direct_rss_2026_11_15/owner_go_one_shot.py --selftest
+      - name: ONE authorized RSS GET per URL; fail closed
+        run: |
+          set -euo pipefail
+          python -u research/casualty_workae_direct_rss_2026_11_15/owner_go_one_shot.py --run
+      - name: Upload bounded RSS metadata and checksums, including safe failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workae-owner-six-rss-once
+          path: /tmp/workae-one-shot/
           if-no-files-found: warn
           retention-days: 30
