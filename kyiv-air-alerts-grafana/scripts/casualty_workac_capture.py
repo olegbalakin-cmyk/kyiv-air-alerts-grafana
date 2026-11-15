@@ -380,7 +380,7 @@ def capture_cycle(queue: list[dict], state: dict, index: dict, now: datetime,
             record.update(status="CAPTURED", reason=None,
                           capture_at=timestamp(now),
                           response_sha256=card["response_sha256"],
-                          next_check_at=timestamp(now + timedelta(hours=24)))
+                          next_check_at=timestamp(now + timedelta(hours=4)))
             stats["article_success"] += 1
         except (CaptureBlocked, OSError, TimeoutError, ValueError,
                 ssl.SSLError, UnicodeError) as exc:
