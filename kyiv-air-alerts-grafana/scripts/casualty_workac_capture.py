@@ -235,47 +235,121 @@ def _decode_limited(raw: bytes, encoding: str) -> bytes:
 
 
 class ArticleText(HTMLParser):
-    """Work J _TextExtractor: prefer article/main and ignore page chrome."""
+    """Read the publisher's article element or explicit body container only.
+
+    No reader-mode network calls, JavaScript, proxy or external dependencies.
+    A page shell with no article body must NOT become numeric death evidence.
+    """
     OMIT = {"script", "style", "nav", "footer", "aside", "form",
-            "noscript", "template", "iframe", "svg"}
+            "noscript", "template", "iframe", "svg", "header"}
+    VOID = {"meta", "link", "img", "input", "br", "hr", "source", "wbr"}
+    CONTENT_HINT = re.compile(
+        r"(?:article[-_ ]?(?:body|content|text)|post[-_ ]?(?:body|content|text)|"
+        r"story[-_ ]?(?:body|content|text)|entry[-_ ]?content|"
+        r"news[-_ ]?(?:body|content|text)|articlebody|article__body|"
+        r"post_text|content[-_ ]?article|text[-_ ]?article)", re.I)
+    CHROME_HINT = re.compile(
+        r"(?:^|[-_ ])(?:related|recommend|advert|banner|social|share|"
+        r"subscribe|breadcrumb|read[-_ ]?more|most[-_ ]?read|"
+        r"sidebar|comments|cookie|newsletter|promotion|widget|tags)"
+        r"(?:$|[-_ ])", re.I)
+
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.parts, self.article, self.main = [], [], []
-        self.skip_depth = self.in_article = self.in_main = self.title_depth = 0
+        self.parts, self.article, self.main, self.content = [], [], [], []
+        self.h1_parts, self.title_parts = [], []
+        self.frames = []
+        self.metadata = {}
+        self.language = None
+
+    def _attributes(self, tag, attrs):
+        d = {str(k).lower(): v for k, v in attrs if k}
+        if tag == "html" and d.get("lang"):
+            self.language = str(d["lang"]).split("-")[0].lower()
+        if tag == "meta":
+            key = (d.get("property") or d.get("name") or d.get("itemprop") or "").lower()
+            if key in {"article:published_time", "datepublished", "pubdate",
+                       "date", "og:title", "twitter:title"} and d.get("content"):
+                self.metadata.setdefault(key, str(d["content"]))
+        if tag == "time" and d.get("datetime"):
+            self.metadata.setdefault("time.datetime", str(d["datetime"]))
 
     def handle_starttag(self, tag, attrs):
-        if tag in self.OMIT:
-            self.skip_depth += 1
-        if tag == "article":
-            self.in_article += 1
-        if tag == "main":
-            self.in_main += 1
-        if tag == "title":
-            self.title_depth += 1
+        tag = tag.lower()
+        self._attributes(tag, attrs)
+        if tag in self.VOID:
+            return
+        d = {str(k).lower(): v for k, v in attrs if k}
+        attrs_hint = " ".join(str(d.get(k) or "") for k in
+                              ("class", "id", "itemprop", "role"))
+        prev = self.frames[-1] if self.frames else None
+        skip = bool((prev and prev[1]) or tag in self.OMIT or
+                    self.CHROME_HINT.search(attrs_hint))
+        article = bool((prev and prev[2]) or tag == "article")
+        main = bool((prev and prev[3]) or tag == "main" or d.get("role") == "main")
+        body = bool((prev and prev[4]) or
+                    (tag in {"div", "section", "article"} and
+                     (d.get("itemprop", "").lower() == "articlebody" or
+                      self.CONTENT_HINT.search(attrs_hint))))
+        title = bool((prev and prev[5]) or tag == "title")
+        h1 = bool((prev and prev[6]) or tag == "h1")
+        self.frames.append((tag, skip, article, main, body, title, h1))
+
+    def handle_startendtag(self, tag, attrs):
+        self._attributes(tag.lower(), attrs)
 
     def handle_endtag(self, tag):
-        if tag in self.OMIT:
-            self.skip_depth = max(0, self.skip_depth - 1)
-        if tag == "article":
-            self.in_article = max(0, self.in_article - 1)
-        if tag == "main":
-            self.in_main = max(0, self.in_main - 1)
-        if tag == "title":
-            self.title_depth = max(0, self.title_depth - 1)
+        tag = tag.lower()
+        for i in range(len(self.frames) - 1, -1, -1):
+            if self.frames[i][0] == tag:
+                del self.frames[i:]
+                return
 
     def handle_data(self, data):
         s = " ".join(data.split())
-        if s and not self.skip_depth:
-            self.parts.append(s)
-            if self.in_article:
-                self.article.append(s)
-            if self.in_main:
-                self.main.append(s)
+        if not s:
+            return
+        frame = self.frames[-1] if self.frames else None
+        if not frame or frame[1]:
+            return
+        if frame[5]:
+            self.title_parts.append(s)
+            return
+        if frame[6]:
+            self.h1_parts.append(s)
+        self.parts.append(s)
+        if frame[2]:
+            self.article.append(s)
+        if frame[3]:
+            self.main.append(s)
+        if frame[4]:
+            self.content.append(s)
+
+    def title(self):
+        return (self.metadata.get("og:title") or
+                " ".join(self.h1_parts) or
+                self.metadata.get("twitter:title") or
+                " ".join(self.title_parts)).strip()[:300]
+
+    def publication_time(self):
+        return next((self.metadata[key] for key in
+                     ("article:published_time", "datepublished",
+                      "pubdate", "time.datetime", "date")
+                     if self.metadata.get(key)), None)
 
     def body(self):
+        # Do not fall back to all page text: navigation, RSS teasers and
+        # recommended stories could otherwise be misreported as article facts.
         article = " ".join(self.article)
+        content = " ".join(self.content)
         main = " ".join(self.main)
-        return article if (article and (len(article) >= 180 or not main)) else (main or " ".join(self.parts))
+        if len(content) >= 120:
+            return content
+        if len(article) >= 120:
+            return article
+        if len(main) >= 180:
+            return main
+        return ""
 
 
 def resolve_original_url(candidate: dict) -> tuple[str, str]:
@@ -337,7 +411,7 @@ def _make_fact(candidate: dict, raw: bytes, encoding: str, now: datetime,
     parser.feed(page.decode("utf-8", "replace"))
     text = parser.body()
     if len(text) < 180 or re.search(r"captcha|access denied|enable javascript|sign in to read", text, re.I):
-        raise CaptureBlocked("CONTENT_INACCESSIBLE_OR_NOT_ARTICLE")
+        raise CaptureBlocked("ARTICLE_BODY_UNAVAILABLE")
     if resolved_url is None:
         resolved_url, resolution_method = resolve_original_url(candidate)
     low = text.casefold()
@@ -351,7 +425,8 @@ def _make_fact(candidate: dict, raw: bytes, encoding: str, now: datetime,
     multi_attack = len(fatal_scopes) > 1 or (len(scopes) > 1 and attack_scopes > 1)
     daily_aggregate = bool(re.search(
         r"\b(?:за|протягом)\s+доб[иу]\b|"
-        r"\b(?:унаслідок|після)\s+кількох\s+(?:атак|ударів|обстрілів)\b", low))
+        r"\b(?:унаслідок|після)\s+кількох\s+(?:атак|ударів|обстрілів)\b|"
+        r"\b(?:у|в)\s+(?:двох|трьох|\d+)\s+(?:атаках|ударах|обстрілах)\b", low))
     scope = fatal_scopes[0] if len(fatal_scopes) == 1 and not multi_attack else ""
     total = workj._fatal_total(scope) if scope and not daily_aggregate else None
     kind = "cumulative" if total is not None else "unknown"
@@ -365,6 +440,16 @@ def _make_fact(candidate: dict, raw: bytes, encoding: str, now: datetime,
     attack_date = _attack_date_directly_stated(scope, candidate.get("published_at")) if scope else None
     origin_id, origin_name = workj._origin_attribution(scope) if scope else ("unattributed", None)
     clues = context.retain_incident_review_clues(text)
+    parsed_publication = parse_time(parser.publication_time())
+    publication_date = (timestamp(parsed_publication) if parsed_publication
+                        else candidate.get("published_at"))
+    publication_origin = ("article_html_metadata" if parsed_publication
+                          else "candidate_unverified" if publication_date
+                          else "unknown")
+    city = candidate.get("city_key")
+    city_pattern = workj.CITY_FORMS.get(city)
+    geographic_status = ("CITY_MENTION_NOT_VERIFIED" if city_pattern and
+                         re.search(city_pattern, low) else "UNKNOWN")
     excerpts = []
     for mention in clues.get("evidence_mentions", []):
         quote = mention.get("excerpt")
@@ -403,8 +488,12 @@ def _make_fact(candidate: dict, raw: bytes, encoding: str, now: datetime,
         "source_url": allowed_article_url(resolved_url),
         "source_url_resolution_method": resolution_method,
         "feed_original_url": candidate.get("url"),
-        "publication_date": candidate.get("published_at"),
-        "publication_date_origin": "google_news_rss_not_article_confirmed",
+        "publication_date": publication_date,
+        "publication_date_origin": publication_origin,
+        "article_title_sha256": (hashlib.sha256(parser.title().encode("utf-8")).hexdigest()
+                                 if parser.title() else None),
+        "article_language_claimed": parser.language,
+        "geographic_status": geographic_status,
         "source_capture_time_utc": timestamp(now),
         "attack_date_explicit": attack_date,
         "attack_slot_hint_not_identity": workj._attack_slot(scope) if scope else None,
@@ -423,6 +512,51 @@ def _make_fact(candidate: dict, raw: bytes, encoding: str, now: datetime,
         "decision": "NEEDS_REVIEW", "reasons": sorted(set(reasons)),
         "publication_allowed": False,
     }
+
+
+def analyze_direct_article(url: str, *, offline_html: bytes | None = None,
+                           owner_go=None, fetch=None, previous=None,
+                           now: datetime | None = None,
+                           published_at: str | None = None,
+                           city_key: str | None = None,
+                           candidate_id: str | None = None) -> dict:
+    """Article-first interface, reusing Work AC/J/AA/X without a new pipeline.
+
+    Offline bytes are accepted only without a network callback or GO. Live
+    access requires a previously atomically *claimed* single-use owner GO;
+    an unguarded call is rejected before HTTP. Never publishes casualties.
+    """
+    url = allowed_article_url(url)
+    network_attempts = 0
+    if offline_html is not None:
+        if owner_go is not None or fetch is not None or not isinstance(offline_html, bytes):
+            raise CaptureBlocked("INVALID_OFFLINE_ARTICLE_INPUT")
+        raw, content_type, status, encoding = offline_html, "text/html", 200, "identity"
+    else:
+        import casualty_go_guard
+        if not isinstance(owner_go, casualty_go_guard.ClaimedGo):
+            raise CaptureBlocked("OWNER_GO_REQUIRED_BEFORE_NETWORK")
+        owner_go.authorize_get("article", url)
+        network_attempts = 1
+        raw, content_type, status, encoding = (fetch or get_html)(url)
+    if status != 200 or not re.match(
+            r"^(?:text/html|application/xhtml\+xml)(?:\s*;|$)", content_type, re.I):
+        raise CaptureBlocked("ARTICLE_RESPONSE_UNUSABLE")
+    stamp = now or datetime.now(UTC)
+    candidate = {"candidate_id": candidate_id or "article-" +
+                 hashlib.sha256(url.encode("utf-8")).hexdigest()[:20],
+                 "city_key": city_key, "url": url, "published_at": published_at}
+    fact = _make_fact(candidate, raw, encoding, stamp,
+                      resolved_url=url, resolution_method="article_direct_url")
+    result = evidence.build_review_index(
+        {"facts": [fact], "automatic_credits": 0, "publication_allowed": False},
+        queue=[candidate], previous=previous or [], include_unretained=False)
+    card = result["cards"][0]
+    if card["incident_id"] is not None or card["automatic_credits"] or card["publication_allowed"]:
+        raise CaptureBlocked("UNSAFE_INDEX_FROM_ARTICLE")
+    return {"source_fact": fact, "card": card,
+            "network_attempts": network_attempts,
+            "PROMOTE": "OFF", "publication_allowed": False}
 
 
 def capture_cycle(queue: list[dict], state: dict, index: dict, now: datetime,
