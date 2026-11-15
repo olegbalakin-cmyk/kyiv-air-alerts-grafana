@@ -3018,11 +3018,15 @@ function renderCity() {
       ? " ("+factualRow.days_observed+" calendar days)" : "";
     intensitySubtitle.textContent=completion
       ? tr("Факт — незмінні стовпчик і зелена лінія за вихідним рядом до "+factUntilText+
-           actualNoteUk+". Біла риска і порожній ромб — прогнози середнього за повний період, "+
-           "обчислені за даними до "+forecastAsOfUk+". Це різні зрізи, не додавати їх один до одного.",
+           actualNoteUk+". Штрихована ділянка того самого стовпчика показує різницю до прогнозу "+
+           "середнього за повний період: усередині стовпчика, якщо прогноз нижчий, або над ним, якщо вищий. "+
+           "Порожній зелений ромб — прогноз тривог/день за даними до "+forecastAsOfUk+
+           ". Штрихування не додається до факту.",
            "Actual: unchanged bar and green line from the original series through "+factUntilText+
-           actualNoteEn+". White tick and hollow diamond: full-period average forecasts based on data through "+
-           forecastAsOfEn+". These are different cutoffs, not additive.")
+           actualNoteEn+". The hatched region of the same bar shows the difference to the estimated "+
+           "full-period average: inside the bar when lower, above it when higher. "+
+           "The hollow green diamond forecasts alerts/day using data through "+
+           forecastAsOfEn+". Hatching is not additive.")
       : tr("Факт за вихідним рядом до "+factUntilText+actualNoteUk+
            ". Тренд не змінює фактичні дані.",
            "Actual from the original series through "+factUntilText+actualNoteEn+
@@ -3060,12 +3064,24 @@ function renderCity() {
           },
           callbacks: {
             label(context) {
-              if (completion && context.dataIndex===rows.length-1 &&
-                  context.dataset._isCompletion) {
-                if (context.dataset.yAxisID==="yHours")
+              if (completion && context.dataIndex===rows.length-1) {
+                if(context.datasetIndex===0){
+                  const actual=context.parsed.y,forecast=completion.expectedHours/completion.days;
+                  const delta=Math.abs(forecast-actual);
+                  const relation=forecast<actual
+                    ? tr("Прогноз нижчий за факт на ","Forecast below actual by ")
+                    : forecast>actual
+                    ? tr("Прогноз вищий за факт на ","Forecast above actual by ")
+                    : tr("Прогноз дорівнює факту: ","Forecast equals actual: ");
+                  return [
+                    `${context.dataset.label}: ${formatDurationHours(actual)}`,
+                    tr("Прогноз середнього за повний період: ","Forecast full-period daily mean: ")+
+                      formatDurationHours(forecast),
+                    relation+formatDurationHours(delta)
+                  ];
+                }
+                if(context.dataset._isCompletion)
                   return tr("Прогноз повного періоду: ","Full-period forecast: ")+
-                    formatDurationHours(context.parsed.y)+tr("/добу","/day");
-                return tr("Прогноз повного періоду: ","Full-period forecast: ")+
                     fmt(context.parsed.y,2)+tr(" тривог/день"," alerts/day");
               }
               if(context.dataset.yAxisID==="yHours")
