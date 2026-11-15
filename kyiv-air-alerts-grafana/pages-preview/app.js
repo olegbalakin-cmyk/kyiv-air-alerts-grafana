@@ -2917,16 +2917,19 @@ function renderCity() {
 
   if (completion) {
     const i=rows.length-1;
-    // Both parts use the full-calendar denominator; no future day is labelled actual.
-    intensityDatasets[0].data[i]=completion.actualHours/completion.days;
-    intensityDatasets[1].data[i]=completion.actualAlerts/completion.days;
+    // Fact and forecast use different denominators. Fact is the observed
+    // per-day rate (completed days plus any source-certified partial day);
+    // forecast is the expected per-day rate for the FULL calendar period.
+    // Show them side by side, never stacked or as forecast "remainder".
+    intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;
+    intensityDatasets[1].data[i]=completion.periodRow.alerts_per_day;
     intensityDatasets[0].backgroundColor[i]=COLORS[0]+"99";
     intensityDatasets[0].borderWidth[i]=0;
-    intensityDatasets[0].stack="completion";
+    intensityDatasets[0].skipNull=true;
     intensityDatasets.push({
-      type:"bar",_isCompletion:true,stack:"completion",
-      label:tr("Оцінка решти · години / добу","Estimated remainder · hours/day"),
-      data:rows.map((_,j)=>j===i?completion.remainingHours/completion.days:null),
+      type:"bar",_isCompletion:true,skipNull:true,
+      label:tr("Оцінка підсумку · годин / добу","Estimated full-period average · hours/day"),
+      data:rows.map((_,j)=>j===i?completion.expectedHours/completion.days:null),
       yAxisID:"yHours",backgroundColor:"#a7d7fa44",borderColor:"#c5e1fa",
       borderWidth:0,_exportRows:rows
     });
@@ -2975,10 +2978,23 @@ function renderCity() {
   }
 
   if (intensitySubtitle && completion) {
-    intensitySubtitle.textContent += " " + tr(
-      "Штрихована частина — оцінка лише ще не спостережених годин за часткою часу під тривогою в попередні 28 завершених днів. Чим менше часу залишається, тим менший можливий додатковий час під тривогою. Це не попередження про атаки. Дані станом на "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+".",
-      "The hatched part estimates only remaining unobserved hours using the alert-time share of the last 28 complete verified days. Less time left means less possible additional alert time. This is not a warning of attacks. Data as of "+(completion.asOfIsIntraday ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf)) : completion.through)+"."
-    );
+    const observedDaysText=completion.asOfIsIntraday
+      ? fmt(completion.observedDaysEquivalent,1) : String(completion.observed);
+    const asOfUk=completion.asOfIsIntraday
+      ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf))
+      : completion.through;
+    const asOfEn=completion.asOfIsIntraday
+      ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf))
+      : completion.through;
+    intensitySubtitle.textContent=period==="daily28"
+      ? tr(
+          "Суцільний стовпчик і зелена лінія — факт за спостережену частину сьогоднішнього дня. Штрихований стовпчик і зелена точка — оцінка підсумку за весь день. Це не попередження про атаки. Дані станом на "+asOfUk+".",
+          "The solid bar and green line show the observed part of today. The hatched bar and green point estimate the full-day total. This is not an attack warning. Data as of "+asOfEn+"."
+        )
+      : tr(
+          "Суцільний стовпчик і зелена лінія — фактична середня за "+observedDaysText+" спостережених днів. Штрихований стовпчик і зелена точка — оцінка середньої за всі "+completion.days+" днів періоду (факт плюс прогноз решти). Показники не додаються один до одного. Для оцінки решти використано частку часу під тривогою за попередні 28 завершених днів. Це не попередження про атаки. Дані станом на "+asOfUk+".",
+          "The solid bar and green line show the observed daily average across "+observedDaysText+" observed day equivalents. The hatched bar and green point estimate the full "+completion.days+"-day period average (observations plus forecast remainder). The two averages are not additive. The remaining-hours estimate uses alert-time occupancy in the last 28 complete days. This is not an attack warning. Data as of "+asOfEn+"."
+        );
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
@@ -3036,7 +3052,7 @@ function renderCity() {
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
         yHours: {
-          stacked:Boolean(completion),
+          stacked:false,
           position: "left",
           beginAtZero: true,
           ticks: { color: TEXT, callback: value => formatDurationHours(value) },
