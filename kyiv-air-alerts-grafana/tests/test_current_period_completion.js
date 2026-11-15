@@ -127,10 +127,46 @@ assert.equal(F.estimateToday({...history,end:"2026-11-12"},"2026-11-14",partialT
 assert.equal(F.estimateToday({...history,verified_metric_months:[],verified_metric_days:[]},"2026-11-14",partialToday,"2026-11-14T21:02:00+02:00"),null,
  "requires verified 28-day baseline");
 
+// Regression: current source as-of Sunday 15 Nov 18:09 Kyiv,
+ // user visits Monday 16 Nov 00:05 Kyiv. Same month/quarter, different week.
+ // A certified fresh partial day may anchor MONTH/Q4 prediction to the
+ // source's 15 Nov cutoff, but never invent Monday observations/weekly stats.
+const rolloverIndex={...history,end:"2026-11-14",
+ counts:[...history.counts,2],
+ daily_total_alert_duration_seconds:[...history.daily_total_alert_duration_seconds,7200],
+ verified_metric_months:[...new Set([...history.verified_metric_months,"2026-11"])]};
+const rolloverPartial={date:"2026-11-15",is_partial_period:true,
+ partial_through:"2026-11-15T18:09:00+02:00",
+ total_alert_duration_hours:0,alerts_started:0};
+const midnightNow="2026-11-16T00:05:00+02:00";
+assert(F.estimate(rolloverIndex,"quarterly","2026-11-15",rolloverPartial,midnightNow),
+ "Q4 forecast stays available after midnight using fresh certified Nov15 snapshot");
+assert(F.estimate(rolloverIndex,"monthly","2026-11-15",rolloverPartial,midnightNow),
+ "November forecast stays available after midnight using recent certified cutoff");
+assert.equal(F.estimate(rolloverIndex,"quarterly","2026-11-16",rolloverPartial,midnightNow),null,
+ "no silent claim of observed Monday Nov16");
+assert.notEqual(F.bounds("2026-11-15","calendarWeekly").start,
+ F.bounds("2026-11-16","calendarWeekly").start,
+ "new Monday week must not inherit old Sunday week forecast");
+assert.equal(F.estimate(rolloverIndex,"quarterly","2026-11-15",rolloverPartial,
+ "2026-11-16T03:00:00+02:00"),null,
+ "source older than 8 hours must disable prediction");
+assert(app.includes('sourceDayCanAnchor=period!=="daily28"'),
+ "cross-midnight source anchoring restricted to supported period modes");
+assert(app.includes('currentBounds.start===sourceBounds.start'),
+ "stale source snapshot cannot cross period boundary");
+assert(app.includes('trendControl.classList.remove("hidden")'),
+ "trend checkbox stays visible even if source projection unavailable");
+assert(app.includes('trendToggle.disabled=!completionPotential'),
+ "unavailable forecast is disabled, never faked");
+assert(app.includes('if(!completionPotential)trendToggle.checked=false'),
+ "stale selected trend must clear when projection is unavailable");
+assert(app.includes('intensitySubtitle.textContent+=" "+trendReason'),
+ "unavailable state is explained in the UI");
 assert(app.includes('window.PeriodCompletionPreview?.estimate('));
 assert(app.includes('const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"]'));
 assert(app.includes("window.PeriodCompletionPreview?.estimateToday("),"daily chart uses verified current day");
-assert(app.includes('trendControl.classList.toggle("hidden", !completionPotential)'),"trend only if original factual period matches the certified forecast");
+assert(app.includes('trendToggle.disabled=!completionPotential'),"trend disabled unless the original factual period has a certified forecast");
 assert(!app.includes("QuarterRollingPreview?.rollingForecast("),"no rolling next-period forecast invocation");
 assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period forecast invocation");
 assert(!app.includes("projectedRows"),"no additional future bar");
@@ -197,8 +233,8 @@ assert(app.includes('ctx.fillStyle=expected>actual?'),
 assert(!app.includes('pointStyle:"line",pointRadius:13'),
   "old detached white tick has been replaced by in-bar hatching");
 assert(app.includes('pointStyle:"rectRot"'),"alert forecast is a separate diamond");
-assert(app.includes('trendControl.classList.toggle("hidden", !completionPotential)'),
-  "trend hidden if the original factual period has no matching source period");
+assert(app.includes('trendControl.classList.remove("hidden")'),
+  "trend always visible, including unsupported or fresh-data-unavailable modes");
 assert(app.includes('Штрихування не додається до факту.'),
   "Ukrainian explanation must distinguish fact/forecast cutoffs");
 assert(app.includes('Hatching is not additive.'),
