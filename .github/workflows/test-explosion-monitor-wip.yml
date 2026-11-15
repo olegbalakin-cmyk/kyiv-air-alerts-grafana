@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15, research-casualty-workaf-filter-allowlist-go-offline-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15, research-casualty-workaf-filter-allowlist-go-offline-2026-11-15, research-casualty-workag-article-first-offline-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -23,6 +23,7 @@ on:
       - "kyiv-air-alerts-grafana/scripts/casualty_workj_rules.py"
       - "kyiv-air-alerts-grafana/scripts/casualty_go_guard.py"
       - "research/casualty_workaf_2026_11_15/**"
+      - "research/casualty_workag_2026_11_15/**"
   workflow_dispatch:
 
 permissions:
@@ -497,5 +498,35 @@ jobs:
             /tmp/workaf/offline_proof.json
             /tmp/workaf/github_atomic_proof.json
             /tmp/workaf/sha256_manifest.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  casualty_workag_offline:
+    if: github.ref == 'refs/heads/research-casualty-workag-article-first-offline-2026-11-15'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install inherited Python test requirements
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Physical article-first offline test (no source HTTP)
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s research/casualty_workag_2026_11_15 -p 'test_workag.py' -v
+          python research/casualty_workag_2026_11_15/offline_proof.py
+          git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
+      - name: Upload Work AG proof only (no HTML)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workag-article-first-offline
+          path: /tmp/workag/
           if-no-files-found: warn
           retention-days: 30
