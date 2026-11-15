@@ -1,9 +1,13 @@
 # Changelog
 
 <!-- coordination:history:start -->
-### CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 — real RSS proof, no casualty publication (2026-11-15)
+### CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 — aggregated owner GO exceeded (2026-11-15)
 
-- [Work AE PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, offline CI #43699168963 40/40 PASS; isolated owner-GO commit `1ee89a1180425c09f669d1f4abb6cf68fb4fd569`, [Actions #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) SUCCESS, [artifact #14156048863](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130/artifacts/14156048863), uploader ZIP SHA256 `95898566c9dba46bf83a5f2c8711698078d9c3a4b5f55737f61306261423e41f` (not independently rehashed). 6 GET: Ukrinform 30/0, Radio Svoboda 20/3, Pravda 20/1, Interfax 25/0, Hromadske Radio 20/2 HTTP200; Espreso 403 (items/keyword candidates). 115 direct publisher-site HTTPS URLs; no article GET, retries, redirects or credits. Google News incremental coverage unknown. No WIP/prod changes.
+- [Run A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) `1f5b8f9e64b3583f56c8f5cba84977c7eacd2241`, PR #172 `a9e1eca573429e03a326c2f8189ccd6f5216a13a`, artifact #14156356307 ZIP SHA256 `28ad8b5cc105c81d87d15d04912af1285bf4c1bd62e52cacbfb6d4226770041d` (independent rehash reported in PR); [Run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) `1ee89a11`, artifact #14156048863 (SHA in prior entry). Each ran 6 RSS GET with same one-time six-GET owner GO: **12 vs 6 approved**, cross-worker coordination failure. Both 5/6 HTTP200, 115 RSS entries with publisher URL, Espreso 403. Run A Work AD city+topic 1 Odesa vs Run B broader keywords 6; not equivalent accuracy. Only 30/115 links pass Work AC article-host allowlist. 0 article GET, credits, WIP/prod writes. Require new GO plus globally single-use grant gate; live shadow BLOCKED.
+
+### CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 — one of two RSS runs (2026-11-15)
+
+- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, offline #43699168963 40/40 PASS. [Run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) `1ee89a11`, artifact #14156048863 uploader ZIP SHA256 `95898566c9dba46bf83a5f2c8711698078d9c3a4b5f55737f61306261423e41f` (no independent rehash). Six GET, 5 RSS200/115 links, 6 broad keyword candidates, Espreso 403; no article GET/credits. Separate earlier Run A noted above.
 
 ### CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 — technical PASS / readiness PARTIAL (2026-11-15)
 
@@ -69,9 +73,9 @@
 
 - [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) `5e5628a8`, CI #43510162714, 3 HTTP200; ZIP #14076819100 SHA256 `dc7d1ba10d66e6b3e39f7f3a85fffbb7522e8930390117b139185e5eb6627da6`, independent/4 inner PASS. Original parser insufficient; T03–T05 NEEDS_REVIEW, 0 credits. Grant spent.
 
-### CASUALTY-WORKN-LAUNCH-STATE-FIX-OFFLINE-PASS-01 — Work N offline PASS and safety fix on independent branch (2026-11-13)
+### CASUALTY-WORKN-LAUNCH-STATE-FIX-OFFLINE-PASS-01 (2026-11-13)
 
-- [PR #127](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/127) `4ae85477`, [Actions #43507349125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43507349125) 68/68 PASS, both artifact ZIP hashes independently checked. Live test/launch file contradiction fixed in [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) `236d3d3a`, [CI #43508802671](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43508802671) 2/2 PASS incl 68/68 synthetic launch-present, ZIP #14076498074 SHA256 `2eb23ffc7fab82ee660f765becd147ca65609a24a1fc36f01a3b73d0ff3d5d84` checked. GET=0; new SHA-specific owner grant needed. No PROMOTE/production.
+- [PR #127](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/127) `4ae85477`, [CI #43507349125](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43507349125) 68/68 PASS. Launch guard fixed in [PR #128](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/128) `236d3d3a`, [CI #43508802671](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43508802671) 2/2 PASS, ZIP #14076498074 SHA256 `2eb23ffc7fab82ee660f765becd147ca65609a24a1fc36f01a3b73d0ff3d5d84` checked. 0 GET, no PROMOTE/production.
 
 ### CASUALTY-WORKM-PREHTTP-CI-FIX-OFFLINE-PASS-01 — Work M exact live-fixture pre-HTTP offline PASS (2026-11-13)
 
