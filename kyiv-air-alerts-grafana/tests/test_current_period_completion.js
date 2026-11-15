@@ -136,6 +136,37 @@ assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period
 assert(!app.includes("projectedRows"),"no additional future bar");
 assert(!app.includes("_isForecast: true"),"no future-period dataset");
 assert(!app.includes("forecastIndices"),"no extra forecast axis labels");
+// The observed and full-period rates must never share the full-period divisor.
+// Otherwise 45 observed days in Q4 falsely display about half the real daily rate.
+const q4Index={...history,end:"2026-11-13"};
+const q4=F.estimate(q4Index,"quarterly","2026-11-14");
+assert(q4&&q4.days===92&&q4.observed===44);
+assert.equal(q4.actualHours,88);
+assert.equal(q4.actualAlerts,88);
+assert.equal(q4.periodRow.avg_daily_alert_hours,2);
+assert.equal(q4.periodRow.alerts_per_day,2);
+assert(q4.actualHours/q4.days<1,"old wrong 92-day fact divisor dilutes actual");
+assert.equal(q4.expectedHours/q4.days,2,"full-period forecast uses 92 days");
+assert.equal(q4.expectedAlerts/q4.days,2);
+assert(app.includes("intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;"),
+  "observed bar must use observed-day mean");
+assert(app.includes("intensityDatasets[1].data[i]=completion.periodRow.alerts_per_day;"),
+  "observed alerts line must use observed-day mean");
+assert(app.includes("completion.expectedHours/completion.days"),
+  "forecast bar must use full calendar-period mean");
+assert(app.includes("completion.expectedAlerts/completion.days"),
+  "forecast alerts dot must use full calendar-period mean");
+assert(!app.includes("intensityDatasets[0].data[i]=completion.actualHours/completion.days"),
+  "cannot label observed sum divided by 92 days as current fact");
+assert(!app.includes("intensityDatasets[1].data[i]=completion.actualAlerts/completion.days"),
+  "cannot label observed count divided by 92 days as current fact");
+assert(!app.includes('stack="completion"'),
+  "observed daily average and forecast full-period average cannot stack");
+assert(app.includes('stacked:false'),"two distinct bars must not sum");
+assert(app.includes('фактична середня за '),"Ukrainian subtitle explains observed day basis");
+assert(app.includes('estimate the full '),"English subtitle explains full-period forecast basis");
+assert(app.includes('Показати тренд')||app.includes('showTrend'));
+
 assert(app.includes('if (completion) {'));
 assert(app.includes('periodCompletionHatchPlugin'));
 assert(app.includes('stacked:Boolean(completion)'));
