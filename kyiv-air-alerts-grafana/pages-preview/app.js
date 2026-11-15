@@ -2877,12 +2877,32 @@ function renderCity() {
   const calendarToday=kyivCalendarToday();
   const partialDay=city?.daily28?.at(-1);
   const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"].includes(period);
+  const completionModel=window.PeriodCompletionPreview;
+  const completedIndex=state.historicalDaily?.cities?.[key];
+  // Crossing Kyiv midnight must not make a still-current month/quarter
+  // disappear merely because the latest certified intraday observation is
+  // from yesterday. Anchor to that REAL source day for a dated snapshot
+  // forecast; the estimator independently enforces the eight-hour maximum
+  // source age, trustworthy offset-aware timestamp and full DST clock.
+  // Never back-project a completed prior calendar week as a current forecast.
+  const sourceDayAfterIndex=completedIndex?.end
+    ? completionModel?.add(completedIndex.end,1) : null;
+  const currentBounds=completionModel?.bounds(calendarToday,period);
+  const sourceBounds=sourceDayAfterIndex
+    ? completionModel?.bounds(sourceDayAfterIndex,period) : null;
+  const sourceDayCanAnchor=period!=="daily28" &&
+    sourceDayAfterIndex && sourceDayAfterIndex<calendarToday &&
+    partialDay?.date===sourceDayAfterIndex &&
+    typeof partialDay.partial_through==="string" &&
+    partialDay.partial_through.includes("T") &&
+    currentBounds && sourceBounds &&
+    currentBounds.start===sourceBounds.start &&
+    currentBounds.end===sourceBounds.end;
+  const forecastReferenceDay=sourceDayCanAnchor ? sourceDayAfterIndex : calendarToday;
   const completionCandidate = !completionPeriod ? null :
     period==="daily28"
-      ? window.PeriodCompletionPreview?.estimateToday(
-          state.historicalDaily?.cities?.[key],calendarToday,partialDay)
-      : window.PeriodCompletionPreview?.estimate(
-          state.historicalDaily?.cities?.[key],period,calendarToday,partialDay);
+      ? completionModel?.estimateToday(completedIndex,calendarToday,partialDay)
+      : completionModel?.estimate(completedIndex,period,forecastReferenceDay,partialDay);
   const completionVisible = completionCandidate &&
     (period==="daily28"
       ? rows.length===28 && rows.at(-1)?.date===calendarToday &&
@@ -2904,12 +2924,33 @@ function renderCity() {
      period==="quarterly" ? currentObservedRow.quarter===completionCandidate.key : false));
   const completionPotential=completionVisible && currentObservedPeriodMatches
     ? completionCandidate : null;
-  const completion=completionPotential && $("showTrend")?.checked ? completionPotential : null;
+  // Keep the control discoverable even when the strict source/period guard
+  // fails; disable it with an explicit reason rather than silently hiding it.
+  const trendToggle=$("showTrend");
+  const trendControl=trendToggle?.closest("label");
+  const trendReason=!completionPeriod
+    ? tr("Тренд доступний для днів, тижнів, місяців і кварталів.",
+         "Trend is available for days, weeks, months and quarters.")
+    : period==="daily28"
+    ? tr("Для прогнозу сьогодні потрібні підтверджені дані за вчора й точний час останнього оновлення сьогодні.",
+         "Today's forecast requires verified yesterday data and a current source timestamp.")
+    : period==="calendarWeekly"
+    ? tr("Для поточного тижня потрібно щонайменше два підтверджені завершені дні.",
+         "A current-week forecast requires at least two verified completed days.")
+    : tr("Поки немає достатньо свіжого підтвердженого зрізу для вибраного періоду.",
+         "No sufficiently recent verified snapshot exists for the selected period.");
+  if(trendControl){
+    trendControl.classList.remove("hidden");
+    trendControl.title=completionPotential?"":trendReason;
+  }
+  if(trendToggle){
+    trendToggle.disabled=!completionPotential;
+    trendToggle.setAttribute("aria-disabled",String(!completionPotential));
+    trendToggle.title=completionPotential?"":trendReason;
+    if(!completionPotential)trendToggle.checked=false;
+  }
+  const completion=completionPotential && trendToggle?.checked ? completionPotential : null;
   const labels = rows.map(r => periodDisplayLabel(r, period));
-  // Consistent meaning: estimate completion of the unfinished current day,
-  // week, month or quarter. Never extrapolate new rolling or future periods.
-  const trendControl = $("showTrend")?.closest("label");
-  if (trendControl) trendControl.classList.toggle("hidden", !completionPotential);
   const chartLabels = labels;
   const dashed = type === "raion_proxy";
 
@@ -2993,6 +3034,9 @@ function renderCity() {
         );
   }
 
+  if(intensitySubtitle && !completionPotential){
+    intensitySubtitle.textContent+=" "+trendReason;
+  }
   if (intensitySubtitle && completionPotential) {
     const factualRow=rows.at(-1);
     const factUntil=factualRow?.partial_through ||
