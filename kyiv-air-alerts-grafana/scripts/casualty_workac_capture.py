@@ -444,7 +444,7 @@ def capture_cycle(queue: list[dict], state: dict, index: dict, now: datetime,
     fetch = fetch or get_html
     seen_keys = set()
     for candidate in queue:
-        if not isinstance(candidate, dict) or candidate.get("source") != "Google News RSS":
+        if not isinstance(candidate, dict) or candidate.get("source") not in {"Google News RSS", "Direct RSS"}:
             continue
         cid = candidate.get("candidate_id")
         if not cid or cid in seen_keys:
