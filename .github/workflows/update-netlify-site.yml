@@ -51,7 +51,7 @@ permissions:
 
 jobs:
   update-site:
-    if: ${{ (github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true') || (vars.C6_AUTO_NEON_GIT_ENABLED != 'true' && (github.event_name != 'workflow_dispatch' || (!inputs.c6_neon_git_release && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_pilot)) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true') }}
+    if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true') || (vars.C6_AUTO_NEON_GIT_ENABLED != 'true' && (github.event_name != 'workflow_dispatch' || (!inputs.c6_neon_git_release && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_pilot)) && vars.C6_GIT_ONLY_PUBLISHER_PAUSED != 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -545,7 +545,7 @@ jobs:
           retention-days: 7
 
       - name: Require C2 same-run Neon bundle for scheduled or manual Git-only cycle
-        if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+        if: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
         shell: bash
         env:
           PILOT_INPUT: ${{ inputs.c6_neon_git_pilot }}
@@ -574,7 +574,7 @@ jobs:
           test -s "${RUNNER_TEMP}/c2-shadow-bundle/c2-shadow-inputs.zip.sha256"
 
       - name: Checkout exact same-run integration scripts (never push-enabled)
-        if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+        if: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
@@ -582,7 +582,7 @@ jobs:
           persist-credentials: false
 
       - name: Read-only redacted Git status before C6 capture
-        if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+        if: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
         continue-on-error: true
         working-directory: .
         shell: bash
@@ -592,7 +592,7 @@ jobs:
             --expected-head "${PHASE1_INPUT_SHA}"
 
       - name: Freeze same-run C2 checkpoint delta (no commit/push)
-        if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+        if: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
         working-directory: .
         shell: bash
         run: |
@@ -607,7 +607,7 @@ jobs:
             --output "${RUNNER_TEMP}/c2-neon-auto-delta"
 
       - name: Upload same-run C2 delta for one Git-only commit
-        if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+        if: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
         uses: actions/upload-artifact@v4
         with:
           name: c6-neon-auto-delta-${{ github.run_id }}-${{ github.run_attempt }}
@@ -839,7 +839,7 @@ jobs:
   # Scheduled four-hour Git-only update, enabled by ONE default-OFF variable.
   c6-neon-auto-git-publish:
     needs: [update-site, c6-neon-six-json-prepare]
-    if: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) && needs.update-site.result == 'success' && needs.c6-neon-six-json-prepare.result == 'success' }}
+    if: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) && needs.update-site.result == 'success' && needs.c6-neon-six-json-prepare.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -871,7 +871,7 @@ jobs:
       - name: One atomic site-prod Git commit, zero Netlify calls
         env:
           PYTHONPATH: integration
-          C6_AUTO_NEON_GIT_ENABLED: ${{ ((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
+          C6_AUTO_NEON_GIT_ENABLED: ${{ (((github.event_name == 'schedule' && vars.C6_AUTO_NEON_GIT_ENABLED == 'true') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'C6-OWNER-ONESHOT-2026-11-15-NEON-GIT-ONLY') && vars.C6_AUTO_NEON_GIT_ENABLED == 'true')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'olegbalakin-cmyk' && inputs.c6_neon_git_pilot && !inputs.c6_final_prepare_only && !inputs.c6_neon_git_release && vars.C6_GIT_ONLY_PUBLISHER_PAUSED == 'true' && vars.C6_AUTO_NEON_GIT_ENABLED != 'true')) }}
           NETLIFY_DEPLOYMENTS_PER_UPDATE: '0'
         run: |
           set -euo pipefail
