@@ -2917,19 +2917,23 @@ function renderCity() {
 
   if (completion) {
     const i=rows.length-1;
-    // Fact and forecast use different denominators. Fact is the observed
-    // per-day rate (completed days plus any source-certified partial day);
-    // forecast is the expected per-day rate for the FULL calendar period.
-    // Show them side by side, never stacked or as forecast "remainder".
-    intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;
-    intensityDatasets[1].data[i]=completion.periodRow.alerts_per_day;
+    // Accepted PR #151/#152 contract: one stacked bar, not two averages.
+    // Both components contribute to the same full-calendar-period mean:
+    // verified hours already observed + estimated hours not yet observed.
+    // The observed-only daily rate has a DIFFERENT denominator and belongs
+    // in the tooltip, not in this additive stacked bar.
+    intensityDatasets[0].data[i]=completion.actualHours/completion.days;
+    // For multi-day periods show only the hollow expected full-period count
+    // point: the observed contribution would look like an actual daily rate.
+    intensityDatasets[1].data[i]=period==="daily28"
+      ? completion.actualAlerts/completion.days : null;
     intensityDatasets[0].backgroundColor[i]=COLORS[0]+"99";
     intensityDatasets[0].borderWidth[i]=0;
-    intensityDatasets[0].skipNull=true;
+    intensityDatasets[0].stack="completion";
     intensityDatasets.push({
-      type:"bar",_isCompletion:true,skipNull:true,
-      label:tr("Оцінка підсумку · годин / добу","Estimated full-period average · hours/day"),
-      data:rows.map((_,j)=>j===i?completion.expectedHours/completion.days:null),
+      type:"bar",_isCompletion:true,stack:"completion",
+      label:tr("Оцінка решти · внесок у середню","Estimated remainder · average contribution"),
+      data:rows.map((_,j)=>j===i?completion.remainingHours/completion.days:null),
       yAxisID:"yHours",backgroundColor:"#a7d7fa44",borderColor:"#c5e1fa",
       borderWidth:0,_exportRows:rows
     });
@@ -2938,7 +2942,9 @@ function renderCity() {
       label:tr("Оцінка підсумку · тривоги / день","Estimated total · alerts/day"),
       data:rows.map((_,j)=>j===i?completion.expectedAlerts/completion.days:null),
       yAxisID:"yAlerts",borderColor:"#b8ffc5",borderDash:[5,4],
-      pointRadius:5,pointHoverRadius:6,showLine:false,spanGaps:false,
+      pointRadius:6,pointHoverRadius:7,pointBackgroundColor:"#101820",
+      pointBorderColor:"#b8ffc5",pointBorderWidth:2,
+      showLine:false,spanGaps:false,
       _exportRows:rows
     });
   }
@@ -2988,12 +2994,12 @@ function renderCity() {
       : completion.through;
     intensitySubtitle.textContent=period==="daily28"
       ? tr(
-          "Суцільний стовпчик і зелена лінія — факт за спостережену частину сьогоднішнього дня. Штрихований стовпчик і зелена точка — оцінка підсумку за весь день. Це не попередження про атаки. Дані станом на "+asOfUk+".",
-          "The solid bar and green line show the observed part of today. The hatched bar and green point estimate the full-day total. This is not an attack warning. Data as of "+asOfEn+"."
+          "Суцільна частина — зафіксовані години; штрихована — оцінка решти дня. Їх сума — прогноз підсумку дня. Це не попередження про атаки. Дані станом на "+asOfUk+".",
+          "Solid: hours observed; hatched: estimated rest of today. Their sum is the expected full-day total. Not an attack warning. Data as of "+asOfEn+"."
         )
       : tr(
-          "Суцільний стовпчик і зелена лінія — фактична середня за "+observedDaysText+" спостережених днів. Штрихований стовпчик і зелена точка — оцінка середньої за всі "+completion.days+" днів періоду (факт плюс прогноз решти). Показники не додаються один до одного. Для оцінки решти використано частку часу під тривогою за попередні 28 завершених днів. Це не попередження про атаки. Дані станом на "+asOfUk+".",
-          "The solid bar and green line show the observed daily average across "+observedDaysText+" observed day equivalents. The hatched bar and green point estimate the full "+completion.days+"-day period average (observations plus forecast remainder). The two averages are not additive. The remaining-hours estimate uses alert-time occupancy in the last 28 complete days. This is not an attack warning. Data as of "+asOfEn+"."
+          "Суцільна частина — внесок факту, штрихована — прогноз решти у середню за всі "+completion.days+" днів. Разом — прогноз підсумку періоду. Фактична середня за "+observedDaysText+" дня — у підказці. Зелена точка — прогноз тривог на день. Не є попередженням про атаки. Дані станом на "+asOfUk+".",
+          "Solid: observed contribution; hatched: estimated remainder in the "+completion.days+"-day average. Together they give the full-period estimate. The observed daily average for "+observedDaysText+" days is in the tooltip. The hollow green point forecasts alerts/day. Not an attack warning. Data as of "+asOfEn+"."
         );
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
@@ -3028,6 +3034,29 @@ function renderCity() {
           },
           callbacks: {
             label(context) {
+              if (completion && context.dataIndex===rows.length-1) {
+                const observedDays=completion.observedDaysEquivalent;
+                const observedDaysText=completion.asOfIsIntraday
+                  ? fmt(observedDays,1) : String(completion.observed);
+                if (!context.dataset._isCompletion && context.dataset.type==="bar" && period!=="daily28") {
+                  return [
+                    tr("Факт за "+observedDaysText+" дня: "+formatDurationHours(completion.actualHours/observedDays)+"/добу",
+                      "Observed "+observedDaysText+" days: "+formatDurationHours(completion.actualHours/observedDays)+"/day"),
+                    tr("Частка у середній за "+completion.days+" днів: "+formatDurationHours(context.parsed.y),
+                      "Contribution to "+completion.days+"-day average: "+formatDurationHours(context.parsed.y)),
+                    tr("Фактична частота: "+fmt(completion.actualAlerts/observedDays,2)+" тривог/день",
+                      "Observed frequency: "+fmt(completion.actualAlerts/observedDays,2)+" alerts/day")
+                  ];
+                }
+                if (context.dataset._isCompletion && context.dataset.type==="bar") {
+                  return tr("Прогноз решти (частка у середній): ","Estimated remainder (average contribution): ")+
+                    formatDurationHours(context.parsed.y);
+                }
+                if (context.dataset._isCompletion && context.dataset.type==="line") {
+                  return tr("Прогноз на весь період: ","Full-period forecast: ")+
+                    fmt(context.parsed.y,2)+tr(" тривог/день"," alerts/day");
+                }
+              }
               if (context.dataset.yAxisID === "yHours") {
                 return `${context.dataset.label}: ${formatDurationHours(context.parsed.y)}`;
               }
@@ -3036,8 +3065,10 @@ function renderCity() {
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
               if (completion && i===rows.length-1)
-                return tr("Факт: "+completion.observed+" з "+completion.days+" днів · оцінка до "+completion.end,
-                  "Observed: "+completion.observed+" of "+completion.days+" days · estimate through "+completion.end);
+                return tr("Спостережено: "+(completion.asOfIsIntraday?fmt(completion.observedDaysEquivalent,1):completion.observed)+
+                    " з "+completion.days+" днів · оцінка до "+completion.end,
+                  "Observed: "+(completion.asOfIsIntraday?fmt(completion.observedDaysEquivalent,1):completion.observed)+
+                    " of "+completion.days+" days · estimate through "+completion.end);
               return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
                 : partialPeriodFooter(rows[i]);
             }
@@ -3052,7 +3083,7 @@ function renderCity() {
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
         yHours: {
-          stacked:false,
+          stacked:Boolean(completion),
           position: "left",
           beginAtZero: true,
           ticks: { color: TEXT, callback: value => formatDurationHours(value) },

@@ -136,8 +136,11 @@ assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period
 assert(!app.includes("projectedRows"),"no additional future bar");
 assert(!app.includes("_isForecast: true"),"no future-period dataset");
 assert(!app.includes("forecastIndices"),"no extra forecast axis labels");
-// The observed and full-period rates must never share the full-period divisor.
-// Otherwise 45 observed days in Q4 falsely display about half the real daily rate.
+// Accepted PR #151/#152: a single, additive stacked completion bar.
+// The solid segment is the observed contribution to the whole-period mean,
+// the hatched segment is the remaining contribution. The tooltip must show
+// the actual observed-day mean so the solid segment cannot be misconstrued as
+// 45-day daily fact; only one full-period alert forecast dot is drawn.
 const q4Index={...history,end:"2026-11-13"};
 const q4=F.estimate(q4Index,"quarterly","2026-11-14");
 assert(q4&&q4.days===92&&q4.observed===44);
@@ -145,31 +148,41 @@ assert.equal(q4.actualHours,88);
 assert.equal(q4.actualAlerts,88);
 assert.equal(q4.periodRow.avg_daily_alert_hours,2);
 assert.equal(q4.periodRow.alerts_per_day,2);
-assert(q4.actualHours/q4.days<1,"old wrong 92-day fact divisor dilutes actual");
-assert(Math.abs(q4.expectedHours/q4.days-2)<0.01,"full-period forecast uses 92 days (DST-safe physical baseline)");
+assert(q4.actualHours/q4.days<1,"observed contribution is not an observed-day mean");
+assert(Math.abs((q4.actualHours+q4.remainingHours)/q4.days-q4.expectedHours/q4.days)<1e-12);
+assert(Math.abs(q4.expectedHours/q4.days-2)<0.01,"DST-safe physical baseline");
 assert.equal(q4.expectedAlerts/q4.days,2);
-assert(app.includes("intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;"),
-  "observed bar must use observed-day mean");
-assert(app.includes("intensityDatasets[1].data[i]=completion.periodRow.alerts_per_day;"),
-  "observed alerts line must use observed-day mean");
-assert(app.includes("completion.expectedHours/completion.days"),
-  "forecast bar must use full calendar-period mean");
+assert(app.includes("intensityDatasets[0].data[i]=completion.actualHours/completion.days;"),
+  "stacked fact segment retains common full-period denominator");
+assert(app.includes("completion.remainingHours/completion.days"),
+  "hatched segment is only projected remaining alert-hours");
+assert(app.includes("intensityDatasets[0].stack=\"completion\";"),
+  "observed hours and remaining hours must share the same stack");
+assert(app.includes('stack:"completion"'),"estimated remainder shares one stack");
+assert(app.includes('stacked:Boolean(completion)'),"chart renders one additive completion bar");
+assert(app.includes("completion.actualHours/observedDays"),
+  "tooltip gives true observed-day hours rather than whole-period contribution");
+assert(app.includes("completion.actualAlerts/observedDays"),
+  "tooltip gives true observed alert frequency");
+assert(app.includes('period==="daily28"'),"current-day observations keep their existing count");
+assert(app.includes('period==="daily28"\n      ? completion.actualAlerts/completion.days : null'),
+  "quarterly chart hides a misleading second actual frequency point");
 assert(app.includes("completion.expectedAlerts/completion.days"),
-  "forecast alerts dot must use full calendar-period mean");
-assert(!app.includes("intensityDatasets[0].data[i]=completion.actualHours/completion.days"),
-  "cannot label observed sum divided by 92 days as current fact");
-assert(!app.includes("intensityDatasets[1].data[i]=completion.actualAlerts/completion.days"),
-  "cannot label observed count divided by 92 days as current fact");
-assert(!app.includes('stack="completion"'),
-  "observed daily average and forecast full-period average cannot stack");
-assert(app.includes('stacked:false'),"two distinct bars must not sum");
-assert(app.includes('фактична середня за '),"Ukrainian subtitle explains observed day basis");
-assert(app.includes('estimate the full '),"English subtitle explains full-period forecast basis");
-assert(app.includes('Показати тренд')||app.includes('showTrend'));
+  "one hollow expected full-period frequency dot remains");
+assert(app.includes("pointBackgroundColor:\"#101820\""),
+  "forecast-only marker remains visibly hollow");
+assert(app.includes('Разом — прогноз підсумку періоду.'),
+  "UA subtitle explains stacked forecast completion, not independent averages");
+assert(app.includes('Together they give the full-period estimate.'),
+  "EN subtitle explains stacked forecast completion");
+assert(!app.includes('intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;'),
+  "PR #185 non-additive adjacent bar regression removed");
+assert(!app.includes('type:"bar",_isCompletion:true,skipNull:true'),
+  "PR #185 second non-additive bar removed");
 
 assert(app.includes('if (completion) {'));
 assert(app.includes('periodCompletionHatchPlugin'));
-assert(!app.includes('stacked:Boolean(completion)'),"two averages must never be stacked");
+assert(app.includes('stacked:Boolean(completion)'),"accepted one stacked completion bar");
 assert(app.includes('approvedNeonGitRelease'));
 assert(app.includes('matchesDashboardGeneration'));
 assert(!app.includes('netlify deploy --prod'));
