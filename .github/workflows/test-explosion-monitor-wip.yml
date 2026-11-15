@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15, research-casualty-workaf-filter-allowlist-go-offline-2026-11-15, research-casualty-workag-article-first-offline-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15, research-casualty-workae-six-rss-live-2026-11-15, research-casualty-workaf-filter-allowlist-go-offline-2026-11-15, research-casualty-workag-article-first-offline-2026-11-15, research-casualty-workah-guarded-article-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -24,7 +24,33 @@ on:
       - "kyiv-air-alerts-grafana/scripts/casualty_go_guard.py"
       - "research/casualty_workaf_2026_11_15/**"
       - "research/casualty_workag_2026_11_15/**"
+      - "research/casualty_workah_2026_11_15/**"
   workflow_dispatch:
+    inputs:
+      owner_go_id:
+        description: "Owner-issued unique one-shot GO identifier"
+        required: false
+        type: string
+      approved_head:
+        description: "Exact 40-character Git commit approved by owner"
+        required: false
+        type: string
+      manifest_sha256:
+        description: "SHA256 canonical JSON manifest approved by owner"
+        required: false
+        type: string
+      grant_json:
+        description: "Exact canonical owner-approved JSON grant; no secrets"
+        required: false
+        type: string
+      article_go:
+        description: "Explicit one-shot publisher HTTP approval"
+        required: false
+        type: choice
+        default: "OFF"
+        options:
+          - "OFF"
+          - "OWNER_APPROVED_ONE_SHOT"
 
 permissions:
   contents: read
@@ -529,4 +555,81 @@ jobs:
           name: casualty-workag-article-first-offline
           path: /tmp/workag/
           if-no-files-found: warn
+          retention-days: 30
+
+  casualty_workah_offline:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-workah-guarded-article-2026-11-15'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline regression and guarded executor mocks (NO media HTTP)
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s research/casualty_workag_2026_11_15 -p 'test_workag.py' -v
+          python -m unittest discover -s research/casualty_workah_2026_11_15 -p 'test_workah.py' -v
+          python research/casualty_workah_2026_11_15/offline_proof.py
+          git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
+      - name: Upload bounded offline proof (NO HTML, no credentials)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workah-guarded-article-offline
+          path: |
+            /tmp/workah/offline-article-proof.json
+            /tmp/workah/offline-blocked-proof.json
+            /tmp/workah/offline_proof.json
+            /tmp/workah/sha256_manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+  casualty_workah_one_shot:
+    # Deliberately never runs on a push or schedule; owner must dispatch.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' &&
+          github.ref == 'refs/heads/research-casualty-workah-guarded-article-2026-11-15' &&
+          github.actor == 'olegbalakin-cmyk' &&
+          github.triggering_actor == 'olegbalakin-cmyk' &&
+          github.run_attempt == 1 &&
+          inputs.article_go == 'OWNER_APPROVED_ONE_SHOT' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout exact dispatched research commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: One guarded article execution after atomic spent-GO
+        env:
+          CASUALTY_ARTICLE_NETWORK: ${{ inputs.article_go }}
+          CASUALTY_APPROVED_HEAD: ${{ inputs.approved_head }}
+          CASUALTY_OWNER_GO_ID: ${{ inputs.owner_go_id }}
+          CASUALTY_OWNER_GO_DIGEST: ${{ inputs.manifest_sha256 }}
+          CASUALTY_OWNER_GO_JSON: ${{ inputs.grant_json }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python research/casualty_workag_2026_11_15/article_oneshot.py
+          git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
+      - name: Upload short review-only evidence; NEVER full article HTML
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-workah-owner-article-one-shot
+          path: /tmp/casualty_workah_article_proof.json
+          if-no-files-found: error
           retention-days: 30
