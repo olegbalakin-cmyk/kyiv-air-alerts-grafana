@@ -1,8 +1,8 @@
-name: Test explosion monitor WIP
+name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -11,13 +11,20 @@ on:
       - "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json"
       - "kyiv-air-alerts-grafana/data/explosion_preview_input.json"
       - ".github/workflows/test-explosion-monitor-wip.yml"
+      - "kyiv-air-alerts-grafana/scripts/monitor_casualty_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/casualty_workx_evidence.py"
+      - "kyiv-air-alerts-grafana/scripts/casualty_workaa_context.py"
+      - "kyiv-air-alerts-grafana/scripts/casualty_workaa_offline.py"
+      - "research/casualty_workab_shadow_2026_11_15/**"
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   smoke:
+    if: github.ref == 'refs/heads/multicity-wip-2026-09-16'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -253,3 +260,62 @@ jobs:
               "active cities =", output["meta"]["city_count"],
           )
           PY
+
+  casualty_workab_offline:
+    if: github.ref == 'refs/heads/integration-casualty-workab-shadow-off-2026-11-15'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dependencies for existing RSS module (no source-site requests)
+        run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Read main promotion guards without mutation
+        run: git fetch origin main site-prod
+      - name: Restore PREVIOUSLY SAVED Work Z artifact only (no HTTP pilot)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 43609731091
+          name: casualty-workl-approved-three-source-research-only
+          path: /tmp/workab-workz
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Two 4-hour shadow cycles, failure recovery, evidence, no source GET
+        env:
+          WORKAB_WORKZ_DIR: /tmp/workab-workz
+          WORKAB_OUT: /tmp/workab
+        run: |
+          set -euo pipefail
+          test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
+          python -m unittest discover -s research/casualty_workab_shadow_2026_11_15 -p 'test_workab.py' -v
+          git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
+          test ! -e /tmp/workab/launch.json
+          python - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path("/tmp/workab")
+          a=json.loads((root/"cycles.json").read_text())
+          b=json.loads((root/"saved_evidence_summary.json").read_text())
+          assert a["head_sha"]==os.environ["GITHUB_SHA"],"HEAD mismatch"
+          assert a["external_source_http_requests"]==0
+          assert a["cycles"][0]["fixture_cities_retrieved"]==23
+          assert a["cycles"][1]["fixture_cities_retrieved"]==22
+          assert a["cycles"][2]["new_candidates"]==0
+          assert b["source_index_summary"]["total"]==3
+          assert b["automatic_credits"]==0
+          for p in root.glob("*.json"):
+              assert all(k not in p.read_text() for k in ("<html","<!DOCTYPE html","launch.json"))
+          hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.glob("*.json")}
+          (root/"sha256_manifest.json").write_text(json.dumps(hashes,indent=2,sort_keys=True)+"\n")
+          print("WORKAB_EXACT_HEAD_OFFLINE_PASS",os.environ["GITHUB_SHA"],hashes)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-workab-two-cycle-offline
+          path: /tmp/workab/
+          if-no-files-found: warn
+          retention-days: 30
