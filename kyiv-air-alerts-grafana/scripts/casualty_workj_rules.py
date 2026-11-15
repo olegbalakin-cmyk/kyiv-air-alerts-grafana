@@ -16,17 +16,6 @@ MONTHS = {'січня': 1, 'лютого': 2, 'березня': 3, 'квітня
           'листопада': 11, 'грудня': 12}
 
 
-def digest(value):
-    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
-                                     separators=(',', ':')).encode()).hexdigest()
-
-
-def fingerprint(candidate):
-    # A historical attestation cannot silently attach to an edited queue record.
-    return digest({k: candidate.get(k) for k in
-                   ('candidate_id', 'city_key', 'title', 'snippet', 'url', 'published_at')}
-
-
 COUNT_WORDS = {'один': 1, 'одна': 1, 'дві': 2, 'двоє': 2,
                'три': 3, 'троє': 3, 'чотири': 4, 'четверо': 4,
                'двох': 2, 'трьох': 3}
