@@ -51,6 +51,8 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        registeredPlugin:Array.isArray(c.config.plugins)&&c.config.plugins.some(p=>p.id==="periodForecastDeltaHatch"),
        forecast,
        checked:document.querySelector("#showTrend").checked,
+       enabled:!document.querySelector("#showTrend").disabled,
+       reason:document.querySelector("#showTrend").title||"",
        visible:!document.querySelector("#showTrend").closest("label").classList.contains("hidden")};
    });
  }
@@ -69,7 +71,12 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
      assert.deepEqual(off.labels,old.labels,mode+" source labels changed");
      assert.deepEqual(off.values,old.values,mode+" FACT CHANGED VS ORIGINAL PRODUCTION");
      assert.equal(off.checked,false,mode+" OFF expected");
-     if(!off.visible){report.cases.push({mode,eligible:false,actual:off.values.map(v=>v.at(-1))});continue;}
+     assert.equal(off.visible,true,mode+" trend checkbox unexpectedly HIDDEN");
+     if(!off.enabled){
+       assert(off.reason.length>=12,mode+" disabled trend must explain source condition");
+       report.cases.push({mode,eligible:false,reason:off.reason,actual:off.values.map(v=>v.at(-1))});
+       continue;
+     }
      await page.click("#showTrend");
      const on=await snapshot();
      assert.equal(on.checked,true,mode+" ON expected");
