@@ -2,7 +2,7 @@ name: Test WIP monitors (existing offline test workflow)
 
 on:
   push:
-    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15]
+    branches: [multicity-wip-2026-09-16, integration-casualty-workab-shadow-off-2026-11-15, integration-casualty-workac-bounded-shadow-off-2026-11-15, integration-casualty-workad-url-facts-offline-2026-11-15, research-casualty-workae-direct-rss-offline-2026-11-15]
     paths:
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
@@ -19,6 +19,7 @@ on:
       - "kyiv-air-alerts-grafana/scripts/casualty_workac_capture.py"
       - "research/casualty_workac_shadow_2026_11_15/**"
       - "research/casualty_workad_shadow_2026_11_15/**"
+      - "research/casualty_workae_direct_rss_2026_11_15/**"
       - "kyiv-air-alerts-grafana/scripts/casualty_workj_rules.py"
   workflow_dispatch:
 
@@ -266,7 +267,7 @@ jobs:
           PY
 
   casualty_workab_offline:
-    if: github.ref == 'refs/heads/integration-casualty-workab-shadow-off-2026-11-15' || github.ref == 'refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15' || github.ref == 'refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15'
+    if: github.ref == 'refs/heads/integration-casualty-workab-shadow-off-2026-11-15' || github.ref == 'refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15' || github.ref == 'refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15' || github.ref == 'refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -279,6 +280,31 @@ jobs:
           python-version: "3.12"
       - name: Dependencies for existing RSS module (no source-site requests)
         run: python -m pip install requests==2.32.3 beautifulsoup4==4.12.3
+      - name: Direct RSS Work AE offline integration (no network)
+        if: github.ref == 'refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15'
+        run: |
+          python -m unittest discover -s research/casualty_workae_direct_rss_2026_11_15 -p 'test_workae.py' -v
+          python - <<'PY'
+          import hashlib, json, os, pathlib
+          out=pathlib.Path("/tmp/workae")
+          out.mkdir(parents=True,exist_ok=True)
+          proof={"head_sha":os.environ["GITHUB_SHA"],"source_http_gets":0,
+                 "real_rss_coverage_measured":False,"source_fixtures":"synthetic",
+                 "new_cards_credited":0,"PROMOTE":"OFF","publication_allowed":False,
+                 "rss_get_budget":23,"article_get_budget":10,"live_wip_touched":False}
+          b=json.dumps(proof,sort_keys=True,indent=2).encode()
+          (out/"offline_proof.json").write_bytes(b)
+          (out/"sha256_manifest.json").write_text(json.dumps({"offline_proof.json":hashlib.sha256(b).hexdigest()},indent=2))
+          assert hashlib.sha256((out/"offline_proof.json").read_bytes()).hexdigest()==json.loads((out/"sha256_manifest.json").read_text())["offline_proof.json"]
+          print("WORKAE_OFFLINE_MANIFEST_PASS",os.environ["GITHUB_SHA"])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15'
+        with:
+          name: casualty-workae-direct-rss-offline
+          path: /tmp/workae/
+          if-no-files-found: error
+          retention-days: 30
       - name: Read main promotion guards without mutation
         run: git fetch origin main site-prod
       - name: Restore PREVIOUSLY SAVED Work Z artifact only (no HTTP pilot)
@@ -296,10 +322,10 @@ jobs:
           set -euo pipefail
           test ! -e research/casualty_one_time_capture_2026_11_13/launch.json
           python -m unittest discover -s research/casualty_workab_shadow_2026_11_15 -p 'test_workab.py' -v
-          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15" || "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workac-bounded-shadow-off-2026-11-15" || "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" || "$GITHUB_REF" == "refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15" ]]; then
             WORKAC_OUT=/tmp/workac python -m unittest discover -s research/casualty_workac_shadow_2026_11_15 -p 'test_workac.py' -v
           fi
-          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/integration-casualty-workad-url-facts-offline-2026-11-15" || "$GITHUB_REF" == "refs/heads/research-casualty-workae-direct-rss-offline-2026-11-15" ]]; then
             WORKAD_OUT=/tmp/workad python -m unittest discover -s research/casualty_workad_shadow_2026_11_15 -p "test_workad.py" -v
           fi
           git diff --exit-code -- kyiv-air-alerts-grafana/data/casualties/
@@ -319,12 +345,12 @@ jobs:
 
           for p in root.glob("*.json"):
               assert all(k not in p.read_text() for k in ("<html","<!DOCTYPE html","launch.json"))
-          if os.environ.get("GITHUB_REF","").endswith(("integration-casualty-workac-bounded-shadow-off-2026-11-15","integration-casualty-workad-url-facts-offline-2026-11-15")):
+          if os.environ.get("GITHUB_REF","").endswith(("integration-casualty-workac-bounded-shadow-off-2026-11-15","integration-casualty-workad-url-facts-offline-2026-11-15","research-casualty-workae-direct-rss-offline-2026-11-15")):
               ac=json.loads(pathlib.Path("/tmp/workac/cycles.json").read_text())
               assert ac["external_http"]==0 and ac["automatic_credits"]==0
               assert ac["cards"]==1 and len(ac["cycles"])==3
               (root/"workac_cycles.json").write_text(json.dumps(ac,sort_keys=True,indent=2))
-          if os.environ.get("GITHUB_REF","").endswith("integration-casualty-workad-url-facts-offline-2026-11-15"):
+          if os.environ.get("GITHUB_REF","").endswith(("integration-casualty-workad-url-facts-offline-2026-11-15","research-casualty-workae-direct-rss-offline-2026-11-15")):
               ad=json.loads(pathlib.Path("/tmp/workad/workad_results.json").read_text())
               assert ad["exact_head"]==os.environ["GITHUB_SHA"]
               assert ad["source_http_gets"]==0 and ad["automatic_credits"]==0

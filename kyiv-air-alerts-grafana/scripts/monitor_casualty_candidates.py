@@ -398,30 +398,44 @@ def google_news_query(city_label: str) -> str:
     )
 
 
-def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[list[dict], str]:
+def search_city_news(city_key: str, earliest: datetime, now: datetime, *,
+                     feed_url: str | None = None,
+                     feed_name: str | None = None) -> tuple[list[dict], str]:
     label = CITY_CONFIG[city_key]["label"]
     query = google_news_query(label)
-    url = (
+    url = feed_url or (
         f"{GOOGLE_NEWS_URL}?q={quote_plus(query)}"
         "&hl=uk&gl=UA&ceid=UA:uk"
     )
+    # A research-only optional direct feed reuses the same XML item selection.
+    # The active 23-city loop never supplies feed_url; no new live GETs.
+    if feed_url is not None:
+        import casualty_workac_capture as secure
+        secure.allowed_article_url(url)  # exact HTTPS Work AC host allowlist
     global HTTP_REQUESTS_THIS_RUN
     if HTTP_REQUESTS_THIS_RUN >= MAX_RSS_GETS:
         raise RuntimeError("RSS_REQUEST_BUDGET_EXCEEDED")
     HTTP_REQUESTS_THIS_RUN += 1  # Count attempts including failures.
-    response = requests.get(
-        url,
-        headers={
-            "User-Agent": "ukraine-air-alerts-casualty-monitor/1.0",
-            "Accept-Language": "uk,en;q=0.7",
-        },
-        timeout=RSS_TIMEOUT_SECONDS,
-        allow_redirects=False,
-    )
-    if 300 <= response.status_code < 400:
-        raise RuntimeError("RSS_REDIRECT_BLOCKED")
-    response.raise_for_status()
-    root = ET.fromstring(response.content)
+    if feed_url is not None:
+        body, _type, _status, content_encoding = secure.get_html(
+            url, total_timeout=RSS_TIMEOUT_SECONDS, expect_xml=True)
+        root = ET.fromstring(secure._decode_limited(body, content_encoding))
+        if root.tag != "rss":
+            raise RuntimeError("DIRECT_FEED_NOT_RSS2_XML")
+    else:
+        response = requests.get(
+            url,
+            headers={
+                "User-Agent": "ukraine-air-alerts-casualty-monitor/1.0",
+                "Accept-Language": "uk,en;q=0.7",
+            },
+            timeout=RSS_TIMEOUT_SECONDS,
+            allow_redirects=False,
+        )
+        if 300 <= response.status_code < 400:
+            raise RuntimeError("RSS_REDIRECT_BLOCKED")
+        response.raise_for_status()
+        root = ET.fromstring(response.content)
 
     lower_bound = earliest - timedelta(hours=3)
     upper_bound = now + timedelta(hours=1)
@@ -455,7 +469,9 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
             {
                 "title": title,
                 "url": link,
-                "publisher": publisher or "Google News result",
+                "publisher": publisher or feed_name or "Google News result",
+                "source": ("Direct RSS" if feed_url is not None else "Google News RSS"),
+                "source_feed_url": feed_url,
                 "publisher_url": publisher_url or None,
                 "rss_guid_url": guid_url,
                 "rss_guid_is_permalink": guid_is_permalink,
@@ -546,6 +562,10 @@ def add_news_candidates(
         # exact publication. This is a *source* dedup, not an incident merge.
         existing = by_id.get(cid) or by_url.get((row["url"], city_key))
         if existing:
+            feed = row.get("source_feed_url")
+            if feed:
+                existing["discovered_feeds"] = sorted(set(
+                    existing.get("discovered_feeds") or []) | {feed})
             if row.get("rss_guid_is_permalink") and row.get("rss_guid_url"):
                 old = existing.get("rss_guid_url")
                 if old and old != row["rss_guid_url"]:
@@ -570,7 +590,9 @@ def add_news_candidates(
             "city": CITY_CONFIG[city_key]["label"],
             "alert_trigger_scope": CITY_CONFIG[city_key]["scope"],
             "status": "needs_review",
-            "source": "Google News RSS",
+            "source": row.get("source") or "Google News RSS",
+            "discovered_feeds": ([row["source_feed_url"]]
+                                 if row.get("source_feed_url") else []),
             "publisher": row.get("publisher"),
             "publisher_url": row.get("publisher_url"),
             "rss_guid_url": row.get("rss_guid_url"),
