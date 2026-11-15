@@ -1,0 +1,41 @@
+name: UI observed-vs-forecast regression (no deploy)
+on:
+  pull_request:
+    branches: [site-prod]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/tests/test_current_period_completion.js"
+      - ".github/workflows/test-observed-vs-forecast-chart.yml"
+  push:
+    branches: [fix-ui-quarter-observed-average-2026-11-15]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/tests/test_current_period_completion.js"
+      - ".github/workflows/test-observed-vs-forecast-chart.yml"
+permissions:
+  contents: read
+jobs:
+  offline-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JS syntax checks
+        run: |
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/current-period-completion.js
+          node --check kyiv-air-alerts-grafana/tests/test_current_period_completion.js
+      - name: Source-certified fact, forecast, quarter and other UI regression checks
+        run: |
+          node kyiv-air-alerts-grafana/tests/test_current_period_completion.js
+          node kyiv-air-alerts-grafana/tests/test_quarter_rolling_preview.js
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+      - name: Read-only, no Netlify deployment and no production data mutation
+        run: echo "NO_NETLIFY_DEPLOY=YES NO_NEON_WRITES=YES NO_SITE_PROD_PUSH=YES"
