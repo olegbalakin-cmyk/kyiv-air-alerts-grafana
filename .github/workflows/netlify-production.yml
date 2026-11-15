@@ -311,12 +311,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         run: |
           test -n "$NETLIFY_AUTH_TOKEN"
-          npx -y netlify-cli@latest deploy \
-            --prod \
-            --dir=_site \
-            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
-            --auth="$NETLIFY_AUTH_TOKEN" \
-            --json | tee netlify-production-deploy.json
+          python3 kyiv-air-alerts-grafana/scripts/one_shot_locked_netlify_deploy.py
 
       - name: Lock exact new Netlify deploy without opening auto publishing
         env:
@@ -339,10 +334,10 @@ jobs:
                   return json.load(response)
           d = api("/deploys/" + deploy_id)
           assert d["site_id"] == site and d["state"] == "ready", "DEPLOY_NOT_READY_OR_NOT_SITE"
-          # Netlify lockDeploy publishes the target deploy if it is not current,
-          # then locks it; unlike unlocking, this never enables auto publishing.
-          locked = api("/deploys/" + deploy_id + "/lock", "POST")
-          assert locked["id"] == deploy_id and locked["site_id"] == site, "LOCK_WRONG_DEPLOY"
+          # The one-shot publisher already relocked this exact new deploy;
+          # verify read-only rather than opening any additional lock transition.
+          locked = api("/deploys/" + deploy_id)
+          assert locked["id"] == deploy_id and locked["site_id"] == site and locked.get("locked") is True, "LOCK_WRONG_DEPLOY"
           import time
           for attempt in range(30):
               current = api("/sites/" + site)
