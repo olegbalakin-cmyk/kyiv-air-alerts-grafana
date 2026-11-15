@@ -55,7 +55,7 @@ class WorkAF(unittest.TestCase):
          ("У Запоріжжі після атаки поранені троє","zaporizhzhia","ATTACK_FOLLOWUP_CANDIDATE",False),
          ("У Сумах після удару зруйновано будівлю","sumy","ATTACK_FOLLOWUP_CANDIDATE",False),
          ("У Запоріжжі загинули двоє людей","zaporizhzhia","NEEDS_ARTICLE_CAUSALITY_CHECK",False),
-         ("На Харківщині після атаки загинули люди","kharkiv","NEEDS_ARTICLE_CITY_CHECK",False),
+         ("На Харківщині після атаки загинули люди","kharkiv","NEEDS_ARTICLE_CITY_CHECK",True),
          ("У Сумах і Харкові після ударів загинули люди","sumy","NEEDS_ARTICLE_CITY_CHECK",True),
          ("Річниця ракетної атаки: у Києві загинули люди","kyiv","HISTORICAL_CONTEXT_NEEDS_REVIEW",True),
          ("Зведення Генштабу: втрати рф під Києвом","kyiv","OUT_OF_SCOPE",False),
