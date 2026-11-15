@@ -434,6 +434,12 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
         source_el = item.find("source")
         publisher = clean_text(source_el.text or "") if source_el is not None else ""
         publisher_url = (source_el.attrib.get("url") or "").strip() if source_el is not None else ""
+        guid_el = item.find("guid")
+        # RSS 2.0 guid is a permalink only when isPermaLink is true (or
+        # omitted). Its value is never guessed from an opaque Google News ID.
+        guid_is_permalink = bool(guid_el is not None and
+            (guid_el.attrib.get("isPermaLink", "true").casefold() == "true"))
+        guid_url = (guid_el.text or "").strip() if guid_is_permalink else None
 
         if not title or not link:
             continue
@@ -451,6 +457,8 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
                 "url": link,
                 "publisher": publisher or "Google News result",
                 "publisher_url": publisher_url or None,
+                "rss_guid_url": guid_url,
+                "rss_guid_is_permalink": guid_is_permalink,
                 "published_at": iso(published) if published else None,
                 "snippet": description[:1200],
             }
@@ -538,6 +546,13 @@ def add_news_candidates(
         # exact publication. This is a *source* dedup, not an incident merge.
         existing = by_id.get(cid) or by_url.get((row["url"], city_key))
         if existing:
+            if row.get("rss_guid_is_permalink") and row.get("rss_guid_url"):
+                old = existing.get("rss_guid_url")
+                if old and old != row["rss_guid_url"]:
+                    existing["rss_guid_conflict"] = True
+                elif not old:
+                    existing["rss_guid_url"] = row["rss_guid_url"]
+                    existing["rss_guid_is_permalink"] = True
             if independent:
                 existing["discovery_triggers"] = sorted(set(
                     existing.get("discovery_triggers") or []
@@ -558,6 +573,8 @@ def add_news_candidates(
             "source": "Google News RSS",
             "publisher": row.get("publisher"),
             "publisher_url": row.get("publisher_url"),
+            "rss_guid_url": row.get("rss_guid_url"),
+            "rss_guid_is_permalink": bool(row.get("rss_guid_is_permalink")),
             "url": row["url"],
             "title": row["title"],
             "published_at": row.get("published_at"),

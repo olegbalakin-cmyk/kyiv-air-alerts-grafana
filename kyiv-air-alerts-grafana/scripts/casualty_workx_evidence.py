@@ -198,7 +198,7 @@ def build_review_index(facts: dict, queue: list[dict] | None = None,
             count = None
             reasons.add("FATAL_TOTAL_NOT_PROVEN")
         kind = card.get("claim_type") or card.get("count_kind") or "unknown"
-        if kind == "ADDITIONAL_DEATH_REPORTED":
+        if kind in {"ADDITIONAL_DEATH_REPORTED", "delta"}:
             count = None
             reasons.add("LATE_DEATH_REQUIRES_INCIDENT_LINK_AND_BASELINE")
         if "MULTIPLE_POSSIBLE_INCIDENTS" in reasons:
@@ -222,6 +222,9 @@ def build_review_index(facts: dict, queue: list[dict] | None = None,
         row = {
             "candidate_id": cid,
             "source_role": card.get("source_role"),
+            "source_url_resolution_method": card.get("source_url_resolution_method"),
+            "claim_origin": card.get("claim_origin"),
+            "fatal_claim_context_status": card.get("fatal_claim_context_status"),
             "original_source_url": source,
             "source_type": source_type(source),
             "feed_url": _source_url(candidate.get("url")),
