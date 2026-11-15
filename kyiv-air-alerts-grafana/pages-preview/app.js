@@ -1275,26 +1275,6 @@ const partialPeriodBarPlugin = {
   }
 };
 
-const periodCompletionHatchPlugin = {
-  id:"periodCompletionHatch",
-  afterDatasetsDraw(chart,_args,options){
-    if(!Number.isInteger(options?.datasetIndex)||options.datasetIndex<0||options.index<0)return;
-    const element=chart.getDatasetMeta(options.datasetIndex)?.data?.[options.index];
-    if(!element||element.skip)return;
-    const {x,y,base,width}=element.getProps(["x","y","base","width"],true);
-    if(![x,y,base,width].every(Number.isFinite))return;
-    const top=Math.min(y,base),height=Math.abs(base-y);
-    if(height<2)return;
-    const ctx=chart.ctx;ctx.save();ctx.beginPath();ctx.rect(x-width/2,top,width,height);ctx.clip();
-    ctx.strokeStyle="#c5e1fa";ctx.lineWidth=1.5;
-    for(let z=-height;z<width+height;z+=9){
-      ctx.beginPath();ctx.moveTo(x-width/2+z,top+height);
-      ctx.lineTo(x-width/2+z+height,top);ctx.stroke();
-    }
-    ctx.restore();
-  }
-};
-
 function seriesDataset(label, values, color, dashed = false, rows = null) {
   return {
     label,
@@ -2871,13 +2851,16 @@ function renderCity() {
         (!activeRange.to||activeRange.to>=calendarToday)
       : (!activeRange.from || activeRange.from<=completionCandidate.start) &&
         (!activeRange.to || activeRange.to>=completionCandidate.through));
-  const completion = completionVisible && $("showTrend")?.checked ? completionCandidate : null;
-  if (completion && period!=="daily28") {
-    rows = rows.filter(row => !(isPartialPeriod(row) &&
-      (period==="calendarWeekly" ? row.week_start===completion.start :
-       period==="monthly" ? row.month===completion.key : row.quarter===completion.key)));
-    rows = [...rows,completion.periodRow];
+  // Verified observations must be identical with trend OFF and ON.
+  // Both use the same current-period source cutoff when available.
+  const completionPotential=completionVisible?completionCandidate:null;
+  if (completionPotential && period!=="daily28") {
+    rows=rows.filter(row=>!(isPartialPeriod(row) &&
+      (period==="calendarWeekly"?row.week_start===completionPotential.start:
+       period==="monthly"?row.month===completionPotential.key:row.quarter===completionPotential.key)));
+    rows=[...rows,completionPotential.periodRow];
   }
+  const completion=completionPotential && $("showTrend")?.checked ? completionPotential:null;
   const labels = rows.map(r => periodDisplayLabel(r, period));
   // Consistent meaning: estimate completion of the unfinished current day,
   // week, month or quarter. Never extrapolate new rolling or future periods.
@@ -2892,7 +2875,8 @@ function renderCity() {
       label: tr("Годин під тривогою / добу","Hours under alert / day"),
       data: rows.map(r => r.avg_daily_alert_hours),
       yAxisID: "yHours",
-      backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
+      backgroundColor: rows.map((r,j) => completionPotential && j===rows.length-1
+        ? COLORS[0] + "99" : isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
       borderColor: rows.map(() => COLORS[0]),
       borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
       _exportRows: rows
@@ -2917,34 +2901,28 @@ function renderCity() {
 
   if (completion) {
     const i=rows.length-1;
-    // Accepted PR #151/#152 contract: one stacked bar, not two averages.
-    // Both components contribute to the same full-calendar-period mean:
-    // verified hours already observed + estimated hours not yet observed.
-    // The observed-only daily rate has a DIFFERENT denominator and belongs
-    // in the tooltip, not in this additive stacked bar.
-    intensityDatasets[0].data[i]=completion.actualHours/completion.days;
-    // For multi-day periods show only the hollow expected full-period count
-    // point: the observed contribution would look like an actual daily rate.
-    intensityDatasets[1].data[i]=period==="daily28"
-      ? completion.actualAlerts/completion.days : null;
-    intensityDatasets[0].backgroundColor[i]=COLORS[0]+"99";
-    intensityDatasets[0].borderWidth[i]=0;
-    intensityDatasets[0].stack="completion";
+    // The forecast is an annotation, NOT a replacement for the actual bar
+    // or a stack: future period averages may be BELOW observed averages.
     intensityDatasets.push({
-      type:"bar",_isCompletion:true,stack:"completion",
-      label:tr("Оцінка решти · внесок у середню","Estimated remainder · average contribution"),
-      data:rows.map((_,j)=>j===i?completion.remainingHours/completion.days:null),
-      yAxisID:"yHours",backgroundColor:"#a7d7fa44",borderColor:"#c5e1fa",
-      borderWidth:0,_exportRows:rows
+      type:"line",_isCompletion:true,
+      label:tr("Прогноз за весь період · годин / добу",
+               "Full-period forecast · hours/day"),
+      data:rows.map((_,j)=>j===i?completion.expectedHours/completion.days:null),
+      yAxisID:"yHours",borderColor:"#e7f3ff",
+      pointStyle:"line",pointRadius:13,pointHoverRadius:15,
+      pointBorderColor:"#e7f3ff",pointBorderWidth:3,
+      pointBackgroundColor:"transparent",showLine:false,spanGaps:false,
+      _exportRows:rows
     });
     intensityDatasets.push({
       type:"line",_isCompletion:true,
-      label:tr("Оцінка підсумку · тривоги / день","Estimated total · alerts/day"),
+      label:tr("Прогноз за весь період · тривоги / день",
+               "Full-period forecast · alerts/day"),
       data:rows.map((_,j)=>j===i?completion.expectedAlerts/completion.days:null),
-      yAxisID:"yAlerts",borderColor:"#b8ffc5",borderDash:[5,4],
-      pointRadius:6,pointHoverRadius:7,pointBackgroundColor:"#101820",
-      pointBorderColor:"#b8ffc5",pointBorderWidth:2,
-      showLine:false,spanGaps:false,
+      yAxisID:"yAlerts",borderColor:"#b8ffc5",
+      pointStyle:"rectRot",pointRadius:7,pointHoverRadius:9,
+      pointBackgroundColor:"#101820",pointBorderColor:"#b8ffc5",
+      pointBorderWidth:2,showLine:false,spanGaps:false,
       _exportRows:rows
     });
   }
@@ -2983,24 +2961,24 @@ function renderCity() {
         );
   }
 
-  if (intensitySubtitle && completion) {
-    const observedDaysText=completion.asOfIsIntraday
-      ? fmt(completion.observedDaysEquivalent,1) : String(completion.observed);
-    const asOfUk=completion.asOfIsIntraday
-      ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf))
-      : completion.through;
-    const asOfEn=completion.asOfIsIntraday
-      ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completion.asOf))
-      : completion.through;
-    intensitySubtitle.textContent=period==="daily28"
-      ? tr(
-          "Суцільна частина — зафіксовані години; штрихована — оцінка решти дня. Їх сума — прогноз підсумку дня. Це не попередження про атаки. Дані станом на "+asOfUk+".",
-          "Solid: hours observed; hatched: estimated rest of today. Their sum is the expected full-day total. Not an attack warning. Data as of "+asOfEn+"."
-        )
-      : tr(
-          "Суцільна частина — внесок факту, штрихована — прогноз решти у середню за всі "+completion.days+" днів. Разом — прогноз підсумку періоду. Фактична середня за "+observedDaysText+" дня — у підказці. Зелена точка — прогноз тривог на день. Не є попередженням про атаки. Дані станом на "+asOfUk+".",
-          "Solid: observed contribution; hatched: estimated remainder in the "+completion.days+"-day average. Together they give the full-period estimate. The observed daily average for "+observedDaysText+" days is in the tooltip. The hollow green point forecasts alerts/day. Not an attack warning. Data as of "+asOfEn+"."
-        );
+  if (intensitySubtitle && completionPotential) {
+    const observedDaysText=completionPotential.asOfIsIntraday
+      ? fmt(completionPotential.observedDaysEquivalent,1) : String(completionPotential.observed);
+    const asOfUk=completionPotential.asOfIsIntraday
+      ? new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completionPotential.asOf))
+      : completionPotential.through;
+    const asOfEn=completionPotential.asOfIsIntraday
+      ? new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"}).format(new Date(completionPotential.asOf))
+      : completionPotential.through;
+    const observedUk=period==="daily28"?"за спостережену частину сьогодні":"за "+observedDaysText+" спостережених днів";
+    const observedEn=period==="daily28"?"for today's observed portion":"across "+observedDaysText+" observed day equivalents";
+    intensitySubtitle.textContent=completion
+      ? tr("Стовпчик і зелена лінія — незмінний факт "+observedUk+
+           ". Біла риска — прогноз годин/добу, зелений порожній ромб — прогноз тривог/день. Прогноз не додається до факту. Дані станом на "+asOfUk+".",
+           "Solid bar and green line: unchanged actual values "+observedEn+
+           ". White tick: forecast hours/day; hollow green diamond: forecast alerts/day. Forecast is not added to fact. Data as of "+asOfEn+".")
+      : tr("Стовпчик і зелена лінія — факт "+observedUk+". Дані станом на "+asOfUk+".",
+           "Bar and green line: actual values "+observedEn+". Data as of "+asOfEn+".");
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
@@ -3008,7 +2986,7 @@ function renderCity() {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin, ...(completion ? [periodCompletionHatchPlugin] : [])],
+    plugins: [partialPeriodBarPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -3034,33 +3012,17 @@ function renderCity() {
           },
           callbacks: {
             label(context) {
-              if (completion && context.dataIndex===rows.length-1) {
-                const observedDays=completion.observedDaysEquivalent;
-                const observedDaysText=completion.asOfIsIntraday
-                  ? fmt(observedDays,1) : String(completion.observed);
-                if (!context.dataset._isCompletion && context.dataset.type==="bar" && period!=="daily28") {
-                  return [
-                    tr("Факт за "+observedDaysText+" дня: "+formatDurationHours(completion.actualHours/observedDays)+"/добу",
-                      "Observed "+observedDaysText+" days: "+formatDurationHours(completion.actualHours/observedDays)+"/day"),
-                    tr("Частка у середній за "+completion.days+" днів: "+formatDurationHours(context.parsed.y),
-                      "Contribution to "+completion.days+"-day average: "+formatDurationHours(context.parsed.y)),
-                    tr("Фактична частота: "+fmt(completion.actualAlerts/observedDays,2)+" тривог/день",
-                      "Observed frequency: "+fmt(completion.actualAlerts/observedDays,2)+" alerts/day")
-                  ];
-                }
-                if (context.dataset._isCompletion && context.dataset.type==="bar") {
-                  return tr("Прогноз решти (частка у середній): ","Estimated remainder (average contribution): ")+
-                    formatDurationHours(context.parsed.y);
-                }
-                if (context.dataset._isCompletion && context.dataset.type==="line") {
-                  return tr("Прогноз на весь період: ","Full-period forecast: ")+
+              if (completion && context.dataIndex===rows.length-1 &&
+                  context.dataset._isCompletion) {
+                if (context.dataset.yAxisID==="yHours")
+                  return tr("Прогноз повного періоду: ","Full-period forecast: ")+
+                    formatDurationHours(context.parsed.y)+tr("/добу","/day");
+                return tr("Прогноз повного періоду: ","Full-period forecast: ")+
                     fmt(context.parsed.y,2)+tr(" тривог/день"," alerts/day");
-                }
               }
-              if (context.dataset.yAxisID === "yHours") {
+              if(context.dataset.yAxisID==="yHours")
                 return `${context.dataset.label}: ${formatDurationHours(context.parsed.y)}`;
-              }
-              return `${context.dataset.label}: ${fmt(context.parsed.y, 2)}`;
+              return `${context.dataset.label}: ${fmt(context.parsed.y,2)}`;
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
@@ -3075,15 +3037,16 @@ function renderCity() {
           }
         },
         partialPeriodBar: { rows, datasetIndices: [0] },
-        periodCompletionHatch:{
-          datasetIndex:completion?intensityDatasets.findIndex(d=>d._isCompletion&&d.type==="bar"):-1,
-          index:completion?rows.length-1:-1
-        }
+        // The forecast is presented by non-additive markers only.
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
         yHours: {
-          stacked:Boolean(completion),
+          stacked:false,
+          suggestedMax:Math.max(
+            ...rows.map(r=>Number(r.avg_daily_alert_hours)||0),
+            completionPotential ? completionPotential.expectedHours/completionPotential.days : 0
+          ),
           position: "left",
           beginAtZero: true,
           ticks: { color: TEXT, callback: value => formatDurationHours(value) },
@@ -3091,6 +3054,10 @@ function renderCity() {
           title: { display: true, text: tr("Час / добу","Time / day"), color: TEXT }
         },
         yAlerts: {
+          suggestedMax:Math.max(
+            ...rows.map(r=>Number(r.alerts_per_day)||0),
+            completionPotential ? completionPotential.expectedAlerts/completionPotential.days : 0
+          ),
           position: "right",
           beginAtZero: true,
           ticks: { color: TEXT },
