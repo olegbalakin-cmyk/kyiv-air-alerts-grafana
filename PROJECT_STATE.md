@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-14. **Casualty scope: PROMOTE=OFF.** C6 current historical status follows newer accepted `main:C6-AUTO-GIT-RESTORED-2026-11-14-01` (`GLOBAL_CUTOVER=YES`, stabilization open); old C6 checkpoints here are historical.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01**: [PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) `4604004b`, CI #43646987342 7/7 PASS, live shadow BLOCKED.
+Latest casualty: **CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01**: PR #169 `1cd3e85f`, Actions #43696226023 17/17 offline PASS. Live shadow BLOCKED.
 
 ## Working instructions
 
@@ -16,18 +16,22 @@ Latest casualty: **CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01**: [PR #1
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** Work Y merged into main, PROMOTE hard-OFF. Work AB independent 23-city RSS + Work X/AA index PASS offline only; no real discovery/card capture, credits OFF.
+- **Operational WIP / casualty:** Work Y merged to main (PROMOTE hard-OFF); Work AB/AC RSS→article→evidence PASS on mocked input. Direct Google News publisher links and counted claims unresolved; 0 credits. Active WIP workflow unchanged.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: Work AC minimal reusable allowlisted page-capture adapter + enforce RSS/page budgets and offline recovery proof. No recurring source HTTP, WIP writes or live shadow without separate owner GO; T03–T05 NEEDS_REVIEW.
+3. Casualty next: Work AD narrow source-URL resolution and Work J count/scope integration, plus exact-head offline E2E. Check current WIP HEAD before transfer. No live HTTP or WIP writes before owner GO; T03–T05 NEEDS_REVIEW.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
+
+- [PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) `1cd3e85f72f8c80dadd2b53d2b9ce2bb0b0984cf`; [Actions #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) SUCCESS 7 Work AB + 10 Work AC offline tests; proof #14154303167 (uploader ZIP digest in CHANGELOG), 3/3 inner SHA PASS. 23 RSS/10 publisher GET budgets, secure article capture and three mocked cycles PASS. 0 real HTTP, WIP writes or death credits. Opaque Google News URLs remain unresolved and `claim_deaths=null` without Work J counts. No active workflow changes, PROMOTE OFF; `READY_FOR_SHADOW_GO=BLOCKED`.
+
 ## CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 — three-cycle scratch proof PASS; live GO blocked (2026-11-15)
 
 - [PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) exact `4604004bd7399975c7b4d4cc87c0a43fcb4cd403`; [Actions #43646987342](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342) SUCCESS 7/7 offline; artifact #14133897958 (ZIP digest in CHANGELOG). Three mocked four-hour scans 23/23→22/23→23/23, cursor recovery, 48h overlap, replay 0; scratch queue 1707→1708 synthetic, 3 saved T03–T05 cards NEEDS_REVIEW, 0 publisher GET or credits. No live page capture, network budgets not enforced; WIP/main/site-prod unchanged.
