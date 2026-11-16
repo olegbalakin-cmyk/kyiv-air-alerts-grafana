@@ -153,6 +153,14 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
   min-height:28px;
 }
 .chart-export-row[data-csv-chart="cityIntensityChart"] .forecast-control.hidden{display:none}
+/* Help remains focusable when a disabled checkbox can't receive pointer or
+   keyboard focus. The reason appears on hover, focus or tap of the info icon. */
+.forecast-help{display:inline-flex;align-items:center;justify-content:center;width:24px;height:28px;border:0;background:transparent;color:#a6c9e7;font-size:18px;line-height:1;cursor:help;padding:0;border-radius:6px;position:relative}
+.forecast-help:focus-visible{outline:2px solid #79bfff;outline-offset:2px}
+.forecast-help[hidden]{display:none!important}
+.forecast-help-tooltip{display:none;position:absolute;right:16px;transform:translateY(100%);margin-top:4px;max-width:min(320px,calc(100vw - 32px));min-width:min(210px,calc(100vw - 32px));padding:9px 12px;border:1px solid #4b6075;border-radius:8px;background:#111f2b;color:#e0ecf5;font-size:12px;line-height:1.4;box-shadow:0 8px 30px rgba(0,0,0,.38);z-index:30}
+.forecast-help:hover + .forecast-help-tooltip,.forecast-help:focus-visible + .forecast-help-tooltip,.forecast-help[aria-expanded="true"] + .forecast-help-tooltip{display:block}
+
 
 /* Allow Chart.js canvas and chart actions to shrink on narrow viewports. */
 .chart-grid > .chart-card{min-width:0}
