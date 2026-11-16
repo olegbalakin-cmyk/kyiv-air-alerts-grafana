@@ -29,8 +29,11 @@ class SeoMonthlySourceSelectionTests(unittest.TestCase):
         self.assertEqual(selected["value"], 2)
 
     def test_select_standalone_when_older_embedded(self):
+        self.old["meta"]["generated_at"] = self.late
+        later = "2026-12-04T10:00:00+02:00"
+        self.dashboard["meta"]["generated_at"] = later
         old_nested = {"meta": {"generated_at": self.early,
-                                "source_dashboard_generated_at": self.late}, "value": 1}
+                                "source_dashboard_generated_at": later}, "value": 1}
         self.dashboard["historical_daily_kpi"] = old_nested
         selected, origin = module.choose(self.old, self.dashboard)
         self.assertEqual(origin, "standalone_historical_daily_kpi")
