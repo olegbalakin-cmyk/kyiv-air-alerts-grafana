@@ -1,0 +1,131 @@
+name: SEO full history guarded preview
+on:
+  push:
+    branches: [seo-full-history-preview-2026-11-16]
+  pull_request:
+    branches: [site-prod]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: seo-full-history-draft-only
+  cancel-in-progress: true
+jobs:
+  build-browser-deploy:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/seo-full-history-preview-2026-11-16') || (github.event_name == 'pull_request' && github.head_ref == 'seo-full-history-preview-2026-11-16') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/seo-full-history-preview-2026-11-16')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - name: Check out exact archive preview HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Validate source and static archive unit tests
+        run: |
+          set -euo pipefail
+          test "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" = "seo-full-history-preview-2026-11-16"
+          python3 -m unittest discover -s tests -p test_seo_full_history_archive.py -v
+          node --check tests/seo_full_history_visual.cjs
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+      - name: Run exact Netlify build recipe and validate all URLs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,subprocess,tomllib
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          cmd=tomllib.loads(Path("netlify.toml").read_text())["build"]["command"]
+          subprocess.run(["bash","-e","-o","pipefail","-c",cmd],check=True)
+          out=Path("_site")
+          manifest=json.loads((out/"static-archive-manifest.json").read_text())
+          assert manifest["cities"]==23 and manifest["verified_full_months"]==392
+          assert manifest["month_pages_both_languages"]==784
+          namespace="{http://www.sitemaps.org/schemas/sitemap/0.9}"
+          urls=ET.parse(out/"sitemap.xml").findall(".//"+namespace+"loc")
+          assert len(urls)==manifest["sitemap_url_count"] and len(urls)>850
+          assert (out/"robots.txt").is_file()
+          for p in ["index.html","en/index.html"]:
+              assert (out/p).read_text().count('id="staticStatsFooterLink"')==1
+          assert 'href="/stats/"' in (out/"index.html").read_text()
+          assert 'href="/en/stats/"' in (out/"en/index.html").read_text()
+          print("SEO_FULL_HISTORY_NETLIFY_BUILD_PASS",len(urls),"sitemap URLs")
+          PY
+      - name: Install Playwright Chromium on pinned Ubuntu 24.04
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/seo-full-node
+          cd /tmp/seo-full-node
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.56.1
+          ./node_modules/.bin/playwright install --with-deps chromium
+          echo "NODE_PATH=/tmp/seo-full-node/node_modules" >> "$GITHUB_ENV"
+      - name: Physically inspect desktop/mobile, Ukrainian/English, JS on/off
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --directory _site --bind 127.0.0.1 >/tmp/seo-full-http.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" || true' EXIT
+          python3 - <<'PY'
+          import time,urllib.request
+          for _ in range(30):
+              try:
+                  urllib.request.urlopen("http://127.0.0.1:8765/stats/",timeout=2)
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise RuntimeError("HTTP localhost missing")
+          PY
+          node tests/seo_full_history_visual.cjs
+      - name: Save source, sitemap, and visual proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-full-history-offline-proof
+          path: |
+            seo-full-history-proof/**
+            _site/static-archive-manifest.json
+            _site/sitemap.xml
+          if-no-files-found: warn
+      - name: Isolated draft deploy without --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          test "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" = "seo-full-history-preview-2026-11-16"
+          test -s seo-full-history-proof/browser-checks.json
+          npx -y netlify-cli@23.15.1 deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json > seo-full-history-deploy.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          info=json.loads(Path("seo-full-history-deploy.json").read_text())
+          url=info.get("deploy_url") or info.get("url")
+          assert url and url.startswith("https://") and "--ukraine-air-alerts.netlify.app" in url
+          assert url!="https://ukraine-air-alerts.netlify.app"
+          Path("seo-full-history-preview-url.txt").write_text(url.rstrip("/")+"/\n")
+          print("SEO_FULL_HISTORY_DRAFT_URL",url)
+          PY
+      - name: Verify served draft HTTP on representative pages
+        run: |
+          set -euo pipefail
+          PREVIEW=$(cat seo-full-history-preview-url.txt)
+          for route in / /en/ /stats/ /en/stats/ /sitemap.xml /robots.txt /static-archive-manifest.json /stats/kyiv/ /en/stats/kyiv/ /stats/kyiv/2022/ /en/stats/kyiv/2022/ /stats/kyiv/2022-03/ /stats/kyiv/2026-10/ /en/stats/kyiv/2026-10/ /stats/kharkiv/2026-10/ /en/stats/lviv/2026-10/ /stats/sevastopol/2026-10/; do
+            status=$(curl --silent --show-error --location --retry 2 --retry-delay 2 -o /tmp/seo-full-remote -w '%{http_code}' "$PREVIEW${route#/}")
+            test "$status" = "200" || { echo "SEO_REMOTE_HTTP_FAIL $route status=$status"; exit 1; }
+          done
+          echo "SEO_FULL_HISTORY_REMOTE_17_OF_17_PASS"
+      - name: Save draft preview URL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-full-history-draft-preview
+          path: |
+            seo-full-history-preview-url.txt
+            seo-full-history-deploy.json
+            seo-full-history-proof/browser-checks.json
+          if-no-files-found: warn
