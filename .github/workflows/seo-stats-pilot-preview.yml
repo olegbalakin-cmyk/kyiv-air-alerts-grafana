@@ -12,6 +12,17 @@ on:
       - "tests/seo_pilot_visual.cjs"
       - "netlify.toml"
       - ".github/workflows/seo-stats-pilot-preview.yml"
+  pull_request:
+    branches:
+      - site-prod
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/scripts/build_bilingual_html.py"
+      - "research/seo_pilot_2026_11_16/**"
+      - "tests/test_seo_static_pilot.py"
+      - "tests/seo_pilot_visual.cjs"
+      - "netlify.toml"
+      - ".github/workflows/seo-stats-pilot-preview.yml"
   workflow_dispatch:
 
 permissions:
@@ -23,20 +34,20 @@ concurrency:
 
 jobs:
   preview:
-    if: github.ref == 'refs/heads/seo-stats-pilot-2026-11-16'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/seo-stats-pilot-2026-11-16') || (github.event_name == 'pull_request' && github.head_ref == 'seo-stats-pilot-2026-11-16') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/seo-stats-pilot-2026-11-16')
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
       - name: Check out exact preview branch head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Validate branch, build and immutable input
         shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_REF}" = "refs/heads/seo-stats-pilot-2026-11-16"
+          test "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" = "seo-stats-pilot-2026-11-16"
           test -s historical-daily-kpi.json
           python3 - <<'PY'
           import hashlib, json
@@ -121,7 +132,7 @@ jobs:
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN"
           test -s seo-preview-proof/visual-matrix.json
-          test "${GITHUB_REF}" = "refs/heads/seo-stats-pilot-2026-11-16"
+          test "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" = "seo-stats-pilot-2026-11-16"
           npx -y netlify-cli@23.15.1 deploy \
             --dir=_site \
             --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
