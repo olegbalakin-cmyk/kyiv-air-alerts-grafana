@@ -245,6 +245,14 @@ assert(app.includes('Штрихування не додається до фак�
   "Ukrainian explanation must distinguish fact/forecast cutoffs");
 assert(app.includes('Hatching is not additive.'),
   "English explanation must distinguish fact/forecast cutoffs");
+assert(app.includes('const factClock=partialThroughKyivClock(factSource,factDay);'),
+  "tooltip formats source timezone-aware factual clock instead of dropping time");
+assert(app.includes('partialThroughKyivClock(modelSource,modelDay)'),
+  "forecast source clock is rendered in Kyiv local time");
+assert(app.includes('shortDateLabel(completion.end)'),
+  "tooltip uses readable short forecast period ending date");
+assert(!app.includes('" за даними до "+modelCutoff'),
+  "tooltip must not expose raw ISO timestamp and timezone offsets");
 assert(app.includes('factualRow?.quarter_end'),
   "quarterly factual cutoff is the original completed-month endpoint");
 assert(app.includes('completionPotential.asOf'),
