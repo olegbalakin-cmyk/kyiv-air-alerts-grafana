@@ -20,7 +20,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
 SITE = "https://ukraine-air-alerts.netlify.app"
-GIT_SOURCE = "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/site-prod/historical-daily-kpi.json"
+GIT_SOURCE = SITE + "/historical-daily-kpi.json"
 
 # Ukrainian/English city names, followed by the exact administrative raion
 # used when the source row is a raion proxy. City series must have no raion.
