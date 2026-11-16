@@ -2928,7 +2928,31 @@ function renderCity() {
   // fails; disable it with an explicit reason rather than silently hiding it.
   const trendToggle=$("showTrend");
   const trendControl=trendToggle?.closest("label");
-  const trendReason=!completionPeriod
+  // Diagnose an excluded calendar quarter *only when the source-certified
+  // forecast itself exists*. An April/November-only date range can omit the
+  // original completed-month bar even while Q4 forecasting is fully valid.
+  // Never incorrectly call this missing fresh data or mutate the chosen range.
+  const quarterRangeStartsTooLate=period==="quarterly" && completionCandidate &&
+    activeRange.from && activeRange.from>completionCandidate.start;
+  const quarterRangeEndsTooEarly=period==="quarterly" && completionCandidate &&
+    !quarterRangeStartsTooLate && activeRange.to &&
+    activeRange.to<completionCandidate.through;
+  const quarterNum=completionCandidate?.key?.slice(-1);
+  const quarterRoman=({1:"I",2:"II",3:"III",4:"IV"})[quarterNum] || quarterNum;
+  const quarterStart=completionCandidate?.start || "";
+  const quarterThrough=completionCandidate?.through || "";
+  const toUkrDate=d=>d.slice(8,10)+"."+d.slice(5,7)+"."+d.slice(0,4);
+  const trendReason=quarterRangeStartsTooLate
+    ? tr("Для прогнозу "+quarterRoman+" кварталу виберіть діапазон від "+
+         toUkrDate(quarterStart)+" або раніше.",
+         "To forecast Q"+quarterNum+", select a range starting on "+
+         quarterStart+" or earlier.")
+    : quarterRangeEndsTooEarly
+    ? tr("Для прогнозу "+quarterRoman+" кварталу виберіть завершення діапазону "+
+         toUkrDate(quarterThrough)+" або пізніше.",
+         "To forecast Q"+quarterNum+", select a range ending on "+
+         quarterThrough+" or later.")
+    : !completionPeriod
     ? tr("Тренд доступний для днів, тижнів, місяців і кварталів.",
          "Trend is available for days, weeks, months and quarters.")
     : period==="daily28"
