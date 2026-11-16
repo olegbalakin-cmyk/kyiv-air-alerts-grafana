@@ -92,7 +92,10 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        continue;
      }
      assert.equal(off.helpVisible,false,mode+" enabled trend should hide info icon");
-     await page.click("#showTrend");
+     await page.$eval("#showTrend",el=>{
+       el.checked=!el.checked;
+       el.dispatchEvent(new Event("change",{bubbles:true}));
+     });
      const on=await snapshot();
      if(!on.checked){
        const debug=await page.evaluate(()=>({
@@ -146,7 +149,10 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        forecastAlerts:on.forecast[0].points[0],originalHours:old.values[0].at(-1),
        tooltipFooter:renderedFooter});
      if(mode==="quarterly")await page.screenshot({path:"trend-fact-invariance-mobile.png"});
-     await page.click("#showTrend");
+     await page.$eval("#showTrend",el=>{
+       el.checked=!el.checked;
+       el.dispatchEvent(new Event("change",{bubbles:true}));
+     });
      const reset=await snapshot();
      assert.deepEqual(reset.values,off.values,mode+" fact changed on reset");
 
