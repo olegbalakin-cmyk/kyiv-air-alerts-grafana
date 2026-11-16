@@ -86,6 +86,8 @@ class StaticSeoPilotTests(unittest.TestCase):
         dashboard = (PAGES / "index.html").read_text(encoding="utf-8")
         self.assertEqual(dashboard.count('id="staticStatsFooterLink"'), 1)
         self.assertIn('href="/stats/" id="staticStatsFooterLink"', dashboard)
+        self.assertIn('class="footer-stats-link"', dashboard)
+        self.assertRegex(dashboard, r'</span>\s*<a href="/stats/" id="staticStatsFooterLink"')
         bilingual = (ROOT / "kyiv-air-alerts-grafana/scripts/build_bilingual_html.py").read_text(encoding="utf-8")
         self.assertIn('href="/en/stats/" id="staticStatsFooterLink"', bilingual)
         netlify = (ROOT / "netlify.toml").read_text(encoding="utf-8")
