@@ -67,13 +67,53 @@ const assert = require('node:assert/strict');
         }
       }
       await context.close();
+      // Regression: the real dashboard runs a localization function which
+      // rewrites footer <span> elements. Test with JS enabled as well.
+      const interactive = await browser.newContext({
+        viewport: {width: viewport.width, height: viewport.height},
+        javaScriptEnabled: true,
+        locale: 'uk-UA'
+      });
+      await interactive.route('**/*', route => {
+        const host = new URL(route.request().url()).hostname;
+        return host === '127.0.0.1' || host === 'localhost'
+          ? route.continue() : route.abort();
+      });
+      const interactivePage = await interactive.newPage();
+      for (const lang of ['uk', 'en']) {
+        const dashboard = lang === 'uk' ? '/' : '/en/';
+        const index = lang === 'uk' ? '/stats/' : '/en/stats/';
+        const label = lang === 'uk' ? 'Статистика у таблицях' : 'Data tables';
+        const response = await interactivePage.goto(base + dashboard, {waitUntil: 'domcontentloaded'});
+        assert.equal(response.status(), 200, 'JS dashboard status');
+        await interactivePage.waitForTimeout(1200);
+        const link = interactivePage.locator('footer #staticStatsFooterLink');
+        assert.equal(await link.count(), 1, 'footer link survives JS initialization');
+        assert.equal((await link.textContent()).trim(), label, 'JS localized link');
+        assert.equal(await link.getAttribute('href'), index, 'JS localized destination');
+        assert.ok(await link.isVisible(), 'footer link is visible with JS on');
+        assert.equal(await interactivePage.evaluate(() => {
+          return document.querySelectorAll('footer > span').length;
+        }), 2, 'existing JS-managed footer spans preserved');
+        if (lang === 'en') {
+          const first = await interactivePage.locator('footer > span').first().innerText();
+          assert.match(first, /Data and code/, 'real English JS localization ran');
+        }
+        await link.scrollIntoViewIfNeeded();
+        await link.screenshot({path: path.join(output, viewport.name + '-' + lang + '-js-enabled-link.png')});
+        await link.click();
+        await interactivePage.waitForURL('**' + index);
+        assert.equal(await interactivePage.locator('tbody tr').count(), 3, 'JS enabled click opens stat index');
+        checks.push({viewport: viewport.name, lang, kind: 'js-enabled-footer-navigation', href: index, pass: true});
+      }
+      await interactive.close();
     }
   } finally {
     await browser.close();
   }
   fs.writeFileSync(path.join(output, 'visual-matrix.json'), JSON.stringify({source: receipt.input_sha_git_blob, checks}, null, 2));
-  assert.equal(checks.length, 20);
-  process.stdout.write('SEO_PREVIEW_BROWSER_PASS: 20/20 UA+EN desktop+mobile no-JS checks; screenshots recorded\n');
+  assert.equal(checks.length, 24);
+  process.stdout.write('SEO_PREVIEW_BROWSER_PASS: 24/24 no-JS and JS-enabled UA+EN desktop+mobile checks; screenshots recorded\n');
 })().catch(err => {
   process.stderr.write('SEO_PREVIEW_BROWSER_FAIL: ' + (err.stack || err) + '\n');
   process.exitCode = 1;
