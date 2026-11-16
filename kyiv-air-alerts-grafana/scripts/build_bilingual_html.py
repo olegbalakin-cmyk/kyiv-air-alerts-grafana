@@ -124,6 +124,11 @@ def build_pages(template: str) -> tuple[str, str]:
         '<button id="langEn" class="language-button" type="button" aria-pressed="true">',
     )
 
+    # Keep footer archive link outside the two spans rewritten by app.js.
+    en = one_replace(en,
+        '<a id="staticStatsFooterLink" href="/stats/" class="footer-stats-link">Статистика у таблицях</a>',
+        '<a id="staticStatsFooterLink" href="/en/stats/" class="footer-stats-link">Data tables</a>')
+
     # Both pages still refer to one shared application, not copied frontends.
     if en.count('src="app.js?') != 1 or en.count('href="styles.css?') != 1:
         raise ValueError("Unexpected shared asset references")

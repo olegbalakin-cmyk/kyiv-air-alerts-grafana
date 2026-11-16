@@ -296,11 +296,39 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/index.html kyiv-air-alerts-grafana/pages-preview/styles.css kyiv-air-alerts-grafana/pages-preview/app.js kyiv-air-alerts-grafana/pages-preview/features.json kyiv-air-alerts-grafana/pages-preview/chart-share.js kyiv-air-alerts-grafana/pages-preview/brand-mark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-uk-dark.svg kyiv-air-alerts-grafana/pages-preview/brand-horizontal-en-dark.svg kyiv-air-alerts-grafana/pages-preview/favicon.svg kyiv-air-alerts-grafana/pages-preview/favicon-32.png _site/
           cp kyiv-air-alerts-grafana/pages-preview/kpi-range.js historical-daily-kpi.json _site/
           python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python3 -m unittest discover -s tests -p test_seo_full_history_archive.py -v
+          python3 kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py --source historical-daily-kpi.json --output-dir _site
           test -s _site/en/index.html
           grep -q 'rel="canonical" href="https://ukraine-air-alerts.netlify.app/en/"' _site/en/index.html
           grep -q 'hreflang="uk"' _site/index.html
           grep -q 'hreflang="en"' _site/en/index.html
-          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 12
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 15
+          test -s _site/stats/index.html
+          test -s _site/en/stats/index.html
+          test -s _site/stats/kyiv/2026-10/index.html
+          test -s _site/en/stats/lviv/2026-10/index.html
+          test -s _site/robots.txt
+          test -s _site/sitemap.xml
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          raw=Path("historical-daily-kpi.json").read_bytes()
+          blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()
+          index=json.loads(raw)
+          manifest=json.loads(Path("_site/static-archive-manifest.json").read_text())
+          assert manifest["source_git_blob"]==blob, "SEO_SOURCE_GENERATION_DRIFT"
+          assert manifest["cities"]==23, "SEO_WRONG_CITY_COUNT"
+          assert manifest["verified_full_months"]==index["meta"]["verified_full_metric_months"], "SEO_MONTH_COUNT_DRIFT"
+          assert manifest["month_pages_both_languages"]==2*manifest["verified_full_months"], "SEO_MONTH_PAGE_COUNT"
+          ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"
+          urls=ET.parse("_site/sitemap.xml").findall(".//"+ns+"loc")
+          assert len(urls)==manifest["sitemap_url_count"], "SEO_SITEMAP_COUNT"
+          assert len(urls)==4+46+manifest["year_pages_both_languages"]+manifest["month_pages_both_languages"], "SEO_ROUTE_COUNT"
+          assert Path("_site/index.html").read_text().count('id="staticStatsFooterLink"')==1
+          assert Path("_site/en/index.html").read_text().count('id="staticStatsFooterLink"')==1
+          print("SEO_PRODUCTION_STATIC_PARITY_PASS",len(urls),manifest["verified_full_months"],blob)
+          PY
           if [[ "${{ inputs.neon_release_mode }}" == "true" ]]; then
             cmp historical-daily-kpi.json _site/historical-daily-kpi.json
             test "$(sha256sum _site/historical-daily-kpi.json | cut -d ' ' -f1)" = "${{ inputs.approved_kpi_sha256 }}"
