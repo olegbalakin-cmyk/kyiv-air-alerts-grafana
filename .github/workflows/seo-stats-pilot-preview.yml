@@ -1,0 +1,163 @@
+name: SEO static pilot — guarded draft preview
+
+on:
+  push:
+    branches:
+      - seo-stats-pilot-2026-11-16
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/scripts/build_bilingual_html.py"
+      - "research/seo_pilot_2026_11_16/**"
+      - "tests/test_seo_static_pilot.py"
+      - "tests/seo_pilot_visual.cjs"
+      - "netlify.toml"
+      - ".github/workflows/seo-stats-pilot-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-stats-pilot-draft-only
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/seo-stats-pilot-2026-11-16'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Check out exact preview branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Validate branch, build and immutable input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/seo-stats-pilot-2026-11-16"
+          test -s historical-daily-kpi.json
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          source = Path("historical-daily-kpi.json")
+          data = json.loads(source.read_text())
+          receipt = json.loads(Path("research/seo_pilot_2026_11_16/verified_snapshot.json").read_text())
+          assert data["meta"]["generated_at"] == receipt["source_generated_at"]
+          assert data["meta"]["verified_count"] == 23
+          assert data["meta"]["timezone"] == "Europe/Kyiv"
+          print("SEO_SOURCE_INPUT_PASS", data["meta"]["generated_at"])
+          PY
+          python3 -m unittest discover -s tests -p test_seo_static_pilot.py -v
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/chart-share.js
+          python3 - <<'PY'
+          import pathlib, subprocess, tomllib
+          recipe = tomllib.loads(pathlib.Path("netlify.toml").read_text())
+          subprocess.run(["bash", "-e", "-o", "pipefail", "-c", recipe["build"]["command"]], check=True)
+          out=pathlib.Path("_site")
+          required=["index.html","en/index.html","app.js","styles.css","data.json","historical-daily-kpi.json",
+            "stats/index.html","en/stats/index.html"]
+          for lang in ["", "en/"]:
+            for city in ["kyiv","kharkiv","lviv"]:
+              required.append(f"{lang}stats/{city}/2026-10/index.html")
+          for f in required:
+            assert (out/f).stat().st_size > 30, f"missing preview asset: {f}"
+          for f in ["index.html","en/index.html"]:
+            html=(out/f).read_text()
+            assert html.count('id="staticStatsFooterLink"')==1
+          assert 'href="/stats/" id="staticStatsFooterLink"' in (out/"index.html").read_text()
+          assert 'href="/en/stats/" id="staticStatsFooterLink"' in (out/"en/index.html").read_text()
+          print("SEO_PREVIEW_NETLIFY_BUILD_PASS", len(required), "required assets")
+          PY
+
+      - name: Install isolated browser test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/seo-preview-node
+          cd /tmp/seo-preview-node
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.56.1
+          ./node_modules/.bin/playwright install --with-deps chromium
+          echo "NODE_PATH=/tmp/seo-preview-node/node_modules" >> "$GITHUB_ENV"
+
+      - name: Browser check desktop/mobile UA/EN with JavaScript disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --directory _site --bind 127.0.0.1 >/tmp/seo-preview-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill "$HTTP_PID" || true' EXIT
+          python3 - <<'PY'
+          import time,urllib.request
+          for i in range(30):
+            try:
+              urllib.request.urlopen("http://127.0.0.1:8765/stats/",timeout=2)
+              break
+            except Exception:
+              time.sleep(1)
+          else:
+            raise RuntimeError("Preview HTTP server did not start")
+          PY
+          node tests/seo_pilot_visual.cjs
+
+      - name: Upload offline preview proof regardless of later deploy result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-stats-pilot-visual-proof
+          path: |
+            seo-preview-proof/**
+            research/seo_pilot_2026_11_16/verified_snapshot.json
+          if-no-files-found: warn
+
+      - name: Guarded non-production Netlify draft deployment
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          test -s seo-preview-proof/visual-matrix.json
+          test "${GITHUB_REF}" = "refs/heads/seo-stats-pilot-2026-11-16"
+          npx -y netlify-cli@23.15.1 deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json > seo-preview-deploy.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          info = json.loads(Path("seo-preview-deploy.json").read_text())
+          preview_url = info.get("deploy_url") or info.get("url")
+          assert preview_url and preview_url.startswith("https://"), "NO_HTTPS_DRAFT_URL"
+          assert "ukraine-air-alerts.netlify.app" in preview_url
+          assert preview_url != "https://ukraine-air-alerts.netlify.app", "PRODUCTION_URL_FORBIDDEN"
+          print("SEO_DRAFT_PREVIEW_URL", preview_url)
+          Path("seo-preview-url.txt").write_text(preview_url+"\n")
+          PY
+
+      - name: Verify public draft responses
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREVIEW=$(cat seo-preview-url.txt)
+          for route in / /en/ /stats/ /en/stats/ /stats/kyiv/2026-10/ /en/stats/kyiv/2026-10/ /stats/kharkiv/2026-10/ /en/stats/kharkiv/2026-10/ /stats/lviv/2026-10/ /en/stats/lviv/2026-10/; do
+            code=$(curl --silent --show-error --location --retry 3 --retry-delay 2 --retry-all-errors -o /tmp/seo-preview-remote.html -w '%{http_code}' "$PREVIEW$route")
+            test "$code" = "200" || { echo "HTTP_FAIL $route $code"; exit 1; }
+            grep -q '<html lang=' /tmp/seo-preview-remote.html || { echo "HTML_FAIL $route"; exit 1; }
+          done
+          echo "SEO_REMOTE_DRAFT_10_OF_10_PASS"
+
+      - name: Upload preview URL and proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-stats-pilot-draft-preview
+          path: |
+            seo-preview-url.txt
+            seo-preview-deploy.json
+            seo-preview-proof/visual-matrix.json
+          if-no-files-found: warn
