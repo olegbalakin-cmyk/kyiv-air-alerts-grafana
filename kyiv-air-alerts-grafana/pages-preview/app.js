@@ -2949,6 +2949,13 @@ function renderCity() {
     trendToggle.title=completionPotential?"":trendReason;
     if(!completionPotential)trendToggle.checked=false;
   }
+  const trendHelp=$("trendHelp"),trendHelpText=$("trendHelpTooltip");
+  if(trendHelp && trendHelpText){
+    trendHelp.hidden=Boolean(completionPotential);
+    trendHelpText.textContent=completionPotential?"":trendReason;
+    trendHelp.setAttribute("aria-label",completionPotential?"":trendReason);
+    if(completionPotential)trendHelp.setAttribute("aria-expanded","false");
+  }
   const completion=completionPotential && trendToggle?.checked ? completionPotential : null;
   const labels = rows.map(r => periodDisplayLabel(r, period));
   const chartLabels = labels;
@@ -3034,9 +3041,6 @@ function renderCity() {
         );
   }
 
-  if(intensitySubtitle && !completionPotential){
-    intensitySubtitle.textContent+=" "+trendReason;
-  }
   if (intensitySubtitle && completionPotential) {
     const factualRow=rows.at(-1);
     const factUntil=factualRow?.partial_through ||
@@ -4291,6 +4295,24 @@ function bind() {
     renderCity();
   });
   $("showTrend")?.addEventListener("change", () => renderCity());
+  // Disabled native checkboxes are not focusable; a separate help button
+  // exposes the exact eligibility reason to hover, keyboard and touch.
+  const trendHelpButton=$("trendHelp");
+  trendHelpButton?.addEventListener("click", event=>{
+    event.stopPropagation();
+    const open=trendHelpButton.getAttribute("aria-expanded")==="true";
+    trendHelpButton.setAttribute("aria-expanded",String(!open));
+  });
+  document.addEventListener("click", event=>{
+    if(trendHelpButton && !event.target.closest("#trendHelp"))
+      trendHelpButton.setAttribute("aria-expanded","false");
+  });
+  trendHelpButton?.addEventListener("keydown",event=>{
+    if(event.key==="Escape"){
+      trendHelpButton.setAttribute("aria-expanded","false");
+      trendHelpButton.blur();
+    }
+  });
   document.querySelectorAll(".time-of-day-range-option").forEach(option => {
     option.addEventListener("change", () => {
       if (!selectedTimeOfDayRanges().length) option.checked = true;
