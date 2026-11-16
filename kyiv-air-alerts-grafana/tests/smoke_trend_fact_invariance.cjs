@@ -53,7 +53,10 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        checked:document.querySelector("#showTrend").checked,
        enabled:!document.querySelector("#showTrend").disabled,
        reason:document.querySelector("#showTrend").title||"",
-       visible:!document.querySelector("#showTrend").closest("label").classList.contains("hidden")};
+       visible:!document.querySelector("#showTrend").closest("label").classList.contains("hidden"),
+       helpVisible:!document.querySelector("#trendHelp").hidden,
+       helpText:document.querySelector("#trendHelpTooltip").textContent,
+       subtitle:document.querySelector("#cityIntensityChart").closest(".chart-card").querySelector(".chart-subtitle").textContent};
    });
  }
  try{
@@ -74,9 +77,21 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
      assert.equal(off.visible,true,mode+" trend checkbox unexpectedly HIDDEN");
      if(!off.enabled){
        assert(off.reason.length>=12,mode+" disabled trend must explain source condition");
+       assert.equal(off.helpVisible,true,mode+" disabled trend info icon must be visible");
+       assert.equal(off.helpText,off.reason,mode+" hover text must match disabled reason");
+       assert(!off.subtitle.includes(off.reason),mode+" reason must not clutter chart description");
+       await page.click("#trendHelp");
+       const helpState=await page.evaluate(()=>({
+         expanded:document.querySelector("#trendHelp").getAttribute("aria-expanded"),
+         visible:getComputedStyle(document.querySelector("#trendHelpTooltip")).display!=="none"
+       }));
+       assert.equal(helpState.expanded,"true",mode+" touch help expands");
+       assert.equal(helpState.visible,true,mode+" tooltip must be visibly rendered");
+       await page.click("#trendHelp");
        report.cases.push({mode,eligible:false,reason:off.reason,actual:off.values.map(v=>v.at(-1))});
        continue;
      }
+     assert.equal(off.helpVisible,false,mode+" enabled trend should hide info icon");
      await page.click("#showTrend");
      const on=await snapshot();
      if(!on.checked){
