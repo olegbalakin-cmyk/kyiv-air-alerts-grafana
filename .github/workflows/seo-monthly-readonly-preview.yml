@@ -1,0 +1,137 @@
+name: SEO monthly read-only preflight (no production)
+on:
+  push:
+    branches: [seo-full-history-preview-2026-11-16]
+  workflow_dispatch:
+  # Only activates on default main AFTER a separate owner-approved integration.
+  schedule:
+    - cron: "23 8 3 * *"
+permissions:
+  contents: read
+concurrency:
+  group: seo-monthly-preview-readonly
+  cancel-in-progress: true
+jobs:
+  check:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/seo-full-history-preview-2026-11-16') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/seo-full-history-preview-2026-11-16') || (github.event_name == 'schedule' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Check out preflight-only test code
+        uses: actions/checkout@v4
+      - name: Read current site-prod source separately
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: production-source
+          sparse-checkout: |
+            historical-daily-kpi.json
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+      - name: Verify monthly fail-closed logic
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_seo_monthly_*.py' -v
+      - name: Select newest provenance-bound KPI, no upstream mutation
+        run: |
+          set -euo pipefail
+          python3 kyiv-air-alerts-grafana/scripts/seo_monthly_source_select.py --standalone production-source/historical-daily-kpi.json --dashboard production-source/kyiv-air-alerts-grafana/data/dashboard_data.json --output seo-monthly-selected.json --receipt seo-monthly-source-receipt.json
+      - name: Read currently published archive baseline (404 means not released)
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import urllib.request, urllib.error
+          url='https://ukraine-air-alerts.netlify.app/static-archive-manifest.json'
+          receipt={'url':url,'status':'UNKNOWN','published_baseline_verified':False}
+          try:
+              req=urllib.request.Request(url,headers={'Accept':'application/json','User-Agent':'KyivSEOMonthlyReadOnlyGate/1.0'})
+              with urllib.request.urlopen(req,timeout=12) as response:
+                  if response.status!=200: raise ValueError('Unexpected HTTP status')
+                  content=response.read(1048577)
+                  if len(content)>1048576: raise ValueError('Oversized baseline')
+                  manifest=json.loads(content)
+                  if manifest.get('schema')!='verified-air-alert-html-archive-v1':
+                      raise ValueError('Unrecognized production schema')
+                  Path('seo-published-manifest.json').write_bytes(content)
+                  receipt.update(status='HTTP_200',published_baseline_verified=True)
+          except urllib.error.HTTPError as ex:
+              receipt['status']='HTTP_'+str(ex.code)
+              if ex.code!=404: raise
+          Path('seo-production-baseline-status.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print('SEO_MONTHLY_BASELINE',receipt['status'])
+          PY
+      - name: Evaluate previous full month in Europe Kyiv, no production permit
+        id: preflight
+        run: |
+          set -euo pipefail
+          AS_OF=$(python3 -c 'from datetime import datetime; from zoneinfo import ZoneInfo; print(datetime.now(ZoneInfo("Europe/Kyiv")).date())')
+          EXTRA=()
+          if test -s seo-published-manifest.json; then EXTRA=(--published-manifest seo-published-manifest.json); fi
+          python3 kyiv-air-alerts-grafana/scripts/seo_monthly_archive_gate.py --source seo-monthly-selected.json --as-of "$AS_OF" --output seo-monthly-gate-result.json "${EXTRA[@]}"
+          python3 - <<'PY'
+          import json,os
+          v=json.load(open('seo-monthly-gate-result.json'))
+          assert v['decision'] in ('BLOCKED','NO_CHANGE','READY_FOR_DRAFT')
+          assert v['production_deploy_allowed'] is False
+          assert v['git_publish_allowed'] is False
+          assert v['neon_access_allowed'] is False
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write('decision='+v['decision']+'\n')
+          print('SEO_MONTHLY_PREFLIGHT',v['decision'],v['reason'])
+          PY
+      - name: Store proof for review, no production write
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-monthly-preflight-proof
+          path: |
+            seo-monthly-source-receipt.json
+            seo-monthly-gate-result.json
+            seo-production-baseline-status.json
+          if-no-files-found: warn
+      - name: Build a draft archive only after all 23 cities pass
+        if: steps.preflight.outputs.decision == 'READY_FOR_DRAFT'
+        run: |
+          set -euo pipefail
+          cp seo-monthly-selected.json historical-daily-kpi.json
+          cp production-source/kyiv-air-alerts-grafana/data/dashboard_data.json kyiv-air-alerts-grafana/data/dashboard_data.json
+          python3 - <<'PY'
+          import json,subprocess,tomllib
+          from pathlib import Path
+          command=tomllib.loads(Path('netlify.toml').read_text())['build']['command']
+          subprocess.run(['bash','-e','-o','pipefail','-c',command],check=True)
+          m=json.loads(Path('_site/static-archive-manifest.json').read_text())
+          gate=json.loads(Path('seo-monthly-gate-result.json').read_text())
+          assert m['cities']==23
+          assert m['verified_full_months']==gate['verified_full_months']
+          assert m['source_git_blob']==gate['source_git_blob']
+          print('SEO_MONTHLY_DRAFT_BUILD_READY',m['verified_full_months'])
+          PY
+      - name: Deploy draft only - never production
+        if: steps.preflight.outputs.decision == 'READY_FOR_DRAFT'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@23.15.1 deploy --dir=_site --site=b5aafc46-7468-4070-baf1-db80a4d30501 --auth="$NETLIFY_AUTH_TOKEN" --json > seo-monthly-draft.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('seo-monthly-draft.json').read_text())
+          url=d.get('deploy_url') or d.get('url')
+          assert url.startswith('https://') and '--ukraine-air-alerts.netlify.app' in url
+          assert url!='https://ukraine-air-alerts.netlify.app'
+          Path('seo-monthly-draft-url.txt').write_text(url+'\n')
+          print('SEO_MONTHLY_DRAFT_URL',url)
+          PY
+      - name: Store optional draft receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-monthly-draft-receipt-if-ready
+          path: |
+            seo-monthly-draft.json
+            seo-monthly-draft-url.txt
+            seo-monthly-gate-result.json
+          if-no-files-found: warn
