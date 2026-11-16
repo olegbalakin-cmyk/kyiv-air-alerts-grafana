@@ -1,0 +1,81 @@
+name: AUDIT READ ONLY quarter forecast eligibility
+on:
+  push:
+    branches: [audit-quarter-forecast-blocker-2026-11-16]
+permissions:
+  contents: read
+jobs:
+  inspect-live-git:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          persist-credentials: false
+      - name: Print non-sensitive current 23-city forecast blocker evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "SITE_PROD_HEAD=$(git rev-parse HEAD)"
+          node <<'NODE'
+          const fs=require('node:fs');
+          const dash=JSON.parse(fs.readFileSync('kyiv-air-alerts-grafana/data/dashboard_data.json','utf8'));
+          const model=require('./kyiv-air-alerts-grafana/pages-preview/current-period-completion.js');
+          const {spawnSync}=require('node:child_process');
+          const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Kyiv',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+          const dateToday=/^\d{4}-\d{2}-\d{2}$/.test(today)?today:new Date().toISOString().slice(0,10);
+          const index=dash.historical_daily_kpi;
+          const bound=model.bounds(dateToday,'quarterly');
+          console.log('SNAPSHOT',JSON.stringify({dashAt:dash.meta?.generated_at, indexAt:index?.meta?.generated_at,indexSource:index?.meta?.source_ref,indexCount:index?.meta?.verified_count, cities:Object.keys(dash.cities||{}).length, today:dateToday, quarter:bound}));
+          const keys=Object.keys(dash.cities||{}).sort();
+          let statuses={};
+          for(const key of keys){
+            const city=dash.cities[key];
+            const idx=index?.cities?.[key];
+            const partial=city?.daily28?.at(-1);
+            const tomorrow=idx?.end?model.add(idx.end,1):null;
+            const freshToday=tomorrow===dateToday;
+            const recentPartial=partial?.partial_through;
+            const sourceDayEligible=tomorrow && tomorrow<dateToday && partial?.date===tomorrow
+              && typeof recentPartial==='string' && recentPartial.includes('T')
+              && model.bounds(tomorrow,'quarterly')?.start===bound?.start
+              && model.bounds(tomorrow,'quarterly')?.end===bound?.end;
+            const anchor=sourceDayEligible?tomorrow:dateToday;
+            const result=model.estimate(idx,'quarterly',anchor,partial);
+            const certified=model.certifiedPartial(partial,anchor,Date.now());
+            const base={
+              indexEnd:idx?.end,indexStart:idx?.start,status:idx?.status,
+              indexDays:idx?.counts?.length, monthVerified:idx?.verified_metric_months?.slice(-3),
+              dailyVerifiedLast:idx?.verified_metric_days?.slice(-3),
+              partialDate:partial?.date,partialThrough:recentPartial,
+              partialHours:partial?.total_alert_duration_hours,partialAlerts:partial?.alerts_started,
+              partialFlag:partial?.is_partial_period,
+              anchor,calendarToday:dateToday,
+              nextExpected:tomorrow,freshToday,sourceDayEligible, certifiedPartial:certified===false?'REJECTED':certified===null?'NOT_CERTIFIED':'CERTIFIED',
+              directQuarterEstimator:!!result, completeCount:bound?Math.round((Date.parse((idx?.end||'2000-01-01')+'T00:00:00Z')-Date.parse(bound.start+'T00:00:00Z'))/86400000)+1:null
+            };
+            const reasons=[];
+            if(idx?.status!=='verified')reasons.push('INDEX_NOT_VERIFIED');
+            if(tomorrow!==anchor)reasons.push('INDEX_END_NOT_DAY_BEFORE_FORECAST_ANCHOR');
+            if(!bound||idx?.end<bound.start)reasons.push('INDEX_NOT_IN_QUARTER');
+            if(base.completeCount<30)reasons.push('MIN_30_DAYS_NOT_MET');
+            if(certified===false)reasons.push('INVALID_OR_STALE_TIMESTAMP_PARTIAL');
+            if(result===null)reasons.push('MODEL_REJECTED_OTHER_OR_ABOVE');
+            if(!idx)reasons.push('MISSING_INDEX');
+            base.reasons=reasons;
+            if(key==='kyiv')console.log('KYIV_EXACT',JSON.stringify(base));
+            const label=result?'PASS':reasons.join(',')||'FAIL_UNKNOWN';
+            statuses[label]=(statuses[label]||0)+1;
+            console.log('CITY',key,JSON.stringify({indexEnd:base.indexEnd,partialDate:base.partialDate,anchor:base.anchor,modelPass:!!result,reasons}));
+          }
+          console.log('CITY_SUMMARY',JSON.stringify(statuses));
+          const c=dash.cities.kyiv;
+          console.log('KYIV_ROWS',JSON.stringify({
+            quarter:c?.quarterly?.slice(-2),monthly:c?.monthly?.slice(-2),
+            daily28:c?.daily28?.slice(-3),
+            periodsKeys:Object.keys(c?.periods||{}),
+            generation:dash.meta?.generated_at
+          }).slice(0,14000));
+          if(!index||Object.keys(index.cities||{}).length!==23)process.exitCode=2;
+          NODE
