@@ -27,6 +27,27 @@ jobs:
           python3 -m unittest discover -s tests -p test_seo_full_history_archive.py -v
           node --check tests/seo_full_history_visual.cjs
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
+      - name: Read-only checkout of current production data
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: seo-monthly-live-source
+          sparse-checkout: |
+            historical-daily-kpi.json
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+      - name: Monthly gate physical smoke - source selection and fail-closed result
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_seo_monthly_*.py' -v
+          python3 kyiv-air-alerts-grafana/scripts/seo_monthly_source_select.py --standalone seo-monthly-live-source/historical-daily-kpi.json --dashboard seo-monthly-live-source/kyiv-air-alerts-grafana/data/dashboard_data.json --output seo-monthly-test-source.json --receipt seo-monthly-test-selection.json
+          python3 kyiv-air-alerts-grafana/scripts/seo_monthly_archive_gate.py --source seo-monthly-test-source.json --as-of 2026-11-16 --output seo-monthly-test-gate.json
+          python3 - <<'PY'
+          import json
+          proof=json.load(open('seo-monthly-test-gate.json'))
+          assert proof['decision'] in ('BLOCKED','NO_CHANGE')
+          assert proof['production_deploy_allowed'] is False
+          print('SEO_MONTHLY_PHYSICAL_SHADOW_PASS',proof['decision'],proof['reason'])
+          PY
       - name: Run exact Netlify build recipe and validate all URLs
         run: |
           set -euo pipefail
@@ -86,6 +107,8 @@ jobs:
             seo-full-history-proof/**
             _site/static-archive-manifest.json
             _site/sitemap.xml
+            seo-monthly-test-selection.json
+            seo-monthly-test-gate.json
           if-no-files-found: warn
       - name: Isolated draft deploy without --prod
         env:
