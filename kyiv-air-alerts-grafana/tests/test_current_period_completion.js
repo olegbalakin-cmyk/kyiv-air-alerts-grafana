@@ -261,4 +261,16 @@ assert(app.includes('completionPotential.asOf'),
 assert(app.includes('approvedNeonGitRelease'));
 assert(app.includes('matchesDashboardGeneration'));
 assert(!app.includes('netlify deploy --prod'));
+assert(app.includes('const quarterRangeStartsTooLate=period==="quarterly" && completionCandidate'),
+  "quarter range warning is only used for an actually valid forecast");
+assert(app.includes('activeRange.from>completionCandidate.start'),
+  "late date-from is diagnosed against the current quarter start");
+assert(app.includes('activeRange.to<completionCandidate.through'),
+  "early date-to is diagnosed separately");
+assert(app.includes('Для прогнозу "+quarterRoman+" кварталу виберіть діапазон від '),
+  "quarter-specific Ukrainian tooltip replaces ambiguous freshness message");
+assert(app.includes('toUkrDate(quarterStart)+" або раніше."'),
+  "quarter start shown as a localized inclusive boundary");
+assert(app.includes('select a range starting on '),
+  "English tooltip describes the actual date-range problem");
 console.log("CURRENT_PERIOD_ORIGINAL_FACT_METHOD_PASS: original quarter/month/week rows unchanged, forecast-only markers and two source cutoffs, DST 23/25h");
