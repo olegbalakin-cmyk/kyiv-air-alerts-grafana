@@ -3,6 +3,9 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### SEO-ARCHIVE-23C-LIVE-LOCKED-2026-11-16-01 — 23-city historical archive production LIVE, monthly OFF
+- Owner approved first production SEO archive only. PR #194 → site-prod@`6d0879c`, release CI #43874588605 PASS. Netlify `6afb034ee4ead33599681226` READY and locked; production Actions #43874825782 deploy/KPI/relock PASS, **overall FAILURE** at prior strict bilingual HTML post-smoke. Independent read-only [Actions #43875088810](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43875088810) SUCCESS: 50 HTML pages/61 HTTP checks, 936 sitemap URLs, 23/23 exact deployed KPI blob parity; artifact #14229611799. No C2/Neon/four-hour updates affected. Monthly schedule in Draft #193 remains OFF, separate owner GO required.
+
 ### UI-TREND-HATCH-LIVE-LOCKED-2026-11-16-01 — trend live, Netlify locked, HTML QA still red
 - Approved PR #191 site-prod@7c1adc43; 4-file UI release on latest C2; CI #43854043494 PASS. Actions #43854098357 deployed 6afae2d20fa2229b8c0c2bc0 READY+locked (independent Netlify proof); JS/KPI HTTP/relock PASS, overall FAILURE due to last bilingual HTML smoke. #187 test-only; no Neon/C2/JSON/schedule changes. Investigate smoke harness without redeployment.
 
