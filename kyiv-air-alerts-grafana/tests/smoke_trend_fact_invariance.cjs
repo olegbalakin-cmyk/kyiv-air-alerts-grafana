@@ -151,6 +151,34 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
      assert.deepEqual(reset.values,off.values,mode+" fact changed on reset");
 
    }
+   // Quarterly current period is sourced from completed October. A
+   // November-only window hides its original Q4 bar; explain the correct
+   // date-range condition instead of claiming that verified data are stale.
+   await setPeriod("quarterly");
+   await page.$eval("#cityDateFrom",el=>{
+     el.value="2026-11-01";
+     el.dispatchEvent(new Event("change",{bubbles:true}));
+   });
+   await page.$eval("#cityDateTo",el=>{
+     el.value="2026-11-15";
+     el.dispatchEvent(new Event("change",{bubbles:true}));
+   });
+   const excluded=await snapshot();
+   assert.equal(excluded.enabled,false,"Nov-only window excludes October-sourced Q4 bar");
+   assert.equal(excluded.helpVisible,true,"unavailable quarter has info icon");
+   assert.equal(excluded.helpText,
+     "Для прогнозу IV кварталу виберіть діапазон від 01.10.2026 або раніше.",
+     "quarter tooltip must show precise earliest date");
+   assert(!excluded.reason.includes("свіжого"),"do not suggest stale data for a range problem");
+   await page.$eval("#cityDateFrom",el=>{
+     el.value="2026-10-01";
+     el.dispatchEvent(new Event("change",{bubbles:true}));
+   });
+   const included=await snapshot();
+   assert.equal(included.enabled,true,"including October start restores valid Q4 forecast");
+   assert.equal(included.helpVisible,false,"valid quarter hides unavailability info icon");
+   report.quarterRange={excludedReason:excluded.helpText,
+     restoredForecast:included.enabled,actualQ4:included.values[0].at(-1)};
    console.log("TREND_FACT_BROWSER_INVARIANCE_PASS",JSON.stringify(report));
  }catch(e){report.faults.push(String(e));console.error(e);}
  fs.writeFileSync("trend-fact-invariance-browser.json",JSON.stringify(report,null,2));
