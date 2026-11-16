@@ -161,8 +161,14 @@ assert(app.includes('trendToggle.disabled=!completionPotential'),
  "unavailable forecast is disabled, never faked");
 assert(app.includes('if(!completionPotential)trendToggle.checked=false'),
  "stale selected trend must clear when projection is unavailable");
-assert(app.includes('intensitySubtitle.textContent+=" "+trendReason'),
- "unavailable state is explained in the UI");
+assert(!app.includes('intensitySubtitle.textContent+=" "+trendReason'),
+ "unavailable state must not clutter chart explanation");
+assert(app.includes('trendHelpText.textContent=completionPotential?"":trendReason'),
+ "unavailable reason appears in the compact tooltip");
+assert(app.includes('trendHelpButton?.addEventListener("click"'),
+ "info button can open tooltip on touch");
+assert(app.includes('trendHelpButton?.addEventListener("keydown"'),
+ "keyboard users can dismiss explanation");
 assert(app.includes('completionModel?.estimate('),"trend uses established verified completion estimator");
 assert(app.includes('const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"]'));
 assert(app.includes("completionModel?.estimateToday("),"daily chart uses verified current day");
