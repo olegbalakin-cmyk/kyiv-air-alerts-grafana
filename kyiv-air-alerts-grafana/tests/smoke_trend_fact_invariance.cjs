@@ -54,8 +54,8 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
        enabled:!document.querySelector("#showTrend").disabled,
        reason:document.querySelector("#showTrend").title||"",
        visible:!document.querySelector("#showTrend").closest("label").classList.contains("hidden"),
-       helpVisible:!document.querySelector("#trendHelp").hidden,
-       helpText:document.querySelector("#trendHelpTooltip").textContent,
+       helpVisible:document.querySelector("#trendHelp") ? !document.querySelector("#trendHelp").hidden : false,
+       helpText:document.querySelector("#trendHelpTooltip")?.textContent||"",
        subtitle:document.querySelector("#cityIntensityChart").closest(".chart-card").querySelector(".chart-subtitle").textContent};
    });
  }
