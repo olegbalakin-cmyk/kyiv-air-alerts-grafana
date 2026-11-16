@@ -3140,15 +3140,29 @@ function renderCity() {
               const i = items?.[0]?.dataIndex ?? -1;
               if (completion && i===rows.length-1) {
                 const factual=rows[i];
-                const factualCutoff=String(factual?.partial_through ||
-                    factual?.quarter_end || factual?.week_end || factual?.date ||
-                    factual?.month || "").slice(0,10);
-                const modelCutoff=completion.asOfIsIntraday
-                  ? completion.asOf : completion.through;
-                return tr("Факт до "+factualCutoff+" · прогноз на "+completion.end+
-                    " за даними до "+modelCutoff,
-                  "Actual through "+factualCutoff+" · forecast to "+completion.end+
-                    " using source through "+modelCutoff);
+                const factSource=String(factual?.partial_through ||
+                  factual?.quarter_end || factual?.week_end || factual?.date ||
+                  factual?.month || "");
+                const factDay=factSource.slice(0,10);
+                const factClock=partialThroughKyivClock(factSource,factDay);
+                const modelSource=String(completion.asOfIsIntraday
+                  ? completion.asOf : completion.through);
+                const modelDay=modelSource.slice(0,10);
+                const modelClock=completion.asOfIsIntraday
+                  ? partialThroughKyivClock(modelSource,modelDay) : "";
+                const factLabel=shortDateLabel(factDay)+
+                  (factClock?", "+factClock:"");
+                const modelLabel=modelClock && modelDay===completion.end
+                  ? modelClock
+                  : shortDateLabel(modelDay)+(modelClock?", "+modelClock:"");
+                // Two compact, localized lines. Never expose an ISO timestamp
+                // with microseconds or an offset to the chart reader.
+                return [
+                  tr("Факт: ","Actual: ")+factLabel,
+                  tr("Прогноз до ","Forecast through ")+
+                    shortDateLabel(completion.end)+
+                    tr(" · зріз "," · source ")+modelLabel
+                ];
               }
               return period === "daily28" ? dailyAlertTooltipFooter(rows[i])
                 : partialPeriodFooter(rows[i]);
