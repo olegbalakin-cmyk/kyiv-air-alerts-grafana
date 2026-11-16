@@ -1,0 +1,96 @@
+name: SEO production archive HTTP read-only proof
+on:
+  push:
+    branches: [proof/seo-production-http-2026-11-16]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-http:
+    if: github.ref == 'refs/heads/proof/seo-production-http-2026-11-16'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify published archive, KPI blob, sitemap and bilingual pages
+        run: |
+          set -euo pipefail
+          mkdir -p seo-live-proof
+          python3 - <<'PY'
+          import hashlib,json,re,time,urllib.request,urllib.error
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+
+          root="https://ukraine-air-alerts.netlify.app"
+          pinned="https://6afb034ee4ead33599681226--ukraine-air-alerts.netlify.app"
+          checks=[]
+          def get(base,route):
+              url=base+route
+              for i in range(4):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url,headers={
+                          "User-Agent":"Kyiv-Archive-Readonly-Public-HTTP-Proof/1.0",
+                          "Accept":"text/html,application/json,application/xml,text/plain"
+                      }),timeout=18) as response:
+                          assert response.status==200, (url,response.status)
+                          data=response.read(1500001)
+                          assert len(data)<1500001, ("OVERSIZED",url)
+                          checks.append({"url":url,"status":200,"bytes":len(data)})
+                          return data
+                  except (urllib.error.HTTPError,urllib.error.URLError,TimeoutError):
+                      if i>=3: raise
+                      time.sleep(2*(i+1))
+          manifest=json.loads(get(root,"/static-archive-manifest.json"))
+          assert manifest["schema"]=="verified-air-alert-html-archive-v1"
+          assert manifest["cities"]==23
+          assert manifest["verified_full_months"]==392
+          assert manifest["month_pages_both_languages"]==784
+          assert manifest["sitemap_url_count"]==936
+          raw=get(root,"/historical-daily-kpi.json")
+          source=json.loads(raw)
+          gitsha=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()
+          assert gitsha==manifest["source_git_blob"],"PUBLIC_KPI_ARCHIVE_SOURCE_MISMATCH"
+          assert manifest["verified_full_months"]==source["meta"]["verified_full_metric_months"]
+          assert source["meta"]["verified_count"]==23
+          xml=get(root,"/sitemap.xml")
+          ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"
+          urls=[row.text for row in ET.fromstring(xml).findall(".//"+ns+"loc")]
+          assert len(urls)==len(set(urls))==936
+          assert all(u.startswith(root+"/") for u in urls)
+          robots=get(root,"/robots.txt").decode()
+          assert "Sitemap: "+root+"/sitemap.xml" in robots
+          slugs=sorted(source["cities"])
+          required=["/","/en/","/stats/","/en/stats/"]
+          required.extend("/"+lang+"stats/"+slug+"/2026-10/" for slug in slugs for lang in ("","en/"))
+          for route in required:
+              page=get(root,route).decode("utf-8")
+              if route in ("/","/en/"):
+                  assert 'id="staticStatsFooterLink"' in page
+                  assert '/en/stats/' in page if route=="/en/" else '/stats/' in page
+              else:
+                  assert "<table" in page,route
+              if route not in ("/","/en/"):
+                  assert 'hreflang="uk"' in page and 'hreflang="en"' in page
+                  assert 'rel="canonical" href="'+root+route+'"' in page
+              if "2026-10" in route:
+                  assert 'data-month-count=' in page
+                  assert 'data-month-seconds=' in page
+                  assert 'application/ld+json' in page
+          alias_manifest=json.loads(get(pinned,"/static-archive-manifest.json"))
+          assert manifest==alias_manifest
+          for route in ["/stats/","/en/stats/","/stats/kyiv/2026-10/"]:
+              assert get(root,route)==get(pinned,route), "CANONICAL_AND_PINNED_DEPLOY_DIFFER"
+          report={"schema":"seo-live-http-readonly-v1","production_deploy_id":"6afb034ee4ead33599681226",
+                  "source_git_blob":gitsha,"manifest":manifest,"sitemap_urls":len(urls),
+                  "sample_urls":len(required),"probes":len(checks),"checks":checks,
+                  "git_mutation":False,"netlify_deploy":False}
+          Path("seo-live-proof/verify.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print("SEO_LIVE_HTTP_23_CITY_BILINGUAL_PASS",len(required),"pages",len(checks),"requests",gitsha)
+          PY
+      - name: Save immutable live proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-production-archive-http-proof
+          path: seo-live-proof/verify.json
+          if-no-files-found: warn
