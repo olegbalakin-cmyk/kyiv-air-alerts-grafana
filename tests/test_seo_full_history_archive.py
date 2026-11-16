@@ -70,6 +70,10 @@ class StaticFullHistoryTests(unittest.TestCase):
             self.assertEqual(result["per_city_months"]["kyiv"], 56)
             for link in links:
                 relative = link.removeprefix(self.mod.SITE)
+                # / and /en/ are produced by the existing bilingual dashboard builder,
+                # not by this archive generator, and are checked in the full build.
+                if relative in ("/", "/en/"):
+                    continue
                 html_path = output / relative.lstrip("/") / "index.html"
                 self.assertTrue(html_path.is_file(), relative)
                 html = html_path.read_text(encoding="utf-8")
