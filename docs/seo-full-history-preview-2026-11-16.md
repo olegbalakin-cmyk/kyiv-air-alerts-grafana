@@ -42,3 +42,39 @@ The generator fails closed on unknown/missing cities, unverified or incomplete m
 ## Next gate
 
 Owner review of the full archive UX, text, and naming; then an explicit release decision. Before production publication, reconfirm current site-prod HEAD, historical Git blob, Netlify lock, preview parity and the production HTML QA harness. Update `PROJECT_STATE.md` and `CHANGELOG.md` only after an accepted checkpoint alters coordination state; neither is changed by this draft proof.
+
+## Monthly automation, experimental / NOT ACTIVATED
+
+**Owner request on 2026-11-16:** prepare monthly autonomous archive refresh on **test only**. Current code does not enable scheduled publishing, production deployment or persistent changes to the live four-hour data pipeline. The new readiness workflow is `.github/workflows/seo-monthly-readonly-preview.yml`.
+
+**Planned calendar:** the third day of every month at **08:23 UTC** (GitHub cron). This is intended as a checkpoint after month-end, not a guarantee that every city is up to date by then. GitHub scheduled workflows run **only from the repository default branch (`main`)**. The workflow exists on the isolated `seo-full-history-preview-2026-11-16` branch and therefore **its monthly schedule is dormant** until a separately authorized main integration. The feature branch permits test push/manual-run checks. No claim is made that a production monthly automation is already active.
+
+### Input and verification
+
+The source selection script reads both **live `site-prod` Git files**, without writing them:
+
+- `historical-daily-kpi.json`, the existing static 23-city index. This file is **not** in the automatic four-hour C6 Git-only publisher's `DELIVERED` allowlist, so it can stay older than the current dashboard data.
+- `kyiv-air-alerts-grafana/data/dashboard_data.json`, possibly containing a more recent `historical_daily_kpi` index. If a newer embedded index exists, its generation timestamp MUST agree with the enclosing dashboard's generation; the selector rejects unbound/conflicting inputs. Its normalized extracted Git blob is **derived**, not falsely presented as an independently committed `historical-daily-kpi.json` file. The receipt records both original source Git blobs.
+
+Read the **actual published** archive manifest, not the unapproved test preview receipt. Before a first owner-approved production archive release, this baseline is absent and the gate returns `NO_VERIFIED_PUBLISHED_BASELINE`.
+
+The gate uses local **Europe/Kyiv** dates. It requires a fresh snapshot in the month of the check, and the **previous full calendar month verified for all 23 cities**. The underlying existing archive validator checks all asserted months, daily-array coverage, day counts, geography/scope and exact parity of daily and verified monthly totals.
+
+Outcomes:
+
+| Decision | Meaning | Allowed action |
+| --- | --- | --- |
+| `BLOCKED` | Missing verified month, stale source, unverified or partial city coverage, no published baseline, historical revision without new months, data regression, or failed provenance | **Nothing published**; read-only receipt |
+| `NO_CHANGE` | The previously published archive already covers all verified months with identical source blob | No deployment |
+| `READY_FOR_DRAFT` | All 23 city series advanced and complete source checks passed | **Draft preview only**, never `--prod` |
+
+Every outcome explicitly sets `production_deploy_allowed=false`, `git_publish_allowed=false` and `neon_access_allowed=false`. GitHub workflow permissions are `contents: read`. An optional Netlify draft deploy happens **only** after `READY_FOR_DRAFT`; no token is used on blocked/no-change runs. The existing Netlify production lock remains unchanged. The four-hour C2/Neon/Git updates are independent and untouched.
+
+### Open operational gates
+
+1. Confirm that automatic C6 current `dashboard_data.json` really generates a fresh, same-generation `historical_daily_kpi` for every completed month. If it does not, **an upstream verified-index refresh is required**; the monthly SEO checker must not synthesize the missing month or misrepresent the static file as fresh.
+2. After a first explicitly authorized archive production release, confirm that `/static-archive-manifest.json` is served and its source blob matches the shipped data. Until then, the monthly job remains blocked by design.
+3. To activate true scheduled shadow checks, owner approval is required for a minimal **main** integration. To permit recurring production publication, a **separate explicit production GO** and guarded unlock/deploy/relock workflow must be reviewed; that behavior does not exist in this test.
+4. Once a new month genuinely passes, validate the generated draft against current `site-prod`, not a stale UI commit; owner decides on production release. A future production automation must enforce a separate release-authorization contract.
+
+This is intentionally conservative, particularly because the site already has a known unrelated production HTML post-smoke failure and ongoing C6 scheduled stabilization.
