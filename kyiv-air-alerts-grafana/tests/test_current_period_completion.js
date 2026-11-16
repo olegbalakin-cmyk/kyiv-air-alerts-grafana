@@ -127,63 +127,150 @@ assert.equal(F.estimateToday({...history,end:"2026-11-12"},"2026-11-14",partialT
 assert.equal(F.estimateToday({...history,verified_metric_months:[],verified_metric_days:[]},"2026-11-14",partialToday,"2026-11-14T21:02:00+02:00"),null,
  "requires verified 28-day baseline");
 
-assert(app.includes('window.PeriodCompletionPreview?.estimate('));
+// Regression: current source as-of Sunday 15 Nov 18:09 Kyiv,
+ // user visits Monday 16 Nov 00:05 Kyiv. Same month/quarter, different week.
+ // A certified fresh partial day may anchor MONTH/Q4 prediction to the
+ // source's 15 Nov cutoff, but never invent Monday observations/weekly stats.
+const rolloverIndex={...history,end:"2026-11-14",
+ counts:[...history.counts,2],
+ daily_total_alert_duration_seconds:[...history.daily_total_alert_duration_seconds,7200],
+ verified_metric_months:[...new Set([...history.verified_metric_months,"2026-11"])]};
+const rolloverPartial={date:"2026-11-15",is_partial_period:true,
+ partial_through:"2026-11-15T18:09:00+02:00",
+ total_alert_duration_hours:0,alerts_started:0};
+const midnightNow="2026-11-16T00:05:00+02:00";
+assert(F.estimate(rolloverIndex,"quarterly","2026-11-15",rolloverPartial,midnightNow),
+ "Q4 forecast stays available after midnight using fresh certified Nov15 snapshot");
+assert(F.estimate(rolloverIndex,"monthly","2026-11-15",rolloverPartial,midnightNow),
+ "November forecast stays available after midnight using recent certified cutoff");
+assert.equal(F.estimate(rolloverIndex,"quarterly","2026-11-16",rolloverPartial,midnightNow),null,
+ "no silent claim of observed Monday Nov16");
+assert.notEqual(F.bounds("2026-11-15","calendarWeekly").start,
+ F.bounds("2026-11-16","calendarWeekly").start,
+ "new Monday week must not inherit old Sunday week forecast");
+assert.equal(F.estimate(rolloverIndex,"quarterly","2026-11-15",rolloverPartial,
+ "2026-11-16T03:00:00+02:00"),null,
+ "source older than 8 hours must disable prediction");
+assert(app.includes('sourceDayCanAnchor=period!=="daily28"'),
+ "cross-midnight source anchoring restricted to supported period modes");
+assert(app.includes('currentBounds.start===sourceBounds.start'),
+ "stale source snapshot cannot cross period boundary");
+assert(app.includes('trendControl.classList.remove("hidden")'),
+ "trend checkbox stays visible even if source projection unavailable");
+assert(app.includes('trendToggle.disabled=!completionPotential'),
+ "unavailable forecast is disabled, never faked");
+assert(app.includes('if(!completionPotential)trendToggle.checked=false'),
+ "stale selected trend must clear when projection is unavailable");
+assert(!app.includes('intensitySubtitle.textContent+=" "+trendReason'),
+ "unavailable state must not clutter chart explanation");
+assert(app.includes('trendHelpText.textContent=completionPotential?"":trendReason'),
+ "unavailable reason appears in the compact tooltip");
+assert(app.includes('trendHelpButton?.addEventListener("click"'),
+ "info button can open tooltip on touch");
+assert(app.includes('trendHelpButton?.addEventListener("keydown"'),
+ "keyboard users can dismiss explanation");
+assert(app.includes('completionModel?.estimate('),"trend uses established verified completion estimator");
 assert(app.includes('const completionPeriod = ["daily28","calendarWeekly","monthly","quarterly"]'));
-assert(app.includes("window.PeriodCompletionPreview?.estimateToday("),"daily chart uses verified current day");
-assert(app.includes('trendControl.classList.toggle("hidden", !completionVisible)'),"trend only on current calendar periods");
+assert(app.includes("completionModel?.estimateToday("),"daily chart uses verified current day");
+assert(app.includes('trendToggle.disabled=!completionPotential'),"trend disabled unless the original factual period has a certified forecast");
 assert(!app.includes("QuarterRollingPreview?.rollingForecast("),"no rolling next-period forecast invocation");
 assert(!app.includes("window.ForecastTrend?.build("),"no daily/month next-period forecast invocation");
 assert(!app.includes("projectedRows"),"no additional future bar");
 assert(!app.includes("_isForecast: true"),"no future-period dataset");
 assert(!app.includes("forecastIndices"),"no extra forecast axis labels");
-// Accepted PR #151/#152: a single, additive stacked completion bar.
-// The solid segment is the observed contribution to the whole-period mean,
-// the hatched segment is the remaining contribution. The tooltip must show
-// the actual observed-day mean so the solid segment cannot be misconstrued as
-// 45-day daily fact; only one full-period alert forecast dot is drawn.
-const q4Index={...history,end:"2026-11-13"};
-const q4=F.estimate(q4Index,"quarterly","2026-11-14");
+// The trend toggle must NEVER change any actual input, scale or value.
+// All observed daily averages use the verified source's observed-day divisor;
+// a forecast uses full calendar-period days and is only an annotation.
+const q4=F.estimate(history,"quarterly","2026-11-14");
 assert(q4&&q4.days===92&&q4.observed===44);
-assert.equal(q4.actualHours,88);
-assert.equal(q4.actualAlerts,88);
 assert.equal(q4.periodRow.avg_daily_alert_hours,2);
 assert.equal(q4.periodRow.alerts_per_day,2);
-assert(q4.actualHours/q4.days<1,"observed contribution is not an observed-day mean");
-assert(Math.abs((q4.actualHours+q4.remainingHours)/q4.days-q4.expectedHours/q4.days)<1e-12);
-assert(Math.abs(q4.expectedHours/q4.days-2)<0.01,"DST-safe physical baseline");
-assert.equal(q4.expectedAlerts/q4.days,2);
-assert(app.includes("intensityDatasets[0].data[i]=completion.actualHours/completion.days;"),
-  "stacked fact segment retains common full-period denominator");
-assert(app.includes("completion.remainingHours/completion.days"),
-  "hatched segment is only projected remaining alert-hours");
-assert(app.includes("intensityDatasets[0].stack=\"completion\";"),
-  "observed hours and remaining hours must share the same stack");
-assert(app.includes('stack:"completion"'),"estimated remainder shares one stack");
-assert(app.includes('stacked:Boolean(completion)'),"chart renders one additive completion bar");
-assert(app.includes("completion.actualHours/observedDays"),
-  "tooltip gives true observed-day hours rather than whole-period contribution");
-assert(app.includes("completion.actualAlerts/observedDays"),
-  "tooltip gives true observed alert frequency");
-assert(app.includes('period==="daily28"'),"current-day observations keep their existing count");
-assert(app.includes('period==="daily28"\n      ? completion.actualAlerts/completion.days : null'),
-  "quarterly chart hides a misleading second actual frequency point");
-assert(app.includes("completion.expectedAlerts/completion.days"),
-  "one hollow expected full-period frequency dot remains");
-assert(app.includes("pointBackgroundColor:\"#101820\""),
-  "forecast-only marker remains visibly hollow");
-assert(app.includes('Разом — прогноз підсумку періоду.'),
-  "UA subtitle explains stacked forecast completion, not independent averages");
-assert(app.includes('Together they give the full-period estimate.'),
-  "EN subtitle explains stacked forecast completion");
-assert(!app.includes('intensityDatasets[0].data[i]=completion.periodRow.avg_daily_alert_hours;'),
-  "PR #185 non-additive adjacent bar regression removed");
-assert(!app.includes('type:"bar",_isCompletion:true,skipNull:true'),
-  "PR #185 second non-additive bar removed");
+assert.equal(q4.actualHours/q4.observedDaysEquivalent,2);
+assert(q4.actualHours/q4.days<1,"dividing actual by 92 is not observed intensity");
+assert(Math.abs(q4.expectedHours-q4.actualHours-q4.remainingHours)<1e-9);
+// Independent baseline: raw periodRows() must remain exactly as it is on
+// site-prod. Even selecting the verified newer forecast source may NOT
+// change a factual October-only Q4 into an October+November Q4.
+assert(app.includes('const currentObservedRow=rows.at(-1);'),
+  "actuals must be anchored to the original period rows");
+assert(app.includes('const currentObservedPeriodMatches=Boolean('),
+  "forecast can be added only to its matching calendar period");
+assert(app.includes('const completionPotential=completionVisible && currentObservedPeriodMatches'),
+  "forecast candidate is distinct from original actual period");
+assert(app.includes('const completion=completionPotential && trendToggle?.checked'),
+  "toggle affects only forecast overlay, not fact");
+assert(!app.includes('rows=[...rows,completionPotential.periodRow]'),
+  "trend cannot replace original factual rows with a newer partial day");
+assert(!app.includes('rows = [...rows,completion.periodRow]'),
+  "regression: original production replaced actual Q4 on trend ON");
+assert(app.includes('data: rows.map(r => r.avg_daily_alert_hours)'),
+  "actual bars remain original-source values");
+assert(app.includes('data: rows.map(r => r.alerts_per_day)'),
+  "actual line remains original-source values");
+assert(!app.includes('intensityDatasets[0].data[i]='),
+  "trend cannot overwrite observed hours");
+assert(!app.includes('intensityDatasets[1].data[i]='),
+  "trend cannot overwrite observed alert rate");
+assert(app.includes('completion.expectedHours/completion.days'),
+  "forecast-only hours uses all calendar days");
+assert(app.includes('completion.expectedAlerts/completion.days'),
+  "forecast-only alerts uses all calendar days");
+assert(!app.includes('type:"bar",_isCompletion:true'),
+  "no forecast bar should be confused with the observed bar");
+assert(!app.includes('stack:"completion"'),"forecast-only markers are not additive to fact");
+assert(app.includes('stacked:false'),"actual bar retains original stacking semantics");
+assert(!app.includes('periodCompletionHatchPlugin'),"no misleading hatch on actual");
+assert(app.includes('completionPotential ? completionPotential.expectedHours/completionPotential.days : 0'),
+  "hours axis stays stable regardless of trend toggle");
+assert(app.includes('completionPotential ? completionPotential.expectedAlerts/completionPotential.days : 0'),
+  "alerts axis stays stable regardless of trend toggle");
+assert(app.includes('const periodForecastDeltaHatchPlugin = {'),"hatched forecast delta renderer exists");
+assert(app.includes('id:"periodForecastDeltaHatch"'),"hatch plugin registered by stable ID");
+assert(app.includes('plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin]'),
+  "hatch renderer used only on city intensity chart");
+assert(app.includes('observedHoursPerDay:completion ? rows.at(-1)?.avg_daily_alert_hours : null'),
+  "hatch compares current forecast to the ORIGINAL factual mean");
+assert(app.includes('forecastHoursPerDay:completion ? completion.expectedHours/completion.days : null'),
+  "hatch forecast uses full period denominator");
+assert(app.includes('const top=Math.min(ya,yf),bottom=Math.max(ya,yf)'),
+  "hatched interval is bounded by actual and forecast for either direction");
+assert(app.includes('ctx.fillStyle=expected>actual?'),
+  "forecast above and below actual must have visibly distinct hatch infill");
+assert(!app.includes('pointStyle:"line",pointRadius:13'),
+  "old detached white tick has been replaced by in-bar hatching");
+assert(app.includes('pointStyle:"rectRot"'),"alert forecast is a separate diamond");
+assert(app.includes('trendControl.classList.remove("hidden")'),
+  "trend always visible, including unsupported or fresh-data-unavailable modes");
+assert(app.includes('Штрихування не додається до факту.'),
+  "Ukrainian explanation must distinguish fact/forecast cutoffs");
+assert(app.includes('Hatching is not additive.'),
+  "English explanation must distinguish fact/forecast cutoffs");
+assert(app.includes('const factClock=partialThroughKyivClock(factSource,factDay);'),
+  "tooltip formats source timezone-aware factual clock instead of dropping time");
+assert(app.includes('partialThroughKyivClock(modelSource,modelDay)'),
+  "forecast source clock is rendered in Kyiv local time");
+assert(app.includes('shortDateLabel(completion.end)'),
+  "tooltip uses readable short forecast period ending date");
+assert(!app.includes('" за даними до "+modelCutoff'),
+  "tooltip must not expose raw ISO timestamp and timezone offsets");
+assert(app.includes('factualRow?.quarter_end'),
+  "quarterly factual cutoff is the original completed-month endpoint");
+assert(app.includes('completionPotential.asOf'),
+  "forecast carries its own independently verified cutoff");
 
-assert(app.includes('if (completion) {'));
-assert(app.includes('periodCompletionHatchPlugin'));
-assert(app.includes('stacked:Boolean(completion)'),"accepted one stacked completion bar");
 assert(app.includes('approvedNeonGitRelease'));
 assert(app.includes('matchesDashboardGeneration'));
 assert(!app.includes('netlify deploy --prod'));
-console.log("CURRENT_PERIOD_COMPLETION_OFFLINE_PASS: verified source, calendar bounds, 3 modes, no future leakage, legend/stack/tooltip guards");
+assert(app.includes('const quarterRangeStartsTooLate=period==="quarterly" && completionCandidate'),
+  "quarter range warning is only used for an actually valid forecast");
+assert(app.includes('activeRange.from>completionCandidate.start'),
+  "late date-from is diagnosed against the current quarter start");
+assert(app.includes('activeRange.to<completionCandidate.through'),
+  "early date-to is diagnosed separately");
+assert(app.includes('Для прогнозу "+quarterRoman+" кварталу виберіть діапазон від '),
+  "quarter-specific Ukrainian tooltip replaces ambiguous freshness message");
+assert(app.includes('toUkrDate(quarterStart)+" або раніше."'),
+  "quarter start shown as a localized inclusive boundary");
+assert(app.includes('select a range starting on '),
+  "English tooltip describes the actual date-range problem");
+console.log("CURRENT_PERIOD_ORIGINAL_FACT_METHOD_PASS: original quarter/month/week rows unchanged, forecast-only markers and two source cutoffs, DST 23/25h");
