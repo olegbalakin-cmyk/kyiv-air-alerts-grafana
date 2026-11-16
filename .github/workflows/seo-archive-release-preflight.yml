@@ -1,0 +1,96 @@
+name: SEO full archive production release preflight (read-only)
+on:
+  push:
+    branches: [release/seo-history-2026-11-16]
+  pull_request:
+    branches: [site-prod]
+permissions:
+  contents: read
+concurrency:
+  group: seo-release-preflight
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: (github.ref == 'refs/heads/release/seo-history-2026-11-16') || (github.event_name == 'pull_request' && github.head_ref == 'release/seo-history-2026-11-16')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Ensure only archive production bundle and no monthly schedule
+        run: |
+          set -euo pipefail
+          test ! -e .github/workflows/seo-monthly-readonly-preview.yml
+          test ! -e .github/workflows/seo-full-history-preview.yml
+          grep -q 'build_historical_static_archive.py' .github/workflows/netlify-production.yml
+          grep -q 'one_shot_locked_netlify_deploy.py' .github/workflows/netlify-production.yml
+          grep -q 'netlify-production-site' .github/workflows/netlify-production.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          y=Path(".github/workflows/netlify-production.yml").read_text()
+          assert 'schedule:' not in y
+          assert 'test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 15' in y
+          assert "SEO_SOURCE_GENERATION_DRIFT" in y
+          assert 'NETLIFY_AUTH_TOKEN' in y
+          assert 'one_shot_locked_netlify_deploy.py' in y
+          assert not Path('.github/workflows/seo-monthly-readonly-preview.yml').exists()
+          print("SEO_RELEASE_NO_MONTHLY_OR_C2_CHANGE_PASS")
+          PY
+      - name: Verify existing UI and production data exporter
+        run: |
+          set -euo pipefail
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/tests/test_monthly_seconds.py
+          python kyiv-air-alerts-grafana/tests/test_bilingual_static_seo.py
+          node kyiv-air-alerts-grafana/tests/test_chart_share.js
+          node kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_live_history_binding.js
+          python3 kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json --output /tmp/seo-release-verified-historical-index.json
+          mv /tmp/seo-release-verified-historical-index.json historical-daily-kpi.json
+          python3 -m unittest discover -s tests -p test_seo_full_history_archive.py -v
+      - name: Build exact production archiver from validated same-generation source
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess, hashlib, json, tomllib
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          build=tomllib.loads(Path("netlify.toml").read_text())["build"]["command"]
+          subprocess.run(["bash","-e","-o","pipefail","-c",build],check=True)
+          p=Path("_site")
+          raw=Path("historical-daily-kpi.json").read_bytes()
+          blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()
+          manifest=json.loads((p/"static-archive-manifest.json").read_text())
+          source=json.loads(raw)
+          assert manifest["source_git_blob"]==blob, "SOURCE_DRIFT"
+          assert manifest["cities"]==23
+          assert manifest["verified_full_months"]==source["meta"]["verified_full_metric_months"]
+          assert manifest["month_pages_both_languages"]==2*manifest["verified_full_months"]
+          ns="{http://www.sitemaps.org/schemas/sitemap/0.9}"
+          links=[v.text for v in ET.parse(p/"sitemap.xml").findall(".//"+ns+"loc")]
+          assert len(links)==len(set(links))==manifest["sitemap_url_count"]
+          assert len(links)>=936
+          assert (p/"stats/index.html").exists() and (p/"en/stats/index.html").exists()
+          for lang in ("", "en/"):
+            for slug in ("kyiv","kharkiv","lviv","sevastopol"):
+              assert (p/lang/"stats"/slug/"2026-10/index.html").exists()
+          assert (p/"index.html").read_text().count('id="staticStatsFooterLink"')==1
+          assert (p/"en/index.html").read_text().count('id="staticStatsFooterLink"')==1
+          for lang in ("","en/"):
+            html=(p/lang/"stats/kyiv/2026-10/index.html").read_text()
+            assert 'https://ukraine-air-alerts.netlify.app/historical-daily-kpi.json' in html
+            assert 'application/ld+json' in html
+          print("SEO_RELEASE_SAME_GENERATION_PARITY_PASS",len(links),"URLs",blob)
+          PY
+      - name: Archive offline release preflight
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-production-release-readonly-preflight
+          path: |
+            _site/static-archive-manifest.json
+            _site/sitemap.xml
+          if-no-files-found: warn
