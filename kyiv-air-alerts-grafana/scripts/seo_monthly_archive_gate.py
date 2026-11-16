@@ -68,7 +68,11 @@ def evaluate(source_bytes: bytes, published: dict | None, *, as_of: date) -> dic
     try:
         source = json.loads(source_bytes)
         generated_at = source["meta"]["generated_at"]
-        captured = datetime.fromisoformat(generated_at).astimezone(ZoneInfo("Europe/Kyiv"))
+        source_dt = datetime.fromisoformat(generated_at)
+        if source_dt.tzinfo is None or source_dt.utcoffset() is None:
+            out["reason"] = "SOURCE_TIMEZONE_MISSING"
+            return out
+        captured = source_dt.astimezone(ZoneInfo("Europe/Kyiv"))
         date_captured = captured.date()
         out["source_generated_at"] = generated_at
     except (ValueError, TypeError, KeyError, json.JSONDecodeError, OverflowError):
