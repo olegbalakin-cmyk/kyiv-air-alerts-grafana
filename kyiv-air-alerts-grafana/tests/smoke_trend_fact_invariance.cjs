@@ -126,13 +126,30 @@ const baselineUrl="https://6afa019d1d413ed7e10c27b1--ukraine-air-alerts.netlify.
      assert.equal(on.options.observedHoursPerDay,off.values[0].at(-1),
        mode+" hatching uses unchanged actual bar");
      assert(Number.isFinite(on.options.forecastHoursPerDay),mode+" forecast hours supported");
+     // Use the real chart callback attached after rendering. The footer must
+     // be readable and must not leak ISO timestamps / microseconds / offsets.
+     const renderedFooter=await page.evaluate(()=>{
+       const chart=window.Chart.getChart(document.querySelector("#cityIntensityChart"));
+       const index=chart.data.labels.length-1;
+       const cb=chart.config.options.plugins.tooltip.callbacks.footer;
+       return cb([{dataIndex:index}]);
+     });
+     assert(Array.isArray(renderedFooter)&&renderedFooter.length===2,
+       mode+" tooltip must have two concise cutoff lines");
+     assert(renderedFooter.every(line=>!line.includes("T09:")&&!/\\d{4}-\\d{2}-\\d{2}T\\d{2}:/.test(line)),
+       mode+" raw ISO cutoff found in tooltip: "+JSON.stringify(renderedFooter));
+     assert(!JSON.stringify(renderedFooter).includes("+02:00") &&
+       !JSON.stringify(renderedFooter).includes(".366"),
+       mode+" timezone/microseconds leaked in tooltip");
+     report.cases.push({mode,eligible:true,factHours:off.values[0].at(-1),
+       factAlerts:off.values[1].at(-1),forecastHours:on.options.forecastHoursPerDay,
+       forecastAlerts:on.forecast[0].points[0],originalHours:old.values[0].at(-1),
+       tooltipFooter:renderedFooter});
      if(mode==="quarterly")await page.screenshot({path:"trend-fact-invariance-mobile.png"});
      await page.click("#showTrend");
      const reset=await snapshot();
      assert.deepEqual(reset.values,off.values,mode+" fact changed on reset");
-     report.cases.push({mode,eligible:true,factHours:off.values[0].at(-1),
-       factAlerts:off.values[1].at(-1),forecastHours:on.options.forecastHoursPerDay,
-       forecastAlerts:on.forecast[0].points[0],originalHours:old.values[0].at(-1)});
+
    }
    console.log("TREND_FACT_BROWSER_INVARIANCE_PASS",JSON.stringify(report));
  }catch(e){report.faults.push(String(e));console.error(e);}
