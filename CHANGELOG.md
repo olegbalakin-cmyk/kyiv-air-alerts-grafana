@@ -3,6 +3,9 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-TREND-HATCH-LIVE-LOCKED-2026-11-16-01 — trend live, Netlify locked, HTML QA still red
+- Approved PR #191 site-prod@7c1adc43; 4-file UI release on latest C2; CI #43854043494 PASS. Actions #43854098357 deployed 6afae2d20fa2229b8c0c2bc0 READY+locked (independent Netlify proof); JS/KPI HTTP/relock PASS, overall FAILURE due to last bilingual HTML smoke. #187 test-only; no Neon/C2/JSON/schedule changes. Investigate smoke harness without redeployment.
+
 ### C6-DST-CANONICAL-DISPLAY-VERIFIED-2026-11-15-01 — same-run 23-city Git projection already excludes stale DST parents
 
 - Live physical readback proof [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819), artifact #14159523883: 33,911 raw closed AIR rows, 33,646 exact C2 canonical lineages/23 cities, eight correct Oct 25 DST witnesses in the four city calculations, three wrong merged physical parent UIDs absent from lineage. Published at site-prod@048af474, six data blobs unchanged through site-prod@901dab2f; frontend reads Git JSON. No second correction required: leave `DST_CORRECTION=OFF`, preserve three physical legacy records; PR #182 selector would block if enabled on already clean current canonical input. Scheduled stabilization still OPEN; no data, workflow, Neon, C2, source HTTP or Netlify changes.
