@@ -125,8 +125,8 @@ def build_pages(template: str) -> tuple[str, str]:
     )
 
     # Footer link in EN must lead to the English static archive, not UA.
-    en = one_replace(en, '<a href="/stats/" id="staticStatsFooterLink">Статистика у таблицях</a>',
-                     '<a href="/en/stats/" id="staticStatsFooterLink">Data tables</a>')
+    en = one_replace(en, '<a href="/stats/" id="staticStatsFooterLink" class="footer-stats-link">Статистика у таблицях</a>',
+                     '<a href="/en/stats/" id="staticStatsFooterLink" class="footer-stats-link">Data tables</a>')
 
     # Both pages still refer to one shared application, not copied frontends.
     if en.count('src="app.js?') != 1 or en.count('href="styles.css?') != 1:
