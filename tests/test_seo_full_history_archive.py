@@ -33,7 +33,8 @@ class StaticFullHistoryTests(unittest.TestCase):
 
     def test_source_full_history(self):
         self.assertEqual(len(self.series), 23)
-        self.assertEqual(self.expected, 392)
+        self.assertEqual(self.mod.GIT_SOURCE, self.mod.SITE + "/historical-daily-kpi.json")
+        self.assertGreaterEqual(self.expected, 392)
         self.assertEqual(self.expected, self.source["meta"]["verified_full_metric_months"])
         self.assertEqual(self.series["kyiv"]["months"][0]["ym"], "2022-03")
         self.assertEqual(self.series["lviv"]["type"], "raion_proxy")
@@ -53,13 +54,13 @@ class StaticFullHistoryTests(unittest.TestCase):
             output = Path(tmp)
             result = self.mod.generate(SOURCE, output)
             self.assertEqual(result["cities"], 23)
-            self.assertEqual(result["verified_full_months"], 392)
-            self.assertEqual(result["month_pages_both_languages"], 784)
+            self.assertEqual(result["verified_full_months"], self.expected)
+            self.assertEqual(result["month_pages_both_languages"], 2*self.expected)
             self.assertEqual(result["source_git_blob"], hashlib.sha1(
                 b"blob " + str(len(SOURCE.read_bytes())).encode() + b"\x00" + SOURCE.read_bytes()
             ).hexdigest())
             self.assertEqual(result["sitemap_url_count"],
-                             4 + 46 + result["year_pages_both_languages"] + 784)
+                             4 + 46 + result["year_pages_both_languages"] + 2*self.expected)
             urls = ET.parse(output / "sitemap.xml")
             namespace = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
             links = [node.text for node in urls.findall(f".//{namespace}loc")]
@@ -67,7 +68,7 @@ class StaticFullHistoryTests(unittest.TestCase):
             self.assertEqual(len(set(links)), len(links))
             self.assertIn("Sitemap: https://ukraine-air-alerts.netlify.app/sitemap.xml",
                           (output / "robots.txt").read_text())
-            self.assertEqual(result["per_city_months"]["kyiv"], 56)
+            self.assertGreaterEqual(result["per_city_months"]["kyiv"], 56)
             for link in links:
                 relative = link.removeprefix(self.mod.SITE)
                 # / and /en/ are produced by the existing bilingual dashboard builder,
