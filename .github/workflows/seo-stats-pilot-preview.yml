@@ -35,7 +35,7 @@ concurrency:
 jobs:
   preview:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/seo-stats-pilot-2026-11-16') || (github.event_name == 'pull_request' && github.head_ref == 'seo-stats-pilot-2026-11-16') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/seo-stats-pilot-2026-11-16')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
       - name: Check out exact preview branch head
