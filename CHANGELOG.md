@@ -1,9 +1,13 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01 — 29/29 offline PASS, original owner grant expired (2026-11-17)
+
+- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) exact `2b3b57991d035168d737f40b2239c15b01945776`, [Actions #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 20 AG + 9 AH offline PASS; one-shot network job SKIPPED, [artifact #14159263098](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154/artifacts/14159263098) GitHub ZIP SHA256 `144150a679f947e81569729a87039bb3614109d0f0aa0072538046b1603a70aa` (no independent ZIP rehash), 3/3 inner hashes CI PASS. Scoped atomic GO claim from Work AF; AH concurrency mocked. Proposed ID `workah-article-20261115-001`, manifest SHA256 `52fe38b4c2c83908c6917ce39f009c2c88708026be683ab6a91e62dd5972892e`, expiry 2026-11-16T00:00Z, never approved. Research workflow absent on main; safe manual/API launch unverified. Fresh grant/GO required; 0 source HTTP, WIP/prod writes, credits, PROMOTE OFF; `LIVE_PILOT=BLOCKED`.
+
 ### CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 — article-first offline PASS / live pilot BLOCKED (2026-11-15)
 
-- [Draft PR #174](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/174) exact `4d20b5f0c09418d8253560f4222008925c637f6e`, [Actions #43706844061](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061) SUCCESS 20/20, [artifact #14159030801](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061/artifacts/14159030801) uploader ZIP SHA256 `c340d32fddf9cf4d4aafb01499e3e0c513718b11c41937b49119b7769038f15a` (no independent ZIP rehash), inner SHA256 `c6b2aa56d42cd534b7e18ad5f9069a9594fe8c2b4057eb2b9498dcf8f6db31de` PASS in CI. Four synthetic HTML layouts, 0 real publisher HTML. AC/J/AA/X article pipeline, numerical claims and same-source replay offline PASS; cross-source incident identity and real-site extraction unverified. Exact T03 Ukrinform/T04 MIG/T05 police URLs saved in Work X PR #142; no RSS recapture. Guarded article runner inert, legacy bypass, new owner GO required. 0 media GET/WIP/credits/PROMOTE; `GO_SAFETY=BLOCKED`, `ARTICLE_PILOT=BLOCKED`.
+- [PR #174](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/174) `4d20b5f0c09418d8253560f4222008925c637f6e`, [CI #43706844061](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061) 20/20 offline PASS, artifact #14159030801 ZIP SHA256 `c340d32fddf9cf4d4aafb01499e3e0c513718b11c41937b49119b7769038f15a`, inner `c6b2aa56d42cd534b7e18ad5f9069a9594fe8c2b4057eb2b9498dcf8f6db31de`. Four synthetic HTML examples only; Work X real URLs; live GO and incident identity unproven, 0 HTTP/credits/PROMOTE.
 
 ### CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
@@ -11,11 +15,11 @@
 
 ### CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
-- [Actions A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) `1f5b8f9e`, artifact #14156356307 SHA256 `28ad8b5cc105c81d87d15d04912af1285bf4c1bd62e52cacbfb6d4226770041d` (independently checked); [B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) `1ee89a11`, artifact #14156048863 ZIP SHA in earlier entry. 6+6=**12 vs 6 owner GO**; each 5/6 HTTP200 and 115 RSS links; 1 city vs 6 broad keyword hits not comparable. Only 30/115 article links allowlisted; 0 article GET/deaths; future GO requires shared lease.
+- [Run A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104), artifact #14156356307 SHA256 `28ad8b5cc105c81d87d15d04912af1285bf4c1bd62e52cacbfb6d4226770041d`; [Run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130), artifact #14156048863 (SHA in adjacent entry). **12 RSS GET vs six authorized**; 5/6 RSS200 each, 115 direct links, mismatched filter 1 vs 6. No article GET or deaths.
 
 ### CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 — one of two RSS runs (2026-11-15)
 
-- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, offline #43699168963 40/40 PASS. [Run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) `1ee89a11`, artifact #14156048863 uploader ZIP SHA256 `95898566c9dba46bf83a5f2c8711698078d9c3a4b5f55737f61306261423e41f` (no independent rehash). Six GET, 5 RSS200/115 links, 6 broad keyword candidates, Espreso 403; no article GET/credits. Separate earlier Run A noted above.
+- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, [run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) 5/6 RSS200, 115 publisher URLs and six broad keyword candidates, artifact #14156048863 SHA in prior checkpoint. Second parallel run A exceeded shared GO budget (see dual-run checkpoint). No article GET/credits.
 
 ### CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 (archived evidence)
 
@@ -31,7 +35,7 @@
 
 ### CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 — TECHNICAL PASS / EVIDENCE PARTIAL (2026-11-14)
 
-- [Draft PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160) `38b444dff0e9f1e363593aaa42dec4dc278743e0`; [Actions #43643850083](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43643850083) SUCCESS, 183 executed/1 expected skip, artifact #14132887476 SHA256 `3cb896fd323aabad663ba6955404b1c6930a40e03603a3a26b107f927d0cfc06` (independently rehashed by executor, 15/15 inner PASS). Index 1,683→3; incomplete T04 flagged; all T03–T05 pairs unlinked, 0 HTTP/credits. No AA merge or PROMOTE.
+- [PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160) `38b444df`, [CI #43643850083](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43643850083) 183 PASS/1 SKIP, artifact #14132887476 ZIP SHA256 `3cb896fd323aabad663ba6955404b1c6930a40e03603a3a26b107f927d0cfc06`; 15/15 hashes PASS. T04 incomplete, T03–T05 unlinked, 0 credits.
 
 ### CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
 
