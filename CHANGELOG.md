@@ -1,9 +1,13 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01 — owner-approved registration merge; OFF-dispatch pending (2026-11-18)
+
+- [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) exact `afdd4e7b1fcace15592c00e887b3804deba3ccda` squash merged `main@ddb5880938f3dfac95f63e34a26839c18589bcd5`. Only 55-line `workflow_dispatch` registration stub, no automatic triggers, parser, live article runner or source GET on main. Work AH exact `2b3b5799` remains research. OFF dispatch not performed; old proposed GO expired. Article GO still separate, 0 credits/PROMOTE.
+
 ### CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01 — 29/29 offline PASS, original owner grant expired (2026-11-17)
 
-- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) exact `2b3b57991d035168d737f40b2239c15b01945776`, [Actions #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 20 AG + 9 AH offline PASS; one-shot network job SKIPPED, [artifact #14159263098](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154/artifacts/14159263098) GitHub ZIP SHA256 `144150a679f947e81569729a87039bb3614109d0f0aa0072538046b1603a70aa` (no independent ZIP rehash), 3/3 inner hashes CI PASS. Scoped atomic GO claim from Work AF; AH concurrency mocked. Proposed ID `workah-article-20261115-001`, manifest SHA256 `52fe38b4c2c83908c6917ce39f009c2c88708026be683ab6a91e62dd5972892e`, expiry 2026-11-16T00:00Z, never approved. Research workflow absent on main; safe manual/API launch unverified. Fresh grant/GO required; 0 source HTTP, WIP/prod writes, credits, PROMOTE OFF; `LIVE_PILOT=BLOCKED`.
+- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) `2b3b57991d035168d737f40b2239c15b01945776`, [CI #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 29/29 offline PASS; proof #14159263098 SHA256 `144150a679f947e81569729a87039bb3614109d0f0aa0072538046b1603a70aa`, 3/3 inner PASS. Scoped GO atomicity from Work AF; AH concurrent mock. Expired manifest never approved; 0 HTTP/credits/PROMOTE.
 
 ### CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 — article-first offline PASS / live pilot BLOCKED (2026-11-15)
 
