@@ -1,0 +1,55 @@
+# Work AI: default-branch registration only. NO parser, schedule or publisher GET here.
+# The vetted Work AH version of this SAME PATH runs only when explicitly
+# dispatched with ref=research-casualty-workah-guarded-article-2026-11-15.
+name: Test WIP monitors (existing offline test workflow)
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_go_id:
+        description: "Owner-issued unique one-shot GO identifier"
+        required: false
+        type: string
+      approved_head:
+        description: "Exact 40-character Git commit approved by owner"
+        required: false
+        type: string
+      manifest_sha256:
+        description: "SHA256 canonical JSON manifest approved by owner"
+        required: false
+        type: string
+      grant_json:
+        description: "Exact canonical owner-approved JSON grant; no secrets"
+        required: false
+        type: string
+      article_go:
+        description: "Explicit one-shot publisher HTTP approval"
+        required: false
+        type: choice
+        default: "OFF"
+        options:
+          - "OFF"
+          - "OWNER_APPROVED_ONE_SHOT"
+
+permissions:
+  contents: read
+
+jobs:
+  registration_only:
+    # Dispatching main MUST NOT execute any article runner.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Fail closed on main; zero publisher requests
+        env:
+          ARTICLE_GO: ${{ inputs.article_go }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$ARTICLE_GO" != "OFF" ]]; then
+            echo "BLOCKED: main is only a manual-dispatch registration stub"
+            exit 1
+          fi
+          echo "WORKAI_DEFAULT_BRANCH_REGISTRATION_ONLY_OFFLINE"
+          echo "No article/RSS GET, parser, WIP data, credits or promotion."
