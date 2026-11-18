@@ -6,7 +6,7 @@
   if(root)root.KyivEarlyPreview=api;
   if(root?.document) {
     const launch=()=>api.mount(root.document,root.fetch.bind(root),
-      new URL("kyiv-early-2022-preview.json",root.document.currentScript?.src||root.location.href).href);
+      new URL("/kyiv-early-2022-preview.json",root.location.origin).href);
     if(root.document.readyState==="loading")root.document.addEventListener("DOMContentLoaded",launch);
     else launch();
   }
