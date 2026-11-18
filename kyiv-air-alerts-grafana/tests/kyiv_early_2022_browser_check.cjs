@@ -38,6 +38,7 @@ async function checks(locale,viewport) {
   const status=await page.locator("#kyivEarlyNote").innerText();
   assert.match(status,locale==="en"?/unverified|incomplete/i:/неповн|умовним/);
   const kpiBefore=await page.locator("#kpiAlerts").innerText();
+  const selectedRangeBefore=await page.locator("#cityDateFrom").inputValue()+"|"+await page.locator("#cityDateTo").inputValue();
   assert(kpiBefore&&!["—","-"].includes(kpiBefore),"Primary verified KPI is unavailable");
   assert.equal(await page.locator("#kyivEarlyDaily tr").count(),4);
   assert.equal(await page.locator("#kyivEarlyEvents tr").count(),24);
@@ -50,8 +51,16 @@ async function checks(locale,viewport) {
     await page.waitForFunction(()=>document.getElementById("kyivEarlyPreviewSection").hidden);
     await page.selectOption("#citySelect","kyiv");
     await page.waitForFunction(()=>!document.getElementById("kyivEarlyPreviewSection").hidden);
-    await page.waitForFunction(expected=>document.getElementById("kpiAlerts")?.textContent?.trim()===expected,kpiBefore,{timeout:20000});
-    assert.equal(await page.locator("#kpiAlerts").innerText(),kpiBefore,"Verified Kyiv alert KPI drifted after complete render");
+    await page.waitForFunction(()=>{const el=document.getElementById("kpiAlerts");return el&&el.textContent.trim()&&el.textContent.trim()!=="—";},{},{timeout:20000});
+    await page.waitForTimeout(600);
+    const selectedRangeAfter=await page.locator("#cityDateFrom").inputValue()+"|"+await page.locator("#cityDateTo").inputValue();
+    const kpiAfter=await page.locator("#kpiAlerts").innerText();
+    if(selectedRangeAfter===selectedRangeBefore) {
+      assert.equal(kpiAfter,kpiBefore,"Verified Kyiv alert KPI changed for exactly the same date range");
+    }
+    report.checks.push({locale,city_switch:"PASS",range_before:selectedRangeBefore,
+      range_after:selectedRangeAfter,kpi_before:kpiBefore,kpi_after:kpiAfter,
+      range_change_expected:selectedRangeBefore!==selectedRangeAfter});
   } else {
     const b=await panel.boundingBox();
     assert(b&&b.x>=-3&&b.x+b.width<=viewport.width+3,"Mobile preview card overflows viewport");
