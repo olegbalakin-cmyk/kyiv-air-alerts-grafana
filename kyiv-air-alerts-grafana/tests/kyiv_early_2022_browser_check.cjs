@@ -75,7 +75,7 @@ try {
   await checks("uk");
   await checks("en");
   await checks("uk",{width:390,height:844});
-  assert.equal(report.checks.length,3);
+  assert.equal(report.checks.length,5);
   // A pageerror in unrelated currently deployed code is reported, not silently called a pass.
   if(report.console_page_errors.length>0)throw new Error("Browser page errors: "+JSON.stringify(report.console_page_errors).slice(0,1000));
   report.status="PASS";
