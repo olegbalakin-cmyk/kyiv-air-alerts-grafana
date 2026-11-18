@@ -130,6 +130,36 @@
     </section>
     <p id="kpiRangeNote" class="kpi-range-note" aria-live="polite"></p>
 
+    <!-- Historical Kyiv 2022 research sidecar: never used by canonical KPI or charts. -->
+    <section id="kyivEarlyPreviewSection" class="panel kyiv-early-research" aria-label="Рання історія Києва" hidden>
+      <div class="kyiv-early-top">
+        <div>
+          <div class="eyebrow" id="kyivEarlyTag">Тест · орієнтовно</div>
+          <h2 id="kyivEarlyTitle">Рання історія Києва · 24–27 лютого 2022</h2>
+        </div>
+        <span class="kyiv-early-chip">24–27.02.2022</span>
+      </div>
+      <p id="kyivEarlyNote" class="source-note">Дані alerts.in.ua неповні, відбої можуть бути умовними. Ці години не входять до підтверджених KPI.</p>
+      <div id="kyivEarlyTotal" class="kyiv-early-total" aria-live="polite">Завантаження тестових даних…</div>
+      <div class="table-scroll">
+        <table class="kyiv-early-table" aria-label="Орієнтовні тривоги за днями">
+          <thead><tr><th id="kyivEarlyDayHead">Дата</th><th id="kyivEarlyCountHead">Оголошень</th><th id="kyivEarlyHoursHead">Час під тривогою</th><th id="kyivEarlyQualityHead">Якість</th></tr></thead>
+          <tbody id="kyivEarlyDaily"></tbody>
+        </table>
+      </div>
+      <p id="kyivEarlySpill" class="source-note"></p>
+      <details class="kyiv-early-details">
+        <summary id="kyivEarlyToggle">Усі 24 оголошення та орієнтовні відбої</summary>
+        <div class="table-scroll">
+          <table class="kyiv-early-table" aria-label="Орієнтовні відбої">
+            <thead><tr><th id="kyivEarlyStartHead">Початок (Київ)</th><th id="kyivEarlyEndHead">Відбій із джерела (Київ)</th><th id="kyivEarlyDurationHead">Тривалість</th><th id="kyivEarlyStatusHead">Статус</th></tr></thead>
+            <tbody id="kyivEarlyEvents"></tbody>
+          </table>
+        </div>
+      </details>
+      <p class="source-note"><a id="kyivEarlyMethodLink" href="https://blog.alerts.in.ua/p/data-sources" target="_blank" rel="noopener noreferrer">Методологія alerts.in.ua</a></p>
+    </section>
+
 
 
 
@@ -623,5 +653,6 @@
   <script src="chart-share.js?v=20261019-share2-1"></script>
   <script src="kpi-range.js?v=20261021-interval-kpi-test1"></script>
   <script src="app.js?v=20261114-completion-prod1"></script>
+  <script src="kyiv-early-2022-preview.js?v=20261117-research1"></script>
 </body>
 </html>
