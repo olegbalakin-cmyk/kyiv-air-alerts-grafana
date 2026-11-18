@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01**: owner GO merged PR #198, `main@ddb58809`, manual-only registration; OFF dispatch and separate article GO pending.
+Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Actions #44326207596 owner manual OFF-dispatch, seven jobs skipped, no HTTP; article GO pending.
 
 ## Working instructions
 
@@ -16,18 +16,22 @@ Latest casualty: **CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-0
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** Work AH 29/29 offline PASS, research-only; PR #198 registered manual-only workflow on main. Research dispatch not yet tested. No publisher GET/credits; PROMOTE OFF.
+- **Operational WIP / casualty:** AH 29/29 offline PASS, manual OFF-dispatch #44326207596 verified. Zero source GET/credits; PROMOTE OFF.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: separate owner-approved manual `article_go=OFF` dispatch on exact Work AH branch, then fresh GO manifest/expiry and distinct owner GO for 3 T03–T05 article GET. No RSS, WIP/production writes or PROMOTE.
+3. Casualty next: new manifest + owner GO for three exact T03–T05 article URLs; then one guarded research pilot. RSS/WIP/production writes/PROMOTE OFF.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01 (2026-11-18)
+
+- [Actions #44326207596](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44326207596): manual `workflow_dispatch` by owner on exact AH `2b3b57991d035168d737f40b2239c15b01945776`, attempt 1, all 7 jobs SKIPPED incl. network. Zero HTTP/credits, no artifacts. Registration PASS_OFF_ONLY; fresh owner article GO needed. PROMOTE OFF.
+
 ## CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01 (2026-11-18)
 
 - [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) `afdd4e7b` merged `main@ddb5880938f3dfac95f63e34a26839c18589bcd5`: 1 new 55-line manual-only workflow. No push/schedule, parser, live job on main, data/WIP changes or publisher HTTP. Research OFF-dispatch pending, old GO expired. No credits; PROMOTE OFF.
@@ -46,7 +50,7 @@ Latest casualty: **CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-0
 
 ## CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
-- Owner six-GET GO was used twice: [A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) and [B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130): **12 vs 6 approved**. Both 5/6 RSS200 and 115 direct publisher links, Espreso 403. A city-filter hit 1 vs B broad filter 6 (non-comparable). [PR #172](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/172) 30/115 hosts allowlisted. No article GET/credits; shared spent-GO required.
+- Owner six-GET RSS grant used twice: [A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) and [B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) = 12 vs 6 GET. Both 5/6 RSS200, 115 links; strict 1 vs broad 6 hits; no article GET/credits.
 
 ## CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 (2026-11-15)
 
