@@ -50,7 +50,8 @@ async function checks(locale,viewport) {
     await page.waitForFunction(()=>document.getElementById("kyivEarlyPreviewSection").hidden);
     await page.selectOption("#citySelect","kyiv");
     await page.waitForFunction(()=>!document.getElementById("kyivEarlyPreviewSection").hidden);
-    assert.equal(await page.locator("#kpiAlerts").innerText(),kpiBefore,"Verified Kyiv alert KPI drifted on city toggling");
+    await page.waitForFunction(expected=>document.getElementById("kpiAlerts")?.textContent?.trim()===expected,kpiBefore,{timeout:20000});
+    assert.equal(await page.locator("#kpiAlerts").innerText(),kpiBefore,"Verified Kyiv alert KPI drifted after complete render");
   } else {
     const b=await panel.boundingBox();
     assert(b&&b.x>=-3&&b.x+b.width<=viewport.width+3,"Mobile preview card overflows viewport");
