@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01**: PR #177 `2b3b5799`, CI #43709216154 29/29 offline PASS; live GO absent, proposed manifest expired and manual dispatch unverified.
+Latest casualty: **CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01**: owner GO merged PR #198, `main@ddb58809`, manual-only registration; OFF dispatch and separate article GO pending.
 
 ## Working instructions
 
@@ -16,21 +16,25 @@ Latest casualty: **CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** AB–AH research only, PROMOTE OFF. AH one-shot executor 29/29 offline PASS; no media GET or credits. T03–T05 URLs known; owner GO expired, dispatch path unverified.
+- **Operational WIP / casualty:** Work AH 29/29 offline PASS, research-only; PR #198 registered manual-only workflow on main. Research dispatch not yet tested. No publisher GET/credits; PROMOTE OFF.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: validate research manual dispatch (workflow absent main); issue new owner-go ID, expiry and canonical manifest pinned to exact HEAD, seek separate GO for 3 T03–T05 article GET. No RSS repeat, WIP/production writes or PROMOTE.
+3. Casualty next: separate owner-approved manual `article_go=OFF` dispatch on exact Work AH branch, then fresh GO manifest/expiry and distinct owner GO for 3 T03–T05 article GET. No RSS, WIP/production writes or PROMOTE.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01 (2026-11-18)
+
+- [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) `afdd4e7b` merged `main@ddb5880938f3dfac95f63e34a26839c18589bcd5`: 1 new 55-line manual-only workflow. No push/schedule, parser, live job on main, data/WIP changes or publisher HTTP. Research OFF-dispatch pending, old GO expired. No credits; PROMOTE OFF.
+
 ## CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01 (2026-11-17)
 
-- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) `2b3b57991d035168d737f40b2239c15b01945776`, [Actions #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 29/29 offline PASS, [artifact #14159263098](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154/artifacts/14159263098); ZIP SHA in CHANGELOG, 3/3 inner checks PASS; one-shot network job SKIPPED. GitHub atomic claim test reused Work AF; AH race mocked. Zero source GET/WIP/credits/PROMOTE. Proposed GO `workah-article-20261115-001` expires 2026-11-16T00:00Z, never authorized. Manual workflow absent on main; API/CLI feasibility unverified. `OFFLINE=PASS`, `LIVE_PILOT=BLOCKED` pending fresh approved grant and working dispatch.
+- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) `2b3b5799`, [CI #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 29/29 offline PASS, proof #14159263098 (SHA in log), 3/3 inner PASS. Network job skipped, GO expired; no HTTP/credits/PROMOTE.
 
 ## CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
