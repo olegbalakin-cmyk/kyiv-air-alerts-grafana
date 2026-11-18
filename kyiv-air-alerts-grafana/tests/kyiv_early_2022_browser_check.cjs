@@ -22,7 +22,7 @@ async function checks(locale,viewport) {
   page.on("pageerror",err=>errors.push(err.message));
   const target=new URL(locale==="en"?"/en/":"/",u);
   await page.goto(target.toString(),{waitUntil:"domcontentloaded",timeout:60000});
-  await page.waitForSelector('#citySelect option[value="kyiv"]',{timeout:60000});
+  await page.waitForSelector('#citySelect option[value="kyiv"]',{state:"attached",timeout:60000});
   await page.selectOption("#citySelect","kyiv");
   await page.waitForFunction(()=>{
     const panel=document.getElementById("kyivEarlyPreviewSection");
