@@ -12,6 +12,7 @@ assert.match(u.hostname,/^kyiv-early-pr199-20261118--ukraine-air-alerts\.netlify
 const proof=path.resolve(process.env.KYIV_EARLY_BROWSER_PROOF_DIR||"_preview-proof");
 fs.mkdirSync(proof,{recursive:true});
 const report={url:u.origin,checks:[],console_page_errors:[],screenshots:[]};
+async function main(){
 const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:1280,height:900},locale:"uk-UA"});
 async function checks(locale,viewport) {
@@ -79,3 +80,6 @@ try {
   await context.close();
   await browser.close();
 }
+
+}
+main().catch(err=>{console.error(err);process.exitCode=1});
