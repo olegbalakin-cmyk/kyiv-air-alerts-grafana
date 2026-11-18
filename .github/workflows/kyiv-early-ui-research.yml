@@ -1,0 +1,35 @@
+name: Kyiv early 2022 sidecar offline research proof
+on:
+  push:
+    branches:
+      - research/kyiv-early-ui-integration-20261117
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate source sidecar without publisher or Neon
+        run: |
+          node --version
+          node --check kyiv-air-alerts-grafana/pages-preview/kyiv-early-2022-preview.js
+          node kyiv-air-alerts-grafana/tests/test_kyiv_early_2022_ui_preview.js
+      - name: Evidence, one pinned branch only
+        run: |
+          mkdir -p /tmp/kyiv-proof
+          git rev-parse HEAD > /tmp/kyiv-proof/head.sha
+          sha256sum kyiv-air-alerts-grafana/pages-preview/kyiv-early-2022-preview.json kyiv-air-alerts-grafana/pages-preview/kyiv-early-2022-preview.js > /tmp/kyiv-proof/sha256.txt
+          git status --porcelain > /tmp/kyiv-proof/status.txt
+          test ! -s /tmp/kyiv-proof/status.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-2022-early-ui-readonly-proof
+          path: /tmp/kyiv-proof/
+          if-no-files-found: error
