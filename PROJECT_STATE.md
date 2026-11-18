@@ -1,83 +1,109 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-12. **Release decision: NO-GO. GLOBAL_CUTOVER=NO; C6=PARTIAL; C3=PARTIAL.**
-Latest accepted: **C6-POSTMERGE-C2-EXPORT-23-01**. First post-merge regular C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) SUCCESS: `NEON_SUCCEEDED` 33,135 episodes, QA 23/23, Git JSON published `site-prod@cf960d7c`; real C2 ZIP `ebcf2b6a...04c1d` and 23/23 source checkpoints at this run. **Independent same-run Neon→JSON readback not yet performed.** `GLOBAL_CUTOVER=NO`.
-Latest casualty: **CASUALTY-INTEGRATED-E2E-SHADOW-WORKF-01** + **CASUALTY-CONTROLLED-CAPTURE-PREFLIGHT-OFFLINE-01**. [F #112](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/112) joined saved-source C+D+E PASS: +23/replay 0, 11+42 tests; current frontend QA OPEN. [G #111](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/111) 10-URL preflight PASS, **HTTP NOT_AUTHORIZED**; same-host redirect-path guard OPEN. Oct Zaporizhzhia **≥23 INCOMPLETE**, publication OFF.
+**Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
+Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
+Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Actions #44326207596 owner manual OFF-dispatch, seven jobs skipped, no HTTP; article GO pending.
 
 ## Working instructions
 
-1. Read this root file and [CHANGELOG.md](CHANGELOG.md) before repository work. This file governs current coordination; newer accepted repository checkpoints govern older chat memory.
-2. Verify the relevant immutable commits, actual Actions runs and proof artifacts before technical action. A successful research job does not prove production deployment or a release PASS.
-3. Keep production, development/WIP, historical reference, backfill, casualty and Neon/persistence tracks separate. Do not overwrite another worker's commits, force-push shared branches, expose credentials or infer a production change from research.
-4. Keep unresolved blockers, track status and next tasks **outside** the history markers below. Put detailed accepted checkpoints inside them, newest first; retain the latest checkpoint. Prepend brief accepted transitions inside CHANGELOG's markers. Full evidence belongs in immutable archives or proof files.
-5. Aim for **5–8 KiB** here and **5–10 recent transitions** in CHANGELOG. UTF-8 byte gate: ≤12,288 PASS; 12,289–16,384 WARNING; >16,384 FAIL. Before an oversized update, run `python scripts/coordination_docs.py archive --dry-run`, then `archive` on a separate branch. See [maintenance instructions](docs/coordination-maintenance.md).
-6. Never load entire historical archives, large JSON/SQL dumps or full Actions logs into Work context. Search an exact checkpoint ID and read bounded lines. Save reproducible work promptly; recover interrupted commits before new research.
+1. Read both root documents first; newer accepted checkpoints govern old memory.
+2. Verify exact commits, Actions and artifacts; research PASS does not imply production.
+3. Separate production, WIP, history, backfill, casualty and Neon; no overwritten commits, force pushes or leaked credentials.
+4. Keep live blockers/status/next tasks outside history markers; accepted checkpoints inside, newest first, full evidence in archives.
+5. Aim for 5–8 KiB state and 5–10 changelog entries; ≤12,288 B PASS, ≤16,384 WARNING, above FAIL. Before oversize, use [maintenance CLI](docs/coordination-maintenance.md) dry-run then archive on a separate branch.
+6. Search checkpoint IDs and read bounded lines; avoid bulk JSON/SQL, archives and full logs. Preserve reproducible work; recover interrupted commits first.
 
 ## Current tracks and open release gates
 
-- **Production:** Git JSON updated and remote publication confirmed in C2 #43055353190 (`site-prod@cf960d7c`); frontend/source still Git, no Neon cutover. Netlify deployment not independently verified.
-- **Neon reader / historical parity:** frozen 23-city [proof 741f277f](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/741f277f73d1dde1325069d25fa00b44a42d6f03), 0 unexplained diffs; no current full continuity PASS.
-- **Live writer / provenance:** C2 #43055353190 `NEON_SUCCEEDED`, 33,135 episodes (69 inserted), 23/23 checkpoints match run/attempt/workflow SHA. Sevastopol checkpoint advanced; its historical alert `25006→25008` remains unresolved.
-- **23-city generator / publication:** first real post-merge same-run export PASS (`C2 ZIP SHA-256=ebcf2b6a94080f7a374b0897715c732846c5bd55eb4127f79d202cf8fec04c1d`, artifact `13873291895`, manifest SHA `f6462093...3e433`); no `CAPTURE_NAIVE_TIMESTAMP`. Independent Neon→JSON readback still OPEN.
-- **UkraineAlarm current API (research):** [run 41219158954](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/41219158954): 9/21 mapped IDs direct AIR, 12 UNKNOWN. Active/negative/cache semantics OPEN.
-- **DST / Kyiv:** 4-case offline fix `14e1b0b9` passed tests; rolling guard BLOCKED pending private raw baseline. DST OFF; Kyiv provenance OPEN.
-- **Preview / C3:** frozen browser/CSV/rollback [proof 66f87241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/66f872413f67668c9bd23b94cff17520fea705f9) research-only; operational cutover and rollback gates OPEN.
-- **Operational WIP / historical reference / backfill:** separate. **Casualty:** WIP discovery and site-prod dedup operate; research #108/109/110 isolated PASS, #112 joined saved-source PASS, #111 capture preflight PASS (OFF). Automatic evidence capture/publication not activated.
+- **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
+- **Operational WIP / casualty:** AH 29/29 offline PASS, manual OFF-dispatch #44326207596 verified. Zero source GET/credits; PROMOTE OFF.
 
 ## Concrete next tasks
 
-1. From immutable C2 [#43055353190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43055353190) and ZIP/SHA, run an **independent, read-only exact-run Neon→JSON proof** for all 23 cities, with same-run corpus and provenance. Requires separate owner approval for PR #48/exact head; no source HTTP/writer/cutover.
-2. Verify 23/23 full historical capture receipts and freshness in the independent proof. Keep `25006` unresolved. Compare live output and rollback gate; do not infer Netlify deployed merely from Git publication.
-3. DST raw baseline/rolling 4-case correction and C3 rollback acceptance remain separately gated. `GLOBAL_CUTOVER=NO; DST_CORRECTION=OFF`.
-4. Casualty: check PR #112 with current site-prod frontend in isolated browser, not just frozen one; no merge or live writes.
-5. Before HTTP pilot: exact-path redirect guard + offline regression, then separate owner approval for ten URL, max 20 requests/≤24h; Sep credit reconciliation still BLOCKED. Default OFF.
+1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
+2. Casualty H/I: PRs #114/#115 PASS offline, no release.
+3. Casualty next: new manifest + owner GO for three exact T03–T05 article URLs; then one guarded research pilot. RSS/WIP/production writes/PROMOTE OFF.
+4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## CASUALTY-INTEGRATED-E2E-SHADOW-WORKF-01 — joined historical-source shadow PASS (2026-11-13)
+## CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01 (2026-11-18)
 
-- [PR #112](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/112) `2274276`, [CI #43387209190](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43387209190) SUCCESS; E/A → scratch REVIEW/PROMOTE → generator +23/replay 0 → chart `≥23 INCOMPLETE`. Work C 11/11, D 42/42; Sumy +1 preserved. Proof ZIP #14018663260 SHA256 MATCH. Current frontend not browser-tested; no publication.
+- [Actions #44326207596](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44326207596): manual `workflow_dispatch` by owner on exact AH `2b3b57991d035168d737f40b2239c15b01945776`, attempt 1, all 7 jobs SKIPPED incl. network. Zero HTTP/credits, no artifacts. Registration PASS_OFF_ONLY; fresh owner article GO needed. PROMOTE OFF.
 
-## CASUALTY-CONTROLLED-CAPTURE-PREFLIGHT-OFFLINE-01 — controlled capture preflight PASS, HTTP OFF (2026-11-13)
+## CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01 (2026-11-18)
 
-- [PR #111](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/111) `630c996`, [CI #43387015696](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43387015696) 12/12 PASS. Ten exact URLs/seven hosts/max 20 requests proposed; 0 HTTP, consent absent. Proof ZIP #14019520132 SHA256 MATCH. Same-host redirect path still unguarded: must fix before pilot.
+- [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) `afdd4e7b` merged `main@ddb5880938f3dfac95f63e34a26839c18589bcd5`: 1 new 55-line manual-only workflow. No push/schedule, parser, live job on main, data/WIP changes or publisher HTTP. Research OFF-dispatch pending, old GO expired. No credits; PROMOTE OFF.
 
-## CASUALTY-EVIDENCE-INGESTION-WORKE-01 — archived-source ingestion PASS, autonomous capture OFF (2026-11-13)
+## CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01 (2026-11-17)
 
-- [Draft PR #110](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/110) exact `6b44b976`, [Actions #43320351570](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320351570) SUCCESS 10/10, [artifact #13990550763](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43320351570/artifacts/13990550763) ZIP SHA256 `5d313e372e53f4afd9c2d9f412e0b30c9b9f41880fae94e6f404fd4a1126b7e5` independently verified. Frozen 1682 candidates: 3 saved-source texts, 2 parsed reports, 1 +23 shadow AUTO_READY; five PR102 clusters missing texts blocked. `CONTROLLED_CAPTURE` default-OFF, 0 new publisher HTTP, no scheduled hook, merge or publication. Work C/D isolated PASS; joined E2E and authorized controlled live-capture proof remain OPEN.
+- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) `2b3b5799`, [CI #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 29/29 offline PASS, proof #14159263098 (SHA in log), 3/3 inner PASS. Network job skipped, GO expired; no HTTP/credits/PROMOTE.
 
-## CASUALTY-GENERATOR-DISPLAY-WORKD-01 — real generator to qualified chart PASS, isolated (2026-11-12)
+## CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #109](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/109) exact `62aef364`, [Actions #43308531075](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43308531075) SUCCESS, 42/42 browser PASS. Actual source-backed Work A generator +23 to Oct `INCOMPLETE/≥23` chart, CSV, PNG and embed; other 22 casualty cities, 23 alert cities unchanged, rollback PASS. [Artifact #13985535590](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43308531075/artifacts/13985535590) ZIP SHA256 independently verified `86dff044fbe148fa4fe1d05eb24c3540f07e29d50a8d16f581527a59d2e7ca5a`. **Research only; no main/site-prod adoption or publication.** Work E and joined E2E pending.
+- [PR #174](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/174) `4d20b5f0`, [CI #43706844061](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061) 20/20 offline PASS, artifact #14159030801 (ZIP SHA in changelog); 4 synthetic HTML layouts, no saved full real HTML. Work X T03–T05 URL known, no article GET/credits; live GO unready.
 
-## CASUALTY-REVIEWER-DEDUP-CONTRACT-WORKC-01 — 11/11 protected reviewer contract PASS, isolated (2026-11-12)
+## CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #108](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/108) `fb3dcb7a`: genuine Work A source-backed +23 through patched REVIEW → protected PROMOTE → scratch CSV → unchanged pinned site-prod generator, 0 duplicate replay; Sumy +1 and all five provenance fields preserved. [Actions #43305347207](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43305347207) SUCCESS, 11/11; [artifact #13982783250](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43305347207/artifacts/13982783250) SHA256 `27e0f18fe97d0c150a6d9753784c53f483219ab85e2f1c59dc3cf3237c8c54e4` independently rehashed. **No site-prod adoption/production writes.** PR #106 UI and source blocks remain; publication NO.
+- [PR #173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/173) `37cf0b19`, [CI #43702948168](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43702948168) 12/12 PASS, artifact #14157426485. Synthetic atomic GO tag PASS; old network jobs unguarded. Four article hosts staged; no media GET or credits.
 
-## CASUALTY-INDEPENDENT-E2E-PARTIAL-01 — independent evidence and two integration FAILs (2026-11-12)
+## CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
-- [PR #105](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/105) head `6a0100b0`, [CI #43290975899](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43290975899) PASS; one source-backed +23 Zaporizhzhia shadow, 0 replay, 1681 unverified candidates. Independent [PR #106](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/106) head `5441bdaf`, [CI #43295488092](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43295488092) SUCCESS, [artifact #13979427285](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43295488092/artifacts/13979427285) ZIP SHA256 `15e160bee3bdafad80aef1dc5299296deec1d7ff53fc034433f1388279b45aab` independently verified. Verdict **PARTIAL**: old reviewer drops 5 proof fields; real generator does not emit PR99 lower-bound status; 4 other confirmed selected attacks not advanced due to missing original text/September credit. No live changes; **SHADOW_E2E_PASS=NO, PUBLICATION=NO**.
+- Owner six-GET RSS grant used twice: [A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) and [B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) = 12 vs 6 GET. Both 5/6 RSS200, 115 links; strict 1 vs broad 6 hits; no article GET/credits.
 
-## CASUALTY-MAIN-ADOPTION-READY-01 — live site-prod dedup; dormant main parity ready (2026-11-12)
+## CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 (2026-11-15)
 
-- `main:update-netlify-site.yml` cron `15 */4 * * *` checks out `site-prod`, runs `update_casualties.py`; [#43262387718](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43262387718) SUCCESS including casualty step. Supersedes prior claim of dormant site-prod dedup. `main:update.yml` job is manual-only. [PR #98](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/98) exact `39c395cf`, four scoped paths, [CI #43259380544](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43259380544) 37/37 + 25/25 PASS, [artifact #13963896363](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43259380544/artifacts/13963896363) ZIP SHA256 `5f12c4ef784ba2f3226eed5c4b58df1161bd2ef31a7d7dd90aac3a85ed654bff` independently verified. Optional main-only merge awaits separate owner approval. No casualty publication.
+- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b` offline 40/40 PASS, [Actions #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) six GET, five RSS200/115 direct links, six broad keyword hits; artifact #14156048863 SHA in changelog. Also run A above; no article GET, credits or live shadow.
 
-## CASUALTY-DEDUP-CODE-SITEPROD-MERGED-01 — owner-approved code merge only (2026-11-12)
+## CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 (2026-11-15)
 
-- [Clean PR #91](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/91) squash-merged to `site-prod@68629fdae5534ec3a136e666bcb7d5c84dcd05aa`, parent `6704c48306289bbc40b6e12da4fc8cac163ec428` retained for rollback. Compared parent→merge: **exactly five approved paths**, and all five blobs equal proven PR head `50446b24`. Earlier strict [CI #43204809570](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43204809570) **25/25 PASS**. `revisions.csv` and `dashboard_data.json` blobs unchanged; site-prod Netlify path filters not hit, no deployment. **`main` still runs old script**, so live scheduled casualty update has NOT adopted fix. Work B remains blocked on 11 original article bodies; October `COVERAGE_INCOMPLETE`; data publication NO-GO.
+- [PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170) `a502616d`, [CI #43697942529](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529) 34/34 PASS; artifact #14155356566 SHA in changelog, 4/4 inner PASS. Work J count/delta/scope synthetic PASS; opaque GN links unresolved, T03–T05 NEEDS_REVIEW; 0 live HTTP/credits.
 
-## CASUALTY-DEDUP-CLEAN-SITEPROD-25-01 — correct-base code readiness, no publication (2026-11-12)
+## CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (archived evidence)
 
-- [Draft PR #91](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/91) exact head `50446b24d33e0fdb4af0414b224c4aab6bbf5598`, base/merge-base `site-prod@fc7261660bdee75ee59296ee94cc1189be6b1a22`, **5 intended files, +637/−3, zero others**. [Actions #43204809570](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43204809570) exact-head STRICT **25/25 PASS**, 0 FAIL, offline; [artifact #13936737623](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43204809570/artifacts/13936737623) ZIP SHA256 `35da0f733505c4ae3227051e3c2a52ac100220fb5aad913f4d813cf46354a210` independently checked; inner checksums 5/5 and 14 input SHA entries. Duplicates/ambiguous corrections fail closed; frozen Sumy +1 and rollback PASS. **CLEAN_PR_READY** is code review readiness only, **no merge/production change**; Work B source completeness separately blocked.
+- [PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) `1cd3e85f`, [CI #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) 17/17 offline, artifact #14154303167 SHA256 `c45ae98be3dd0ab4e5bd0ffc9b23d31777032d2bb9b39e150c635bbd531695d9`, 3/3 inner PASS. Network safeguards mocked; live URL/claims unproven, credits OFF.
 
-## CASUALTY-SAME-INCIDENT-DEDUP-25-01 — read-only exact-head research PASS (2026-11-12)
+## CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 (archived evidence)
 
-- [Draft PR #89](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/89) exact `d406875cd5ccbd382fc736fcbb9a3cdc3a448289`, [Actions #43201016241](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43201016241) SUCCESS **25 domain PASS, 0 FAIL**, independently downloaded artifact `13936055275` SHA256 `4a7aefc61f4d47683b72d0b33ec81deb57104eff6933873a2b2923d2ada4179f`. Frozen `site-prod@fc726166`; explicit incident identity, cumulative/delta classification and evidence-backed prior credit fix 18→23 to +5, 23→23 +0, 18→20→23 total 23. Reject ambiguous records; preserve pinned Sumy+1, other cities, October row and rollback. Proof handles require human review. **Research PASS only**: PR's `main` comparison contains 166 changed files (vs five actual research files from frozen production); do not merge. Work B source evidence and October completeness still NO-GO.
+- [PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) `4604004b`, [CI #43646987342](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342) 7/7 offline; artifact #14133897958 SHA256 `7e7e1474f1dfd6c40ae336fead3045fd818413b0eaff8109f11fa52a5349c818`. 23→22→23 mock cursor/replay, 0 real HTTP/credits.
 
-## CASUALTY-ZAPORIZHZHIA-ADDITIONAL-EVENTS-WORKB-01 — source evidence unavailable (2026-11-12)
+## CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 (2026-11-14)
 
-- [PR #88](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/88) final `34bc539d`: 11 WIP candidates / 5 priority Sep–Oct Zaporizhzhia groups, all `BLOCKED_MISSING_SOURCE` (no original publisher body). Retained earlier captures do not match target IDs. **0 additional deaths established by this review** is NOT a finding of zero actual deaths. October remains **≥23 minimum / COVERAGE_INCOMPLETE**. No new HTTP, CI or source ZIP verification claimed; production and WIP unchanged.
+- [PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160) `38b444df`, [CI #43643850083](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43643850083) 183 PASS/1 SKIP, artifact #14132887476 (SHA in changelog). T03–T05 evidence partial/unlinked, 0 HTTP/credits; PROMOTE OFF.
+
+## CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
+
+- [PR #145](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/145), [run #43609731091](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43609731091): 3 GET/HTTP200, three unproven pairs, 0 credits. GET grant spent. Saved excerpts only; absent text cannot be recovered offline.
+
+## CASUALTY-WORKW-INTEGRATION-OFFLINE-PASS-01 (2026-11-14)
+
+- [PR #141](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/141) `4e083db7` / CI #43589692637 PASS. Protected write OFF; research only, zero production changes.
+
+## CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01 — offline PASS (2026-11-14)
+
+- [PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) `b07a5957`, Actions #43589727392 169 PASS/1 SKIP, artifact #14111089895 (SHA in CHANGELOG). 23-city independent RSS plan and retained cards tested; 3/3 T03–T05 NEEDS_REVIEW. No live HTTP, credits, merge or deployment.
+
+## CASUALTY-WORKV-REVIEWER-OPERATOR-OFFLINE-E2E-PASS-01 — physical offline chain PASS (2026-11-14)
+
+- [PR #140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/140) `663f3eeb`, [CI #43587369075](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43587369075) PASS, artifact #14110980955. Offline reviewer→generator 18→20→23 with no summed credit, T03–T05 NEEDS_REVIEW; 0 live HTTP/PROMOTE.
+
+## CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01 — Work T code mismatch verified; Work U live parity unresolved (2026-11-14)
+
+- Exact Git blobs: `main@413d34ac` reviewer `cf65d85c`, operator `740b985b`, workflow `3771a501`; `site-prod@2fa9044a` generator `f5840c20`. The reviewer does not emit generator's incident/proof fields; operator preview calculates a raw delta sum, not the cumulative effective credit. PR #105 [shadow Actions #43290975899](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43290975899) SUCCESS does not prove scheduled operation. No new code deployed.
+- Work U: Zaporizhzhia Git JSON compared against PR #139, 316 deaths, September last validated month, October absent. Current Netlify deploy `6af76b2d` is READY/locked, but the actual served frontend/data fetch was not captured; `LIVE_PARITY=UNVERIFIED`. Live site may fetch GitHub Raw directly; do not equate locked deploy with frozen JSON. T03–T05 remains blocked, death credits 0.
+
+## CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 (archived evidence)
+
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) / [CI #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) three GET/HTTP200, ZIP #14105343291 SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b`. T03–T05 age matches; attack identity unproven, zero credits; one-shot spent.
+
+## CASUALTY-WORKR-IDENTITY-REVIEW-PREFLIGHT-SOURCE-REVIEW-REQUIRED-01 (2026-11-14)
+
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) `f2f3a922`, CI #43573408615 153 PASS/1 SKIP, ZIP #14104883690 SHA256 `6ab3d7ec12d6973f8ea3f63bc6fe572364dba0c48eb514ff39b7e3ecfba8d76b`, independent/11 inner PASS. T03–T05 ages overlap, attack identity INSUFFICIENT_EVIDENCE. 0 credits/GET.
+
+## CASUALTY-WORKQ-REAL-EXCERPTS-AUXCI-OFFLINE-PARTIAL-01 (archived evidence)
+
+- [PR #135](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/135) `858e255e`, [CI #43571952329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329) 145 PASS/1 SKIP, ZIP #14104761484 SHA256 `90ec4ef12c967facc743914316da41e99b6d9d0237350b16437cd820bad451d5` independent/10 inner PASS. T03 2, T04 +1 not total, T05 3 unbound; 0 credits, totals PARTIAL.
 
 <!-- coordination:history:end -->
 
