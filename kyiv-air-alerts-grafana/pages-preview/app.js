@@ -2053,6 +2053,9 @@ function updateUrl() {
   if ($("heavyDaysExcludeZero")?.checked) params.set("heavyexclude", "1");
   if ($("daypartYear")?.value) params.set("daypartyear", $("daypartYear").value);
   if ($("daypartMode")?.value) params.set("daypartmode", $("daypartMode").value);
+  if ($("weekdayRange")?.value) params.set("weekrange", $("weekdayRange").value);
+  if ($("weekdayDateFrom")?.value) params.set("weekfrom", $("weekdayDateFrom").value);
+  if ($("weekdayDateTo")?.value) params.set("weekto", $("weekdayDateTo").value);
   if ($("kyivCausePeriod")?.value) params.set("causeperiod", $("kyivCausePeriod").value);
   if ($("casualtyYear")?.value) params.set("casyear", $("casualtyYear").value);
   if ($("casualtyInterval")?.value) params.set("casint", $("casualtyInterval").value);
@@ -3255,6 +3258,7 @@ function renderCity() {
   setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes", period === "daily28" ? rows : null);
 
   renderAlertBurden(key);
+  window.WeekdayUI?.render(state.historicalDaily?.cities?.[key], key, currentLanguage);
   renderTimeOfDay(key);
   renderDaypart(key);
   renderKyivThreatCauses(key);
