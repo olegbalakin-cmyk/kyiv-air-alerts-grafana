@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-16. **Historical Neon cutover `GLOBAL_CUTOVER=YES`; C6 owner-approved one-shot Neon→Git #43706909819 PASS; scheduled four-hour stabilization OPEN.** `DST_CORRECTION=OFF` (separate overlay unnecessary: current canonical C2 selection already excludes the three stale DST parents); live active-alert status not certified. **English, trend and 23-city SEO archive LIVE; Netlify locked.** Strict post-deploy HTML smoke FAILED, independent HTTP PASS. Dashboard historical data remains Git JSON.
-Latest accepted transition: **SEO-ARCHIVE-23C-LIVE-LOCKED-2026-11-16-01**; latest prior C6 code pin **C6-DST-READER-PIN-MERGED-2026-11-15-01**.
+**Date:** 2026-11-19. **Weekday dashboard LIVE, Netlify READY + locked.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**; latest prior C6 code pin **C6-DST-READER-PIN-MERGED-2026-11-15-01**.
 
 ## Working instructions
 
@@ -18,6 +18,7 @@ Latest accepted transition: **SEO-ARCHIVE-23C-LIVE-LOCKED-2026-11-16-01**; lates
 - **Scheduled C2/C6:** first four-hour Neon→Git #43625014243 PASS. Next two #43655729191/#43686460909: writer PASS, reader hash blocked. PR #167 fixed pin on main. Owner-approved one-shot [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819) SUCCESS, C2 Neon receipt, 23/23 readback, [Git-only `site-prod@048af474`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/048af474d98c953bbac351936092ee2bd08c6fad), zero Netlify. Temporary one-shot trigger removed via PR #176 (`main@63a614ca`). **Still no successful scheduled post-pin cycle; C6_STABILIZATION=OPEN**.
 - **Netlify/UI + SEO archive (2026-11-16):** Trend hatch PR #191 site-prod@7c1adc43 and bilingual site LIVE. Owner-approved SEO release PR #194 merged `site-prod@6d0879c`; Netlify `6afb034ee4ead33599681226` READY and locked. 23 city/raion series, 392 verified completed months, 784 bilingual monthly pages, 936 sitemap URLs, `robots.txt`, footer link. Same-generation KPI sourced from embedded verified dashboard (deployed blob `a64a93e3`; standalone Git index older). Release CI #43874588605 PASS. Production workflow #43874825782 deploy/relock/KPI PASS, overall **FAIL** at known HTML post-smoke. Independent live HTTP #43875088810 PASS (50 pages/61 requests, artifact #14229611799). Monthly cron OFF (Draft #193); future activation needs separate GO. Four-hour C6 unchanged.
 
+- **Weekday UI LIVE (Nov 19):** PR #201 site-prod@`ae650fea`; Netlify `6aff5392a3a6d0497a6f5d1d` READY + locked; Actions #44602714671 SUCCESS. UK/EN tutorial, 4-band/day-night switch. Next scheduled dayparts refresh awaits proof; C2/Neon unchanged.
 - **DST VERIFIED; correction OFF:** one-shot #43706909819 artifact #14159523883 proves all eight correct Kharkiv/Poltava/Zhytomyr/Cherkasy DST witnesses selected, all three obsolete parent UIDs excluded by canonical C2; no overlay/Neon writes. Other backfill/casualty/live-status gates independent.
 
 
@@ -26,11 +27,15 @@ Latest accepted transition: **SEO-ARCHIVE-23C-LIVE-LOCKED-2026-11-16-01**; lates
 1. Check 1–2 **scheduled** post-pin C2→Neon→Git cycles: 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
 2. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 3. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
-4. Mark C6 stabilization CLOSED only after repeat-cycle proof; keep casualty/backfill separate.
+4. Verify scheduled same-generation weekday dayparts refresh; old Netlify UI test #44602714524 failed *before deploy* (tour 8 vs 6). Keep regular Netlify publishing locked.
+5. Mark C6 stabilization CLOSED only after repeat-cycle proof; keep casualty/backfill separate.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01 — production LIVE
+- Owner GO; PR #200 preview Actions #44591705771 PASS, artifact #14564845428; release PR #201 exact QA #44602597715 PASS. site-prod@`ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b`. One-shot Actions #44602714671 SUCCESS, proof #14567973014. Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; live asset parity/KPI PASS. 4h derived update code ready, scheduled proof pending. No Neon writes or C2 changes. Old workflow #44602714524 failed before publish.
+
 ## SEO-ARCHIVE-23C-LIVE-LOCKED-2026-11-16-01 — 23-city bilingual historical tables LIVE
 - Owner GO 2026-11-16: **first SEO production release only**, monthly automation OFF. Test #193/#43872244555 PASS. Seven-file release [PR #194](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/194) merged site-prod@`6d0879c97c83af0811c0c705bb43a06d5775ff69`; exact-source CI #43874588605 SUCCESS. Netlify `6afb034ee4ead33599681226` READY and locked, production #43874825782 deploy/relock/KPI PASS, overall **FAIL** at known strict HTML post-smoke. Independent [live HTTP #43875088810](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43875088810) PASS: 50 pages/61 requests, 936 sitemap URLs, 23/23 source blob parity; artifact #14229611799. No C2/Neon/Git data/scheduler changes. Monthly Draft #193 not in main/site-prod; separate GO before scheduled shadow or recurring production.
 
