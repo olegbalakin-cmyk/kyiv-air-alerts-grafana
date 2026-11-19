@@ -18,8 +18,8 @@ const {chromium} = require("playwright");
         Chart.getChart(one)?.data?.datasets?.[0]?.data?.length === 7 &&
         Chart.getChart(two)?.data?.datasets?.[0]?.data?.length === 7;
     }, null, {timeout:20000}); } catch(error) {
-      const diagnostic = await page.evaluate(() => ({url:location.href,ready:document.readyState,chart:typeof Chart,meta:document.querySelector("#weekdayMeta")?.textContent,section:!!document.querySelector("#weekdaySection"),scripts:[...document.scripts].map(x=>x.src),errors:document.querySelector("#freshnessBanner")?.textContent}));
-      console.error("WEEKDAY_DIAGNOSTIC",JSON.stringify(diagnostic));
+      const diagnostic = await page.evaluate(() => ({url:location.href,ready:document.readyState,chart:typeof Chart,meta:document.querySelector("#weekdayMeta")?.textContent,section:!!document.querySelector("#weekdaySection"),scripts:[...document.scripts].map(x=>x.src),errors:document.querySelector("#freshnessBanner")?.textContent, kpi:document.querySelector("#kpiAlerts")?.textContent, city:document.querySelector("#cityTitle")?.textContent, weekdayApi:!!window.WeekdayUI, weekdayLogic:!!window.WeekdayDistribution, resources:performance.getEntriesByType("resource").slice(-12).map(x=>({name:x.name,duration:x.duration,bytes:x.transferSize}))}));
+      console.error("WEEKDAY_DIAGNOSTIC",JSON.stringify(diagnostic),"PAGE_ERRORS",JSON.stringify(evidence.pageErrors));
       await page.screenshot({path:"_preview-proof/failed-browser-state.png",fullPage:true});
       throw error;
     }
