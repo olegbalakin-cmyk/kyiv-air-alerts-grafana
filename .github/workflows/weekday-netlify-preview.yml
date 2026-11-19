@@ -7,6 +7,7 @@ on:
       - ".github/workflows/weekday-netlify-preview.yml"
       - "tests/weekday_preview_browser_pr200.cjs"
       - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "netlify.toml"
 
 permissions:
   contents: read
@@ -90,6 +91,17 @@ jobs:
           assert actual==os.environ["WEEKDAY_PREVIEW_URL"].rstrip("/"),("UNEXPECTED_ALIAS",actual)
           print("WEEKDAY_PREVIEW_READY",actual)
           PY
+
+      - name: Verify both weekday scripts are actually served as JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in weekday-distribution.js weekday-ui.js; do
+            curl --fail --silent --show-error --location --max-time 15 "$WEEKDAY_PREVIEW_URL$file" -o "/tmp/$file"
+            test "$(wc -c < "/tmp/$file")" -gt 1000
+            node --check "/tmp/$file"
+            echo "HOSTED_WEEKDAY_SCRIPT_OK $file"
+          done
 
       - name: Verify published production ID and lock unchanged
         shell: bash
