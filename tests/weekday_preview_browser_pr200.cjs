@@ -57,9 +57,26 @@ const {chromium} = require("playwright");
     evidence.tests.push("CSV download available");
     await ua.selectOption("#weekdayRange","28d");
     await ua.locator("#weekdaySplitEnabled").check();
-    await ua.waitForFunction(() =>
-      document.querySelector("#weekdaySplitStatus")?.textContent?.includes("Точний розподіл"),
-      null,{timeout:20000});
+    try {
+      await ua.waitForFunction(() =>
+        document.querySelector("#weekdaySplitStatus")?.textContent?.includes("Точний розподіл"),
+        null,{timeout:15000});
+    } catch(error) {
+      const details=await ua.evaluate(async()=>({
+        lang:document.documentElement.lang,split:document.querySelector("#weekdaySplitEnabled")?.checked,
+        mode:document.querySelector("#weekdaySplitMode")?.value,
+        from:document.querySelector("#weekdayDateFrom")?.value,
+        to:document.querySelector("#weekdayDateTo")?.value,
+        range:document.querySelector("#weekdayRange")?.value,
+        status:document.querySelector("#weekdaySplitStatus")?.textContent,
+        chartData:window.Chart?.getChart(document.querySelector("#weekdayHoursChart"))?.data?.datasets?.map(x=>({label:x.label,first:x.data[0]})),
+        metadata:document.querySelector("#weekdayMeta")?.textContent,
+        daypartResponse:(await fetch("weekday-dayparts.json?v=qa",{cache:"no-store"}).then(r=>({ok:r.ok,status:r.status,contentType:r.headers.get("content-type")})).catch(e=>({error:String(e)})))
+      }));
+      console.error("WEEKDAY_SPLIT_DIAGNOSTIC",JSON.stringify(details));
+      await ua.screenshot({path:"_preview-proof/weekday-split-diagnostic.png",fullPage:true});
+      throw error;
+    }
     const fourBands=await ua.evaluate(()=>Chart.getChart(document.querySelector("#weekdayHoursChart")).data.datasets.length);
     assert.equal(fourBands,4,"four locally timed bands from verified source");
     await ua.selectOption("#weekdaySplitMode","daynight");
