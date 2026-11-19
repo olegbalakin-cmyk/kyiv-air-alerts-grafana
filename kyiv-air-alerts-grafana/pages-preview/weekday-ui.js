@@ -103,6 +103,7 @@
     const options=[
       ["28d","Останні 28 днів","Last 28 days"],
       ["90d","Останні 90 днів","Last 90 days"],
+      ["180d","Останні 180 днів","Last 180 days"],
       ["year","Поточний рік","Current year"],
       ["all","За весь час","All time"],
       ["custom","Довільний","Custom"]
@@ -167,7 +168,7 @@
     initialized=true;
     const params=new URLSearchParams(location.search);
     const selected=params.get("weekrange")||"28d";
-    $("weekdayRange").value=["28d","90d","year","all","custom"].includes(selected)?selected:"28d";
+    $("weekdayRange").value=["28d","90d","180d","year","all","custom"].includes(selected)?selected:"28d";
     if(params.get("weekfrom"))$("weekdayDateFrom").value=params.get("weekfrom");
     if(params.get("weekto"))$("weekdayDateTo").value=params.get("weekto");
     $("weekdayRange").addEventListener("change",()=>{paint();syncLinks();});

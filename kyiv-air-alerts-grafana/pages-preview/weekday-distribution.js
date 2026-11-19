@@ -34,6 +34,7 @@
     let start = first;
     if (range === "28d") start = Math.max(first, last - 27 * DAY_MS);
     if (range === "90d") start = Math.max(first, last - 89 * DAY_MS);
+    if (range === "180d") start = Math.max(first, last - 179 * DAY_MS);
     if (range === "year") start = Math.max(first, dayMs(index.end.slice(0, 4) + "-01-01"));
     return { from: isoDay(start), to: index.end };
   }

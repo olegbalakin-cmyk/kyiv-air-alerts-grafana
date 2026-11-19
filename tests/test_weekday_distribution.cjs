@@ -26,6 +26,7 @@ test("range selection clamps and missing weekday is null rather than zero",()=>{
 test("presets use latest verified day rather than wall clock",()=>{
   assert.deepEqual(w.preset(index,"28d"),{from:"2026-10-25",to:"2026-10-29"});
   assert.deepEqual(w.preset(index,"90d"),{from:"2026-10-25",to:"2026-10-29"});
+  assert.deepEqual(w.preset(index,"180d"),{from:"2026-10-25",to:"2026-10-29"});
   assert.deepEqual(w.preset(index,"year"),{from:"2026-10-25",to:"2026-10-29"});
 });
 test("invalid or incomplete source index fails closed",()=>{
@@ -38,4 +39,14 @@ test("DST transition does not shift weekday assignment",()=>{
     daily_total_alert_duration_seconds:[120,300,180,400]};
   assert.deepEqual(w.summarize(dst,dst.start,dst.end).weekdays.map(x=>x.days),[1,1,0,0,0,1,1]);
   assert.equal(w.summarize(dst,dst.start,dst.end).weekdays[0].seconds,180);
+});
+
+test("180-day preset includes exactly 180 verified calendar days",()=>{
+  const end="2026-11-18";
+  const start=new Date(Date.parse(end+"T00:00:00Z")-219*86400000).toISOString().slice(0,10);
+  const from=new Date(Date.parse(end+"T00:00:00Z")-179*86400000).toISOString().slice(0,10);
+  const long={status:"verified",start,end,counts:Array(220).fill(1),daily_total_alert_duration_seconds:Array(220).fill(60)};
+  assert.deepEqual(w.preset(long,"180d"),{from,to:end});
+  assert.equal(w.summarize(long,from,end).calendarDays,180);
+  assert.equal(w.summarize(long,from,end).weekdays.reduce((sum,day)=>sum+day.starts,0),180);
 });
