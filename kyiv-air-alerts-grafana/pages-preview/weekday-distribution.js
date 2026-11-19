@@ -64,5 +64,45 @@
     };
   }
 
-  return Object.freeze({ validIndex, preset, summarize });
+
+  // Snapshot-only exact day-part seconds; fail closed if they do not match the
+  // same-generation verified daily union. Never infer 09:00 from 06-hour totals.
+  function splitHours(index, source, from, to, mode) {
+    if (!validIndex(index) || !source || source.schema !== "weekday-dayparts-test-v1" ||
+        source.meta?.timezone !== "Europe/Kyiv" || source.meta?.test_only !== true ||
+        !["four", "daynight"].includes(mode) || !Array.isArray(source.rows)) return null;
+    const start = dayMs(from), end = dayMs(to), base = dayMs(index.start);
+    if (start === null || end === null || start > end || start < base ||
+        end > dayMs(index.end) || to > source.max_day) return null;
+    const dates = new Map();
+    for (const row of source.rows) {
+      if (!Array.isArray(row) || row.length !== 6 || dayMs(row[0]) === null ||
+          dates.has(row[0]) || !row.slice(1).every(v => typeof v === "number" &&
+          Number.isFinite(v) && v >= 0)) return null;
+      dates.set(row[0], row.slice(1));
+    }
+    const bins = Array.from({length:7},(_,weekday)=>({
+      weekday, days:0, seconds:0, parts:mode==="four"?[0,0,0,0]:[0,0]
+    }));
+    for(let ms=start;ms<=end;ms+=DAY_MS){
+      const date=isoDay(ms), offset=Math.round((ms-base)/DAY_MS);
+      const actual=Number(index.daily_total_alert_duration_seconds[offset]);
+      const parts=dates.get(date)||[0,0,0,0,0];
+      const seconds=parts.reduce((sum,n)=>sum+n,0);
+      if(Math.abs(seconds-actual)>1) return null;
+      const weekday=(new Date(ms).getUTCDay()+6)%7, bin=bins[weekday];
+      bin.days++;
+      bin.seconds+=actual;
+      const values=mode==="four"
+        ?[parts[0],parts[1]+parts[2],parts[3],parts[4]]
+        :[parts[2]+parts[3],parts[0]+parts[1]+parts[4]];
+      values.forEach((n,i)=>{bin.parts[i]+=n;});
+    }
+    return {mode,from,to,weekdays:bins.map(bin=>({
+      ...bin,
+      averageParts:bin.parts.map(n=>bin.days?n/(3600*bin.days):null)
+    }))};
+  }
+
+  return Object.freeze({ validIndex, preset, summarize, splitHours });
 });
