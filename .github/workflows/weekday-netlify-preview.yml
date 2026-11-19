@@ -1,0 +1,173 @@
+name: Weekday PR200 isolated Netlify preview QA
+on:
+  push:
+    branches:
+      - feature/weekday-distribution-2026-11-19
+    paths:
+      - ".github/workflows/weekday-netlify-preview.yml"
+      - "tests/weekday_preview_browser_pr200.cjs"
+      - "tests/test_weekday_distribution.cjs"
+      - "kyiv-air-alerts-grafana/pages-preview/index.html"
+      - "kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js"
+      - "kyiv-air-alerts-grafana/pages-preview/weekday-ui.js"
+      - "kyiv-air-alerts-grafana/pages-preview/weekday-dayparts.json"
+      - "kyiv-air-alerts-grafana/pages-preview/styles.css"
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "netlify.toml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekday-pr200-isolated-preview
+  cancel-in-progress: false
+
+jobs:
+  isolated-preview:
+    if: github.ref == 'refs/heads/feature/weekday-distribution-2026-11-19'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE: b5aafc46-7468-4070-baf1-db80a4d30501
+      PREVIEW_ALIAS: weekday-pr200-20261119
+      WEEKDAY_PREVIEW_URL: https://weekday-pr200-20261119--ukraine-air-alerts.netlify.app/
+    steps:
+      - name: Checkout test branch only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify calculations and live production lock before any deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          node --test tests/test_weekday_distribution.cjs
+          node --check kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js
+          node --check kyiv-air-alerts-grafana/pages-preview/weekday-ui.js
+          node --check tests/weekday_preview_browser_pr200.cjs
+          python3 - <<'PY'
+          import json,os,urllib.request
+          from pathlib import Path
+          def get(path):
+              req=urllib.request.Request("https://api.netlify.com/api/v1"+path,headers={"Authorization":"Bearer "+os.environ["NETLIFY_AUTH_TOKEN"]})
+              with urllib.request.urlopen(req,timeout=25) as res:return json.load(res)
+          site=get("/sites/"+os.environ["NETLIFY_SITE"])
+          published=(site.get("published_deploy") or {}).get("id")
+          assert published,"MISSING_PUBLISHED_DEPLOY"
+          current=get("/deploys/"+published)
+          assert current.get("locked") is True,"PRODUCTION_NOT_LOCKED"
+          Path("/tmp/weekday_pr200_prod_id").write_text(published)
+          print("PREVIEW_PREFLIGHT_PRODUCTION_LOCKED",published)
+          PY
+
+      - name: Build isolated static UA and EN dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site _preview-proof
+          for file in index.html styles.css app.js features.json chart-share.js kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$file" "_site/$file"
+          done
+          cp historical-daily-kpi.json _site/historical-daily-kpi.json
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python3 kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py --source historical-daily-kpi.json --output-dir _site
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n' > _site/_headers
+          test -s _site/index.html
+          test -s _site/en/index.html
+          test -s _site/weekday-distribution.js
+          test -s _site/weekday-ui.js
+          test -s _site/weekday-dayparts.json
+          test -s _site/historical-daily-kpi.json
+          printf '%s\n' "$GITHUB_SHA" > _preview-proof/source-head.sha
+
+      - name: Deploy preview alias only (never production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx -y netlify-cli@latest deploy --dir=_site --site="$NETLIFY_SITE" --alias="$PREVIEW_ALIAS" --json > _preview-proof/deploy.json
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          r=json.loads(Path("_preview-proof/deploy.json").read_text())
+          assert not r.get("production"),"UNEXPECTED_PRODUCTION_DEPLOY"
+          actual=(r.get("deploy_url") or r.get("url") or "").rstrip("/")
+          assert actual==os.environ["WEEKDAY_PREVIEW_URL"].rstrip("/"),("UNEXPECTED_ALIAS",actual)
+          print("WEEKDAY_PREVIEW_READY",actual)
+          PY
+
+      - name: Verify both weekday scripts are actually served as JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in weekday-distribution.js weekday-ui.js; do
+            curl --fail --silent --show-error --location --max-time 15 "$WEEKDAY_PREVIEW_URL$file" -o "/tmp/$file"
+            test "$(wc -c < "/tmp/$file")" -gt 1000
+            node --check "/tmp/$file"
+            echo "HOSTED_WEEKDAY_SCRIPT_OK $file"
+          done
+
+      - name: Verify published production ID and lock unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          from pathlib import Path
+          expected=Path("/tmp/weekday_pr200_prod_id").read_text()
+          def get(path):
+              req=urllib.request.Request("https://api.netlify.com/api/v1"+path,headers={"Authorization":"Bearer "+os.environ["NETLIFY_AUTH_TOKEN"]})
+              with urllib.request.urlopen(req,timeout=25) as res:return json.load(res)
+          site=get("/sites/"+os.environ["NETLIFY_SITE"])
+          assert (site.get("published_deploy") or {}).get("id")==expected,"PRODUCTION_CHANGED"
+          assert get("/deploys/"+expected).get("locked") is True,"PRODUCTION_UNLOCKED"
+          print("PRODUCTION_UNCHANGED_LOCKED",expected)
+          PY
+
+      - name: Restore Chromium for isolated weekday browser QA
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: weekday-pr200-playwright-1.56.1-chromium-linux
+
+      - name: Real-browser QA in Ukrainian English and mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.56.1
+          npx playwright install-deps chromium
+          npx playwright install chromium
+          node tests/weekday_preview_browser_pr200.cjs
+
+      - name: Always recheck immutable production lock and published ID
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          from pathlib import Path
+          saved=Path("/tmp/weekday_pr200_prod_id")
+          if not saved.exists():
+              print("PRECHECK_BLOCKED; no deploy was allowed")
+              raise SystemExit(0)
+          req=urllib.request.Request("https://api.netlify.com/api/v1/sites/"+os.environ["NETLIFY_SITE"],headers={"Authorization":"Bearer "+os.environ["NETLIFY_AUTH_TOKEN"]})
+          with urllib.request.urlopen(req,timeout=25) as r:site=json.load(r)
+          expected=saved.read_text()
+          assert (site.get("published_deploy") or {}).get("id")==expected,"PROD_ID_DRIFT"
+          req=urllib.request.Request("https://api.netlify.com/api/v1/deploys/"+expected,headers={"Authorization":"Bearer "+os.environ["NETLIFY_AUTH_TOKEN"]})
+          with urllib.request.urlopen(req,timeout=25) as r:prod=json.load(r)
+          assert prod.get("locked") is True,"PROD_LOCK_DRIFT"
+          print("FINAL_PRODUCTION_ID_UNCHANGED_LOCKED",expected)
+          PY
+
+      - name: Save URL, deploy receipt, browser screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekday-pr200-preview-browser-proof
+          path: _preview-proof/
+          if-no-files-found: warn
