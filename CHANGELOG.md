@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01 — weekday UI production READY + locked
+- Owner GO, PR #201 site-prod@`ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b`; proof-tested preview #44591705771, release QA #44602597715 PASS. Production one-shot [#44602714671](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44602714671) SUCCESS; artifact #14567973014; Netlify `6aff5392a3a6d0497a6f5d1d` READY + locked, served JS and 23-city KPI PASS. Weekday counts/time filters, 4-part and day(09–18)/evening-night switch, bilingual tutorial LIVE. Same-run 4h derived-data generator updated; first scheduled refresh not yet proven; no C2/Neon modifications. Legacy prod workflow #44602714524 failed predeploy (tour steps test).
+
+
 ### SEO-ARCHIVE-23C-LIVE-LOCKED-2026-11-16-01 — 23-city historical archive production LIVE, monthly OFF
 - Owner approved first production SEO archive only. PR #194 → site-prod@`6d0879c`, release CI #43874588605 PASS. Netlify `6afb034ee4ead33599681226` READY and locked; production Actions #43874825782 deploy/KPI/relock PASS, **overall FAILURE** at prior strict bilingual HTML post-smoke. Independent read-only [Actions #43875088810](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43875088810) SUCCESS: 50 HTML pages/61 HTTP checks, 936 sitemap URLs, 23/23 exact deployed KPI blob parity; artifact #14229611799. No C2/Neon/four-hour updates affected. Monthly schedule in Draft #193 remains OFF, separate owner GO required.
 
