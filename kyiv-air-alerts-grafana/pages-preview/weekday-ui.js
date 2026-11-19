@@ -3,6 +3,7 @@
   "use strict";
   let activeIndex=null, activeKey="", activeLanguage="uk", initialized=false;
   let dayparts=null,daypartsLoadStarted=false,daypartsLoadFailed=false;
+  let currentDerived=null;
   const $=id=>document.getElementById(id);
   const tr=(uk,en)=>activeLanguage==="en"?en:uk;
   const dayNames={
@@ -81,10 +82,28 @@
   }
 
   function selectedSplit(stats){
-    if(!$("weekdaySplitEnabled").checked||!dayparts||!activeIndex)return null;
-    const source=dayparts.cities?.[activeKey];
+    if(!$("weekdaySplitEnabled").checked||!activeIndex)return null;
+    // Live data arrive in the existing four-hour Git-only site_derived.json
+    // update, not in the immutable Netlify deployment. Reject other generations.
+    const ctx=currentDerived;
+    if(ctx?.dashboardGeneratedAt && ctx.derivedGeneratedAt===ctx.dashboardGeneratedAt &&
+       ctx.schema==="weekday-local-five-bands-union-v1" && Array.isArray(ctx.city?.daily)){
+      const rows=ctx.city.daily.map(day=>[day.date,...(day.weekday_time_band_seconds||[])]);
+      const source={
+        schema:"weekday-dayparts-test-v1",
+        meta:{timezone:"Europe/Kyiv",test_only:true},
+        max_day:ctx.city.analysis_end,
+        rows
+      };
+      return root.WeekdayDistribution.splitHours(activeIndex,source,
+        stats.from,stats.to,$("weekdaySplitMode").value);
+    }
+    // Temporary preview-proven initial fallback. Never use an older static
+    // snapshot beyond its last complete day (splitHours enforces this).
+    const fallback=dayparts?.cities?.[activeKey];
     return root.WeekdayDistribution.splitHours(activeIndex,
-      source?{...source,meta:dayparts.meta,schema:dayparts.schema,max_day:dayparts.meta.max_complete_day}:null,
+      fallback?{...fallback,meta:dayparts.meta,schema:dayparts.schema,
+        max_day:dayparts.meta.max_complete_day}:null,
       stats.from,stats.to,$("weekdaySplitMode").value);
   }
   function drawSplitHours(stats,split){
@@ -239,7 +258,7 @@
     }else{
       draw("weekdayHoursChart",stats.weekdays.map(x=>x.averageHours),tr("Годин/день","Hours/day"),"#8ff0a4",stats,true);
       $("weekdaySplitStatus").textContent=!enabled?"":daypartsLoadFailed
-        ?tr("Розподіл недоступний: тестові дані не завантажилися.","Split unavailable: preview data did not load.")
+        ?tr("Розподіл недоступний: немає перевірених часових інтервалів для цього зрізу.","Split unavailable: no verified time-band intervals for this data generation.")
         :!dayparts
           ?tr("Завантаження точного розподілу…","Loading exact time bands…")
           :tr("Розподіл недоступний для цього періоду: недостатньо підтверджених або узгоджених інтервалів. Показано загальний час.",
@@ -301,10 +320,11 @@
     firstCard.insertBefore(row,firstCard.querySelector(".chart-wrap"));
   }
   root.WeekdayUI={
-    render(index,key,language){
+    render(index,key,language,derived){
       activeIndex=index;
       activeKey=key;
       activeLanguage=language==="en"?"en":"uk";
+      currentDerived=derived||null;
       install();
       localize();
       paint();
