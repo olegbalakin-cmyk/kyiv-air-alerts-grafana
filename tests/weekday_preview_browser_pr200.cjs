@@ -8,7 +8,7 @@ const {chromium} = require("playwright");
   assert.match(url || "", /^https:\/\/weekday-pr200-20261119--ukraine-air-alerts\.netlify\.app\/$/);
   fs.mkdirSync("_preview-proof", {recursive:true});
   const browser = await chromium.launch({headless:true});
-  const evidence = {url, tests:[], pageErrors:[]};
+  const evidence = {url, tests:[], pageErrors:[], consoleErrors:[], network:[]};
   async function ready(page) {
     try { await page.waitForFunction(() => {
       const meta=document.getElementById("weekdayMeta")?.textContent||"";
@@ -17,9 +17,9 @@ const {chromium} = require("playwright");
       return meta.includes("20") && window.Chart && one && two &&
         Chart.getChart(one)?.data?.datasets?.[0]?.data?.length === 7 &&
         Chart.getChart(two)?.data?.datasets?.[0]?.data?.length === 7;
-    }, null, {timeout:20000}); } catch(error) {
+    }, null, {timeout:8000}); } catch(error) {
       const diagnostic = await page.evaluate(() => ({url:location.href,ready:document.readyState,chart:typeof Chart,meta:document.querySelector("#weekdayMeta")?.textContent,section:!!document.querySelector("#weekdaySection"),scripts:[...document.scripts].map(x=>x.src),errors:document.querySelector("#freshnessBanner")?.textContent, kpi:document.querySelector("#kpiAlerts")?.textContent, city:document.querySelector("#cityTitle")?.textContent, weekdayApi:!!window.WeekdayUI, weekdayLogic:!!window.WeekdayDistribution, resources:performance.getEntriesByType("resource").slice(-12).map(x=>({name:x.name,duration:x.duration,bytes:x.transferSize}))}));
-      console.error("WEEKDAY_DIAGNOSTIC",JSON.stringify(diagnostic),"PAGE_ERRORS",JSON.stringify(evidence.pageErrors));
+      console.error("WEEKDAY_DIAGNOSTIC",JSON.stringify(diagnostic),"PAGE_ERRORS",JSON.stringify(evidence.pageErrors),"CONSOLE_ERRORS",JSON.stringify(evidence.consoleErrors),"NETWORK",JSON.stringify(evidence.network));
       await page.screenshot({path:"_preview-proof/failed-browser-state.png",fullPage:true});
       throw error;
     }
@@ -27,6 +27,8 @@ const {chromium} = require("playwright");
   try {
     const ua = await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true});
     ua.on("pageerror", error => evidence.pageErrors.push("UA: "+error.message));
+    ua.on("console", msg=>{if(msg.type()==="error") evidence.consoleErrors.push(msg.text());});
+    ua.on("response", response=>{if(/weekday-(ui|distribution)\.js/.test(response.url())) evidence.network.push({url:response.url(),status:response.status(),contentType:response.headers()["content-type"]});});
     const response = await ua.goto(url,{waitUntil:"domcontentloaded",timeout:60000});
     assert.equal(response.status(), 200, "preview HTTP 200");
     await ready(ua);
