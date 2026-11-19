@@ -55,6 +55,22 @@ const {chromium} = require("playwright");
     const download=await downloadPromise;
     assert.ok(download.suggestedFilename().endsWith(".csv"));
     evidence.tests.push("CSV download available");
+    await ua.selectOption("#weekdayRange","28d");
+    await ua.locator("#weekdaySplitEnabled").check();
+    await ua.waitForFunction(() =>
+      document.querySelector("#weekdaySplitStatus")?.textContent?.includes("Точний розподіл"),
+      null,{timeout:20000});
+    const fourBands=await ua.evaluate(()=>Chart.getChart(document.querySelector("#weekdayHoursChart")).data.datasets.length);
+    assert.equal(fourBands,4,"four locally timed bands from verified source");
+    await ua.selectOption("#weekdaySplitMode","daynight");
+    const twoBands=await ua.evaluate(()=>Chart.getChart(document.querySelector("#weekdayHoursChart")).data.datasets.map(x=>x.label));
+    assert.equal(twoBands.length,2,"day and evening-night datasets");
+    assert.match(twoBands[0],/09–18/);
+    evidence.tests.push("Four exact bands and day/evening-night switch render with daily parity");
+    await ua.locator("#weekdaySplitEnabled").uncheck();
+    const totalDatasetCount=await ua.evaluate(()=>Chart.getChart(document.querySelector("#weekdayHoursChart")).data.datasets.length);
+    assert.equal(totalDatasetCount,1,"unchecked split returns verified base chart");
+    evidence.tests.push("Checkbox restores original hours chart");
     await ua.screenshot({path:"_preview-proof/weekday-ua-desktop.png",fullPage:true});
 
     const en=await browser.newPage({viewport:{width:1440,height:900}});
@@ -64,6 +80,8 @@ const {chromium} = require("playwright");
     await en.locator("#langEn").click();
     await en.waitForFunction(()=>document.querySelector("#weekdaySection h2")?.textContent==="Air alerts by weekday",null,{timeout:10000});
     assert.match(await en.locator("#weekdayMeta").innerText(),/completed days/);
+    assert.match(await en.locator(".weekday-split-check span").innerText(),/Split by time of day/);
+    evidence.tests.push("English weekday split and tour copy localized");
     evidence.tests.push("English copy and charts rendered");
     await en.screenshot({path:"_preview-proof/weekday-en-desktop.png",fullPage:true});
 
@@ -72,6 +90,8 @@ const {chromium} = require("playwright");
     await mobile.goto(url,{waitUntil:"domcontentloaded",timeout:60000});
     await ready(mobile);
     assert.equal(await mobile.locator("#weekdaySection").isVisible(),true);
+    assert.equal(await mobile.locator("#weekdaySplitEnabled").isVisible(),true);
+    evidence.tests.push("Mobile 390x844: split checkbox displayed");
     evidence.tests.push("Mobile 390x844: weekday charts rendered");
     evidence.mobileHorizontalOverflow=await mobile.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
     await mobile.screenshot({path:"_preview-proof/weekday-ua-mobile.png",fullPage:true});
