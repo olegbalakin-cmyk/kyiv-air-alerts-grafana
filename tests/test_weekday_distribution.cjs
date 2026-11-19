@@ -50,3 +50,43 @@ test("180-day preset includes exactly 180 verified calendar days",()=>{
   assert.equal(w.summarize(long,from,end).calendarDays,180);
   assert.equal(w.summarize(long,from,end).weekdays.reduce((sum,day)=>sum+day.starts,0),180);
 });
+
+const bandSource={schema:"weekday-dayparts-test-v1",
+  meta:{timezone:"Europe/Kyiv",test_only:true},max_day:"2026-10-29",
+  rows:[
+    ["2026-10-25",1200,300,600,900,600],
+    ["2026-10-26",0,600,600,300,300],
+    ["2026-10-27",1800,600,600,3600,600],
+    ["2026-10-29",0,0,0,0,0]
+  ]};
+test("four time bands exactly preserve verified daily hours and weekdays",()=>{
+  const split=w.splitHours(index,bandSource,index.start,index.end,"four");
+  assert.ok(split);
+  assert.equal(split.weekdays[6].days,1);
+  assert.deepEqual(split.weekdays[6].parts,[1200,900,900,600]);
+  assert.deepEqual(split.weekdays[0].parts,[0,1200,300,300]);
+  assert.equal(split.weekdays[4].averageParts[0],null);
+  assert.ok(Math.abs(split.weekdays.reduce((v,b)=>v+b.parts.reduce((x,y)=>x+y,0),0)-12600)<0.0001);
+});
+test("day and evening-night are 09-18 / 18-09, not a six-hour approximation",()=>{
+  const split=w.splitHours(index,bandSource,index.start,index.end,"daynight");
+  assert.ok(split);
+  assert.deepEqual(split.weekdays[6].parts,[1500,2100]);
+  assert.deepEqual(split.weekdays[1].parts,[4200,3000]);
+});
+test("time band split rejects discrepancies, future dates, invalid and duplicate rows",()=>{
+  assert.equal(w.splitHours(index,{...bandSource,rows:[["2026-10-25",0,0,0,0,0]]},index.start,index.end,"four"),null);
+  assert.equal(w.splitHours(index,{...bandSource,max_day:"2026-10-28"},index.start,index.end,"four"),null);
+  assert.equal(w.splitHours(index,{...bandSource,rows:[...bandSource.rows,bandSource.rows[0]]},index.start,index.end,"four"),null);
+  assert.equal(w.splitHours(index,bandSource,index.start,index.end,"six"),null);
+  assert.equal(w.splitHours(index,bandSource,"2026-10-20",index.end,"four"),null);
+});
+test("DST day can contain more than 24 elapsed hours without normalization",()=>{
+  const dst={status:"verified",start:"2026-10-25",end:"2026-10-25",
+    counts:[1],daily_total_alert_duration_seconds:[90000]};
+  const bands={...bandSource,rows:[["2026-10-25",25200,10800,10800,21600,21600]]};
+  const split=w.splitHours(dst,bands,dst.start,dst.end,"daynight");
+  assert.ok(split);
+  assert.equal(split.weekdays[6].parts[0],32400);
+  assert.equal(split.weekdays[6].parts[1],57600);
+});
