@@ -562,7 +562,7 @@ const KYIV_THREAT_CAUSE_COLORS = {
   "unknown": "#7f8c99"
 };
 const PARTIAL_PERIOD_DASH = [3, 4];
-const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v5";
+const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v6";
 const TOUR_STEPS = [
   {
     selector:".controls-panel",
@@ -578,6 +578,13 @@ const TOUR_STEPS = [
     titleEn:"Alert intensity",
     textUk:"Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. У режимі «Останні 28 днів» поточний неповний день позначений пунктиром. Показники в легенді можна вмикати й вимикати.",
     textEn:"Bars show average time under alert per day; the line shows average alerts per day. In the Last 28 days view, the current incomplete day is dashed. Legend items can be toggled on and off."
+  },
+  {
+    selector:"#weekdaySection",
+    titleUk:"Тривоги за днями тижня",
+    titleEn:"Alerts by weekday",
+    textUk:"Оберіть період (28, 90, 180 днів, рік, весь час або власні дати). Перший графік рахує тривоги за днем початку, другий — лише фактичні години в межах календарного дня; стовпчики показують середнє на один відповідний день тижня. Галочка вмикає розподіл часу на 4 частини доби або день (09–18) і вечір та ніч (18–09). Якщо точні інтервали не збігаються зі щоденними даними, відображається лише перевірений загальний час. CSV містить підсумки.",
+    textEn:"Choose 28, 90 or 180 days, the current year, all time or custom dates. The first chart counts alerts by start weekday; the second counts only time within each local calendar day. Bars show the average per weekday occurrence. The checkbox splits time into four bands or day (09–18) versus evening and night (18–09). If source intervals do not reconcile with verified daily totals, only total hours are shown. CSV exports the summary."
   },
   {
     selector:"#alertBurdenSection",
@@ -3255,6 +3262,12 @@ function renderCity() {
   setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes", period === "daily28" ? rows : null);
 
   renderAlertBurden(key);
+  window.WeekdayUI?.render(state.historicalDaily?.cities?.[key], key, currentLanguage, {
+    dashboardGeneratedAt: state.data?.meta?.generated_at,
+    derivedGeneratedAt: state.weekdayDerivedGeneration,
+    city: state.explorations?.cities?.[key],
+    schema: state.weekdayDaypartSchema
+  });
   renderTimeOfDay(key);
   renderDaypart(key);
   renderKyivThreatCauses(key);
@@ -4538,6 +4551,8 @@ async function init() {
       if (derived?.all_cities_table_test) state.data.all_cities_table_test = derived.all_cities_table_test;
       if (derived?.explorations?.cities) {
         state.explorations = derived.explorations;
+        state.weekdayDerivedGeneration = derived.meta?.generated_at;
+        state.weekdayDaypartSchema = derived.explorations.meta?.weekday_daypart_schema;
         mergeCurrentDayDaily28(state.data.cities, derived.explorations.daily28_current);
       }
     }
