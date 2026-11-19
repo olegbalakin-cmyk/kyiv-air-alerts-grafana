@@ -154,6 +154,73 @@
       </article>
     </section>
 
+    <section id="weekdaySection" class="comparison-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Дні тижня</div>
+          <h2>Тривоги за днями тижня</h2>
+          <p>Кількість — за днем початку тривоги; час — лише фактична частина, що припала на кожен календарний день у Europe/Kyiv.</p>
+        </div>
+        <div class="section-range-controls weekday-controls">
+          <div class="control">
+            <label for="weekdayRange">Період</label>
+            <select id="weekdayRange" aria-label="Період для статистики за днями тижня">
+              <option value="28d">Останні 28 днів</option>
+              <option value="90d">Останні 90 днів</option>
+              <option value="180d">Останні 180 днів</option>
+              <option value="year">Поточний рік</option>
+              <option value="all">За весь час</option>
+              <option value="custom">Довільний</option>
+            </select>
+          </div>
+          <div class="control date-control">
+            <label for="weekdayDateFrom">Від</label>
+            <div class="date-entry-wrap">
+              <input id="weekdayDateFrom" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+              <span class="date-picker-access">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+                <input type="date" class="date-picker-native" data-date-for="weekdayDateFrom" aria-label="Обрати початкову дату" autocomplete="off">
+              </span>
+            </div>
+          </div>
+          <div class="control date-control">
+            <label for="weekdayDateTo">До</label>
+            <div class="date-entry-wrap">
+              <input id="weekdayDateTo" type="text" class="date-entry" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+              <span class="date-picker-access">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+                <input type="date" class="date-picker-native" data-date-for="weekdayDateTo" aria-label="Обрати кінцеву дату" autocomplete="off">
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p id="weekdayMeta" class="source-note" aria-live="polite"></p>
+      <section class="chart-grid">
+        <article class="panel chart-card wide">
+          <h3>Кількість тривог за днем початку</h3>
+          <p class="chart-subtitle">Середня кількість нових тривог за один понеділок, вівторок тощо в обраному періоді.</p>
+          <div class="chart-wrap"><canvas id="weekdayStartsChart"></canvas></div>
+        </article>
+        <article class="panel chart-card wide">
+          <h3>Фактичний час під тривогою</h3>
+          <p class="chart-subtitle">Середній час під тривогою за один календарний день відповідного дня тижня; переходи через північ розрізані.</p>
+          <div class="weekday-split-controls">
+            <label class="weekday-split-check"><input id="weekdaySplitEnabled" type="checkbox"> <span>Розподілити за частинами доби</span></label>
+            <div class="weekday-split-select">
+              <label for="weekdaySplitMode">Розподіл</label>
+              <select id="weekdaySplitMode" aria-label="Розподіл часу за частинами доби" disabled>
+                <option value="four">4 частини доби</option>
+                <option value="daynight">День / вечір і ніч</option>
+              </select>
+            </div>
+          </div>
+          <p id="weekdaySplitStatus" class="source-note weekday-split-status" aria-live="polite"></p>
+          <div class="chart-wrap"><canvas id="weekdayHoursChart"></canvas></div>
+        </article>
+      </section>
+    </section>
+
     <section id="alertBurdenSection" class="comparison-section hidden">
       <div class="section-heading insight-section-heading">
         <div>
@@ -622,6 +689,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="chart-share.js?v=20261019-share2-1"></script>
   <script src="kpi-range.js?v=20261021-interval-kpi-test1"></script>
-  <script src="app.js?v=20261114-completion-prod1"></script>
+  <script src="weekday-distribution.js?v=20261119-weekday-prod1"></script>
+  <script src="weekday-ui.js?v=20261119-weekday-prod1"></script>
+  <script src="app.js?v=20261119-weekday-prod1"></script>
 </body>
 </html>
