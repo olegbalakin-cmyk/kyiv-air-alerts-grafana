@@ -127,12 +127,19 @@ jobs:
           print("PRODUCTION_UNCHANGED_LOCKED",expected)
           PY
 
+      - name: Restore Chromium for isolated weekday browser QA
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: weekday-pr200-playwright-1.56.1-chromium-linux
+
       - name: Real-browser QA in Ukrainian English and mobile
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npx playwright install-deps chromium
+          npx playwright install chromium
           node tests/weekday_preview_browser_pr200.cjs
 
       - name: Always recheck immutable production lock and published ID
