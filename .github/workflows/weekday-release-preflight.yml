@@ -1,0 +1,69 @@
+name: Weekday production release offline preflight
+on:
+  push:
+    branches: [release/weekday-auto-dayparts-2026-11-19]
+    paths:
+      - ".github/workflows/weekday-release-preflight.yml"
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py"
+      - "tests/test_weekday_distribution.cjs"
+      - "tests/test_weekday_local_bands.py"
+      - "netlify.toml"
+permissions:
+  contents: read
+jobs:
+  offline-release-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify JS and exact weekday aggregation
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js
+          node --check kyiv-air-alerts-grafana/pages-preview/weekday-ui.js
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --test tests/test_weekday_distribution.cjs
+          python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python3 -m unittest discover -s tests -p test_weekday_local_bands.py -v
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("kyiv-air-alerts-grafana/pages-preview/weekday-dayparts.json")
+          j=json.loads(p.read_text())
+          assert j["schema"] == "weekday-dayparts-test-v1"
+          assert j["meta"]["timezone"] == "Europe/Kyiv"
+          assert len(j["cities"])==23
+          assert j["meta"]["snapshot_only"] is True
+          assert j["meta"]["max_complete_day"] == "2026-11-18"
+          assert all(all(len(row)==6 for row in city["rows"]) for city in j["cities"].values())
+          print("WEEKDAY_SNAPSHOT_23_CITIES_VALID")
+          PY
+      - name: Compile production bilingual and SEO static site offline
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir _site
+          for f in index.html styles.css app.js features.json chart-share.js kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$f" "_site/$f"
+          done
+          cp historical-daily-kpi.json _site/historical-daily-kpi.json
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python3 kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py --source historical-daily-kpi.json --output-dir _site
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 18
+          grep -q 'weekday-distribution.js' _site/index.html
+          grep -q 'weekday-ui.js' _site/en/index.html
+          test -s _site/weekday-dayparts.json
+          test -s _site/en/stats/index.html
+          test -s _site/sitemap.xml
+          test -s _site/robots.txt
+          echo "WEEKDAY_PRODUCTION_OFFLINE_BUNDLE_PASS 18_ROOT_FILES"
+      - name: Verify no production publication
+        run: |
+          test "$GITHUB_REF" = "refs/heads/release/weekday-auto-dayparts-2026-11-19"
+          echo "OFFLINE_ONLY_NO_NETLIFY_NO_NEON_NO_SITE_PROD_PUSH"
