@@ -205,6 +205,17 @@
         <article class="panel chart-card wide">
           <h3>Фактичний час під тривогою</h3>
           <p class="chart-subtitle">Середній час під тривогою за один календарний день відповідного дня тижня; переходи через північ розрізані.</p>
+          <div class="weekday-split-controls">
+            <label class="weekday-split-check"><input id="weekdaySplitEnabled" type="checkbox"> <span>Розподілити за частинами доби</span></label>
+            <div class="weekday-split-select">
+              <label for="weekdaySplitMode">Розподіл</label>
+              <select id="weekdaySplitMode" aria-label="Розподіл часу за частинами доби" disabled>
+                <option value="four">4 частини доби</option>
+                <option value="daynight">День / вечір і ніч</option>
+              </select>
+            </div>
+          </div>
+          <p id="weekdaySplitStatus" class="source-note weekday-split-status" aria-live="polite"></p>
           <div class="chart-wrap"><canvas id="weekdayHoursChart"></canvas></div>
         </article>
       </section>
@@ -678,8 +689,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="chart-share.js?v=20261019-share2-1"></script>
   <script src="kpi-range.js?v=20261021-interval-kpi-test1"></script>
-  <script src="weekday-distribution.js?v=20261119-weekday-test1"></script>
-  <script src="weekday-ui.js?v=20261119-weekday-test1"></script>
-  <script src="app.js?v=20261119-weekday-test1"></script>
+  <script src="weekday-distribution.js?v=20261119-weekday-test2"></script>
+  <script src="weekday-ui.js?v=20261119-weekday-test2"></script>
+  <script src="app.js?v=20261119-weekday-test2"></script>
 </body>
 </html>
