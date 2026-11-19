@@ -10,14 +10,19 @@ const {chromium} = require("playwright");
   const browser = await chromium.launch({headless:true});
   const evidence = {url, tests:[], pageErrors:[]};
   async function ready(page) {
-    await page.waitForFunction(() => {
+    try { await page.waitForFunction(() => {
       const meta=document.getElementById("weekdayMeta")?.textContent||"";
       const one=document.getElementById("weekdayStartsChart");
       const two=document.getElementById("weekdayHoursChart");
       return meta.includes("20") && window.Chart && one && two &&
         Chart.getChart(one)?.data?.datasets?.[0]?.data?.length === 7 &&
         Chart.getChart(two)?.data?.datasets?.[0]?.data?.length === 7;
-    }, null, {timeout:90000});
+    }, null, {timeout:20000}); } catch(error) {
+      const diagnostic = await page.evaluate(() => ({url:location.href,ready:document.readyState,chart:typeof Chart,meta:document.querySelector("#weekdayMeta")?.textContent,section:!!document.querySelector("#weekdaySection"),scripts:[...document.scripts].map(x=>x.src),errors:document.querySelector("#freshnessBanner")?.textContent}));
+      console.error("WEEKDAY_DIAGNOSTIC",JSON.stringify(diagnostic));
+      await page.screenshot({path:"_preview-proof/failed-browser-state.png",fullPage:true});
+      throw error;
+    }
   }
   try {
     const ua = await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true});
