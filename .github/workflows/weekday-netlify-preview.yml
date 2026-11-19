@@ -10,6 +10,8 @@ on:
       - "kyiv-air-alerts-grafana/pages-preview/index.html"
       - "kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js"
       - "kyiv-air-alerts-grafana/pages-preview/weekday-ui.js"
+      - "kyiv-air-alerts-grafana/pages-preview/weekday-dayparts.json"
+      - "kyiv-air-alerts-grafana/pages-preview/styles.css"
       - "kyiv-air-alerts-grafana/pages-preview/app.js"
       - "netlify.toml"
 
@@ -66,7 +68,7 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site _preview-proof
-          for file in index.html styles.css app.js features.json chart-share.js kpi-range.js weekday-distribution.js weekday-ui.js brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
+          for file in index.html styles.css app.js features.json chart-share.js kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
             cp "kyiv-air-alerts-grafana/pages-preview/$file" "_site/$file"
           done
           cp historical-daily-kpi.json _site/historical-daily-kpi.json
@@ -78,6 +80,7 @@ jobs:
           test -s _site/en/index.html
           test -s _site/weekday-distribution.js
           test -s _site/weekday-ui.js
+          test -s _site/weekday-dayparts.json
           test -s _site/historical-daily-kpi.json
           printf '%s\n' "$GITHUB_SHA" > _preview-proof/source-head.sha
 
