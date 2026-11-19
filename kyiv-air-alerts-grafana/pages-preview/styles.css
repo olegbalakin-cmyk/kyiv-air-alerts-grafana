@@ -168,3 +168,13 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 .chart-grid .chart-wrap{min-width:0;max-width:100%}
 .chart-grid .chart-wrap canvas{max-width:100%}
 .chart-export-row[data-csv-chart="cityIntensityChart"]{min-width:0}
+
+/* Weekday chart: optional exact time bands, matching existing chart controls. */
+.weekday-split-controls{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:10px 0 8px}
+.weekday-split-check{display:inline-flex;gap:9px;align-items:center;min-height:39px;font-size:13px;color:#dbe4ec;cursor:pointer}
+.weekday-split-check input{width:17px;height:17px;accent-color:#62a0ea;flex:none}
+.weekday-split-select{width:min(250px,100%)}
+.weekday-split-select label{display:block;font-size:12px;color:#9ba9b6;margin-bottom:6px}
+.weekday-split-select select:disabled{opacity:.55;cursor:not-allowed}
+.weekday-split-status{min-height:18px;margin:4px 0 8px}
+@media(max-width:620px){.weekday-split-controls{align-items:stretch;flex-direction:column;gap:6px}.weekday-split-select{width:100%}}

@@ -513,6 +513,48 @@ def aggregate_exploration_profile(profile_15: dict, slot_minutes: int) -> dict:
     }
 
 
+def weekday_daypart_seconds(
+    alerts: list[Alert], coverage_day: date, end_day: date
+) -> dict[date, list[float]]:
+    """Exact overlap-deduplicated seconds in 00-06, 06-09, 09-12, 12-18, 18-24.
+
+    The input is a local calendar-day range; the intervals are unioned in UTC
+    first, then split on Europe/Kyiv clock boundaries. An autumn DST day can
+    legitimately contain 25 elapsed hours.
+    """
+    range_start = datetime.combine(coverage_day, time.min, tzinfo=TZ).astimezone(UTC)
+    range_end = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=TZ).astimezone(UTC)
+    out: dict[date, list[float]] = defaultdict(lambda: [0.0] * 5)
+    if range_end <= range_start:
+        return out
+    for alert in union_alerts(alerts, "weekday_daypart_union"):
+        cursor = max(alert.start.astimezone(UTC), range_start)
+        stop = min(alert.end.astimezone(UTC), range_end)
+        while cursor < stop:
+            local = cursor.astimezone(TZ)
+            day = local.date()
+            hour = local.hour
+            slot = 0 if hour < 6 else (1 if hour < 9 else
+                   (2 if hour < 12 else (3 if hour < 18 else 4)))
+            # All boundaries are local wall times, interpreted as UTC instants
+            # before taking differences. No fixed-offset / 24-hour assumption.
+            candidates = [
+                datetime.combine(day, time(h), tzinfo=TZ).astimezone(UTC)
+                for h in (6, 9, 12, 18)
+            ] + [
+                datetime.combine(day + timedelta(days=1), time.min, tzinfo=TZ).astimezone(UTC)
+            ]
+            future = [boundary for boundary in candidates if boundary > cursor]
+            if not future:
+                raise RuntimeError("Missing forward Europe/Kyiv daypart boundary")
+            edge = min(stop, min(future))
+            if edge <= cursor:
+                raise RuntimeError("Non-advancing Europe/Kyiv daypart boundary")
+            out[day][slot] += (edge - cursor).total_seconds()
+            cursor = edge
+    return out
+
+
 def build_exploration_city(
     alerts: list[Alert],
     coverage_day: date,
@@ -579,6 +621,7 @@ def build_exploration_city(
             month_intervals[month_start.strftime("%Y-%m")].append((cursor, segment_end))
             cursor = segment_end
 
+    weekday_bins = weekday_daypart_seconds(alerts, coverage_day, end_day)
     daily_rows = []
     for day in exploration_days(coverage_day, end_day):
         hours = daily_seconds.get(day, 0.0) / 3600.0
@@ -586,6 +629,9 @@ def build_exploration_city(
             "date": day.isoformat(),
             "alert_hours": round(hours, 3),
             "alerts_started": int(daily_starts.get(day, 0)),
+            "weekday_time_band_seconds": [
+                round(value, 3) for value in weekday_bins.get(day, [0.0] * 5)
+            ],
         })
 
     monthly_rows = []
@@ -757,6 +803,7 @@ def build_exploration_payload(
             "test_only": True,
             "generated_at": generated_at.astimezone(UTC).isoformat(),
             "timezone": "Europe/Kyiv",
+            "weekday_daypart_schema": "weekday-local-five-bands-union-v1",
             "city_count": len(cities),
             "views": [
                 "calendar_burden",
@@ -776,6 +823,8 @@ def build_exploration_payload(
                 "quiet_gap": "Longest quiet gap is measured within the covered part of each calendar month, including month-boundary-to-first-alert and last-alert-to-month-boundary gaps.",
                 "dayparts": "Alert time is split into Europe/Kyiv local-time bands 00-06, 06-12, 12-18, and 18-24.",
                 "day_night": "Day=09:00-18:00; evening/night=18:00-09:00 Europe/Kyiv. Source intervals split at exact local boundaries, honoring DST.",
+                "weekday_dayparts": "Local 00-06,06-09,09-12,12-18,18-24 exact union seconds per calendar day; DST-safe.",
+
                 "time_profile": "Time-of-day profiles are normalized separately for 15-, 30-, and 60-minute local-time slots.",
             },
         },
