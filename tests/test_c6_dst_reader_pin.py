@@ -1,4 +1,4 @@
-"""Offline exact-source regression for the C6 DST-UTC bridge compatibility pin.
+"""Offline exact-source regression for the C6 DST-UTC and weekday builder pins.
 
 Only immutable Git files are loaded; never connects to Neon, source APIs, or Git.
 """
@@ -17,6 +17,11 @@ BRIDGE = ROOT / "site-current" / "kyiv-air-alerts-grafana" / "scripts" / "apply_
 PRIOR_BRIDGE = ROOT / "site-prior" / "kyiv-air-alerts-grafana" / "scripts" / "apply_ukrainealarm_bridge.py"
 EXPECTED_SOURCE = "8b95c4b508b9a473240889603f593e399cf8815d"
 
+WEEKDAY_OLD = ROOT / "site-weekday-prior" / "kyiv-air-alerts-grafana" / "scripts" / "build_time_of_day_heatmap.py"
+WEEKDAY_NEW = ROOT / "site-weekday-current" / "kyiv-air-alerts-grafana" / "scripts" / "build_time_of_day_heatmap.py"
+EXPECTED_OLD_WEEKDAY = "382e815dc95ec4e0d7cb3cb3619e3242aba823ce"
+EXPECTED_NEW_WEEKDAY = "ad6c913ab7554eb59597702ee26a4b903b3d2c6f"
+
 
 def accepted_namespace(generated):
     """Execute only fixed literal dicts and two pure guard helpers from AST."""
@@ -24,7 +29,7 @@ def accepted_namespace(generated):
     names = {
         "CAPTURE_HOOK_BLOBS", "C6_INTEGRATION_HOOK_BLOBS",
         "C6_SEVASTOPOL_CHECKPOINT_BLOBS", "C6_SEVASTOPOL_PR93_BLOBS",
-        "C6_DST_UTC_BRIDGE_BLOBS",
+        "C6_DST_UTC_BRIDGE_BLOBS", "C6_WEEKDAY_HEATMAP_BLOBS",
     }
     nodes = []
     for node in source.body:
@@ -49,6 +54,8 @@ class ExactDstBridgePinTests(unittest.TestCase):
         cls.parser = PARSER.read_bytes()
         cls.bridge = BRIDGE.read_bytes()
         cls.prior = PRIOR_BRIDGE.read_bytes()
+        cls.old_weekday = WEEKDAY_OLD.read_bytes()
+        cls.new_weekday = WEEKDAY_NEW.read_bytes()
 
     def test_exact_immutable_inputs(self):
         self.assertEqual(pin.git_blob(self.generator), pin.BASE_GENERATOR_GIT_BLOB)
@@ -73,6 +80,18 @@ class ExactDstBridgePinTests(unittest.TestCase):
         self.assertFalse(accepted("scripts/apply_ukrainealarm_bridge.py",
                                   self.bridge, "different-expected-blob"))
         self.assertFalse(accepted("scripts/update_data.py", self.bridge, EXPECTED_SOURCE))
+
+    def test_exact_weekday_heatmap_pin_and_negative_drift(self):
+        self.assertEqual(pin.git_blob(self.old_weekday), EXPECTED_OLD_WEEKDAY)
+        self.assertEqual(pin.git_blob(self.new_weekday), EXPECTED_NEW_WEEKDAY)
+        updated = pin.patched_bytes(self.generator, self.parser, self.bridge)
+        accepted = accepted_namespace(updated)["accepted_builder_blob"]
+        path = "scripts/build_time_of_day_heatmap.py"
+        self.assertTrue(accepted(path, self.old_weekday, EXPECTED_OLD_WEEKDAY))
+        self.assertTrue(accepted(path, self.new_weekday, EXPECTED_OLD_WEEKDAY))
+        self.assertFalse(accepted(path, self.new_weekday + b"\n# unexpected drift\n", EXPECTED_OLD_WEEKDAY))
+        self.assertFalse(accepted(path, self.new_weekday, "wrong-expected-blob"))
+        self.assertFalse(accepted("scripts/update_data.py", self.new_weekday, EXPECTED_OLD_WEEKDAY))
 
     def test_wrong_same_run_bridge_fails_before_patching(self):
         with self.assertRaisesRegex(pin.PinBlocked, "DST_UTC_BRIDGE_BLOB_MISMATCH"):

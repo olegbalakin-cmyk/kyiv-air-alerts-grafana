@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact PR #93 and DST-UTC collector blob pins for the accepted C6 generator.
+"""Exact PR #93, DST-UTC and weekday builder blob pins for the C6 generator.
 
 This changes only the generator's immutable allowlist in its isolated checkout.
 It cannot fetch a source, run Neon, write site data, or publish Git.
@@ -28,11 +28,17 @@ C6_SEVASTOPOL_PR93_BLOBS = {
 C6_DST_UTC_BRIDGE_BLOBS = {
  'scripts/apply_ukrainealarm_bridge.py': ('8b95c4b508b9a473240889603f593e399cf8815d', '1e3860df58d229b566ff0383409dd7527ad25576'),
 }
+# Exact owner-approved additive weekday dayparts builder (PR #201).
+# Previous site-prod@148c545d and new site-prod@ae650fea only; keep all other pins.
+C6_WEEKDAY_HEATMAP_BLOBS = {
+ 'scripts/build_time_of_day_heatmap.py': ('382e815dc95ec4e0d7cb3cb3619e3242aba823ce', 'ad6c913ab7554eb59597702ee26a4b903b3d2c6f'),
+}
 """
 ORIGINAL_PREDICATE = "            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual))"
 PATCHED_PREDICATE = ("            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual) or\n"
                      "            C6_SEVASTOPOL_PR93_BLOBS.get(path) == (expected, actual) or\n"
-                     "            C6_DST_UTC_BRIDGE_BLOBS.get(path) == (expected, actual))")
+                     "            C6_DST_UTC_BRIDGE_BLOBS.get(path) == (expected, actual) or\n"
+                     "            C6_WEEKDAY_HEATMAP_BLOBS.get(path) == (expected, actual))")
 
 
 class PinBlocked(ValueError):
