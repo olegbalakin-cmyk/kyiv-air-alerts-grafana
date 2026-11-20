@@ -122,6 +122,11 @@ test("missing or inconsistent 23-city proof never inserts invented chart dates",
  const stale=make();
  assert.equal(model.ensureSnapshotDay(stale,proof,"2026-11-21",derived),false);
 });
+test("final November 20 X-axis date stays labeled even with autoskip and mobile layout",()=>{
+ assert.match(app,/autoSkip: period !== "daily28"/);
+ assert.match(app,/index===chartLabels\.length-1 \|\| index%step===0/);
+ assert.match(app,/const snapshotDay=state\.active23Snapshot\?\.cities\?\.kyiv\?\.date/);
+});
 test("render order: today is reconciled before city period ranges and chart creation",()=>{
  assert.match(app,/ensureSnapshotDay\([\s\S]*?state\.data\.cities,state\.active23Snapshot,snapshotDay/);
  assert.ok(app.indexOf("const didShowSnapshotDay")<app.indexOf("renderCity();",app.indexOf("async function init()")));
