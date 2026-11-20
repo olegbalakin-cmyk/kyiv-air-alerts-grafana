@@ -35,7 +35,7 @@
        !iso(x.capture_at)||typeof x.date!=="string"||x.date!==day(x.capture_at)||
        x.state==="open_at_source_capture"!==Boolean(x.start_at)||
        (x.start_at!==null&&!iso(x.start_at))||
-       !p||!(/^\d{4}-\d{2}-\d{2}$/.test(p.from)||p.through===x.date))return null;
+       !p||!/^\d{4}-\d{2}-\d{2}$/.test(p.from)||p.through!==x.date)return null;
     const closed=p.closed_seconds,open=p.provisional_seconds,total=p.combined_seconds;
     if(![closed,open,total].every(n=>typeof n==="number"&&Number.isFinite(n)&&n>=0)||
        Math.abs(total-(closed+open))>.005||
