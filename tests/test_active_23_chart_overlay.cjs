@@ -4,6 +4,7 @@ const fs=require("node:fs");
 const model=require("../kyiv-air-alerts-grafana/pages-preview/active-23-chart-overlay.js");
 const capture=require("../kyiv-air-alerts-grafana/pages-preview/active-23-provisional.js");
 const proof=JSON.parse(fs.readFileSync(process.env.ACTIVE23_JSON,"utf8"));
+const derived=JSON.parse(fs.readFileSync(process.env.ACTIVE23_DERIVED,"utf8")).explorations.daily28_current;
 const html=fs.readFileSync("kyiv-air-alerts-grafana/pages-preview/index.html","utf8");
 const app=fs.readFileSync("kyiv-air-alerts-grafana/pages-preview/app.js","utf8");
 function makeRow(city,period){
@@ -80,7 +81,7 @@ test("20 November is an actual final X-axis bar for all 23 series, not a cap on 
    avg_active_alert_duration_minutes:null}))
  }]));
  const original=JSON.stringify(cities);
- assert.equal(model.ensureSnapshotDay(cities,proof,"2026-11-20"),true);
+ assert.equal(model.ensureSnapshotDay(cities,proof,"2026-11-20",derived),true);
  assert.equal(Object.keys(cities).length,23);
  for(const key of keys){
   const rows=cities[key].daily28;
@@ -89,14 +90,10 @@ test("20 November is an actual final X-axis bar for all 23 series, not a cap on 
   assert.equal(rows.at(-1).date,"2026-11-20",key);
   assert.equal(rows.at(-1).is_partial_period,true,key);
   assert.equal(rows.at(-1)._active23_test_snapshot_only,true,key);
-  assert.equal(rows.at(-1).total_alert_duration_hours,0,key);
+  assert.equal(rows.at(-1).total_alert_duration_hours,derived.cities[key].total_alert_duration_hours,key);
   const report=capture.evaluate(proof,key,"day");
   const expected=proof.cities[key];
-  const startDay=expected.start_at?new Intl.DateTimeFormat("en-CA",{
-   timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"
-  }).format(new Date(expected.start_at)):null;
-  assert.equal(rows.at(-1).alerts_started,
-    report.hadOpen&&startDay==="2026-11-20"?1:0,key);
+  assert.equal(rows.at(-1).alerts_started,derived.cities[key].alerts_started,key);
   const asChartRow=rows.at(-1);
   const dailyChartRow={...asChartRow,
    avg_daily_alert_hours:asChartRow.total_alert_duration_hours,
@@ -109,7 +106,7 @@ test("20 November is an actual final X-axis bar for all 23 series, not a cap on 
   } else assert.equal(output,null);
  }
  assert.notEqual(JSON.stringify(cities),original);
- assert.equal(model.ensureSnapshotDay(cities,proof,"2026-11-20"),true);
+ assert.equal(model.ensureSnapshotDay(cities,proof,"2026-11-20",derived),true);
  assert.equal(cities.kyiv.daily28.at(-1).date,"2026-11-20");
 });
 test("missing or inconsistent 23-city proof never inserts invented chart dates",()=>{
@@ -118,12 +115,12 @@ test("missing or inconsistent 23-city proof never inserts invented chart dates",
    date:new Date(Date.parse("2026-10-23T00:00:00Z")+i*86400000).toISOString().slice(0,10)
  }))}]));
  const missing=make();delete missing.sumy;
- assert.equal(model.ensureSnapshotDay(missing,proof,"2026-11-20"),false);
+ assert.equal(model.ensureSnapshotDay(missing,proof,"2026-11-20",derived),false);
  const wrong=make();wrong.kyiv.daily28.at(-1).date="2026-11-18";
- assert.equal(model.ensureSnapshotDay(wrong,proof,"2026-11-20"),false);
+ assert.equal(model.ensureSnapshotDay(wrong,proof,"2026-11-20",derived),false);
  for(const [k,obj] of Object.entries(wrong))assert.notEqual(obj.daily28.at(-1).date,"2026-11-20",k);
  const stale=make();
- assert.equal(model.ensureSnapshotDay(stale,proof,"2026-11-21"),false);
+ assert.equal(model.ensureSnapshotDay(stale,proof,"2026-11-21",derived),false);
 });
 test("render order: today is reconciled before city period ranges and chart creation",()=>{
  assert.match(app,/ensureSnapshotDay\([\s\S]*?state\.data\.cities,state\.active23Snapshot,snapshotDay/);
