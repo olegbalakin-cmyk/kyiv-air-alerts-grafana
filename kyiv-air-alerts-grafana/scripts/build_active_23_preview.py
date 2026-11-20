@@ -220,7 +220,8 @@ def build(blob, expected_sha, run_id, attempt):
                 receipt.get("status") == "succeeded" and
                 receipt.get("persistence_status") == "persisted" and
                 receipt.get("city_count") == 23 and
-                receipt.get("canonical_episode_count") == manifest["canonical_episode_count"],
+                type(receipt.get("canonical_episode_count")) is int and
+                receipt["canonical_episode_count"] > 0,
                 "SAME_RUN_NEON_CANONICAL_RECEIPT_NOT_CERTIFIED")
         original = content(archive, "payload.json", manifest)
         dashboard_bytes = content(archive, "site_data/dashboard_data.json", manifest)
@@ -228,6 +229,8 @@ def build(blob, expected_sha, run_id, attempt):
         dataset = json.loads(original)
         dashboard = json.loads(dashboard_bytes)
         sev_store = json.loads(sev_bytes)
+    require(sum(len(v["episodes"]) for v in dataset["cities"].values()) ==
+            receipt["canonical_episode_count"], "NEON_RECEIPT_CORPUS_COUNT_MISMATCH")
     receipts = dataset["historical_source_receipts"]
     require(set(receipts) == EXPECTED_KEYS and set(dataset["cities"]) == EXPECTED_KEYS and
             set(dashboard["cities"]) == EXPECTED_KEYS, "C2_AND_DASHBOARD_23_CITY_SET")
