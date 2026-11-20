@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**UI-ACTIVE23-LIVE-SOURCE-OFFLINE-PASS-2026-11-20-01 — source-bound release preparation, DRAFT ONLY**
+- Producer C6 PR #213 and UI PR #214 UNMERGED. C2 source→physical 6-JSON release SHA/clock binding offline Actions #44721997889 PASS; 23-city UI expiry/clear/count regression #44721447216 PASS. Browser QA and real scheduled Git-only proof remain release gates. Prod Netlify site locked; no data, C2 or Netlify publication.
+
 **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01 — Nov20 actual Chart.js rendering PASS on unpublished draft**
 - Chromium regression #44702699636 FAIL showed Nov19, missing snapshot and `site-derived.json` 404 despite static source PASS. PR #208 HEAD `3101a468` isolates complete Netlify draft bundle, Actions [#44703989283](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44703989283) SUCCESS: 27 browser cases, 23 cities, UA desktop/EN mobile, actual Nov20 axis tick/bar, trend on/off; proof artifact #14614097420 (screenshots/JSON), Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Production unchanged; frozen source is not live publisher.
 
