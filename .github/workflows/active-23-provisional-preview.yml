@@ -7,6 +7,7 @@ on:
       - "kyiv-air-alerts-grafana/pages-preview/**"
       - "tests/test_active_23_provisional.cjs"
       - "tests/test_active_23_chart_overlay.cjs"
+      - "tests/test_active_23_browser.py"
       - ".github/workflows/active-23-provisional-preview.yml"
       - "netlify.toml"
 permissions:
@@ -177,6 +178,14 @@ jobs:
           print('ACTIVE23_NETLIFY_DRAFT_URL',url)
           print('ZERO_NETLIFY_PRODUCTION_PUBLISH')
           PY
+      - name: Real Chromium browser smoke on DEPLOYED unpublished preview
+        run: |
+          set -euo pipefail
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          python tests/test_active_23_browser.py
+          test -s _browser_proof/chart-axis-proof.json
+          echo "REAL_BROWSER_CHART_AXIS_23_CITY_UA_EN_PASS"
       - name: Preserve reviewable proofs (no raw article or source bodies)
         if: always()
         uses: actions/upload-artifact@v4
@@ -185,5 +194,6 @@ jobs:
           path: |
             /tmp/active23/active-23-provisional-test.json
             active23-draft-deploy.json
+            _browser_proof/
           retention-days: 7
           if-no-files-found: warn
