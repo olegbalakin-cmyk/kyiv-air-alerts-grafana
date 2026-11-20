@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01 — source-bound last-bar UI production READY+locked**
+- Scheduled C6 #44778822214 SUCCESS, 23-city source sidecar on site-prod (6 open at capture), zero Netlify; UI PR #217 site-prod@60cb8bb, one-shot build fix@096504ba, Actions #44812658726 SUCCESS, proof #14667572246; Netlify `6b00af31d1f034384896af23` published READY+locked. 8h/local-midnight expiry, not a live status feed. Legacy automatic Netlify push disabled; C6 repeat-cycle stabilization OPEN.
+
 **C6-ACTIVE23-SOURCE-REGISTERED-UI-PREVIEW-PASS-2026-11-20-01 — producer main, UI still gated**
 - PR #213 merged main@`615e91244b9750cd9a1584ec3027537ad2255734`, physical 6-file release binding offline #44721997889 PASS. UI PR #214 still draft; Chromium [#44722499442](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44722499442) SUCCESS 27/27 cases, screenshot/JSON proof #14623105687, archived Netlify preview only. First actual scheduled C6 source-sidecar publication still UNVERIFIED; production Netlify and site-prod unchanged. No claim of live rollout.
 
