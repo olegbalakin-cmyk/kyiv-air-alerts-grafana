@@ -8,12 +8,14 @@ from hashlib import sha256
 from pathlib import Path
 import io
 import json
+from tempfile import TemporaryDirectory
 import os
 import unittest
 import zipfile
 
 from scripts import active23_live_sidecar as active
 from scripts import c6_neon_auto_git as publish
+from scripts import c6_neon_release_binding as release
 
 BUNDLE = os.environ.get("ACTIVE23_BUNDLE", "")
 REQUIRED = set(active.EXPECTED_KEYS)
@@ -109,6 +111,47 @@ class VerifiedSourceCaptureTests(unittest.TestCase):
                 now=now + timedelta(hours=9))
         self.assertTrue(publish.allowed(publish.ACTIVE23_PATH))
         self.assertNotIn(publish.ACTIVE23_PATH, publish.DELIVERED)
+
+    def test_real_six_json_release_generation_binding(self):
+        """Physical C6 preparation artifacts: two different generated_at stamps.
+
+        No database, network, Git push or Netlify calls during the test.
+        """
+        prepared_dir = os.environ.get("ACTIVE23_C6_PREPARED_DIR")
+        if not prepared_dir:
+            raise unittest.SkipTest("real C6 six-file preparation not supplied")
+        raw, manifest, now = evidence()
+        snapshot = active.build(raw, sha256(raw).hexdigest(),
+                                44680696823, 1, as_of=now)
+        prepared = Path(prepared_dir)
+        report = json.loads((prepared / "REPORT.json").read_text())
+        self.assertEqual(report["c2_run_id"], 44680696823)
+        self.assertEqual(report["c2_bundle_sha256"], sha256(raw).hexdigest())
+        with TemporaryDirectory() as temp:
+            out = Path(temp) / "released"
+            release.release_candidate(
+                prepared, report, repository=publish.REPOSITORY,
+                release_id="active23-offline-20261120", output=out)
+            emitted = json.loads((out / "RELEASE_MANIFEST.json").read_text())
+            path = out / "candidate"
+            candidate = publish.candidate.FILES
+            dashboard = json.loads((path / candidate["dashboard_data.json"]).read_text())
+            derived = json.loads((path / candidate["site_derived.json"]).read_text())
+            self.assertNotEqual(dashboard["meta"]["generated_at"],
+                                derived["meta"]["generated_at"])
+            self.assertEqual(snapshot["source_generated_at"],
+                             derived["meta"]["generated_at"])
+            binding = emitted["release_manifest_sha256"]
+            verified = publish.verify_active23_sidecar(
+                snapshot, report, dashboard, derived,
+                {"dashboard_data.json":
+                    manifest["files"]["site_data/dashboard_data.json"],
+                 "site_derived.json":
+                    manifest["files"]["site_data/site_derived.json"]},
+                binding, now=now)
+            self.assertEqual(verified["release_manifest_sha256"], binding)
+            self.assertEqual(verified["count_cities"], 23)
+            self.assertFalse(verified["authoritative_live_status"])
 
     def test_stale_snapshot_is_never_publishable(self):
         raw, _, now = evidence()
