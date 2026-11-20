@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01 — Nov 20 chart row restored in 23-city draft
+- Owner reported no current date. Confirmed same-run C2 dashboard `daily28` ends Nov19; SHA-verified C2 `site_derived.daily28_current` supplies partial Nov20 for all 23 (including closed durations). Draft PR #208 HEAD `31b68ac1` now reconciles exact same-run partial row before range/chart and explicitly labels final day on mobile, preserving source-bound unclosed hatch, trend tick, and no independent panel. Actions [#44698962480](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44698962480) SUCCESS: 8 overlay + 6 source + 10 weekday tests, DST/midnight; artifact #14611712593. Netlify draft `6afffe14b64ca786aa56288d` READY unpublished, existing published deploy unchanged. Frozen test only; no Neon/C2/production UI change.
+
+
 ### UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01 — source-bound last-bar preview, no live release
 - Owner requested no separate card: Draft PR #208 HEAD 9c11f385 now renders Neon-completed blue base + hatched unclosed source cap within last intensity bar; trend uses a short dashed marker (not a second fill). UA/EN, source-time tooltip, provisional CSV. Actions #44693191591 PASS 23/23 + 6/4/10 JS + DST; regression #44693198945 PASS; artifact #14609895891. Netlify draft `6afff30b288eb0e2e4f4e5e7` READY unpublished, production unchanged. Static archived test, not an automated live sidecar.
 
