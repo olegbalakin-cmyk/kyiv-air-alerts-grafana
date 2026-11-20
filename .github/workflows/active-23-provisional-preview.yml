@@ -15,20 +15,22 @@ concurrency:
   group: active-23-provisional-test-only
   cancel-in-progress: true
 jobs:
-  test:
+  preview:
+    if: github.ref == 'refs/heads/test/active-provisional-23-20261120'
     runs-on: ubuntu-24.04
-    timeout-minutes: 24
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - name: Exact read-only checkout
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install source parser dependencies
+      - name: Install pinned existing source parser requirements
         run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
-      - name: Download exact immutable C2 archive; no source HTTP
+      - name: Generate 23-city provisional durations from immutable C2 archive only
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -44,19 +46,124 @@ jobs:
           python - <<'PY'
           import json
           d=json.load(open('/tmp/active23/active-23-provisional-test.json'))
-          assert d['count_cities'] == 23
-          assert d['count_source_open'] == 22
-          assert d['count_source_no_open'] == 1
-          assert d['cities']['sevastopol']['state'] == 'no_open_at_source_capture'
-          assert d['cities']['kyiv']['state'] == 'open_at_source_capture'
-          assert d['publication_allowed'] is False
-          print("23_CITY_PILOT_PROVENANCE_AND_COUNTS_PASS",d['count_source_open'])
+          assert d['count_cities']==23 and d['count_source_open']==22
+          assert d['count_source_no_open']==1 and d['publication_allowed'] is False
+          assert d['cities']['sevastopol']['state']=='no_open_at_source_capture'
+          assert d['cities']['kyiv']['state']=='open_at_source_capture'
+          assert d['cities']['kharkiv']['source_key']=='ukrainealarm_region_history'
+          for key,city in d['cities'].items():
+              assert set(city['periods'])=={'day','week','last7','last28','last30',
+                  'last90','last180','month','quarter','allTime'},key
+              for period,entry in city['periods'].items():
+                  assert abs(entry['combined_seconds']-entry['closed_seconds']-entry['provisional_seconds'])<.005,(key,period)
+          print("C2_23_CITY_EXACT_PROOF_PASS 22_SOURCE_OPEN 1_NO_OPEN")
           PY
-      - name: Upload test JSON proof
+      - name: Test source overlap, date bounds and unchanged canonical KPI contract
+        env:
+          ACTIVE23_JSON: /tmp/active23/active-23-provisional-test.json
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/active-23-provisional.js
+          node --test tests/test_active_23_provisional.cjs
+          node --test tests/test_weekday_distribution.cjs
+          python - <<'PY'
+          import importlib.util
+          from datetime import datetime, timezone
+          p='kyiv-air-alerts-grafana/scripts/build_active_23_preview.py'
+          spec=importlib.util.spec_from_file_location('proof',p)
+          obj=importlib.util.module_from_spec(spec);spec.loader.exec_module(obj)
+          def episode(start,end):
+            return {'episode_state':'closed','alert_type':'AIR','start_at':start,'end_at':end}
+          # Two intervals crossing Kyiv midnight with an overlap: count union.
+          rows=[
+            episode('2026-11-19T21:45:00Z','2026-11-19T22:30:00Z'),
+            episode('2026-11-19T22:10:00Z','2026-11-19T22:50:00Z')
+          ]
+          low=datetime.fromisoformat('2026-11-19T22:00:00+00:00')
+          end=datetime.fromisoformat('2026-11-19T23:00:00+00:00')
+          seconds,_=obj.closed_seconds_window(rows,low,end)
+          assert seconds==3000,seconds
+          # Kyiv spring DST 2026-03-29: local midnight shifts by an hour later.
+          from zoneinfo import ZoneInfo
+          k=ZoneInfo('Europe/Kyiv')
+          from datetime import time,date
+          before=datetime.combine(date(2026,3,29),time.min,tzinfo=k).astimezone(timezone.utc)
+          after=datetime.combine(date(2026,3,30),time.min,tzinfo=k).astimezone(timezone.utc)
+          assert (after-before).total_seconds()==23*3600
+          print('OVERLAP_MIDNIGHT_DST_OFFLINE_PASS')
+          PY
+          git diff --quiet 8c8ee93ced3c7d70a12402f8a74ba586946eaae5 HEAD -- \
+            kyiv-air-alerts-grafana/data \
+            kyiv-air-alerts-grafana/scripts/update_data.py \
+            kyiv-air-alerts-grafana/scripts/multicity_canonical_postgres.py \
+            .github/workflows/update-netlify-site.yml
+          echo "PRODUCTION_WRITER_NEON_SITE_PROD_UNTOUCHED"
+      - name: Build exact same-run 23-city bilingual static draft
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          for f in index.html styles.css app.js features.json chart-share.js \
+            kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json \
+            active-23-provisional.js brand-mark.svg \
+            brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg \
+            favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$f" "_site/$f"
+          done
+          cp /tmp/active23/active-23-provisional-test.json _site/active-23-provisional-test.json
+          python - <<'PY'
+          import zipfile,hashlib,json
+          from pathlib import Path
+          p='/tmp/active23/c2-shadow-inputs.zip'
+          with zipfile.ZipFile(p) as z:
+              manifest=json.loads(z.read('manifest.json'))
+              for source,target in {
+                'site_data/dashboard_data.json':'data.json',
+                'site_data/site_derived.json':'site-derived.json',
+                'site_data/kyiv_threat_mix.json':'kyiv-threat-mix.json'
+              }.items():
+                  blob=z.read(source)
+                  assert hashlib.sha256(blob).hexdigest()==manifest['files'][source]
+                  Path('_site',target).write_bytes(blob)
+          print('SAME_RUN_C2_DASHBOARD_SITE_DERIVED_AND_SNAPSHOT_PASS')
+          PY
+          cp historical-daily-kpi.json _site/historical-daily-kpi.json
+          python kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py \
+            --source historical-daily-kpi.json --output-dir _site
+          test -s _site/index.html
+          test -s _site/en/index.html
+          test -s _site/active-23-provisional.js
+          grep -q 'active-23-provisional.js' _site/en/index.html
+          grep -q 'id="active23Section"' _site/index.html
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          echo "23_CITY_UA_EN_DRAFT_BUILD_PASS"
+      - name: Deploy Netlify DRAFT ONLY — no production publish
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --alias=active23-test-20261120 --json > active23-draft-deploy.json
+          python - <<'PY'
+          import json
+          d=json.load(open('active23-draft-deploy.json'))
+          url=d.get('deploy_url') or d.get('url')
+          assert url and url.startswith('https://')
+          print('ACTIVE23_NETLIFY_DRAFT_URL',url)
+          print('ZERO_NETLIFY_PRODUCTION_PUBLISH')
+          PY
+      - name: Preserve reviewable proofs (no raw article or source bodies)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: active-23-provisional-proof-${{ github.run_id }}
-          path: /tmp/active23/active-23-provisional-test.json
-          if-no-files-found: warn
+          name: active23-test-proof-${{ github.run_id }}
+          path: |
+            /tmp/active23/active-23-provisional-test.json
+            active23-draft-deploy.json
           retention-days: 7
+          if-no-files-found: warn
