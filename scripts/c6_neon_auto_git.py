@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import tempfile
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from scripts import c6_neon_git_candidate as candidate
@@ -29,6 +30,8 @@ DELIVERED = frozenset(p for n, p in candidate.FILES.items()
 SCHEMA = "c6-neon-auto-c2-delta-v1"
 REPOSITORY = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
 NEON_BRANCH = "br-bold-mode-b5rub8pq"
+ACTIVE23_PATH = PREFIX + "active23_source_capture.json"
+ACTIVE23_SCHEMA = "c6-active-23-source-capture-v1"
 
 # One immutable, independently verified exception. No generic failed-run bypass.
 RECOVERY_PINS = {
@@ -351,6 +354,78 @@ def verify_embedded(dashboard, index, manifest):
             "EMBEDDED_HISTORICAL_KPI_CONTRACT_FAIL")
 
 
+def verify_active23_sidecar(raw, report, new, source_hashes, binding, *, now=None):
+    """Accept only C2 same-run observations, never the browser's archive fixture.
+
+    A source no-open is authoritative ONLY as-of its capture. The frontend
+    independently enforces freshness and same-generation checks. The C6 six
+    JSON publication never depends on a missing optional sidecar.
+    """
+    from scripts import c6_neon_publication_gate as clock
+    now = clock.utc(now or datetime.now(timezone.utc))
+    require(isinstance(raw, dict) and raw.get("schema") == ACTIVE23_SCHEMA
+            and raw.get("capture_scope") ==
+            "observed_at_last_collection_not_live"
+            and raw.get("test_only") is False
+            and raw.get("publication_allowed") is True
+            and raw.get("timezone") == "Europe/Kyiv",
+            "ACTIVE23_SOURCE_CONTRACT")
+    require(raw.get("c2_run_id") == report["c2_run_id"]
+            and raw.get("c2_run_attempt") == report["c2_run_attempt"]
+            and raw.get("c2_corpus_sha256") == report["c2_corpus_sha256"]
+            and raw.get("archive_sha256") == report["c2_bundle_sha256"]
+            and raw.get("source_generated_at") == new["meta"]["generated_at"]
+            and raw.get("same_run_dashboard_sha256") ==
+                source_hashes["dashboard_data.json"]
+            and raw.get("same_run_derived_sha256") ==
+                source_hashes["site_derived.json"],
+            "ACTIVE23_SAME_RUN_BINDING")
+    keys = set(new["multicity_meta"]["production_city_keys"])
+    rows = raw.get("cities")
+    require(len(keys) == 23 and isinstance(rows, dict)
+            and set(rows) == keys and
+            raw.get("count_cities") == 23 and
+            raw.get("count_source_open") + raw.get("count_source_no_open") == 23,
+            "ACTIVE23_CITY_SET")
+    opens = 0
+    today = now.astimezone(ZoneInfo("Europe/Kyiv")).date().isoformat()
+    for city, item in rows.items():
+        require(isinstance(item, dict) and item.get("city_key") == city and
+                item.get("date") == today and
+                item.get("state") in
+                    {"open_at_source_capture", "no_open_at_source_capture"} and
+                isinstance(item.get("periods"), dict) and
+                isinstance(item.get("source_sha256"), str) and
+                len(item["source_sha256"]) == 64,
+                "ACTIVE23_CITY_SOURCE:" + city)
+        try:
+            checked = clock.utc(item["capture_at"])
+            start = clock.utc(item["start_at"]) if item.get("start_at") else None
+        except (ValueError, TypeError, KeyError) as e:
+            raise Blocked("ACTIVE23_SOURCE_TIME:" + city) from e
+        require(-120 <= (now - checked).total_seconds() <= 8 * 3600
+                and checked.astimezone(ZoneInfo("Europe/Kyiv")).date().isoformat() == today,
+                "ACTIVE23_SOURCE_STALE:" + city)
+        had_open = item["state"] == "open_at_source_capture"
+        opens += int(had_open)
+        require(bool(start) == had_open and (start is None or start < checked),
+                "ACTIVE23_START_STATE_MISMATCH:" + city)
+        day = item["periods"].get("day", {})
+        require(day.get("from") == day.get("through") == today and
+                all(isinstance(day.get(k), (int, float)) and day[k] >= 0
+                    for k in ("closed_seconds", "provisional_seconds",
+                              "combined_seconds")) and
+                abs(day["closed_seconds"] + day["provisional_seconds"] -
+                    day["combined_seconds"]) < .01 and
+                (had_open or day["provisional_seconds"] == 0),
+                "ACTIVE23_DAY_TOTAL:" + city)
+    require(raw["count_source_open"] == opens and
+            raw["count_source_no_open"] == 23 - opens,
+            "ACTIVE23_OPEN_COUNT")
+    return {**raw, "release_manifest_sha256": binding,
+            "delivery": "site-prod-git", "authoritative_live_status": False}
+
+
 def publish(checkout, delta, prepared, proof, *, repository,
             workflow_sha, run_id, run_attempt, enabled, zero_deploys):
     """Verify everything before touching a Git worktree or its remote."""
@@ -432,6 +507,24 @@ def publish(checkout, delta, prepared, proof, *, repository,
         require(old_kyiv and old_kyiv <= final_kyiv
                 and candidate.intervals(load(c2_kyiv)) <= final_kyiv,
                 "KYIV_HISTORICAL_INTERVAL_LOSS")
+        # Optional same-run C2 source-at-capture sidecar. A stale or missing
+        # input never fabricates an open/cleared state. A malformed present
+        # sidecar hard-blocks publication rather than contaminating the Git
+        # atomic commit. The regular C6 cycle can publish without this file.
+        active23 = None
+        sidecar_file = prepared / "active23-source-capture.json"
+        if sidecar_file.exists():
+            require(sidecar_file.is_file() and not sidecar_file.is_symlink(),
+                    "ACTIVE23_FILE_NOT_REGULAR")
+            require("site_derived.json" in hashes and
+                    "dashboard_data.json" in hashes,
+                    "ACTIVE23_C2_GENERATION_MISSING")
+            active23 = verify_active23_sidecar(
+                load(sidecar_file), report, new,
+                {"dashboard_data.json": hashes[candidate.FILES["dashboard_data.json"]],
+                 "site_derived.json": hashes[candidate.FILES["site_derived.json"]]},
+                manifest["release_manifest_sha256"])
+
         # Everything above is read-only. C2's same-run state and Neon JSON
         # now enter the *same* Git index; no separate C2 Git publisher runs.
         for path in sorted(hashes):
@@ -443,7 +536,14 @@ def publish(checkout, delta, prepared, proof, *, repository,
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(final_data / path, dest)
             require(sha(dest) == result["files"][path], "FINAL_SHA_MISMATCH")
-        paths = sorted(set(hashes) | DELIVERED)
+        if active23 is not None:
+            out = checkout / ACTIVE23_PATH
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(active23, ensure_ascii=False,
+                                      sort_keys=True, indent=2) + "\n",
+                           encoding="utf-8")
+        paths = sorted(set(hashes) | DELIVERED |
+                       ({ACTIVE23_PATH} if active23 is not None else set()))
         subprocess.run(["git", "-C", str(checkout), "add", "--", *paths],
                        check=True)
         staged = set(git(checkout, "diff", "--cached", "--name-only").splitlines())
