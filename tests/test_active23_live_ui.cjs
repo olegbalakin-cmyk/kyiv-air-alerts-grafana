@@ -126,9 +126,10 @@ test("invalid schema, cross-generation, missing source are never displayed",()=>
     "kyiv","day",AT),null);
   assert.equal(provisional.evaluate({...snap,count_cities:22},
     "kyiv","day",AT),null);
-  assert.match(app,/source_generated_at === source/);
+  assert.match(app,/derived\?\.meta\?\.generated_at===state\.active23Snapshot\.source_generated_at/);
   assert.match(app,/release_manifest_sha256 === release\?\.release_manifest_sha256/);
-  assert.match(app,/derived\?\.meta\?\.generated_at === state\.data\?\.meta\?\.generated_at/);
+  assert.match(app,/derived\?\.meta\?\.publication_authority\?\.release_manifest_sha256===releaseId/);
+  assert.doesNotMatch(app,/derived\?\.meta\?\.generated_at === state\.data\?\.meta\?\.generated_at/);
 });
 test("production has no frozen preview urls and deploys both chart modules",()=>{
   assert.match(app,/RAW_DATA_BASE \+ "active23_source_capture\.json"/);
