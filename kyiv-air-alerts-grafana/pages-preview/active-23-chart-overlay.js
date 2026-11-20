@@ -100,11 +100,21 @@
     const f=type=>parts.find(p=>p.type===type)?.value;
     return f("year")+"-"+f("month")+"-"+f("day");
   };
-  function ensureSnapshotDay(cities,snapshot,today){
+  function ensureSnapshotDay(cities,snapshot,today,envelope=null){
     if(!cities||!snapshot||typeof today!=="string"||
        !/^\d{4}-\d{2}-\d{2}$/.test(today)||
        !snapshot.cities||Object.keys(cities).length!==23||
        Object.keys(snapshot.cities).length!==23)return false;
+    // Existing same-run derived data may include completed episodes from
+    // November 20 even when the dashboard daily28 cuts off on November 19.
+    // Require source-certified 23-row partial daily data for this fallback;
+    // never invent completed hours or alert-start counts from wall clock.
+    if(envelope && (envelope.meta?.timezone!=="Europe/Kyiv"||
+       envelope.meta?.current_day!==today||
+       envelope.meta?.current_day_is_partial!==true||
+       envelope.meta?.kpi_period_unchanged!==true||
+       !envelope.cities||Object.keys(envelope.cities).length!==23))
+      return false;
     const keys=Object.keys(cities),next=new Map();
     for(const key of keys){
       const base=cities[key]?.daily28;
@@ -129,23 +139,21 @@
           return false;
         next.set(key,null); // already correctly attached by same-run generator
       }else{
-        // In particular no green-line zero can be invented when completed
-        // source-start counts are unknown: this fallback is only for the
-        // exact zero-completed time in the frozen C2 snapshot.
-        if(proof.closed!==0)return false;
-        const row={
-          time:today+"T00:00:00+02:00",
-          date:today,
-          // Started-count semantics: a source-proven open alert beginning
-          // on this date counts once even without an all-clear.
-          alerts_started:proof.hadOpen&&
-            localDay(snapshot.cities[key].start_at)===today?1:0,
-          active_alerts:proof.hadOpen?1:0,
-          total_alert_duration_minutes:0,total_alert_duration_hours:0,
-          avg_alert_duration_minutes:null,avg_active_alert_duration_minutes:null,
-          is_partial_period:true,partial_through:proof.capturedAt,
-          _active23_test_snapshot_only:true
-        };
+        const observed=envelope?.cities?.[key];
+        if(!observed||observed.date!==today||
+           observed.is_partial_period!==true||
+           !Number.isInteger(observed.alerts_started)||observed.alerts_started<0||
+           !Number.isInteger(observed.active_alerts)||observed.active_alerts<0||
+           typeof observed.total_alert_duration_hours!=="number"||
+           !Number.isFinite(observed.total_alert_duration_hours)||
+           Math.abs(observed.total_alert_duration_hours*3600-proof.closed)>150||
+           typeof observed.partial_through!=="string"||
+           !Number.isFinite(Date.parse(observed.partial_through))||
+           localDay(observed.partial_through)!==today||
+           Math.abs(Date.parse(observed.partial_through)-
+             Date.parse(proof.capturedAt))>4*3600000)
+          return false;
+        const row={...observed,_active23_test_snapshot_only:true};
         next.set(key,[...prev.slice(-27),row]);
       }
     }
