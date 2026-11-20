@@ -44,8 +44,11 @@ test("periods accumulate verified completed and provisional only once",()=>{
   const c=api.evaluate(snapshot,city,"last28",at);
   assert.ok(b.closed+0.01>=a.closed,city);
   assert.ok(c.closed+0.01>=a.closed,city);
-  assert.ok(Math.abs(a.open-b.open)<0.001,city);
-  assert.ok(Math.abs(a.open-c.open)<0.001,city);
+  // Cross-midnight alerts contribute only today's portion to the day,
+  // but their previous-day portion also belongs to month/28-day windows.
+  assert.ok(b.open+0.001>=a.open,city);
+  assert.ok(c.open+0.001>=a.open,city);
+  assert.ok(b.open<36*3600&&c.open<36*3600,city);
  }
 });
 test("stale snapshot remains explicitly archival and never claims live status",()=>{
