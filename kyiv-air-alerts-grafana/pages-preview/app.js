@@ -4662,6 +4662,7 @@ async function init() {
     }
   }
 
+  let active23DerivedDay=null;
   try {
     const derivedResponse = await fetch(`${DERIVED_DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
     if (derivedResponse.ok) {
@@ -4672,7 +4673,8 @@ async function init() {
         state.explorations = derived.explorations;
         state.weekdayDerivedGeneration = derived.meta?.generated_at;
         state.weekdayDaypartSchema = derived.explorations.meta?.weekday_daypart_schema;
-        mergeCurrentDayDaily28(state.data.cities, derived.explorations.daily28_current);
+        active23DerivedDay=derived.explorations.daily28_current;
+        mergeCurrentDayDaily28(state.data.cities, active23DerivedDay);
       }
     }
   } catch (err) {
@@ -4685,7 +4687,7 @@ async function init() {
   // the already verified derived partial-day rows are present.
   const snapshotDay=state.active23Snapshot?.cities?.kyiv?.date;
   const didShowSnapshotDay=window.Active23ChartOverlay?.ensureSnapshotDay(
-    state.data.cities,state.active23Snapshot,snapshotDay);
+    state.data.cities,state.active23Snapshot,snapshotDay,active23DerivedDay);
   if(!didShowSnapshotDay)
     console.warn("Unverified current-day plot: test-only source day not merged");
 
