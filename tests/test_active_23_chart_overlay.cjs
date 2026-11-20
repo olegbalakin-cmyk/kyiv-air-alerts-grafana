@@ -28,7 +28,7 @@ test("no separate content block, one final-bar drawing plugin",()=>{
  assert.match(app,/active23Overlay\.closedHours/);
  assert.match(app,/active23FinalBar: \{overlay:active23Overlay,forecast:active23Forecast\}/);
  assert.match(app,/periodForecastDeltaHatch:[\s\S]{0,150}!active23Overlay/);
- assert.match(app,/Завершено \(Neon\)/);
+ assert.match(app,/Завершені тривоги/);
  assert.match(app,/Архівний зріз джерела/);
 });
 test("all 22 open source captures become ONLY the final chart bar",()=>{
@@ -47,6 +47,25 @@ test("all 22 open source captures become ONLY the final chart bar",()=>{
    assert.ok(Math.abs(o.rawCombinedHours-o.rawProvisionalHours-o.rawClosedHours)<0.0001);
   }
  }
+});
+test("unclosed alert is counted ONLY on its verified Kyiv start day",()=>{
+  const kyiv=model.forChart(proof,"kyiv","daily28",[makeRow("kyiv","daily28")]);
+  const poltava=model.forChart(proof,"poltava","daily28",[makeRow("poltava","daily28")]);
+  assert.ok(kyiv&&poltava);
+  assert.equal(kyiv.unclosedStartDay,"2026-11-20");
+  assert.equal(kyiv.unclosedStartsToday,1);
+  assert.equal(kyiv.unclosedStartsInPeriod,1);
+  assert.equal(poltava.unclosedStartDay,"2026-11-19");
+  assert.equal(poltava.unclosedStartsToday,0);
+  assert.equal(poltava.unclosedStartsInPeriod,0);
+  const month=model.forChart(proof,"poltava","monthly",[makeRow("poltava","monthly")]);
+  assert.ok(month);
+  assert.equal(month.unclosedStartsInPeriod,1,"a Nov19 start still counts in November");
+  assert.equal(month.unclosedStartsToday,0);
+  assert.match(app,/countRows\.map\(r => r\.alerts_per_day\)/);
+  assert.match(app,/renderSelectedCityKpis\(city,key,activeRange\.from,activeRange\.to,period,active23Overlay\)/);
+  assert.match(app,/countRows\.map\(r => r\.alerts_started\)/);
+  assert.doesNotMatch(app,/Завершено \(Neon\)/);
 });
 test("strictly fail closed on unrelated/old last bars and no false current states",()=>{
  const r=makeRow("kyiv","daily28");
