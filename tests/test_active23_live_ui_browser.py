@@ -181,14 +181,24 @@ def main():
                 state = assert_visible_day(page, slug)
                 results['cases'].append({'name': slug, **state})
                 snap(page, slug)
-                # Real click triggers the same render path the owner uses.
-                page.locator('#showTrend').check()
-                trend = assert_visible_day(page, slug + '-trend')
-                assert trend['showTrend'], f'{slug}: trend toggle not active'
-                results['cases'].append({'name': slug + '-trend', **trend})
-                snap(page, slug + '-trend')
-                page.locator('#showTrend').uncheck()
-                assert_visible_day(page, slug + '-no-trend')
+                # A source-certified trend can legitimately be unavailable:
+                # never force-enable a disabled forecast with missing proof.
+                trend_toggle = page.locator('#showTrend')
+                if trend_toggle.is_enabled():
+                    trend_toggle.check()
+                    trend = assert_visible_day(page, slug + '-trend')
+                    assert trend['showTrend'], f'{slug}: trend toggle not active'
+                    results['cases'].append({'name': slug + '-trend', **trend})
+                    snap(page, slug + '-trend')
+                    trend_toggle.uncheck()
+                    assert_visible_day(page, slug + '-no-trend')
+                else:
+                    reason = page.locator('#showTrend').get_attribute('title')
+                    assert reason and len(reason) >= 20, (
+                        f'{slug}: trend disabled without an accessible reason')
+                    results['cases'].append({'name':slug+'-trend-unavailable',
+                                              'reason':reason})
+
                 if lang == 'uk':
                     # Every city uses the same exact C2 capture and chart path.
                     options = page.locator('#citySelect option').evaluate_all(
