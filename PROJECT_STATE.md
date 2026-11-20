@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-19. **Weekday dashboard LIVE, Netlify READY + locked.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**; latest prior C6 code pin **C6-DST-READER-PIN-MERGED-2026-11-15-01**.
+**Date:** 2026-11-20. **Weekday dashboard LIVE, Netlify READY + locked; C6 exact heatmap pin merged, scheduled proof pending.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
 
 ## Working instructions
 
@@ -15,7 +15,7 @@ Latest accepted transition: **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**; latest pri
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted `C6-C3-WORKS-NEON-CUTOVER-PASS-01`; owner-gated [Netlify #43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) and [Git #43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769) SUCCESS, 23-city historical KPI/CSV/browser QA PASS. `GLOBAL_CUTOVER=YES` applies to historical JSON only.
-- **Scheduled C2/C6:** first four-hour Neon→Git #43625014243 PASS. Next two #43655729191/#43686460909: writer PASS, reader hash blocked. PR #167 fixed pin on main. Owner-approved one-shot [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819) SUCCESS, C2 Neon receipt, 23/23 readback, [Git-only `site-prod@048af474`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/048af474d98c953bbac351936092ee2bd08c6fad), zero Netlify. Temporary one-shot trigger removed via PR #176 (`main@63a614ca`). **Still no successful scheduled post-pin cycle; C6_STABILIZATION=OPEN**.
+- **Scheduled C2/C6:** 2026-11-20 scheduled #44634410260 C2 writer NEON_SUCCEEDED (34,271 episodes, +53), but six-JSON reader BLOCKED on exact weekday `build_time_of_day_heatmap.py` blob drift. PR #203 squash merged `main@cf8d5db4`, offline C6 pin #44679502629 PASS; production `site-prod@ae650fea` unchanged, scheduled reader/Git-only proof **PENDING**. Earlier first four-hour Neon→Git #43625014243 PASS. Next two #43655729191/#43686460909: writer PASS, reader hash blocked. PR #167 fixed pin on main. Owner-approved one-shot [#43706909819](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706909819) SUCCESS, C2 Neon receipt, 23/23 readback, [Git-only `site-prod@048af474`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/048af474d98c953bbac351936092ee2bd08c6fad), zero Netlify. Temporary one-shot trigger removed via PR #176 (`main@63a614ca`). **Still no successful scheduled post-pin cycle; C6_STABILIZATION=OPEN**.
 - **Netlify/UI + SEO archive (2026-11-16):** Trend hatch PR #191 site-prod@7c1adc43 and bilingual site LIVE. Owner-approved SEO release PR #194 merged `site-prod@6d0879c`; Netlify `6afb034ee4ead33599681226` READY and locked. 23 city/raion series, 392 verified completed months, 784 bilingual monthly pages, 936 sitemap URLs, `robots.txt`, footer link. Same-generation KPI sourced from embedded verified dashboard (deployed blob `a64a93e3`; standalone Git index older). Release CI #43874588605 PASS. Production workflow #43874825782 deploy/relock/KPI PASS, overall **FAIL** at known HTML post-smoke. Independent live HTTP #43875088810 PASS (50 pages/61 requests, artifact #14229611799). Monthly cron OFF (Draft #193); future activation needs separate GO. Four-hour C6 unchanged.
 
 - **Weekday UI LIVE (Nov 19):** PR #201 site-prod@`ae650fea`; Netlify `6aff5392a3a6d0497a6f5d1d` READY + locked; Actions #44602714671 SUCCESS. UK/EN tutorial, 4-band/day-night switch. Next scheduled dayparts refresh awaits proof; C2/Neon unchanged.
@@ -24,15 +24,18 @@ Latest accepted transition: **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**; latest pri
 
 ## Concrete next tasks
 
-1. Check 1–2 **scheduled** post-pin C2→Neon→Git cycles: 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
+1. Check next 1–2 **scheduled** post-PR203 C2→Neon→Git cycles: exact weekday builder readback, 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
 2. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 3. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
-4. Verify scheduled same-generation weekday dayparts refresh; old Netlify UI test #44602714524 failed *before deploy* (tour 8 vs 6). Keep regular Netlify publishing locked.
+4. Verify scheduled same-generation weekday dayparts refresh after PR #203; old Netlify UI test #44602714524 failed *before deploy* (tour 8 vs 6). Keep regular Netlify publishing locked.
 5. Mark C6 stabilization CLOSED only after repeat-cycle proof; keep casualty/backfill separate.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01 — fix merged; scheduled proof pending
+- Scheduled #44634410260: C2 writer NEON_SUCCEEDED, +53 / 34,271 canonical episodes, but isolated six-JSON reader fail-closed `BUILDER_CODE_DRIFT:scripts/build_time_of_day_heatmap.py`; no Git publish. Owner-authorized exact guard repair PR #203 squash merged `main@cf8d5db40eaa5ac94934035870e43d26af471b23`, fixed PR201 new Git blob while retaining original and rejecting arbitrary drift. Offline pin #44679502629 PASS, capture timestamp #44679502645 PASS, coordination CI #44679502639 PASS. No Netlify, production JSON, Neon or C2 mutation from repair. Need future scheduled 23/23 readback + Git commit proof; C6_STABILIZATION=OPEN.
+
 ## UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01 — production LIVE
 - Owner GO; PR #200 preview Actions #44591705771 PASS, artifact #14564845428; release PR #201 exact QA #44602597715 PASS. site-prod@`ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b`. One-shot Actions #44602714671 SUCCESS, proof #14567973014. Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; live asset parity/KPI PASS. 4h derived update code ready, scheduled proof pending. No Neon writes or C2 changes. Old workflow #44602714524 failed before publish.
 
