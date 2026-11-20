@@ -3035,11 +3035,14 @@ function renderCity() {
     state.active23Snapshot,key,period,rows) || null;
   const intensityHours=rows.map(r=>r.avg_daily_alert_hours);
   if(active23Overlay)intensityHours[active23Overlay.index]=active23Overlay.closedHours;
-  const active23Forecast=completion&&active23Overlay
+  // Axis reserves forecast space with trend ON or OFF; only the marker
+  // visibility follows the checkbox. No jump in scale on interaction.
+  const active23AxisForecast=completionPotential&&active23Overlay
     ? window.Active23ChartOverlay?.completionHoursPerDay(
-        active23Overlay,completion,
+        active23Overlay,completionPotential,
         window.PeriodCompletionPreview?.kyivMidnightUtc,
         window.PeriodCompletionPreview?.add) : null;
+  const active23Forecast=completion&&active23Overlay ? active23AxisForecast : null;
 
   const intensityDatasets = [
     {
@@ -3303,7 +3306,7 @@ function renderCity() {
           suggestedMax:Math.max(
             ...intensityHours.map(v=>Number(v)||0),
             active23Overlay?.combinedHours||0,
-            Number(active23Forecast)||0,
+            Number(active23AxisForecast)||0,
             completionPotential&&!active23Overlay ? completionPotential.expectedHours/completionPotential.days : 0
           ),
           position: "left",
