@@ -1,0 +1,125 @@
+name: Kyiv active provisional (test preview only)
+on:
+  push:
+    branches: [test/kyiv-active-provisional-20261120]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/scripts/build_active_kyiv_preview.py"
+      - "tests/test_kyiv_active_provisional.cjs"
+      - ".github/workflows/kyiv-active-provisional-preview.yml"
+      - "netlify.toml"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: kyiv-active-provisional-test-preview
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/test/kyiv-active-provisional-20261120'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Read-only checkout, no persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check exact script and frontend module without running any publisher
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/kyiv-active-provisional.js
+          node --test tests/test_kyiv_active_provisional.cjs
+          node --test tests/test_weekday_distribution.cjs
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Read immutable C2 source artifact once, no source HTTP or Neon
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/kyiv-active-c2
+          gh run download 44680696823 -R "$GITHUB_REPOSITORY" \
+            -n c2-shadow-inputs-44680696823-1 -D /tmp/kyiv-active-c2
+          test -s /tmp/kyiv-active-c2/c2-shadow-inputs.zip
+          python kyiv-air-alerts-grafana/scripts/build_active_kyiv_preview.py \
+            --bundle /tmp/kyiv-active-c2/c2-shadow-inputs.zip \
+            --output /tmp/kyiv-active-c2/derived-test.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          generated=json.loads(Path("/tmp/kyiv-active-c2/derived-test.json").read_text())
+          committed=json.loads(Path("kyiv-air-alerts-grafana/pages-preview/kyiv-active-provisional-test.json").read_text())
+          assert generated==committed,(generated,committed)
+          assert generated["status"]=="unclosed_at_source_capture"
+          assert generated["started_at"]=="2026-11-20T01:19:00+02:00"
+          assert generated["captured_at"]=="2026-11-20T05:24:02.290610+00:00"
+          assert generated["ends_at"] is None and generated["neon_writes"]==0
+          assert generated["publication_allowed"] is False
+          print("IMMUTABLE_SOURCE_TO_SEPARATE_TEST_ONLY_PROVISIONAL_JSON_PASS")
+          PY
+      - name: Guard no production mutation and certified-history untouched
+        run: |
+          set -euo pipefail
+          git diff --quiet 8c8ee93ced3c7d70a12402f8a74ba586946eaae5 HEAD \
+            -- kyiv-air-alerts-grafana/data historical-daily-kpi.json \
+               kyiv-air-alerts-grafana/scripts/update_data.py \
+               .github/workflows/update-netlify-site.yml \
+               .github/workflows/netlify-production.yml
+          grep -q 'id="kyivActiveProvisional"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'renderActiveKyivProvisional' kyiv-air-alerts-grafana/pages-preview/app.js
+          echo "NO_C2_NEON_SOURCE_API_SITE_PROD_PUBLISH_OR_PRODUCTION_HISTORY_MUTATION"
+      - name: Build test-only static bundle (UA/EN + existing static historical pages)
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          for f in index.html styles.css app.js features.json chart-share.js \
+              kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json \
+              kyiv-active-provisional.js kyiv-active-provisional-test.json \
+              brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg \
+              favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$f" "_site/$f"
+          done
+          cp historical-daily-kpi.json _site/historical-daily-kpi.json
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          python kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py \
+            --source historical-daily-kpi.json --output-dir _site
+          test -s _site/index.html
+          test -s _site/en/index.html
+          test -s _site/kyiv-active-provisional.js
+          test -s _site/kyiv-active-provisional-test.json
+          grep -q 'kyiv-active-provisional.js' _site/en/index.html
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          echo "ISOLATED_UA_EN_DRAFT_BUNDLE_PASS"
+      - name: Deploy Netlify DRAFT ONLY, never published production
+        env:
+          NETLIFY_AUTH_TOKEN: \${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --alias=kyiv-active-provisional-20261120 --json > kyiv-active-preview-deploy.json
+          python - <<'PY'
+          import json
+          x=json.load(open("kyiv-active-preview-deploy.json"))
+          url=x.get("deploy_url") or x.get("url")
+          assert url and url.startswith("https://"),x
+          print("KYIV_ACTIVE_TEST_DRAFT_URL",url)
+          print("NETLIFY_PUBLISHED_PRODUCTION_UNTOUCHED")
+          PY
+      - name: Save proof and draft URL (never raw source body)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-active-provisional-test-proof-\${{ github.run_id }}
+          path: |
+            kyiv-active-preview-deploy.json
+            kyiv-air-alerts-grafana/pages-preview/kyiv-active-provisional-test.json
+          retention-days: 7
+          if-no-files-found: warn
