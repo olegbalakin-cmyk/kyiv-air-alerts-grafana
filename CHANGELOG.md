@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01 — manual path registered, not executed
+- PR #205 merged `main@7abdaf02`; exact scheduled C2→Neon→Git-only pipeline now accepts default-OFF `c6_run_now` for owner on main with AUTO enabled, other one-shot inputs OFF. CI [#44680250526](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44680250526) PASS and existing guards PASS. No dispatch, new `site-prod` commit, or Netlify deploy from this change. Physical manual cycle pending; separate scheduled stabilization still open.
+
+
 ### C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01 — exact approved reader fix, scheduled validation pending
 - Scheduled Actions #44634410260 writer PASS (+53, 34,271), six-JSON reader BLOCKED on new PR201 heatmap Git blob. Owner-approved PR #203 merged main@cf8d5db4; exact old/new allowlist plus negative drift CI [#44679502629](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44679502629) PASS, regression #44679502645 PASS, docs #44679502639 PASS. No site-prod or Netlify changes, next four-hour scheduled cycle must demonstrate 23/23 readback and Git-only publication; C6 stabilization remains open.
 
