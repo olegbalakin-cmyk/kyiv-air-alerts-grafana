@@ -3292,7 +3292,7 @@ function renderCity() {
                 }).format(new Date(active23Overlay.capturedAt));
                 return [
                   tr("Архівний зріз джерела: ","Archived source snapshot: ")+stamp,
-                  tr("Попередні години не є остаточними.","Provisional hours are not final.")
+                  tr("Попередні дані можуть коригуватися при наступних оновленнях.","Preliminary data may be revised in subsequent updates.")
                 ];
               }
               if (completion && i===rows.length-1) {
