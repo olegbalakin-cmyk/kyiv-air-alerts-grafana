@@ -1,0 +1,175 @@
+name: Owner-approved active23 current-day one-shot locked Netlify release
+on:
+  pull_request:
+    branches: [site-prod]
+    paths:
+      - ".github/workflows/active23-production-once.yml"
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "netlify.toml"
+  push:
+    branches: [site-prod]
+    paths:
+      - ".github/workflows/active23-production-once.yml"
+permissions:
+  contents: read
+concurrency:
+  group: netlify-production-site
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate current-day UI and safety guards (never deploy)
+        run: |
+          set -euo pipefail
+          for file in app.js active-23-provisional.js active-23-chart-overlay.js; do
+            node --check "kyiv-air-alerts-grafana/pages-preview/$file"
+          done
+          node --test tests/test_active23_live_ui.cjs
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_current_period_completion.js
+          python3 - <<'PY'
+          import json, tomllib
+          from pathlib import Path
+          from datetime import datetime, timezone
+          root=Path("kyiv-air-alerts-grafana")
+          source=json.loads((root/"data/active23_source_capture.json").read_text())
+          dashboard=json.loads((root/"data/dashboard_data.json").read_text())
+          derived=json.loads((root/"data/site_derived.json").read_text())
+          assert source["schema"]=="c6-active-23-source-capture-v1"
+          assert source["capture_scope"]=="observed_at_last_collection_not_live"
+          assert source["test_only"] is False and source["publication_allowed"] is True
+          assert source["authoritative_live_status"] is False
+          assert source["delivery"]=="site-prod-git"
+          assert source["c2_run_id"]>=44778822214
+          assert len(source["cities"])==source["count_cities"]==23
+          assert source["count_source_open"]+source["count_source_no_open"]==23
+          assert set(source["cities"])==set(dashboard["multicity_meta"]["production_city_keys"])
+          for item in (dashboard,derived):
+            assert item["meta"]["publication_authority"]["release_manifest_sha256"]==source["release_manifest_sha256"]
+            assert item["meta"]["generated_at"]==source["source_generated_at"]
+          now=datetime.now(timezone.utc)
+          for key,city in source["cities"].items():
+            assert key==city["city_key"]
+            t=datetime.fromisoformat(city["capture_at"].replace("Z","+00:00"))
+            age=(now-t).total_seconds()
+            assert -120<=age<=8*3600,(key,"stale_source")
+            assert city["periods"]["day"]["through"]==city["date"]
+            assert city["state"] in ("open_at_source_capture","no_open_at_source_capture")
+            assert (city["start_at"] is not None)==(city["state"]=="open_at_source_capture")
+          cfg=tomllib.loads(Path("netlify.toml").read_text())
+          for asset in ("active-23-provisional.js","active-23-chart-overlay.js"):
+            assert asset in cfg["build"]["command"]
+            assert asset in (root/"pages-preview/index.html").read_text()
+          legacy=Path(".github/workflows/netlify-production.yml").read_text()
+          assert "\n  push:\n" not in legacy, "Legacy automatic Netlify production deploy must be disabled"
+          print("ACTIVE23_RELEASE_PREFLIGHT_23_CITY_SAME_GENERATION_FRESH_LOCK_GUARD_PASS",source["c2_run_id"])
+          PY
+  release:
+    needs: preflight
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/site-prod' && github.actor == 'olegbalakin-cmyk' && startsWith(github.event.head_commit.message, 'Release active23 UI 2026-11-20') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact owner-approved release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Confirm exact head and no publication of research/data by this release
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/site-prod"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -s kyiv-air-alerts-grafana/data/active23_source_capture.json
+          test -s kyiv-air-alerts-grafana/pages-preview/active-23-provisional.js
+          test -s kyiv-air-alerts-grafana/pages-preview/active-23-chart-overlay.js
+          if git diff-tree --no-commit-id --name-only -r HEAD | grep -E '^(kyiv-air-alerts-grafana/data/|kyiv-air-alerts-grafana/scripts/|docs/)'; then
+            echo "::error::Release commit touched data or production producer code"
+            exit 1
+          fi
+          echo "ACTIVE23_OWNER_APPROVED_FRONTEND_ONLY_RELEASE_HEAD_PASS"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build exact production frontend, UA/EN and verified 23-city static archive
+        run: |
+          set -euo pipefail
+          python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python3 kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json --output historical-daily-kpi.json
+          rm -rf _site
+          mkdir _site
+          for file in index.html styles.css app.js features.json chart-share.js kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json active-23-provisional.js active-23-chart-overlay.js brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$file" "_site/$file"
+          done
+          cp historical-daily-kpi.json _site/historical-daily-kpi.json
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python3 -m unittest discover -s tests -p test_seo_full_history_archive.py -v
+          python3 kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py --source historical-daily-kpi.json --output-dir _site
+          for file in _site/index.html _site/en/index.html _site/active-23-provisional.js _site/active-23-chart-overlay.js _site/stats/index.html _site/en/stats/index.html _site/sitemap.xml; do test -s "$file"; done
+          grep -q 'active-23-provisional.js' _site/index.html
+          grep -q 'active-23-chart-overlay.js' _site/en/index.html
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          dashboard=json.loads(Path("kyiv-air-alerts-grafana/data/dashboard_data.json").read_text())
+          index=json.loads(Path("_site/historical-daily-kpi.json").read_text())
+          assert index["meta"]["verified_count"]==23
+          assert index["meta"]["source_dashboard_generated_at"]==dashboard["meta"]["generated_at"]
+          assert set(index["cities"])==set(dashboard["multicity_meta"]["production_city_keys"])
+          print("ACTIVE23_23_CITY_VERIFIED_ARCHIVE_AND_BILINGUAL_SITE_PASS")
+          PY
+      - name: One owner-gated Netlify publish and automatic exact relock
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          python3 kyiv-air-alerts-grafana/scripts/one_shot_locked_netlify_deploy.py
+      - name: Verify served JS/UA/EN and published locked deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          site="https://ukraine-air-alerts.netlify.app"
+          for asset in app.js active-23-provisional.js active-23-chart-overlay.js; do
+            curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "$site/$asset?v=active23-20261120" -o "/tmp/live-active23-$asset"
+            cmp "_site/$asset" "/tmp/live-active23-$asset"
+          done
+          curl --fail --silent --show-error --location "$site/" -o /tmp/active23-uk.html
+          curl --fail --silent --show-error --location "$site/en/" -o /tmp/active23-en.html
+          grep -q 'active-23-provisional.js' /tmp/active23-uk.html
+          grep -q 'active-23-chart-overlay.js' /tmp/active23-en.html
+          python3 - <<'PY'
+          import json,os,urllib.request
+          from pathlib import Path
+          meta=json.loads(Path("netlify-production-deploy.json").read_text())
+          did=meta.get("deploy_id") or meta.get("id")
+          token=os.environ["NETLIFY_AUTH_TOKEN"]
+          headers={"Authorization":"Bearer "+token}
+          def req(path):
+            with urllib.request.urlopen(urllib.request.Request("https://api.netlify.com/api/v1"+path,headers=headers),timeout=25) as response:
+              return json.load(response)
+          site=req("/sites/b5aafc46-7468-4070-baf1-db80a4d30501")
+          published=site.get("published_deploy") or {}
+          deploy=req("/deploys/"+did)
+          assert published.get("id")==did
+          assert deploy["state"]=="ready" and deploy["locked"] is True
+          print("ACTIVE23_PRODUCTION_READY_PUBLISHED_LOCKED_PASS",did)
+          PY
+      - name: Preserve exact production release receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: active23-one-shot-production-proof
+          path: netlify-production-deploy.json
+          if-no-files-found: warn
+          retention-days: 90
