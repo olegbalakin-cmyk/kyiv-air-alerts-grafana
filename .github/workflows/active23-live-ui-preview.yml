@@ -105,6 +105,13 @@ jobs:
           }
           Path('_site/data.json').write_text(
               json.dumps(dashboard,ensure_ascii=False,indent=2)+'\n')
+          derived=json.loads(Path('_site/site-derived.json').read_text())
+          # This preview-only substitution emulates the existing C6 release
+          # binding; the original archive and production code stay untouched.
+          assert derived['meta']['generated_at']==snapshot['source_generated_at']
+          derived['meta']['publication_authority']=dashboard['meta']['publication_authority']
+          Path('_site/site-derived.json').write_text(
+              json.dumps(derived,ensure_ascii=False,indent=2)+'\n')
           snapshot.update({'release_manifest_sha256':fake,
                            'delivery':'site-prod-git',
                            'authoritative_live_status':False})
