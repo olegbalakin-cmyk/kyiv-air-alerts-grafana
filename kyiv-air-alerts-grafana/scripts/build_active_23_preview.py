@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import argparse
 import base64
-from datetime import datetime, time, timezone
+from datetime import datetime, time, timezone, timedelta
 from hashlib import sha256
 import io
 import json
@@ -184,7 +184,7 @@ def sev_open(row, pages, raw, checked, stored):
     return msg["at"], {"pages": len(pages), "message_id": msg["id"]}
 
 
-def closed_seconds_today(episodes, midnight, checked):
+def closed_seconds_window(episodes, midnight, checked):
     intervals = []
     for episode in episodes:
         require(episode["episode_state"] == "closed" and episode["alert_type"] == "AIR",
@@ -212,6 +212,16 @@ def build(blob, expected_sha, run_id, attempt):
                 manifest["github_run_attempt"] == attempt and
                 set(manifest["historical_capture_receipts"]["complete_cities"]) == EXPECTED_KEYS,
                 "C2_ARCHIVE_ID_OR_23_CITIES")
+        status = json.loads(content(archive, "status.json", manifest))
+        receipt = json.loads(content(archive, "receipt.json", manifest))
+        require(status.get("canonical_persistence_status") == "NEON_SUCCEEDED" and
+                status.get("canonical_db_commit") == "CONFIRMED" and
+                status.get("canonical_receipt_validated") is True and
+                receipt.get("status") == "succeeded" and
+                receipt.get("persistence_status") == "persisted" and
+                receipt.get("city_count") == 23 and
+                receipt.get("canonical_episode_count") == manifest["canonical_episode_count"],
+                "SAME_RUN_NEON_CANONICAL_RECEIPT_NOT_CERTIFIED")
         original = content(archive, "payload.json", manifest)
         dashboard_bytes = content(archive, "site_data/dashboard_data.json", manifest)
         sev_bytes = content(archive, "site_data/sevastopol_events.json", manifest)
@@ -234,7 +244,7 @@ def build(blob, expected_sha, run_id, attempt):
         day = checked.astimezone(KYIV).date()
         midnight = datetime.combine(day, time.min, tzinfo=KYIV).astimezone(UTC)
         source_episodes = dataset["cities"][city]["episodes"]
-        confirmed, intervals = closed_seconds_today(source_episodes, midnight, checked)
+        confirmed, intervals = closed_seconds_window(source_episodes, midnight, checked)
         provisional = 0
         if started is not None:
             require(started < checked, "ACTIVE_START_AFTER_CAPTURE")
@@ -245,6 +255,37 @@ def build(blob, expected_sha, run_id, attempt):
         total = confirmed + provisional
         require(total <= (checked-midnight).total_seconds() + .001,
                 "COMBINED_DAY_OVERRUN")
+        periods = {}
+        first = min(at(a["start_at"]).astimezone(KYIV).date() for a in source_episodes)
+        starts = {
+            "day": day,
+            "week": day - timedelta(days=day.weekday()),
+            "last7": day - timedelta(days=6),
+            "last28": day - timedelta(days=27),
+            "last30": day - timedelta(days=29),
+            "last90": day - timedelta(days=89),
+            "last180": day - timedelta(days=179),
+            "month": day.replace(day=1),
+            "quarter": day.replace(month=1+3*((day.month-1)//3),day=1),
+            "allTime": first,
+        }
+        for name, day_start in starts.items():
+            lo = datetime.combine(day_start, time.min, tzinfo=KYIV).astimezone(UTC)
+            done, accepted = closed_seconds_window(source_episodes, lo, checked)
+            pending = 0.0
+            if started is not None:
+                begin = max(started, lo)
+                require(all(end <= begin or a >= checked for a,end in accepted),
+                        "ACTIVE_OVERLAPS_CONFIRMED_PERIOD:"+name)
+                pending = max(0, (checked-begin).total_seconds())
+            require(done+pending <= (checked-lo).total_seconds()+.001,
+                    "ACTIVE_PERIOD_TOTAL_TOO_LONG:"+name)
+            periods[name] = {"from":day_start.isoformat(),"through":day.isoformat(),
+                             "closed_seconds":round(done,3),
+                             "provisional_seconds":round(pending,3),
+                             "combined_seconds":round(done+pending,3)}
+        require(abs(periods["day"]["combined_seconds"]-total) < .01,
+                "TODAY_PERIOD_SUM_MISMATCH")
         output[city] = {
             "city_key": city,
             "state": "open_at_source_capture" if started is not None else "no_open_at_source_capture",
@@ -258,6 +299,7 @@ def build(blob, expected_sha, run_id, attempt):
             "provisional_seconds_today": round(provisional, 3),
             "combined_seconds_today": round(total, 3),
             "closed_episode_count": len(source_episodes),
+            "periods": periods,
             "source_provenance": ("city" if city in ("kyiv", "sevastopol", "kharkiv", "zaporizhzhia") else "raion_proxy"),
         }
     open_count = sum(x["state"] == "open_at_source_capture" for x in output.values())
