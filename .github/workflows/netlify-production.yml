@@ -69,20 +69,6 @@ on:
         description: 'Exact Work A proof artifact ZIP digest'
         type: string
         required: false
-  push:
-    branches: [site-prod]
-    paths:
-      - "kyiv-air-alerts-grafana/pages-preview/**"
-      - "kyiv-air-alerts-grafana/tests/test_chart_share.js"
-      - "kyiv-air-alerts-grafana/tests/test_dynamic_city_kpi.js"
-      - "kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js"
-      - "kyiv-air-alerts-grafana/tests/test_historical_max.js"
-      - "kyiv-air-alerts-grafana/tests/test_kpi_interval_windows.js"
-      - "kyiv-air-alerts-grafana/tests/test_all_time_period.js"
-      - "kyiv-air-alerts-grafana/tests/test_live_history_binding.js"
-      - "netlify.toml"
-      - ".github/workflows/netlify-production.yml"
-      - "netlify.toml"
 
 concurrency:
   group: netlify-production-site

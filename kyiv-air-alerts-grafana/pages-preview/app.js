@@ -534,6 +534,7 @@ const state = {
   data: null,
   features: { attack_events: false },
   kyivThreatMix: null,
+  active23Snapshot: null,
   explorations: null,
   charts: {},
   tableSort: { key: "alerts", direction: "desc" },
@@ -544,6 +545,7 @@ const RAW_DATA_BASE = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-a
 const DATA_URL = RAW_DATA_BASE + "dashboard_data.json";
 const DERIVED_DATA_URL = RAW_DATA_BASE + "site_derived.json";
 const FEATURES_URL = "features.json";
+const ACTIVE23_SOURCE_URL = RAW_DATA_BASE + "active23_source_capture.json";
 const KYIV_THREAT_MIX_URL = RAW_DATA_BASE + "kyiv_threat_mix.json";
 const KYIV_THREAT_MIX_ARCHIVE_DATA = {"meta":{"source":"https://kyiv.digital/open-api/air-alert/history","timezone":"Europe/Kyiv","semantics":"episode_level_cause_assignment","first_differentiated_date":"2026-09-07","generated_at":"2026-11-12T23:07:54.154116+00:00","visible_start":"2026-09-10","visible_end":"2026-11-12","visible_day_count":64,"note":"Historical Kyiv Digital causes are assigned to the whole alert episode. Intra-alert cause transitions are not reconstructed. Preview reconstruction from historical Git snapshots only; 2026-09-07..09 archived rows are not available.","preview_archival_proof":true,"source_http_performed":false,"archive_provenance":{"method":"three overlapping immutable site-prod GitHub JSON snapshots; later snapshots override on overlaps","snapshots":[{"commit":"a853f215caf04286be61791a165a5570e5749105","blob_sha":"eac79451ef8900c14c339644bf228db3fdaae4b0","generated_at":"2026-10-08T15:03:39.312790+00:00","visible_start":"2026-09-10","visible_end":"2026-10-07"},{"commit":"c0e3cef6bb4437492cb5933fad5f2f6d5b23e3be","blob_sha":"608c61075e199f2cce51efa2d9a39a79cda0edf8","generated_at":"2026-10-28T21:30:14.198793+00:00","visible_start":"2026-09-30","visible_end":"2026-10-27"},{"commit":"54079326ae2b4e691e2bfcf7cd1a51c9705404eb","blob_sha":"7cce390c59b048696fcb8f5f8e66c481c8b365ee","generated_at":"2026-11-12T23:07:54.154116+00:00","visible_start":"2026-10-16","visible_end":"2026-11-12"}],"overlap_conflicts":0,"calendar_date_gaps":0,"known_unarchived_dates":["2026-09-07","2026-09-08","2026-09-09"]}},"rows":[{"date":"2026-09-10","total_minutes":350.6,"minutes":{"drone":287.933,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":62.667,"unknown":0},"shares":{"drone":82.125784,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":17.874216,"unknown":0}},{"date":"2026-09-11","total_minutes":270.266,"minutes":{"drone":150.933,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":119.333,"unknown":0},"shares":{"drone":55.846092,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":44.153908,"unknown":0}},{"date":"2026-09-12","total_minutes":269.116,"minutes":{"drone":246.433,"massive-drone":22.683,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":91.571293,"massive-drone":8.428707,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-13","total_minutes":24.133,"minutes":{"drone":24.133,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-14","total_minutes":35.867,"minutes":{"drone":35.867,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-15","total_minutes":210.2,"minutes":{"drone":185.55,"massive-drone":0,"missile":24.65,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":88.273073,"massive-drone":0,"missile":11.726927,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-16","total_minutes":127.633,"minutes":{"drone":127.633,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-17","total_minutes":397.684,"minutes":{"drone":326.367,"massive-drone":0,"missile":71.317,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":82.066917,"massive-drone":0,"missile":17.933083,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-18","total_minutes":111.934,"minutes":{"drone":75.217,"massive-drone":0,"missile":36.717,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":67.197634,"massive-drone":0,"missile":32.802366,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-19","total_minutes":132.283,"minutes":{"drone":99.3,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":32.983,"unknown":0},"shares":{"drone":75.066335,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":24.933665,"unknown":0}},{"date":"2026-09-20","total_minutes":612.634,"minutes":{"drone":575.55,"massive-drone":0,"missile":25.917,"ballistic":0,"mig":0,"combined":11.167,"unknown":0},"shares":{"drone":93.946794,"massive-drone":0,"missile":4.230421,"ballistic":0,"mig":0,"combined":1.822785,"unknown":0}},{"date":"2026-09-21","total_minutes":441.767,"minutes":{"drone":441.767,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-22","total_minutes":592.25,"minutes":{"drone":356.317,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":235.933,"unknown":0},"shares":{"drone":60.163276,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":39.836724,"unknown":0}},{"date":"2026-09-23","total_minutes":601.433,"minutes":{"drone":601.433,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-24","total_minutes":689.417,"minutes":{"drone":596.817,"massive-drone":0,"missile":92.6,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":86.568361,"massive-drone":0,"missile":13.431639,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-25","total_minutes":482.267,"minutes":{"drone":435.617,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":46.65,"unknown":0},"shares":{"drone":90.326935,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":9.673065,"unknown":0}},{"date":"2026-09-26","total_minutes":635.1,"minutes":{"drone":635.1,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-27","total_minutes":1041.75,"minutes":{"drone":1041.75,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-28","total_minutes":906.033,"minutes":{"drone":906.033,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-09-29","total_minutes":640.917,"minutes":{"drone":584.417,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":56.5,"unknown":0},"shares":{"drone":91.184506,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":8.815494,"unknown":0}},{"date":"2026-09-30","total_minutes":1221.567,"minutes":{"drone":457.5,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":764.067,"unknown":0},"shares":{"drone":37.451896,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":62.548104,"unknown":0}},{"date":"2026-10-01","total_minutes":474.967,"minutes":{"drone":474.967,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-02","total_minutes":473.267,"minutes":{"drone":473.267,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-03","total_minutes":137.983,"minutes":{"drone":137.983,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-04","total_minutes":246.467,"minutes":{"drone":246.467,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-05","total_minutes":78.65,"minutes":{"drone":78.65,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-06","total_minutes":57.617,"minutes":{"drone":57.617,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-07","total_minutes":613.683,"minutes":{"drone":377.483,"massive-drone":0,"missile":236.2,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":61.511073,"massive-drone":0,"missile":38.488927,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-08","total_minutes":654.7,"minutes":{"drone":602.967,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":51.733,"unknown":0},"shares":{"drone":92.098213,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":7.901787,"unknown":0}},{"date":"2026-10-09","total_minutes":808.983,"minutes":{"drone":808.983,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-10","total_minutes":759.316,"minutes":{"drone":720.383,"massive-drone":0,"missile":38.933,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":94.872622,"massive-drone":0,"missile":5.127378,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-11","total_minutes":387.583,"minutes":{"drone":336.333,"massive-drone":0,"missile":11,"ballistic":0,"mig":0,"combined":40.25,"unknown":0},"shares":{"drone":86.777026,"massive-drone":0,"missile":2.838102,"ballistic":0,"mig":0,"combined":10.384872,"unknown":0}},{"date":"2026-10-12","total_minutes":313.533,"minutes":{"drone":313.533,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-13","total_minutes":430.267,"minutes":{"drone":260.55,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":169.717,"unknown":0},"shares":{"drone":60.555423,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":39.444577,"unknown":0}},{"date":"2026-10-14","total_minutes":644.617,"minutes":{"drone":372.35,"massive-drone":0,"missile":72.167,"ballistic":0,"mig":0,"combined":200.1,"unknown":0},"shares":{"drone":57.762982,"massive-drone":0,"missile":11.19533,"ballistic":0,"mig":0,"combined":31.041688,"unknown":0}},{"date":"2026-10-15","total_minutes":534.9,"minutes":{"drone":438.917,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":95.983,"unknown":0},"shares":{"drone":82.055898,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":17.944102,"unknown":0}},{"date":"2026-10-16","total_minutes":477.6,"minutes":{"drone":372.233,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":105.367,"unknown":0},"shares":{"drone":77.938233,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":22.061767,"unknown":0}},{"date":"2026-10-17","total_minutes":137.1,"minutes":{"drone":71.067,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":66.033,"unknown":0},"shares":{"drone":51.835886,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":48.164114,"unknown":0}},{"date":"2026-10-18","total_minutes":262.717,"minutes":{"drone":167.883,"massive-drone":0,"missile":14.267,"ballistic":0,"mig":0,"combined":80.567,"unknown":0},"shares":{"drone":63.902602,"massive-drone":0,"missile":5.430558,"ballistic":0,"mig":0,"combined":30.666839,"unknown":0}},{"date":"2026-10-19","total_minutes":200.983,"minutes":{"drone":51.05,"massive-drone":0,"missile":82.983,"ballistic":0,"mig":0,"combined":66.95,"unknown":0},"shares":{"drone":25.400158,"massive-drone":0,"missile":41.288567,"ballistic":0,"mig":0,"combined":33.311275,"unknown":0}},{"date":"2026-10-20","total_minutes":572.4,"minutes":{"drone":504.25,"massive-drone":0,"missile":24.983,"ballistic":0,"mig":0,"combined":43.167,"unknown":0},"shares":{"drone":88.09399,"massive-drone":0,"missile":4.364605,"ballistic":0,"mig":0,"combined":7.541405,"unknown":0}},{"date":"2026-10-21","total_minutes":571.983,"minutes":{"drone":388.75,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":183.233,"unknown":0},"shares":{"drone":67.965307,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":32.034693,"unknown":0}},{"date":"2026-10-22","total_minutes":531.517,"minutes":{"drone":131.517,"massive-drone":0,"missile":152.917,"ballistic":0,"mig":0,"combined":247.083,"unknown":0},"shares":{"drone":24.743705,"massive-drone":0,"missile":28.769917,"ballistic":0,"mig":0,"combined":46.486378,"unknown":0}},{"date":"2026-10-23","total_minutes":192.5,"minutes":{"drone":176.35,"massive-drone":0,"missile":16.15,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":91.61039,"massive-drone":0,"missile":8.38961,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-24","total_minutes":230.717,"minutes":{"drone":215.25,"massive-drone":0,"missile":15.467,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":93.296116,"massive-drone":0,"missile":6.703884,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-25","total_minutes":519.733,"minutes":{"drone":475.95,"massive-drone":0,"missile":43.783,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":91.575867,"massive-drone":0,"missile":8.424133,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-26","total_minutes":101.233,"minutes":{"drone":6.883,"massive-drone":3.1,"missile":15.25,"ballistic":0,"mig":0,"combined":76,"unknown":0},"shares":{"drone":6.799166,"massive-drone":3.062243,"missile":15.064258,"ballistic":0,"mig":0,"combined":75.074333,"unknown":0}},{"date":"2026-10-27","total_minutes":191.333,"minutes":{"drone":64.35,"massive-drone":0,"missile":55.5,"ballistic":0,"mig":0,"combined":71.483,"unknown":0},"shares":{"drone":33.632463,"massive-drone":0,"missile":29.007019,"ballistic":0,"mig":0,"combined":37.360518,"unknown":0}},{"date":"2026-10-28","total_minutes":46.95,"minutes":{"drone":0,"massive-drone":0,"missile":46.95,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":0,"massive-drone":0,"missile":100,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-29","total_minutes":151.583,"minutes":{"drone":83.883,"massive-drone":0,"missile":67.7,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":55.338,"massive-drone":0,"missile":44.662,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-10-30","total_minutes":403.583,"minutes":{"drone":170.45,"massive-drone":0,"missile":130.183,"ballistic":0,"mig":0,"combined":102.95,"unknown":0},"shares":{"drone":42.234187,"massive-drone":0,"missile":32.25681,"ballistic":0,"mig":0,"combined":25.509003,"unknown":0}},{"date":"2026-10-31","total_minutes":451.75,"minutes":{"drone":451.75,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-11-01","total_minutes":660.533,"minutes":{"drone":660.533,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-11-02","total_minutes":380.584,"minutes":{"drone":267.367,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":113.217,"unknown":0},"shares":{"drone":70.251771,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":29.748229,"unknown":0}},{"date":"2026-11-03","total_minutes":612.267,"minutes":{"drone":56.817,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":555.45,"unknown":0},"shares":{"drone":9.279775,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":90.720225,"unknown":0}},{"date":"2026-11-04","total_minutes":370.75,"minutes":{"drone":353.417,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":17.333,"unknown":0},"shares":{"drone":95.324882,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":4.675118,"unknown":0}},{"date":"2026-11-05","total_minutes":243.366,"minutes":{"drone":198.283,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":45.083,"unknown":0},"shares":{"drone":81.475227,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":18.524773,"unknown":0}},{"date":"2026-11-06","total_minutes":291.667,"minutes":{"drone":291.667,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-11-07","total_minutes":717.417,"minutes":{"drone":482.3,"massive-drone":0,"missile":48.717,"ballistic":0,"mig":0,"combined":186.4,"unknown":0},"shares":{"drone":67.227289,"massive-drone":0,"missile":6.790611,"ballistic":0,"mig":0,"combined":25.9821,"unknown":0}},{"date":"2026-11-08","total_minutes":155.083,"minutes":{"drone":155.083,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-11-09","total_minutes":234.35,"minutes":{"drone":234.35,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":100,"massive-drone":0,"missile":0,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-11-10","total_minutes":285.25,"minutes":{"drone":255.7,"massive-drone":0,"missile":29.55,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":89.640666,"massive-drone":0,"missile":10.359334,"ballistic":0,"mig":0,"combined":0,"unknown":0}},{"date":"2026-11-11","total_minutes":260.7,"minutes":{"drone":189.983,"massive-drone":0,"missile":17.417,"ballistic":0,"mig":0,"combined":53.3,"unknown":0},"shares":{"drone":72.874185,"massive-drone":0,"missile":6.680859,"ballistic":0,"mig":0,"combined":20.444956,"unknown":0}},{"date":"2026-11-12","total_minutes":215.683,"minutes":{"drone":149.9,"massive-drone":0,"missile":65.783,"ballistic":0,"mig":0,"combined":0,"unknown":0},"shares":{"drone":69.500146,"massive-drone":0,"missile":30.499854,"ballistic":0,"mig":0,"combined":0,"unknown":0}}]};
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
@@ -1078,6 +1080,15 @@ function exportChartCsv(chartId) {
     return row;
   });
 
+  if(chartId==="cityIntensityChart"&&chart._active23Overlay){
+    const o=chart._active23Overlay;
+    headers.push("provisional_source_hours_per_day","combined_snapshot_hours_per_day",
+      "source_capture_utc","source_capture_only");
+    rows.forEach((row,i)=>{
+      row.push(i===o.index?o.provisionalHours:"",i===o.index?o.combinedHours:"",
+        i===o.index?o.capturedAt:"",i===o.index?"true":"");
+    });
+  }
   triggerCsvDownload(exportContextParts(chartId, config.slug), headers, rows);
 }
 
@@ -1285,6 +1296,52 @@ const partialPeriodBarPlugin = {
 // A hatched DIFFERENCE between the unchanged factual bar and the forecast.
 // If the estimated full-period daily mean is lower, hatch INSIDE the bar;
 // if higher, hatch the extension ABOVE it. Never rebase the factual bar.
+
+/* Solid verified bar + diagonally hatched source-observed unclosed cap.
+   Forecast is ONLY an external dashed tick: never a second fill. */
+const active23FinalBarPlugin = {
+  id:"active23FinalBar",
+  afterDatasetsDraw(chart,_args,opts) {
+    const o=opts?.overlay,forecast=opts?.forecast;
+    if(!o||!chart.chartArea)return;
+    const el=chart.getDatasetMeta(0)?.data?.[o.index],axis=chart.scales?.yHours;
+    if(!el||!axis||el.skip)return;
+    const p=el.getProps(["x","y","base","width"],true);
+    if(![p.x,p.y,p.base,p.width].every(Number.isFinite)||p.width<=3)return;
+    const a=axis.getPixelForValue(o.closedHours),b=axis.getPixelForValue(o.combinedHours);
+    if(!Number.isFinite(a)||!Number.isFinite(b)||b>a)return;
+    const ctx=chart.ctx,area=chart.chartArea,side=p.width/2;
+    ctx.save();ctx.beginPath();ctx.rect(area.left,area.top,area.right-area.left,area.bottom-area.top);ctx.clip();
+    const left=p.x-side+1,width=p.width-2,top=b,height=a-b;
+    if(height>=0.5){
+      ctx.save();ctx.beginPath();ctx.rect(left,top,width,height);ctx.clip();
+      ctx.fillStyle="rgba(133,179,222,0.36)";ctx.fillRect(left,top,width,height);
+      ctx.strokeStyle="rgba(234,244,255,0.94)";ctx.lineWidth=1.3;
+      for(let dx=-height;dx<width+height;dx+=8){
+        ctx.beginPath();ctx.moveTo(left+dx,top+height);
+        ctx.lineTo(left+dx+height,top);ctx.stroke();
+      }
+      ctx.restore();ctx.strokeStyle="#d7eafa";ctx.lineWidth=1.7;
+      ctx.beginPath();ctx.moveTo(left,top);ctx.lineTo(left+width,top);ctx.stroke();
+    }
+    if(Number.isFinite(forecast)&&forecast>=0){
+      const yf=axis.getPixelForValue(forecast);
+      // Keep this marker INSIDE the same bar: at the right edge of the
+      // chart there is no room for an outboard marker on mobile.
+      const markLeft=Math.max(area.left+2,p.x-side+2);
+      const markRight=Math.min(area.right-2,p.x+side-2);
+      if(markRight-markLeft>3){
+        ctx.strokeStyle="rgba(10,24,39,.90)";ctx.lineWidth=4;ctx.setLineDash([]);
+        ctx.beginPath();ctx.moveTo(markLeft,yf);ctx.lineTo(markRight,yf);ctx.stroke();
+        ctx.strokeStyle="#ffe7b2";ctx.lineWidth=2;ctx.setLineDash([4,3]);
+        ctx.beginPath();ctx.moveTo(markLeft,yf);ctx.lineTo(markRight,yf);ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+    ctx.restore();
+  }
+};
+
 const periodForecastDeltaHatchPlugin = {
   id:"periodForecastDeltaHatch",
   afterDatasetsDraw(chart,_args,options){
@@ -2767,7 +2824,7 @@ function renderDatasetSummary() {
   ].map(x=>`<span class="summary-pill">${x}</span>`).join("");
 }
 
-function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
+function renderSelectedCityKpis(city, key, from, to, chartPeriod = null, active23Overlay = null) {
   const range = chartPeriod ? window.KpiRange.periodKpiWindow(chartPeriod,from,to,city)
     : {from,to,kind:"custom",days:0};
   const index = state.historicalDaily?.cities?.[key];
@@ -2777,6 +2834,21 @@ function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
   if (historicMax) {
     kpi.maxDay = historicMax.max;
     kpi.maxDayDate = historicMax.dates.join(", ");
+  }
+  // Verified unfinished starts count once; completed duration mean stays unchanged.
+  const pendingStart=active23Overlay?.unclosedStartsInPeriod &&
+    active23Overlay.unclosedStartDay>=range.from &&
+    active23Overlay.unclosedStartDay<=range.to ? 1 : 0;
+  if(kpi.complete&&pendingStart){
+    kpi.alerts+=pendingStart;
+    const dayRow=city.daily28?.find(row=>row.date===active23Overlay.unclosedStartDay);
+    const count=dayRow?Number(dayRow.alerts_started)+pendingStart:null;
+    if(Number.isFinite(count)&&(kpi.maxDay===null||count>=kpi.maxDay)){
+      if(kpi.maxDay===count&&kpi.maxDayDate)
+        kpi.maxDayDate=[...new Set([...kpi.maxDayDate.split(", ").filter(Boolean),active23Overlay.unclosedStartDay])].join(", ");
+      else kpi.maxDayDate=active23Overlay.unclosedStartDay;
+      kpi.maxDay=count;
+    }
   }
   state.lastCityKpi = { ...kpi, city: key };
   setKpiLabel("kpiAlerts", "Кількість тривог", "Alerts started");
@@ -2877,7 +2949,6 @@ function renderCity() {
     ? calendarWeekOverlapsRange(row, activeRange.from, activeRange.to)
     : period === "quarterly" ? calendarQuarterOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
-  renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
   // One display logic: observed hours and estimated remaining clock-time.
   // For daily28, the existing observed partial-day bar already occupies the
   // last of 28 dates. Do not append a new date or duplicate its actual values.
@@ -2991,14 +3062,35 @@ function renderCity() {
   const labels = rows.map(r => periodDisplayLabel(r, period));
   const chartLabels = labels;
   const dashed = type === "raion_proxy";
+  const active23Overlay=window.Active23ChartOverlay?.forChart(
+    state.active23Snapshot,key,period,rows) || null;
+  // Verified unclosed starts contribute once to alert counts in their start period;
+  // never change the source JSON or duration-only calculations.
+  const openStarts=active23Overlay?.unclosedStartsInPeriod || 0;
+  const countRows=rows.map((r,i)=>openStarts&&i===active23Overlay.index
+    ? {...r,alerts_started:(Number(r.alerts_started)||0)+openStarts,
+       alerts_per_day:(Number(r.alerts_per_day)||0)+openStarts/active23Overlay.days,
+       _provisional_start_count:openStarts}:r);
+  renderSelectedCityKpis(city,key,activeRange.from,activeRange.to,period,active23Overlay);
+  const intensityHours=rows.map(r=>r.avg_daily_alert_hours);
+  if(active23Overlay)intensityHours[active23Overlay.index]=active23Overlay.closedHours;
+  // Axis reserves forecast space with trend ON or OFF; only the marker
+  // visibility follows the checkbox. No jump in scale on interaction.
+  const active23AxisForecast=completionPotential&&active23Overlay
+    ? window.Active23ChartOverlay?.completionHoursPerDay(
+        active23Overlay,completionPotential,
+        window.PeriodCompletionPreview?.kyivMidnightUtc,
+        window.PeriodCompletionPreview?.add) : null;
+  const active23Forecast=completion&&active23Overlay ? active23AxisForecast : null;
 
   const intensityDatasets = [
     {
       type: "bar",
       label: tr("Годин під тривогою / добу","Hours under alert / day"),
-      data: rows.map(r => r.avg_daily_alert_hours),
+      data: intensityHours,
       yAxisID: "yHours",
-      backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
+      backgroundColor: rows.map((r,i)=>i===active23Overlay?.index
+        ? COLORS[0]+"bb" : isPartialPeriod(r) ? COLORS[0]+"22" : COLORS[0]+"77"),
       borderColor: rows.map(() => COLORS[0]),
       borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
       _exportRows: rows
@@ -3006,7 +3098,7 @@ function renderCity() {
     {
       type: "line",
       label: tr("Тривог / день","Alerts / day"),
-      data: rows.map(r => r.alerts_per_day),
+      data: countRows.map(r => r.alerts_per_day),
       yAxisID: "yAlerts",
       borderColor: COLORS[1],
       backgroundColor: COLORS[1] + "22",
@@ -3015,7 +3107,7 @@ function renderCity() {
       borderWidth: 2,
       borderDash: dashed ? [7, 5] : [],
       segment: partialSegment(rows, COLORS[1]),
-      _exportRows: rows,
+      _exportRows: countRows,
       tension: 0,
       spanGaps: true
     }
@@ -3111,13 +3203,22 @@ function renderCity() {
            "Actual from the original series through "+factUntilText+actualNoteEn+
            ". The trend does not alter factual data.");
   }
+  if(intensitySubtitle&&active23Overlay){
+    intensitySubtitle.textContent=tr(
+      "Останній стовпчик: суцільний синій — завершені тривоги; світле штрихування — час незавершеної до зрізу джерела. "+
+      (completion?"Тонка пунктирна риска — прогноз, не додаткові фактичні години. ":"")+
+      "Дані станом на останню перевірку, не онлайн-статус. Зелена лінія враховує підтверджений початок незавершеної тривоги.",
+      "Final bar: solid blue is completed alerts; light hatching is unclosed time at source snapshot. "+
+      (completion?"The thin dashed tick marks the forecast, not extra factual hours. ":"")+
+      "Observed at the last source check, not live status. The green line includes a verified unfinished alert start.");
+  }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
     data: {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin],
+    plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin, active23FinalBarPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -3143,6 +3244,21 @@ function renderCity() {
           },
           callbacks: {
             label(context) {
+              if(active23Overlay&&context.datasetIndex===0&&
+                 context.dataIndex===active23Overlay.index){
+                const o=active23Overlay;
+                const lines=[
+                  tr("Завершені тривоги: ","Completed alerts: ")+formatDurationHours(o.closedHours),
+                  tr("Незавершено, попередньо: ","Unclosed, provisional: ")+
+                    formatDurationHours(o.provisionalHours),
+                  tr("Разом до зрізу: ","Combined through snapshot: ")+
+                    formatDurationHours(o.combinedHours)
+                ];
+                if(Number.isFinite(active23Forecast))
+                  lines.push(tr("Прогноз середнього за повний період: ",
+                    "Forecast full-period daily mean: ")+formatDurationHours(active23Forecast));
+                return lines;
+              }
               if (completion && context.dataIndex===rows.length-1) {
                 if(context.datasetIndex===0){
                   const actual=context.parsed.y,forecast=completion.expectedHours/completion.days;
@@ -3169,6 +3285,16 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
+              if(active23Overlay&&i===active23Overlay.index){
+                const stamp=new Intl.DateTimeFormat(
+                  currentLanguage==="en"?"en-GB":"uk-UA",{
+                  timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"
+                }).format(new Date(active23Overlay.capturedAt));
+                return [
+                  tr("Станом на останню перевірку: ","Observed at last check: ")+stamp,
+                  tr("Попередні дані можуть коригуватися при наступних оновленнях.","Preliminary data may be revised in subsequent updates.")
+                ];
+              }
               if (completion && i===rows.length-1) {
                 const factual=rows[i];
                 const factSource=String(factual?.partial_through ||
@@ -3200,20 +3326,42 @@ function renderCity() {
             }
           }
         },
-        partialPeriodBar: { rows, datasetIndices: [0] },
-        periodForecastDeltaHatch: {
-          index:completion ? rows.length-1 : -1,
-          observedHoursPerDay:completion ? rows.at(-1)?.avg_daily_alert_hours : null,
-          forecastHoursPerDay:completion ? completion.expectedHours/completion.days : null
+        partialPeriodBar: {
+          rows:active23Overlay ? rows.map((r,i)=>i===active23Overlay.index?
+            {...r,is_partial_period:false}:r) : rows,
+          datasetIndices: [0]
         },
+        periodForecastDeltaHatch: {
+          index:completion&&!active23Overlay ? rows.length-1 : -1,
+          observedHoursPerDay:completion&&!active23Overlay ? rows.at(-1)?.avg_daily_alert_hours : null,
+          forecastHoursPerDay:completion&&!active23Overlay ? completion.expectedHours/completion.days : null
+        },
+        active23FinalBar: {overlay:active23Overlay,forecast:active23Forecast},
       },
       scales: {
-        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        x: {
+          ticks: {
+            color: TEXT,maxRotation: 0,
+            // Chart.js auto-skip can hide the very last day tick on a
+            // 28-day plot. Always label the actual last source date,
+            // thinning older dates at mobile widths.
+            autoSkip: period !== "daily28",
+            callback: period === "daily28" ? function(value,index) {
+              const width=this.chart?.width || 800;
+              const step=width>880?4:width>560?7:9;
+              return index===chartLabels.length-1 || index%step===0
+                ? chartLabels[index] : "";
+            } : undefined
+          },
+          grid: { color: GRID }
+        },
         yHours: {
           stacked:false,
           suggestedMax:Math.max(
-            ...rows.map(r=>Number(r.avg_daily_alert_hours)||0),
-            completionPotential ? completionPotential.expectedHours/completionPotential.days : 0
+            ...intensityHours.map(v=>Number(v)||0),
+            active23Overlay?.combinedHours||0,
+            Number(active23AxisForecast)||0,
+            completionPotential&&!active23Overlay ? completionPotential.expectedHours/completionPotential.days : 0
           ),
           position: "left",
           beginAtZero: true,
@@ -3236,6 +3384,7 @@ function renderCity() {
     }
   });
 
+  state.charts.cityIntensityChart.$active23Overlay=active23Overlay;
   const durationCard = $("cityDurationChart")?.closest(".chart-card");
   const durationTitle = durationCard?.querySelector("h3");
   const durationSubtitle = durationCard?.querySelector(".chart-subtitle");
@@ -3413,6 +3562,13 @@ function renderRolling7d(key) {
 function renderShortHorizon(key) {
   const allRows = state.data.cities[key]?.daily28 || [];
   const rows = filterRowsByDateRange(allRows, "daily", "shortDateFrom", "shortDateTo");
+  const dateRows=derivedDaily28Rows({daily28:rows});
+  const activeStart=window.Active23ChartOverlay?.forChart(
+    state.active23Snapshot,key,"daily28",dateRows);
+  const countRows=rows.map((r,i)=>activeStart?.unclosedStartsToday&&
+      i===activeStart.index
+    ? {...r,alerts_started:(Number(r.alerts_started)||0)+1,
+       _provisional_start_count:1}:r);
   const labels = rows.map(r => r.date || String(r.time || "").slice(0, 10));
   const range = $("daily28Range");
   if (range) {
@@ -3472,7 +3628,7 @@ function renderShortHorizon(key) {
 
   const explosion = explosionCity(key);
   const strictDaily = explosion?.strict_daily || {};
-  const regularAlerts = rows.map(r => Math.max(0, Number(r.alerts_started || 0) - Number(strictDaily[r.date] || 0)));
+  const regularAlerts = countRows.map(r => Math.max(0, Number(r.alerts_started || 0) - Number(strictDaily[r.date] || 0)));
   const explosionAlerts = rows.map(r => Number(strictDaily[r.date] || 0));
   const alertBarDatasets = explosion ? [
     {
@@ -3498,7 +3654,7 @@ function renderShortHorizon(key) {
   ] : [{
     type: "bar",
     label: tr("Тривог, що почалися","Alerts started"),
-    data: rows.map(r => r.alerts_started),
+    data: countRows.map(r => r.alerts_started),
     yAxisID: "yAlerts",
     backgroundColor: COLORS[1] + "77",
     borderColor: COLORS[1],
@@ -3510,7 +3666,7 @@ function renderShortHorizon(key) {
     const fullFill = dataset.backgroundColor;
     dataset.backgroundColor = rows.map(r => isPartialPeriod(r) ? fullFill.slice(0, 7) + "22" : fullFill);
     dataset.borderWidth = rows.map(r => isPartialPeriod(r) ? 0 : 1);
-    dataset._exportRows = rows;
+    dataset._exportRows = countRows;
   }
 
   if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
@@ -3548,7 +3704,7 @@ function renderShortHorizon(key) {
         tooltip: { mode: "index", intersect: false, callbacks: {
           label(context) {
             if (context.dataset.yAxisID === "yDuration")
-              return dailyAlertTooltipLabel(rows[context.dataIndex]);
+              return dailyAlertTooltipLabel(countRows[context.dataIndex]);
             return `${context.dataset.label}: ${fmt(context.parsed.y, 0)}`;
           },
           footer(items) { return dailyAlertTooltipFooter(rows[items?.[0]?.dataIndex]); }
@@ -4475,6 +4631,23 @@ async function init() {
     }
   }
   if (!state.data) throw new Error("Neither live site-prod nor bundled preview data loaded");
+  // Optional same-run source-at-capture observation. Never infer live status.
+  try {
+    const response = await fetch(ACTIVE23_SOURCE_URL + "?v=" + Date.now(), {cache:"no-store"});
+    const snapshot = response.ok ? await response.json() : null;
+    const source = state.data?.meta?.generated_at;
+    const release = state.data?.meta?.publication_authority;
+    state.active23Snapshot = snapshot?.schema === "c6-active-23-source-capture-v1" &&
+      typeof snapshot?.source_generated_at === "string" &&
+      Number.isFinite(Date.parse(snapshot.source_generated_at)) &&
+      snapshot?.release_manifest_sha256 === release?.release_manifest_sha256 &&
+      snapshot?.delivery === "site-prod-git" &&
+      snapshot?.test_only === false &&
+      snapshot?.publication_allowed === true &&
+      snapshot?.authoritative_live_status === false ? snapshot : null;
+  } catch (error) {
+    state.active23Snapshot = null;
+  }
   // Production data are refreshed independently of frontend deployments.
   // Prefer the index generated atomically with dashboard_data.json; only
   // fall back to the verified static release snapshot for older data.
@@ -4543,6 +4716,7 @@ async function init() {
     }
   }
 
+  let active23DerivedDay=null;
   try {
     const derivedResponse = await fetch(`${DERIVED_DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
     if (derivedResponse.ok) {
@@ -4553,12 +4727,33 @@ async function init() {
         state.explorations = derived.explorations;
         state.weekdayDerivedGeneration = derived.meta?.generated_at;
         state.weekdayDaypartSchema = derived.explorations.meta?.weekday_daypart_schema;
-        mergeCurrentDayDaily28(state.data.cities, derived.explorations.daily28_current);
+        // The physical Neon readback is stamped after the C2-derived
+        // current-day rows. Both still belong to one release, identified by
+        // exact published authority, not by equal generated_at strings.
+        const releaseId=state.data?.meta?.publication_authority?.release_manifest_sha256;
+        if(state.active23Snapshot &&
+           derived?.meta?.publication_authority?.release_manifest_sha256===releaseId &&
+           derived?.meta?.generated_at===state.active23Snapshot.source_generated_at){
+          active23DerivedDay=derived.explorations.daily28_current;
+        } else {
+          state.active23Snapshot=null; // fail closed on stale/mixed generation
+        }
+        mergeCurrentDayDaily28(state.data.cities, active23DerivedDay);
       }
     }
   } catch (err) {
     console.warn("Production derived source temporarily unavailable", err);
   }
+  // The archived 23-city source snapshot has the 20 Nov day even though
+  // Completed-only daily28 ends at the last finished day. Reconcile the
+  // source-certified current-day row on the correct calendar date.
+  // The helper is all-or-nothing across all 23 city rows and no-ops when
+  // the already verified derived partial-day rows are present.
+  const snapshotDay=state.active23Snapshot?.cities?.kyiv?.date;
+  const didShowSnapshotDay=window.Active23ChartOverlay?.ensureSnapshotDay(
+    state.data.cities,state.active23Snapshot,snapshotDay,active23DerivedDay);
+  if(!didShowSnapshotDay)
+    console.warn("Current-day source observation unavailable or stale; fail closed");
 
   // Stable 64-day archival series, overlaid with live Git dates.
   const archivalMix = KYIV_THREAT_MIX_ARCHIVE_DATA;
