@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01 — source-bound last-bar preview, no live release
+- Owner requested no separate card: Draft PR #208 HEAD 9c11f385 now renders Neon-completed blue base + hatched unclosed source cap within last intensity bar; trend uses a short dashed marker (not a second fill). UA/EN, source-time tooltip, provisional CSV. Actions #44693191591 PASS 23/23 + 6/4/10 JS + DST; regression #44693198945 PASS; artifact #14609895891. Netlify draft `6afff30b288eb0e2e4f4e5e7` READY unpublished, production unchanged. Static archived test, not an automated live sidecar.
+
+
 ### UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01 — 23-city archived draft, production unchanged
 - Draft PR #208 HEAD ec688164, Actions #44690082427 SUCCESS (same-run 23/23 C2/Neon source capture, 22 open + Sevastopol no open at source time, 6/6 active and 10/10 weekday JS, midnight/DST). Artifact #14607928356; Netlify draft 6affecda8c37c62e303f8b86 READY but unpublished. Manual C6 #44680696823 SUCCESS, Git-only site-prod@8c8ee93; scheduled stabilization OPEN. No live active-status sidecar and zero production changes.
 
