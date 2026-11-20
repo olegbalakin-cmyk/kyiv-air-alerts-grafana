@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-20. **23-city current-day browser PASS in DRAFT; manual C6 SUCCESS; scheduled C6 OPEN.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01**; prior **UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**; prior **C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01**; prior C6 checkpoint **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
+**Date:** 2026-11-20. **23-city live-source integration OFFLINE PASS in DRAFT; production release BLOCKED; scheduled C6 OPEN.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **UI-ACTIVE23-LIVE-SOURCE-OFFLINE-PASS-2026-11-20-01**; prior **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01**; prior **UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**; prior **C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01**; prior C6 checkpoint **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
 
 ## Working instructions
 
@@ -14,12 +14,12 @@ Latest accepted transition: **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01**; p
 
 ## Current tracks and open release gates
 
-- **Historical production cutover/C3:** PR #78 accepted `C6-C3-WORKS-NEON-CUTOVER-PASS-01`; owner-gated [Netlify #43496568449](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43496568449) and [Git #43497605769](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43497605769) SUCCESS, 23-city historical KPI/CSV/browser QA PASS. `GLOBAL_CUTOVER=YES` applies to historical JSON only.
-- **Scheduled C2/C6:** `c6_run_now` owner-only default-OFF registered through PR #205, owner/main/auto ON guard; C2→23-city Neon readback→Git-only and zero Netlify. Manual #44680696823 SUCCESS, site-prod@8c8ee93; **not scheduled proof**. Scheduled #44634410260 writer NEON_SUCCEEDED (+53; 34,271), six-JSON reader blocked on weekday builder hash; PR #203 merged `main@cf8d5db4`, pin offline #44679502629 PASS. Earlier #43625014243 Git-only PASS; subsequent #43655729191/#43686460909 writer PASS/readback blocked, pin repaired via PR #167. One-shot #43706909819 readback 23/23 PASS published `site-prod@048af474`, zero Netlify, trigger removed PR #176. **Scheduled post-pin Git publication still unverified; C6_STABILIZATION=OPEN.**
+- **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
+- **Scheduled C2/C6:** `c6_run_now` owner-only default-OFF via PR #205; manual #44680696823 SUCCESS published site-prod@8c8ee93, NOT scheduled proof. Scheduled #44634410260 writer PASS but reader blocked on weekday-builder pin; PR #203 `main@cf8d5db4` fixed exact pin, offline #44679502629 PASS. Earlier one-shot #43706909819 published 23/23 via Git only; no Netlify. **Next scheduled post-pin 23-city Git publication still UNVERIFIED; C6_STABILIZATION=OPEN.**
 - **Netlify/UI + SEO LIVE:** Trends and bilingual archive released PR #194; Netlify `6afb034ee4ead33599681226` READY+locked, 23 cities, 784 monthly pages and 936 sitemap URLs. Live independent read-only QA #43875088810 PASS. Monthly cron OFF; Git-only four-hour updates unaffected.
 
 - **Weekday UI LIVE:** PR #201 site-prod@ae650fea, Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; Actions #44602714671 PASS. UA/EN weekday graphs, time modes, tutorial; regular C2/Neon unchanged.
-- **23-city provisional TEST:** Draft PR #208, verified C2 capture #44680696823, 22 source-open + Sevastopol no-open; frozen snapshot only.
+- **23-city provisional TEST:** Draft PR #208 frozen C2 #44680696823 (22 open, Sevastopol no-open); do NOT merge. **Live DRAFT:** PR #213 C6 producer and PR #214 UI, both UNMERGED. Same-run C6 physical-release offline #44721997889 PASS; UI static #44721447216 PASS, browser proof pending. Prod unchanged.
 - **23-city latest-day chart FIX, browser PASS:** Draft PR #208 HEAD `3101a468`; Chromium Actions #44703989283 SUCCESS (27 cases; 23 cities, UA desktop, EN mobile, trend), artifact #14614097420; immutable Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Fixed missing Netlify draft JSON sidecars via isolated deploy directory. Frozen test only; not live.
 - **DST VERIFIED; correction OFF:** one-shot #43706909819 artifact #14159523883 proves all eight correct Kharkiv/Poltava/Zhytomyr/Cherkasy DST witnesses selected, all three obsolete parent UIDs excluded by canonical C2; no overlay/Neon writes. Other backfill/casualty/live-status gates independent.
 
@@ -27,7 +27,7 @@ Latest accepted transition: **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01**; p
 ## Concrete next tasks
 
 1. Manual C6 #44680696823 SUCCESS. Check next 1–2 **scheduled** post-PR203 C2→Neon→Git cycles: exact weekday builder readback, 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
-2. UI active23: owner review [browser-PASS in-chart draft PR #208](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/208). Next, separately engineer same-run live-sidecar producer, stale-source fail-closed and verified-all-clear replacement; owner-gated production release only after its own proof. Never merge frozen snapshot into site-prod.
+2. UI active23: browser proof for PR #214 (23 cities/mobile/UA/EN); verify first physical scheduled same-run C6→Git sidecar from PR #213 (clear/ongoing, source freshness, zero Netlify); then owner-gated UI-only production Netlify publish/relock. PRs #213/#214 draft; no frozen PR #208 promotion.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
 5. Verify scheduled same-generation weekday dayparts refresh after PR #203; old Netlify UI test #44602714524 failed *before deploy* (tour 8 vs 6). Keep regular Netlify publishing locked.
@@ -36,6 +36,9 @@ Latest accepted transition: **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01**; p
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-ACTIVE23-LIVE-SOURCE-OFFLINE-PASS-2026-11-20-01 — integration drafts only
+- PR #213 C6 verified 23-city source receipts, expiry, all-clear and real six-file release-binding offline Actions #44721997889 PASS; PR #214 UI 23-city current-day overlay/count source/locale static #44721447216 PASS, Chromium pending. C2 derived vs later physical dashboard timestamps legitimately differ; bind by C6 release manifest and C2 SHA. No production change; C6 stabilization OPEN.
+
 ## UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01 — rendered 20 Nov verified, draft only
 - Initial Chromium #44702699636 and #44703124322 FAIL proved actual Nov19 final bar, source snapshot missing and `site-derived.json` HTTP 404. Isolated Netlify preview bundle repaired implicit root-build asset omission, tested immutable deploy `6b0007017cdb6d8c97bdbc05`: Actions #44703989283 SUCCESS, 27 real-browser cases across 23 cities, UA desktop/EN mobile, trend toggles and axis labels; screenshot/JSON proof artifact #14614097420. Draft PR #208 HEAD `3101a4682e13108cad75c14c4ab050856d0b3cad`; production untouched, active-status publisher not created.
 
