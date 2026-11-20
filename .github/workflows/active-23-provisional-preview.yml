@@ -159,6 +159,10 @@ jobs:
           grep -q 'active-23-chart-overlay.js' _site/en/index.html
           if grep -q 'id="active23Section"' _site/index.html; then echo "SEPARATE_PANEL_FORBIDDEN"; exit 1; fi
           printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          test -s _site/site-derived.json
+          test -s _site/active-23-provisional-test.json
+          test -s _site/active-23-provisional.js
+          test -s _site/active-23-chart-overlay.js
           echo "23_CITY_UA_EN_DRAFT_BUILD_PASS"
       - name: Deploy Netlify DRAFT ONLY — no production publish
         env:
@@ -183,6 +187,13 @@ jobs:
           set -euo pipefail
           python -m pip install playwright==1.56.0
           python -m playwright install --with-deps chromium
+          export ACTIVE23_PREVIEW_URL="$(python - <<'PY'
+          import json
+          d=json.load(open('active23-draft-deploy.json'))
+          print('https://'+d['deploy_id']+'--ukraine-air-alerts.netlify.app')
+          PY
+          )"
+          echo "Testing immutable deploy permalink, not mutable alias"
           python tests/test_active_23_browser.py
           test -s _browser_proof/chart-axis-proof.json
           echo "REAL_BROWSER_CHART_AXIS_23_CITY_UA_EN_PASS"
