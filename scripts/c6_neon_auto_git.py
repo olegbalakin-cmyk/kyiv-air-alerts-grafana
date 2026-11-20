@@ -522,8 +522,8 @@ def publish(checkout, delta, prepared, proof, *, repository,
         if sidecar_file.exists():
             require(sidecar_file.is_file() and not sidecar_file.is_symlink(),
                     "ACTIVE23_FILE_NOT_REGULAR")
-            require("site_derived.json" in hashes and
-                    "dashboard_data.json" in hashes,
+            require(candidate.FILES["site_derived.json"] in hashes and
+                    candidate.FILES["dashboard_data.json"] in hashes,
                     "ACTIVE23_C2_GENERATION_MISSING")
             active23 = verify_active23_sidecar(
                 load(sidecar_file), report, new,
