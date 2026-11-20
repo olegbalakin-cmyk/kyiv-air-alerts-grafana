@@ -6,17 +6,21 @@
 })(typeof window!=="undefined"?window:null,function(){
   "use strict";
   const MAX_AGE_MS=8*3600000;
-  const localDay=instant=>new Intl.DateTimeFormat("en-CA",{
-    timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"
-  }).format(new Date(instant));
-  const iso=d=>typeof d==="string"&&/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$/.test(d)&&Number.isFinite(Date.parse(d));
+  const localDay=instant=>{
+    const parts=new Intl.DateTimeFormat("en-GB",{
+      timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date(instant));
+    const field=type=>parts.find(item=>item.type===type)?.value;
+    return field("year")+"-"+field("month")+"-"+field("day");
+  };
+  const iso=d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(d)&&Number.isFinite(Date.parse(d));
   function evaluate(snapshot,now=new Date()){
     if(snapshot?.schema!=="kyiv-active-provisional-test-v1"||snapshot?.test_only!==true||
        snapshot?.source!=="kyiv_digital_live"||
        snapshot?.status!=="unclosed_at_source_capture"||
        snapshot?.alert_type!=="AIR"||snapshot?.city_key!=="kyiv"||
        snapshot?.ends_at!==null||!iso(snapshot?.started_at)||
-       !iso(snapshot?.captured_at)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(snapshot?.date||"")||
+       !iso(snapshot?.captured_at)||!/^\d{4}-\d{2}-\d{2}$/.test(snapshot?.date||"")||
        !/^[a-f0-9]{64}$/.test(snapshot?.source_body_sha256||"")||
        snapshot?.github_run_id!==44680696823||snapshot?.github_run_attempt!==1)return null;
     const start=Date.parse(snapshot.started_at),at=Date.parse(snapshot.captured_at),
