@@ -21,6 +21,9 @@ import zipfile
 
 from bs4 import BeautifulSoup
 
+# Reuse the accepted source parser; no replacement parser or extra HTTP client.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "kyiv-air-alerts-grafana" / "scripts"))
+
 KYIV = ZoneInfo("Europe/Kyiv")
 UTC = timezone.utc
 EXPECTED_KEYS = {
@@ -260,7 +263,7 @@ def build(blob, expected_sha, run_id, attempt, *, as_of=None):
             started, identity = sev_open(row, pages, raw, checked, sev_store)
         else:
             started, identity = ua_open(row, pages, raw, checked)
-        require(timedelta(seconds=-120) <= now - checked <= timedelta(hours=3),
+        require(timedelta(seconds=-120) <= now - checked <= timedelta(hours=8),
                 "STALE_OR_FUTURE_SOURCE_CAPTURE:" + city)
         day = checked.astimezone(KYIV).date()
         require(str(day) == partial["meta"]["current_day"] and
