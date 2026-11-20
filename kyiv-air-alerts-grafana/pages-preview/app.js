@@ -1080,6 +1080,15 @@ function exportChartCsv(chartId) {
     return row;
   });
 
+  if(chartId==="cityIntensityChart"&&chart._active23Overlay){
+    const o=chart._active23Overlay;
+    headers.push("provisional_source_hours_per_day","combined_snapshot_hours_per_day",
+      "source_capture_utc","test_snapshot_only");
+    rows.forEach((row,i)=>{
+      row.push(i===o.index?o.provisionalHours:"",i===o.index?o.combinedHours:"",
+        i===o.index?o.capturedAt:"",i===o.index?"true":"");
+    });
+  }
   triggerCsvDownload(exportContextParts(chartId, config.slug), headers, rows);
 }
 
@@ -1317,9 +1326,17 @@ const active23FinalBarPlugin = {
     }
     if(Number.isFinite(forecast)&&forecast>=0){
       const yf=axis.getPixelForValue(forecast);
-      ctx.strokeStyle="#f7e6bd";ctx.lineWidth=2;ctx.setLineDash([4,3]);
-      ctx.beginPath();ctx.moveTo(p.x+side+3,yf);
-      ctx.lineTo(p.x+side+18,yf);ctx.stroke();ctx.setLineDash([]);
+      // Keep this marker INSIDE the same bar: at the right edge of the
+      // chart there is no room for an outboard marker on mobile.
+      const markLeft=Math.max(area.left+2,p.x-side+2);
+      const markRight=Math.min(area.right-2,p.x+side-2);
+      if(markRight-markLeft>3){
+        ctx.strokeStyle="rgba(10,24,39,.90)";ctx.lineWidth=4;ctx.setLineDash([]);
+        ctx.beginPath();ctx.moveTo(markLeft,yf);ctx.lineTo(markRight,yf);ctx.stroke();
+        ctx.strokeStyle="#ffe7b2";ctx.lineWidth=2;ctx.setLineDash([4,3]);
+        ctx.beginPath();ctx.moveTo(markLeft,yf);ctx.lineTo(markRight,yf);ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
     ctx.restore();
   }
@@ -3167,10 +3184,10 @@ function renderCity() {
   if(intensitySubtitle&&active23Overlay){
     intensitySubtitle.textContent=tr(
       "Останній стовпчик: суцільний синій — завершені тривоги; світле штрихування — час незавершеної до зрізу джерела. "+
-      (completion?"Коротка пунктирна риска праворуч — прогноз, не додаткові фактичні години. ":"")+
+      (completion?"Тонка пунктирна риска — прогноз, не додаткові фактичні години. ":"")+
       "Архівний тест 20.11.2026, не поточний статус. Зелена лінія без змін.",
       "Final bar: solid blue is completed alerts; light hatching is unclosed time at source snapshot. "+
-      (completion?"The short dashed tick right of the bar marks the forecast, not extra factual hours. ":"")+
+      (completion?"The thin dashed tick marks the forecast, not extra factual hours. ":"")+
       "Archived test from 20 Nov 2026, not live status. Green line unchanged.");
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
@@ -3330,6 +3347,7 @@ function renderCity() {
     }
   });
 
+  state.charts.cityIntensityChart.$active23Overlay=active23Overlay;
   const durationCard = $("cityDurationChart")?.closest(".chart-card");
   const durationTitle = durationCard?.querySelector("h3");
   const durationSubtitle = durationCard?.querySelector(".chart-subtitle");
