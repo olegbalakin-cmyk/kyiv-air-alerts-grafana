@@ -29,10 +29,10 @@
         row.quarter_end<report.through&&row.quarter_calendar_end>=report.through;
     return false;
   }
-  function forChart(snapshot,key,period,rows){
+  function forChart(snapshot,key,period,rows,now=new Date()){
     if(!Object.hasOwn(supported,period)||!Array.isArray(rows)||!rows.length||
        typeof key!=="string")return null;
-    const report=globalEvaluator(snapshot,key,supported[period]);
+    const report=globalEvaluator(snapshot,key,supported[period],now);
     if(!report||!report.hadOpen||!(report.open>0)||!(report.closed>=0)||
        !(report.total>0)||!report.archival)return null;
     const lastIndex=rows.length-1,row=rows[lastIndex];
@@ -80,13 +80,13 @@
       provisionalHours:open,combinedHours:total,rawClosedHours:report.closed/3600,
       rawProvisionalHours:report.open/3600,rawCombinedHours:report.total/3600});
   }
-  function globalEvaluator(snapshot,key,period){
+  function globalEvaluator(snapshot,key,period,now){
     if(typeof window!=="undefined"){
-      return window.Active23Provisional?.evaluate(snapshot,key,period)||null;
+      return window.Active23Provisional?.evaluate(snapshot,key,period,now)||null;
     }
     if(typeof module==="object"&&module.exports){
       const provisional=require("./active-23-provisional.js");
-      return provisional.evaluate(snapshot,key,period);
+      return provisional.evaluate(snapshot,key,period,now);
     }
     return null;
   }
@@ -106,7 +106,7 @@
     const f=type=>parts.find(p=>p.type===type)?.value;
     return f("year")+"-"+f("month")+"-"+f("day");
   };
-  function ensureSnapshotDay(cities,snapshot,today,envelope=null){
+  function ensureSnapshotDay(cities,snapshot,today,envelope=null,now=new Date()){
     if(!cities||!snapshot||typeof today!=="string"||
        !/^\d{4}-\d{2}-\d{2}$/.test(today)||
        !snapshot.cities||Object.keys(cities).length!==23||
@@ -124,7 +124,7 @@
     const keys=Object.keys(cities),next=new Map();
     for(const key of keys){
       const base=cities[key]?.daily28;
-      const proof=globalEvaluator(snapshot,key,"day");
+      const proof=globalEvaluator(snapshot,key,"day",now);
       if(!Array.isArray(base)||base.length!==28||!proof||
          proof.through!==today||proof.from!==today||
          !proof.archival||localDay(proof.capturedAt)!==today||
