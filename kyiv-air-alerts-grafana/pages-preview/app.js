@@ -4678,6 +4678,16 @@ async function init() {
   } catch (err) {
     console.warn("Production derived source temporarily unavailable", err);
   }
+  // The archived 23-city source snapshot has the 20 Nov day even though
+  // canonical completed-only daily28 stops at 19 Nov. Never attach its
+  // provisional hours to 19 Nov. Reconcile and expose an exact 20 Nov bar.
+  // The helper is all-or-nothing across all 23 city rows and no-ops when
+  // the already verified derived partial-day rows are present.
+  const snapshotDay=state.active23Snapshot?.cities?.kyiv?.date;
+  const didShowSnapshotDay=window.Active23ChartOverlay?.ensureSnapshotDay(
+    state.data.cities,state.active23Snapshot,snapshotDay);
+  if(!didShowSnapshotDay)
+    console.warn("Unverified current-day plot: test-only source day not merged");
 
   // Stable 64-day archival series, overlaid with live Git dates.
   const archivalMix = KYIV_THREAT_MIX_ARCHIVE_DATA;
