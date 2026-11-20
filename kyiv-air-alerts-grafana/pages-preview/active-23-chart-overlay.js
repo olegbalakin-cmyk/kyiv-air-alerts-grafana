@@ -135,7 +135,12 @@
         if(proof.closed!==0)return false;
         const row={
           time:today+"T00:00:00+02:00",
-          date:today,alerts_started:0,active_alerts:0,
+          date:today,
+          // Started-count semantics: a source-proven open alert beginning
+          // on this date counts once even without an all-clear.
+          alerts_started:proof.hadOpen&&
+            localDay(snapshot.cities[key].start_at)===today?1:0,
+          active_alerts:proof.hadOpen?1:0,
           total_alert_duration_minutes:0,total_alert_duration_hours:0,
           avg_alert_duration_minutes:null,avg_active_alert_duration_minutes:null,
           is_partial_period:true,partial_through:proof.capturedAt,
