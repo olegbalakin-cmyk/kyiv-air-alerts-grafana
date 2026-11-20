@@ -37,7 +37,7 @@ jobs:
           python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
       - name: Read immutable C2 source artifact once, no source HTTP or Neon
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/kyiv-active-c2
@@ -97,7 +97,7 @@ jobs:
           echo "ISOLATED_UA_EN_DRAFT_BUNDLE_PASS"
       - name: Deploy Netlify DRAFT ONLY, never published production
         env:
-          NETLIFY_AUTH_TOKEN: \${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         run: |
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN"
@@ -117,7 +117,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kyiv-active-provisional-test-proof-\${{ github.run_id }}
+          name: kyiv-active-provisional-test-proof-${{ github.run_id }}
           path: |
             kyiv-active-preview-deploy.json
             kyiv-air-alerts-grafana/pages-preview/kyiv-active-provisional-test.json
