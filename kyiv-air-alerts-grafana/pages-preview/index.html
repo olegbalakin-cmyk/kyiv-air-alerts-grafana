@@ -129,7 +129,41 @@
       </article>
     </section>
     <p id="kpiRangeNote" class="kpi-range-note" aria-live="polite"></p>
-    <p id="kyivActiveProvisional" class="source-note kyiv-active-provisional hidden" aria-live="polite"></p>
+    <section id="active23Section" class="active23-section" aria-label="Тест попереднього часу тривог">
+      <div class="active23-heading">
+        <div>
+          <h3 id="active23Title">Час під тривогою · тестовий зріз</h3>
+          <p id="active23Intro" class="chart-subtitle">Той самий підтверджений збір 23 міст із Neon + попередній час незавершеної тривоги. Архівний приклад, не поточний стан.</p>
+        </div>
+        <div class="control active23-control">
+          <label id="active23PeriodLabel" for="active23Period">Період</label>
+          <select id="active23Period" aria-label="Період для тестової оцінки часу під тривогою">
+            <option value="day">День зрізу</option>
+            <option value="week">Поточний тиждень</option>
+            <option value="last7">7 днів</option>
+            <option value="last28">28 днів</option>
+            <option value="last30">30 днів</option>
+            <option value="last90">90 днів</option>
+            <option value="last180">180 днів</option>
+            <option value="month" selected>Поточний місяць</option>
+            <option value="quarter">Поточний квартал</option>
+            <option value="allTime">Весь доступний час</option>
+          </select>
+        </div>
+      </div>
+      <div class="active23-summary">
+        <div class="active23-total">
+          <span id="active23TotalLabel">Разом · підтверджено + попередньо</span>
+          <strong id="active23Total">—</strong>
+        </div>
+        <div class="active23-components" aria-label="Складові часу під тривогою">
+          <div><span class="active23-dot closed"></span><span id="active23ClosedLabel">Завершені (Neon)</span><strong id="active23Closed">—</strong></div>
+          <div><span class="active23-dot provisional"></span><span id="active23OpenLabel">Незавершена (попередньо)</span><strong id="active23Open">—</strong></div>
+        </div>
+      </div>
+      <div class="active23-track" aria-hidden="true"><div id="active23BarClosed" class="active23-segment closed"></div><div id="active23BarOpen" class="active23-segment provisional"></div></div>
+      <p id="active23Note" class="source-note" aria-live="polite">Перевірка даних…</p>
+    </section>
 
 
 
@@ -692,7 +726,7 @@
   <script src="kpi-range.js?v=20261021-interval-kpi-test1"></script>
   <script src="weekday-distribution.js?v=20261119-weekday-prod1"></script>
   <script src="weekday-ui.js?v=20261119-weekday-prod1"></script>
-  <script src="kyiv-active-provisional.js?v=kyiv-test-20261120"></script>
-  <script src="app.js?v=kyiv-test-20261120"></script>
+  <script src="active-23-provisional.js?v=active23-test-20261120"></script>
+  <script src="app.js?v=active23-test-20261120"></script>
 </body>
 </html>
