@@ -3317,7 +3317,22 @@ function renderCity() {
         active23FinalBar: {overlay:active23Overlay,forecast:active23Forecast},
       },
       scales: {
-        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        x: {
+          ticks: {
+            color: TEXT,maxRotation: 0,
+            // Chart.js auto-skip can hide the very last day tick on a
+            // 28-day plot. Always label the actual last source date,
+            // thinning older dates at mobile widths.
+            autoSkip: period !== "daily28",
+            callback: period === "daily28" ? function(value,index) {
+              const width=this.chart?.width || 800;
+              const step=width>880?4:width>560?7:9;
+              return index===chartLabels.length-1 || index%step===0
+                ? chartLabels[index] : "";
+            } : undefined
+          },
+          grid: { color: GRID }
+        },
         yHours: {
           stacked:false,
           suggestedMax:Math.max(
