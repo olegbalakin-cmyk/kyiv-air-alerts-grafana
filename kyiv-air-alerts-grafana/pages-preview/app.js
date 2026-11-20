@@ -4638,7 +4638,8 @@ async function init() {
     const source = state.data?.meta?.generated_at;
     const release = state.data?.meta?.publication_authority;
     state.active23Snapshot = snapshot?.schema === "c6-active-23-source-capture-v1" &&
-      snapshot?.source_generated_at === source &&
+      typeof snapshot?.source_generated_at === "string" &&
+      Number.isFinite(Date.parse(snapshot.source_generated_at)) &&
       snapshot?.release_manifest_sha256 === release?.release_manifest_sha256 &&
       snapshot?.delivery === "site-prod-git" &&
       snapshot?.test_only === false &&
@@ -4726,8 +4727,17 @@ async function init() {
         state.explorations = derived.explorations;
         state.weekdayDerivedGeneration = derived.meta?.generated_at;
         state.weekdayDaypartSchema = derived.explorations.meta?.weekday_daypart_schema;
-        if(derived?.meta?.generated_at === state.data?.meta?.generated_at)
+        // The physical Neon readback is stamped after the C2-derived
+        // current-day rows. Both still belong to one release, identified by
+        // exact published authority, not by equal generated_at strings.
+        const releaseId=state.data?.meta?.publication_authority?.release_manifest_sha256;
+        if(state.active23Snapshot &&
+           derived?.meta?.publication_authority?.release_manifest_sha256===releaseId &&
+           derived?.meta?.generated_at===state.active23Snapshot.source_generated_at){
           active23DerivedDay=derived.explorations.daily28_current;
+        } else {
+          state.active23Snapshot=null; // fail closed on stale/mixed generation
+        }
         mergeCurrentDayDaily28(state.data.cities, active23DerivedDay);
       }
     }
