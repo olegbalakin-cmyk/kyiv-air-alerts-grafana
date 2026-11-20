@@ -61,6 +61,32 @@ def assert_visible_day(page, name, *, expect_open=True):
     state = read(page)
     assert state, f'{name}: no Chart.js chart'
     assert state['period'] == 'daily28', f'{name}: incorrect period: {state}'
+    if state['last'] != EXPECTED:
+        diagnostic = page.evaluate(r'''async () => {
+          const key='kyiv';
+          const source=state.data.cities[key];
+          const snapshot=state.active23Snapshot;
+          const data=await fetch('site-derived.json?v=diagnostic-'+Date.now(),{cache:'no-store'});
+          let derived=null,err=null;
+          try{derived=await data.json()}catch(e){err=String(e)}
+          const e=derived?.explorations?.daily28_current;
+          const before=source?.daily28?.at(-1);
+          let manual=null;
+          try{manual=window.Active23ChartOverlay?.ensureSnapshotDay(
+            state.data.cities,snapshot,snapshot?.cities?.kyiv?.date,e)}
+          catch(x){manual='ERROR: '+String(x)}
+          return {sourceDay:snapshot?.cities?.kyiv?.date,
+            hasSnapshot:!!snapshot,derivedHttp:data.status,derivedParse:err,
+            hasExplorationsCities:!!derived?.explorations?.cities,
+            derivedDay:e?.meta?.current_day,derivedMeta:e?.meta,
+            derivedKyiv:e?.cities?.kyiv,
+            priorLast:before,afterLast:source?.daily28?.at(-1),
+            browserToday:kyivCalendarToday(), manual,
+            sourceCount:Object.keys(state.data.cities).length
+          };
+        }''')
+        print('ACTIVE23_BROWSER_DATE_DIAGNOSTIC', json.dumps(
+            diagnostic, ensure_ascii=False, default=str)[:9000], flush=True)
     assert state['last'] == EXPECTED, f'{name}: Chart.js last data LABEL is not {EXPECTED}: {state}'
     assert state['labelsLength'] == 28, f'{name}: 28-day window shifted: {state}'
     assert state['rangeTo'] == EXPECTED, f'{name}: date filter hides current day: {state}'
