@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01 — exact approved reader fix, scheduled validation pending
+- Scheduled Actions #44634410260 writer PASS (+53, 34,271), six-JSON reader BLOCKED on new PR201 heatmap Git blob. Owner-approved PR #203 merged main@cf8d5db4; exact old/new allowlist plus negative drift CI [#44679502629](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44679502629) PASS, regression #44679502645 PASS, docs #44679502639 PASS. No site-prod or Netlify changes, next four-hour scheduled cycle must demonstrate 23/23 readback and Git-only publication; C6 stabilization remains open.
+
+
 ### UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01 — weekday UI production READY + locked
 - Owner GO, PR #201 site-prod@`ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b`; proof-tested preview #44591705771, release QA #44602597715 PASS. Production one-shot [#44602714671](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44602714671) SUCCESS; artifact #14567973014; Netlify `6aff5392a3a6d0497a6f5d1d` READY + locked, served JS and 23-city KPI PASS. Weekday counts/time filters, 4-part and day(09–18)/evening-night switch, bilingual tutorial LIVE. Same-run 4h derived-data generator updated; first scheduled refresh not yet proven; no C2/Neon modifications. Legacy prod workflow #44602714524 failed predeploy (tour steps test).
 
