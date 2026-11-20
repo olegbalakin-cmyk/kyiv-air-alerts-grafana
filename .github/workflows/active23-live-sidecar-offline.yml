@@ -64,6 +64,8 @@ jobs:
           set -euo pipefail
           python -m compileall -q scripts/active23_live_sidecar.py
           python -m unittest discover -s tests -p test_active23_live_sidecar.py -v
+          python -m unittest discover -s tests -p test_c6_neon_auto_git.py -v
+          python -m unittest discover -s tests -p test_c6_neon_git_candidate.py -v
           echo "LIVE_SIDECAR_OFFLINE_PROOF_PASS_NO_HTTP_NO_DB_NO_GIT_PUSH_NO_NETLIFY"
       - name: Static no-publication boundary
         run: |
