@@ -354,7 +354,7 @@ def verify_embedded(dashboard, index, manifest):
             "EMBEDDED_HISTORICAL_KPI_CONTRACT_FAIL")
 
 
-def verify_active23_sidecar(raw, report, new, source_hashes, binding, *, now=None):
+def verify_active23_sidecar(raw, report, new, new_derived, source_hashes, binding, *, now=None):
     """Accept only C2 same-run observations, never the browser's archive fixture.
 
     A source no-open is authoritative ONLY as-of its capture. The frontend
@@ -374,7 +374,13 @@ def verify_active23_sidecar(raw, report, new, source_hashes, binding, *, now=Non
             and raw.get("c2_run_attempt") == report["c2_run_attempt"]
             and raw.get("c2_corpus_sha256") == report["c2_corpus_sha256"]
             and raw.get("archive_sha256") == report["c2_bundle_sha256"]
-            and raw.get("source_generated_at") == new["meta"]["generated_at"]
+            # The physical Neon readback dashboard is stamped AFTER C2.
+            # Its generated_at is intentionally different from the original
+            # same-run C2-derived UI data. Bind source clock to the released
+            # site_derived.json, and its Git release to dashboard via manifest.
+            and raw.get("source_generated_at") == new_derived["meta"]["generated_at"]
+            and new_derived["meta"]["publication_authority"]
+                  ["release_manifest_sha256"] == binding
             and raw.get("same_run_dashboard_sha256") ==
                 source_hashes["dashboard_data.json"]
             and raw.get("same_run_derived_sha256") ==
@@ -521,6 +527,7 @@ def publish(checkout, delta, prepared, proof, *, repository,
                     "ACTIVE23_C2_GENERATION_MISSING")
             active23 = verify_active23_sidecar(
                 load(sidecar_file), report, new,
+                load(final_data / candidate.FILES["site_derived.json"]),
                 {"dashboard_data.json": hashes[candidate.FILES["dashboard_data.json"]],
                  "site_derived.json": hashes[candidate.FILES["site_derived.json"]]},
                 manifest["release_manifest_sha256"])
