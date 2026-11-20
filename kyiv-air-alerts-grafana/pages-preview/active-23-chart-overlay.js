@@ -37,6 +37,11 @@
        !(report.total>0)||!report.archival)return null;
     const lastIndex=rows.length-1,row=rows[lastIndex];
     if(!matchesRow(row,period,report))return null;
+    // A date-only stale/cross-generation frame must never acquire today's
+    // provisional hours from an unrelated snapshot.
+    if(row.partial_through&&row.partial_through.includes("T")&&
+       Math.abs(Date.parse(row.partial_through)-Date.parse(report.capturedAt))>4*3600000)
+      return null;
     const days=countDays(report.from,report.through);
     if(days<1||days>100)return null;
     const observed=Number(row.avg_daily_alert_hours);
@@ -78,17 +83,22 @@
   // Never show a full-period time forecast below hours already observed
   // at the exact source snapshot. Extend from that snapshot only over the
   // physically remaining time using the existing completion model's rate.
-  function completionHoursPerDay(overlay,completion,midnightUtc){
+  function completionHoursPerDay(overlay,completion,midnightUtc,nextDay){
     if(!overlay||!completion||typeof midnightUtc!=="function"||
-       !Number.isFinite(completion.occupancyRate)||
+       typeof nextDay!=="function"||!Number.isFinite(completion.occupancyRate)||
        completion.occupancyRate<0||completion.occupancyRate>1||
-       !Number.isInteger(completion.days)||completion.days<1)return null;
-    const end=midnightUtc(completion.endAfter||"");
+       !Number.isInteger(completion.days)||completion.days<1||
+       !/^\d{4}-\d{2}-\d{2}$/.test(completion.end||""))return null;
+    const after=nextDay(completion.end,1);
+    const end=after?midnightUtc(after):null;
     const captured=Date.parse(overlay.capturedAt);
     if(!Number.isFinite(end)||!Number.isFinite(captured)||end<=captured)return null;
     const remaining=(end-captured)/3600000;
     if(!Number.isFinite(remaining)||remaining<0)return null;
-    return (overlay.rawCombinedHours+completion.occupancyRate*remaining)/completion.days;
+    // This is a research estimate of *remaining time only*, not a claim
+    // that an unfinished alarm lasts until the model's forecast endpoint.
+    const projected=(overlay.rawCombinedHours+completion.occupancyRate*remaining)/completion.days;
+    return Number.isFinite(projected)&&projected>=overlay.combinedHours ? projected:null;
   }
   return Object.freeze({forChart,completionHoursPerDay});
 });
