@@ -163,6 +163,14 @@ jobs:
           test -s _site/active-23-provisional-test.json
           test -s _site/active-23-provisional.js
           test -s _site/active-23-chart-overlay.js
+          # Netlify's root [build] command recreates _site with an older asset
+          # allowlist. Isolate the exact already-verified preview bundle outside
+          # that publish folder so an implicit rebuild cannot drop sidecars.
+          rm -rf /tmp/active23-deploy-site
+          cp -a _site /tmp/active23-deploy-site
+          for asset in site-derived.json active-23-provisional-test.json active-23-provisional.js active-23-chart-overlay.js; do
+            test -s "/tmp/active23-deploy-site/$asset"
+          done
           echo "23_CITY_UA_EN_DRAFT_BUILD_PASS"
       - name: Deploy Netlify DRAFT ONLY — no production publish
         env:
@@ -170,7 +178,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN"
-          npx -y netlify-cli@latest deploy --dir=_site \
+          npx -y netlify-cli@latest deploy --dir=/tmp/active23-deploy-site \
             --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
             --auth="$NETLIFY_AUTH_TOKEN" \
             --alias=active23-test-20261120 --json > active23-draft-deploy.json
