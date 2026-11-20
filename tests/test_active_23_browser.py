@@ -31,6 +31,20 @@ EXTRACT = r'''() => {
     visible:Number.isFinite(last.x) && Number.isFinite(last.y) && last.x >= 0 &&
       last.x <= chart.width && Number.isFinite(last.width) && last.width > 0} : null;
   const overlay = chart.options?.plugins?.active23FinalBar?.overlay;
+  const cityKey=document.getElementById('citySelect')?.value;
+  const raw=state.data.cities[cityKey]?.daily28?.at(-1);
+  const sourceStart=state.active23Snapshot?.cities?.[cityKey]?.start_at;
+  const startDay=sourceStart ? new Intl.DateTimeFormat('en-GB',{
+    timeZone:'Europe/Kyiv',year:'numeric',month:'2-digit',day:'2-digit'
+  }).formatToParts(new Date(sourceStart)) : [];
+  const part=(type)=>startDay.find(x=>x.type===type)?.value;
+  const startedHere=sourceStart &&
+    part('year')+'-'+part('month')+'-'+part('day')==='2026-11-20' ? 1:0;
+  const countLineLast=chart.data.datasets?.[1]?.data?.at(-1);
+  const dailyCountChart=window.Chart?.getChart(document.getElementById('daily28AlertsDurationChart'));
+  const dailyCountBar=dailyCountChart?.data?.datasets?.find(d=>
+    d.type==='bar'&&d.label?.includes('Тривог, що почалися'))?.data?.at(-1);
+
   const delta = chart.options?.plugins?.periodForecastDeltaHatch;
   return {
     city:document.getElementById('citySelect')?.value,
@@ -42,6 +56,8 @@ EXTRACT = r'''() => {
     last:String(labels[labels.length - 1] || ''),
     ticks,
     datasetLast:chart.data.datasets?.[0]?.data?.at(-1),
+    startedHere,baseCount:raw?.alerts_started,
+    countLineLast,dailyCountBar,
     bar,
     overlayIndex:overlay?.index ?? null,
     overlayOpen:overlay?.provisionalHours ?? 0,
@@ -94,6 +110,11 @@ def assert_visible_day(page, name, *, expect_open=True):
     assert any(EXPECTED in t for t in state['ticks']), (
         f'{name}: actual Chart.js canvas axis tick omits {EXPECTED}: {state}')
     assert state['bar'] and state['bar']['visible'], f'{name}: last canvas bar missing: {state}'
+    expected_count = int(state['baseCount']) + int(state['startedHere'])
+    assert state['countLineLast'] == expected_count, (
+        f'{name}: green alert-start line missed/duplicated unfinished start: {state}')
+    assert state['countLineLast'] >= 0, f'{name}: negative starts: {state}'
+
     if expect_open:
         assert state['overlayIndex'] == 27, f'{name}: unclosed cap not on 20 Nov: {state}'
         assert state['overlayOpen'] > 0, f'{name}: no source-verified provisional cap: {state}'
