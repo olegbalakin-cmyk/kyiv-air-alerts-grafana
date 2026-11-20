@@ -811,6 +811,21 @@ jobs:
             --input-sha "$C6_INPUT_SHA" --workflow-sha "$GITHUB_SHA" \
             --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" \
             --bundle-sha256 "$C6_BUNDLE_SHA"
+      - name: Optional source-at-capture active23 sidecar from same-run C2 (fail-closed UI)
+        id: active23_capture
+        continue-on-error: true
+        env:
+          ACTIVE23_SOURCE_PARSERS_PATH: pinned-site/kyiv-air-alerts-grafana/scripts
+        run: |
+          set -euo pipefail
+          python integration/scripts/active23_live_sidecar.py \
+            --bundle existing-c2/c2-shadow-inputs.zip \
+            --expected-sha256 "$C6_BUNDLE_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --attempt "$GITHUB_RUN_ATTEMPT" \
+            --output c6-prepared/active23-source-capture.json
+          test -s c6-prepared/active23-source-capture.json
+          echo "ACTIVE23_SAME_RUN_SOURCE_AT_CAPTURE_PASS"
       - name: Checkout Git delivery for local detached commit only
         uses: actions/checkout@v4
         with:
@@ -843,6 +858,7 @@ jobs:
           path: |
             c6-prepared/REPORT.json
             c6-prepared/candidate/**
+            c6-prepared/active23-source-capture.json
             c6-live-proof/**
           if-no-files-found: warn
           retention-days: 30
