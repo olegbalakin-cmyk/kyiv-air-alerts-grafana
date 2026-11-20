@@ -47,6 +47,10 @@ jobs:
           gh run download 44680696823 -R "$GITHUB_REPOSITORY" \
             -n c2-shadow-inputs-44680696823-1 -D /tmp/active23-live-offline
           test -s /tmp/active23-live-offline/c2-shadow-inputs.zip
+          mkdir -p /tmp/active23-live-six-file
+          gh run download 44680696823 -R "$GITHUB_REPOSITORY" \
+            -n c6-neon-git-preparation-44680696823-1 -D /tmp/active23-live-six-file
+          test -s /tmp/active23-live-six-file/c6-prepared/REPORT.json
           python - <<'PY'
           from pathlib import Path
           import hashlib
@@ -59,6 +63,7 @@ jobs:
       - name: Real 23-city source parser and negative gate tests
         env:
           ACTIVE23_BUNDLE: /tmp/active23-live-offline/c2-shadow-inputs.zip
+          ACTIVE23_C6_PREPARED_DIR: /tmp/active23-live-six-file/c6-prepared
           ACTIVE23_SOURCE_PARSERS_PATH: source-site/kyiv-air-alerts-grafana/scripts
         run: |
           set -euo pipefail
