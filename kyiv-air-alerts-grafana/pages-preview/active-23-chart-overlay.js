@@ -66,7 +66,10 @@
     const closed=report.closed/3600/days,open=report.open/3600/days,total=closed+open;
     if(![closed,open,total].every(Number.isFinite)||closed<0||open<=0||
        total>26+0.02)return null;
-    return Object.freeze({...report,index:lastIndex,days,closedHours:closed,
+    const source=snapshot.cities[key];
+    const unclosedStartsToday=period==="daily28"&&source?.start_at&&
+      localDay(source.start_at)===report.through?1:0;
+    return Object.freeze({...report,index:lastIndex,days,unclosedStartsToday,closedHours:closed,
       provisionalHours:open,combinedHours:total,rawClosedHours:report.closed/3600,
       rawProvisionalHours:report.open/3600,rawCombinedHours:report.total/3600});
   }
@@ -80,6 +83,72 @@
     }
     return null;
   }
+  // Ensure the source-certified snapshot day has an actual X-axis row.
+  // Real C2 dashboard daily28 contains 28 COMPLETED days (through Nov 19 in
+  // this frozen run). The source snapshot for Nov 20 cannot be drawn onto Nov 19.
+  // Prefer an exact same-run partial row provided by the existing site-derived
+  // generator. Only synthesize a preview-only zero-completed-time row if the
+  // exact C2 source proof confirms zero completed time for that day.
+  const addDay=(date,n)=>{
+    const t=Date.parse(date+"T00:00:00Z");
+    return Number.isFinite(t)?new Date(t+n*DAY).toISOString().slice(0,10):null;
+  };
+  const localDay=instant=>{
+    const parts=new Intl.DateTimeFormat("en-GB",{
+      timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date(instant));
+    const f=type=>parts.find(p=>p.type===type)?.value;
+    return f("year")+"-"+f("month")+"-"+f("day");
+  };
+  function ensureSnapshotDay(cities,snapshot,today){
+    if(!cities||!snapshot||typeof today!=="string"||
+       !/^\d{4}-\d{2}-\d{2}$/.test(today)||
+       !snapshot.cities||Object.keys(cities).length!==23||
+       Object.keys(snapshot.cities).length!==23)return false;
+    const keys=Object.keys(cities),next=new Map();
+    for(const key of keys){
+      const base=cities[key]?.daily28;
+      const proof=globalEvaluator(snapshot,key,"day");
+      if(!Array.isArray(base)||base.length!==28||!proof||
+         proof.through!==today||proof.from!==today||
+         !proof.archival||localDay(proof.capturedAt)!==today||
+         !Number.isFinite(proof.closed)||proof.closed<0||
+         !Number.isFinite(proof.open)||proof.open<0||
+         !Object.hasOwn(snapshot.cities,key))return false;
+      const last=base.at(-1)?.date,previous=addDay(today,-1);
+      if(last!==today && last!==previous)return false;
+      const prev=last===today?base.slice(0,-1):base;
+      if(prev.slice(-27).length!==27||
+         prev.slice(-27).some((row,i)=>
+           row?.date!==addDay(today,i-27)))return false;
+      if(last===today){
+        const actual=base.at(-1);
+        if(actual.is_partial_period!==true||
+           !Number.isFinite(Number(actual.total_alert_duration_hours))||
+           Math.abs(Number(actual.total_alert_duration_hours)*3600-proof.closed)>150)
+          return false;
+        next.set(key,null); // already correctly attached by same-run generator
+      }else{
+        // In particular no green-line zero can be invented when completed
+        // source-start counts are unknown: this fallback is only for the
+        // exact zero-completed time in the frozen C2 snapshot.
+        if(proof.closed!==0)return false;
+        const row={
+          time:today+"T00:00:00+02:00",
+          date:today,alerts_started:0,active_alerts:0,
+          total_alert_duration_minutes:0,total_alert_duration_hours:0,
+          avg_alert_duration_minutes:null,avg_active_alert_duration_minutes:null,
+          is_partial_period:true,partial_through:proof.capturedAt,
+          _active23_test_snapshot_only:true
+        };
+        next.set(key,[...prev.slice(-27),row]);
+      }
+    }
+    // All-or-nothing across 23. No Neon or downloaded source records mutated.
+    for(const [key,rows] of next)if(rows)cities[key].daily28=rows;
+    return true;
+  }
+
   // Never show a full-period time forecast below hours already observed
   // at the exact source snapshot. Extend from that snapshot only over the
   // physically remaining time using the existing completion model's rate.
@@ -100,5 +169,5 @@
     const projected=(overlay.rawCombinedHours+completion.occupancyRate*remaining)/completion.days;
     return Number.isFinite(projected)&&projected>=overlay.combinedHours ? projected:null;
   }
-  return Object.freeze({forChart,completionHoursPerDay});
+  return Object.freeze({forChart,completionHoursPerDay,ensureSnapshotDay});
 });
