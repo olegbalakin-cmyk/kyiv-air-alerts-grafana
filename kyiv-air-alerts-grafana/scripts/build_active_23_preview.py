@@ -138,7 +138,7 @@ def kyiv_open(row, pages, raw, checked):
     return start, {}
 
 
-def sev_open(row, pages, raw, checked):
+def sev_open(row, pages, raw, checked, stored):
     require(row["source_key"] == "sevastopol_history" and
             row["source_identity"] == {"url": SEV_URL, "channel": "razvozhaev"} and
             all(p["url"] == SEV_URL or p["url"].startswith(SEV_URL + "?before=") for p in pages),
@@ -154,10 +154,26 @@ def sev_open(row, pages, raw, checked):
     messages = sorted(by_id.values(), key=lambda x: (x["at"], x["id"]))
     pairs, anomalies = pair_recent(messages)
     open_rows = [a for a in anomalies if a["type"] == "open_start"]
-    require(len(open_rows) <= 1 and len(anomalies) == len(open_rows),
-            "SEV_AMBIGUOUS_OPEN_HISTORY")
+    require(len(open_rows) <= 1, "SEV_MULTIPLE_UNCLOSED_STARTS")
+    # Accepted source-continuity already accounts for historic missing ends.
+    # An unproven gap since the previous check remains a hard block.
+    previous = at(row["previous_checked_at"])
+    for anomaly in anomalies:
+        if anomaly["type"] == "open_start":
+            continue
+        require(anomaly["type"] == "missing_end_before_new_start" and
+                at(anomaly["next_start"]["at"]) <= previous and
+                at(anomaly["start"]["at"]) < at(anomaly["next_start"]["at"]),
+                "SEV_NEW_OR_UNEXPLAINED_MISSING_END")
+    recent = stored.get("meta", {}).get("recent_anomalies")
+    require(isinstance(recent, list) and len(recent) <= 1 and
+            all(x.get("type") == "open_start" for x in recent),
+            "SEV_UNRESOLVED_SOURCE_ANOMALIES")
     if not open_rows:
+        require(not recent, "SEV_STORE_OPEN_DISAGREES_WITH_SOURCE")
         return None, {"pages": len(pages)}
+    require(len(recent) == 1 and recent[0].get("start_id") == open_rows[0].get("start_id"),
+            "SEV_STORE_OPEN_ID_NOT_MATCHED")
     open_item = open_rows[0]
     msg = max((m for m in messages if strict_kind(m["text"]) == "start"), key=lambda m: m["id"])
     require(msg["id"] == open_item["start_id"] == open_item["start"]["id"] and
@@ -198,8 +214,10 @@ def build(blob, expected_sha, run_id, attempt):
                 "C2_ARCHIVE_ID_OR_23_CITIES")
         original = content(archive, "payload.json", manifest)
         dashboard_bytes = content(archive, "site_data/dashboard_data.json", manifest)
+        sev_bytes = content(archive, "site_data/sevastopol_events.json", manifest)
         dataset = json.loads(original)
         dashboard = json.loads(dashboard_bytes)
+        sev_store = json.loads(sev_bytes)
     receipts = dataset["historical_source_receipts"]
     require(set(receipts) == EXPECTED_KEYS and set(dataset["cities"]) == EXPECTED_KEYS and
             set(dashboard["cities"]) == EXPECTED_KEYS, "C2_AND_DASHBOARD_23_CITY_SET")
@@ -210,7 +228,7 @@ def build(blob, expected_sha, run_id, attempt):
         if city == "kyiv":
             started, identity = kyiv_open(row, pages, raw, checked)
         elif city == "sevastopol":
-            started, identity = sev_open(row, pages, raw, checked)
+            started, identity = sev_open(row, pages, raw, checked, sev_store)
         else:
             started, identity = ua_open(row, pages, raw, checked)
         day = checked.astimezone(KYIV).date()
