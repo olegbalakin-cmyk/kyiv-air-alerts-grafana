@@ -104,6 +104,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          rm -f historical-daily-kpi.json
           python3 kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json --output historical-daily-kpi.json
           rm -rf _site
           mkdir _site
