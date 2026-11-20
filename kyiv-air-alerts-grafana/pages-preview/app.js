@@ -2824,7 +2824,7 @@ function renderDatasetSummary() {
   ].map(x=>`<span class="summary-pill">${x}</span>`).join("");
 }
 
-function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
+function renderSelectedCityKpis(city, key, from, to, chartPeriod = null, active23Overlay = null) {
   const range = chartPeriod ? window.KpiRange.periodKpiWindow(chartPeriod,from,to,city)
     : {from,to,kind:"custom",days:0};
   const index = state.historicalDaily?.cities?.[key];
@@ -2834,6 +2834,21 @@ function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
   if (historicMax) {
     kpi.maxDay = historicMax.max;
     kpi.maxDayDate = historicMax.dates.join(", ");
+  }
+  // Verified unfinished starts count once; completed duration mean stays unchanged.
+  const pendingStart=active23Overlay?.unclosedStartsInPeriod &&
+    active23Overlay.unclosedStartDay>=range.from &&
+    active23Overlay.unclosedStartDay<=range.to ? 1 : 0;
+  if(kpi.complete&&pendingStart){
+    kpi.alerts+=pendingStart;
+    const dayRow=city.daily28?.find(row=>row.date===active23Overlay.unclosedStartDay);
+    const count=dayRow?Number(dayRow.alerts_started)+pendingStart:null;
+    if(Number.isFinite(count)&&(kpi.maxDay===null||count>=kpi.maxDay)){
+      if(kpi.maxDay===count&&kpi.maxDayDate)
+        kpi.maxDayDate=[...new Set([...kpi.maxDayDate.split(", ").filter(Boolean),active23Overlay.unclosedStartDay])].join(", ");
+      else kpi.maxDayDate=active23Overlay.unclosedStartDay;
+      kpi.maxDay=count;
+    }
   }
   state.lastCityKpi = { ...kpi, city: key };
   setKpiLabel("kpiAlerts", "Кількість тривог", "Alerts started");
@@ -2934,7 +2949,6 @@ function renderCity() {
     ? calendarWeekOverlapsRange(row, activeRange.from, activeRange.to)
     : period === "quarterly" ? calendarQuarterOverlapsRange(row, activeRange.from, activeRange.to)
     : dateKeyInRange(rowTime(row, period), activeRange.from, activeRange.to));
-  renderSelectedCityKpis(city, key, activeRange.from, activeRange.to, period);
   // One display logic: observed hours and estimated remaining clock-time.
   // For daily28, the existing observed partial-day bar already occupies the
   // last of 28 dates. Do not append a new date or duplicate its actual values.
@@ -3050,6 +3064,14 @@ function renderCity() {
   const dashed = type === "raion_proxy";
   const active23Overlay=window.Active23ChartOverlay?.forChart(
     state.active23Snapshot,key,period,rows) || null;
+  // Verified unclosed starts contribute once to alert counts in their start period;
+  // never change the source JSON or duration-only calculations.
+  const openStarts=active23Overlay?.unclosedStartsInPeriod || 0;
+  const countRows=rows.map((r,i)=>openStarts&&i===active23Overlay.index
+    ? {...r,alerts_started:(Number(r.alerts_started)||0)+openStarts,
+       alerts_per_day:(Number(r.alerts_per_day)||0)+openStarts/active23Overlay.days,
+       _provisional_start_count:openStarts}:r);
+  renderSelectedCityKpis(city,key,activeRange.from,activeRange.to,period,active23Overlay);
   const intensityHours=rows.map(r=>r.avg_daily_alert_hours);
   if(active23Overlay)intensityHours[active23Overlay.index]=active23Overlay.closedHours;
   // Axis reserves forecast space with trend ON or OFF; only the marker
@@ -3076,7 +3098,7 @@ function renderCity() {
     {
       type: "line",
       label: tr("Тривог / день","Alerts / day"),
-      data: rows.map(r => r.alerts_per_day),
+      data: countRows.map(r => r.alerts_per_day),
       yAxisID: "yAlerts",
       borderColor: COLORS[1],
       backgroundColor: COLORS[1] + "22",
@@ -3085,7 +3107,7 @@ function renderCity() {
       borderWidth: 2,
       borderDash: dashed ? [7, 5] : [],
       segment: partialSegment(rows, COLORS[1]),
-      _exportRows: rows,
+      _exportRows: countRows,
       tension: 0,
       spanGaps: true
     }
@@ -3185,10 +3207,10 @@ function renderCity() {
     intensitySubtitle.textContent=tr(
       "Останній стовпчик: суцільний синій — завершені тривоги; світле штрихування — час незавершеної до зрізу джерела. "+
       (completion?"Тонка пунктирна риска — прогноз, не додаткові фактичні години. ":"")+
-      "Архівний тест 20.11.2026, не поточний статус. Зелена лінія без змін.",
+      "Архівний тест 20.11.2026, не поточний статус. Зелена лінія враховує підтверджений початок незавершеної тривоги.",
       "Final bar: solid blue is completed alerts; light hatching is unclosed time at source snapshot. "+
       (completion?"The thin dashed tick marks the forecast, not extra factual hours. ":"")+
-      "Archived test from 20 Nov 2026, not live status. Green line unchanged.");
+      "Archived test from 20 Nov 2026, not live status. Green line includes a verified unfinished alert start.");
   }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
@@ -3226,7 +3248,7 @@ function renderCity() {
                  context.dataIndex===active23Overlay.index){
                 const o=active23Overlay;
                 const lines=[
-                  tr("Завершено (Neon): ","Completed (Neon): ")+formatDurationHours(o.closedHours),
+                  tr("Завершені тривоги: ","Completed alerts: ")+formatDurationHours(o.closedHours),
                   tr("Незавершено, попередньо: ","Unclosed, provisional: ")+
                     formatDurationHours(o.provisionalHours),
                   tr("Разом до зрізу: ","Combined through snapshot: ")+
