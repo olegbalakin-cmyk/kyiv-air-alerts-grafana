@@ -139,6 +139,9 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 .date-picker-access:focus-within{outline:2px solid #8dbfff;outline-offset:1px}
 @media (min-width:701px){.date-control{min-width:183px;width:183px;flex:0 0 183px}}
 
+/* Provisional active-alert evidence stays outside factual KPIs and charts. */
+.kyiv-active-provisional{border-left:3px dashed #86b4d2;background:#13202c;padding:10px 12px;margin:4px 0 18px;line-height:1.55;color:#bdceda}
+.kyiv-active-provisional strong{color:#d9edf9}
 /* Selected-range KPI provenance and coverage note. */
 .kpi-range-note{margin:-8px 0 18px;color:#9cb0c1;font-size:12px;line-height:1.6}
 
@@ -178,3 +181,24 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 .weekday-split-select select:disabled{opacity:.55;cursor:not-allowed}
 .weekday-split-status{min-height:18px;margin:4px 0 8px}
 @media(max-width:620px){.weekday-split-controls{align-items:stretch;flex-direction:column;gap:6px}.weekday-split-select{width:100%}}
+
+
+/* 23-city snapshot-only confirmed + provisional time, outside canonical KPIs. */
+.active23-section{border:1px dashed #466078;background:linear-gradient(135deg,#101d29,#14212b);border-radius:13px;padding:16px 18px;margin:16px 0 23px}
+.active23-heading{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:15px}
+.active23-heading h3{font-size:16px;margin-bottom:9px;color:#e6edf5}
+.active23-heading .chart-subtitle{margin-top:0;max-width:760px}
+.active23-control{width:195px;min-width:160px}
+.active23-summary{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin:12px 0}
+.active23-total>span{display:block;font-size:12px;color:#a3b6c9;margin-bottom:6px}
+.active23-total>strong{display:block;font-size:30px;font-variant-numeric:tabular-nums}
+.active23-components{display:flex;flex-wrap:wrap;gap:12px}
+.active23-components>div{display:flex;align-items:center;gap:6px;padding:9px 11px;border:1px solid #364959;border-radius:8px;font-size:12px}
+.active23-components strong{font-size:14px;font-variant-numeric:tabular-nums;margin-left:5px}
+.active23-dot{width:10px;height:10px;display:inline-block;border-radius:2px;flex:none}
+.active23-dot.closed,.active23-segment.closed{background:#62a0ea}
+.active23-dot.provisional,.active23-segment.provisional{background:repeating-linear-gradient(120deg,#d9a249,#d9a249 5px,#88642a 5px,#88642a 9px)}
+.active23-track{display:flex;width:100%;height:12px;overflow:hidden;background:#2a3540;border-radius:6px}
+.active23-segment{height:100%;transition:none}
+.active23-section #active23Note{margin:10px 0 0;color:#b9c7d4}
+@media(max-width:650px){.active23-control{width:100%}.active23-components{width:100%}.active23-components>div{flex:1 1 180px}.active23-total>strong{font-size:27px}}

@@ -203,8 +203,10 @@ assert(!app.includes('rows=[...rows,completionPotential.periodRow]'),
   "trend cannot replace original factual rows with a newer partial day");
 assert(!app.includes('rows = [...rows,completion.periodRow]'),
   "regression: original production replaced actual Q4 on trend ON");
-assert(app.includes('data: rows.map(r => r.avg_daily_alert_hours)'),
-  "actual bars remain original-source values");
+assert(app.includes('const intensityHours=rows.map(r=>r.avg_daily_alert_hours)') &&
+       app.includes('data: intensityHours,') &&
+       app.includes('if(active23Overlay)intensityHours[active23Overlay.index]=active23Overlay.closedHours;'),
+  "original factual bar data remain unchanged except exact source-certified last-bar provisional normalization");
 assert(app.includes('data: rows.map(r => r.alerts_per_day)'),
   "actual line remains original-source values");
 assert(!app.includes('intensityDatasets[0].data[i]='),
@@ -220,18 +222,20 @@ assert(!app.includes('type:"bar",_isCompletion:true'),
 assert(!app.includes('stack:"completion"'),"forecast-only markers are not additive to fact");
 assert(app.includes('stacked:false'),"actual bar retains original stacking semantics");
 assert(!app.includes('periodCompletionHatchPlugin'),"no misleading hatch on actual");
-assert(app.includes('completionPotential ? completionPotential.expectedHours/completionPotential.days : 0'),
-  "hours axis stays stable regardless of trend toggle");
+assert(app.includes('completionPotential&&!active23Overlay ? completionPotential.expectedHours/completionPotential.days : 0') &&
+       app.includes('Number(active23AxisForecast)||0') &&
+       app.includes('const active23Forecast=completion&&active23Overlay ? active23AxisForecast : null;'),
+  "hours axis stays stable regardless of trend toggle, even with source-certified provisional cap");
 assert(app.includes('completionPotential ? completionPotential.expectedAlerts/completionPotential.days : 0'),
   "alerts axis stays stable regardless of trend toggle");
 assert(app.includes('const periodForecastDeltaHatchPlugin = {'),"hatched forecast delta renderer exists");
 assert(app.includes('id:"periodForecastDeltaHatch"'),"hatch plugin registered by stable ID");
-assert(app.includes('plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin]'),
-  "hatch renderer used only on city intensity chart");
-assert(app.includes('observedHoursPerDay:completion ? rows.at(-1)?.avg_daily_alert_hours : null'),
-  "hatch compares current forecast to the ORIGINAL factual mean");
-assert(app.includes('forecastHoursPerDay:completion ? completion.expectedHours/completion.days : null'),
-  "hatch forecast uses full period denominator");
+assert(app.includes('plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin, active23FinalBarPlugin]'),
+  "forecast delta hatch and isolated provisional-cap renderer only on city intensity chart");
+assert(app.includes('observedHoursPerDay:completion&&!active23Overlay ? rows.at(-1)?.avg_daily_alert_hours : null'),
+  "forecast hatching compares original factual mean only when no provisional source cap exists");
+assert(app.includes('forecastHoursPerDay:completion&&!active23Overlay ? completion.expectedHours/completion.days : null'),
+  "forecast hatch uses full period denominator only without competing provisional hatching");
 assert(app.includes('const top=Math.min(ya,yf),bottom=Math.max(ya,yf)'),
   "hatched interval is bounded by actual and forecast for either direction");
 assert(app.includes('ctx.fillStyle=expected>actual?'),

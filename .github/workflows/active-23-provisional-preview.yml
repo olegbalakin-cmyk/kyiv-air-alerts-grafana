@@ -1,0 +1,218 @@
+name: C2 provisional 23-city proof + draft preview (TEST ONLY)
+on:
+  push:
+    branches: [test/active-provisional-23-20261120]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/build_active_23_preview.py"
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "tests/test_active_23_provisional.cjs"
+      - "tests/test_active_23_chart_overlay.cjs"
+      - "tests/test_active_23_browser.py"
+      - ".github/workflows/active-23-provisional-preview.yml"
+      - "netlify.toml"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: active-23-provisional-test-only
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/test/active-provisional-23-20261120'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Exact read-only checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned existing source parser requirements
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Generate 23-city provisional durations from immutable C2 archive only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/active23
+          gh run download 44680696823 -R "$GITHUB_REPOSITORY" -n c2-shadow-inputs-44680696823-1 -D /tmp/active23
+          test -s /tmp/active23/c2-shadow-inputs.zip
+          python - <<'PY'
+          import json,zipfile,hashlib
+          from pathlib import Path
+          path='/tmp/active23/c2-shadow-inputs.zip'
+          with zipfile.ZipFile(path) as z:
+              manifest=json.loads(z.read('manifest.json'))
+              raw=z.read('site_data/site_derived.json')
+              assert hashlib.sha256(raw).hexdigest()==manifest['files']['site_data/site_derived.json']
+              body=json.loads(raw)
+              assert body['explorations']['daily28_current']['meta']['current_day']=='2026-11-20'
+              assert len(body['explorations']['daily28_current']['cities'])==23
+              Path('/tmp/active23/same-run-derived.json').write_bytes(raw)
+          print('SAME_RUN_23_CITY_DERIVED_SOURCE_PASS')
+          PY
+          python kyiv-air-alerts-grafana/scripts/build_active_23_preview.py \
+            --bundle /tmp/active23/c2-shadow-inputs.zip \
+            --expected-sha256 3f822042ceaaea06746dca2683f5fcc7eabf1dc6539752db2069f9aaf464d641 \
+            --run-id 44680696823 --attempt 1 \
+            --output /tmp/active23/active-23-provisional-test.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/active23/active-23-provisional-test.json'))
+          assert d['count_cities']==23 and d['count_source_open']==22
+          assert d['count_source_no_open']==1 and d['publication_allowed'] is False
+          assert d['cities']['sevastopol']['state']=='no_open_at_source_capture'
+          assert d['cities']['kyiv']['state']=='open_at_source_capture'
+          assert d['cities']['kharkiv']['source_key']=='ukrainealarm_region_history'
+          for key,city in d['cities'].items():
+              assert set(city['periods'])=={'day','week','last7','last28','last30',
+                  'last90','last180','month','quarter','allTime'},key
+              for period,entry in city['periods'].items():
+                  assert abs(entry['combined_seconds']-entry['closed_seconds']-entry['provisional_seconds'])<.005,(key,period)
+          print("C2_23_CITY_EXACT_PROOF_PASS 22_SOURCE_OPEN 1_NO_OPEN")
+          PY
+      - name: Test source overlap, date bounds and unchanged canonical KPI contract
+        env:
+          ACTIVE23_JSON: /tmp/active23/active-23-provisional-test.json
+          ACTIVE23_DERIVED: /tmp/active23/same-run-derived.json
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/active-23-provisional.js
+          node --check kyiv-air-alerts-grafana/pages-preview/active-23-chart-overlay.js
+          node --test tests/test_active_23_provisional.cjs
+          node --test tests/test_active_23_chart_overlay.cjs
+          node --test tests/test_weekday_distribution.cjs
+          python - <<'PY'
+          import importlib.util
+          from datetime import datetime, timezone
+          p='kyiv-air-alerts-grafana/scripts/build_active_23_preview.py'
+          spec=importlib.util.spec_from_file_location('proof',p)
+          obj=importlib.util.module_from_spec(spec);spec.loader.exec_module(obj)
+          def episode(start,end):
+            return {'episode_state':'closed','alert_type':'AIR','start_at':start,'end_at':end}
+          # Two intervals crossing Kyiv midnight with an overlap: count union.
+          rows=[
+            episode('2026-11-19T21:45:00Z','2026-11-19T22:30:00Z'),
+            episode('2026-11-19T22:10:00Z','2026-11-19T22:50:00Z')
+          ]
+          low=datetime.fromisoformat('2026-11-19T22:00:00+00:00')
+          end=datetime.fromisoformat('2026-11-19T23:00:00+00:00')
+          seconds,_=obj.closed_seconds_window(rows,low,end)
+          assert seconds==3000,seconds
+          # Kyiv spring DST 2026-03-29: local midnight shifts by an hour later.
+          from zoneinfo import ZoneInfo
+          k=ZoneInfo('Europe/Kyiv')
+          from datetime import time,date
+          before=datetime.combine(date(2026,3,29),time.min,tzinfo=k).astimezone(timezone.utc)
+          after=datetime.combine(date(2026,3,30),time.min,tzinfo=k).astimezone(timezone.utc)
+          assert (after-before).total_seconds()==23*3600
+          print('OVERLAP_MIDNIGHT_DST_OFFLINE_PASS')
+          PY
+          git diff --quiet 8c8ee93ced3c7d70a12402f8a74ba586946eaae5 HEAD -- \
+            kyiv-air-alerts-grafana/data \
+            kyiv-air-alerts-grafana/scripts/update_data.py \
+            kyiv-air-alerts-grafana/scripts/multicity_canonical_postgres.py \
+            .github/workflows/update-netlify-site.yml
+          echo "PRODUCTION_WRITER_NEON_SITE_PROD_UNTOUCHED"
+      - name: Build exact same-run 23-city bilingual static draft
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          for f in index.html styles.css app.js features.json chart-share.js \
+            kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json \
+            active-23-provisional.js active-23-chart-overlay.js brand-mark.svg \
+            brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg \
+            favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$f" "_site/$f"
+          done
+          cp /tmp/active23/active-23-provisional-test.json _site/active-23-provisional-test.json
+          python - <<'PY'
+          import zipfile,hashlib,json
+          from pathlib import Path
+          p='/tmp/active23/c2-shadow-inputs.zip'
+          with zipfile.ZipFile(p) as z:
+              manifest=json.loads(z.read('manifest.json'))
+              for source,target in {
+                'site_data/dashboard_data.json':'data.json',
+                'site_data/site_derived.json':'site-derived.json',
+                'site_data/kyiv_threat_mix.json':'kyiv-threat-mix.json'
+              }.items():
+                  blob=z.read(source)
+                  assert hashlib.sha256(blob).hexdigest()==manifest['files'][source]
+                  Path('_site',target).write_bytes(blob)
+          print('SAME_RUN_C2_DASHBOARD_SITE_DERIVED_AND_SNAPSHOT_PASS')
+          PY
+          cp historical-daily-kpi.json _site/historical-daily-kpi.json
+          python kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py \
+            --source historical-daily-kpi.json --output-dir _site
+          test -s _site/index.html
+          test -s _site/en/index.html
+          test -s _site/active-23-provisional.js
+          test -s _site/active-23-chart-overlay.js
+          grep -q 'active-23-provisional.js' _site/en/index.html
+          grep -q 'active-23-chart-overlay.js' _site/en/index.html
+          if grep -q 'id="active23Section"' _site/index.html; then echo "SEPARATE_PANEL_FORBIDDEN"; exit 1; fi
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          test -s _site/site-derived.json
+          test -s _site/active-23-provisional-test.json
+          test -s _site/active-23-provisional.js
+          test -s _site/active-23-chart-overlay.js
+          # Netlify's root [build] command recreates _site with an older asset
+          # allowlist. Isolate the exact already-verified preview bundle outside
+          # that publish folder so an implicit rebuild cannot drop sidecars.
+          rm -rf /tmp/active23-deploy-site
+          cp -a _site /tmp/active23-deploy-site
+          for asset in site-derived.json active-23-provisional-test.json active-23-provisional.js active-23-chart-overlay.js; do
+            test -s "/tmp/active23-deploy-site/$asset"
+          done
+          echo "23_CITY_UA_EN_DRAFT_BUILD_PASS"
+      - name: Deploy Netlify DRAFT ONLY — no production publish
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=/tmp/active23-deploy-site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --alias=active23-test-20261120 --json > active23-draft-deploy.json
+          python - <<'PY'
+          import json
+          d=json.load(open('active23-draft-deploy.json'))
+          url=d.get('deploy_url') or d.get('url')
+          assert url and url.startswith('https://')
+          print('ACTIVE23_NETLIFY_DRAFT_URL',url)
+          print('ZERO_NETLIFY_PRODUCTION_PUBLISH')
+          PY
+      - name: Real Chromium browser smoke on DEPLOYED unpublished preview
+        run: |
+          set -euo pipefail
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          export ACTIVE23_PREVIEW_URL="$(python - <<'PY'
+          import json
+          d=json.load(open('active23-draft-deploy.json'))
+          print('https://'+d['deploy_id']+'--ukraine-air-alerts.netlify.app')
+          PY
+          )"
+          echo "Testing immutable deploy permalink, not mutable alias"
+          python tests/test_active_23_browser.py
+          test -s _browser_proof/chart-axis-proof.json
+          echo "REAL_BROWSER_CHART_AXIS_23_CITY_UA_EN_PASS"
+      - name: Preserve reviewable proofs (no raw article or source bodies)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: active23-test-proof-${{ github.run_id }}
+          path: |
+            /tmp/active23/active-23-provisional-test.json
+            active23-draft-deploy.json
+            _browser_proof/
+          retention-days: 7
+          if-no-files-found: warn
