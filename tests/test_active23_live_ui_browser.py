@@ -142,7 +142,7 @@ def open_page(browser, lang, size):
     page = context.new_page()
     # Only this immutable archived-source preview uses a pinned browser clock.
     # Production itself always reads the real wall clock and expires after 8h.
-    page.clock.install(time=datetime(2026, 11, 20, 7, 30,
+    page.clock.install(time=datetime(2026, 11, 20, 7, 55,
                                      tzinfo=timezone(timedelta(hours=2))))
     problems = []
     page.on('pageerror', lambda error: problems.append(str(error)))
