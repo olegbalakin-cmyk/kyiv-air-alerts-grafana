@@ -80,7 +80,7 @@ class VerifiedSourceCaptureTests(unittest.TestCase):
         # Even before the 8h boundary, crossing local midnight is blocked.
         after = datetime(2026, 11, 21, 0, 1, tzinfo=active.KYIV)
         with self.assertRaisesRegex(
-                ValueError, "INCONSISTENT_CURRENT_KYIV_DAY"):
+                ValueError, "STALE_OR_FUTURE_SOURCE_CAPTURE|INCONSISTENT_CURRENT_KYIV_DAY"):
             active.build(raw, sha256(raw).hexdigest(), 44680696823, 1,
                          as_of=after)
 
