@@ -1,4 +1,4 @@
-name: C6 exact DST bridge reader pin (offline, no publication)
+name: C6 exact DST and weekday reader pins (offline, no publication)
 
 on:
   push:
@@ -46,11 +46,25 @@ jobs:
           ref: c980c3f70ed894d2583fc83ecdedd1f82c04afb1
           path: site-prior
           persist-credentials: false
+      - name: Checkout exact accepted heatmap before weekday release
+        uses: actions/checkout@v4
+        with:
+          ref: 148c545d12aa1a2b03202ef89f21e108c98241c0
+          path: site-weekday-prior
+          persist-credentials: false
+      - name: Checkout exact failing site-prod weekday input
+        uses: actions/checkout@v4
+        with:
+          ref: ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b
+          path: site-weekday-current
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Exact bridge and negative drift tests (no HTTP, Neon, data writes or Git push)
-        run: python -m unittest discover -s tests -p test_c6_dst_reader_pin.py -v
+      - name: Exact bridge and weekday-builder negative drift tests (no HTTP, Neon, data writes or Git push)
+        run: |
+          python -m unittest discover -s tests -p test_c6_dst_reader_pin.py -v
+          python -m unittest discover -s site-weekday-current/tests -p test_weekday_local_bands.py -v
       - name: Verify production workflow only passes the exact bridge to the gate
         run: |
           python - <<'PY'
