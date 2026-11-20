@@ -67,9 +67,16 @@
     if(![closed,open,total].every(Number.isFinite)||closed<0||open<=0||
        total>26+0.02)return null;
     const source=snapshot.cities[key];
-    const unclosedStartsToday=period==="daily28"&&source?.start_at&&
-      localDay(source.start_at)===report.through?1:0;
-    return Object.freeze({...report,index:lastIndex,days,unclosedStartsToday,closedHours:closed,
+    // Source-verified OPEN alerts have a known start even before a final end.
+    // Count the start once on its real Kyiv calendar day; its duration remains
+    // provisional. Previous-day open alerts are not new starts today.
+    const unclosedStartDay=source?.start_at?localDay(source.start_at):null;
+    const unclosedStartsToday=period==="daily28"&&
+      unclosedStartDay===report.through?1:0;
+    const unclosedStartsInPeriod=unclosedStartDay>=report.from&&
+      unclosedStartDay<=report.through?1:0;
+    return Object.freeze({...report,index:lastIndex,days,unclosedStartDay,
+      unclosedStartsToday,unclosedStartsInPeriod,closedHours:closed,
       provisionalHours:open,combinedHours:total,rawClosedHours:report.closed/3600,
       rawProvisionalHours:report.open/3600,rawCombinedHours:report.total/3600});
   }
