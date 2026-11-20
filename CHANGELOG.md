@@ -3,6 +3,10 @@
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
 <!-- coordination:history:start -->
+### UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01 — 23-city archived draft, production unchanged
+- Draft PR #208 HEAD ec688164, Actions #44690082427 SUCCESS (same-run 23/23 C2/Neon source capture, 22 open + Sevastopol no open at source time, 6/6 active and 10/10 weekday JS, midnight/DST). Artifact #14607928356; Netlify draft 6affecda8c37c62e303f8b86 READY but unpublished. Manual C6 #44680696823 SUCCESS, Git-only site-prod@8c8ee93; scheduled stabilization OPEN. No live active-status sidecar and zero production changes.
+
+
 ### C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01 — manual path registered, not executed
 - PR #205 merged `main@7abdaf02`; exact scheduled C2→Neon→Git-only pipeline now accepts default-OFF `c6_run_now` for owner on main with AUTO enabled, other one-shot inputs OFF. CI [#44680250526](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44680250526) PASS and existing guards PASS. No dispatch, new `site-prod` commit, or Netlify deploy from this change. Physical manual cycle pending; separate scheduled stabilization still open.
 
