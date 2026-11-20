@@ -142,7 +142,6 @@ jobs:
           grep -q 'active-23-provisional.js' _site/en/index.html
           grep -q 'active-23-chart-overlay.js' _site/en/index.html
           if grep -q 'id="active23Section"' _site/index.html; then echo "SEPARATE_PANEL_FORBIDDEN"; exit 1; fi
-          grep -q 'id="active23Section"' _site/index.html
           printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
           echo "23_CITY_UA_EN_DRAFT_BUILD_PASS"
       - name: Deploy Netlify DRAFT ONLY — no production publish
