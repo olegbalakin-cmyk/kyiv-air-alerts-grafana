@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01 — Nov20 actual Chart.js rendering PASS on unpublished draft**
+- Chromium regression #44702699636 FAIL showed Nov19, missing snapshot and `site-derived.json` 404 despite static source PASS. PR #208 HEAD `3101a468` isolates complete Netlify draft bundle, Actions [#44703989283](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44703989283) SUCCESS: 27 browser cases, 23 cities, UA desktop/EN mobile, actual Nov20 axis tick/bar, trend on/off; proof artifact #14614097420 (screenshots/JSON), Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Production unchanged; frozen source is not live publisher.
+
 <!-- coordination:history:start -->
 ### UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01 — Nov 20 chart row restored in 23-city draft
 - Owner reported no current date. Confirmed same-run C2 dashboard `daily28` ends Nov19; SHA-verified C2 `site_derived.daily28_current` supplies partial Nov20 for all 23 (including closed durations). Draft PR #208 HEAD `31b68ac1` now reconciles exact same-run partial row before range/chart and explicitly labels final day on mobile, preserving source-bound unclosed hatch, trend tick, and no independent panel. Actions [#44698962480](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44698962480) SUCCESS: 8 overlay + 6 source + 10 weekday tests, DST/midnight; artifact #14611712593. Netlify draft `6afffe14b64ca786aa56288d` READY unpublished, existing published deploy unchanged. Frozen test only; no Neon/C2/production UI change.
