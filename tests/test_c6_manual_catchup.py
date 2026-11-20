@@ -33,11 +33,11 @@ class ManualCatchupContract(unittest.TestCase):
         cls.jobs = cls.doc["jobs"]
 
     def test_exact_default_off_owner_main_auto_gate(self):
-        inputs = self.doc["on"]["workflow_dispatch"]["inputs"]
+        inputs = self.doc[True]["workflow_dispatch"]["inputs"]
         self.assertIs(inputs["c6_run_now"]["default"], False)
         self.assertEqual(inputs["c6_run_now"]["type"], "boolean")
         self.assertTrue(inputs["c6_run_now"]["required"])
-        self.assertEqual(self.doc["on"]["schedule"][0]["cron"], "15 */4 * * *")
+        self.assertEqual(self.doc[True]["schedule"][0]["cron"], "15 */4 * * *")
         self.assertEqual(self.raw.count(SCHEDULE), 8)
         self.assertEqual(self.raw.count(MANUAL), 8)
         for name in ("update-site", "c6-neon-six-json-prepare", "c6-neon-auto-git-publish"):
