@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-20. **23-city provisional TEST READY; manual C6 catch-up SUCCESS; scheduled C6 OPEN.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**; prior **C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01**; prior C6 checkpoint **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
+**Date:** 2026-11-20. **23-city in-chart provisional DRAFT READY; manual C6 catch-up SUCCESS; scheduled C6 OPEN.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**; prior **C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01**; prior C6 checkpoint **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
 
 ## Working instructions
 
@@ -20,13 +20,14 @@ Latest accepted transition: **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**
 
 - **Weekday UI LIVE (Nov 19):** PR #201 site-prod@`ae650fea`; Netlify `6aff5392a3a6d0497a6f5d1d` READY + locked; Actions #44602714671 SUCCESS. UK/EN tutorial, 4-band/day-night switch. Next scheduled dayparts refresh awaits proof; C2/Neon unchanged.
 - **23-city provisional UI TEST:** Draft PR #208 HEAD ec688164; Actions #44690082427 SUCCESS (6/6 active and 10/10 weekday tests; 23/23 C2/Neon source receipts; 22 source-open + 1 Sevastopol no-open; midnight/DST). Artifact #14607928356. Netlify DRAFT `6affecda8c37c62e303f8b86` READY, `published_at=null`; frozen 20 Nov snapshot, no live sidecar or production UI/data mutation.
+- **In-chart last-bar 23-city TEST (Nov 20):** Owner rejected standalone provisional panel. Draft PR #208 now HEAD `9c11f385`; same-run archived 23-city source sidecar injected only into the last `Інтенсивність тривог` bar, solid Neon-confirmed base + light hatch for unclosed duration, short dashed forecast tick (no second hatch) when trend ON, same line source unchanged. UA/EN, tooltip and CSV source labels, no other chart or canonical mutation. Actions #44693191591 PASS (6+4+10 JS plus 23/23 C2, DST, same-run draft); accepted UI regression #44693198945 PASS. Netlify draft `6afff30b288eb0e2e4f4e5e7` READY and unpublished. **Frozen test snapshot, NOT live or auto-updating.**
 - **DST VERIFIED; correction OFF:** one-shot #43706909819 artifact #14159523883 proves all eight correct Kharkiv/Poltava/Zhytomyr/Cherkasy DST witnesses selected, all three obsolete parent UIDs excluded by canonical C2; no overlay/Neon writes. Other backfill/casualty/live-status gates independent.
 
 
 ## Concrete next tasks
 
 1. Manual C6 #44680696823 SUCCESS. Check next 1–2 **scheduled** post-PR203 C2→Neon→Git cycles: exact weekday builder readback, 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
-2. UI active23: owner review Draft PR #208. Future live implementation needs independently verified same-run dynamic source-status sidecar, stale-source guards, closed-after-all-clear replacement, and new owner-gated release. Do not merge frozen demo into site-prod.
+2. UI active23: owner to review [in-chart draft PR #208](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/208) (no separate block). If approved, implement same-run live-sidecar producer with stale-source fail-closed and verified-all-clear replacement before separate owner-gated production release. Do not merge frozen snapshot into site-prod.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
 5. Verify scheduled same-generation weekday dayparts refresh after PR #203; old Netlify UI test #44602714524 failed *before deploy* (tour 8 vs 6). Keep regular Netlify publishing locked.
@@ -35,6 +36,9 @@ Latest accepted transition: **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01 — owner-feedback in-chart draft PASS; production unchanged
+- Draft PR #208 HEAD 9c11f385f5755430b9067f17279de3e5e2c211f7. Replace standalone card with confirmed-blue + hatched provisional cap on the LAST intensity bar (23 source series), short dashed forecast-only tick when trend enabled, no competing forecast hatch; source-time tooltip and separate CSV provisional columns. Actions #44693191591 SUCCESS (23/23 frozen C2/Neon, 6+4+10 JS, DST/midnight) and #44693198945 SUCCESS, artifact #14609895891. Netlify draft `6afff30b288eb0e2e4f4e5e7` READY, unpublished; production `site-prod@8c8ee93` and published Netlify deploy unchanged. This is an archived static visual test, NOT a live status feed or automatic update.
+
 ## UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01 — archived 23-city draft PASS
 - Draft PR #208 HEAD ec688164; C2 run #44680696823 NEON_SUCCEEDED, same-run source capture 23/23; Actions #44690082427 SUCCESS 6/6+10/10 JS, midnight/DST; proof #14607928356; 22 open source observations + Sevastopol no open at snapshot. Netlify draft 6affecda8c37c62e303f8b86 READY and unpublished; prod current deploy untouched. No automatic status publisher; NOT current live status, no canonical changes.
 
