@@ -92,9 +92,11 @@ test("20 November is an actual final X-axis bar for all 23 series, not a cap on 
   assert.equal(rows.at(-1).total_alert_duration_hours,0,key);
   const report=capture.evaluate(proof,key,"day");
   const expected=proof.cities[key];
+  const startDay=expected.start_at?new Intl.DateTimeFormat("en-CA",{
+   timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"
+  }).format(new Date(expected.start_at)):null;
   assert.equal(rows.at(-1).alerts_started,
-    expected.start_at&&expected.start_at.slice(0,10)==="2026-11-19" ? 0 :
-    report.hadOpen ? 1:0,key);
+    report.hadOpen&&startDay==="2026-11-20"?1:0,key);
   const asChartRow=rows.at(-1);
   const dailyChartRow={...asChartRow,
    avg_daily_alert_hours:asChartRow.total_alert_duration_hours,
