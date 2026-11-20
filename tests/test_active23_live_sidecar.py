@@ -13,6 +13,7 @@ import unittest
 import zipfile
 
 from scripts import active23_live_sidecar as active
+from scripts import c6_neon_auto_git as publish
 
 BUNDLE = os.environ.get("ACTIVE23_BUNDLE", "")
 REQUIRED = set(active.EXPECTED_KEYS)
@@ -68,6 +69,40 @@ class VerifiedSourceCaptureTests(unittest.TestCase):
                 self.assertAlmostEqual(
                     period["closed_seconds"] + period["provisional_seconds"],
                     period["combined_seconds"], places=2)
+
+    def test_exact_publication_binding_and_fail_closed(self):
+        raw, manifest, now = evidence()
+        snapshot = active.build(raw, sha256(raw).hexdigest(),
+                                44680696823, 1, as_of=now)
+        report = {"c2_run_id": 44680696823,
+                  "c2_run_attempt": 1,
+                  "c2_corpus_sha256": manifest["corpus_sha256"],
+                  "c2_bundle_sha256": sha256(raw).hexdigest()}
+        published = {"meta": {"generated_at": snapshot["source_generated_at"]},
+                     "multicity_meta": {"production_city_keys": sorted(REQUIRED)}}
+        source_hashes = {
+            "dashboard_data.json": manifest["files"]["site_data/dashboard_data.json"],
+            "site_derived.json": manifest["files"]["site_data/site_derived.json"],
+        }
+        result = publish.verify_active23_sidecar(
+            snapshot, report, published, source_hashes, "f" * 64, now=now)
+        self.assertEqual(result["release_manifest_sha256"], "f" * 64)
+        self.assertEqual(result["delivery"], "site-prod-git")
+        self.assertFalse(result["authoritative_live_status"])
+        bad = {**snapshot, "source_generated_at": "2026-11-19"}
+        with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SAME_RUN_BINDING"):
+            publish.verify_active23_sidecar(
+                bad, report, published, source_hashes, "f" * 64, now=now)
+        bad = {**snapshot, "same_run_derived_sha256": "0" * 64}
+        with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SAME_RUN_BINDING"):
+            publish.verify_active23_sidecar(
+                bad, report, published, source_hashes, "f" * 64, now=now)
+        with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SOURCE_STALE"):
+            publish.verify_active23_sidecar(
+                snapshot, report, published, source_hashes, "f" * 64,
+                now=now + timedelta(hours=9))
+        self.assertTrue(publish.allowed(publish.ACTIVE23_PATH))
+        self.assertNotIn(publish.ACTIVE23_PATH, publish.DELIVERED)
 
     def test_stale_snapshot_is_never_publishable(self):
         raw, _, now = evidence()
