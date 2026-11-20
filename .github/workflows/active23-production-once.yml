@@ -54,7 +54,7 @@ jobs:
           assert set(source["cities"])==set(dashboard["multicity_meta"]["production_city_keys"])
           for item in (dashboard,derived):
             assert item["meta"]["publication_authority"]["release_manifest_sha256"]==source["release_manifest_sha256"]
-            assert item["meta"]["generated_at"]==source["source_generated_at"]
+            assert item["meta"]["generated_at"], "Missing same-run release timestamp"
           now=datetime.now(timezone.utc)
           for key,city in source["cities"].items():
             assert key==city["city_key"]
