@@ -67,3 +67,63 @@ test("trend estimates future remainder only and never changes observed cap",()=>
  assert.equal(model.completionHoursPerDay(m,{...comp,occupancyRate:1.2},date,add),null);
  assert.equal(model.completionHoursPerDay(m,{...comp,end:"2026-11-19"},date,add),null);
 });
+
+
+test("20 November is an actual final X-axis bar for all 23 series, not a cap on 19 November",()=>{
+ const keys=Object.keys(proof.cities);
+ const first="2026-10-23";
+ const days=Array.from({length:28},(_,i)=>new Date(Date.parse(first+"T00:00:00Z")+i*86400000).toISOString().slice(0,10));
+ assert.equal(days.at(-1),"2026-11-19");
+ const cities=Object.fromEntries(keys.map(key=>[key,{
+  daily28:days.map(date=>({date,time:date+"T00:00:00+02:00",
+   alerts_started:0,active_alerts:0,total_alert_duration_hours:0,
+   avg_active_alert_duration_minutes:null}))
+ }]));
+ const original=JSON.stringify(cities);
+ assert.equal(model.ensureSnapshotDay(cities,proof,"2026-11-20"),true);
+ assert.equal(Object.keys(cities).length,23);
+ for(const key of keys){
+  const rows=cities[key].daily28;
+  assert.equal(rows.length,28,key);
+  assert.equal(rows.at(-2).date,"2026-11-19",key);
+  assert.equal(rows.at(-1).date,"2026-11-20",key);
+  assert.equal(rows.at(-1).is_partial_period,true,key);
+  assert.equal(rows.at(-1)._active23_test_snapshot_only,true,key);
+  assert.equal(rows.at(-1).total_alert_duration_hours,0,key);
+  const report=capture.evaluate(proof,key,"day");
+  const expected=proof.cities[key];
+  assert.equal(rows.at(-1).alerts_started,
+    expected.start_at&&expected.start_at.slice(0,10)==="2026-11-19" ? 0 :
+    report.hadOpen ? 1:0,key);
+  const asChartRow=rows.at(-1);
+  const dailyChartRow={...asChartRow,
+   avg_daily_alert_hours:asChartRow.total_alert_duration_hours,
+   alerts_per_day:asChartRow.alerts_started};
+  const output=model.forChart(proof,key,"daily28",[...rows.slice(0,-1),dailyChartRow]);
+  if(report.hadOpen){
+   assert.ok(output,key+" overlay missing on November 20");
+   assert.equal(output.index,27);
+   assert.ok(output.combinedHours>0);
+  } else assert.equal(output,null);
+ }
+ assert.notEqual(JSON.stringify(cities),original);
+ assert.equal(model.ensureSnapshotDay(cities,proof,"2026-11-20"),true);
+ assert.equal(cities.kyiv.daily28.at(-1).date,"2026-11-20");
+});
+test("missing or inconsistent 23-city proof never inserts invented chart dates",()=>{
+ const keys=Object.keys(proof.cities),day="2026-11-19";
+ const make=()=>Object.fromEntries(keys.map(k=>[k,{daily28:Array.from({length:28},(_,i)=>({
+   date:new Date(Date.parse("2026-10-23T00:00:00Z")+i*86400000).toISOString().slice(0,10)
+ }))}]));
+ const missing=make();delete missing.sumy;
+ assert.equal(model.ensureSnapshotDay(missing,proof,"2026-11-20"),false);
+ const wrong=make();wrong.kyiv.daily28.at(-1).date="2026-11-18";
+ assert.equal(model.ensureSnapshotDay(wrong,proof,"2026-11-20"),false);
+ for(const [k,obj] of Object.entries(wrong))assert.notEqual(obj.daily28.at(-1).date,"2026-11-20",k);
+ const stale=make();
+ assert.equal(model.ensureSnapshotDay(stale,proof,"2026-11-21"),false);
+});
+test("render order: today is reconciled before city period ranges and chart creation",()=>{
+ assert.match(app,/ensureSnapshotDay\([\s\S]*?state\.data\.cities,state\.active23Snapshot,snapshotDay/);
+ assert.ok(app.indexOf("const didShowSnapshotDay")<app.indexOf("renderCity();",app.indexOf("async function init()")));
+});
