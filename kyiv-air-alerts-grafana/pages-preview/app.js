@@ -1287,6 +1287,44 @@ const partialPeriodBarPlugin = {
 // A hatched DIFFERENCE between the unchanged factual bar and the forecast.
 // If the estimated full-period daily mean is lower, hatch INSIDE the bar;
 // if higher, hatch the extension ABOVE it. Never rebase the factual bar.
+
+/* Solid verified bar + diagonally hatched source-observed unclosed cap.
+   Forecast is ONLY an external dashed tick: never a second fill. */
+const active23FinalBarPlugin = {
+  id:"active23FinalBar",
+  afterDatasetsDraw(chart,_args,opts) {
+    const o=opts?.overlay,forecast=opts?.forecast;
+    if(!o||!chart.chartArea)return;
+    const el=chart.getDatasetMeta(0)?.data?.[o.index],axis=chart.scales?.yHours;
+    if(!el||!axis||el.skip)return;
+    const p=el.getProps(["x","y","base","width"],true);
+    if(![p.x,p.y,p.base,p.width].every(Number.isFinite)||p.width<=3)return;
+    const a=axis.getPixelForValue(o.closedHours),b=axis.getPixelForValue(o.combinedHours);
+    if(!Number.isFinite(a)||!Number.isFinite(b)||b>a)return;
+    const ctx=chart.ctx,area=chart.chartArea,side=p.width/2;
+    ctx.save();ctx.beginPath();ctx.rect(area.left,area.top,area.right-area.left,area.bottom-area.top);ctx.clip();
+    const left=p.x-side+1,width=p.width-2,top=b,height=a-b;
+    if(height>=0.5){
+      ctx.save();ctx.beginPath();ctx.rect(left,top,width,height);ctx.clip();
+      ctx.fillStyle="rgba(133,179,222,0.36)";ctx.fillRect(left,top,width,height);
+      ctx.strokeStyle="rgba(234,244,255,0.94)";ctx.lineWidth=1.3;
+      for(let dx=-height;dx<width+height;dx+=8){
+        ctx.beginPath();ctx.moveTo(left+dx,top+height);
+        ctx.lineTo(left+dx+height,top);ctx.stroke();
+      }
+      ctx.restore();ctx.strokeStyle="#d7eafa";ctx.lineWidth=1.7;
+      ctx.beginPath();ctx.moveTo(left,top);ctx.lineTo(left+width,top);ctx.stroke();
+    }
+    if(Number.isFinite(forecast)&&forecast>=0){
+      const yf=axis.getPixelForValue(forecast);
+      ctx.strokeStyle="#f7e6bd";ctx.lineWidth=2;ctx.setLineDash([4,3]);
+      ctx.beginPath();ctx.moveTo(p.x+side+3,yf);
+      ctx.lineTo(p.x+side+18,yf);ctx.stroke();ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+};
+
 const periodForecastDeltaHatchPlugin = {
   id:"periodForecastDeltaHatch",
   afterDatasetsDraw(chart,_args,options){
@@ -2836,63 +2874,6 @@ function renderSelectedCityKpis(city, key, from, to, chartPeriod = null) {
   if (note) note.textContent = notes.join(" · ");
 }
 
-function renderActive23Summary(key) {
-  const panel=$("active23Section"), select=$("active23Period"), note=$("active23Note");
-  if (!panel || !select || !note) return;
-  const names={
-    day:["День зрізу","Snapshot day"],week:["Поточний тиждень","Current week"],
-    last7:["7 днів","7 days"],last28:["28 днів","28 days"],
-    last30:["30 днів","30 days"],last90:["90 днів","90 days"],
-    last180:["180 днів","180 days"],month:["Поточний місяць","Current month"],
-    quarter:["Поточний квартал","Current quarter"],allTime:["Весь доступний час","All available history"]
-  };
-  for (const opt of select.options)
-    if(names[opt.value])opt.textContent=tr(...names[opt.value]);
-  $("active23Title").textContent=tr("Час під тривогою · тестовий зріз","Time under alert · test snapshot");
-  $("active23Intro").textContent=tr(
-    "Підсумок з однакового знімка Neon і джерел. Історичний тест, а не поточний статус тривоги; штатні KPI та графіки не змінено.",
-    "Totals from the same Neon and source snapshot. Archived test, not live alert status; existing KPIs and charts are unchanged.");
-  $("active23PeriodLabel").textContent=tr("Період","Period");
-  $("active23TotalLabel").textContent=tr("Разом · підтверджено + попередньо",
-    "Total · confirmed + provisional");
-  $("active23ClosedLabel").textContent=tr("Завершені (Neon)","Completed (Neon)");
-  $("active23OpenLabel").textContent=tr("Незавершені (попередньо)","Unclosed (provisional)");
-  const report=window.Active23Provisional?.evaluate(state.active23Snapshot,key,select.value);
-  if(!report){
-    for(const id of ["active23Total","active23Closed","active23Open"])$(id).textContent="—";
-    for(const id of ["active23BarClosed","active23BarOpen"])$(id).style.width="0%";
-    note.textContent=tr("Немає перевіреного тестового зрізу для цього міста.",
-      "No verified test snapshot for this city.");
-    return;
-  }
-  const duration=seconds=>formatDurationHours(seconds/3600);
-  $("active23Total").textContent=duration(report.total);
-  $("active23Closed").textContent=duration(report.closed);
-  $("active23Open").textContent=duration(report.open);
-  const positive=report.total>0;
-  $("active23BarClosed").style.width=(positive?100*report.closed/report.total:0)+"%";
-  $("active23BarOpen").style.width=(positive?100*report.open/report.total:0)+"%";
-  const fmtDate=day=>day.slice(8,10)+"."+day.slice(5,7)+"."+day.slice(0,4);
-  const at=new Intl.DateTimeFormat(currentLanguage==="en"?"en-GB":"uk-UA",{
-    timeZone:"Europe/Kyiv",day:"2-digit",month:"2-digit",year:"numeric",
-    hour:"2-digit",minute:"2-digit",hourCycle:"h23"
-  }).format(new Date(report.capturedAt));
-  const scope=report.scope==="raion_proxy"
-    ?tr("Районний ряд","District-level series")
-    :tr("Міський ряд","City-level series");
-  const status=report.hadOpen
-    ?tr("На час зрізу початок без відбою.","At snapshot: start without all-clear.")
-    :tr("На час зрізу незавершеної тривоги не знайдено.",
-        "No unclosed alert observed at snapshot.");
-  note.textContent=tr(
-    "Архівний тест: "+fmtDate(report.from)+" – "+fmtDate(report.through)+
-      " · зріз "+at+". "+status+" "+scope+
-      ". Попередні години враховано лише до зрізу; після відбою їх замінять фінальні дані. Не актуальний статус.",
-    "Archived test: "+report.from+" – "+report.through+
-      " · snapshot "+at+". "+status+" "+scope+
-      ". Provisional hours stop at capture and would be replaced by final data after all-clear. Not live status.");
-}
-
 function renderCity() {
   const key = $("citySelect").value;
   const period = $("cityPeriod").value;
@@ -2900,7 +2881,6 @@ function renderCity() {
   if (!city) return;
 
   $("cityTitle").textContent = labelFor(key);
-  renderActive23Summary(key);
   const type = sourceType(key);
   const coverage = coverageStart(key);
   const badgeClass = type === "raion_proxy" ? "proxy" : "exact";
@@ -3051,14 +3031,24 @@ function renderCity() {
   const labels = rows.map(r => periodDisplayLabel(r, period));
   const chartLabels = labels;
   const dashed = type === "raion_proxy";
+  const active23Overlay=window.Active23ChartOverlay?.forChart(
+    state.active23Snapshot,key,period,rows) || null;
+  const intensityHours=rows.map(r=>r.avg_daily_alert_hours);
+  if(active23Overlay)intensityHours[active23Overlay.index]=active23Overlay.closedHours;
+  const active23Forecast=completion&&active23Overlay
+    ? window.Active23ChartOverlay?.completionHoursPerDay(
+        active23Overlay,completion,
+        window.PeriodCompletionPreview?.kyivMidnightUtc,
+        window.PeriodCompletionPreview?.add) : null;
 
   const intensityDatasets = [
     {
       type: "bar",
       label: tr("Годин під тривогою / добу","Hours under alert / day"),
-      data: rows.map(r => r.avg_daily_alert_hours),
+      data: intensityHours,
       yAxisID: "yHours",
-      backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
+      backgroundColor: rows.map((r,i)=>i===active23Overlay?.index
+        ? COLORS[0]+"bb" : isPartialPeriod(r) ? COLORS[0]+"22" : COLORS[0]+"77"),
       borderColor: rows.map(() => COLORS[0]),
       borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
       _exportRows: rows
@@ -3171,13 +3161,22 @@ function renderCity() {
            "Actual from the original series through "+factUntilText+actualNoteEn+
            ". The trend does not alter factual data.");
   }
+  if(intensitySubtitle&&active23Overlay){
+    intensitySubtitle.textContent=tr(
+      "Останній стовпчик: суцільний синій — завершені тривоги; світле штрихування — час незавершеної до зрізу джерела. "+
+      (completion?"Коротка пунктирна риска праворуч — прогноз, не додаткові фактичні години. ":"")+
+      "Архівний тест 20.11.2026, не поточний статус. Зелена лінія без змін.",
+      "Final bar: solid blue is completed alerts; light hatching is unclosed time at source snapshot. "+
+      (completion?"The short dashed tick right of the bar marks the forecast, not extra factual hours. ":"")+
+      "Archived test from 20 Nov 2026, not live status. Green line unchanged.");
+  }
   if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
   state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
     data: {
       labels: chartLabels,
       datasets: intensityDatasets
     },
-    plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin],
+    plugins: [partialPeriodBarPlugin, periodForecastDeltaHatchPlugin, active23FinalBarPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -3203,6 +3202,21 @@ function renderCity() {
           },
           callbacks: {
             label(context) {
+              if(active23Overlay&&context.datasetIndex===0&&
+                 context.dataIndex===active23Overlay.index){
+                const o=active23Overlay;
+                const lines=[
+                  tr("Завершено (Neon): ","Completed (Neon): ")+formatDurationHours(o.closedHours),
+                  tr("Незавершено, попередньо: ","Unclosed, provisional: ")+
+                    formatDurationHours(o.provisionalHours),
+                  tr("Разом до зрізу: ","Combined through snapshot: ")+
+                    formatDurationHours(o.combinedHours)
+                ];
+                if(Number.isFinite(active23Forecast))
+                  lines.push(tr("Прогноз середнього за повний період: ",
+                    "Forecast full-period daily mean: ")+formatDurationHours(active23Forecast));
+                return lines;
+              }
               if (completion && context.dataIndex===rows.length-1) {
                 if(context.datasetIndex===0){
                   const actual=context.parsed.y,forecast=completion.expectedHours/completion.days;
@@ -3229,6 +3243,16 @@ function renderCity() {
             },
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
+              if(active23Overlay&&i===active23Overlay.index){
+                const stamp=new Intl.DateTimeFormat(
+                  currentLanguage==="en"?"en-GB":"uk-UA",{
+                  timeZone:"Europe/Kyiv",dateStyle:"short",timeStyle:"short"
+                }).format(new Date(active23Overlay.capturedAt));
+                return [
+                  tr("Архівний зріз джерела: ","Archived source snapshot: ")+stamp,
+                  tr("Попередні години не є остаточними.","Provisional hours are not final.")
+                ];
+              }
               if (completion && i===rows.length-1) {
                 const factual=rows[i];
                 const factSource=String(factual?.partial_through ||
@@ -3260,20 +3284,27 @@ function renderCity() {
             }
           }
         },
-        partialPeriodBar: { rows, datasetIndices: [0] },
-        periodForecastDeltaHatch: {
-          index:completion ? rows.length-1 : -1,
-          observedHoursPerDay:completion ? rows.at(-1)?.avg_daily_alert_hours : null,
-          forecastHoursPerDay:completion ? completion.expectedHours/completion.days : null
+        partialPeriodBar: {
+          rows:active23Overlay ? rows.map((r,i)=>i===active23Overlay.index?
+            {...r,is_partial_period:false}:r) : rows,
+          datasetIndices: [0]
         },
+        periodForecastDeltaHatch: {
+          index:completion&&!active23Overlay ? rows.length-1 : -1,
+          observedHoursPerDay:completion&&!active23Overlay ? rows.at(-1)?.avg_daily_alert_hours : null,
+          forecastHoursPerDay:completion&&!active23Overlay ? completion.expectedHours/completion.days : null
+        },
+        active23FinalBar: {overlay:active23Overlay,forecast:active23Forecast},
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
         yHours: {
           stacked:false,
           suggestedMax:Math.max(
-            ...rows.map(r=>Number(r.avg_daily_alert_hours)||0),
-            completionPotential ? completionPotential.expectedHours/completionPotential.days : 0
+            ...intensityHours.map(v=>Number(v)||0),
+            active23Overlay?.combinedHours||0,
+            Number(active23Forecast)||0,
+            completionPotential&&!active23Overlay ? completionPotential.expectedHours/completionPotential.days : 0
           ),
           position: "left",
           beginAtZero: true,
@@ -4476,7 +4507,6 @@ function bind() {
     }
   };
   bindRange("cityDateFrom", "cityDateTo", renderCity);
-  $("active23Period")?.addEventListener("change",()=>renderActive23Summary($("citySelect").value));
   bindRange("rolling7dDateFrom", "rolling7dDateTo", () => renderRolling7d($("citySelect").value), () => {
     if ($("rolling7dYear")) $("rolling7dYear").value = "custom";
   });
