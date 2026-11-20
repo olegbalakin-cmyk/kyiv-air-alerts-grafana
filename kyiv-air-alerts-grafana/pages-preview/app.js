@@ -3562,6 +3562,13 @@ function renderRolling7d(key) {
 function renderShortHorizon(key) {
   const allRows = state.data.cities[key]?.daily28 || [];
   const rows = filterRowsByDateRange(allRows, "daily", "shortDateFrom", "shortDateTo");
+  const dateRows=derivedDaily28Rows({daily28:rows});
+  const activeStart=window.Active23ChartOverlay?.forChart(
+    state.active23Snapshot,key,"daily28",dateRows);
+  const countRows=rows.map((r,i)=>activeStart?.unclosedStartsToday&&
+      i===activeStart.index
+    ? {...r,alerts_started:(Number(r.alerts_started)||0)+1,
+       _provisional_start_count:1}:r);
   const labels = rows.map(r => r.date || String(r.time || "").slice(0, 10));
   const range = $("daily28Range");
   if (range) {
@@ -3621,7 +3628,7 @@ function renderShortHorizon(key) {
 
   const explosion = explosionCity(key);
   const strictDaily = explosion?.strict_daily || {};
-  const regularAlerts = rows.map(r => Math.max(0, Number(r.alerts_started || 0) - Number(strictDaily[r.date] || 0)));
+  const regularAlerts = countRows.map(r => Math.max(0, Number(r.alerts_started || 0) - Number(strictDaily[r.date] || 0)));
   const explosionAlerts = rows.map(r => Number(strictDaily[r.date] || 0));
   const alertBarDatasets = explosion ? [
     {
@@ -3647,7 +3654,7 @@ function renderShortHorizon(key) {
   ] : [{
     type: "bar",
     label: tr("Тривог, що почалися","Alerts started"),
-    data: rows.map(r => r.alerts_started),
+    data: countRows.map(r => r.alerts_started),
     yAxisID: "yAlerts",
     backgroundColor: COLORS[1] + "77",
     borderColor: COLORS[1],
@@ -3659,7 +3666,7 @@ function renderShortHorizon(key) {
     const fullFill = dataset.backgroundColor;
     dataset.backgroundColor = rows.map(r => isPartialPeriod(r) ? fullFill.slice(0, 7) + "22" : fullFill);
     dataset.borderWidth = rows.map(r => isPartialPeriod(r) ? 0 : 1);
-    dataset._exportRows = rows;
+    dataset._exportRows = countRows;
   }
 
   if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
@@ -3697,7 +3704,7 @@ function renderShortHorizon(key) {
         tooltip: { mode: "index", intersect: false, callbacks: {
           label(context) {
             if (context.dataset.yAxisID === "yDuration")
-              return dailyAlertTooltipLabel(rows[context.dataIndex]);
+              return dailyAlertTooltipLabel(countRows[context.dataIndex]);
             return `${context.dataset.label}: ${fmt(context.parsed.y, 0)}`;
           },
           footer(items) { return dailyAlertTooltipFooter(rows[items?.[0]?.dataIndex]); }
