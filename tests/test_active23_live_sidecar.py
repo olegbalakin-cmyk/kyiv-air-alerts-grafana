@@ -80,26 +80,32 @@ class VerifiedSourceCaptureTests(unittest.TestCase):
                   "c2_bundle_sha256": sha256(raw).hexdigest()}
         published = {"meta": {"generated_at": snapshot["source_generated_at"]},
                      "multicity_meta": {"production_city_keys": sorted(REQUIRED)}}
+        derived = {"meta": {
+            "generated_at": snapshot["source_generated_at"],
+            "publication_authority": {"release_manifest_sha256": "f" * 64}}}
+        # Same-run C2 derived timestamp predates Neon physical readback.
+        # Correct release binding MUST NOT demand equal dashboard time.
+        published["meta"]["generated_at"] = "2026-11-20T07:51:25.265359+02:00"
         source_hashes = {
             "dashboard_data.json": manifest["files"]["site_data/dashboard_data.json"],
             "site_derived.json": manifest["files"]["site_data/site_derived.json"],
         }
         result = publish.verify_active23_sidecar(
-            snapshot, report, published, source_hashes, "f" * 64, now=now)
+            snapshot, report, published, derived, source_hashes, "f" * 64, now=now)
         self.assertEqual(result["release_manifest_sha256"], "f" * 64)
         self.assertEqual(result["delivery"], "site-prod-git")
         self.assertFalse(result["authoritative_live_status"])
         bad = {**snapshot, "source_generated_at": "2026-11-19"}
         with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SAME_RUN_BINDING"):
             publish.verify_active23_sidecar(
-                bad, report, published, source_hashes, "f" * 64, now=now)
+                bad, report, published, derived, source_hashes, "f" * 64, now=now)
         bad = {**snapshot, "same_run_derived_sha256": "0" * 64}
         with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SAME_RUN_BINDING"):
             publish.verify_active23_sidecar(
                 bad, report, published, source_hashes, "f" * 64, now=now)
         with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SOURCE_STALE"):
             publish.verify_active23_sidecar(
-                snapshot, report, published, source_hashes, "f" * 64,
+                snapshot, report, published, derived, source_hashes, "f" * 64,
                 now=now + timedelta(hours=9))
         self.assertTrue(publish.allowed(publish.ACTIVE23_PATH))
         self.assertNotIn(publish.ACTIVE23_PATH, publish.DELIVERED)
