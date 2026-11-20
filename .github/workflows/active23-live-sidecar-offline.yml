@@ -1,0 +1,65 @@
+name: Active23 same-run source-capture sidecar offline proof (NO DEPLOY)
+on:
+  push:
+    branches: [feature/active23-live-sidecar-20261120]
+    paths:
+      - "scripts/active23_live_sidecar.py"
+      - "tests/test_active23_live_sidecar.py"
+      - ".github/workflows/active23-live-sidecar-offline.yml"
+  pull_request:
+    paths:
+      - "scripts/active23_live_sidecar.py"
+      - "tests/test_active23_live_sidecar.py"
+      - ".github/workflows/active23-live-sidecar-offline.yml"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: active23-live-sidecar-offline-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact branch without write credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install existing public source-parser dependencies
+        run: python -m pip install "beautifulsoup4>=4.12,<5"
+      - name: Retrieve immutable accepted same-run C2 proof (no API/source GET)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/active23-live-offline
+          gh run download 44680696823 -R "$GITHUB_REPOSITORY" \
+            -n c2-shadow-inputs-44680696823-1 -D /tmp/active23-live-offline
+          test -s /tmp/active23-live-offline/c2-shadow-inputs.zip
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          root=Path('/tmp/active23-live-offline')
+          sidecar=(root/'c2-shadow-inputs.zip.sha256').read_text().split()
+          assert len(sidecar)==2 and sidecar[1]=='c2-shadow-inputs.zip'
+          assert hashlib.sha256((root/'c2-shadow-inputs.zip').read_bytes()).hexdigest()==sidecar[0]
+          print('PINNED_C2_ZIP_SHA256_PASS')
+          PY
+      - name: Real 23-city source parser and negative gate tests
+        env:
+          ACTIVE23_BUNDLE: /tmp/active23-live-offline/c2-shadow-inputs.zip
+        run: |
+          set -euo pipefail
+          python -m compileall -q scripts/active23_live_sidecar.py
+          python -m unittest discover -s tests -p test_active23_live_sidecar.py -v
+          echo "LIVE_SIDECAR_OFFLINE_PROOF_PASS_NO_HTTP_NO_DB_NO_GIT_PUSH_NO_NETLIFY"
+      - name: Static no-publication boundary
+        run: |
+          set -euo pipefail
+          ! grep -E '(^|[^a-zA-Z])(requests\.(get|post)|urlopen|httpx|psycopg|subprocess\.(run|check_output)|os\.system)\(' scripts/active23_live_sidecar.py
+          echo "SIDECAR_NO_NETWORK_OR_PUBLISHER_PASS"
