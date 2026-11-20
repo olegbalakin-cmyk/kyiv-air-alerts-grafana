@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-20. **23-city current-day in-chart DRAFT READY; manual C6 SUCCESS; scheduled C6 OPEN.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**; prior **C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01**; prior C6 checkpoint **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
+**Date:** 2026-11-20. **23-city current-day browser PASS in DRAFT; manual C6 SUCCESS; scheduled C6 OPEN.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01**; prior **UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-LASTBAR-DRAFT-2026-11-20-01**; prior **UI-ACTIVE23-PROVISIONAL-TEST-READY-2026-11-20-01**; prior **C6-OWNER-MANUAL-CATCHUP-READY-2026-11-20-01**; prior C6 checkpoint **C6-WEEKDAY-READER-PIN-MERGED-2026-11-20-01**; prior UI checkpoint **UI-WEEKDAY-LIVE-LOCKED-2026-11-19-01**.
 
 ## Working instructions
 
@@ -20,14 +20,14 @@ Latest accepted transition: **UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01**; pri
 
 - **Weekday UI LIVE:** PR #201 site-prod@ae650fea, Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; Actions #44602714671 PASS. UA/EN weekday graphs, time modes, tutorial; regular C2/Neon unchanged.
 - **23-city provisional TEST:** Draft PR #208, verified C2 capture #44680696823, 22 source-open + Sevastopol no-open; frozen snapshot only.
-- **23-city latest-day chart FIX:** Draft PR #208 HEAD `31b68ac1`, verified 20 Nov final bar + mobile last-date tick, completed hours + unclosed hatch, uncluttered trend. Actions #44698962480 PASS (23/23 C2, 8+6+10 JS, DST); draft Netlify `6afffe14b64ca786aa56288d` READY/unpublished. Not live.
+- **23-city latest-day chart FIX, browser PASS:** Draft PR #208 HEAD `3101a468`; Chromium Actions #44703989283 SUCCESS (27 cases; 23 cities, UA desktop, EN mobile, trend), artifact #14614097420; immutable Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Fixed missing Netlify draft JSON sidecars via isolated deploy directory. Frozen test only; not live.
 - **DST VERIFIED; correction OFF:** one-shot #43706909819 artifact #14159523883 proves all eight correct Kharkiv/Poltava/Zhytomyr/Cherkasy DST witnesses selected, all three obsolete parent UIDs excluded by canonical C2; no overlay/Neon writes. Other backfill/casualty/live-status gates independent.
 
 
 ## Concrete next tasks
 
 1. Manual C6 #44680696823 SUCCESS. Check next 1–2 **scheduled** post-PR203 C2→Neon→Git cycles: exact weekday builder readback, 21/21 continuity, writer, 23/23 readback, Git-only publication, no Netlify. Do not mistake manual #43706909819 for scheduled proof.
-2. UI active23: owner to review [corrected current-day in-chart draft PR #208](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/208), 20 Nov visible (no separate block). If approved, implement same-run live-sidecar producer with stale-source fail-closed and verified-all-clear replacement before separate owner-gated production release. Do not merge frozen snapshot into site-prod.
+2. UI active23: owner review [browser-PASS in-chart draft PR #208](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/208). Next, separately engineer same-run live-sidecar producer, stale-source fail-closed and verified-all-clear replacement; owner-gated production release only after its own proof. Never merge frozen snapshot into site-prod.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
 5. Verify scheduled same-generation weekday dayparts refresh after PR #203; old Netlify UI test #44602714524 failed *before deploy* (tour 8 vs 6). Keep regular Netlify publishing locked.
@@ -36,6 +36,9 @@ Latest accepted transition: **UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01**; pri
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-ACTIVE23-BROWSER-RENDER-PASS-2026-11-20-01 — rendered 20 Nov verified, draft only
+- Initial Chromium #44702699636 and #44703124322 FAIL proved actual Nov19 final bar, source snapshot missing and `site-derived.json` HTTP 404. Isolated Netlify preview bundle repaired implicit root-build asset omission, tested immutable deploy `6b0007017cdb6d8c97bdbc05`: Actions #44703989283 SUCCESS, 27 real-browser cases across 23 cities, UA desktop/EN mobile, trend toggles and axis labels; screenshot/JSON proof artifact #14614097420. Draft PR #208 HEAD `3101a4682e13108cad75c14c4ab050856d0b3cad`; production untouched, active-status publisher not created.
+
 ## UI-ACTIVE23-CURRENT-DAY-DRAFT-2026-11-20-01 — 23-city final-day fix, draft PASS
 - Owner flagged missing 20 Nov on intensity chart: same-run C2 dashboard has daily28 through Nov19, but exact C2 site_derived has Nov20 partial day for 23/23. Draft PR #208 HEAD `31b68ac10cc6a6ba1bd4f30b9255eeab5aeb0bad` now reconciles same-generation partial day without inventing completed hours, and forces final date tick on mobile. Actions #44698962480 SUCCESS (8+6+10 JS, DST/midnight), artifact #14611712593. Netlify draft `6afffe14b64ca786aa56288d` READY unpublished, primary production unchanged. Frozen snapshot, no automatic live status publisher.
 
