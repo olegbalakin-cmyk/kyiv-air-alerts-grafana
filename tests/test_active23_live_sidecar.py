@@ -102,7 +102,7 @@ class VerifiedSourceCaptureTests(unittest.TestCase):
         bad = {**snapshot, "same_run_derived_sha256": "0" * 64}
         with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SAME_RUN_BINDING"):
             publish.verify_active23_sidecar(
-                bad, report, published, source_hashes, "f" * 64, now=now)
+                bad, report, published, derived, source_hashes, "f" * 64, now=now)
         with self.assertRaisesRegex(publish.Blocked, "ACTIVE23_SOURCE_STALE"):
             publish.verify_active23_sidecar(
                 snapshot, report, published, derived, source_hashes, "f" * 64,
