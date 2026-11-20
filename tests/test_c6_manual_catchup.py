@@ -40,8 +40,9 @@ class ManualCatchupContract(unittest.TestCase):
         self.assertEqual(self.doc[True]["schedule"][0]["cron"], "15 */4 * * *")
         self.assertEqual(self.raw.count(SCHEDULE), 8)
         self.assertEqual(self.raw.count(MANUAL), 8)
-        for name in ("update-site", "c6-neon-six-json-prepare", "c6-neon-auto-git-publish"):
+        for name in ("update-site", "c6-neon-auto-git-publish"):
             self.assertIn(MANUAL, self.jobs[name]["if"])
+        self.assertIn("vars.C6_AUTO_NEON_GIT_ENABLED == 'true'", self.jobs["c6-neon-six-json-prepare"]["if"])
         self.assertIn("needs.update-site.result == 'success'", self.jobs["c6-neon-six-json-prepare"]["if"])
         self.assertIn("needs.c6-neon-six-json-prepare.result == 'success'", self.jobs["c6-neon-auto-git-publish"]["if"])
 
@@ -61,7 +62,7 @@ class ManualCatchupContract(unittest.TestCase):
         checks = [x for x in steps if x.get("name") == "Require C2 same-run Neon bundle for scheduled or manual Git-only cycle"]
         self.assertEqual(len(checks), 1)
         shell = checks[0]["run"]
-        self.assertIn('test "$RUN_NOW_INPUT" = "true"', shell)
+        self.assertIn('if [ "$RUN_NOW_INPUT" = "true" ]; then', shell)
         self.assertIn('test "$PILOT_INPUT" != "true"', shell)
         self.assertIn('test "$AUTO_ENABLED" = "true"', shell)
         self.assertIn('test "$GITHUB_ACTOR" = "olegbalakin-cmyk"', shell)
