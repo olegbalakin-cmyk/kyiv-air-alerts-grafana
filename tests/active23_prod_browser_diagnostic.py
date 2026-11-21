@@ -2,6 +2,7 @@ import asyncio, json
 from pathlib import Path
 from playwright.async_api import async_playwright
 OUT=Path("_active23_diagnostic")
+# Verify browser behavior after production rolling-date hotfix.
 OUT.mkdir(exist_ok=True)
 JS="""() => {
  const chart=window.Chart?.getChart(document.getElementById('cityIntensityChart'));
