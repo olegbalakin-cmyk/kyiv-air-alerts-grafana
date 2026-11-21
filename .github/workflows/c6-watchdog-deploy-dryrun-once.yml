@@ -1,0 +1,54 @@
+name: C6 independent Netlify watchdog one-shot dry-run deploy
+on:
+  push:
+    branches: [feature/c6-netlify-backup-scheduler-20261121]
+    paths:
+      - .github/workflows/c6-watchdog-deploy-dryrun-once.yml
+permissions:
+  contents: read
+jobs:
+  deploy-isolated-only:
+    if: github.actor == 'olegbalakin-cmyk'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      WATCHDOG_SITE_ID: 4370af81-4ccf-485c-8e43-5a9184ee7565
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Assert this can never deploy public production project
+        run: |
+          set -euo pipefail
+          test "$WATCHDOG_SITE_ID" = "4370af81-4ccf-485c-8e43-5a9184ee7565"
+          test -s ops/c6-backup-scheduler/netlify/functions/c6-backup.mjs
+          test -s ops/c6-backup-scheduler/public/index.html
+          node --test ops/c6-backup-scheduler/tests/c6-backup.test.mjs
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "::error::NETLIFY_AUTH_TOKEN_MISSING; independent watchdog not deployed"
+            exit 1
+          fi
+          echo "ISOLATED_WATCHDOG_DRYRUN_DEPLOY_ELIGIBLE"
+      - name: Deploy ONLY the independent watchdog project, C6 dispatch disabled
+        working-directory: ops/c6-backup-scheduler
+        run: |
+          set -euo pipefail
+          # No GitHub dispatch credential provided: C6_BACKUP_ENABLED is
+          # unset on the separate scheduler project and remains OFF.
+          npx --yes netlify-cli@23.8.1 deploy \
+            --prod --no-build --dir public --functions netlify/functions \
+            --site "$WATCHDOG_SITE_ID" --auth "$NETLIFY_AUTH_TOKEN" \
+            --message "Isolated C6 watchdog dry-run default OFF" \
+            --json > "$RUNNER_TEMP/watchdog-deploy.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          obj=json.loads((Path(os.environ["RUNNER_TEMP"])/"watchdog-deploy.json").read_text())
+          deployment=obj.get("deploy_id") or obj.get("id")
+          assert isinstance(deployment,str) and deployment, "WATCHDOG_DEPLOY_ID_MISSING"
+          print("WATCHDOG_SEPARATE_PROJECT_DRYRUN_DEPLOY_OK",deployment)
+          PY
