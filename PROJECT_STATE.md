@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-21. **Active23 28-day URL rollover FIX LIVE and Netlify locked; 21 Nov row verified.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**; previous **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01**. Historical details below.
+Latest accepted transition: **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01**; previous **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**. Historical details below.
 
 ## Working instructions
 
@@ -15,7 +15,7 @@ Latest accepted transition: **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**;
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
-- **Scheduled C2/C6:** #44778822214 SUCCESS scheduled writer/readback/Git-only publish; 23-city source sidecar on site-prod@d8845e19, zero Netlify. Earlier reader pin PR #203 PASS. Repeat-cycle proof pending; `C6_STABILIZATION=OPEN`.
+- **Scheduled C2/C6:** #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`.
 - **UI/SEO LIVE:** PR #194 bilingual archive & trends (784 monthly pages, sitemap 936), Netlify `6afb034ee4ead33599681226` locked; browser QA #43875088810 PASS. Monthly cron OFF.
 
 - **Weekday UI LIVE:** PR #201 site-prod@ae650fea, Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; Actions #44602714671 PASS. UA/EN weekday graphs, time modes, tutorial; regular C2/Neon unchanged.
@@ -26,7 +26,7 @@ Latest accepted transition: **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**;
 
 ## Concrete next tasks
 
-1. Verify 1–2 more scheduled 23-city C2→Git cycles after #44778822214 (writer, 21/21 continuity, reader, zero Netlify); keep C6 stabilization OPEN until repeat proof.
+1. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
 2. Monitor Active23 current-day rows after subsequent Git-only cycles, including URL rollover, 23-city parity, stale unclosed cap, clear behavior and trend; no regular Netlify deploys.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
@@ -36,6 +36,9 @@ Latest accepted transition: **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**;
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01 — UI-only Git race recovery merged, live proof pending
+- Scheduled #44905215404 Neon writer/reader PASS, but Git-only publication BLOCKED after UI-only site-prod PR #219 merged during run; no Git data publish. PR #221 merged `main@8eba3cd7d4a50568b1ee399d155e6656b8a4c039`: bounded one-retry fast-forward across allowlisted UI changes, otherwise fail closed for data/non-UI drift; no Netlify or Neon change. Isolated Git Actions #44950124198 SUCCESS (8 race and 12 existing C6 tests); coordination CI #44950124236 SUCCESS. `site-prod` not changed by this code merge; real scheduled pass NOT YET PROVEN, `C6_STABILIZATION=OPEN`.
+
 ## UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01 — saved 28-day URLs follow new dates
 - Scheduled C6 #44850889425 SUCCESS, 23-city 21 Nov source; Chromium #44905071873 proved clean link showed Nov21, while #44905182276 proved stale `cityto=2026-11-20` omitted it. PR #219 merged site-prod@fcef2eb9; owner one-shot #44905428716 SUCCESS, receipt #14707134897. Netlify `6b01928589f62e08bb7e4793` READY/published/locked. Post-release Chromium #44906316130 SUCCESS: UA/EN/stale-URL show Nov21, Kyiv 20min/2 starts, no JS errors; source remains 23-city Git-only, provisional expiry unchanged. Custom date intervals are not auto-shifted.
 
