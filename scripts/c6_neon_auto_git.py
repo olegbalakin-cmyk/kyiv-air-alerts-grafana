@@ -482,7 +482,7 @@ def refresh_site_prod_for_ui_only(checkout, input_sha):
     require(ancestor.returncode == 0, "SITE_PROD_DIVERGED_REQUIRE_NEW_C2")
     changed = subprocess.check_output(
         ["git", "-C", str(checkout), "diff", "--name-only", "-z",
-         input_sha, latest]).split(b"\\0")
+         input_sha, latest]).split(b"\x00")
     paths = [p.decode("utf-8") for p in changed if p]
     for path in paths:
         require(not (path.startswith(PREFIX) or path.startswith(
