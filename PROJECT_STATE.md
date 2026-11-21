@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-21. **Active23 28-day URL rollover FIX LIVE and Netlify locked; 21 Nov row verified.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01**; previous **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**. Historical details below.
+Latest accepted transition: **C6-CRON-RELIABILITY-AUDIT-2026-11-21-01**; previous **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01**. Historical details below.
 
 ## Working instructions
 
@@ -15,7 +15,7 @@ Latest accepted transition: **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-0
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
-- **Scheduled C2/C6:** #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`.
+- **Scheduled C2/C6:** #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
 - **UI/SEO LIVE:** PR #194 bilingual archive & trends (784 monthly pages, sitemap 936), Netlify `6afb034ee4ead33599681226` locked; browser QA #43875088810 PASS. Monthly cron OFF.
 
 - **Weekday UI LIVE:** PR #201 site-prod@ae650fea, Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; Actions #44602714671 PASS. UA/EN weekday graphs, time modes, tutorial; regular C2/Neon unchanged.
@@ -26,7 +26,7 @@ Latest accepted transition: **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-0
 
 ## Concrete next tasks
 
-1. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
+1. Investigate a separately approved independently scheduled, freshness-and-attempt-gated catch-up; GitHub cron is not reliably delivering all six nominal C6 runs/day. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
 2. Monitor Active23 current-day rows after subsequent Git-only cycles, including URL rollover, 23-city parity, stale unclosed cap, clear behavior and trend; no regular Netlify deploys.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
@@ -36,6 +36,9 @@ Latest accepted transition: **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-0
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-CRON-RELIABILITY-AUDIT-2026-11-21-01 — read-only schedule audit, recovery not deployed
+- C6 cron unchanged `15 */4 * * *` on main, but Nov18–21 only 9 scheduled run entries vs 24 expected slots; unrelated casualty and backfill cron workflows also severely delayed/absent. GitHub documents delayed/dropped scheduled runs; no verified Nov21 GitHub Actions incident or repository-level disablement. See `docs/c6-scheduled-reliability-2026-11-21.md`. No schedule or site-prod changes. Independently scheduled catch-up needs separate owner GO, last-attempt/freshness safety and zero Netlify; `C6_SCHEDULE_RELIABILITY=OPEN`.
+
 ## C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01 — UI-only Git race recovery merged, live proof pending
 - Scheduled #44905215404 Neon writer/reader PASS, but Git-only publication BLOCKED after UI-only site-prod PR #219 merged during run; no Git data publish. PR #221 merged `main@8eba3cd7d4a50568b1ee399d155e6656b8a4c039`: bounded one-retry fast-forward across allowlisted UI changes, otherwise fail closed for data/non-UI drift; no Netlify or Neon change. Isolated Git Actions #44950124198 SUCCESS (8 race and 12 existing C6 tests); coordination CI #44950124236 SUCCESS. `site-prod` not changed by this code merge; real scheduled pass NOT YET PROVEN, `C6_STABILIZATION=OPEN`.
 
