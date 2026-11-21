@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01 — UI-only race recovery merged; real production cycle pending**
+- Scheduled #44905215404 wrote to Neon but Git-only publish blocked after UI PR #219 advanced `site-prod` mid-run. PR #221 merged `main@8eba3cd7d4a50568b1ee399d155e6656b8a4c039`: revalidate and retry once across allowlisted UI-only changes; data/non-UI drift fail-closed (fresh C2 on next schedule or owner manual). Offline Actions #44950124198 PASS (8 new + 12 existing C6 tests), docs CI #44950124236 PASS. Zero Netlify, no immediate `site-prod`/Neon release; scheduled proof pending, stabilization OPEN.
+
 **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01 — saved full 28-day range follows scheduled refresh**
 - C6 #44850889425 PASS; actual browser #44905182276 exposed old URL capped at Nov20, while #44905071873 showed Nov21 on clean URL. PR #219 site-prod@fcef2eb9, one-shot #44905428716 SUCCESS, proof #14707134897, Netlify `6b01928589f62e08bb7e4793` READY+locked. Live browser #44906316130 PASS for UK/EN/stale-URL Nov21. No C2/Neon/data changes; custom date filters unaffected.
 
