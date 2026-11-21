@@ -443,11 +443,13 @@ def verify_active23_sidecar(raw, report, new, new_derived, source_hashes, bindin
 # A script, workflow, data or Grafana change requires a fresh C2 run instead.
 UI_ONLY_PREFIXES = (
     "kyiv-air-alerts-grafana/pages-preview/",
-    "kyiv-air-alerts-grafana/tests/",
-    "tests/",
+    "tests/test_active23_",
+    "tests/test_weekday_",
 )
 UI_ONLY_FILES = frozenset({
     "netlify.toml",
+    "kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js",
+    "kyiv-air-alerts-grafana/tests/test_current_period_completion.js",
     ".github/workflows/active23-production-once.yml",
     ".github/workflows/weekday-production-once.yml",
     ".github/workflows/weekday-release-preflight.yml",
