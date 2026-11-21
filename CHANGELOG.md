@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**C6-CRON-RELIABILITY-AUDIT-2026-11-21-01 — observed missed/delayed four-hour starts; no scheduler change**
+- Nov18–21: 9 scheduled C6 starts vs 24 nominal slots, while unrelated casualty/backfill workflows also delayed or missing. Same cron on main, no disabled workflow; no confirmed GitHub incident. Recorded bounded diagnosis in `docs/c6-scheduled-reliability-2026-11-21.md`; add independent freshness/attempt-gated recovery only with separate owner GO. `C6_SCHEDULE_RELIABILITY=OPEN`; zero live changes.
+
 **C6-UI-RACE-RECOVERY-MAIN-OFFLINE-PASS-2026-11-21-01 — UI-only race recovery merged; real production cycle pending**
 - Scheduled #44905215404 wrote to Neon but Git-only publish blocked after UI PR #219 advanced `site-prod` mid-run. PR #221 merged `main@8eba3cd7d4a50568b1ee399d155e6656b8a4c039`: revalidate and retry once across allowlisted UI-only changes; data/non-UI drift fail-closed (fresh C2 on next schedule or owner manual). Offline Actions #44950124198 PASS (8 new + 12 existing C6 tests), docs CI #44950124236 PASS. Zero Netlify, no immediate `site-prod`/Neon release; scheduled proof pending, stabilization OPEN.
 
