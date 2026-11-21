@@ -78,6 +78,22 @@ class C6UIRaceTest(unittest.TestCase):
                 auto.Blocked, "SITE_PROD_NON_UI_CHANGED_REQUIRE_NEW_C2"):
             auto.refresh_site_prod_for_ui_only(self.publisher, self.input_sha)
 
+    def test_non_presentation_test_change_blocks(self):
+        self.write("tests/test_c6_neon_auto_git.py", "changed\\n")
+        self.commit("backend regression test changed")
+        with self.assertRaisesRegex(
+                auto.Blocked, "SITE_PROD_NON_UI_CHANGED_REQUIRE_NEW_C2"):
+            auto.refresh_site_prod_for_ui_only(self.publisher, self.input_sha)
+
+    def test_concurrent_ui_release_with_test_changes_allowed(self):
+        self.write(self.ui, "const version = 3;\\n")
+        self.write("tests/test_active23_daily28_url.cjs", "test('rollover', () => {});\\n")
+        self.write(".github/workflows/active23-production-once.yml", "name: UI one-shot\\n")
+        self.commit("UI fix and corresponding test/workflow")
+        latest = git(self.work, "rev-parse", "HEAD")
+        self.assertEqual(auto.refresh_site_prod_for_ui_only(
+            self.publisher, self.input_sha), latest)
+
     def test_unchanged_head_preserved(self):
         self.assertEqual(auto.refresh_site_prod_for_ui_only(
             self.publisher, self.input_sha), self.input_sha)
