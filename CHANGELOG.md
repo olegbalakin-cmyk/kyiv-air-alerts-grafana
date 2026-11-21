@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01 — saved full 28-day range follows scheduled refresh**
+- C6 #44850889425 PASS; actual browser #44905182276 exposed old URL capped at Nov20, while #44905071873 showed Nov21 on clean URL. PR #219 site-prod@fcef2eb9, one-shot #44905428716 SUCCESS, proof #14707134897, Netlify `6b01928589f62e08bb7e4793` READY+locked. Live browser #44906316130 PASS for UK/EN/stale-URL Nov21. No C2/Neon/data changes; custom date filters unaffected.
+
 **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01 — source-bound last-bar UI production READY+locked**
 - Scheduled C6 #44778822214 SUCCESS, 23-city source sidecar on site-prod (6 open at capture), zero Netlify; UI PR #217 site-prod@60cb8bb, one-shot build fix@096504ba, Actions #44812658726 SUCCESS, proof #14667572246; Netlify `6b00af31d1f034384896af23` published READY+locked. 8h/local-midnight expiry, not a live status feed. Legacy automatic Netlify push disabled; C6 repeat-cycle stabilization OPEN.
 
