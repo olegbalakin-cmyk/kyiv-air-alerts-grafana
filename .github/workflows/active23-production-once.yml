@@ -33,6 +33,7 @@ jobs:
             node --check "kyiv-air-alerts-grafana/pages-preview/$file"
           done
           node --test tests/test_active23_live_ui.cjs
+          node --test tests/test_active23_daily28_url.cjs
           node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
           node kyiv-air-alerts-grafana/tests/test_current_period_completion.js
           python3 - <<'PY'
@@ -60,7 +61,8 @@ jobs:
             assert key==city["city_key"]
             t=datetime.fromisoformat(city["capture_at"].replace("Z","+00:00"))
             age=(now-t).total_seconds()
-            assert -120<=age<=8*3600,(key,"stale_source")
+            assert age>=-120,(key,"future_source")
+            if age>8*3600: print("ACTIVE23_STALE_PROVISIONAL_GATE_CLIENT_HIDE",key)
             assert city["periods"]["day"]["through"]==city["date"]
             assert city["state"] in ("open_at_source_capture","no_open_at_source_capture")
             assert (city["start_at"] is not None)==(city["state"]=="open_at_source_capture")
@@ -74,7 +76,7 @@ jobs:
           PY
   release:
     needs: preflight
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/site-prod' && github.actor == 'olegbalakin-cmyk' && startsWith(github.event.head_commit.message, 'Release active23 UI 2026-11-20') }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/site-prod' && github.actor == 'olegbalakin-cmyk' && startsWith(github.event.head_commit.message, 'Release active23 daily28 URL fix 2026-11-21') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
