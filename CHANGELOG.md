@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**C6-WATCHDOG-SEPARATE-DRYRUN-LIVE-2026-11-21-01 — separate Netlify scheduled watchdog deployed, dispatch still OFF**
+- PR #224 main@500576ff; isolated Netlify project id 4370af81-4ccf-485c-8e43-5a9184ee7565, deploy 6b020ecee1511caa3ff3792d READY with function `c6-backup` cron :47 UTC hourly. Actions #44952344169 deploy SUCCESS, #44952250179 offline 13 Node + 3 owner-gate PASS. No secret vars or PAT, `C6_BACKUP_ENABLED` unset, hence no automatic C6 dispatch. Owner token, separate-site activation and actual fallback proof pending; no website Netlify/Neon/site-prod change. `C6_SCHEDULE_RELIABILITY=OPEN`.
+
 **C6-CRON-RELIABILITY-AUDIT-2026-11-21-01 — observed missed/delayed four-hour starts; no scheduler change**
 - Nov18–21: 9 scheduled C6 starts vs 24 nominal slots, while unrelated casualty/backfill workflows also delayed or missing. Same cron on main, no disabled workflow; no confirmed GitHub incident. Recorded bounded diagnosis in `docs/c6-scheduled-reliability-2026-11-21.md`; add independent freshness/attempt-gated recovery only with separate owner GO. `C6_SCHEDULE_RELIABILITY=OPEN`; zero live changes.
 
