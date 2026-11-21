@@ -2,13 +2,13 @@
 
 This is a separately hosted watchdog for the existing C2→Neon→Git-only site data publisher. It does not read Neon, commit to Git, deploy the public website, or modify Netlify production settings.
 
-**Status:** code and offline CI only until the independent Netlify project is deployed and an owner-created GitHub fine-grained personal token is configured. Do not assert production activation without a recorded successful actual scheduled function invocation and corresponding owner-authorized C6 dispatch.
+**Status (2026-11-21):** the isolated scheduler was physically deployed in **DRY-RUN / dispatch OFF** via GitHub Actions #44952344169, independent Netlify deploy ID 6b020ecee1511caa3ff3792d (READY). Netlify confirms the deployed function c6-backup with cron 47 * * * *; separate project environment variables are empty. Code offline 13 Node tests + 3 owner gate tests PASS in Actions #44952250179. The owner-created GitHub token is NOT provisioned, real scheduled invocation and any C6 dispatch are NOT VERIFIED. Do not claim unattended backup is active.
 
 ## Separate Netlify project
 
 Created project: https://app.netlify.com/projects/ukraine-air-alerts-c6-watchdog (project ID: 4370af81-4ccf-485c-8e43-5a9184ee7565). **Never link or redeploy the production website project** to install this scheduler.
 
-1. In this new project, connect ONLY repository olegbalakin-cmyk/kyiv-air-alerts-grafana and select the approved main commit containing this directory. Set Netlify base directory ops/c6-backup-scheduler and publish directory public. The local netlify.toml configures the function directory. Deploy the independent project once (not production).
+1. The independent Netlify project already has a published ready function from the isolated one-shot deployment. Continuous deployment linkage is OPTIONAL and currently not required. Any future deployment must target only the separate project ID and use ops/c6-backup-scheduler as base, with public publish directory; do not point this at the website production project. No deploy on site-prod was performed.
 2. Keep C6_BACKUP_ENABLED unset or false until initial scheduled invocations show C6_BACKUP_CHECK C6_CATCHUP_REQUIRED DRY_RUN_ONLY when stale.
 3. Create one fine-grained GitHub PAT in owner account olegbalakin-cmyk, restricted to ONLY this repository with Actions: Read and write, Metadata: Read. Set a short expiry and rotate it on expiration. Do not paste it into chat, GitHub code, CI or Netlify build files.
 4. Save token ONLY in the separate Netlify scheduler project's secret environment variable C6_BACKUP_GITHUB_TOKEN, production context, Functions scope. It needs neither Neon nor site-prod write nor Netlify deploy permissions. Environment changes require a new deployment of the scheduler project.
