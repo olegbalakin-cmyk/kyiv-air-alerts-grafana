@@ -1,0 +1,51 @@
+name: Active23 production UI static and source-state regression (NO DEPLOY)
+on:
+  push:
+    branches: [feature/active23-live-ui-20261120]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/pages-preview/index.html"
+      - "kyiv-air-alerts-grafana/pages-preview/active-23-provisional.js"
+      - "kyiv-air-alerts-grafana/pages-preview/active-23-chart-overlay.js"
+      - "netlify.toml"
+      - "tests/test_active23_live_ui.cjs"
+      - ".github/workflows/active23-live-ui-offline.yml"
+permissions:
+  contents: read
+concurrency:
+  group: active23-live-ui-no-deploy-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify JavaScript + 23-city source-at-capture UI contract
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/active-23-provisional.js
+          node --check kyiv-air-alerts-grafana/pages-preview/active-23-chart-overlay.js
+          node --test tests/test_active23_live_ui.cjs
+      - name: Verify production Netlify bundle includes required sidecars
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import tomllib
+          c=tomllib.loads(Path('netlify.toml').read_text())
+          command=c['build']['command']
+          for file in ['active-23-provisional.js','active-23-chart-overlay.js']:
+              assert file in command
+              assert Path('kyiv-air-alerts-grafana/pages-preview',file).is_file()
+              assert file in Path('kyiv-air-alerts-grafana/pages-preview/index.html').read_text()
+          assert 'active-23-provisional-test.json' not in command
+          assert '--prod' not in command and 'netlify deploy' not in command
+          print('ACTIVE23_PRODUCTION_STATIC_BUNDLE_NO_DEPLOY_PASS')
+          PY
