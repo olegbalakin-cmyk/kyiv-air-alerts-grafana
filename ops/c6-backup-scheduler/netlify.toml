@@ -1,0 +1,12 @@
+[build]
+  base = "ops/c6-backup-scheduler"
+  publish = "public"
+  command = "echo C6 watchdog-only build"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# The only executable function is a scheduled, non-routable Netlify function.
+# This is a separate Netlify project and MUST NEVER be used as the existing
+# production ukraine-air-alerts site.
