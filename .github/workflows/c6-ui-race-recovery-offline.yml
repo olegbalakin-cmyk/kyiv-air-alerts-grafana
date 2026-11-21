@@ -1,0 +1,44 @@
+name: C6 UI-only Git race recovery — offline
+on:
+  push:
+    branches: [fix/c6-ui-only-fast-forward-20261121]
+    paths:
+      - scripts/c6_neon_auto_git.py
+      - tests/test_c6_ui_race_recovery.py
+      - tests/test_c6_neon_auto_git.py
+      - .github/workflows/c6-ui-race-recovery-offline.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/c6_neon_auto_git.py
+      - tests/test_c6_ui_race_recovery.py
+      - tests/test_c6_neon_auto_git.py
+      - .github/workflows/c6-ui-race-recovery-offline.yml
+permissions:
+  contents: read
+jobs:
+  isolated-git-race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify offline UI-only fast-forward and data drift blocks
+        run: python -m unittest discover -s tests -p 'test_c6_ui_race_recovery.py' -v
+      - name: Verify existing C6 safety contracts
+        run: python -m unittest discover -s tests -p 'test_c6_neon_auto_git.py' -v
+      - name: Verify no Netlify path was added
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text=Path("scripts/c6_neon_auto_git.py").read_text()
+          assert "netlify deploy" not in text.lower()
+          assert "SITE_PROD_DATA_CHANGED_REQUIRE_NEW_C2" in text
+          assert "SITE_PROD_NON_UI_CHANGED_REQUIRE_NEW_C2" in text
+          assert "SITE_PROD_RACE_RETRY_EXHAUSTED" in text
+          print("C6_OFFLINE_GIT_RACE_GUARDS_PASS")
+          PY

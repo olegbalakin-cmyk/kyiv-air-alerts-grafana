@@ -70,6 +70,12 @@ SAFE_CAPTURE_BLOCK_REASONS = frozenset({
     "OUTPUT_NOT_ISOLATED",
     "OUTSIDE_C2_DATA_ALLOWLIST",
     "UNEXPECTED_GIT_DATA_PATH",
+    "SITE_PROD_DATA_CHANGED_REQUIRE_NEW_C2",
+    "SITE_PROD_NON_UI_CHANGED_REQUIRE_NEW_C2",
+    "SITE_PROD_DIVERGED_REQUIRE_NEW_C2",
+    "SITE_PROD_MOVED_DURING_FETCH",
+    "SITE_PROD_RACE_RETRY_EXHAUSTED",
+
 })
 
 
@@ -432,8 +438,70 @@ def verify_active23_sidecar(raw, report, new, new_derived, source_hashes, bindin
             "delivery": "site-prod-git", "authoritative_live_status": False}
 
 
+
+# Only presentation changes may advance the site branch during a C2 collection.
+# A script, workflow, data or Grafana change requires a fresh C2 run instead.
+UI_ONLY_PREFIXES = (
+    "kyiv-air-alerts-grafana/pages-preview/",
+    "tests/test_active23_",
+    "tests/test_weekday_",
+)
+UI_ONLY_FILES = frozenset({
+    "netlify.toml",
+    "kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js",
+    "kyiv-air-alerts-grafana/tests/test_current_period_completion.js",
+    ".github/workflows/active23-production-once.yml",
+    ".github/workflows/weekday-production-once.yml",
+    ".github/workflows/weekday-release-preflight.yml",
+    ".github/workflows/ui-bilingual-neon-index-offline.yml",
+})
+
+
+def refresh_site_prod_for_ui_only(checkout, input_sha):
+    """Rebase *only* across validated UI-only commits; never replay old C2 data.
+
+    The C2 delta and Neon readback must still pass all original release gates.
+    If any protected data or non-UI code changed, a NEW complete C2 run is
+    necessary. No force push, merge, cherry-pick or credential-bearing logging.
+    """
+    import re
+    require(bool(re.fullmatch(r"[a-f0-9]{40}", input_sha)),
+            "C2_INPUT_SHA_INVALID")
+    require(git(checkout, "branch", "--show-current") == "site-prod"
+            and not git(checkout, "status", "--porcelain"),
+            "SITE_PROD_MOVED_OR_UNCLEAN")
+    # Fetch the live branch before comparing; checkout's remote refs may be old.
+    subprocess.run(
+        ["git", "-C", str(checkout), "fetch", "--quiet", "--no-tags",
+         "origin", "+refs/heads/site-prod:refs/remotes/origin/site-prod"],
+        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    latest = git(checkout, "rev-parse", "refs/remotes/origin/site-prod")
+    require(remote_head(checkout) == latest, "SITE_PROD_MOVED_DURING_FETCH")
+    ancestor = subprocess.run(
+        ["git", "-C", str(checkout), "merge-base", "--is-ancestor",
+         input_sha, latest], stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+    require(ancestor.returncode == 0, "SITE_PROD_DIVERGED_REQUIRE_NEW_C2")
+    changed = subprocess.check_output(
+        ["git", "-C", str(checkout), "diff", "--name-only", "-z",
+         input_sha, latest]).split(b"\x00")
+    paths = [p.decode("utf-8") for p in changed if p]
+    for path in paths:
+        require(not (path.startswith(PREFIX) or path.startswith(
+                    "kyiv-air-alerts-grafana/grafana/")),
+                "SITE_PROD_DATA_CHANGED_REQUIRE_NEW_C2")
+        require(path.startswith(UI_ONLY_PREFIXES) or path in UI_ONLY_FILES,
+                "SITE_PROD_NON_UI_CHANGED_REQUIRE_NEW_C2")
+    if git(checkout, "rev-parse", "HEAD") != latest:
+        subprocess.run(["git", "-C", str(checkout),
+                        "reset", "--hard", latest], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return latest
+
+
 def publish(checkout, delta, prepared, proof, *, repository,
-            workflow_sha, run_id, run_attempt, enabled, zero_deploys):
+            workflow_sha, run_id, run_attempt, enabled, zero_deploys,
+            _ui_race_retry=0):
     """Verify everything before touching a Git worktree or its remote."""
     require(enabled == "true" and zero_deploys == "0",
             "AUTO_MODE_DISABLED_OR_NETLIFY_NOT_ZERO")
@@ -456,11 +524,7 @@ def publish(checkout, delta, prepared, proof, *, repository,
     hashes = verify_capture(delta, report, workflow_sha=workflow_sha,
                             run_id=run_id, run_attempt=run_attempt)
     input_sha = report["c2_input_sha"]
-    require(git(checkout, "branch", "--show-current") == "site-prod"
-            and git(checkout, "rev-parse", "HEAD") == input_sha
-            and not git(checkout, "status", "--porcelain")
-            and remote_head(checkout) == input_sha,
-            "SITE_PROD_MOVED_OR_UNCLEAN")
+    publishing_base = refresh_site_prod_for_ui_only(checkout, input_sha)
     old = load(checkout / candidate.FILES["dashboard_data.json"])
     require(old.get("meta", {}).get("publication_authority", {})
             .get("scope") == release.RELEASE_SCOPE,
@@ -558,22 +622,57 @@ def publish(checkout, delta, prepared, proof, *, repository,
                 and all(allowed(p) for p in staged)
                 and "historical-daily-kpi.json" not in staged,
                 "NETLIFY_TRIGGER_OR_OUTSIDE_DATA_PATH")
-        require(remote_head(checkout) == input_sha, "PRE_PUSH_HEAD_MOVED")
+        if remote_head(checkout) != publishing_base:
+            if _ui_race_retry == 0:
+                subprocess.run(["git", "-C", str(checkout),
+                                "reset", "--hard", publishing_base], check=True,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return publish(checkout, delta, prepared, proof,
+                               repository=repository, workflow_sha=workflow_sha,
+                               run_id=run_id, run_attempt=run_attempt,
+                               enabled=enabled, zero_deploys=zero_deploys,
+                               _ui_race_retry=1)
+            raise Blocked("SITE_PROD_RACE_RETRY_EXHAUSTED")
         subprocess.run(["git", "-C", str(checkout), "-c",
                         "user.name=github-actions[bot]", "-c",
                         "user.email=41898282+github-actions[bot]@users.noreply.github.com",
                         "commit", "-m",
                         "Publish verified Neon generation and same-run C2 checkpoints"],
-                       check=True, stdout=subprocess.DEVNULL)
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         commit = git(checkout, "rev-parse", "HEAD")
-        require(git(checkout, "rev-parse", "HEAD^") == input_sha
-                and remote_head(checkout) == input_sha,
+        require(git(checkout, "rev-parse", "HEAD^") == publishing_base,
                 "FAST_FORWARD_PARENT_CHANGED")
-        subprocess.run(["git", "-C", str(checkout), "push",
-                        "origin", "HEAD:refs/heads/site-prod"], check=True)
+        if remote_head(checkout) != publishing_base:
+            if _ui_race_retry == 0:
+                subprocess.run(["git", "-C", str(checkout),
+                                "reset", "--hard", publishing_base], check=True,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return publish(checkout, delta, prepared, proof,
+                               repository=repository, workflow_sha=workflow_sha,
+                               run_id=run_id, run_attempt=run_attempt,
+                               enabled=enabled, zero_deploys=zero_deploys,
+                               _ui_race_retry=1)
+            raise Blocked("SITE_PROD_RACE_RETRY_EXHAUSTED")
+        pushed = subprocess.run(
+            ["git", "-C", str(checkout), "push",
+             "origin", "HEAD:refs/heads/site-prod"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if pushed.returncode != 0:
+            if _ui_race_retry == 0:
+                subprocess.run(["git", "-C", str(checkout),
+                                "reset", "--hard", publishing_base], check=True,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return publish(checkout, delta, prepared, proof,
+                               repository=repository, workflow_sha=workflow_sha,
+                               run_id=run_id, run_attempt=run_attempt,
+                               enabled=enabled, zero_deploys=zero_deploys,
+                               _ui_race_retry=1)
+            raise Blocked("SITE_PROD_RACE_RETRY_EXHAUSTED")
         require(remote_head(checkout) == commit, "REMOTE_COMMIT_UNCONFIRMED")
         return {"status": "GIT_ONLY_PUBLISHED",
-                "commit": commit, "changed_files": sorted(staged),
+                "commit": commit, "base_commit": publishing_base,
+                "ui_only_rebase": publishing_base != input_sha,
+                "changed_files": sorted(staged),
                 "city_count": 23, "generation": result["generation"],
                 "netlify_deployments_per_update": 0}
 
