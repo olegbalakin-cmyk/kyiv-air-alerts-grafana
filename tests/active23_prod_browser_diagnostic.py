@@ -16,12 +16,12 @@ async def main():
  async with async_playwright() as p:
   browser=await p.chromium.launch(headless=True,args=['--no-sandbox'])
   all_results=[]
-  for lang in ['uk','en']:
+  for lang in ['uk','en','stale-uk']:
    page=await browser.new_page(viewport={'width':1366,'height':900},timezone_id='Europe/Kyiv')
    errors=[];failures=[]
    page.on('pageerror',lambda e: errors.append(str(e)))
    page.on('requestfailed',lambda req:failures.append({'url':req.url,'failure':req.failure}))
-   url='https://ukraine-air-alerts.netlify.app/'+('en/' if lang=='en' else '')+'?city=kyiv&period=daily28'
+   url='https://ukraine-air-alerts.netlify.app/'+('en/' if lang=='en' else '')+'?city=kyiv&period=daily28' + ('&cityfrom=2026-10-24&cityto=2026-11-20' if lang=='stale-uk' else '')
    try:
     response=await page.goto(url,wait_until='domcontentloaded',timeout=90000)
     await page.wait_for_function("() => !!window.Chart?.getChart(document.getElementById('cityIntensityChart'))",timeout=90000)
