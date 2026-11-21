@@ -1,0 +1,37 @@
+name: C6 independent watchdog offline gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ops/c6-backup-scheduler/**
+      - .github/workflows/c6-backup-scheduler-offline.yml
+  push:
+    branches: [feature/c6-netlify-backup-scheduler-20261121]
+    paths:
+      - ops/c6-backup-scheduler/**
+      - .github/workflows/c6-backup-scheduler-offline.yml
+permissions:
+  contents: read
+jobs:
+  no-network:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static function and zero production deployment assertions
+        run: |
+          set -euo pipefail
+          node --check ops/c6-backup-scheduler/netlify/functions/c6-backup.mjs
+          test -f ops/c6-backup-scheduler/netlify.toml
+          test -f ops/c6-backup-scheduler/public/index.html
+          ! grep -R -Ei '(netlify deploy|force.push|neon_database_url|github_pat_)' ops/c6-backup-scheduler/netlify/functions
+          node --test ops/c6-backup-scheduler/tests/c6-backup.test.mjs
+      - name: Existing owner-only manual dispatch contract
+        run: |
+          python -m pip install 'PyYAML==6.0.2'
+          python -m unittest discover -s tests -p test_c6_manual_catchup.py -v
