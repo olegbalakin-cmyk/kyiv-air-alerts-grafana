@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-20. **Active23 current-day UI LIVE and locked; first scheduled 23-city source sidecar PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01**; previous **C6-ACTIVE23-SOURCE-REGISTERED-UI-PREVIEW-PASS-2026-11-20-01**. Historical details below.
+**Date:** 2026-11-21. **Active23 28-day URL rollover FIX LIVE and Netlify locked; 21 Nov row verified.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01**; previous **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01**. Historical details below.
 
 ## Working instructions
 
@@ -19,7 +19,7 @@ Latest accepted transition: **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01**; previous 
 - **UI/SEO LIVE:** PR #194 bilingual archive & trends (784 monthly pages, sitemap 936), Netlify `6afb034ee4ead33599681226` locked; browser QA #43875088810 PASS. Monthly cron OFF.
 
 - **Weekday UI LIVE:** PR #201 site-prod@ae650fea, Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; Actions #44602714671 PASS. UA/EN weekday graphs, time modes, tutorial; regular C2/Neon unchanged.
-- **Active23 UI LIVE:** scheduled source #44778822214 PASS (23 cities, six open at collection); UI PR #217 merged site-prod@60cb8bb, patch@096504ba; one-shot #44812658726 SUCCESS, proof #14667572246. Netlify `6b00af31d1f034384896af23` READY+published+locked. Source-at-last-capture only, not live status; expiry 8h/local midnight. Frozen PR #208 never merge.
+- **Active23 UI LIVE + daily28 URL rollover FIX:** scheduled #44850889425 PASS, 23-city 21 Nov partial-day source; PR #219 merged site-prod@fcef2eb9. One-shot #44905428716 SUCCESS, proof #14707134897; Netlify `6b01928589f62e08bb7e4793` READY+published+locked. Live UA/EN/stale-URL Chromium #44906316130 PASS (Nov21 shown; 20min/2 starts for Kyiv). Source-at-capture only; stale unclosed cap hidden, completed data retained. No Neon/C2 change.
 - **Archived preview:** PR #208 frozen and NOT production; source-bound PR #214 tested, released via #217.
 - **DST VERIFIED; correction OFF:** #43706909819 proves 8 correct witnesses for Kharkiv/Poltava/Zhytomyr/Cherkasy and 3 stale parent UIDs excluded; no Neon mutation.
 
@@ -27,7 +27,7 @@ Latest accepted transition: **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01**; previous 
 ## Concrete next tasks
 
 1. Verify 1–2 more scheduled 23-city C2→Git cycles after #44778822214 (writer, 21/21 continuity, reader, zero Netlify); keep C6 stabilization OPEN until repeat proof.
-2. Monitor Active23 UI against the next scheduled sidecar: 23-city generation parity, count of starts, stale/clear behavior, trend/last-bar and midnight; no Netlify for regular updates.
+2. Monitor Active23 current-day rows after subsequent Git-only cycles, including URL rollover, 23-city parity, stale unclosed cap, clear behavior and trend; no regular Netlify deploys.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
 5. Verify weekday dayparts after the next scheduled cycle; keep Netlify locked and Git-only publication.
@@ -36,6 +36,9 @@ Latest accepted transition: **UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01**; previous 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## UI-ACTIVE23-URL-ROLLOVER-FIX-LIVE-2026-11-21-01 — saved 28-day URLs follow new dates
+- Scheduled C6 #44850889425 SUCCESS, 23-city 21 Nov source; Chromium #44905071873 proved clean link showed Nov21, while #44905182276 proved stale `cityto=2026-11-20` omitted it. PR #219 merged site-prod@fcef2eb9; owner one-shot #44905428716 SUCCESS, receipt #14707134897. Netlify `6b01928589f62e08bb7e4793` READY/published/locked. Post-release Chromium #44906316130 SUCCESS: UA/EN/stale-URL show Nov21, Kyiv 20min/2 starts, no JS errors; source remains 23-city Git-only, provisional expiry unchanged. Custom date intervals are not auto-shifted.
+
 ## UI-ACTIVE23-LIVE-LOCKED-2026-11-20-01 — scheduled sidecar and UI production PASS
 - Scheduled Actions #44778822214 SUCCESS: C2→Neon readback, 23-city `active23_source_capture.json` (6 open at capture), Git-only site-prod@d8845e19; not authoritative live status. PR #217 released tested source-bound UI after Chromium #44722499442 PASS, PR preflight #44812470553 SUCCESS; site-prod@60cb8bb, follow-up one-shot build fix@096504ba. Owner-gated Actions #44812658726 SUCCESS, receipt #14667572246, Netlify deploy `6b00af31d1f034384896af23` READY, published and locked. Legacy automatic Netlify push trigger disabled; C6 updates remain Git-only. `C6_STABILIZATION=OPEN` pending repeat scheduled cycle.
 
