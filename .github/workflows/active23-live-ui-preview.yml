@@ -1,0 +1,198 @@
+name: Active23 source-bound UI Chromium PREVIEW (NO PRODUCTION)
+on:
+  push:
+    branches: [feature/active23-live-ui-20261120]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "tests/test_active23_live_ui_browser.py"
+      - ".github/workflows/active23-live-ui-preview.yml"
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: active23-live-ui-netlify-draft
+  cancel-in-progress: true
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout live UI candidate read-only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned no-write source producer
+        uses: actions/checkout@v4
+        with:
+          ref: 9ac20f4cb54d529cdd3d2380a51ddf807784d9de
+          path: producer-code
+          persist-credentials: false
+      - name: Checkout exact C2 site source parser
+        uses: actions/checkout@v4
+        with:
+          ref: ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b
+          path: pinned-site
+          persist-credentials: false
+      - name: Python and parser dependencies
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r pinned-site/kyiv-air-alerts-grafana/requirements.txt
+      - name: Retrieve immutable C2 archive and matching read-only KPI proof
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/active23-live-ui-c2 /tmp/active23-live-ui-kpi
+          gh run download 44680696823 -R "$GITHUB_REPOSITORY" \
+            -n c2-shadow-inputs-44680696823-1 -D /tmp/active23-live-ui-c2
+          gh run download 44680696823 -R "$GITHUB_REPOSITORY" \
+            -n c6-neon-git-preparation-44680696823-1 -D /tmp/active23-live-ui-kpi
+          test -s /tmp/active23-live-ui-c2/c2-shadow-inputs.zip
+          find /tmp/active23-live-ui-kpi -name historical-daily-kpi.json -print
+      - name: Prepare immutable ARCHIVED test-only preview, never production JSON
+        env:
+          ACTIVE23_SOURCE_PARSERS_PATH: pinned-site/kyiv-air-alerts-grafana/scripts
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          for f in index.html styles.css app.js features.json chart-share.js \
+            kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json \
+            active-23-provisional.js active-23-chart-overlay.js brand-mark.svg \
+            brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg \
+            favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$f" "_site/$f"
+          done
+          python - <<'PY'
+          import hashlib,io,json,sys,zipfile
+          from pathlib import Path
+          from datetime import timedelta
+          root=Path('/tmp/active23-live-ui-c2')
+          path=root/'c2-shadow-inputs.zip'
+          digest=hashlib.sha256(path.read_bytes()).hexdigest()
+          sidecar=(root/'c2-shadow-inputs.zip.sha256').read_text().split()
+          assert sidecar==[digest,'c2-shadow-inputs.zip']
+          blob=path.read_bytes()
+          with zipfile.ZipFile(io.BytesIO(blob)) as z:
+              manifest=json.loads(z.read('manifest.json'))
+              assert manifest['github_run_id']==44680696823
+              assert manifest['input_sha']=='ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b'
+              for member,name in [
+                  ('site_data/dashboard_data.json','data.json'),
+                  ('site_data/site_derived.json','site-derived.json'),
+                  ('site_data/kyiv_threat_mix.json','kyiv-threat-mix.json')
+              ]:
+                  b=z.read(member)
+                  assert hashlib.sha256(b).hexdigest()==manifest['files'][member]
+                  Path('_site',name).write_bytes(b)
+              receipts=json.loads(z.read('payload.json'))['historical_source_receipts']
+          sys.path.insert(0,str(Path('producer-code').resolve()))
+          from scripts.active23_live_sidecar import build,at
+          as_of=max(at(x['last_checked_at']) for x in receipts.values())+timedelta(minutes=1)
+          snapshot=build(blob,digest,44680696823,1,as_of=as_of)
+          assert snapshot['count_cities']==23 and snapshot['count_source_open']==22
+          # Preview-only release binding; C2 historical source dashboard is not
+          # the final publisher output. NEVER mutate production JSON.
+          fake='f'*64
+          dashboard=json.loads(Path('_site/data.json').read_text())
+          dashboard.setdefault('meta',{})['publication_authority']={
+              'publication_allowed':True,'scope':'PRODUCTION_NEON_GIT_RELEASE',
+              'delivery':'site-prod-git','branch_id':'br-bold-mode-b5rub8pq',
+              'release_manifest_sha256':fake,
+              'historical_freshness':{'binding_sha256':fake},
+              'dst_simulation':False,'source_fallback':False,
+              'active_status':'UNKNOWN_UNCERTIFIED'
+          }
+          Path('_site/data.json').write_text(
+              json.dumps(dashboard,ensure_ascii=False,indent=2)+'\n')
+          derived=json.loads(Path('_site/site-derived.json').read_text())
+          # This preview-only substitution emulates the existing C6 release
+          # binding; the original archive and production code stay untouched.
+          assert derived['meta']['generated_at']==snapshot['source_generated_at']
+          derived['meta']['publication_authority']=dashboard['meta']['publication_authority']
+          Path('_site/site-derived.json').write_text(
+              json.dumps(derived,ensure_ascii=False,indent=2)+'\n')
+          snapshot.update({'release_manifest_sha256':fake,
+                           'delivery':'site-prod-git',
+                           'authoritative_live_status':False})
+          Path('_site/active23_source_capture.json').write_text(
+              json.dumps(snapshot,ensure_ascii=False,indent=2)+'\n')
+          app=Path('_site/app.js')
+          js=app.read_text()
+          for before,after in [
+              ('const DATA_URL = RAW_DATA_BASE + "dashboard_data.json";',
+               'const DATA_URL = "data.json";'),
+              ('const DERIVED_DATA_URL = RAW_DATA_BASE + "site_derived.json";',
+               'const DERIVED_DATA_URL = "site-derived.json";'),
+              ('const ACTIVE23_SOURCE_URL = RAW_DATA_BASE + "active23_source_capture.json";',
+               'const ACTIVE23_SOURCE_URL = "active23_source_capture.json";'),
+              ('const KYIV_THREAT_MIX_URL = RAW_DATA_BASE + "kyiv_threat_mix.json";',
+               'const KYIV_THREAT_MIX_URL = "kyiv-threat-mix.json";')
+          ]:
+              assert js.count(before)==1,before
+              js=js.replace(before,after)
+          app.write_text(js)
+          print('ARCHIVED_TEST_ONLY_SAME_RUN_23_CITY_BUNDLE_PASS')
+          PY
+          find /tmp/active23-live-ui-kpi -name historical-daily-kpi.json -exec cp {} _site/historical-daily-kpi.json \;
+          test -s _site/historical-daily-kpi.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('_site/historical-daily-kpi.json')
+          x=json.loads(p.read_text())
+          x['meta']['release_manifest_sha256']='f'*64
+          p.write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n')
+          PY
+          python kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py \
+            --source _site/historical-daily-kpi.json --output-dir _site
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          node --check _site/app.js
+          test -s _site/en/index.html
+          test -s _site/site-derived.json
+          test -s _site/active23_source_capture.json
+          rm -rf /tmp/active23-live-ui-deploy
+          cp -a _site /tmp/active23-live-ui-deploy
+          echo "SOURCE_BOUND_BILINGUAL_PREVIEW_READY_NO_PROD"
+      - name: Netlify branch DRAFT only, no production deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=/tmp/active23-live-ui-deploy \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --alias=active23-live-ui-20261120 --json > active23-live-ui-preview.json
+          python - <<'PY'
+          import json
+          d=json.load(open('active23-live-ui-preview.json'))
+          assert d.get('deploy_id') and not d.get('is_production',False)
+          print('IMMUTABLE_DRAFT_DEPLOY_ID',d['deploy_id'])
+          PY
+      - name: Chromium rendered 23-city last-bar, counts, trend and languages
+        run: |
+          set -euo pipefail
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          export ACTIVE23_PREVIEW_URL="$(python - <<'PY'
+          import json
+          d=json.load(open('active23-live-ui-preview.json'))
+          print('https://'+d['deploy_id']+'--ukraine-air-alerts.netlify.app')
+          PY
+          )"
+          python tests/test_active23_live_ui_browser.py
+          echo "ACTIVE23_SOURCE_BOUND_CHROMIUM_PREVIEW_PASS"
+      - name: Preserve screenshots and JSON only (no raw source ZIP)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: active23-live-ui-browser-proof-${{ github.run_id }}
+          path: |
+            active23-live-ui-preview.json
+            _browser_proof/chart-axis-proof.json
+            _browser_proof/*.png
+          if-no-files-found: warn
+          retention-days: 7
