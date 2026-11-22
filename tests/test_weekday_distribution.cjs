@@ -90,3 +90,80 @@ test("DST day can contain more than 24 elapsed hours without normalization",()=>
   assert.equal(split.weekdays[6].parts[0],32400);
   assert.equal(split.weekdays[6].parts[1],57600);
 });
+
+test("dynamic weekday bands accept same C6 release despite different build clocks",()=>{
+  const id="a".repeat(64);
+  const verified={...index,meta:{release_manifest_sha256:id}};
+  const ctx={
+    dashboardReleaseId:id,historicalReleaseId:id,derivedReleaseId:id,
+    dashboardGeneratedAt:"2026-11-21T12:30:00+02:00",
+    derivedGeneratedAt:"2026-11-21T12:23:00+02:00",
+    schema:"weekday-local-five-bands-union-v1",
+    city:{analysis_end:index.end,daily:index.counts.map((_,i)=>({
+      date:new Date(Date.parse(index.start+"T00:00:00Z")+i*86400000).toISOString().slice(0,10),
+      weekday_time_band_seconds:(bandSource.rows.find(row=>
+        row[0]===new Date(Date.parse(index.start+"T00:00:00Z")+i*86400000).toISOString().slice(0,10))||[null,0,0,0,0,0]).slice(1)
+    }))}
+  };
+  assert.equal(w.sameVerifiedRelease(verified,ctx),true);
+  const four=w.splitDerivedHours(verified,ctx,index.start,index.end,"four");
+  const daynight=w.splitDerivedHours(verified,ctx,index.start,index.end,"daynight");
+  assert.ok(four);
+  assert.ok(daynight);
+  assert.equal(four.weekdays[6].parts.reduce((a,b)=>a+b),3600);
+  assert.equal(daynight.weekdays[1].parts.reduce((a,b)=>a+b),7200);
+});
+
+test("dynamic weekday bands reject other releases and per-day mismatches",()=>{
+  const id="a".repeat(64);
+  const verified={...index,meta:{release_manifest_sha256:id}};
+  const rows=[
+    ["2026-10-25",1200,300,600,900,600],
+    ["2026-10-26",0,600,600,300,300],
+    ["2026-10-27",1800,600,600,3600,600],
+    ["2026-10-28",0,0,0,0,0],
+    ["2026-10-29",0,0,0,0,0]
+  ];
+  const ctx={dashboardReleaseId:id,historicalReleaseId:id,derivedReleaseId:id,
+    schema:"weekday-local-five-bands-union-v1",
+    city:{analysis_end:index.end,
+      daily:rows.map(row=>({date:row[0],weekday_time_band_seconds:row.slice(1)}))}
+  };
+  assert.equal(w.splitDerivedHours(verified,ctx,index.start,index.end,"four")?.mode,"four");
+  assert.equal(w.splitDerivedHours(verified,{...ctx,derivedReleaseId:"b".repeat(64)},index.start,index.end,"four"),null);
+  assert.equal(w.splitDerivedHours(verified,{...ctx,city:{...ctx.city,daily:rows.map(row=>
+    ({date:row[0],weekday_time_band_seconds:row[0]==="2026-10-26"?[1,0,0,0,0]:row.slice(1)}))}},index.start,index.end,"four"),null);
+  assert.equal(w.splitDerivedHours(verified,ctx,index.start,"2026-10-30","four"),null);
+});
+
+test("weekday tooltip percentages total 100% for EACH bar, never the entire period",()=>{
+  const split={mode:"four",weekdays:[
+    {days:2,parts:[7200,3600,0,0]},
+    {days:1,parts:[0,3600,3600,0]},
+    {days:1,parts:[0,0,0,3600]},
+    ...Array.from({length:4},()=>({days:0,parts:[0,0,0,0]}))
+  ]};
+  const mon=w.weekdayBarShares(split,0),tue=w.weekdayBarShares(split,1);
+  assert.equal(mon.averageHours,1.5);
+  assert.deepEqual(mon.parts.map(p=>p.averageHours),[1,0.5,0,0]);
+  assert.ok(Math.abs(mon.parts[0].percent-200/3)<1e-9);
+  assert.ok(Math.abs(mon.parts.reduce((s,p)=>s+p.percent,0)-100)<1e-9);
+  assert.deepEqual(tue.parts.map(p=>p.averageHours),[0,1,1,0]);
+  assert.equal(tue.parts[1].percent,50);
+  assert.equal(tue.parts[2].percent,50);
+  assert.notEqual(mon.parts[1].percent,tue.parts[1].percent);
+  assert.equal(w.weekdayBarShares(split,2).parts[3].percent,100);
+  assert.equal(w.weekdayBarShares(split,3).parts.reduce((s,p)=>s+p.percent,0),0);
+  assert.equal(w.weekdayBarShares(split,7),null);
+  assert.equal(w.weekdayBarShares({...split,weekdays:[{days:1,parts:[-1,0,0,0]},...split.weekdays.slice(1)]},0),null);
+});
+
+test("two-way 09-18 and 18-09 breakdown uses own weekday and avoids division by zero",()=>{
+  const original=w.splitHours(index,bandSource,index.start,index.end,"daynight");
+  const tuesday=w.weekdayBarShares(original,1);
+  assert.equal(tuesday.seconds,7200);
+  assert.equal(tuesday.averageHours,2);
+  assert.deepEqual(tuesday.parts.map(x=>x.percent),[100*4200/7200,100*3000/7200]);
+  const zero={mode:"daynight",weekdays:Array.from({length:7},()=>({days:1,parts:[0,0]}))};
+  assert.deepEqual(w.weekdayBarShares(zero,0).parts.map(x=>x.percent),[0,0]);
+});

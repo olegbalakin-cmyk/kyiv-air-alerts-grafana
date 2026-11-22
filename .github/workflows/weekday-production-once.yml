@@ -1,4 +1,4 @@
-name: Owner-approved weekday one-shot locked Netlify release
+name: Owner-approved 2026-11-22 weekday split one-shot locked Netlify release
 on:
   push:
     branches: [site-prod]
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    if: ${{ github.ref == 'refs/heads/site-prod' && startsWith(github.event.head_commit.message, 'Release weekday statistics 2026-11-19') }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/site-prod' && github.actor == 'olegbalakin-cmyk' && startsWith(github.event.head_commit.message, 'Release weekday split per-column shares 2026-11-22') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -34,7 +34,35 @@ jobs:
           grep -q 'weekday-local-five-bands-union-v1' kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py
           grep -q 'selector:"#weekdaySection"' kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q 'id="weekdaySection"' kyiv-air-alerts-grafana/pages-preview/index.html
-          echo "OWNER_GO_RELEASE_GATE_SOURCE_PIN_PASS"
+          test "$GITHUB_ACTOR" = "olegbalakin-cmyk"
+          # Must be the 5 exact proven UI blobs + 2 exact tests + this one-shot workflow.
+          changed=$(git diff-tree --no-commit-id --name-only -r HEAD)
+          test "$(printf '%s\n' "$changed" | wc -l)" -eq 8
+          while IFS= read -r path; do
+            case "$path" in
+              .github/workflows/weekday-production-once.yml|\
+              kyiv-air-alerts-grafana/pages-preview/app.js|\
+              kyiv-air-alerts-grafana/pages-preview/index.html|\
+              kyiv-air-alerts-grafana/pages-preview/styles.css|\
+              kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js|\
+              kyiv-air-alerts-grafana/pages-preview/weekday-ui.js|\
+              tests/test_weekday_distribution.cjs|\
+              tests/weekday_c6_integration_probe.cjs) ;;
+              *) echo "::error::UNAPPROVED_RELEASE_FILE:$path"; exit 1 ;;
+            esac
+          done <<< "$changed"
+          while read -r expected path; do
+            test "$(git hash-object "$path")" = "$expected" || { echo "::error::PROVEN_BLOB_MISMATCH:$path"; exit 1; }
+          done <<'APPROVED_BLOBS'
+          75f7ee65a88ede002380281a0990c2503cf69afb kyiv-air-alerts-grafana/pages-preview/app.js
+          6cd00a6e7242649680b5783e1f2b1631b0560e93 kyiv-air-alerts-grafana/pages-preview/index.html
+          f334c5c7ac71a35536b80d5dca93e8015f45a1f7 kyiv-air-alerts-grafana/pages-preview/styles.css
+          d4aa4d6830b20c952a4f6376bf2f111f9ff43647 kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js
+          9e8a9ce2401917aad9a8636560748de9895cdb3f kyiv-air-alerts-grafana/pages-preview/weekday-ui.js
+          f70771b3f56d7b3d91aab163cd6a53f0f5d2dd9a tests/test_weekday_distribution.cjs
+          35b79914affcb8ac338a468e67dec0ccc8b404fb tests/weekday_c6_integration_probe.cjs
+          APPROVED_BLOBS
+          echo "OWNER_GO_RELEASE_GATE_EXACT_PR226_BLOBS_NO_DATA_CHANGED_PASS"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -45,6 +73,7 @@ jobs:
           node --check kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js
           node --check kyiv-air-alerts-grafana/pages-preview/app.js
           node --test tests/test_weekday_distribution.cjs
+          node tests/weekday_c6_integration_probe.cjs
           python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
           python3 -m unittest discover -s tests -p test_weekday_local_bands.py -v
       - name: Rebuild only the frontend and same-generation verified static archive
@@ -78,6 +107,7 @@ jobs:
           assert index["meta"]["verified_count"]==23
           assert index["meta"]["source_dashboard_generated_at"]==dashboard["meta"]["generated_at"]
           assert set(index["cities"])==set(dashboard["multicity_meta"]["production_city_keys"])
+          assert dashboard["meta"]["publication_authority"]["release_manifest_sha256"] == index["meta"]["release_manifest_sha256"]
           print("PRODUCTION_SAME_GENERATION_23_CITY_KPI_PASS")
           PY
           echo "WEEKDAY_STATIC_18_FILES_WITH_SEO_PASS"
@@ -94,13 +124,20 @@ jobs:
         run: |
           set -euo pipefail
           url="https://ukraine-air-alerts.netlify.app"
-          for asset in weekday-distribution.js weekday-ui.js weekday-dayparts.json app.js; do
+          for asset in weekday-distribution.js weekday-ui.js weekday-dayparts.json app.js styles.css; do
             curl --fail --silent --show-error --location --retry 4 --retry-delay 2 "$url/$asset?v=weekday-prod-20261119" -o "/tmp/weekday-live-$asset"
           done
           cmp _site/weekday-distribution.js /tmp/weekday-live-weekday-distribution.js
           cmp _site/weekday-ui.js /tmp/weekday-live-weekday-ui.js
           cmp _site/weekday-dayparts.json /tmp/weekday-live-weekday-dayparts.json
           cmp _site/app.js /tmp/weekday-live-app.js
+          cmp _site/styles.css /tmp/weekday-live-styles.css
+          curl --fail --silent --show-error --location --retry 4 --retry-delay 2 "$url/" -o /tmp/weekday-live-uk.html
+          curl --fail --silent --show-error --location --retry 4 --retry-delay 2 "$url/en/" -o /tmp/weekday-live-en.html
+          cmp _site/index.html /tmp/weekday-live-uk.html
+          cmp _site/en/index.html /tmp/weekday-live-en.html
+          grep -q 'weekdayShareLegend' /tmp/weekday-live-uk.html
+          grep -q 'weekdayShareLegend' /tmp/weekday-live-en.html
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -127,6 +164,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: weekday-one-shot-production-proof
-          path: netlify-production-deploy.json
+          name: weekday-split-20261122-one-shot-production-proof
+          path: |
+            netlify-production-deploy.json
+            weekday-c6-integration-proof.json
           if-no-files-found: warn

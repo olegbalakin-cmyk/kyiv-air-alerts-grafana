@@ -104,5 +104,58 @@
     }))};
   }
 
-  return Object.freeze({ validIndex, preset, summarize, splitHours });
+  // A C6 release has one immutable identity, even though the Neon readback
+  // and the same-run C2 derived payload have different generated_at clocks.
+  // Trust neither clock alone: dashboard, KPI index and derived JSON must all
+  // carry the exact published release manifest binding.
+  function sameVerifiedRelease(index, ctx) {
+    const id = ctx?.dashboardReleaseId;
+    return typeof id === "string" && /^[a-f0-9]{64}$/.test(id) &&
+      ctx.derivedReleaseId === id &&
+      ctx.historicalReleaseId === id && validIndex(index);
+  }
+
+  function splitDerivedHours(index, ctx, from, to, mode) {
+    if (!sameVerifiedRelease(index, ctx) ||
+        ctx.schema !== "weekday-local-five-bands-union-v1" ||
+        !Array.isArray(ctx.city?.daily)) return null;
+    const rows = ctx.city.daily.map(day => [
+      day.date, ...(Array.isArray(day.weekday_time_band_seconds)
+        ? day.weekday_time_band_seconds : [])
+    ]);
+    const source = {
+      schema: "weekday-dayparts-test-v1",
+      meta: { timezone: "Europe/Kyiv", test_only: true },
+      max_day: ctx.city.analysis_end,
+      rows
+    };
+    // The immutable verified historical daily index remains the final
+    // per-day parity gate; no proportional estimation or stale fallback.
+    return splitHours(index, source, from, to, mode);
+  }
+
+  // A stacked bar is the average for one weekday. Percentages are based
+  // on this weekday's seconds only, not the selected period's global totals.
+  function weekdayBarShares(split, weekday) {
+    const size=split?.mode==="four"?4:split?.mode==="daynight"?2:0;
+    if(!size || !Number.isInteger(weekday) || weekday<0 || weekday>6 ||
+       !Array.isArray(split.weekdays) || split.weekdays.length!==7)return null;
+    const day=split.weekdays[weekday];
+    if(!day || !Number.isInteger(day.days) || day.days<0 ||
+       !Array.isArray(day.parts) || day.parts.length!==size ||
+       !day.parts.every(v=>typeof v==="number"&&Number.isFinite(v)&&v>=0))return null;
+    const seconds=day.parts.reduce((sum,v)=>sum+v,0);
+    return {
+      weekday,days:day.days,seconds,
+      averageHours:day.days>0?seconds/(3600*day.days):0,
+      parts:day.parts.map(partSeconds=>({
+        seconds:partSeconds,
+        averageHours:day.days>0?partSeconds/(3600*day.days):0,
+        percent:seconds>0?100*partSeconds/seconds:0
+      }))
+    };
+  }
+
+  return Object.freeze({ validIndex, preset, summarize, splitHours,
+    sameVerifiedRelease, splitDerivedHours, weekdayBarShares });
 });
