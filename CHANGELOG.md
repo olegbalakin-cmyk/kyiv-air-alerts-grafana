@@ -1,6 +1,10 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01 — proposed canonical 27-GET grant, not yet approved (2026-11-22)
+
+- [Draft #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact HEAD `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, CI #45046769980 offline PASS; 27 exact URLs, source SHA256 `9896815fb6e800883d95182499c4d12c00b273651d8733e4d5ab7a552e566585`, GO ID `casualty-23city-monthly-20261122-001`, canonical grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, expiry 2026-11-23T17:00Z. **Owner has not issued this exact GO**; no manual dispatch, spent tag, or publisher GET. Data/PROMOTE OFF.
+
 ### CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01 — guarded monthly collector offline CI PASS (2026-11-22)
 
 - [Draft #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 PASS, network SKIPPED. Exact 27 URLs (owner <=50 ceiling), spent-tag and actor/SHA/24h grant guards, pinned public HTTPS, <=2MiB/20s, no redirects/retry or full text. No execution grant or publisher GET, no credits/Neon/site-prod writes; PROMOTE OFF.
@@ -83,7 +87,7 @@
 
 ### CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 (2026-11-14)
 
-- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137), [Actions #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) PASS, ZIP #14105343291 SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b` independent/4 inner PASS. 3 GET/HTTP200, T03 2, T04 later +1 aged 69, T05 3 aged 37/38/69. Incident identity unverified, 0 credits; owner grant spent.
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137), CI #43574791160: 3 HTTP200; artifact #14105343291 SHA in prior archive. T03–T05 identity unproven; no credits/PROMOTE.
 
 ### CASUALTY-WORKR-IDENTITY-REVIEW-PREFLIGHT-SOURCE-REVIEW-REQUIRED-01 (2026-11-14)
 
@@ -91,7 +95,7 @@
 
 ### CASUALTY-WORKQ-REAL-EXCERPTS-AUXCI-OFFLINE-PARTIAL-01 (2026-11-14)
 
-- [PR #135](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/135), [Actions #43571952329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329) 145 PASS/1 SKIP, ZIP #14104761484 SHA256 `90ec4ef12c967facc743914316da41e99b6d9d0237350b16437cd820bad451d5`, independent/10 inner PASS. T03 2, T04 additional age 69, T05 3 unbound; 18→20→23 PASS, 0 credits or new HTTP.
+- Work Q short real excerpts, not full HTML, partial proof archived; incident identity unverified, no credits/PROMOTE.
 
 ### CASUALTY-WORKP-T03T05-HTTP200-EXCERPTS-PASS-TOTALS-PARTIAL-01 (2026-11-14)
 
