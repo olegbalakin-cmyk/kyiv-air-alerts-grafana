@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01**: [Draft PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) offline CI #45046769980 12/12 PASS; real 27 GET unstarted, PROMOTE OFF.
+Latest casualty: **CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01**: proposed 27-GET grant for PR #234 exact HEAD, digest/expiry recorded below; NOT owner-approved, no GET/PROMOTE.
 
 ## Working instructions
 
@@ -22,12 +22,16 @@ Latest casualty: **CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01**: [
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: owner-approved fresh exact HEAD/manifest/expiry grant for manual research 27 GET, then receipt proof and air-only city reconciliation; no prod writes.
+3. Casualty next: owner approval of prepared exact grant, then one manual research 27-GET dispatch; receipt and city-air-only reconciliation before any release.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01 (2026-11-22)
+
+- Proposed (NOT APPROVED) `casualty-23city-monthly-20261122-001` for [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) HEAD `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`. 27 GET, source file SHA256 `9896815fb6e800883d95182499c4d12c00b273651d8733e4d5ab7a552e566585`; grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, expiry `2026-11-23T17:00Z`. Await separate owner GO; spent tag absent; 0 publisher GET, no credits/PROMOTE.
+
 ## CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01 (2026-11-22)
 
 - [Draft PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 PASS, network job SKIPPED. Exact 27 URLs, atomic one-use GO, owner/HEAD/expiry, pinned public HTTPS, <=2MiB/20s, no redirects/retries. No owner execution grant, publisher GET, credits, WIP/Neon/site-prod mutation. PROMOTE OFF.
@@ -66,7 +70,7 @@ Latest casualty: **CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01**: [
 
 ## CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
-- Owner six-GET RSS grant used twice: [A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104) and [B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) = 12 vs 6 GET. Both 5/6 RSS200, 115 links; strict 1 vs broad 6 hits; no article GET/credits.
+- Shared 6-GET GO mistakenly consumed twice in runs #43700780104/#43700806130 (12 RSS GET); each 5/6 HTTP200, 115 links. No article GET/credits; avoid replay.
 
 ## CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 (2026-11-15)
 
@@ -102,7 +106,7 @@ Latest casualty: **CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01**: [
 
 ## CASUALTY-WORKV-REVIEWER-OPERATOR-OFFLINE-E2E-PASS-01 — physical offline chain PASS (2026-11-14)
 
-- [PR #140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/140) `663f3eeb`, [CI #43587369075](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43587369075) PASS, artifact #14110980955. Offline reviewer→generator 18→20→23 with no summed credit, T03–T05 NEEDS_REVIEW; 0 live HTTP/PROMOTE.
+- [PR #140](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/140) offline reviewer+operator chain PASS; historical proof preserved. No live credits/PROMOTE.
 
 ## CASUALTY-WORKTU-CONTRACT-AND-LIVE-JSON-GATES-01 — Work T code mismatch verified; Work U live parity unresolved (2026-11-14)
 
