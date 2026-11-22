@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Actions #44326207596 owner manual OFF-dispatch, seven jobs skipped, no HTTP; article GO pending.
+Latest casualty: **CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01**: 3-article owner GO approved, expires 2026-11-23T12:00Z. No dispatch/GET, PROMOTE OFF.
 
 ## Working instructions
 
@@ -16,18 +16,22 @@ Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Action
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** AH 29/29 offline PASS, manual OFF-dispatch #44326207596 verified. Zero source GET/credits; PROMOTE OFF.
+- **Operational WIP / casualty:** Work AH offline 29/29 + manual OFF PASS. New exact-scope GO approved, not dispatched; 0 GET/credits, PROMOTE OFF.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: new manifest + owner GO for three exact T03–T05 article URLs; then one guarded research pilot. RSS/WIP/production writes/PROMOTE OFF.
+3. Casualty next: owner manual dispatch of Work AH one-shot before GO expiry; verify evidence artifact. No RSS, WIP/production writes or credits.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01 (2026-11-22)
+
+- Owner GO: `workai-article-20261122-001`, exact AH `2b3b57991d035168d737f40b2239c15b01945776`; T03–T05 only, 3 article GET/0 RSS, expiry `2026-11-23T12:00Z`, manifest SHA in changelog. No spent tag or dispatch; **0 publisher GET executed**, PROMOTE OFF. Manual owner dispatch needed.
+
 ## CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01 (2026-11-18)
 
 - [Actions #44326207596](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44326207596): manual `workflow_dispatch` by owner on exact AH `2b3b57991d035168d737f40b2239c15b01945776`, attempt 1, all 7 jobs SKIPPED incl. network. Zero HTTP/credits, no artifacts. Registration PASS_OFF_ONLY; fresh owner article GO needed. PROMOTE OFF.
@@ -42,7 +46,7 @@ Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Action
 
 ## CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #174](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/174) `4d20b5f0`, [CI #43706844061](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43706844061) 20/20 offline PASS, artifact #14159030801 (ZIP SHA in changelog); 4 synthetic HTML layouts, no saved full real HTML. Work X T03–T05 URL known, no article GET/credits; live GO unready.
+- [PR #174](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/174) `4d20b5f0`, CI #43706844061 20/20 offline, artifact #14159030801 SHA in log. 4 synthetic HTML fixtures only, live proof pending.
 
 ## CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
@@ -95,7 +99,7 @@ Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Action
 
 ## CASUALTY-WORKR-OWNER-ONE-SHOT-HTTP200-CONTEXT-CAPTURE-PASS-IDENTITY-REVIEW-01 (archived evidence)
 
-- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137) / [CI #43574791160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43574791160) three GET/HTTP200, ZIP #14105343291 SHA256 `8248b426baa23d822b0ba92332137ab59c63146b648b22271c41af7ff0a3177b`. T03–T05 age matches; attack identity unproven, zero credits; one-shot spent.
+- [PR #137](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/137), CI #43574791160 3 HTTP200, artifact #14105343291 SHA in log. T03–T05 incident identity not proven, 0 credits.
 
 ## CASUALTY-WORKR-IDENTITY-REVIEW-PREFLIGHT-SOURCE-REVIEW-REQUIRED-01 (2026-11-14)
 
@@ -103,7 +107,7 @@ Latest casualty: **CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01**: Action
 
 ## CASUALTY-WORKQ-REAL-EXCERPTS-AUXCI-OFFLINE-PARTIAL-01 (archived evidence)
 
-- [PR #135](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/135) `858e255e`, [CI #43571952329](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43571952329) 145 PASS/1 SKIP, ZIP #14104761484 SHA256 `90ec4ef12c967facc743914316da41e99b6d9d0237350b16437cd820bad451d5` independent/10 inner PASS. T03 2, T04 +1 not total, T05 3 unbound; 0 credits, totals PARTIAL.
+- Historical real excerpts, not full HTML (Work Q proof archived); T03–T05 identity unresolved, 0 credits.
 
 <!-- coordination:history:end -->
 
