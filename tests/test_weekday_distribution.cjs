@@ -95,7 +95,7 @@ test("dynamic weekday bands accept same C6 release despite different build clock
   const id="a".repeat(64);
   const verified={...index,meta:{release_manifest_sha256:id}};
   const ctx={
-    dashboardReleaseId:id,derivedReleaseId:id,
+    dashboardReleaseId:id,historicalReleaseId:id,derivedReleaseId:id,
     dashboardGeneratedAt:"2026-11-21T12:30:00+02:00",
     derivedGeneratedAt:"2026-11-21T12:23:00+02:00",
     schema:"weekday-local-five-bands-union-v1",
@@ -124,7 +124,7 @@ test("dynamic weekday bands reject other releases and per-day mismatches",()=>{
     ["2026-10-28",0,0,0,0,0],
     ["2026-10-29",0,0,0,0,0]
   ];
-  const ctx={dashboardReleaseId:id,derivedReleaseId:id,
+  const ctx={dashboardReleaseId:id,historicalReleaseId:id,derivedReleaseId:id,
     schema:"weekday-local-five-bands-union-v1",
     city:{analysis_end:index.end,
       daily:rows.map(row=>({date:row[0],weekday_time_band_seconds:row.slice(1)}))}
