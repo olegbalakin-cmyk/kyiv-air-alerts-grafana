@@ -1,17 +1,21 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01 — verified one-shot 21/27 source responses (2026-11-22)
+
+- [Run #45070256716](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716) SUCCESS exact `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, owner GO spent; 27 GET: 21 HTTP200/5 HTTP403/1 blocked HTTP301, 11 cities with source bodies, not complete months. [Artifact #14773425588](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716/artifacts/14773425588) ZIP SHA256 `f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f`, JSON `be053f77ade09db833eb976a67a6bcb036fb42cff1c98f81bfd90dde1fbe7ed8` independently rehashed. [Detailed review](docs/casualty-monthly-27get-physical-review-2026-11-22.md). No credits/WIP/production writes, PROMOTE OFF; next offline identity/baseline reconciliation.
+
 ### CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01 — owner authorized exact 27 GET, dispatch pending (2026-11-22)
 
-- Owner approved `casualty-23city-monthly-20261122-001`, exact [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, 27 URLs, source SHA256 `9896815fb6e800883d95182499c4d12c00b273651d8733e4d5ab7a552e566585`, grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, deadline `2026-11-23T17:00Z`. No dispatch API available; no workflow_dispatch/spent tag/publisher GET observed. Manual owner launch pending; data, credits, PROMOTE OFF.
+- Owner approved 27 GET `casualty-23city-monthly-20261122-001`, SHA `11f9f2d`, grant `0b655665…`; spent #45070256716.
 
 ### CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01 — proposed canonical 27-GET grant, not yet approved (2026-11-22)
 
-- Prepared [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact 27-GET draft `11f9f2d`, manifest `9896815f…`, grant `0b655665…`, expiry Nov23 17:00Z. Initially not approved; later owner GO recorded separately.
+- Grant draft `11f9f2d`, exp Nov23 17Z, subsequently approved and spent #45070256716.
 
 ### CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01 — guarded monthly collector offline CI PASS (2026-11-22)
 
-- [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 PASS; network SKIPPED. Atomic GO, public TLS, 2MiB/20s, no retry/redirect; no credits.
+- [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234), #45046769980 12/12 offline PASS, network skipped; live proof separately logged.
 
 ### CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01 — 23-city source audit partial (2026-11-22)
 
@@ -55,7 +59,7 @@
 
 ### CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 (archived evidence)
 
-- [PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170) `a502616d`, [CI #43697942529](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43697942529) 34/34 offline PASS; artifact #14155356566 ZIP SHA256 `99fe9eaad0ca0941caf693fe0c7ee2bc801d46f2073bd5909251446f5acc9510`. Work J numeric claims PASS fixtures only, opaque Google News URL unresolved, PROMOTE OFF.
+- [PR #170](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/170), CI #43697942529 34/34 offline PASS; artifact #14155356566 ZIP SHA256 `99fe9eaad0ca0941caf693fe0c7ee2bc801d46f2073bd5909251446f5acc9510`. Google News URL unresolved; credits OFF.
 
 ### CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
@@ -67,7 +71,7 @@
 
 ### CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 — TECHNICAL PASS / EVIDENCE PARTIAL (2026-11-14)
 
-- [PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160) `38b444df`, [CI #43643850083](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43643850083) 183 PASS/1 SKIP, artifact #14132887476 ZIP SHA256 `3cb896fd323aabad663ba6955404b1c6930a40e03603a3a26b107f927d0cfc06`; 15/15 hashes PASS. T04 incomplete, T03–T05 unlinked, 0 credits.
+- [PR #160](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/160), CI #43643850083 183 PASS/1 SKIP; artifact #14132887476 ZIP SHA256 `3cb896fd323aabad663ba6955404b1c6930a40e03603a3a26b107f927d0cfc06`. T04 incomplete; T03–T05 unlinked, credits OFF.
 
 ### CASUALTY-WORKZ-HTTP200-EVIDENCE-PARTIAL-01 (2026-11-14)
 
@@ -79,7 +83,7 @@
 
 ### CASUALTY-WORKX-INDEPENDENT-SCAN-EVIDENCE-OFFLINE-PASS-01 (2026-11-14)
 
-- [PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) `b07a5957cb57ab8cf008d14373b15fa1db47b3af`; [Actions #43589727392](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43589727392) SUCCESS, 169 PASS/1 SKIP; artifact #14111089895 (SHA in PR). Independent 23-city 48h source discovery and excerpts offline-tested, 3 T03–T05 NEEDS_REVIEW, 0 credits, source HTTP OFF.
+- [PR #142](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/142) #43589727392 169 PASS/1 SKIP, artifact #14111089895 SHA in PR. Offline 23-city scan only, identity unlinked; credits OFF.
 
 ### CASUALTY-WORKV-REVIEWER-OPERATOR-OFFLINE-E2E-PASS-01 (2026-11-14)
 
