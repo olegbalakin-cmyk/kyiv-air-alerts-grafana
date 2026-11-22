@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01**: proposed 27-GET grant for PR #234 exact HEAD, digest/expiry recorded below; NOT owner-approved, no GET/PROMOTE.
+Latest casualty: **CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01**: owner authorized 27 GET at PR #234 exact SHA; manual run pending, PROMOTE OFF.
 
 ## Working instructions
 
@@ -22,19 +22,23 @@ Latest casualty: **CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01**: pro
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: owner approval of prepared exact grant, then one manual research 27-GET dispatch; receipt and city-air-only reconciliation before any release.
+3. Casualty next: owner manually dispatch exact 27-GET research grant before Nov23 17:00Z; inspect spent tag and receipts; no credit/publication.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01 (2026-11-22)
+
+- Owner GO: `casualty-23city-monthly-20261122-001` for 27 GET, [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact HEAD `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, deadline Nov23 17:00Z. GitHub dispatch unavailable to connector; tag absent, 0 GET; owner manual run pending. PROMOTE OFF.
+
 ## CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01 (2026-11-22)
 
-- Proposed (NOT APPROVED) `casualty-23city-monthly-20261122-001` for [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) HEAD `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`. 27 GET, source file SHA256 `9896815fb6e800883d95182499c4d12c00b273651d8733e4d5ab7a552e566585`; grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, expiry `2026-11-23T17:00Z`. Await separate owner GO; spent tag absent; 0 publisher GET, no credits/PROMOTE.
+- 27-GET grant prepared for [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234), exact SHA `11f9f2d`, digest `0b655665…`; originally unapproved. Next checkpoint records explicit GO.
 
 ## CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01 (2026-11-22)
 
-- [Draft PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 PASS, network job SKIPPED. Exact 27 URLs, atomic one-use GO, owner/HEAD/expiry, pinned public HTTPS, <=2MiB/20s, no redirects/retries. No owner execution grant, publisher GET, credits, WIP/Neon/site-prod mutation. PROMOTE OFF.
+- [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234), [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 offline PASS, manual network SKIPPED; no GET/credits.
 
 ## CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01 (2026-11-22)
 
