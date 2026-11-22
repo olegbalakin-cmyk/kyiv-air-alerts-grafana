@@ -53,5 +53,18 @@ jobs:
           print("log_lines",len(content.splitlines()))
           print("status_events",len(events))
           for event in events[:25]: print("watchdog_event",*event)
-          if not events: print("NO_VISIBLE_WATCHDOG_STATUS_LOGS")
+          if not events:
+              print("NO_VISIBLE_WATCHDOG_STATUS_LOGS")
+              shape=[]
+              for raw in content.splitlines()[:15]:
+                  try: obj=json.loads(raw)
+                  except ValueError: shape.append("not_json"); continue
+                  if isinstance(obj,dict):
+                      shape.append(",".join(sorted(obj.keys())[:12]))
+                  elif isinstance(obj,list): shape.append("list")
+                  else: shape.append(type(obj).__name__)
+              print("JSON_LINE_KEY_SHAPES", "|".join(shape))
+              print("ANY_WATCHDOG_MARKER", "C6_BACKUP_" in content)
+              print("ANY_FUNCTION_NAME", "c6-backup" in content)
+              print("CONTAINS_NO_LOGS_HINT", "no logs" in content.lower())
           PY
