@@ -1,9 +1,13 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-OCT2026-13-INCIDENT-REVIEW-OFFLINE-PASS-2026-11-22-01 — October 23-city offline candidate reconciliation (2026-11-22)
+
+- [Draft PR #235](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/235) HEAD `17291da5ab7a682eabc1b9458685b2a2724b3d71`, [CI #45071282274](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45071282274) SUCCESS, network SKIPPED. 23 `site-prod` series end partial Sep; October unpublished. 21 source excerpts/11 city slug sets, 13 candidate incident groups/10 cities; Kyiv Oct8 3→4 correction, Lutsk six reported twice, Zaporizhzhia 2→3 uncertain. All NEEDS_REVIEW, 0 publishable October totals, 0 credits/PROMOTE. [Details](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/17291da5ab7a682eabc1b9458685b2a2724b3d71/research/casualty_monthly_sources_2026_11_22/OCTOBER_OFFLINE_RECONCILIATION.md). No new HTTP/site/WIP/Neon writes.
+
 ### CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01 — verified one-shot 21/27 source responses (2026-11-22)
 
-- [Run #45070256716](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716) SUCCESS exact `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, owner GO spent; 27 GET: 21 HTTP200/5 HTTP403/1 blocked HTTP301, 11 cities with source bodies, not complete months. [Artifact #14773425588](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716/artifacts/14773425588) ZIP SHA256 `f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f`, JSON `be053f77ade09db833eb976a67a6bcb036fb42cff1c98f81bfd90dde1fbe7ed8` independently rehashed. [Detailed review](docs/casualty-monthly-27get-physical-review-2026-11-22.md). No credits/WIP/production writes, PROMOTE OFF; next offline identity/baseline reconciliation.
+- [Run #45070256716](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716) 27 GET/21 HTTP200, six blocked; artifact #14773425588 ZIP SHA256 `f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f`, other hash in detailed receipt report. GO spent, credits/PROMOTE OFF.
 
 ### CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01 — owner authorized exact 27 GET, dispatch pending (2026-11-22)
 
@@ -131,6 +135,6 @@
 
 ### CASUALTY-WORKL-FIRST-OWNER-LAUNCH-PREHTTP-CI-BLOCK-01 — real launch CI failure before HTTP (2026-11-13)
 
-- Owner-approved Work L [run #43502247617](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43502247617) at `e1f9c3af` FAILED on missing `_pr102/.../capture_once.py` test fixture after owner-grant gate PASS; source capture SKIPPED, no artifact, 0 GET/0 casualty credit. One-time grant consumed, no retry; fix offline and seek fresh owner approval separately.
+- Work L #43502247617 failed pre-HTTP due to fixture; GO consumed, no source GET/credits; see archived proof.
 
 <!-- coordination:history:end -->
