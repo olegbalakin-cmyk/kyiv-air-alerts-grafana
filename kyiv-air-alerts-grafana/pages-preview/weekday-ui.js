@@ -100,6 +100,27 @@
         max_day:dayparts.meta.max_complete_day}:null,
       stats.from,stats.to,$("weekdaySplitMode").value);
   }
+  function updateShareLegend(split,labels,colors){
+    const legend=$("weekdayShareLegend");
+    if(!legend)return;
+    legend.replaceChildren();
+    const shares=split&&root.WeekdayDistribution.splitShares(split);
+    legend.hidden=!shares;
+    if(!shares)return;
+    shares.forEach((share,i)=>{
+      const item=document.createElement("span");
+      item.className="weekday-share-item";
+      const swatch=document.createElement("span");
+      swatch.className="weekday-share-swatch";
+      swatch.style.backgroundColor=colors[i];
+      swatch.setAttribute("aria-hidden","true");
+      const label=document.createElement("span");
+      label.textContent=labels[i]+": "+fmt(share.hours,1)+" "+
+        tr("год","h")+" · "+fmt(share.percent,1)+"%";
+      item.append(swatch,label);
+      legend.append(item);
+    });
+  }
   function drawSplitHours(stats,split){
     const id="weekdayHoursChart";
     charts[id]?.destroy();
@@ -107,6 +128,7 @@
     const labels=four?["00–06","06–12","12–18","18–24"]:
       [tr("День (09–18)","Day (09–18)"),tr("Вечір і ніч (18–09)","Evening & night (18–09)")];
     const colors=four?["#62a0ea","#8ff0a4","#f8e45c","#ff9f43"]:["#f8e45c","#62a0ea"];
+    updateShareLegend(split,labels,colors);
     charts[id]=new Chart($(id),{
       type:"bar",
       data:{labels:dayNames[activeLanguage],datasets:labels.map((label,i)=>({
@@ -117,7 +139,7 @@
         responsive:true,maintainAspectRatio:false,animation:false,
         interaction:{mode:"index",intersect:false},
         plugins:{
-          legend:{display:true,labels:{color:"#b8c4cf"}},
+          legend:{display:false},
           tooltip:{callbacks:{
             label:ctx=>ctx.dataset.label+": "+fmt(ctx.parsed.y||0,2)+tr(" год/день"," hr/day"),
             footer:items=>{
@@ -213,6 +235,7 @@
   function paint(){
     if(!activeIndex||!root.WeekdayDistribution?.validIndex(activeIndex)){
       clearCharts();
+      updateShareLegend(null,[],[]);
       $("weekdayMeta").textContent=tr(
         "Перевірені щоденні дані для цього міста наразі недоступні.",
         "Verified daily data for this city are currently unavailable."
@@ -250,6 +273,7 @@
         "Точний розподіл фактичних годин за Europe/Kyiv (підтверджено звіркою із щоденним підсумком).",
         "Exact Europe/Kyiv time-band distribution (verified against daily totals).");
     }else{
+      updateShareLegend(null,[],[]);
       draw("weekdayHoursChart",stats.weekdays.map(x=>x.averageHours),tr("Годин/день","Hours/day"),"#8ff0a4",stats,true);
       $("weekdaySplitStatus").textContent=!enabled?"":daypartsLoadFailed
         ?tr("Розподіл недоступний: немає перевірених часових інтервалів для цього зрізу.","Split unavailable: no verified time-band intervals for this data generation.")
