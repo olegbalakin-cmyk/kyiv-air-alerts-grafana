@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-OCT2026-13-INCIDENT-REVIEW-OFFLINE-PASS-2026-11-22-01**: PR #235 CI #45071282274 PASS; 13 October candidate groups, 0 credits, PROMOTE OFF.
+Latest casualty: **CASUALTY-OCT2026-FOUR-EVENT-LOWERBOUND-PREVIEW-2026-11-22-01**: PR #236 CI #45073045655 PASS: 4 city events/11 civilian deaths October partial preview, 19 unknown; no credits/PROMOTE.
 
 ## Working instructions
 
@@ -16,21 +16,25 @@ Latest casualty: **CASUALTY-OCT2026-13-INCIDENT-REVIEW-OFFLINE-PASS-2026-11-22-0
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** 27 GET/21 HTTP200; 13 October candidate groups, all NEEDS_REVIEW, 0 credits/PROMOTE.
+- **Operational WIP / casualty:** 4 verified October air-attack events, 11 civilian deaths as lower bounds, incomplete city/month coverage. No credits/PROMOTE.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: offline verify October incidents, city boundaries and baseline credits; 12 cities need sources and fresh owner GET GO. No publishing.
+3. Casualty next: test actual UA/EN frontend partial-month notation and nulls before separate owner publication GO; no site writes now.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-OCT2026-FOUR-EVENT-LOWERBOUND-PREVIEW-2026-11-22-01 (2026-11-22)
+
+- [Draft #236](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/236) `270702ccc4a76d81ee8cc5b9cf73059fd19df025`, [CI #45073045655](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45073045655) SUCCESS, network SKIPPED. Four October civilian aerial incidents: Lutsk 6, Poltava 1 (cruise missile), Ivano-Frankivsk 1 (excludes Oct11 military dead), Khmelnytskyi 3 (2+1 later hospital death). 23-city research preview: 4 known **lower bounds**, 19 null unknowns, not exact month/year data. UA/EN presentation module tested but not connected to live UI. 0 credits/WIP/site-prod/Neon writes; PROMOTE OFF.
+
 ## CASUALTY-OCT2026-13-INCIDENT-REVIEW-OFFLINE-PASS-2026-11-22-01 (2026-11-22)
 
-- [Draft PR #235](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/235) `17291da5`, [CI #45071282274](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45071282274) SUCCESS, network SKIPPED. Read `site-prod@175c4254`: all 23 monthly series end at partial Sep 2026, October missing != 0. From 21 source excerpts + Kyiv review queue, 13 provisional incident groups/10 cities, 0 ready: Kyiv Oct8 3→4 after later death, Lutsk six repeated, Zaporizhzhia 2→3 identity unclear. 0 credits/publisher GET/WIP/site-prod/Neon writes, PROMOTE OFF.
+- [PR #235](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/235) #45071282274 offline PASS, 13 initial review groups/10 cities, zero credits; later source verification in PR #236.
 
 ## CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01 (2026-11-22)
 
