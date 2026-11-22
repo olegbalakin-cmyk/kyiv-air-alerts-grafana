@@ -18,7 +18,7 @@ Owner explicitly authorized up to 50 bounded HTTP GET and no production mutation
 * **Kropyvnytskyi city council** [Oct 17 report](https://www.kr-rada.gov.ua/news/koli-misto-perezhiva-bil-poruch-ti-hto-gotoviy-dopomogti_17-10-2026.html): reports three residents killed in air attacks Oct 14–15. Must verify whether one or several incident IDs, and the city-boundary/air-only context.
 * **Zaporizhzhia**: the existing Work AH [one-shot evidence](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794) got 3/3 HTTP200 but 1/3 numerics; T03/T04/T05 identity remains open. UN monthly 31 is all-weapon monthly verified total, not proof of an additional 31 beyond known cases.
 
-These sources contain evidence for research **only**. The `audit_23cities_2026_10.csv` contains exactly 23 rows. Ten cities have no verified city-specific October report in this bounded search; this means **UNKNOWN, never zero**.
+These sources contain evidence for research **only**. The `audit_23cities_2026_10.csv` contains exactly 23 rows. Eleven cities have no verified city-specific October report in this bounded search; this means **UNKNOWN, never zero**.
 
 ## Metrics and gates
 
