@@ -20,7 +20,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN" || { echo "AUDIT_TOKEN_UNAVAILABLE"; exit 2; }
-          npx --yes netlify-cli@23.8.1 logs \
+          npx --yes netlify-cli@latest logs \
             --source functions \
             --function c6-backup \
             --url https://ukraine-air-alerts-c6-watchdog.netlify.app \
