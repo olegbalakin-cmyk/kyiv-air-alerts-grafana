@@ -1,13 +1,17 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01 — exact owner GO approved, network unstarted (2026-11-22)
+
+- Work AH `2b3b57991d035168d737f40b2239c15b01945776`; `workai-article-20261122-001`, manifest SHA256 `da6b11752c0b60f38900f5fc311313cd4876f88bb70ce56722c8631df68079d8` verified, expires `2026-11-23T12:00Z`. Exact T03–T05 only, 3 article GET/0 RSS, no redirects/retry, PROMOTE OFF. No spent tag/dispatch, 0 publisher GET; GitHub connector lacks dispatch write, owner must execute manually.
+
 ### CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01 — owner OFF-dispatch verified (2026-11-18)
 
 - [Actions #44326207596](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44326207596): owner `workflow_dispatch`, exact AH `2b3b57991d035168d737f40b2239c15b01945776`, attempt 1; seven jobs SKIPPED incl. network. No HTTP/artifacts/credits. PR #198 registration PASS, article GO pending; PROMOTE OFF.
 
 ### CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01 — owner-approved registration merge; OFF-dispatch pending (2026-11-18)
 
-- [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) exact `afdd4e7b1fcace15592c00e887b3804deba3ccda` squash merged `main@ddb5880938f3dfac95f63e34a26839c18589bcd5`. Only 55-line `workflow_dispatch` registration stub, no automatic triggers, parser, live article runner or source GET on main. Work AH exact `2b3b5799` remains research. OFF dispatch not performed; old proposed GO expired. Article GO still separate, 0 credits/PROMOTE.
+- [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) `afdd4e7b` merged main@`ddb58809`, manual-only workflow, no auto GET. OFF dispatch #44326207596 verified.
 
 ### CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01 (2026-11-17)
 
@@ -23,7 +27,7 @@
 
 ### CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
-- [Run A #43700780104](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700780104), artifact #14156356307 SHA256 `28ad8b5cc105c81d87d15d04912af1285bf4c1bd62e52cacbfb6d4226770041d`; [Run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130), artifact #14156048863 (SHA in adjacent entry). **12 RSS GET vs six authorized**; 5/6 RSS200 each, 115 direct links, mismatched filter 1 vs 6. No article GET or deaths.
+- Two physical RSS runs #43700780104/#43700806130 used one 6-GET GO for 12 GET; each 5/6 HTTP200, 115 links. A artifact #14156356307 SHA256 `28ad8b5cc105c81d87d15d04912af1285bf4c1bd62e52cacbfb6d4226770041d`; B #14156048863 SHA in prior log. 0 article GET.
 
 ### CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 — one of two RSS runs (2026-11-15)
 
@@ -39,7 +43,7 @@
 
 ### CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) `4604004b`, [Actions #43646987342](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43646987342) 7/7 PASS, artifact #14133897958 ZIP SHA256 `7e7e1474f1dfd6c40ae336fead3045fd818413b0eaff8109f11fa52a5349c818` independently verified. Three mocked 23→22→23 city cycles, cursor recovery, replay +0, 3 T03–T05 NEEDS_REVIEW. No real HTTP, credits, live GO.
+- [PR #163](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/163) #43646987342 7/7 offline PASS, artifact #14133897958 SHA in archived proof. Shadow only, 0 live HTTP/credits; PROMOTE OFF.
 
 ### CASUALTY-WORKAA-CONTEXT-OFFLINE-PASS-EVIDENCE-PARTIAL-01 — TECHNICAL PASS / EVIDENCE PARTIAL (2026-11-14)
 
