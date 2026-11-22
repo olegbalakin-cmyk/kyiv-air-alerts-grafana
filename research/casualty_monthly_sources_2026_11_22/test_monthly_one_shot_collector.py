@@ -192,7 +192,10 @@ class OfflineCollectorTests(unittest.TestCase):
             report = (Path(tmp) / "capture_report.json").read_bytes()
             manifest = json.loads((Path(tmp) / "sha256_manifest.json").read_text())
             self.assertEqual(m.sha256(report), manifest["capture_report.json"])
-            self.assertNotIn("Two people were killed.", report.decode())
+            self.assertNotIn("<html>", report.decode())
+            self.assertNotIn("<article>", report.decode())
+            self.assertEqual(len(proof["results"][0]["context"]), 23)
+            self.assertLessEqual(len(proof["results"][0]["context"]), 150)
 
     def test_preclaim_refusal_has_no_network(self):
         e = dict(self.env, GITHUB_EVENT_NAME="push")
