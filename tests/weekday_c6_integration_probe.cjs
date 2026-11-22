@@ -70,6 +70,7 @@ try {
     if(!w.validIndex(index)) {entry.fail++;continue;}
     const ctx={
       dashboardReleaseId:manifest,
+      historicalReleaseId:indexMeta?.release_manifest_sha256,
       derivedReleaseId:derived.meta?.publication_authority?.release_manifest_sha256,
       dashboardGeneratedAt:generated,
       derivedGeneratedAt:derived.meta?.generated_at,
