@@ -1,9 +1,13 @@
 # Changelog
 
 <!-- coordination:history:start -->
-### CASUALTY-WORKAH-LIVE-3HTTP200-1NUMERIC-REVIEWONLY-2026-11-22-01 — article HTTP 3/3; numeric 1/3; review only (2026-11-22)
+### CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01 — 23-city source audit partial (2026-11-22)
 
-- [Actions #45020948794](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794) SUCCESS, Work AH exact `2b3b57991d035168d737f40b2239c15b01945776`; spent GO tag `workai-article-20261122-001`. Three GET HTTP200/body: T03 649 chars/numeric UNKNOWN, T04 773/UNKNOWN, T05 2297/3 cumulative with police excerpt. Dates, place, incident identity unresolved; dedup NEEDS_REVIEW. [Artifact #14753224774](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794/artifacts/14753224774) ZIP SHA256 `549a3fc4b9389d6f43f89621c821ac6bd9a6ab8d1bd1e728381c103e9e765140`, inner JSON `4c724125346fb55b20c72313be5a22c13b19646a27e78aa97d080a72e476788c`, independently rehashed. 0 RSS/credits/WIP/prod writes, PROMOTE OFF; next offline fix T03/T04, no new HTTP without separate GO.
+- [Draft PR #233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/233) 23 October city rows (12 with leads, 11 unknown), 27 candidate URLs; monthly OVA/MVA/UN scope differs from air-only city metric. Direct DNS prevented physical <=50 GET collection: 0 collector GET/receipts. Web-search examples only, no production/WIP changes. Next: manual fail-closed GitHub research one-shot, proof and reconciliation; PROMOTE OFF.
+
+### CASUALTY-WORKAH-LIVE-3HTTP200-1NUMERIC-REVIEWONLY-2026-11-22-01 (2026-11-22)
+
+- [Run #45020948794](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794) 3 HTTP200, numeric T03/T04 UNKNOWN, T05=3. Artifact #14753224774 ZIP SHA256 `549a3fc4b9389d6f43f89621c821ac6bd9a6ab8d1bd1e728381c103e9e765140`, inner JSON `4c724125346fb55b20c72313be5a22c13b19646a27e78aa97d080a72e476788c`. Identity unresolved, credits/PROMOTE OFF.
 
 ### CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01 (2026-11-22)
 
