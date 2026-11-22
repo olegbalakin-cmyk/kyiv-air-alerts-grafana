@@ -3436,6 +3436,8 @@ function renderCity() {
   window.WeekdayUI?.render(state.historicalDaily?.cities?.[key], key, currentLanguage, {
     dashboardGeneratedAt: state.data?.meta?.generated_at,
     derivedGeneratedAt: state.weekdayDerivedGeneration,
+    dashboardReleaseId: state.data?.meta?.publication_authority?.release_manifest_sha256,
+    derivedReleaseId: state.weekdayDerivedReleaseId,
     city: state.explorations?.cities?.[key],
     schema: state.weekdayDaypartSchema
   });
@@ -4748,6 +4750,7 @@ async function init() {
       if (derived?.explorations?.cities) {
         state.explorations = derived.explorations;
         state.weekdayDerivedGeneration = derived.meta?.generated_at;
+        state.weekdayDerivedReleaseId = derived.meta?.publication_authority?.release_manifest_sha256;
         state.weekdayDaypartSchema = derived.explorations.meta?.weekday_daypart_schema;
         // The physical Neon readback is stamped after the C2-derived
         // current-day rows. Both still belong to one release, identified by
