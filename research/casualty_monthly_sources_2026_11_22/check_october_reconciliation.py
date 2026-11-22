@@ -63,7 +63,8 @@ def verify():
     kyiv = groups["KYIV-2026-10-08-MORNING-UAV"]
     assert kyiv["cumulative_deaths_candidate"] == "4"
     assert kyiv["capture_source_ids"] == "s10"
-    assert "supersedes 3" in kyiv["evidence_summary"]
+    assert "preliminary citywide three" in kyiv["evidence_summary"]
+    assert "four after hospital death" in kyiv["evidence_summary"]
     # We refuse to produce sums or an exportable final October casualty table.
     counts = Counter(c["decision"] for c in cases)
     return {"city_rows": len(base), "retrieved_city_leads": 11,
