@@ -44,7 +44,7 @@ def build():
     for e in events:
         if not e["incident_id"].startswith("incident:"):
             raise AssertionError("Invalid incident")
-        if e["weapon_class"] not in {"aerial_uav", "aerial_missile_or_uav", "aerial_attack"}:
+        if e["weapon_class"] not in {"aerial_uav", "aerial_cruise_missile", "aerial_attack"}:
             raise AssertionError("Incompatible weapon classification")
         if e["victim_scope"] != "civilians_killed_inside_city":
             raise AssertionError("Civilians in city only")
