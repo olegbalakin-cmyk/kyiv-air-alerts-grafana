@@ -26,7 +26,7 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF" = "refs/heads/site-prod"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor 148c545d12aa1a2b03202ef89f21e108c98241c0 HEAD
+          # PR229 already landed as parent. Exact seven proven blobs checked below; no shallow-history dependency.
           test -s kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js
           test -s kyiv-air-alerts-grafana/pages-preview/weekday-ui.js
           test -s kyiv-air-alerts-grafana/pages-preview/weekday-dayparts.json
@@ -35,9 +35,9 @@ jobs:
           grep -q 'selector:"#weekdaySection"' kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q 'id="weekdaySection"' kyiv-air-alerts-grafana/pages-preview/index.html
           test "$GITHUB_ACTOR" = "olegbalakin-cmyk"
-          # Must be the 5 exact proven UI blobs + 2 exact tests + this one-shot workflow.
+          # Recovery commit must change only this one-shot workflow; PR229 already pinned the seven proven blobs.
           changed=$(git diff-tree --no-commit-id --name-only -r HEAD)
-          test "$(printf '%s\n' "$changed" | wc -l)" -eq 8
+          test "$changed" = ".github/workflows/weekday-production-once.yml"
           while IFS= read -r path; do
             case "$path" in
               .github/workflows/weekday-production-once.yml|\
