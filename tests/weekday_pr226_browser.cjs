@@ -12,7 +12,7 @@ async function split(p,n){
   await p.waitForFunction(expected=>{
     const s=document.querySelector("#weekdaySplitStatus")?.textContent||"";
     const d=window.Chart?.getChart(document.querySelector("#weekdayHoursChart"))?.data?.datasets||[];
-    return /Точний розподіл|Exact Europe/.test(s)&&d.length===expected;
+    return /Точний розподіл|Exact time bands/.test(s)&&d.length===expected;
   },n,{timeout:12000});
   const key=await p.locator("#weekdayShareLegend .weekday-share-item").allTextContents();
   assert.equal(key.length,n,"Color key matches the time bands");
