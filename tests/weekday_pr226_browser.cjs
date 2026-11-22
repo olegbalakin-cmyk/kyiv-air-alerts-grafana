@@ -14,10 +14,35 @@ async function split(p,n){
     const d=window.Chart?.getChart(document.querySelector("#weekdayHoursChart"))?.data?.datasets||[];
     return /Точний розподіл|Exact Europe/.test(s)&&d.length===expected;
   },n,{timeout:12000});
-  const shares=await p.locator("#weekdayShareLegend .weekday-share-item").allTextContents();
-  assert.equal(shares.length,n,"Time-band legend matches chart bands");
-  for(const label of shares)assert.match(label,/\d+[,.]\d\s*(год|h)\s*·\s*\d+[,.]\d%/);
-  report.cases.push({city:await p.locator("#citySelect").inputValue(),range:await p.locator("#weekdayRange").inputValue(),bands:n,status:"PASS",legend:shares});
+  const key=await p.locator("#weekdayShareLegend .weekday-share-item").allTextContents();
+  assert.equal(key.length,n,"Color key matches the time bands");
+  for(const entry of key)assert.doesNotMatch(entry,/\d+[,.]\d\s*(год|h)\s*·|%/);
+  const tooltip=await p.evaluate(()=>{
+    const chart=Chart.getChart(document.querySelector("#weekdayHoursChart"));
+    const callbacks=chart.options.plugins.tooltip.callbacks;
+    const all=chart.data.datasets.map(d=>d.data);
+    const first=chart.data.labels.findIndex((_,i)=>all.some(part=>(part[i]||0)>0));
+    const i=first<0?0:first;
+    const values=all.map(part=>Number(part[i]||0));
+    const lines=chart.data.datasets.map((dataset,datasetIndex)=>
+      String(callbacks.label({dataset,datasetIndex,dataIndex:i,parsed:{y:values[datasetIndex]}})));
+    const footer=callbacks.footer([{dataIndex:i}]);
+    return {values,lines,footer};
+  });
+  const total=tooltip.values.reduce((a,b)=>a+b,0);
+  assert.equal(tooltip.lines.length,n);
+  for(let i=0;i<n;i++){
+    assert.match(tooltip.lines[i],/(год\/день|hr\/day)\s*·\s*\d+[,.]\d%$/);
+    const m=tooltip.lines[i].match(/·\s*(\d+[,.]\d)%$/);
+    assert.ok(m,"Percent is shown for the clicked weekday bar");
+    const shown=Number(m[1].replace(",","."));
+    const expected=total>0?100*tooltip.values[i]/total:0;
+    assert.ok(Math.abs(shown-expected)<=0.11,"Time-band percentage refers to this weekday bar");
+  }
+  assert.ok(tooltip.footer.some(t=>String(t).includes(total>0?"100%":"0%")));
+  report.cases.push({city:await p.locator("#citySelect").inputValue(),
+    range:await p.locator("#weekdayRange").inputValue(),
+    bands:n,status:"PASS",colorKey:key,tooltip:tooltip.lines});
 }
 async function page(browser,path,width,height){
   const p=await browser.newPage({viewport:{width,height}});

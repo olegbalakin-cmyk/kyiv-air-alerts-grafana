@@ -100,14 +100,15 @@
         max_day:dayparts.meta.max_complete_day}:null,
       stats.from,stats.to,$("weekdaySplitMode").value);
   }
+  // Color key identifies the bands only. Each bar's actual breakdown is
+  // available on hover/tap; showing global shares here confuses users.
   function updateShareLegend(split,labels,colors){
     const legend=$("weekdayShareLegend");
     if(!legend)return;
     legend.replaceChildren();
-    const shares=split&&root.WeekdayDistribution.splitShares(split);
-    legend.hidden=!shares;
-    if(!shares)return;
-    shares.forEach((share,i)=>{
+    legend.hidden=!split;
+    if(!split)return;
+    labels.forEach((name,i)=>{
       const item=document.createElement("span");
       item.className="weekday-share-item";
       const swatch=document.createElement("span");
@@ -115,8 +116,7 @@
       swatch.style.backgroundColor=colors[i];
       swatch.setAttribute("aria-hidden","true");
       const label=document.createElement("span");
-      label.textContent=labels[i]+": "+fmt(share.hours,1)+" "+
-        tr("год","h")+" · "+fmt(share.percent,1)+"%";
+      label.textContent=name;
       item.append(swatch,label);
       legend.append(item);
     });
@@ -141,12 +141,22 @@
         plugins:{
           legend:{display:false},
           tooltip:{callbacks:{
-            label:ctx=>ctx.dataset.label+": "+fmt(ctx.parsed.y||0,2)+tr(" год/день"," hr/day"),
+            title:items=>items.length?dayNames[activeLanguage][items[0].dataIndex]:"",
+            label:ctx=>{
+              const bar=root.WeekdayDistribution.weekdayBarShares(split,ctx.dataIndex);
+              const part=bar?.parts[ctx.datasetIndex];
+              return ctx.dataset.label+": "+fmt(part?.averageHours||0,2)+
+                tr(" год/день"," hr/day")+" · "+fmt(part?.percent||0,1)+"%";
+            },
             footer:items=>{
               if(!items.length)return "";
-              const day=split.weekdays[items[0].dataIndex];
-              return [tr("Усього годин","Total hours")+": "+fmt(day.seconds/3600,2),
-                tr("Днів","Days")+": "+day.days];
+              const bar=root.WeekdayDistribution.weekdayBarShares(split,items[0].dataIndex);
+              if(!bar)return "";
+              return [
+                tr("Разом у стовпчику","Bar total")+": "+fmt(bar.averageHours,2)+
+                  tr(" год/день"," hr/day")+" · "+(bar.seconds>0?"100%":"0%"),
+                tr("Днів у вибірці","Observed days")+": "+bar.days
+              ];
             }
           }}
         },
@@ -199,6 +209,7 @@
     );
     section.querySelector('label[for="weekdayRange"]').textContent=tr("Період","Period");
     section.querySelector(".weekday-split-check span").textContent=tr("Розподілити за частинами доби","Split by time of day");
+    $("weekdayShareLegend")?.setAttribute("aria-label",tr("Кольори частин доби","Time-band colors"));
     section.querySelector('label[for="weekdaySplitMode"]').textContent=tr("Розподіл","Grouping");
     $("weekdaySplitMode").querySelector('option[value="four"]').textContent=tr("4 частини доби","Four time bands");
     $("weekdaySplitMode").querySelector('option[value="daynight"]').textContent=tr("День / вечір і ніч","Day / evening & night");
@@ -270,8 +281,8 @@
     if(enabled && split){
       drawSplitHours(stats,split);
       $("weekdaySplitStatus").textContent=tr(
-        "Точний розподіл фактичних годин за Europe/Kyiv (підтверджено звіркою із щоденним підсумком).",
-        "Exact Europe/Kyiv time-band distribution (verified against daily totals).");
+        "Точний розподіл (Europe/Kyiv). Наведіть або натисніть на стовпчик: години та частки саме цього дня тижня.",
+        "Exact time bands (Europe/Kyiv). Hover or tap a bar to see hours and shares for that weekday.");
     }else{
       updateShareLegend(null,[],[]);
       draw("weekdayHoursChart",stats.weekdays.map(x=>x.averageHours),tr("Годин/день","Hours/day"),"#8ff0a4",stats,true);

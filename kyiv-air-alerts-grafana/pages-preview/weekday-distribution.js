@@ -134,25 +134,28 @@
     return splitHours(index, source, from, to, mode);
   }
 
-  // Legend shares use total seconds across the selected calendar range.
-  // Do not weight the weekday averages equally: weekdays may have different
-  // numbers of observations, especially for custom date ranges.
-  function splitShares(split) {
+  // A stacked bar is the average for one weekday. Percentages are based
+  // on this weekday's seconds only, not the selected period's global totals.
+  function weekdayBarShares(split, weekday) {
     const size=split?.mode==="four"?4:split?.mode==="daynight"?2:0;
-    if (!size || !Array.isArray(split.weekdays) || split.weekdays.length!==7) return null;
-    const totals=Array(size).fill(0);
-    for(const day of split.weekdays) {
-      if (!Array.isArray(day.parts) || day.parts.length!==size ||
-          !day.parts.every(v=>Number.isFinite(v)&&v>=0)) return null;
-      day.parts.forEach((seconds,i)=>{totals[i]+=seconds;});
-    }
-    const sum=totals.reduce((a,b)=>a+b,0);
-    return totals.map(seconds=>({
-      seconds, hours:seconds/3600,
-      percent:sum>0?100*seconds/sum:0
-    }));
+    if(!size || !Number.isInteger(weekday) || weekday<0 || weekday>6 ||
+       !Array.isArray(split.weekdays) || split.weekdays.length!==7)return null;
+    const day=split.weekdays[weekday];
+    if(!day || !Number.isInteger(day.days) || day.days<0 ||
+       !Array.isArray(day.parts) || day.parts.length!==size ||
+       !day.parts.every(v=>typeof v==="number"&&Number.isFinite(v)&&v>=0))return null;
+    const seconds=day.parts.reduce((sum,v)=>sum+v,0);
+    return {
+      weekday,days:day.days,seconds,
+      averageHours:day.days>0?seconds/(3600*day.days):0,
+      parts:day.parts.map(partSeconds=>({
+        seconds:partSeconds,
+        averageHours:day.days>0?partSeconds/(3600*day.days):0,
+        percent:seconds>0?100*partSeconds/seconds:0
+      }))
+    };
   }
 
   return Object.freeze({ validIndex, preset, summarize, splitHours,
-    sameVerifiedRelease, splitDerivedHours, splitShares });
+    sameVerifiedRelease, splitDerivedHours, weekdayBarShares });
 });
