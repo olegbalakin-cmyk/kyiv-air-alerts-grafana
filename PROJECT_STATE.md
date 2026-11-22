@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01**: run #45070256716 27 GET, 21 HTTP200/6 blocked; no credits/PROMOTE.
+Latest casualty: **CASUALTY-OCT2026-13-INCIDENT-REVIEW-OFFLINE-PASS-2026-11-22-01**: PR #235 CI #45071282274 PASS; 13 October candidate groups, 0 credits, PROMOTE OFF.
 
 ## Working instructions
 
@@ -16,21 +16,25 @@ Latest casualty: **CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** research 27 GET physical PASS, 21 HTTP200, 6 blocked; zero credits/WIP/prod writes, PROMOTE OFF.
+- **Operational WIP / casualty:** 27 GET/21 HTTP200; 13 October candidate groups, all NEEDS_REVIEW, 0 credits/PROMOTE.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: offline reconcile captured short evidence/incident baseline; 12 cities need independent source discovery and fresh GO. No publishing.
+3. Casualty next: offline verify October incidents, city boundaries and baseline credits; 12 cities need sources and fresh owner GET GO. No publishing.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-OCT2026-13-INCIDENT-REVIEW-OFFLINE-PASS-2026-11-22-01 (2026-11-22)
+
+- [Draft PR #235](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/235) `17291da5`, [CI #45071282274](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45071282274) SUCCESS, network SKIPPED. Read `site-prod@175c4254`: all 23 monthly series end at partial Sep 2026, October missing != 0. From 21 source excerpts + Kyiv review queue, 13 provisional incident groups/10 cities, 0 ready: Kyiv Oct8 3→4 after later death, Lutsk six repeated, Zaporizhzhia 2→3 identity unclear. 0 credits/publisher GET/WIP/site-prod/Neon writes, PROMOTE OFF.
+
 ## CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01 (2026-11-22)
 
-- [Run #45070256716](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716) SUCCESS: 27 GET, 21 HTTP200, 5 HTTP403, 1 HTTP301 blocked; 11/23 cities with source bodies. One-use GO spent; [proof #14773425588](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716/artifacts/14773425588) ZIP SHA256 `f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f`, JSON SHA256 `be053f77ade09db833eb976a67a6bcb036fb42cff1c98f81bfd90dde1fbe7ed8` rehashed. [Review](docs/casualty-monthly-27get-physical-review-2026-11-22.md). No credits/WIP/prod writes; PROMOTE OFF.
+- Run #45070256716: 27 GET, 21 HTTP200, 6 blocked; proof #14773425588 hashes in detailed report. GO spent, 0 credits/PROMOTE.
 
 ## CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01 (2026-11-22)
 
@@ -58,15 +62,15 @@ Latest casualty: **CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-
 
 ## CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01 (2026-11-18)
 
-- [Actions #44326207596](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44326207596): manual `workflow_dispatch` by owner on exact AH `2b3b57991d035168d737f40b2239c15b01945776`, attempt 1, all 7 jobs SKIPPED incl. network. Zero HTTP/credits, no artifacts. Registration PASS_OFF_ONLY; fresh owner article GO needed. PROMOTE OFF.
+- Owner Actions #44326207596 manual OFF: all jobs SKIPPED, 0 GET. Later article pilot documented separately.
 
 ## CASUALTY-WORKAI-PR198-MANUAL-REGISTRATION-MERGED-2026-11-18-01 (2026-11-18)
 
-- [PR #198](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/198) `afdd4e7b` merged `main@ddb5880938f3dfac95f63e34a26839c18589bcd5`: 1 new 55-line manual-only workflow. No push/schedule, parser, live job on main, data/WIP changes or publisher HTTP. Research OFF-dispatch pending, old GO expired. No credits; PROMOTE OFF.
+- PR #198 merged main@ddb58809, manual registration-only workflow, no automatic publisher or credits.
 
 ## CASUALTY-WORKAH-OFFLINE-PASS-EXPIRED-GO-DISPATCH-UNVERIFIED-2026-11-17-01 (2026-11-17)
 
-- [PR #177](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/177) `2b3b5799`, [CI #43709216154](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43709216154) 29/29 offline PASS, proof #14159263098 (SHA in log), 3/3 inner PASS. Network job skipped, GO expired; no HTTP/credits/PROMOTE.
+- PR #177 CI #43709216154 29/29 offline PASS; network SKIPPED, older GO expired, 0 GET.
 
 ## CASUALTY-WORKAG-ARTICLE-FIRST-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
@@ -74,7 +78,7 @@ Latest casualty: **CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-
 
 ## CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/173) `37cf0b19`, [CI #43702948168](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43702948168) 12/12 PASS, artifact #14157426485. Synthetic atomic GO tag PASS; old network jobs unguarded. Four article hosts staged; no media GET or credits.
+- PR #173 CI #43702948168 12/12 offline, artifact #14157426485 (hash archived). No live GET or credits.
 
 ## CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
