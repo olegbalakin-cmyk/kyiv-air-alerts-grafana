@@ -1,0 +1,63 @@
+name: Weekday split 2026-11-22 independent served-production audit
+on:
+  push:
+    branches: [site-prod]
+    paths:
+      - ".github/workflows/weekday-split-postrelease-audit.yml"
+permissions:
+  contents: read
+concurrency:
+  group: weekday-split-postrelease-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify the exact published UI, UK and EN, same-generation 23 cities, and locked Netlify
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          python3 - <<'PY'
+          import hashlib,json,os,urllib.request
+          from pathlib import Path
+          base='https://ukraine-air-alerts.netlify.app'
+          token=os.environ['NETLIFY_AUTH_TOKEN']
+          site_id='b5aafc46-7468-4070-baf1-db80a4d30501'
+          def get(url,auth=False):
+            headers={'User-Agent':'WeekdaySplitReleaseAudit/1.0','Cache-Control':'no-cache'}
+            if auth: headers['Authorization']='Bearer '+token
+            with urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=30) as resp:
+              assert resp.status==200,(url,resp.status)
+              return resp.read()
+          site=json.loads(get('https://api.netlify.com/api/v1/sites/'+site_id,True))
+          deploy_id=(site.get('published_deploy') or {}).get('id')
+          assert deploy_id=='6b02d5edba0ff97b80b83052',deploy_id
+          deploy=json.loads(get('https://api.netlify.com/api/v1/deploys/'+deploy_id,True))
+          assert deploy['state']=='ready' and deploy['locked'] is True
+          root=Path('kyiv-air-alerts-grafana/pages-preview')
+          assets=['app.js','weekday-ui.js','weekday-distribution.js','styles.css','weekday-dayparts.json']
+          for asset in assets:
+            expected=(root/asset).read_bytes()
+            served=get(base+'/'+asset+'?v=independent-weekday-20261122')
+            assert hashlib.sha256(expected).digest()==hashlib.sha256(served).digest(),asset
+            print('EXACT_SERVED_ASSET_PASS',asset,hashlib.sha256(served).hexdigest())
+          for locale in ('','en/'):
+            html=get(base+'/'+locale+'?v=independent-weekday-20261122').decode('utf-8')
+            assert 'weekdayShareLegend' in html,locale
+            assert 'weekday-ui.js' in html and 'weekday-distribution.js' in html,locale
+            assert 'weekdayHoursChart' in html and 'weekdaySection' in html,locale
+            print('LIVE_LOCALE_MARKERS_PASS',locale or 'uk')
+          d=json.loads((Path('kyiv-air-alerts-grafana/data/dashboard_data.json')).read_text())
+          e=json.loads((Path('kyiv-air-alerts-grafana/data/site_derived.json')).read_text())
+          assert d['meta']['publication_authority']['release_manifest_sha256']==e['meta']['publication_authority']['release_manifest_sha256']
+          assert len(d['multicity_meta']['production_city_keys'])==23
+          assert len(e['explorations']['cities'])==23
+          print('SAME_RELEASE_23_CITIES_PASS')
+          print('INDEPENDENT_UI_LIVE_READY_LOCKED_PASS',deploy_id)
+          PY
