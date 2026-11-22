@@ -104,5 +104,36 @@
     }))};
   }
 
-  return Object.freeze({ validIndex, preset, summarize, splitHours });
+  // A C6 release has one immutable identity, even though the Neon readback
+  // and the same-run C2 derived payload have different generated_at clocks.
+  // Trust neither clock alone: dashboard, KPI index and derived JSON must all
+  // carry the exact published release manifest binding.
+  function sameVerifiedRelease(index, ctx) {
+    const id = ctx?.dashboardReleaseId;
+    return typeof id === "string" && /^[a-f0-9]{64}$/.test(id) &&
+      ctx.derivedReleaseId === id &&
+      index?.meta?.release_manifest_sha256 === id;
+  }
+
+  function splitDerivedHours(index, ctx, from, to, mode) {
+    if (!sameVerifiedRelease(index, ctx) ||
+        ctx.schema !== "weekday-local-five-bands-union-v1" ||
+        !Array.isArray(ctx.city?.daily)) return null;
+    const rows = ctx.city.daily.map(day => [
+      day.date, ...(Array.isArray(day.weekday_time_band_seconds)
+        ? day.weekday_time_band_seconds : [])
+    ]);
+    const source = {
+      schema: "weekday-dayparts-test-v1",
+      meta: { timezone: "Europe/Kyiv", test_only: true },
+      max_day: ctx.city.analysis_end,
+      rows
+    };
+    // The immutable verified historical daily index remains the final
+    // per-day parity gate; no proportional estimation or stale fallback.
+    return splitHours(index, source, from, to, mode);
+  }
+
+  return Object.freeze({ validIndex, preset, summarize, splitHours,
+    sameVerifiedRelease, splitDerivedHours });
 });
