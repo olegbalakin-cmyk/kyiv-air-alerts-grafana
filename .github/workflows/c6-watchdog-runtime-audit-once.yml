@@ -43,7 +43,7 @@ jobs:
               message=row.get("message") if isinstance(row,dict) else ""
               if not isinstance(message,str): message=json.dumps(message,ensure_ascii=True)
               # Whitelist only known, finite status codes. Never print log bodies or secrets.
-              found=re.search(r"C6_BACKUP_CHECK\s+([A-Z_]+)\s+([A-Z_]+)",message)
+              found=re.search(r"C6_BACKUP_CHECK\s+([A-Z0-9_]+)\s+([A-Z0-9_]+)",message)
               failure="C6_BACKUP_FAIL_CLOSED" in message
               if found or failure:
                   iso=row.get("timestamp") or row.get("time") or ""
