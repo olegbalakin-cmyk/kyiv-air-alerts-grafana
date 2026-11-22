@@ -90,3 +90,48 @@ test("DST day can contain more than 24 elapsed hours without normalization",()=>
   assert.equal(split.weekdays[6].parts[0],32400);
   assert.equal(split.weekdays[6].parts[1],57600);
 });
+
+test("dynamic weekday bands accept same C6 release despite different build clocks",()=>{
+  const id="a".repeat(64);
+  const verified={...index,meta:{release_manifest_sha256:id}};
+  const ctx={
+    dashboardReleaseId:id,derivedReleaseId:id,
+    dashboardGeneratedAt:"2026-11-21T12:30:00+02:00",
+    derivedGeneratedAt:"2026-11-21T12:23:00+02:00",
+    schema:"weekday-local-five-bands-union-v1",
+    city:{analysis_end:index.end,daily:index.counts.map((_,i)=>({
+      date:new Date(Date.parse(index.start+"T00:00:00Z")+i*86400000).toISOString().slice(0,10),
+      weekday_time_band_seconds:(bandSource.rows.find(row=>
+        row[0]===new Date(Date.parse(index.start+"T00:00:00Z")+i*86400000).toISOString().slice(0,10))||[null,0,0,0,0,0]).slice(1)
+    }))}
+  };
+  assert.equal(w.sameVerifiedRelease(verified,ctx),true);
+  const four=w.splitDerivedHours(verified,ctx,index.start,index.end,"four");
+  const daynight=w.splitDerivedHours(verified,ctx,index.start,index.end,"daynight");
+  assert.ok(four);
+  assert.ok(daynight);
+  assert.equal(four.weekdays[6].parts.reduce((a,b)=>a+b),3600);
+  assert.equal(daynight.weekdays[1].parts.reduce((a,b)=>a+b),7200);
+});
+
+test("dynamic weekday bands reject other releases and per-day mismatches",()=>{
+  const id="a".repeat(64);
+  const verified={...index,meta:{release_manifest_sha256:id}};
+  const rows=[
+    ["2026-10-25",1200,300,600,900,600],
+    ["2026-10-26",0,600,600,300,300],
+    ["2026-10-27",1800,600,600,3600,600],
+    ["2026-10-28",0,0,0,0,0],
+    ["2026-10-29",0,0,0,0,0]
+  ];
+  const ctx={dashboardReleaseId:id,derivedReleaseId:id,
+    schema:"weekday-local-five-bands-union-v1",
+    city:{analysis_end:index.end,
+      daily:rows.map(row=>({date:row[0],weekday_time_band_seconds:row.slice(1)}))}
+  };
+  assert.equal(w.splitDerivedHours(verified,ctx,index.start,index.end,"four")?.mode,"four");
+  assert.equal(w.splitDerivedHours(verified,{...ctx,derivedReleaseId:"b".repeat(64)},index.start,index.end,"four"),null);
+  assert.equal(w.splitDerivedHours(verified,{...ctx,city:{...ctx.city,daily:rows.map(row=>
+    ({date:row[0],weekday_time_band_seconds:row[0]==="2026-10-26"?[1,0,0,0,0]:row.slice(1)}))}},index.start,index.end,"four"),null);
+  assert.equal(w.splitDerivedHours(verified,ctx,index.start,"2026-10-30","four"),null);
+});
