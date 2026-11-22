@@ -86,18 +86,12 @@
     // Live data arrive in the existing four-hour Git-only site_derived.json
     // update, not in the immutable Netlify deployment. Reject other generations.
     const ctx=currentDerived;
-    if(ctx?.dashboardGeneratedAt && ctx.derivedGeneratedAt===ctx.dashboardGeneratedAt &&
-       ctx.schema==="weekday-local-five-bands-union-v1" && Array.isArray(ctx.city?.daily)){
-      const rows=ctx.city.daily.map(day=>[day.date,...(day.weekday_time_band_seconds||[])]);
-      const source={
-        schema:"weekday-dayparts-test-v1",
-        meta:{timezone:"Europe/Kyiv",test_only:true},
-        max_day:ctx.city.analysis_end,
-        rows
-      };
-      return root.WeekdayDistribution.splitHours(activeIndex,source,
-        stats.from,stats.to,$("weekdaySplitMode").value);
-    }
+    const verified=root.WeekdayDistribution.splitDerivedHours(activeIndex,ctx,
+      stats.from,stats.to,$("weekdaySplitMode").value);
+    if(verified)return verified;
+    // Do not fall back to an old static snapshot after a verified dynamic
+    // release has loaded: a failed parity/release check must remain blocked.
+    if(ctx?.city?.daily)return null;
     // Temporary preview-proven initial fallback. Never use an older static
     // snapshot beyond its last complete day (splitHours enforces this).
     const fallback=dayparts?.cities?.[activeKey];
