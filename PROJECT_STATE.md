@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01**: owner authorized 27 GET at PR #234 exact SHA; manual run pending, PROMOTE OFF.
+Latest casualty: **CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01**: run #45070256716 27 GET, 21 HTTP200/6 blocked; no credits/PROMOTE.
 
 ## Working instructions
 
@@ -16,29 +16,33 @@ Latest casualty: **CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-202
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** monthly 27-URL collector CI PASS, publisher GET=0; earlier Work AH 3/3 HTTP, numeric 1/3. Credits/PROMOTE OFF.
+- **Operational WIP / casualty:** research 27 GET physical PASS, 21 HTTP200, 6 blocked; zero credits/WIP/prod writes, PROMOTE OFF.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: owner manually dispatch exact 27-GET research grant before Nov23 17:00Z; inspect spent tag and receipts; no credit/publication.
+3. Casualty next: offline reconcile captured short evidence/incident baseline; 12 cities need independent source discovery and fresh GO. No publishing.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-MONTHLY-27GET-PHYSICAL-21OF27-REVIEWONLY-2026-11-22-01 (2026-11-22)
+
+- [Run #45070256716](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716) SUCCESS: 27 GET, 21 HTTP200, 5 HTTP403, 1 HTTP301 blocked; 11/23 cities with source bodies. One-use GO spent; [proof #14773425588](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716/artifacts/14773425588) ZIP SHA256 `f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f`, JSON SHA256 `be053f77ade09db833eb976a67a6bcb036fb42cff1c98f81bfd90dde1fbe7ed8` rehashed. [Review](docs/casualty-monthly-27get-physical-review-2026-11-22.md). No credits/WIP/prod writes; PROMOTE OFF.
+
 ## CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01 (2026-11-22)
 
-- Owner GO: `casualty-23city-monthly-20261122-001` for 27 GET, [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact HEAD `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, deadline Nov23 17:00Z. GitHub dispatch unavailable to connector; tag absent, 0 GET; owner manual run pending. PROMOTE OFF.
+- Owner GO `casualty-23city-monthly-20261122-001` approved exact `11f9f2d`; spent #45070256716, 0 credits.
 
 ## CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01 (2026-11-22)
 
-- 27-GET grant prepared for [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234), exact SHA `11f9f2d`, digest `0b655665…`; originally unapproved. Next checkpoint records explicit GO.
+- 27-GET grant digest `0b655665…` prepared for #234, subsequently owner approved and spent #45070256716.
 
 ## CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01 (2026-11-22)
 
-- [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234), [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 offline PASS, manual network SKIPPED; no GET/credits.
+- [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) #45046769980 12/12 offline PASS; live proof separately accepted, PROMOTE OFF.
 
 ## CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01 (2026-11-22)
 
