@@ -86,18 +86,12 @@
     // Live data arrive in the existing four-hour Git-only site_derived.json
     // update, not in the immutable Netlify deployment. Reject other generations.
     const ctx=currentDerived;
-    if(ctx?.dashboardGeneratedAt && ctx.derivedGeneratedAt===ctx.dashboardGeneratedAt &&
-       ctx.schema==="weekday-local-five-bands-union-v1" && Array.isArray(ctx.city?.daily)){
-      const rows=ctx.city.daily.map(day=>[day.date,...(day.weekday_time_band_seconds||[])]);
-      const source={
-        schema:"weekday-dayparts-test-v1",
-        meta:{timezone:"Europe/Kyiv",test_only:true},
-        max_day:ctx.city.analysis_end,
-        rows
-      };
-      return root.WeekdayDistribution.splitHours(activeIndex,source,
-        stats.from,stats.to,$("weekdaySplitMode").value);
-    }
+    const verified=root.WeekdayDistribution.splitDerivedHours(activeIndex,ctx,
+      stats.from,stats.to,$("weekdaySplitMode").value);
+    if(verified)return verified;
+    // Do not fall back to an old static snapshot after a verified dynamic
+    // release has loaded: a failed parity/release check must remain blocked.
+    if(ctx?.city?.daily)return null;
     // Temporary preview-proven initial fallback. Never use an older static
     // snapshot beyond its last complete day (splitHours enforces this).
     const fallback=dayparts?.cities?.[activeKey];
@@ -106,6 +100,27 @@
         max_day:dayparts.meta.max_complete_day}:null,
       stats.from,stats.to,$("weekdaySplitMode").value);
   }
+  // Color key identifies the bands only. Each bar's actual breakdown is
+  // available on hover/tap; showing global shares here confuses users.
+  function updateShareLegend(split,labels,colors){
+    const legend=$("weekdayShareLegend");
+    if(!legend)return;
+    legend.replaceChildren();
+    legend.hidden=!split;
+    if(!split)return;
+    labels.forEach((name,i)=>{
+      const item=document.createElement("span");
+      item.className="weekday-share-item";
+      const swatch=document.createElement("span");
+      swatch.className="weekday-share-swatch";
+      swatch.style.backgroundColor=colors[i];
+      swatch.setAttribute("aria-hidden","true");
+      const label=document.createElement("span");
+      label.textContent=name;
+      item.append(swatch,label);
+      legend.append(item);
+    });
+  }
   function drawSplitHours(stats,split){
     const id="weekdayHoursChart";
     charts[id]?.destroy();
@@ -113,6 +128,7 @@
     const labels=four?["00–06","06–12","12–18","18–24"]:
       [tr("День (09–18)","Day (09–18)"),tr("Вечір і ніч (18–09)","Evening & night (18–09)")];
     const colors=four?["#62a0ea","#8ff0a4","#f8e45c","#ff9f43"]:["#f8e45c","#62a0ea"];
+    updateShareLegend(split,labels,colors);
     charts[id]=new Chart($(id),{
       type:"bar",
       data:{labels:dayNames[activeLanguage],datasets:labels.map((label,i)=>({
@@ -123,14 +139,24 @@
         responsive:true,maintainAspectRatio:false,animation:false,
         interaction:{mode:"index",intersect:false},
         plugins:{
-          legend:{display:true,labels:{color:"#b8c4cf"}},
+          legend:{display:false},
           tooltip:{callbacks:{
-            label:ctx=>ctx.dataset.label+": "+fmt(ctx.parsed.y||0,2)+tr(" год/день"," hr/day"),
+            title:items=>items.length?dayNames[activeLanguage][items[0].dataIndex]:"",
+            label:ctx=>{
+              const bar=root.WeekdayDistribution.weekdayBarShares(split,ctx.dataIndex);
+              const part=bar?.parts[ctx.datasetIndex];
+              return ctx.dataset.label+": "+fmt(part?.averageHours||0,2)+
+                tr(" год/день"," hr/day")+" · "+fmt(part?.percent||0,1)+"%";
+            },
             footer:items=>{
               if(!items.length)return "";
-              const day=split.weekdays[items[0].dataIndex];
-              return [tr("Усього годин","Total hours")+": "+fmt(day.seconds/3600,2),
-                tr("Днів","Days")+": "+day.days];
+              const bar=root.WeekdayDistribution.weekdayBarShares(split,items[0].dataIndex);
+              if(!bar)return "";
+              return [
+                tr("Разом у стовпчику","Bar total")+": "+fmt(bar.averageHours,2)+
+                  tr(" год/день"," hr/day")+" · "+(bar.seconds>0?"100%":"0%"),
+                tr("Днів у вибірці","Observed days")+": "+bar.days
+              ];
             }
           }}
         },
@@ -183,6 +209,7 @@
     );
     section.querySelector('label[for="weekdayRange"]').textContent=tr("Період","Period");
     section.querySelector(".weekday-split-check span").textContent=tr("Розподілити за частинами доби","Split by time of day");
+    $("weekdayShareLegend")?.setAttribute("aria-label",tr("Кольори частин доби","Time-band colors"));
     section.querySelector('label[for="weekdaySplitMode"]').textContent=tr("Розподіл","Grouping");
     $("weekdaySplitMode").querySelector('option[value="four"]').textContent=tr("4 частини доби","Four time bands");
     $("weekdaySplitMode").querySelector('option[value="daynight"]').textContent=tr("День / вечір і ніч","Day / evening & night");
@@ -219,6 +246,7 @@
   function paint(){
     if(!activeIndex||!root.WeekdayDistribution?.validIndex(activeIndex)){
       clearCharts();
+      updateShareLegend(null,[],[]);
       $("weekdayMeta").textContent=tr(
         "Перевірені щоденні дані для цього міста наразі недоступні.",
         "Verified daily data for this city are currently unavailable."
@@ -253,9 +281,10 @@
     if(enabled && split){
       drawSplitHours(stats,split);
       $("weekdaySplitStatus").textContent=tr(
-        "Точний розподіл фактичних годин за Europe/Kyiv (підтверджено звіркою із щоденним підсумком).",
-        "Exact Europe/Kyiv time-band distribution (verified against daily totals).");
+        "Точний розподіл (Europe/Kyiv). Наведіть або натисніть на стовпчик: години та частки саме цього дня тижня.",
+        "Exact time bands (Europe/Kyiv). Hover or tap a bar to see hours and shares for that weekday.");
     }else{
+      updateShareLegend(null,[],[]);
       draw("weekdayHoursChart",stats.weekdays.map(x=>x.averageHours),tr("Годин/день","Hours/day"),"#8ff0a4",stats,true);
       $("weekdaySplitStatus").textContent=!enabled?"":daypartsLoadFailed
         ?tr("Розподіл недоступний: немає перевірених часових інтервалів для цього зрізу.","Split unavailable: no verified time-band intervals for this data generation.")
