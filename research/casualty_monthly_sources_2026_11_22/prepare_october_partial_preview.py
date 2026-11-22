@@ -105,6 +105,13 @@ def main():
     p.add_argument("--write-preview", type=Path)
     args=p.parse_args()
     preview=build()
+    # A checked-in static preview must match this deterministic generator.
+    frozen = ROOT / "october_2026_partial_preview.json"
+    if not frozen.is_file():
+        raise AssertionError("Missing staged preview")
+    actual = json.loads(frozen.read_text(encoding="utf-8"))
+    if actual != preview:
+        raise AssertionError("Frozen October preview differs from validated ledger")
     raw=json.dumps(preview,sort_keys=True,ensure_ascii=False,indent=2)+"\n"
     if args.write_preview:
         if args.write_preview.resolve().is_relative_to(Path.cwd().resolve()):
