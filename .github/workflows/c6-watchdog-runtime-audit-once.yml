@@ -67,4 +67,17 @@ jobs:
               print("ANY_WATCHDOG_MARKER", "C6_BACKUP_" in content)
               print("ANY_FUNCTION_NAME", "c6-backup" in content)
               print("CONTAINS_NO_LOGS_HINT", "no logs" in content.lower())
+              for raw in content.splitlines()[:15]:
+                  try: row=json.loads(raw)
+                  except ValueError: continue
+                  if not isinstance(row,dict): continue
+                  message=row.get("message")
+                  if not isinstance(message,str): message=json.dumps(message,ensure_ascii=True)
+                  if re.search(r"gh[pousr]_[A-Za-z0-9_]{8,}",message):
+                      print("LOG_CLASS",row.get("source","unknown"),"SENSITIVE_PATTERN_SUPPRESSED")
+                      continue
+                  whitelist=re.findall(r"(?:C6_BACKUP_[A-Z_]+|FAIL_CLOSED|DRY_RUN_ONLY|DISPATCH_ACCEPTED|C6_[A-Z_]+)",message)
+                  print("LOG_CLASS",str(row.get("source","unknown"))[:28],str(row.get("level","unknown"))[:12],
+                        str(row.get("name","unknown"))[:28],"labels="+",".join(sorted(set(whitelist)))[:100],
+                        "msg_len="+str(len(message)))
           PY
