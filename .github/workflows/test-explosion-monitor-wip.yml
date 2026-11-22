@@ -1,21 +1,25 @@
-# Work AI: default-branch registration only. NO parser, schedule or publisher GET here.
-# The vetted Work AH version of this SAME PATH runs only when explicitly
-# dispatched with ref=research-casualty-workah-guarded-article-2026-11-15.
+# Research-only monthly collector; main retains fail-closed registration stub.
 name: Test WIP monitors (existing offline test workflow)
 
 on:
+  push:
+    branches:
+      - research-casualty-monthly-collector-2026-11-22
+    paths:
+      - "research/casualty_monthly_sources_2026_11_22/**"
+      - ".github/workflows/test-explosion-monitor-wip.yml"
   workflow_dispatch:
     inputs:
       owner_go_id:
-        description: "Owner-issued unique one-shot GO identifier"
+        description: "Unique owner one-shot ID"
         required: false
         type: string
       approved_head:
-        description: "Exact 40-character Git commit approved by owner"
+        description: "Exact research commit SHA"
         required: false
         type: string
       manifest_sha256:
-        description: "SHA256 canonical JSON manifest approved by owner"
+        description: "SHA256 canonical grant JSON (not source URL file)"
         required: false
         type: string
       grant_json:
@@ -27,29 +31,89 @@ on:
         required: false
         type: choice
         default: "OFF"
-        options:
-          - "OFF"
-          - "OWNER_APPROVED_ONE_SHOT"
+        options: ["OFF", "OWNER_APPROVED_ONE_SHOT"]
 
 permissions:
   contents: read
 
 jobs:
-  registration_only:
-    # Dispatching main MUST NOT execute any article runner.
-    if: github.ref == 'refs/heads/main'
+  monthly_offline:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-monthly-collector-2026-11-22'
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 4
+    permissions:
+      contents: read
     steps:
-      - name: Fail closed on main; zero publisher requests
-        env:
-          ARTICLE_GO: ${{ inputs.article_go }}
-        shell: bash
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline manifest validation and fail-closed tests
         run: |
           set -euo pipefail
-          if [[ "$ARTICLE_GO" != "OFF" ]]; then
-            echo "BLOCKED: main is only a manual-dispatch registration stub"
-            exit 1
-          fi
-          echo "WORKAI_DEFAULT_BRANCH_REGISTRATION_ONLY_OFFLINE"
-          echo "No article/RSS GET, parser, WIP data, credits or promotion."
+          python research/casualty_monthly_sources_2026_11_22/monthly_one_shot_collector.py --validate
+          python research/casualty_monthly_sources_2026_11_22/validate_monthly_sources.py --self-test --month 2026-10 > /tmp/casualty-monthly-offline-summary.json
+          python research/casualty_monthly_sources_2026_11_22/test_monthly_one_shot_collector.py
+
+  monthly_one_shot:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' &&
+          github.ref == 'refs/heads/research-casualty-monthly-collector-2026-11-22' &&
+          github.actor == 'olegbalakin-cmyk' &&
+          github.triggering_actor == 'olegbalakin-cmyk' &&
+          github.run_attempt == 1 &&
+          inputs.article_go == 'OWNER_APPROVED_ONE_SHOT' &&
+          inputs.approved_head == github.sha }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    permissions:
+      contents: read
+    concurrency:
+      group: casualty-monthly-oneshot-${{ inputs.owner_go_id }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout exact owner-dispatched research commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Claim atomic GO tag before bounded publisher GET
+        env:
+          CASUALTY_MONTHLY_GO: ${{ inputs.article_go }}
+          CASUALTY_MONTHLY_GO_ID: ${{ inputs.owner_go_id }}
+          CASUALTY_MONTHLY_APPROVED_HEAD: ${{ inputs.approved_head }}
+          CASUALTY_MONTHLY_GO_DIGEST: ${{ inputs.manifest_sha256 }}
+          CASUALTY_MONTHLY_GRANT_JSON: ${{ inputs.grant_json }}
+          GH_OWNER_LEDGER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          CASUALTY_MONTHLY_OUTPUT: /tmp/casualty-monthly-oneshot
+        run: |
+          set -euo pipefail
+          python research/casualty_monthly_sources_2026_11_22/monthly_one_shot_collector.py --capture
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          out=Path('/tmp/casualty-monthly-oneshot')
+          data=(out/'capture_report.json').read_bytes()
+          digest=json.loads((out/'sha256_manifest.json').read_text())
+          assert hashlib.sha256(data).hexdigest()==digest['capture_report.json']
+          p=json.loads(data)
+          assert p['target_count']==27 and p['attempted_gets']==27
+          assert p['budget']==27 and p['rss_gets']==0
+          assert p['production_writes']==p['wip_writes']==p['automatic_credits']==0
+          assert p['promotion']=='OFF' and p['source_full_text_saved'] is False
+          print('MONTHLY_REVIEW_ONLY_PROOF_REHASH_PASS',digest['capture_report.json'])
+          PY
+      - name: Upload short review evidence, no source HTML/PDF
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-monthly-23city-one-shot
+          path: /tmp/casualty-monthly-oneshot
+          retention-days: 30
+          if-no-files-found: warn
