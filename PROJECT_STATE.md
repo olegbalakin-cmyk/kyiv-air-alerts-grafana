@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-21. **Active23 28-day URL rollover FIX LIVE and Netlify locked; 21 Nov row verified.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **C6-WATCHDOG-SEPARATE-DRYRUN-LIVE-2026-11-21-01**; previous **C6-CRON-RELIABILITY-AUDIT-2026-11-21-01**. Historical details below.
+Latest accepted transition: **C6-WATCHDOG-ENABLED-DEPLOYED-PROOF-PENDING-2026-11-22-01**; previous **C6-WATCHDOG-SEPARATE-DRYRUN-LIVE-2026-11-21-01**. Historical details below.
 
 ## Working instructions
 
@@ -15,18 +15,18 @@ Latest accepted transition: **C6-WATCHDOG-SEPARATE-DRYRUN-LIVE-2026-11-21-01**; 
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
-- **Scheduled C2/C6:** backup scheduler PR #224 merged main@500576ff, *separate* Netlify deploy 6b020ecee1511caa3ff3792d READY (scheduled c6-backup :47 UTC hourly, AUTO dispatch OFF, no PAT); physical C6 backup run not verified. #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
-- **UI/SEO LIVE:** PR #194 bilingual archive & trends (784 monthly pages, sitemap 936), Netlify `6afb034ee4ead33599681226` locked; browser QA #43875088810 PASS. Monthly cron OFF.
+- **Scheduled C2/C6:** backup scheduler PR #224 merged; owner PAT saved as Netlify secret, backup enabled in isolated deploy `6b02b299b68451c6ef022581` READY (cron :47 UTC hourly). Physical C6 backup dispatch not yet verified. #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
+- **UI/SEO LIVE:** PR #194 bilingual archive/trends (936 sitemap URLs); Netlify locked, #43875088810 PASS. Monthly cron OFF.
 
-- **Weekday UI LIVE:** PR #201 site-prod@ae650fea, Netlify `6aff5392a3a6d0497a6f5d1d` READY+locked; Actions #44602714671 PASS. UA/EN weekday graphs, time modes, tutorial; regular C2/Neon unchanged.
+- **Weekday UI LIVE:** PR #201, Netlify READY+locked, Actions #44602714671 PASS; weekday charts, modes, tutorial LIVE. C2 unchanged.
 - **Active23 UI LIVE + daily28 URL rollover FIX:** scheduled #44850889425 PASS, 23-city 21 Nov partial-day source; PR #219 merged site-prod@fcef2eb9. One-shot #44905428716 SUCCESS, proof #14707134897; Netlify `6b01928589f62e08bb7e4793` READY+published+locked. Live UA/EN/stale-URL Chromium #44906316130 PASS (Nov21 shown; 20min/2 starts for Kyiv). Source-at-capture only; stale unclosed cap hidden, completed data retained. No Neon/C2 change.
-- **Archived preview:** PR #208 frozen and NOT production; source-bound PR #214 tested, released via #217.
-- **DST VERIFIED; correction OFF:** #43706909819 proves 8 correct witnesses for Kharkiv/Poltava/Zhytomyr/Cherkasy and 3 stale parent UIDs excluded; no Neon mutation.
+- **Archived preview:** PR #208 not production; #214 released via #217.
+- **DST VERIFIED; correction OFF:** #43706909819 proves eight correct witnesses and three stale UIDs excluded; no Neon mutation.
 
 
 ## Concrete next tasks
 
-1. Activate existing independently deployed C6 backup *only after* owner adds repo-scoped GitHub fine-grained PAT (`Actions:write`) as secret to the separate Netlify watchdog project, dry-run confirmation, and explicit `C6_BACKUP_ENABLED=true` + separate-site redeploy; verify one actual owner-actor c6_run_now publish. GitHub cron currently unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
+1. Verify actual Netlify `c6-backup` scheduled invocation and, once both age gates permit, one owner-actor `c6_run_now` C2→Neon→Git-only publish. Production Netlify must remain locked; GitHub cron remains active but unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
 2. Monitor Active23 current-day rows after subsequent Git-only cycles, including URL rollover, 23-city parity, stale unclosed cap, clear behavior and trend; no regular Netlify deploys.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
@@ -36,6 +36,9 @@ Latest accepted transition: **C6-WATCHDOG-SEPARATE-DRYRUN-LIVE-2026-11-21-01**; 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WATCHDOG-ENABLED-DEPLOYED-PROOF-PENDING-2026-11-22-01 — external backup ON; runtime catch-up unverified
+- Owner stored GitHub PAT as secret in isolated Netlify project (name/scopes verified; value not read). `C6_BACKUP_ENABLED=true`; independent deploy `6b02b299b68451c6ef022581` READY and `c6-backup` hourly :47 UTC registered. Actions #45006564410 SUCCESS. Production deploy `6b01928589f62e08bb7e4793` unchanged; last C6 data publish #44995863969, site-prod@c60c5739. First scheduled function invocation and fallback C6 dispatch NOT YET VERIFIED; schedule reliability OPEN.
+
 ## C6-WATCHDOG-SEPARATE-DRYRUN-LIVE-2026-11-21-01 — external watcher published OFF, no auto C6 dispatch
 - PR #224 merged main@`500576ff1a1af8733681e179081048f796331d4b`. Isolated Netlify project `ukraine-air-alerts-c6-watchdog` ID `4370af81-4ccf-485c-8e43-5a9184ee7565` deployed READY ID `6b020ecee1511caa3ff3792d`; physical deploy lists scheduled `c6-backup` cron `47 * * * *`. Repo Actions #44952344169 SUCCESS deployment; #44952250179 + #44952485462 PASS offline 13 Node + 3 owner-manual guards. Scheduler compares last C6 attempt (>=4h20m), published data file (>=5h), caps 6 attempts/24h, blocks active jobs, uses exact owner-only `c6_run_now`; all failures fail closed. Separate Netlify env vars empty, no owner PAT or enabled flag: **watchdog dispatch OFF and no physical C6 fallback yet**. Production site, site-prod and Neon untouched. `C6_SCHEDULE_RELIABILITY=OPEN`, `C6_STABILIZATION=OPEN`. See `ops/c6-backup-scheduler/README.md`.
 
