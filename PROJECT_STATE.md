@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-22. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_EXTRA_CORRECTION=NOT_REQUIRED` (status label only; research selector remains disabled); live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**; previous **C6-WATCHDOG-RUNTIME-OBSERVED-2026-11-22-01**. Historical details below.
+Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**. Historical details below.
 
 ## Working instructions
 
@@ -36,6 +36,9 @@ Latest accepted transition: **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**; prev
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — documentation label only
+- Clarified the current coordination status to `DST_EXTRA_CORRECTION=NOT_REQUIRED`: eight valid DST witnesses are already counted and three stale physical UIDs excluded, supported by readback Actions #43706909819 and proof artifact #14159523883. Superseded research selector PR #182 remains disabled/unmerged. No runtime flag rename, Neon mutation, C2 change, production publication, or Netlify deploy.
+
 ## UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01 — release verified independently
 - Owner GO; preview PR #226 exact HEAD `75662e5ec013a550d73620e54ca1beb0ede1020f`, Actions #45013730066 SUCCESS (14 Node, 374 23-city integration, 57 browser cases), artifact #14751022637. Production PR #229 squash `site-prod@84c62de09b7df2f6a17e3cb7231bb4d88cd951f6`, follow-up gate repair `49abd7a562ab3becd1df4827aa12d9505be6565d`; Actions #45018819545 built and published Netlify `6b02d5edba0ff97b80b83052` READY/locked but overall FAILURE only on byte-comparing HTML modified by Netlify. Independent read-only Actions #45018970389 SUCCESS: exact served five JS/CSS assets, UA/EN HTML markers, 23-city same-release data and production lock PASS. UI fix LIVE, no duplicate redeploy; C2/Neon and regular Git-only publisher unchanged.
 
