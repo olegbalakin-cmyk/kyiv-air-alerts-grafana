@@ -60,6 +60,7 @@ jobs:
           python research/casualty_monthly_sources_2026_11_22/test_monthly_one_shot_collector.py
           python research/casualty_monthly_sources_2026_11_22/check_october_reconciliation.py
           python research/casualty_monthly_sources_2026_11_22/prepare_october_partial_preview.py --validate > /tmp/casualty-october-4event-preview.json
+          node research/casualty_monthly_sources_2026_11_22/test_casualty_partial_view.mjs
 
   monthly_one_shot:
     if: >-
