@@ -20,6 +20,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN" || { echo "AUDIT_TOKEN_UNAVAILABLE"; exit 2; }
+          npx --yes netlify-cli@latest link --id 4370af81-4ccf-485c-8e43-5a9184ee7565 --auth "$NETLIFY_AUTH_TOKEN" >/dev/null
           npx --yes netlify-cli@latest logs \
             --source functions \
             --function c6-backup \
