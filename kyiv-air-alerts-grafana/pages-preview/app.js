@@ -3437,6 +3437,7 @@ function renderCity() {
     dashboardGeneratedAt: state.data?.meta?.generated_at,
     derivedGeneratedAt: state.weekdayDerivedGeneration,
     dashboardReleaseId: state.data?.meta?.publication_authority?.release_manifest_sha256,
+    historicalReleaseId: state.historicalDaily?.meta?.release_manifest_sha256,
     derivedReleaseId: state.weekdayDerivedReleaseId,
     city: state.explorations?.cities?.[key],
     schema: state.weekdayDaypartSchema
