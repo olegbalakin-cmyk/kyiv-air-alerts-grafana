@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**C6-WATCHDOG-RUNTIME-OBSERVED-2026-11-22-01 — actual checks verified; fallback pending**
+- Actions #45018145331 SUCCESS: seven Netlify checks Nov22 04:47–10:47 UTC. After activation 09:47/10:47 C6_ATTEMPT_RECENT (correct skip); before activation 04:47–06:47 DRY_RUN_ONLY. Native C6 #44995863969 SUCCESS, no backup-triggered C6 yet. Schedule reliability still OPEN.
+
 **C6-WATCHDOG-ENABLED-DEPLOYED-PROOF-PENDING-2026-11-22-01 — backup enabled; physical dispatch still pending**
 - Owner PAT added as secret; `C6_BACKUP_ENABLED=true`; isolated Netlify deploy `6b02b299b68451c6ef022581` READY, cron :47 UTC hourly. Activation Actions #45006564410 SUCCESS. Production Netlify deploy unchanged; C6 #44995863969 updated site-prod@c60c5739. Runtime watchdog invocation and owner-actor catch-up dispatch NOT VERIFIED. `C6_SCHEDULE_RELIABILITY=OPEN`.
 
