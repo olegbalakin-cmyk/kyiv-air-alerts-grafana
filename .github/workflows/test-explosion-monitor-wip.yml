@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 13
     permissions:
-      contents: read
+      contents: write # required ONLY for the atomic spent-GO Git tag
     concurrency:
       group: casualty-monthly-oneshot-${{ inputs.owner_go_id }}
       cancel-in-progress: false
