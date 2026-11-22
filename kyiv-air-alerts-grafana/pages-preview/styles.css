@@ -178,3 +178,10 @@ body.embed-mode .embed-open-chart{max-width:100%;white-space:normal;overflow-wra
 .weekday-split-select select:disabled{opacity:.55;cursor:not-allowed}
 .weekday-split-status{min-height:18px;margin:4px 0 8px}
 @media(max-width:620px){.weekday-split-controls{align-items:stretch;flex-direction:column;gap:6px}.weekday-split-select{width:100%}}
+
+/* Compact, responsive time-band legend with period totals (not weekday averages). */
+.weekday-share-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 12px;margin:8px 0 11px;font-size:12px;line-height:1.5;color:#c8d5df}
+.weekday-share-legend[hidden]{display:none}
+.weekday-share-item{display:flex;align-items:flex-start;gap:7px;min-width:0;overflow-wrap:anywhere}
+.weekday-share-swatch{flex:0 0 10px;width:10px;height:10px;margin-top:4px;border-radius:2px}
+@media(max-width:620px){.weekday-share-legend{grid-template-columns:1fr;gap:4px;font-size:12px}}
