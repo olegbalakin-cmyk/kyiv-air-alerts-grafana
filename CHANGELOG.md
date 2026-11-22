@@ -1,13 +1,17 @@
 # Changelog
 
 <!-- coordination:history:start -->
+### CASUALTY-MONTHLY-27GET-OWNER-GO-ACCEPTED-DISPATCH-PENDING-2026-11-22-01 — owner authorized exact 27 GET, dispatch pending (2026-11-22)
+
+- Owner approved `casualty-23city-monthly-20261122-001`, exact [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, 27 URLs, source SHA256 `9896815fb6e800883d95182499c4d12c00b273651d8733e4d5ab7a552e566585`, grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, deadline `2026-11-23T17:00Z`. No dispatch API available; no workflow_dispatch/spent tag/publisher GET observed. Manual owner launch pending; data, credits, PROMOTE OFF.
+
 ### CASUALTY-MONTHLY-ONE-SHOT-GRANT-PREPARED-2026-11-22-01 — proposed canonical 27-GET grant, not yet approved (2026-11-22)
 
-- [Draft #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact HEAD `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, CI #45046769980 offline PASS; 27 exact URLs, source SHA256 `9896815fb6e800883d95182499c4d12c00b273651d8733e4d5ab7a552e566585`, GO ID `casualty-23city-monthly-20261122-001`, canonical grant SHA256 `0b655665f8e058c9cbbe89f6a9360c686d5d95f9bd524232562a82fddb9c48eb`, expiry 2026-11-23T17:00Z. **Owner has not issued this exact GO**; no manual dispatch, spent tag, or publisher GET. Data/PROMOTE OFF.
+- Prepared [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) exact 27-GET draft `11f9f2d`, manifest `9896815f…`, grant `0b655665…`, expiry Nov23 17:00Z. Initially not approved; later owner GO recorded separately.
 
 ### CASUALTY-MONTHLY-COLLECTOR-OFFLINE-CI-PASS-2026-11-22-01 — guarded monthly collector offline CI PASS (2026-11-22)
 
-- [Draft #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) `11f9f2d7779671beaa7b5609c776ffedb2ef4b1c`, [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 PASS, network SKIPPED. Exact 27 URLs (owner <=50 ceiling), spent-tag and actor/SHA/24h grant guards, pinned public HTTPS, <=2MiB/20s, no redirects/retry or full text. No execution grant or publisher GET, no credits/Neon/site-prod writes; PROMOTE OFF.
+- [PR #234](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/234) [CI #45046769980](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45046769980) 12/12 PASS; network SKIPPED. Atomic GO, public TLS, 2MiB/20s, no retry/redirect; no credits.
 
 ### CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01 — 23-city source audit partial (2026-11-22)
 
