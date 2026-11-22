@@ -14,7 +14,10 @@ async function split(p,n){
     const d=window.Chart?.getChart(document.querySelector("#weekdayHoursChart"))?.data?.datasets||[];
     return /Точний розподіл|Exact Europe/.test(s)&&d.length===expected;
   },n,{timeout:12000});
-  report.cases.push({city:await p.locator("#citySelect").inputValue(),range:await p.locator("#weekdayRange").inputValue(),bands:n,status:"PASS"});
+  const shares=await p.locator("#weekdayShareLegend .weekday-share-item").allTextContents();
+  assert.equal(shares.length,n,"Time-band legend matches chart bands");
+  for(const label of shares)assert.match(label,/\\d+[,.]\\d\\s*(год|h)\\s*·\\s*\\d+[,.]\\d%/);
+  report.cases.push({city:await p.locator("#citySelect").inputValue(),range:await p.locator("#weekdayRange").inputValue(),bands:n,status:"PASS",legend:shares});
 }
 async function page(browser,path,width,height){
   const p=await browser.newPage({viewport:{width,height}});
@@ -57,6 +60,7 @@ async function page(browser,path,width,height){
     assert.ok((await p.locator("#weekdayMeta").innerText()).startsWith(end+" — "+end));
     await p.locator("#weekdaySplitEnabled").uncheck();
     assert.equal(await p.evaluate(()=>Chart.getChart(document.querySelector("#weekdayHoursChart")).data.datasets.length),1);
+    assert.equal(await p.locator("#weekdayShareLegend .weekday-share-item").count(),0);
     const en=await page(b,"en/",1440,900);
     await en.selectOption("#weekdayRange","28d");
     await en.locator("#weekdaySplitEnabled").check();await split(en,4);
