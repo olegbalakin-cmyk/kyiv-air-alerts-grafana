@@ -1,0 +1,137 @@
+name: Weekday PR226 isolated Netlify draft and Chromium proof
+on:
+  push:
+    branches: [fix/weekday-split-release-binding-20261122]
+    paths:
+      - ".github/workflows/weekday-pr226-netlify-preview.yml"
+      - "tests/weekday_pr226_browser.cjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: weekday-pr226-netlify-draft
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/fix/weekday-split-release-binding-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      NETLIFY_SITE: b5aafc46-7468-4070-baf1-db80a4d30501
+      PREVIEW_ALIAS: weekday-pr226-20261122
+      WEEKDAY_PREVIEW_URL: https://weekday-pr226-20261122--ukraine-air-alerts.netlify.app/
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify previous 23-city split and production lock
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          node --test tests/test_weekday_distribution.cjs
+          node tests/weekday_c6_integration_probe.cjs
+          python3 - <<'PY'
+          import urllib.request,json,os
+          from pathlib import Path
+          url='https://api.netlify.com/api/v1/'
+          def read(p):
+            with urllib.request.urlopen(urllib.request.Request(url+p,headers={'Authorization':'Bearer '+os.environ['NETLIFY_AUTH_TOKEN']}),timeout=30) as r:return json.load(r)
+          site=read('sites/'+os.environ['NETLIFY_SITE'])
+          current=(site.get('published_deploy') or {}).get('id')
+          assert current
+          assert read('deploys/'+current)['locked'] is True,'PRODUCTION_NOT_LOCKED'
+          Path('/tmp/weekday-pr226-prod-id').write_text(current)
+          print('PROD_ID_LOCKED_BEFORE',current)
+          PY
+      - name: Build full offline preview pinned to one current six-file Git generation
+        run: |
+          set -euo pipefail
+          mkdir -p _site _preview-proof
+          for f in index.html styles.css app.js features.json chart-share.js kpi-range.js weekday-distribution.js weekday-ui.js weekday-dayparts.json active-23-provisional.js active-23-chart-overlay.js brand-mark.svg brand-horizontal-uk-dark.svg brand-horizontal-en-dark.svg favicon.svg favicon-32.png; do
+            cp "kyiv-air-alerts-grafana/pages-preview/$f" "_site/$f"
+          done
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          cp kyiv-air-alerts-grafana/data/site_derived.json _site/site-derived.json
+          cp kyiv-air-alerts-grafana/data/active23_source_capture.json _site/active23_source_capture.json
+          cp kyiv-air-alerts-grafana/data/kyiv_threat_mix.json _site/kyiv-threat-mix.json
+          python3 kyiv-air-alerts-grafana/scripts/export_verified_neon_historical_kpi.py \
+            --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json --output /tmp/pr226-history.json
+          cp /tmp/pr226-history.json _site/historical-daily-kpi.json
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/app.js');s=p.read_text(encoding='utf-8')
+          replacements=[
+           ('const DATA_URL = RAW_DATA_BASE + "dashboard_data.json";','const DATA_URL = "data.json";'),
+           ('const DERIVED_DATA_URL = RAW_DATA_BASE + "site_derived.json";','const DERIVED_DATA_URL = "site-derived.json";'),
+           ('const ACTIVE23_SOURCE_URL = RAW_DATA_BASE + "active23_source_capture.json";','const ACTIVE23_SOURCE_URL = "active23_source_capture.json";'),
+           ('const KYIV_THREAT_MIX_URL = RAW_DATA_BASE + "kyiv_threat_mix.json";','const KYIV_THREAT_MIX_URL = "kyiv-threat-mix.json";')
+          ]
+          for before,after in replacements:
+            assert s.count(before)==1,before
+            s=s.replace(before,after)
+          p.write_text(s,encoding='utf-8')
+          import json
+          d=json.loads(Path('_site/data.json').read_text())
+          e=json.loads(Path('_site/site-derived.json').read_text())
+          k=json.loads(Path('_site/historical-daily-kpi.json').read_text())
+          a=d['meta']['publication_authority']['release_manifest_sha256']
+          assert a==e['meta']['publication_authority']['release_manifest_sha256']
+          assert a==k['meta']['release_manifest_sha256']
+          assert len(e['explorations']['cities'])==23
+          print('PR226_FROZEN_23_CITY_RELEASE_ID_PASS',a)
+          PY
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py \
+            --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _site
+          python3 kyiv-air-alerts-grafana/scripts/build_historical_static_archive.py \
+            --source _site/historical-daily-kpi.json --output-dir _site
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > _site/_headers
+          node --check _site/app.js
+          for f in data.json site-derived.json weekday-distribution.js weekday-ui.js active23_source_capture.json; do test -s "_site/$f"; done
+          cp -a _site /tmp/pr226-preview-deploy
+      - name: Deploy only unpublished Netlify alias
+        run: |
+          set -euo pipefail
+          npx -y netlify-cli@latest deploy --dir=/tmp/pr226-preview-deploy --site="$NETLIFY_SITE" --auth="$NETLIFY_AUTH_TOKEN" --alias="$PREVIEW_ALIAS" --json > _preview-proof/deploy.json
+          python3 - <<'PY'
+          import json,os
+          x=json.load(open('_preview-proof/deploy.json'))
+          assert x.get('deploy_id')
+          assert not x.get('is_production',False) and not x.get('production',False)
+          assert (x.get('deploy_url') or x.get('url') or '').rstrip('/')==os.environ['WEEKDAY_PREVIEW_URL'].rstrip('/')
+          print('PR226_UNPUBLISHED_PREVIEW_URL',x['deploy_url'])
+          print('PR226_DRAFT_DEPLOY_ID',x['deploy_id'])
+          PY
+      - name: Chromium verify 23 cities, both split modes, language and mobile
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.56.1
+          npx playwright install-deps chromium
+          npx playwright install chromium
+          node tests/weekday_pr226_browser.cjs
+      - name: Verify published production ID and lock never changed
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import urllib.request,json,os
+          from pathlib import Path
+          path=Path('/tmp/weekday-pr226-prod-id')
+          if not path.exists():
+            print('NO_DEPLOY_ALLOWED');raise SystemExit(0)
+          def read(p):
+            with urllib.request.urlopen(urllib.request.Request('https://api.netlify.com/api/v1/'+p,headers={'Authorization':'Bearer '+os.environ['NETLIFY_AUTH_TOKEN']}),timeout=30) as r:return json.load(r)
+          current=read('sites/'+os.environ['NETLIFY_SITE'])['published_deploy']['id']
+          assert current==path.read_text(),'PROD_DEPLOY_CHANGED'
+          assert read('deploys/'+current)['locked'] is True,'PROD_UNLOCKED'
+          print('PR226_PRODUCTION_UNCHANGED_LOCKED',current)
+          PY
+      - name: Archive deploy receipt and browser proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekday-pr226-isolated-preview-${{ github.run_id }}
+          path: _preview-proof/
+          if-no-files-found: warn
+          retention-days: 14
