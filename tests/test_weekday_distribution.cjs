@@ -135,3 +135,20 @@ test("dynamic weekday bands reject other releases and per-day mismatches",()=>{
     ({date:row[0],weekday_time_band_seconds:row[0]==="2026-10-26"?[1,0,0,0,0]:row.slice(1)}))}},index.start,index.end,"four"),null);
   assert.equal(w.splitDerivedHours(verified,ctx,index.start,"2026-10-30","four"),null);
 });
+
+test("legend shares use exact period totals, not an unweighted average of weekdays",()=>{
+  const split={mode:"four",weekdays:[
+    {days:2,parts:[7200,3600,0,0]},
+    {days:1,parts:[0,3600,3600,0]},
+    {days:1,parts:[0,0,0,3600]},
+    ...Array.from({length:4},()=>({days:0,parts:[0,0,0,0]}))
+  ]};
+  const shares=w.splitShares(split);
+  assert.deepEqual(shares.map(s=>s.seconds),[7200,7200,3600,3600]);
+  assert.deepEqual(shares.map(s=>s.hours),[2,2,1,1]);
+  assert.ok(Math.abs(shares.reduce((a,s)=>a+s.percent,0)-100)<1e-9);
+  assert.ok(Math.abs(shares[0].percent-100/3)<1e-9);
+  assert.deepEqual(w.splitShares({...split,mode:"daynight",weekdays:Array.from({length:7},()=>({parts:[0,0]}))}),
+    [{seconds:0,hours:0,percent:0},{seconds:0,hours:0,percent:0}]);
+  assert.equal(w.splitShares({...split,weekdays:[{parts:[-1,0,0,0]}]}),null);
+});
