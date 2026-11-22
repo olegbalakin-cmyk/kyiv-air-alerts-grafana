@@ -1,8 +1,8 @@
 const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
-const adapter = require("../pages-preview/casualty-partial-preview.js");
-const payload=JSON.parse(readFileSync(path.join(__dirname,"../pages-preview/casualty-october-2026-preview.json"),"utf8"));
+const adapter = require("../kyiv-air-alerts-grafana/pages-preview/casualty-partial-preview.js");
+const payload=JSON.parse(readFileSync(path.join(__dirname,"../kyiv-air-alerts-grafana/pages-preview/casualty-october-2026-preview.json"),"utf8"));
 const baseline=Object.fromEntries(payload.cities.map(c=>[c.city_slug,{monthly:[
   {month:"2026-08",deaths:0},{month:"2026-09",deaths:2}
 ]}]));
