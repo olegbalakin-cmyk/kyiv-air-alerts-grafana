@@ -1,0 +1,39 @@
+name: Casualty October partial-month UI isolated preview (NO PUBLISH)
+on:
+  push:
+    branches: [research-casualty-october-ui-preview-2026-11-22]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    if: github.ref == 'refs/heads/research-casualty-october-ui-preview-2026-11-22'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Syntax and 23-city semantic safeguards
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/casualty-partial-preview.js
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node tests/test_casualty_partial_preview.cjs
+          python kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir /tmp/casualty-uaen
+          test "$(grep -c 'casualty-partial-preview.js' /tmp/casualty-uaen/index.html)" -eq 1
+          test "$(grep -c 'casualty-partial-preview.js' /tmp/casualty-uaen/en/index.html)" -eq 1
+          ! grep -R 'netlify deploy --prod' .github/workflows/casualty-partial-ui-preview.yml
+          echo CASUALTY_ISOLATED_UI_OFFLINE_PASS
+      - name: Verify production data and protected branches were not used as output
+        run: |
+          set -euo pipefail
+          git diff --exit-code HEAD -- kyiv-air-alerts-grafana/data/dashboard_data.json kyiv-air-alerts-grafana/data/casualties/
+          test -f kyiv-air-alerts-grafana/pages-preview/casualty-october-2026-preview.json
+          python - <<'PY'
+          import json
+          p=json.load(open('kyiv-air-alerts-grafana/pages-preview/casualty-october-2026-preview.json',encoding='utf-8'))
+          assert p['promotion']=='OFF'
+          assert p['display_policy']=='PREVIEW_ONLY_NO_SITE_MUTATION'
+          assert p['known_civilian_fatalities_from_these_events']==11
+          PY

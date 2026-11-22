@@ -535,6 +535,7 @@ const state = {
   features: { attack_events: false },
   kyivThreatMix: null,
   active23Snapshot: null,
+  casualtyPartial: null,
   explorations: null,
   charts: {},
   tableSort: { key: "alerts", direction: "desc" },
@@ -811,10 +812,11 @@ async function loadPreviewFeatures() {
     const response = await fetch(FEATURES_URL + "?v=" + Date.now(), { cache: "no-store" });
     if (!response.ok) throw new Error("feature config HTTP " + response.status);
     const parsed = await response.json();
-    return { attack_events: parsed?.attack_events === true };
+    return { attack_events: parsed?.attack_events === true,
+      casualty_partial_preview: parsed?.casualty_partial_preview === true };
   } catch (err) {
     console.warn("Preview feature config unavailable; attack-event features stay disabled", err);
-    return { attack_events: false };
+    return { attack_events: false, casualty_partial_preview: false };
   }
 }
 function applyPreviewFeatureVisibility() {
@@ -1055,6 +1057,13 @@ function exportChartCsv(chartId) {
     } else if (unit === "percent") {
       headers.push(`${label} [%]`);
       columnBuilders.push(index => [numericCsvValue(dataset.data?.[index])]);
+    } else if (chartId === "casualtyChart" || chartId === "compareCasualtiesChart") {
+      // Each city gets its own status column; one city may be unknown while another has a lower bound.
+      headers.push(label, label + " [value_status]");
+      columnBuilders.push(index => [
+        numericCsvValue(dataset.data?.[index]),
+        dataset._exportRows?.[index]?._casualty_status || "historical_reconstructed"
+      ]);
     } else {
       headers.push(label);
       columnBuilders.push(index => [numericCsvValue(dataset.data?.[index])]);
@@ -3764,10 +3773,35 @@ function renderShortHorizon(key) {
   });
 }
 
+function casualtyPreviewRows(key) {
+  const series = state.data.casualties_by_city?.[key] ||
+    (key === "kyiv" ? state.data.casualties : null);
+  if (!series) return [];
+  return window.CasualtyPartialPreview?.rows(series.monthly, key, state.casualtyPartial) ||
+    series.monthly || [];
+}
+function casualtyCsvStatus(row, yearly = false) {
+  if (row?.is_partial_period) return row._casualty_status;
+  if (yearly && row?.year === "2026" && state.casualtyPartial)
+    return "year_2026_through_september_excludes_october";
+  return yearly ? "reconstructed_year" : "reconstructed_month";
+}
+function appendCasualtyEvidence(container, key) {
+  if (!container) return;
+  container.replaceChildren();
+  const url = window.CasualtyPartialPreview?.sourceFor(key);
+  if (!state.casualtyPartial || !url) return;
+  container.append(document.createTextNode(tr("Джерело перевіреної атаки: ","Verified attack source: ")));
+  const link=document.createElement("a");
+  link.href=url;link.target="_blank";link.rel="noopener noreferrer";
+  link.textContent=tr("офіційне повідомлення або Суспільне","official report or Suspilne");
+  container.append(link);
+}
+
 function renderCasualties(key) {
   const section = $("casualtySection");
   const series = state.data.casualties_by_city?.[key] || (key === "kyiv" ? state.data.casualties : null);
-  const allRows = series?.monthly || [];
+  const allRows = casualtyPreviewRows(key);
   if (!allRows.length) {
     section.classList.add("hidden");
     if (state.charts.casualtyChart) {
@@ -3776,34 +3810,70 @@ function renderCasualties(key) {
     }
     return;
   }
-
   section.classList.remove("hidden");
   $("casualtyCityEyebrow").textContent = labelFor(key);
-
   const selectedYear = syncCasualtyYearOptions(allRows);
   const interval = $("casualtyInterval")?.value === "yearly" ? "yearly" : "monthly";
   const filteredRows = casualtyRowsForYear(allRows, selectedYear);
-
+  const is2026Selected = selectedYear === "all" || selectedYear === "2026";
   const meta = series?.meta || {};
-  const total = allRows.reduce((sum, r) => sum + (Number(r.deaths) || 0), 0);
+  const total = (series?.monthly || []).reduce((sum, r) => sum + (Number(r.deaths) || 0), 0);
   const unresolved = Number(meta.unresolved_review_cases || 0);
-  $("casualtySourceNote").textContent=unresolved
-    ?tr(`Підтверджений ряд: ${total} загиблих. Невирішених випадків, що потребують перевірки: ${unresolved}; їх не включено. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`,`Confirmed series: ${total} deaths. Unresolved cases requiring review: ${unresolved}; they are excluded. Reconstructed from publicly available reports by official bodies and media.`)
-    :tr(`Підтверджений ряд: ${total} загиблих. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`,`Confirmed series: ${total} deaths. Reconstructed from publicly available reports by official bodies and media.`);
+  let note = unresolved
+    ? tr("Підтверджений історичний ряд: " + total + " загиблих. Невирішених випадків: " + unresolved + "; вони не включені.",
+         "Reconstructed historical series: " + total + " deaths. Unresolved cases: " + unresolved + "; excluded.")
+    : tr("Підтверджений історичний ряд: " + total + " загиблих.",
+         "Reconstructed historical series: " + total + " deaths.");
+  note += " " + tr("Реконструкція за офіційними повідомленнями та медіа.",
+                     "Reconstructed from official reports and media.");
+  if (state.casualtyPartial && is2026Selected) {
+    note += " " + (interval === "yearly"
+      ? tr("2026: річне значення лише за січень–вересень; жовтневі мінімальні випадки не додані.",
+           "2026: year value covers January–September only; October event minimum is excluded.")
+      : window.CasualtyPartialPreview.description(key, state.casualtyPartial, currentLanguage === "en"));
+  }
+  $("casualtySourceNote").textContent = note;
+  appendCasualtyEvidence($("casualtyEvidence"), key);
 
-  const chartRows = interval === "yearly" ? aggregateCasualtiesByYear(filteredRows) : filteredRows;
+  // Explicitly exclude the partial month from yearly aggregation; do not silently add a lower bound.
+  const chartRows = interval === "yearly"
+    ? aggregateCasualtiesByYear(filteredRows.filter(r => r.is_partial_period !== true))
+    : filteredRows;
   const labels = interval === "yearly"
     ? chartRows.map(r => r.year)
     : chartRows.map(r => r.month || String(r.time || "").slice(0, 7));
-  const values = chartRows.map(r => Number(r.deaths) || 0);
-
-  setChart(
-    "casualtyChart",
-    labels,
-    [{ label: tr("Загиблих","Deaths"), data: values, backgroundColor: "#62a0ea99", borderColor: "#62a0ea", borderWidth: 1 }],
-    tr("Кількість загиблих","Number of deaths"),
-    "bar",
-    { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
+  const hasPartial = interval === "monthly" && chartRows.some(r => r.is_partial_period);
+  const datasets = [{
+    label: tr("Історичний реконструйований ряд","Historical reconstructed series"),
+    data: chartRows.map(r => r.is_partial_period ? null : Number(r.deaths)),
+    _exportRows: chartRows.map(r => ({ ...r, _casualty_status: casualtyCsvStatus(r, interval === "yearly") })),
+    backgroundColor: "#62a0ea99", borderColor: "#62a0ea", borderWidth: 1
+  }];
+  if (hasPartial) datasets.push({
+    label: tr("Щонайменше підтверджено (неповний місяць)","At least confirmed (incomplete month)"),
+    data: chartRows.map(r => r.is_partial_period ? r.confirmed_event_lower_bound : null),
+    _exportRows: chartRows.map(r => ({ ...r, _casualty_status: casualtyCsvStatus(r) })),
+    backgroundColor: "#f0a44bbb", borderColor: "#f0a44b", borderWidth: 2
+  });
+  setChart("casualtyChart", labels, datasets,
+    tr("Кількість загиблих","Number of deaths"), "bar", {
+      plugins: {
+        legend: { display: hasPartial, labels: { color: TEXT } },
+        tooltip: { mode: "index", intersect: false,
+          callbacks: {
+            label(ctx) {
+              const row = chartRows[ctx.dataIndex];
+              if (row?.is_partial_period) return tr(
+                "Щонайменше " + row.confirmed_event_lower_bound + " підтверджених (жовтень неповний)",
+                "At least " + row.confirmed_event_lower_bound + " confirmed (October incomplete)");
+              const qualifier = interval === "yearly" && row?.year === "2026" && state.casualtyPartial
+                ? tr(" (лише січень–вересень)"," (January–September only)") : "";
+              return tr("Загиблих: ","Deaths: ") + ctx.formattedValue + qualifier;
+            }
+          }
+        }
+      }
+    }
   );
 }
 
@@ -4084,7 +4154,6 @@ function renderComparison() {
   const casualtyNote = $("compareCasualtiesNote");
   const casualtyKeys = keys.filter(key => (state.data.casualties_by_city?.[key]?.monthly || []).length);
   const missingCasualtyKeys = keys.filter(key => !casualtyKeys.includes(key));
-
   if (!casualtyKeys.length) {
     casualtyCard.classList.add("hidden");
     if (state.charts.compareCasualtiesChart) {
@@ -4095,56 +4164,72 @@ function renderComparison() {
     casualtyCard.classList.remove("hidden");
     const selectedYear = syncCompareCasualtyYearOptions(casualtyKeys);
     const casualtyInterval = $("compareCasualtyInterval")?.value === "yearly" ? "yearly" : "monthly";
-
     const maps = casualtyKeys.map(key => {
-      const filtered = casualtyRowsForYear(
-        state.data.casualties_by_city[key].monthly,
-        selectedYear
-      );
+      const filtered = casualtyRowsForYear(casualtyPreviewRows(key), selectedYear);
       const rows = casualtyInterval === "yearly"
-        ? aggregateCasualtiesByYear(filtered).map(row => ({ key: row.year, deaths: row.deaths }))
+        ? aggregateCasualtiesByYear(filtered.filter(row => !row.is_partial_period))
+            .map(row => ({
+              key: row.year, deaths: row.deaths, is_partial_period: false,
+              _casualty_status: casualtyCsvStatus(row, true)
+            }))
         : filtered.map(row => ({
-            key: row.month || String(row.time || "").slice(0, 7),
-            deaths: Number(row.deaths) || 0
+            key: row.month || String(row.time || "").slice(0,7),
+            deaths: row.is_partial_period ? row.confirmed_event_lower_bound : Number(row.deaths),
+            is_partial_period: row.is_partial_period === true,
+            _casualty_status: casualtyCsvStatus(row)
           }));
-      return new Map(rows.map(row => [row.key, row.deaths]));
+      return new Map(rows.map(row => [row.key, row]));
     });
-
     let commonLabels = new Set(maps[0].keys());
-    for (const map of maps.slice(1)) {
+    for (const map of maps.slice(1))
       commonLabels = new Set([...commonLabels].filter(label => map.has(label)));
-    }
     const casualtyLabels = [...commonLabels].sort();
+    const hasPartial = state.casualtyPartial && casualtyInterval === "monthly" &&
+      casualtyLabels.includes("2026-10");
     const casualtyDatasets = casualtyKeys.map((key, idx) => ({
       label: labelFor(key),
-      data: casualtyLabels.map(label => maps[idx].get(label) ?? null),
-      backgroundColor: COLORS[idx] + "77",
-      borderColor: COLORS[idx],
+      data: casualtyLabels.map(label => maps[idx].get(label)?.deaths ?? null),
+      _exportRows: casualtyLabels.map(label => maps[idx].get(label) || null),
+      backgroundColor: casualtyLabels.map(label =>
+        maps[idx].get(label)?.is_partial_period ? "#f0a44bbb" : COLORS[idx] + "77"),
+      borderColor: casualtyLabels.map(label =>
+        maps[idx].get(label)?.is_partial_period ? "#f0a44b" : COLORS[idx]),
       borderWidth: 1
     }));
-
-    setChart(
-      "compareCasualtiesChart",
-      casualtyLabels,
-      casualtyDatasets,
-      tr("Кількість загиблих","Number of deaths"),
-      "bar",
-      { plugins: { legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } }, tooltip: { mode: "index", intersect: false } } }
-    );
-
-    const intervalText = casualtyInterval === "yearly"
-      ? tr("Річний ряд","Annual series")
-      : tr("Помісячний ряд","Monthly series");
-    const yearText = selectedYear === "all"
-      ? tr("усі спільні роки","all common years")
-      : selectedYear;
+    setChart("compareCasualtiesChart", casualtyLabels, casualtyDatasets,
+      tr("Кількість загиблих","Number of deaths"), "bar", {
+        plugins: {
+          legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+          tooltip: { mode: "index", intersect: false,
+            callbacks: {
+              label(ctx) {
+                const row = ctx.dataset._exportRows?.[ctx.dataIndex];
+                if (row?.is_partial_period)
+                  return ctx.dataset.label + ": " + tr("щонайменше ","at least ") +
+                    row.deaths + tr(" підтверджених — місяць неповний"," confirmed — incomplete month");
+                const qualifier = casualtyInterval === "yearly" && row?.key === "2026" &&
+                  state.casualtyPartial ? tr(" (лише до вересня)"," (through September only)") : "";
+                return ctx.dataset.label + ": " + ctx.formattedValue + qualifier;
+              }
+            }
+          }
+        }
+      });
+    const intervalText = casualtyInterval === "yearly" ? tr("Річний ряд","Annual series") :
+      tr("Помісячний ряд","Monthly series");
+    const yearText = selectedYear === "all" ? tr("усі спільні роки","all common years") : selectedYear;
     const missingText = missingCasualtyKeys.length
-      ? tr(` Немає готового ряду загиблих: ${missingCasualtyKeys.map(labelFor).join(", ")}.`, ` No completed death series for: ${missingCasualtyKeys.map(labelFor).join(", ")}.`)
+      ? tr(" Немає ряду: " + missingCasualtyKeys.map(labelFor).join(", ") + ".",
+           " Missing series: " + missingCasualtyKeys.map(labelFor).join(", ") + ".") : "";
+    const partialText = state.casualtyPartial && (selectedYear === "all" || selectedYear === "2026")
+      ? (casualtyInterval === "monthly"
+        ? tr(" Жовтень 2026: помаранчеві стовпчики — щонайменше підтверджено в окремих атаках; пропуски — невідомо, НЕ нуль.",
+             " October 2026: orange bars are incident-level confirmed minimums; gaps mean unknown, NOT zero.")
+        : tr(" 2026 рік: лише січень–вересень; попередні жовтневі випадки не додано.",
+             " Year 2026: January–September only; preliminary October cases excluded."))
       : "";
-    casualtyNote.textContent = tr(
-      `${intervalText}, ${yearText}. Показано лише періоди, спільні для міст із доступним рядом.${missingText}`,
-      `${intervalText}, ${yearText}. Only periods common to cities with an available series are shown.${missingText}`
-    );
+    casualtyNote.textContent = tr(intervalText + ", " + yearText + ". Показано лише спільні періоди." + missingText + partialText,
+                                  intervalText + ", " + yearText + ". Only common periods shown." + missingText + partialText);
   }
 
   updateUrl();
@@ -4656,6 +4741,19 @@ async function init() {
     }
   }
   if (!state.data) throw new Error("Neither live site-prod nor bundled preview data loaded");
+  // Frozen, explicit test-only sidecar; default OFF, and never changes original monthly data.
+  if (state.features.casualty_partial_preview === true && window.CasualtyPartialPreview) {
+    try {
+      const partialResponse = await fetch("casualty-october-2026-preview.json?v=" + Date.now(), {cache:"no-store"});
+      if (!partialResponse.ok) throw new Error("Partial preview HTTP " + partialResponse.status);
+      state.casualtyPartial = window.CasualtyPartialPreview.validate(
+        await partialResponse.json(), state.data.casualties_by_city
+      );
+    } catch (error) {
+      state.casualtyPartial = null;
+      console.warn("Rejected casualty preview; original monthly series preserved", error);
+    }
+  }
   // Optional same-run source-at-capture observation. Never infer live status.
   try {
     const response = await fetch(ACTIVE23_SOURCE_URL + "?v=" + Date.now(), {cache:"no-store"});
