@@ -1,9 +1,13 @@
 # Changelog
 
 <!-- coordination:history:start -->
-### CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01 — exact owner GO approved, network unstarted (2026-11-22)
+### CASUALTY-WORKAH-LIVE-3HTTP200-1NUMERIC-REVIEWONLY-2026-11-22-01 — article HTTP 3/3; numeric 1/3; review only (2026-11-22)
 
-- Work AH `2b3b57991d035168d737f40b2239c15b01945776`; `workai-article-20261122-001`, manifest SHA256 `da6b11752c0b60f38900f5fc311313cd4876f88bb70ce56722c8631df68079d8` verified, expires `2026-11-23T12:00Z`. Exact T03–T05 only, 3 article GET/0 RSS, no redirects/retry, PROMOTE OFF. No spent tag/dispatch, 0 publisher GET; GitHub connector lacks dispatch write, owner must execute manually.
+- [Actions #45020948794](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794) SUCCESS, Work AH exact `2b3b57991d035168d737f40b2239c15b01945776`; spent GO tag `workai-article-20261122-001`. Three GET HTTP200/body: T03 649 chars/numeric UNKNOWN, T04 773/UNKNOWN, T05 2297/3 cumulative with police excerpt. Dates, place, incident identity unresolved; dedup NEEDS_REVIEW. [Artifact #14753224774](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794/artifacts/14753224774) ZIP SHA256 `549a3fc4b9389d6f43f89621c821ac6bd9a6ab8d1bd1e728381c103e9e765140`, inner JSON `4c724125346fb55b20c72313be5a22c13b19646a27e78aa97d080a72e476788c`, independently rehashed. 0 RSS/credits/WIP/prod writes, PROMOTE OFF; next offline fix T03/T04, no new HTTP without separate GO.
+
+### CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01 (2026-11-22)
+
+- GO `workai-article-20261122-001`, AH `2b3b5799`, 3 article GET/0 RSS, expiry 2026-11-23T12Z, SHA256 `da6b11752c0b60f38900f5fc311313cd4876f88bb70ce56722c8631df68079d8`; later used once by #45020948794.
 
 ### CASUALTY-WORKAI-OFF-DISPATCH-VERIFIED-2026-11-18-01 — owner OFF-dispatch verified (2026-11-18)
 
@@ -23,7 +27,7 @@
 
 ### CASUALTY-WORKAF-FILTER-ALLOWLIST-GO-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/173) `37cf0b19`, [CI #43702948168](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43702948168) 12/12 PASS, artifact #14157426485 SHA256 `e8ee113162701a86a701d96d90c602bc715307b7e03e22b7b688065720b4964a`, 2/2 inner PASS. Synthetic atomic GO tag and rerun PASS; legacy network executor bypass remains, 4 publisher hosts staged, live article BLOCKED, 0 GET/credits.
+- [PR #173](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/173) `37cf0b19`, CI #43702948168 12/12 offline, artifact #14157426485 SHA256 `e8ee113162701a86a701d96d90c602bc715307b7e03e22b7b688065720b4964a`. Atomic GO proof, earlier older workflows unguarded.
 
 ### CASUALTY-WORKAE-DUAL-RSS-PILOTS-RECONCILED-BUDGET-EXCEEDED-2026-11-15-01 (2026-11-15)
 
@@ -31,7 +35,7 @@
 
 ### CASUALTY-WORKAE-SIX-DIRECT-RSS-ONESHOT-5OF6-2026-11-15-01 — one of two RSS runs (2026-11-15)
 
-- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, [run B #43700806130](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43700806130) 5/6 RSS200, 115 publisher URLs and six broad keyword candidates, artifact #14156048863 SHA in prior checkpoint. Second parallel run A exceeded shared GO budget (see dual-run checkpoint). No article GET/credits.
+- [PR #171](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/171) `53c48f0b`, #43700806130 5/6 RSS200, 115 links, artifact #14156048863 SHA in prior checkpoint; duplicate six-GET GO noted in dual-run entry.
 
 ### CASUALTY-WORKAD-URL-WORKJ-FACTS-OFFLINE-PASS-SHADOW-PARTIAL-01 (archived evidence)
 
@@ -39,7 +43,7 @@
 
 ### CASUALTY-WORKAC-BOUNDED-CAPTURE-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
-- [PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) `1cd3e85f`, [Actions #43696226023](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/43696226023) 17/17 PASS, artifact #14154303167 uploader ZIP SHA256 `c45ae98be3dd0ab4e5bd0ffc9b23d31777032d2bb9b39e150c635bbd531695d9`, 3/3 inner PASS. Mock secure article capture/budgets PASS, 0 source GET/WIP credits; opaque links unresolved. Work AD adds Work J counts in research only.
+- [PR #169](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/169) `1cd3e85f`, CI #43696226023 17/17 offline, artifact #14154303167 ZIP SHA256 `c45ae98be3dd0ab4e5bd0ffc9b23d31777032d2bb9b39e150c635bbd531695d9`; mocked only, no GET/credits.
 
 ### CASUALTY-WORKAB-SHADOW-OFFLINE-PASS-LIVE-BLOCKED-01 (2026-11-15)
 
