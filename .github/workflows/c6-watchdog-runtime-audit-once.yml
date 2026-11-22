@@ -1,0 +1,56 @@
+name: C6 watchdog runtime logs read-only audit
+on:
+  push:
+    branches: [audit/c6-watchdog-netlify-runtime-20261122]
+    paths:
+      - .github/workflows/c6-watchdog-runtime-audit-once.yml
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Read ONLY independent Netlify function logs, no C6 dispatch
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN" || { echo "AUDIT_TOKEN_UNAVAILABLE"; exit 2; }
+          npx --yes netlify-cli@23.8.1 logs \
+            --source functions \
+            --function c6-backup \
+            --url https://ukraine-air-alerts-c6-watchdog.netlify.app \
+            --since 7h \
+            --json \
+            --auth "$NETLIFY_AUTH_TOKEN" \
+            > "$RUNNER_TEMP/c6-watchdog-raw-logs.jsonl"
+          python3 - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"c6-watchdog-raw-logs.jsonl"
+          content=path.read_text(errors="replace")
+          events=[]
+          for line in content.splitlines():
+              try:
+                  row=json.loads(line)
+              except (ValueError,TypeError):
+                  continue
+              message=row.get("message") if isinstance(row,dict) else ""
+              if not isinstance(message,str): message=json.dumps(message,ensure_ascii=True)
+              # Whitelist only known, finite status codes. Never print log bodies or secrets.
+              found=re.search(r"C6_BACKUP_CHECK\s+([A-Z_]+)\s+([A-Z_]+)",message)
+              failure="C6_BACKUP_FAIL_CLOSED" in message
+              if found or failure:
+                  iso=row.get("timestamp") or row.get("time") or ""
+                  if not isinstance(iso,str) or not re.match(r"^20\d{2}-",iso): iso="time_unavailable"
+                  events.append((iso,found.group(1) if found else "FAIL_CLOSED",found.group(2) if found else "NONE"))
+          print("NETLIFY_C6_WATCHDOG_LOG_PROOF")
+          print("log_lines",len(content.splitlines()))
+          print("status_events",len(events))
+          for event in events[:25]: print("watchdog_event",*event)
+          if not events: print("NO_VISIBLE_WATCHDOG_STATUS_LOGS")
+          PY
