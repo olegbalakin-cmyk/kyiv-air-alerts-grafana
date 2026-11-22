@@ -1,6 +1,6 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-22. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_CORRECTION=OFF`; live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+**Date:** 2026-11-22. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_EXTRA_CORRECTION=NOT_REQUIRED` (status label only; research selector remains disabled); live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
 Latest accepted transition: **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**; previous **C6-WATCHDOG-RUNTIME-OBSERVED-2026-11-22-01**. Historical details below.
 
 ## Working instructions
@@ -21,7 +21,7 @@ Latest accepted transition: **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**; prev
 - **Weekday UI LIVE:** PR #201 and correction PR #229 (based on PR #226), site-prod@49abd7a, Netlify `6b02d5edba0ff97b80b83052` READY/published/locked. Exact 5 JS/CSS and UA/EN markers, 23-city release parity independently PASS #45018970389. Per-weekday-bar hover/tap gives hours and its own percentages. C2/Neon unchanged; main release Actions #45018819545 published/relocked successfully but overall FAILED at byte-exact HTML smoke (Netlify-injected bytes); no redeploy required.
 - **Active23 UI LIVE:** PR #219, source-bound current day and URL rollover verified #44906316130; present in newer locked Netlify `6b02d5edba0ff97b80b83052`. Source-at-capture only.
 - **Archived preview:** PR #208 not production; #214 released via #217.
-- **DST VERIFIED; correction OFF:** #43706909819 proves eight correct witnesses and three stale UIDs excluded; no Neon mutation.
+- **DST VERIFIED; extra correction NOT REQUIRED:** #43706909819 confirms eight correct witnesses and three stale UIDs already excluded from calculations; research selector stays disabled, no Neon mutation.
 
 
 ## Concrete next tasks
