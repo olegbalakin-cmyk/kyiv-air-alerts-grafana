@@ -134,6 +134,25 @@
     return splitHours(index, source, from, to, mode);
   }
 
+  // Legend shares use total seconds across the selected calendar range.
+  // Do not weight the weekday averages equally: weekdays may have different
+  // numbers of observations, especially for custom date ranges.
+  function splitShares(split) {
+    const size=split?.mode==="four"?4:split?.mode==="daynight"?2:0;
+    if (!size || !Array.isArray(split.weekdays) || split.weekdays.length!==7) return null;
+    const totals=Array(size).fill(0);
+    for(const day of split.weekdays) {
+      if (!Array.isArray(day.parts) || day.parts.length!==size ||
+          !day.parts.every(v=>Number.isFinite(v)&&v>=0)) return null;
+      day.parts.forEach((seconds,i)=>{totals[i]+=seconds;});
+    }
+    const sum=totals.reduce((a,b)=>a+b,0);
+    return totals.map(seconds=>({
+      seconds, hours:seconds/3600,
+      percent:sum>0?100*seconds/sum:0
+    }));
+  }
+
   return Object.freeze({ validIndex, preset, summarize, splitHours,
-    sameVerifiedRelease, splitDerivedHours });
+    sameVerifiedRelease, splitDerivedHours, splitShares });
 });
