@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-15. **Casualty PROMOTE=OFF.** C6 is governed by newer accepted `main:PROJECT_STATE.md`; this casualty draft does not change production.
 Latest C6 state: governed by newer `main:PROJECT_STATE.md`, not this casualty coordination draft.
-Latest casualty: **CASUALTY-WORKAH-LIVE-3HTTP200-1NUMERIC-REVIEWONLY-2026-11-22-01**: [Actions #45020948794](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794) 3/3 HTML200, numeric 1/3 (police=3); no credits, PROMOTE OFF.
+Latest casualty: **CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01**: [Draft #233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/233), 23 cities: 12 leads/11 unknown; zero controlled GET, no data edits.
 
 ## Working instructions
 
@@ -16,21 +16,25 @@ Latest casualty: **CASUALTY-WORKAH-LIVE-3HTTP200-1NUMERIC-REVIEWONLY-2026-11-22-
 ## Current tracks and open release gates
 
 - **Other tracks:** production/C6, Neon, C3, API, DST and historical completeness follow newer accepted `main:PROJECT_STATE.md`; this casualty draft does not authorize changes to them.
-- **Operational WIP / casualty:** AH live one-shot 3 HTTP200/bodies, only T05 numeric=3; T03/T04 unknown, identity unresolved, 0 credits, PROMOTE OFF.
+- **Operational WIP / casualty:** Work AH 3/3 HTML and numeric 1/3; monthly research audit 23 cities, 27 candidate URLs, controlled GET unrun. PROMOTE OFF.
 
 ## Concrete next tasks
 
 1. C6 production/stabilization/DST tasks: see newer `main:PROJECT_STATE.md` and PR #78; do not use old C6 tasks in this casualty draft.
 2. Casualty H/I: PRs #114/#115 PASS offline, no release.
-3. Casualty next: offline investigate T03/T04 missed counts and attack-date/locality/cross-source identity. No new article GET without new GO, no WIP/prod writes.
+3. Casualty next: one-shot GitHub research HTTP capture under owner <=50 GET budget; reconcile air-only city totals and baseline. No automatic credits or prod writes.
 4. Separately verify actual Netlify frontend asset and its GitHub Raw JSON fetch read-only; until then live casualty parity is UNVERIFIED.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-MONTHLY-23CITY-WEB-AUDIT-PARTIAL-2026-11-22-01 (2026-11-22)
+
+- [Draft #233](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/pull/233) 23 October city rows, 12 leads/11 UNKNOWN; 27 source candidates, some incompatible in scope. Direct DNS failed: **0 physical collector GET**, search evidence only. Approved <=50 GET remains unspent. No site/WIP/Neon changes or PROMOTE.
+
 ## CASUALTY-WORKAH-LIVE-3HTTP200-1NUMERIC-REVIEWONLY-2026-11-22-01 (2026-11-22)
 
-- [Run #45020948794](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794) SUCCESS, AH `2b3b5799`, spent owner GO `workai-article-20261122-001`. Three approved GET: 3/3 HTTP200/body; T03/T04 numeric UNKNOWN, T05 police 3 cumulative with excerpt, identity/date/place NEEDS_REVIEW. [Artifact #14753224774](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45020948794/artifacts/14753224774) hashes in log (ZIP/JSON verified); zero credits/RSS/production writes; PROMOTE OFF.
+- Run #45020948794 PASS: 3/3 HTTP200, T03/T04 numeric UNKNOWN, T05=3, artifact #14753224774, hashes in log. GO spent, no credits/PROMOTE.
 
 ## CASUALTY-WORKAI-ARTICLE-GO-APPROVED-NOT-DISPATCHED-2026-11-22-01 (2026-11-22)
 
