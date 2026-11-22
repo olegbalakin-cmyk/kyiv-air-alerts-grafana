@@ -16,7 +16,7 @@ async function split(p,n){
   },n,{timeout:12000});
   const shares=await p.locator("#weekdayShareLegend .weekday-share-item").allTextContents();
   assert.equal(shares.length,n,"Time-band legend matches chart bands");
-  for(const label of shares)assert.match(label,/\\d+[,.]\\d\\s*(год|h)\\s*·\\s*\\d+[,.]\\d%/);
+  for(const label of shares)assert.match(label,/\d+[,.]\d\s*(год|h)\s*·\s*\d+[,.]\d%/);
   report.cases.push({city:await p.locator("#citySelect").inputValue(),range:await p.locator("#weekdayRange").inputValue(),bands:n,status:"PASS",legend:shares});
 }
 async function page(browser,path,width,height){
