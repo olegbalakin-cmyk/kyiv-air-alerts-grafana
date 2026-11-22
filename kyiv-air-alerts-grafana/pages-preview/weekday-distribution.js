@@ -112,7 +112,7 @@
     const id = ctx?.dashboardReleaseId;
     return typeof id === "string" && /^[a-f0-9]{64}$/.test(id) &&
       ctx.derivedReleaseId === id &&
-      index?.meta?.release_manifest_sha256 === id;
+      ctx.historicalReleaseId === id && validIndex(index);
   }
 
   function splitDerivedHours(index, ctx, from, to, mode) {
