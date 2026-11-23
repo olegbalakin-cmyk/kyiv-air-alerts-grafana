@@ -16,7 +16,7 @@ const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok){er
     document.querySelector("#citySelect")?.options.length===23&&window.Chart?.getChart(document.querySelector("#casualtyChart"))?.data.labels.includes("2026-10"),{timeout:100000});
   check(lang+mode+"source",await page.evaluate(()=>document.documentElement.dataset.casualtySourceMode==="frozen_test"&&/^[a-f0-9]{40}$/.test(document.documentElement.dataset.casualtySourceSha)));
   const keys=await page.$$eval("#citySelect option",els=>els.map(e=>e.value).filter(Boolean));
-  const verified={lutsk:6,poltava:1,"ivano-frankivsk":1,khmelnytskyi:3};
+  const verified={lutsk:6,poltava:1,"ivano-frankivsk":1,ivano_frankivsk:1,khmelnytskyi:3};
   for(const key of keys){
    console.log("CASUALTY_245_BROWSER_CITY",lang,mode,key);
    await page.select("#citySelect",key);
@@ -79,7 +79,10 @@ const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok){er
  blocked.on("request",r=>r.url().endsWith("/casualty_partial_months.json")?
   r.respond({status:404,contentType:"application/json",body:"{}"}).catch(()=>{}):r.continue().catch(()=>{}));
  await blocked.goto(base.replace(/\/$/,"")+"/?city=lutsk",{waitUntil:"domcontentloaded",timeout:90000});
- await blocked.waitForFunction(()=>document.documentElement.dataset.casualtyStatus==="blocked",{timeout:90000});
+ await blocked.waitForFunction(()=>
+   document.documentElement.dataset.casualtyStatus==="blocked" &&
+   document.querySelector("#casualtySourceNote")?.textContent?.includes("недоступні"),
+   {timeout:90000});
  const fail=await blocked.evaluate(()=>({blocked:document.documentElement.dataset.casualtyStatus==="blocked",
     noChart:!window.Chart?.getChart(document.querySelector("#casualtyChart")),
     notice:document.querySelector("#casualtySourceNote").textContent}));
