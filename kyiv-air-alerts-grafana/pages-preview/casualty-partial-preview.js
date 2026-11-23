@@ -3,6 +3,23 @@
 (function(root) {
   "use strict";
   const MONTH = "2026-10";
+  const SEPTEMBER = "2026-09";
+  // Git blob SHA-1 of the exact frozen October JSON: "blob <byte-length>\\0" + UTF-8 bytes.
+  const SOURCE_BLOB_SHA = "9ebeacf2e32e1023766f64ddfadf2ba3b8dbab55";
+  async function verifyFrozenSource(sourceText) {
+    if (!globalThis.crypto?.subtle || typeof TextEncoder !== "function") reject("checksum unavailable");
+    const bytes = new TextEncoder().encode(sourceText);
+    const header = new TextEncoder().encode("blob " + bytes.byteLength + "\\0");
+    // Node/Git blob identity uses the NUL byte, not the literal backslash characters.
+    header[header.length - 2] = 0;
+    const input = new Uint8Array(header.length - 1 + bytes.length);
+    input.set(header.subarray(0, header.length - 1));
+    input.set(bytes, header.length - 1);
+    const hash = await globalThis.crypto.subtle.digest("SHA-1", input);
+    const actual = [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,"0")).join("");
+    if (actual !== SOURCE_BLOB_SHA) reject("frozen sidecar checksum mismatch");
+    return JSON.parse(sourceText);
+  }
   const SOURCES = Object.freeze({
     lutsk: "https://www.lutskrada.gov.ua/publications/u-lutsku-vnaslidok-vorozhoi-ataky-zahynuly-shestero-liudei-shche-12-travmovani",
     poltava: "https://rada-poltava.gov.ua/ua/news/u-poltavi-likviduvali-naslidki-vorozhoyi-ataki-17-zhovtnya",
@@ -66,9 +83,18 @@
     if (!Array.isArray(originalMonthly) || !view.cities[city]) reject("unknown series");
     const rec = view.cities[city];
     // No change to historic observations: an additional display-only row has deaths=null.
-    return [...originalMonthly, {
+    const sep = originalMonthly.at(-1);
+    if (sep?.month !== SEPTEMBER || !Number.isSafeInteger(sep.deaths) || sep.deaths < 0)
+      reject("September baseline invalid");
+    const september = {
+      ...sep, is_partial_period: true, partial_through: "2026-09-30",
+      deaths: null,
+      confirmed_event_lower_bound: sep.deaths > 0 ? sep.deaths : null,
+      _casualty_status: sep.deaths > 0 ? "september_partial_confirmed_lower_bound" : "september_unknown_not_zero"
+    };
+    return [...originalMonthly.slice(0, -1), september, {
       time: MONTH + "-01T00:00:00", month: MONTH,
-      deaths: null, is_partial_period: true,
+      deaths: null, is_partial_period: true, partial_through: "2026-10-31",
       confirmed_event_lower_bound: rec.lower_bound,
       _casualty_status: rec.lower_bound === null ?
         "unknown_not_zero" : "verified_incident_lower_bound_not_monthly_total"
@@ -84,7 +110,15 @@
     return en ? "October 2026 — at least " + rec.lower_bound + " confirmed. Not a full monthly total."
               : "Жовтень 2026 — щонайменше " + rec.lower_bound + " підтверджених. Не повний місячний підсумок.";
   }
-  const api = Object.freeze({ validate, rows, description, sourceFor: city => SOURCES[city] || null });
+  function describeRow(row, en) {
+    if (!row?.is_partial_period) return "";
+    const name = row.month === SEPTEMBER ? (en ? "September" : "Вересень") : (en ? "October" : "Жовтень");
+    return row.confirmed_event_lower_bound === null
+      ? (en ? name + " 2026 — unknown (not zero); coverage incomplete." : name + " 2026 — невідомо (це не нуль); неповне покриття.")
+      : (en ? name + " 2026 — at least " + row.confirmed_event_lower_bound + " confirmed; incomplete coverage, not a final monthly total."
+            : name + " 2026 — щонайменше " + row.confirmed_event_lower_bound + " підтверджених; неповне покриття, не остаточний підсумок.");
+  }
+  const api = Object.freeze({ validate, rows, description, describeRow, verifyFrozenSource, sourceFor: city => SOURCES[city] || null });
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.CasualtyPartialPreview = api;
 })(typeof window !== "undefined" ? window : globalThis);
