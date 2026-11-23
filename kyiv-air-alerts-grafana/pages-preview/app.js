@@ -4722,7 +4722,8 @@ async function init() {
   // unavailable or temporarily returns an error. Keep the exact bundled
   // site-prod JSON as a last-resort snapshot; never synthesize values.
   let dashboardLoadError = null;
-  for (const source of [DATA_URL, "data.json"]) {
+  // Frozen research preview: never mix live site-prod casualty baseline into this bundle.
+  for (const source of ["data.json"]) {
     try {
       const response = await fetch(`${source}?v=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
