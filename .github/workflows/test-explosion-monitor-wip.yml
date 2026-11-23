@@ -7,6 +7,7 @@ on:
       - research-casualty-monthly-collector-2026-11-22
       - research-casualty-october-offline-reconcile-2026-11-22
       - research-casualty-oct2026-four-verified-events-2026-11-22
+      - research-casualty-issue247-october-next-offline-2026-11-23
     paths:
       - "research/casualty_monthly_sources_2026_11_22/**"
       - ".github/workflows/test-explosion-monitor-wip.yml"
@@ -40,7 +41,7 @@ permissions:
 
 jobs:
   monthly_offline:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/research-casualty-monthly-collector-2026-11-22' || github.ref == 'refs/heads/research-casualty-october-offline-reconcile-2026-11-22' || github.ref == 'refs/heads/research-casualty-oct2026-four-verified-events-2026-11-22')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/research-casualty-monthly-collector-2026-11-22' || github.ref == 'refs/heads/research-casualty-october-offline-reconcile-2026-11-22' || github.ref == 'refs/heads/research-casualty-oct2026-four-verified-events-2026-11-22' || github.ref == 'refs/heads/research-casualty-issue247-october-next-offline-2026-11-23')
     runs-on: ubuntu-latest
     timeout-minutes: 4
     permissions:
@@ -61,6 +62,7 @@ jobs:
           python research/casualty_monthly_sources_2026_11_22/check_october_reconciliation.py
           python research/casualty_monthly_sources_2026_11_22/prepare_october_partial_preview.py --validate > /tmp/casualty-october-4event-preview.json
           node research/casualty_monthly_sources_2026_11_22/test_casualty_partial_view.mjs
+          python research/casualty_monthly_sources_2026_11_22/test_october_next_incidents.py
 
   monthly_one_shot:
     if: >-
