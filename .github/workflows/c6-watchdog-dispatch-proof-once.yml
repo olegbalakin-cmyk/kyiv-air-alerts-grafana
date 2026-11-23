@@ -1,0 +1,44 @@
+name: C6 watchdog dispatch log proof read-only
+on:
+  push:
+    branches: [audit/c6-watchdog-dispatch-log-20261123]
+    paths: [.github/workflows/c6-watchdog-dispatch-proof-once.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Inspect isolated Netlify scheduled function logs without dispatch
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx --yes netlify-cli@latest link --id 4370af81-4ccf-485c-8e43-5a9184ee7565 --auth "$NETLIFY_AUTH_TOKEN" >/dev/null
+          npx --yes netlify-cli@latest logs --source functions --function c6-backup --url https://ukraine-air-alerts-c6-watchdog.netlify.app --since 40h --json --auth "$NETLIFY_AUTH_TOKEN" > "$RUNNER_TEMP/c6-logs.jsonl"
+          python3 - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          contents=(Path(os.environ["RUNNER_TEMP"])/"c6-logs.jsonl").read_text(errors="replace")
+          statuses=[]
+          for line in contents.splitlines():
+            try: row=json.loads(line)
+            except ValueError: continue
+            if not isinstance(row,dict) or row.get("name")!="c6-backup": continue
+            msg=row.get("message","")
+            if not isinstance(msg,str): continue
+            m=re.search(r"C6_BACKUP_CHECK\s+([A-Z0-9_]+)\s+([A-Z0-9_]+)",msg)
+            if m: statuses.append((str(row.get("timestamp","")),m.group(1),m.group(2)))
+            elif "C6_BACKUP_FAIL_CLOSED" in msg:
+              statuses.append((str(row.get("timestamp","")),"FAIL_CLOSED","NONE"))
+          print("C6_WATCHDOG_RUNTIME_EVENTS",len(statuses))
+          for timestamp,reason,action in statuses:
+            if timestamp.startswith(("2026-11-22","2026-11-23")):
+              print("C6_WATCHDOG_EVENT",timestamp,reason,action)
+          print("C6_WATCHDOG_DISPATCH_ACCEPTED_COUNT",sum(a=="DISPATCH_ACCEPTED" for _,_,a in statuses))
+          PY
