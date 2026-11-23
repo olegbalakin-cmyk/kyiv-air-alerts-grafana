@@ -28,7 +28,7 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 
 - **Priority:** safely publish partial September/October civilian fatality data for 23 cities, without treating incomplete values as exact totals. September has partial baseline in every city; October has 4 verified attacks/11 fatalities in 4 cities, remaining 19 unknown. First UI preview PR #237 passed only offline (#45073738532). Never interpret 11 as full October total.
 - **Parallel prepared scopes:** September coverage/proof #238, Sep+Oct UI + real browser preview #239, Git-only sidecar/publisher contract #240. Their proof and release gates are independent; prevent cross-track writes.
-- **Proof / next gate (Nov 23):** #238→PR #243 CI #45147864411 PASS: Sep 23 partial city rows, known minimum **56** incl. existing Sumy +1, **zero new** safe Sept credits. #239→PR #237 UA/EN browser #45151092355 PASS 28/28 but reads frozen fixture. #240→PR #244 corrected HEAD **1cf1fb29** (#45151954338 PASS): removed 19 unproven per-city cutoff dates; only Kyiv Sep15, Kherson Sep17, Odesa/Zaporizhzhia Sep18 proven; Sumy Sep20 an event, not ongoing coverage. **Integration #245** must connect live canonical Git sidecar and physically prove 23-city browser/CSV/rollback before separate owner GO. `PROMOTE=OFF`; production untouched.
+- **Casualty verified / next:** #245→PR #250 HEAD 71be304e, #45158190608 PASS (113 isolated browser assertions, artifact #14809337693); no production. #246→PR #249 #45156236536 PASS, Kyiv Sep +15 proposed / 2 held. #247→PR #248 #45155998766 PASS, Kyiv Oct +11 proposed; neither new figure independently cleared for release. Inherited UI checks #45158200553/#45158200572 FAIL on obsolete JS version regex. #251: release packet for existing September partial + four Oct events (11 deaths); #252: independent verification of new +26 proposals. PROMOTE=OFF.
 
 ## Concrete next tasks
 
@@ -42,12 +42,8 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
-## CASUALTY-INDEPENDENT-PROOFS-CUTOFF-FIX-2026-11-23-01
-- September PR #243 HEAD f8112362 CI #45147864411 PASS: 23-city partial, existing minimum 56, no new September credits. UI PR #237 HEAD c654a1ef, browser #45151092355 28/28 PASS, proof #14805749223; still frozen local fixture. Publisher PR #244 corrected HEAD 1cf1fb29, CI #45151954338 PASS after removing unsupported 19 Sep18 cutoffs; four known cutoffs only, Sumy Sep20 a single credited event. **Not integrated**: issue #245 canonical Git-only data + UI physical QA. No release GO; PROMOTE=OFF.
-
-
-## CASUALTY-FIRST-PUBLICATION-TASKS-2026-11-23-01 — preparatory gates only
-- Owner prioritizes first correct casualty publication; owner permits executor briefs, **not** production publication. Coordinator created September 23-city audit issue #238, UI partial Sep+Oct browser-preview issue #239, and Git-only sidecar/publisher contract issue #240. PR #237 (HEAD b8f29139, Actions #45073738532 SUCCESS) proves offline October UI only, not browser or production; source PR #236 (HEAD 270702cc, #45073045655 SUCCESS) contains 4 October events/11 deceased, 19 city-months unknown. All September baselines remain partial; existing Kyiv original Sep cutoff 2026-09-15, three independent validated-city cutoffs are Kherson Sep17 and Odesa/Zaporizhzhia Sep18. Freeze Sumy Sep20 confirmed revision. Collector #45070256716 used its one-shot 27 GET grant; no grant remains. Release is BLOCKED until source proofs, 23-city browser+CSV parity, and publish/rollback contract PASS, followed by separate owner GO. Keep PROMOTE=OFF, zero production/Neon/Netlify changes.
+## CASUALTY-THREE-WORKS-INDEPENDENT-PASS-RELEASE-SPLIT-2026-11-23-01
+- PR #250 HEAD 71be304e, Actions #45158190608 PASS: 113 isolated browser assertions; no production. PR #249 HEAD 8212719e, #45156236536 PASS: Sep Kyiv +15 proposed, 2 held. PR #248 HEAD 9b832784, #45155998766 PASS: Oct Kyiv +11 proposed, not publication-ready. Inherited regressions #45158200553/#45158200572 fail on old JS asset query. #251 first release proof, #252 independent verification; publication GO not granted. PROMOTE=OFF.
 
 ## DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — documentation label only
 - Clarified the current coordination status to `DST_EXTRA_CORRECTION=NOT_REQUIRED`: eight valid DST witnesses are already counted and three stale physical UIDs excluded, supported by readback Actions #43706909819 and proof artifact #14159523883. Superseded research selector PR #182 remains disabled/unmerged. No runtime flag rename, Neon mutation, C2 change, production publication, or Netlify deploy.
