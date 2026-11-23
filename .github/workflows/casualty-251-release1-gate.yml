@@ -1,13 +1,13 @@
 name: Casualty 251 Release-1 evidence gate and isolated browser QA (NO PUBLISH)
 on:
   push:
-    branches: [research/casualty-251-release1-owner-go-20261123]
+    branches: [research/casualty-251-repin-c6-20261123]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   integrated-qa:
-    if: github.ref == 'refs/heads/research/casualty-251-release1-owner-go-20261123'
+    if: github.ref == 'refs/heads/research/casualty-251-repin-c6-20261123'
     runs-on: ubuntu-24.04
     timeout-minutes: 24
     env:
