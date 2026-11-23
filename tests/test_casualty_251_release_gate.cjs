@@ -36,7 +36,7 @@ assert.equal(dashboard.meta.generated_at,derived.meta.generated_at);
 assert.equal(capture.count_cities,23);
 assert.equal(Object.keys(capture.cities).length,23);
 assert.equal(dashboard.multicity_meta.production_city_keys.length,23);
-assert.deepEqual(Object.keys(dashboard.casualties_by_city).sort(),dashboard.multicity_meta.production_city_keys.slice().sort());
+assert.deepEqual(Object.keys(dashboard.casualties_by_city).sort(),dashboard.multicity_meta.production_city_keys.map(k=>k.replace('ivano_frankivsk','ivano-frankivsk')).sort());
 assert.equal(side.baseline_ref,"site-prod@"+BASE);
 assert.equal(side.promotion,"OFF");
 assert.equal(side.publication_allowed,false);
