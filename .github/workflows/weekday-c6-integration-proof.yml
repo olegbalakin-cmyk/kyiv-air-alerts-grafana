@@ -1,0 +1,43 @@
+name: Weekday C6 all-city read-only integration proof
+on:
+  push:
+    branches:
+      - fix/weekday-split-release-binding-20261122
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js"
+      - "kyiv-air-alerts-grafana/pages-preview/weekday-ui.js"
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "tests/test_weekday_distribution.cjs"
+      - "tests/weekday_c6_integration_probe.cjs"
+      - ".github/workflows/weekday-c6-integration-proof.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    if: ${{ github.ref == 'refs/heads/fix/weekday-split-release-binding-20261122' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: JS source syntax and focused weekday tests
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/weekday-distribution.js
+          node --check kyiv-air-alerts-grafana/pages-preview/weekday-ui.js
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --test tests/test_weekday_distribution.cjs
+      - name: Same-release historical/derived daypart checks for all 23 cities
+        run: |
+          set -euo pipefail
+          node tests/weekday_c6_integration_probe.cjs
+      - name: Save read-only proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekday-c6-all-23-proof-${{ github.run_id }}
+          path: weekday-c6-integration-proof.json
+          if-no-files-found: warn
+          retention-days: 14
