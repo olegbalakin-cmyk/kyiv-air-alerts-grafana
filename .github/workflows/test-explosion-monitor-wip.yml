@@ -50,9 +50,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install encrypted evidence dependency (offline test only)
+        run: python -m pip install "cryptography==46.0.4"
       - name: Offline manifest validation and fail-closed tests
         run: |
           set -euo pipefail
+          python research/casualty_monthly_sources_2026_11_22/test_private_body_archive.py
           python research/casualty_monthly_sources_2026_11_22/monthly_one_shot_collector.py --validate
           python research/casualty_monthly_sources_2026_11_22/validate_monthly_sources.py --self-test --month 2026-10 > /tmp/casualty-monthly-offline-summary.json
           python research/casualty_monthly_sources_2026_11_22/test_monthly_one_shot_collector.py
@@ -82,6 +85,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install AES evidence dependency (after owner-gate only)
+        run: python -m pip install "cryptography==46.0.4"
       - name: Claim atomic GO tag before bounded publisher GET
         env:
           CASUALTY_MONTHLY_GO: ${{ inputs.article_go }}
@@ -92,6 +97,7 @@ jobs:
           GH_OWNER_LEDGER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
           CASUALTY_MONTHLY_OUTPUT: /tmp/casualty-monthly-oneshot
+          CASUALTY_MONTHLY_ARCHIVE_KEY_B64: ${{ secrets.CASUALTY_MONTHLY_ARCHIVE_KEY_B64 }}
         run: |
           set -euo pipefail
           python research/casualty_monthly_sources_2026_11_22/monthly_one_shot_collector.py --capture
@@ -106,10 +112,17 @@ jobs:
           assert p['target_count']==27 and p['attempted_gets']==27
           assert p['budget']==27 and p['rss_gets']==0
           assert p['production_writes']==p['wip_writes']==p['automatic_credits']==0
-          assert p['promotion']=='OFF' and p['source_full_text_saved'] is False
+          assert p['promotion']=='OFF'
+          assert p['source_full_text_saved']==(p['successful_gets']>0)
+          assert p['encrypted_archive']['record_count']==p['successful_gets']
+          assert p['encrypted_archive']['key_in_artifact'] is False
+          assert (out/'private-archive'/'evidence_index.json').is_file()
+          for receipt in p['results']:
+              if receipt['status']=='HTTP200_REVIEW_ONLY':
+                  assert receipt['archive_receipt']['sealed_sha256']
           print('MONTHLY_REVIEW_ONLY_PROOF_REHASH_PASS',digest['capture_report.json'])
           PY
-      - name: Upload short review evidence, no source HTML/PDF
+      - name: Upload short review metadata plus encrypted full-body evidence only
         if: always()
         uses: actions/upload-artifact@v4
         with:
