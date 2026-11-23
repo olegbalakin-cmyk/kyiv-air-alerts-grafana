@@ -91,7 +91,9 @@ def baseline_series():
     expected_kyiv = {r["month"]: checked_count(r["deaths"], r["month"]) for r in kyiv}
     if len(expected_kyiv) != len(kyiv) or expected_kyiv != series["kyiv"] or kyiv[-1]["coverage_through"] != "2026-09-15":
         raise ValueError("Kyiv audited/master baseline mismatch")
-    cutoff = {slug: "2026-09-18" for slug in master_cities}
+    # The Sep 18 import date is NOT a per-city proof of coverage.
+    # Per #238, only Kyiv and three independently validated cities have cutoffs.
+    cutoff = {slug: None for slug in master_cities}
     cutoff["kyiv"] = "2026-09-15"
     for city in ("kherson", "odesa", "zaporizhzhia"):
         mf = json.loads(read_pinned(PREFIX + f"cities/{city}/manifest.json"))
@@ -128,7 +130,6 @@ def baseline_series():
     # Actual existing generator overlays +1; sidecar mirrors the effective
     # historical value instead of introducing any new credit.
     series["sumy"]["2026-09"] += 1
-    cutoff["sumy"] = "2026-09-18 + pinned 2026-09-20 confirmed revision"
     return series, cutoff
 
 
@@ -182,6 +183,8 @@ def build():
                 "status": "partial_baseline", "confirmed_baseline_deaths": sep,
                 "confirmed_event_lower_bound": None, "monthly_exact_total": None,
                 "is_complete": False, "coverage_through": cutoffs[city],
+                "coverage_unknown": cutoffs[city] is None,
+                "verified_individual_event_dates": ["2026-09-20"] if city == "sumy" else [],
                 "last_verified_at": None,
                 "provenance": {
                     "type": "frozen_site_prod_baseline_plus_pinned_suma_revision",
@@ -218,7 +221,7 @@ def build():
         "contains_exact_monthly_totals": False,
         "last_verified_at": "2026-11-22",
         "latest_exact_month": "2026-08",
-        "year_2026_policy": "Preserve existing year-to-date exact-series semantics; do not add October lower bounds; label January-September as provisional",
+        "year_2026_policy": "Use January-August only for non-final 2026 historical year total; September-October are incomplete and must not be automatically summed",
         "published_monthly_overwrite": False,
         "cities": rows,
     }

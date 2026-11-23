@@ -43,8 +43,16 @@ class PartialPublisherTest(unittest.TestCase):
             self.assertIsNone(s["monthly_exact_total"])
             self.assertIsInstance(s["confirmed_baseline_deaths"], int)
             self.assertGreaterEqual(s["confirmed_baseline_deaths"], 0)
-            self.assertTrue(s["coverage_through"])
+            self.assertEqual(s["coverage_unknown"], s["coverage_through"] is None)
             self.assertEqual(value["2026-10"]["monthly_exact_total"], None)
+        expected_cutoffs = {"kyiv": "2026-09-15", "kherson": "2026-09-17",
+                            "odesa": "2026-09-18", "zaporizhzhia": "2026-09-18"}
+        for city, entry in rows.items():
+            self.assertEqual(entry["2026-09"]["coverage_through"], expected_cutoffs.get(city))
+            self.assertEqual(entry["2026-09"]["coverage_unknown"], city not in expected_cutoffs)
+            self.assertEqual(entry["2026-09"]["verified_individual_event_dates"],
+                             ["2026-09-20"] if city == "sumy" else [])
+        self.assertEqual(sum(r["2026-09"]["coverage_unknown"] for r in rows.values()), 19)
 
     def test_october_four_and_nineteen_unknown(self):
         expected = {"lutsk": 6, "poltava": 1, "ivano-frankivsk": 1, "khmelnytskyi": 3}
