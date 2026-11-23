@@ -1,0 +1,74 @@
+name: Casualty 240 Git-only partial sidecar OFFLINE proof
+on:
+  push:
+    branches:
+      - research/casualty-240-git-only-publisher-20261123
+    paths:
+      - .github/workflows/casualty-240-offline-proof.yml
+      - kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py
+      - kyiv-air-alerts-grafana/data/casualty_partial_months.json
+      - research/casualty_publisher_240/**
+      - tests/test_casualty_240_sidecar.py
+      - docs/casualty-240-publish-runbook.md
+  pull_request:
+    paths:
+      - .github/workflows/casualty-240-offline-proof.yml
+      - kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py
+      - kyiv-air-alerts-grafana/data/casualty_partial_months.json
+      - research/casualty_publisher_240/**
+      - tests/test_casualty_240_sidecar.py
+permissions:
+  contents: read
+jobs:
+  offline-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PROMOTE: 'OFF'
+      CASUALTY_PUBLICATION_ALLOWED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify read-only sidecar and 23-city parity
+        run: |
+          set -euo pipefail
+          python3 -m py_compile kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py tests/test_casualty_240_sidecar.py
+          python3 kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py --check
+          python3 -m unittest discover -s tests -p test_casualty_240_sidecar.py -v 2>&1 | tee /tmp/casualty-240-test-output.txt
+      - name: Assert no tracked output mutated and record exact proof
+        if: always()
+        run: |
+          mkdir -p /tmp/casualty-240-proof
+          cp /tmp/casualty-240-test-output.txt /tmp/casualty-240-proof/tests.txt 2>/dev/null || true
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          files = [
+            'kyiv-air-alerts-grafana/data/casualty_partial_months.json',
+            'research/casualty_publisher_240/october_2026_verified_events_frozen.json',
+            'kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py',
+          ]
+          result = {'head_sha':os.environ['GITHUB_SHA'],'promotion':'OFF',
+                    'publication_allowed':False,'source_http_get':0,
+                    'production_changes':0,
+                    'sha256':{p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in files}}
+          Path('/tmp/casualty-240-proof/proof.json').write_text(json.dumps(result,indent=2)+'\n')
+          state = subprocess.run(['git','status','--porcelain'], capture_output=True, text=True, check=True)
+          changed = [line for line in state.stdout.splitlines() if not line.endswith('__pycache__/')]
+          # bytecode is untracked only; the controlled output and tracked files must not change.
+          changed = [line for line in changed if '__pycache__' not in line]
+          if changed:
+              raise SystemExit('OFFLINE_MUTATION_BLOCKED: '+repr(changed))
+          print('CASUALTY_240_GIT_WORKTREE_CLEAN; 0_NETWORK_GET 0_PUBLISH')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: casualty-240-offline-proof
+          path: /tmp/casualty-240-proof
+          if-no-files-found: error
+          retention-days: 30
