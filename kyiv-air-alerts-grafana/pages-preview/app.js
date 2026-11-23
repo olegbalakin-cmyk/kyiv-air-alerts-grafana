@@ -3783,7 +3783,7 @@ function casualtyPreviewRows(key) {
 function casualtyCsvStatus(row, yearly = false) {
   if (row?.is_partial_period) return row._casualty_status;
   if (yearly && row?.year === "2026" && state.casualtyPartial)
-    return "year_2026_through_september_excludes_october";
+    return "year_2026_january_august_only_september_october_incomplete";
   return yearly ? "reconstructed_year" : "reconstructed_month";
 }
 function appendCasualtyEvidence(container, key) {
@@ -3828,9 +3828,9 @@ function renderCasualties(key) {
                      "Reconstructed from official reports and media.");
   if (state.casualtyPartial && is2026Selected) {
     note += " " + (interval === "yearly"
-      ? tr("2026: річне значення лише за січень–вересень; жовтневі мінімальні випадки не додані.",
-           "2026: year value covers January–September only; October event minimum is excluded.")
-      : window.CasualtyPartialPreview.description(key, state.casualtyPartial, currentLanguage === "en"));
+      ? tr("2026: лише січень–серпень; вересень і жовтень не додані. Не остаточний рік.",
+           "2026: January–August only; September and October excluded. Not a final year.")
+      : allRows.filter(row => row.is_partial_period).map(row => window.CasualtyPartialPreview.describeRow(row, currentLanguage === "en")).join(" "));
   }
   $("casualtySourceNote").textContent = note;
   appendCasualtyEvidence($("casualtyEvidence"), key);
@@ -3864,10 +3864,10 @@ function renderCasualties(key) {
             label(ctx) {
               const row = chartRows[ctx.dataIndex];
               if (row?.is_partial_period) return tr(
-                "Щонайменше " + row.confirmed_event_lower_bound + " підтверджених (жовтень неповний)",
-                "At least " + row.confirmed_event_lower_bound + " confirmed (October incomplete)");
+                window.CasualtyPartialPreview.describeRow(row, false),
+                window.CasualtyPartialPreview.describeRow(row, true));
               const qualifier = interval === "yearly" && row?.year === "2026" && state.casualtyPartial
-                ? tr(" (лише січень–вересень)"," (January–September only)") : "";
+                ? tr(" (січень–серпень; не остаточно)"," (January–August; not final)") : "";
               return tr("Загиблих: ","Deaths: ") + ctx.formattedValue + qualifier;
             }
           }
@@ -4175,6 +4175,7 @@ function renderComparison() {
         : filtered.map(row => ({
             key: row.month || String(row.time || "").slice(0,7),
             deaths: row.is_partial_period ? row.confirmed_event_lower_bound : Number(row.deaths),
+             month: row.month, confirmed_event_lower_bound: row.confirmed_event_lower_bound,
             is_partial_period: row.is_partial_period === true,
             _casualty_status: casualtyCsvStatus(row)
           }));
@@ -4185,7 +4186,7 @@ function renderComparison() {
       commonLabels = new Set([...commonLabels].filter(label => map.has(label)));
     const casualtyLabels = [...commonLabels].sort();
     const hasPartial = state.casualtyPartial && casualtyInterval === "monthly" &&
-      casualtyLabels.includes("2026-10");
+      casualtyLabels.some(label => label === "2026-09" || label === "2026-10");
     const casualtyDatasets = casualtyKeys.map((key, idx) => ({
       label: labelFor(key),
       data: casualtyLabels.map(label => maps[idx].get(label)?.deaths ?? null),
@@ -4205,10 +4206,9 @@ function renderComparison() {
               label(ctx) {
                 const row = ctx.dataset._exportRows?.[ctx.dataIndex];
                 if (row?.is_partial_period)
-                  return ctx.dataset.label + ": " + tr("щонайменше ","at least ") +
-                    row.deaths + tr(" підтверджених — місяць неповний"," confirmed — incomplete month");
+                  return ctx.dataset.label + ": " + window.CasualtyPartialPreview.describeRow(row, currentLanguage === "en");
                 const qualifier = casualtyInterval === "yearly" && row?.key === "2026" &&
-                  state.casualtyPartial ? tr(" (лише до вересня)"," (through September only)") : "";
+                  state.casualtyPartial ? tr(" (січень–серпень; не остаточно)"," (January–August; not final)") : "";
                 return ctx.dataset.label + ": " + ctx.formattedValue + qualifier;
               }
             }
@@ -4223,10 +4223,10 @@ function renderComparison() {
            " Missing series: " + missingCasualtyKeys.map(labelFor).join(", ") + ".") : "";
     const partialText = state.casualtyPartial && (selectedYear === "all" || selectedYear === "2026")
       ? (casualtyInterval === "monthly"
-        ? tr(" Жовтень 2026: помаранчеві стовпчики — щонайменше підтверджено в окремих атаках; пропуски — невідомо, НЕ нуль.",
-             " October 2026: orange bars are incident-level confirmed minimums; gaps mean unknown, NOT zero.")
-        : tr(" 2026 рік: лише січень–вересень; попередні жовтневі випадки не додано.",
-             " Year 2026: January–September only; preliminary October cases excluded."))
+        ? tr(" Вересень–жовтень 2026: неповні місяці. Помаранчеві стовпчики — щонайменше підтверджено; пропуски — невідомо, НЕ нуль. Жовтень охоплює чотири атаки.",
+             " September–October 2026: incomplete months. Orange bars mean at least confirmed; gaps mean unknown, NOT zero. October covers four attacks only.")
+        : tr(" 2026 рік: лише січень–серпень; вересень і жовтень виключені. Не остаточний рік.",
+             " Year 2026: January–August only; September and October excluded. Not final."))
       : "";
     casualtyNote.textContent = tr(intervalText + ", " + yearText + ". Показано лише спільні періоди." + missingText + partialText,
                                   intervalText + ", " + yearText + ". Only common periods shown." + missingText + partialText);
@@ -4747,7 +4747,7 @@ async function init() {
       const partialResponse = await fetch("casualty-october-2026-preview.json?v=" + Date.now(), {cache:"no-store"});
       if (!partialResponse.ok) throw new Error("Partial preview HTTP " + partialResponse.status);
       state.casualtyPartial = window.CasualtyPartialPreview.validate(
-        await partialResponse.json(), state.data.casualties_by_city
+        await window.CasualtyPartialPreview.verifyFrozenSource(await partialResponse.text()), state.data.casualties_by_city
       );
     } catch (error) {
       state.casualtyPartial = null;
