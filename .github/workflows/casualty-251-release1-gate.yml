@@ -35,6 +35,8 @@ jobs:
           python3 kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py --check
           python3 -m unittest discover -s tests -p test_casualty_240_sidecar.py -v 2>&1 | tee casualty-245-python-tests.txt
       - name: Verify immutable real Git candidate canonical source and failure cases (NO PUBLISH)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           node tests/test_casualty_251_git_source.cjs
