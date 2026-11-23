@@ -2,7 +2,7 @@
 """Read-only, fail-closed, owner-gated monthly-source capture.
 
 No source GET when imported, tested, validated or invoked without --capture.
-No source HTML/PDF stored. Does not import, write, or promote casualty/site data.
+Source bodies preserved only as encrypted private evidence. No plaintext HTML/PDF in reports or public artifacts. Does not write or promote casualty/site data.
 """
 from __future__ import annotations
 
@@ -27,6 +27,8 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
+
+from private_body_archive import PrivateBodyArchive, ArchiveError
 
 HERE = Path(__file__).resolve().parent
 MANIFEST = HERE / "approved_sources_manifest.json"
@@ -342,7 +344,7 @@ def fetch_once(url: str, allowed_hosts: set[str]) -> dict:
             "http_status": status, "content_type": content_type,
             "raw_bytes": len(raw), "decoded_bytes": len(decoded),
             "raw_sha256": sha256(raw), "decoded_sha256": sha256(decoded),
-            "_decoded": decoded,
+            "_raw": raw, "_decoded": decoded,
         }
     finally:
         conn.close()
@@ -436,6 +438,18 @@ def capture(env: dict, *, manifest_path: Path = MANIFEST,
     digest = env.get("CASUALTY_MONTHLY_GO_DIGEST", "")
     validate_grant(grant, digest=digest, head=head, manifest=manifest,
                    manifest_bytes=raw, env=env, now=now)
+    out_dir = Path(env.get("CASUALTY_MONTHLY_OUTPUT", "/tmp/casualty-monthly-oneshot"))
+    if not str(out_dir.resolve()).startswith("/tmp/casualty-monthly-"):
+        raise Blocked("OUTPUT_MUST_BE_ISOLATED_TMP")
+    # Archive MUST be ready before the one-shot GO tag and before publisher GET.
+    try:
+        archive = PrivateBodyArchive(
+            out_dir / "private-archive",
+            env.get("CASUALTY_MONTHLY_ARCHIVE_KEY_B64", ""),
+            checkout_root=HERE.parents[1],
+        )
+    except ArchiveError as exc:
+        raise Blocked("ENCRYPTED_ARCHIVE_NOT_READY:" + str(exc)) from exc
     spent_ref = claim_once(grant, head, env, create_ref=tag_claim)
     report = {
         "kind": "CASUALTY_MONTHLY_23CITY_REVIEW_ONLY",
@@ -448,10 +462,6 @@ def capture(env: dict, *, manifest_path: Path = MANIFEST,
         "source_full_text_saved": False, "results": [],
         "finished": False,
     }
-    out_dir = Path(env.get("CASUALTY_MONTHLY_OUTPUT", "/tmp/casualty-monthly-oneshot"))
-    # Protect against writing anywhere in checkout or production artifact dirs.
-    if not str(out_dir.resolve()).startswith("/tmp/casualty-monthly-"):
-        raise Blocked("OUTPUT_MUST_BE_ISOLATED_TMP")
     attempted = set()
     try:
         for target in manifest["targets"]:
@@ -466,8 +476,19 @@ def capture(env: dict, *, manifest_path: Path = MANIFEST,
             try:
                 reply = transport(url, set(manifest["allowed_hosts"]))
                 decoded = reply.pop("_decoded")
+                raw_body = reply.pop("_raw")
+                if (reply.get("raw_sha256") != sha256(raw_body) or
+                        reply.get("decoded_sha256") != sha256(decoded)):
+                    raise Blocked("TRANSPORT_DIGEST_MISMATCH")
+                receipt = archive.store(
+                    target_id=target["id"], url=url,
+                    content_type=reply["content_type"],
+                    raw=raw_body, decoded=decoded,
+                    captured_at=datetime.now(UTC).isoformat(),
+                )
                 item.update(reply)
                 item.update(brief_evidence(decoded, reply["content_type"]))
+                item["archive_receipt"] = receipt
                 item["status"] = "HTTP200_REVIEW_ONLY"
             except Exception as exc:
                 # Never retry or add error text that may disclose internals.
@@ -479,6 +500,16 @@ def capture(env: dict, *, manifest_path: Path = MANIFEST,
         report["finished"] = True
         report["successful_gets"] = sum(
             x["status"] == "HTTP200_REVIEW_ONLY" for x in report["results"])
+        # The index contains URL/digests/lengths and ciphertext paths, no body.
+        index_receipt = archive.write_index()
+        report["encrypted_archive"] = {
+            "format": "AES-256-GCM",
+            "record_count": index_receipt["count"],
+            "index_sha256": index_receipt["index_sha256"],
+            "storage": "private-archive/",
+            "key_in_artifact": False,
+        }
+        report["source_full_text_saved"] = index_receipt["count"] > 0
         write_proof(out_dir, report)
     return report
 
