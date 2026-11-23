@@ -50,9 +50,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install encrypted evidence dependency (offline test only)
+        run: python -m pip install "cryptography==46.0.4"
       - name: Offline manifest validation and fail-closed tests
         run: |
           set -euo pipefail
+          python research/casualty_monthly_sources_2026_11_22/test_private_body_archive.py
           python research/casualty_monthly_sources_2026_11_22/monthly_one_shot_collector.py --validate
           python research/casualty_monthly_sources_2026_11_22/validate_monthly_sources.py --self-test --month 2026-10 > /tmp/casualty-monthly-offline-summary.json
           python research/casualty_monthly_sources_2026_11_22/test_monthly_one_shot_collector.py
