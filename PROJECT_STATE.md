@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-22. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_EXTRA_CORRECTION=NOT_REQUIRED` (status label only; research selector remains disabled); live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**. Historical details below.
+Latest accepted transition: **C6-WATCHDOG-PHYSICAL-FAILOVER-PASS-2026-11-23-01**; previous **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**. Historical details below.
 
 ## Working instructions
 
@@ -15,7 +15,7 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
-- **Scheduled C2/C6:** backup scheduler PR #224 merged; owner PAT saved as Netlify secret, backup enabled in isolated deploy `6b02b299b68451c6ef022581` READY (cron :47 UTC hourly). Seven actual checks verified; fallback dispatch pending. #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
+- **Scheduled C2/C6:** backup scheduler PR #224 merged; owner PAT saved as Netlify secret, backup enabled in isolated deploy `6b02b299b68451c6ef022581` READY (cron :47 UTC hourly). Three watchdog dispatches proved and published; stabilization follow-up remains open. #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
 - **UI/SEO LIVE:** PR #194 bilingual archive/trends (936 sitemap URLs); Netlify locked, #43875088810 PASS. Monthly cron OFF.
 
 - **Weekday UI LIVE:** PR #201 and correction PR #229 (based on PR #226), site-prod@49abd7a, Netlify `6b02d5edba0ff97b80b83052` READY/published/locked. Exact 5 JS/CSS and UA/EN markers, 23-city release parity independently PASS #45018970389. Per-weekday-bar hover/tap gives hours and its own percentages. C2/Neon unchanged; main release Actions #45018819545 published/relocked successfully but overall FAILED at byte-exact HTML smoke (Netlify-injected bytes); no redeploy required.
@@ -26,7 +26,7 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 
 ## Concrete next tasks
 
-1. Verify actual Netlify `c6-backup` scheduled invocation and, once both age gates permit, one owner-actor `c6_run_now` C2→Neon→Git-only publish. Production Netlify must remain locked; GitHub cron remains active but unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
+1. Physical watchdog fallback PASS; monitor subsequent independent C6 cycles and 4h freshness SLA. Keep native cron and Git-only publish; confirm 23-city evidence and long-run stability. Production Netlify must remain locked; GitHub cron remains active but unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
 2. Monitor Active23 current-day rows after subsequent Git-only cycles, including URL rollover, 23-city parity, stale unclosed cap, clear behavior and trend; no regular Netlify deploys.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
@@ -36,6 +36,9 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-WATCHDOG-PHYSICAL-FAILOVER-PASS-2026-11-23-01 — independent watchdog dispatch and Git-only publication physically PASS
+- Netlify function read-only logs verified by Actions #45143745602 SUCCESS: 24 scheduled `c6-backup` status checks, three `C6_CATCHUP_REQUIRED DISPATCH_ACCEPTED` at Nov22 12:47/22:47 UTC and Nov23 06:47 UTC. Exact matching owner `workflow_dispatch` C6 runs #45024070235, #45079631783, #45126465283 all SUCCESS: update-site, six-JSON prepare and Git-only publish PASS. Published site-prod@cacf0d85/feb91028/f7e0681c. Two interspersed native scheduled C6 runs #45043148749/#45091627897 SUCCESS. Independent Netlify watchdog remains on deploy 6b02b299b68451c6ef022581; main site Netlify 6b02d5edba0ff97b80b83052 READY+locked. C6 fallback operation proved; long-run cadence monitoring remains open.
+
 ## DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — documentation label only
 - Clarified the current coordination status to `DST_EXTRA_CORRECTION=NOT_REQUIRED`: eight valid DST witnesses are already counted and three stale physical UIDs excluded, supported by readback Actions #43706909819 and proof artifact #14159523883. Superseded research selector PR #182 remains disabled/unmerged. No runtime flag rename, Neon mutation, C2 change, production publication, or Netlify deploy.
 

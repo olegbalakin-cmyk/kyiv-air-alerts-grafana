@@ -2,6 +2,9 @@
 
 Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md). Full historical text, SHA/Actions/artifact references and exact previous roots are preserved in the [archive index](docs/coordination-archive/README.md), verified by its manifest. Maintain 5–10 brief transitions; use the [archival CLI](docs/coordination-maintenance.md) before growth exceeds 12 KiB.
 
+**C6-WATCHDOG-PHYSICAL-FAILOVER-PASS-2026-11-23-01 — independently scheduled C6 backup physically publishes Git-only data**
+- Isolated Netlify logs audit Actions #45143745602 SUCCESS: 24 function checks, 3 `DISPATCH_ACCEPTED` at Nov22 12:47/22:47 and Nov23 06:47 UTC. Exact corresponding owner-actor C6 runs #45024070235/#45079631783/#45126465283 SUCCESS, including writer, six-JSON preparation and Git-only push. Two native scheduled C6 runs interleaved SUCCESS; latest site-prod@f7e0681c. Production Netlify `6b02d5edba0ff97b80b83052` READY+locked and unchanged by Git-only data updates. Physical backup proof PASS; continue cadence monitoring.
+
 **C6-WATCHDOG-RUNTIME-OBSERVED-2026-11-22-01 — actual checks verified; fallback pending**
 - Actions #45018145331 SUCCESS: seven Netlify checks Nov22 04:47–10:47 UTC. After activation 09:47/10:47 C6_ATTEMPT_RECENT (correct skip); before activation 04:47–06:47 DRY_RUN_ONLY. Native C6 #44995863969 SUCCESS, no backup-triggered C6 yet. Schedule reliability still OPEN.
 
