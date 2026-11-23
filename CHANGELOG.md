@@ -33,6 +33,10 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Chromium regression #44702699636 FAIL showed Nov19, missing snapshot and `site-derived.json` 404 despite static source PASS. PR #208 HEAD `3101a468` isolates complete Netlify draft bundle, Actions [#44703989283](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44703989283) SUCCESS: 27 browser cases, 23 cities, UA desktop/EN mobile, actual Nov20 axis tick/bar, trend on/off; proof artifact #14614097420 (screenshots/JSON), Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Production unchanged; frozen source is not live publisher.
 
 <!-- coordination:history:start -->
+### CASUALTY-INDEPENDENT-PROOFS-CUTOFF-FIX-2026-11-23-01
+- #238→PR #243 #45147864411 PASS (Sep 23 partial, existing 56 minimum, no new credits); #239→PR #237 browser #45151092355 28/28 PASS (local frozen preview); #240→PR #244 corrected HEAD 1cf1fb29, #45151954338 PASS (19 unknown city cutoff dates, 4 proven, Sumy Sep20 isolated event). Integration #245 needs canonical Git-only sidecar browser QA before owner GO. Production unchanged; PROMOTE=OFF.
+
+
 ### CASUALTY-FIRST-PUBLICATION-TASKS-2026-11-23-01 — 3 parallel preparatory scopes
 - Owner directs work toward first casualty release (not a publish GO). Issues #238 Sep coverage, #239 Sep+Oct UI browser preview, #240 Git-only casualty sidecar/publisher proof. PR #237 offline #45073738532 PASS; PR #236 October 4 attacks/11 persons, 19 unknown; September partial in all 23 cities. One-shot collector grant spent. Need 23-city browser QA + baseline proof + controlled publish/rollback runbook before separate owner GO; production unchanged, PROMOTE=OFF.
 
