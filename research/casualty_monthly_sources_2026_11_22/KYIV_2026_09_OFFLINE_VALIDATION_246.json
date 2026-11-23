@@ -1,0 +1,29 @@
+{
+  "schema": "casualty-kyiv-2026-09-offline-static-proof-v1",
+  "issue": 246,
+  "run_type": "isolated GitHub connector readback + independent JavaScript data invariants",
+  "research_head_before_proof_commit": "2da90621bf9ed5274c37e94483e21caf4192915a",
+  "python_script": "check_kyiv_2026_09_credits.py",
+  "python_execution": "NOT_EXECUTED",
+  "github_actions_execution": "NOT_VERIFIED",
+  "static_validation": {
+    "status": "PASS",
+    "assertions": 11,
+    "validated": [
+      "PROMOTE OFF, publication false, zero GET",
+      "original Kyiv baseline 18 cutoff September 15",
+      "six date-group cumulative counts total 17",
+      "exactly 18 decisions = 8 SAFE + 1 HELD + 9 EXCLUDED",
+      "safe delta 15",
+      "held residual 2",
+      "sum per date-group balances",
+      "15 unique non-identifying victim-slot aliases",
+      "every cited source ref resolves to frozen queue item",
+      "all 29 source hashes are 64-character hex and URLs HTTPS",
+      "CSV has exactly 18 data rows; Python negative case runner is present"
+    ]
+  },
+  "release_gate": "BLOCKED_PYTHON_CI_NOT_PROVEN; OWNER_GO_REQUIRED",
+  "production_writes": 0,
+  "publisher_article_gets": 0
+}
