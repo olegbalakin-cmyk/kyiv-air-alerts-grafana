@@ -19,6 +19,11 @@ const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok)err
   const verified={lutsk:6,poltava:1,"ivano-frankivsk":1,khmelnytskyi:3};
   for(const key of keys){
    await page.select("#citySelect",key);
+   await page.waitForFunction(expected => {
+     const chart=window.Chart?.getChart(document.querySelector("#casualtyChart"));
+     return document.querySelector("#citySelect")?.value===expected &&
+       !!chart?.data?.labels?.includes("2026-10");
+   },{timeout:30000},key);
    const r=await page.evaluate(()=>{
     const ch=window.Chart.getChart(document.querySelector("#casualtyChart"));
     const s=ch.data.labels.indexOf("2026-09"),o=ch.data.labels.indexOf("2026-10");
