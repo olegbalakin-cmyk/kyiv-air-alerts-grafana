@@ -490,6 +490,13 @@ def capture(env: dict, *, manifest_path: Path = MANIFEST,
                 item.update(brief_evidence(decoded, reply["content_type"]))
                 item["archive_receipt"] = receipt
                 item["status"] = "HTTP200_REVIEW_ONLY"
+            except ArchiveError as exc:
+                # Archive failure is fatal: NEVER proceed to another publisher GET
+                # when a successful body could be discarded unsealed.
+                item["status"] = "ARCHIVE_FAILED_STOP"
+                item["reason"] = "PRIVATE_ARCHIVE_FAILURE"
+                report["results"].append(item)
+                raise Blocked("PRIVATE_ARCHIVE_FAILURE_STOP") from exc
             except Exception as exc:
                 # Never retry or add error text that may disclose internals.
                 item["status"] = "BLOCKED_OR_FAILED"
