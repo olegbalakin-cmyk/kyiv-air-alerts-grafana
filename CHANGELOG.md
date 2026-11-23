@@ -33,6 +33,9 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Chromium regression #44702699636 FAIL showed Nov19, missing snapshot and `site-derived.json` 404 despite static source PASS. PR #208 HEAD `3101a468` isolates complete Netlify draft bundle, Actions [#44703989283](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44703989283) SUCCESS: 27 browser cases, 23 cities, UA desktop/EN mobile, actual Nov20 axis tick/bar, trend on/off; proof artifact #14614097420 (screenshots/JSON), Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Production unchanged; frozen source is not live publisher.
 
 <!-- coordination:history:start -->
+### CASUALTY-RELEASE1-REPinned-C6-SAMEBASE-2026-11-23-01
+- #251 PR #253 #45190794160 PASS but old C6 pin; #252 PR #254 #45190860163 PASS, new Sep+15/Oct+11 HELD pending primary bodies. Draft #256 re-pinned on site-prod@58634812, CI #45202488008 PASS with proof #14831583664; UI #45202505200 and active23 preflight #45202505458 PASS (no deploy). Site-prod & Netlify unchanged by casualty; PROMOTE=OFF. Separate owner GO still required.
+
 ### CASUALTY-THREE-WORKS-INDEPENDENT-PASS-RELEASE-SPLIT-2026-11-23-01
 - PR #250 #45158190608 PASS 113 isolated browser cases; no production. PR #249 #45156236536 PASS: Sep Kyiv +15 proposed/2 held. PR #248 #45155998766 PASS: Oct Kyiv +11 proposed, not credit-approved. Inherited preflight fails obsolete JS version #45158200553/#45158200572. Issues #251 first release packet, #252 independent +26 verification. PROMOTE=OFF.
 
