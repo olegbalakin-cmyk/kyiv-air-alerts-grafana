@@ -65,6 +65,34 @@ def validate(matrix, proof, witness, request):
           "witness source site-prod mismatch")
     check(witness["PROMOTE"] == "OFF" and not witness["publication_allowed"],
           "witness cannot authorize credit")
+    latest = proof["latest_prod_readback"]
+    check(latest["previous_frozen_head"] == prod
+          and latest["head"] == "58634812155ddc6b4324c26d694cf3de6cfb9bbe",
+          "latest site-prod readback must be explicitly pinned")
+    check(latest["current_queue_git_blob"] ==
+          "280eff9296fc872510462e7d4f3ff02e3ff4a4ce"
+          and latest["previous_frozen_queue_git_blob"] ==
+          witness["immutable_sources"]["review_queue_git_blob"],
+          "latest review queue change must be explained")
+    check(latest["queue_rows"] == 132 and
+          latest["queue_changed_indices"] == [0] and
+          latest["queue_changed_index0_is_not_candidate_evidence"]
+          and latest["remaining_queue_indices_identical"]
+          and latest["sept_source_cards_unchanged"] == 29
+          and latest["oct_queue_cards_unchanged"] == 10,
+          "all 39 candidate source witnesses must survive current queue drift")
+    check(latest["kyiv_baseline_git_blob"] ==
+          proof["prod_blobs"]["kyiv_september_baseline_csv"]
+          and latest["confirmed_revisions_git_blob"] ==
+          proof["prod_blobs"]["confirmed_revisions_csv"]
+          and latest["monthly_wide_git_blob"] ==
+          proof["prod_blobs"]["master_20cities_monthly_wide_csv"]
+          and latest["new_kyiv_credits"] == 0
+          and latest["new_october_credits"] == 0,
+          "concurrent C6 must not be presented as new casualty publication")
+    check(latest["readback_only"] and
+          latest["future_release_requires_fresh_repin"],
+          "latest readback cannot authorize a future release")
 
     sources = witness["witnesses"]
     check(len(sources) == 41, "expected 29 September + 12 October witnesses")
@@ -242,6 +270,14 @@ class IndependentAudit(unittest.TestCase):
     def test_rejects_kyiv_baseline_drift(self):
         self.reject(1, lambda a: a["pub_baseline"].__setitem__(
             "kyiv_2026_09_partial_deaths", 33))
+
+    def test_rejects_concurrent_prod_queue_drift(self):
+        self.reject(1, lambda a: a["latest_prod_readback"].__setitem__(
+            "queue_changed_indices", [0, 69]))
+
+    def test_rejects_concurrent_prod_revision_drift(self):
+        self.reject(1, lambda a: a["latest_prod_readback"].__setitem__(
+            "confirmed_revisions_git_blob", "0" * 40))
 
     def test_rejects_a_fake_october_revision(self):
         self.reject(1, lambda a: a["pub_baseline"].__setitem__(
