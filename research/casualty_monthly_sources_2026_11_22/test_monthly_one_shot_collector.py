@@ -2,7 +2,9 @@
 """No-network tests for the one-shot monthly collector."""
 from __future__ import annotations
 
+import base64
 import copy
+import hashlib
 import json
 import os
 import sys
@@ -50,6 +52,7 @@ class OfflineCollectorTests(unittest.TestCase):
         self.manifest, self.manifest_bytes = m.load_manifest()
         self.grant = grant(self.manifest_bytes)
         self.env = env()
+        self.env["CASUALTY_MONTHLY_ARCHIVE_KEY_B64"] = base64.b64encode(os.urandom(32)).decode("ascii")
         self.env["CASUALTY_MONTHLY_GO_DIGEST"] = m.canonical_sha256(self.grant)
         self.env["CASUALTY_MONTHLY_GRANT_JSON"] = json.dumps(self.grant)
         self.assertEqual(len(self.manifest["targets"]), 27)
@@ -163,6 +166,7 @@ class OfflineCollectorTests(unittest.TestCase):
             # Only /tmp/casualty-monthly-* proof paths are permitted.
             self.env["CASUALTY_MONTHLY_OUTPUT"] = tmp
             called = []
+            body_sample = b"<html><title>Example</title><article>Two people were killed.</article></html>"
             def claim(ref, sha):
                 called.append("claim")
                 return True
@@ -170,13 +174,13 @@ class OfflineCollectorTests(unittest.TestCase):
                 self.assertEqual(called[0], "claim")
                 self.assertIn(url, [x["url"] for x in self.manifest["targets"]])
                 called.append(url)
-                body = b"<html><title>Example</title><article>Two people were killed.</article></html>"
+                body = body_sample
                 return {
                     "http_status": 200, "content_type": "text/html",
                     "raw_bytes": len(body), "decoded_bytes": len(body),
                     "raw_sha256": m.sha256(body),
                     "decoded_sha256": m.sha256(body),
-                    "_decoded": body,
+                    "_raw": body, "_decoded": body,
                 }
             result = mock.Mock(stdout=HEAD + "\n")
             with mock.patch.object(m.subprocess, "run", return_value=result):
@@ -187,7 +191,24 @@ class OfflineCollectorTests(unittest.TestCase):
             self.assertEqual(proof["automatic_credits"], 0)
             self.assertEqual(proof["production_writes"], 0)
             self.assertEqual(proof["wip_writes"], 0)
-            self.assertFalse(proof["source_full_text_saved"])
+            self.assertTrue(proof["source_full_text_saved"])
+            self.assertEqual(proof["encrypted_archive"]["record_count"], 27)
+            from private_body_archive import PrivateBodyArchive
+            archive = PrivateBodyArchive(
+                Path(tmp) / "private-archive",
+                self.env["CASUALTY_MONTHLY_ARCHIVE_KEY_B64"],
+                checkout_root=m.HERE.parents[1],
+            )
+            receipt = proof["results"][0]["archive_receipt"]
+            restored = archive.verify(receipt)
+            self.assertEqual(restored["raw"], body_sample)
+            self.assertEqual(restored["decoded"], body_sample)
+            self.assertEqual(receipt["decoded_sha256"], hashlib.sha256(body_sample).hexdigest())
+            for path in (Path(tmp) / "private-archive").rglob("*"):
+                if path.is_file():
+                    raw_file = path.read_bytes()
+                    self.assertNotIn(body_sample, raw_file)
+                    self.assertNotIn(b"Two people were killed", raw_file)
             self.assertFalse(any("_decoded" in p for p in proof["results"]))
             report = (Path(tmp) / "capture_report.json").read_bytes()
             manifest = json.loads((Path(tmp) / "sha256_manifest.json").read_text())
@@ -218,9 +239,24 @@ class OfflineCollectorTests(unittest.TestCase):
             self.assertEqual(len(calls), 27)
             self.assertEqual(len(set(calls)), 27)
             self.assertEqual(proof["successful_gets"], 0)
+            self.assertFalse(proof["source_full_text_saved"])
+            self.assertEqual(proof["encrypted_archive"]["record_count"], 0)
             self.assertEqual(proof["attempted_gets"], 27)
             self.assertEqual(proof["rss_gets"], 0)
             self.assertTrue(all(p["status"] == "BLOCKED_OR_FAILED" for p in proof["results"]))
+
+    def test_missing_key_prevents_go_claim_and_get(self):
+        self.env.pop("CASUALTY_MONTHLY_ARCHIVE_KEY_B64")
+        claim = mock.Mock(side_effect=AssertionError("GO MUST NOT BE SPENT"))
+        transport = mock.Mock(side_effect=AssertionError("GET MUST NOT RUN"))
+        with tempfile.TemporaryDirectory(prefix="casualty-monthly-test-") as tmp:
+            self.env["CASUALTY_MONTHLY_OUTPUT"] = tmp
+            with mock.patch.object(m.subprocess, "run",
+                                   return_value=mock.Mock(stdout=HEAD + "\n")):
+                with self.assertRaisesRegex(m.Blocked, "ENCRYPTED_ARCHIVE_NOT_READY"):
+                    m.capture(self.env, transport=transport, tag_claim=claim, now=NOW)
+        claim.assert_not_called()
+        transport.assert_not_called()
 
     def test_pdf_is_hash_only(self):
         evidence = m.brief_evidence(b"%PDF-1.4 fake", "application/pdf")
