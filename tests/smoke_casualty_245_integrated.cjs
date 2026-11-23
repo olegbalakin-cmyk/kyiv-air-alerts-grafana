@@ -18,12 +18,25 @@ const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok)err
   const keys=await page.$$eval("#citySelect option",els=>els.map(e=>e.value).filter(Boolean));
   const verified={lutsk:6,poltava:1,"ivano-frankivsk":1,khmelnytskyi:3};
   for(const key of keys){
+   console.log("CASUALTY_245_BROWSER_CITY",lang,mode,key);
    await page.select("#citySelect",key);
-   await page.waitForFunction(expected => {
-     const chart=window.Chart?.getChart(document.querySelector("#casualtyChart"));
-     return document.querySelector("#citySelect")?.value===expected &&
-       !!chart?.data?.labels?.includes("2026-10");
-   },{timeout:30000},key);
+   try {
+     await page.waitForFunction(expected => {
+       const chart=window.Chart?.getChart(document.querySelector("#casualtyChart"));
+       return document.querySelector("#citySelect")?.value===expected &&
+         !!chart?.data?.labels?.includes("2026-10");
+     },{timeout:12000},key);
+   } catch (error) {
+     const debug=await page.evaluate(()=>({
+       selected:document.querySelector("#citySelect")?.value,
+       status:document.documentElement.dataset.casualtyStatus,
+       sectionClass:document.querySelector("#casualtySection")?.className,
+       note:document.querySelector("#casualtySourceNote")?.textContent,
+       chart:!!window.Chart?.getChart(document.querySelector("#casualtyChart"))
+     }));
+     console.error("CASUALTY_245_CITY_DEBUG",key,JSON.stringify(debug));
+     throw error;
+   }
    const r=await page.evaluate(()=>{
     const ch=window.Chart.getChart(document.querySelector("#casualtyChart"));
     const s=ch.data.labels.indexOf("2026-09"),o=ch.data.labels.indexOf("2026-10");
