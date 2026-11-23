@@ -63,7 +63,7 @@ jobs:
           PY
           test "$(grep -c 'casualty-partial-source.js' _casualty245_site/index.html)" -eq 1
           test "$(grep -c 'casualty-partial-source.js' _casualty245_site/en/index.html)" -eq 1
-          ! grep -R 'netlify deploy --prod' .github/workflows/casualty-245-integrated-qa.yml
+          ! grep -E -q 'netlify[[:space:]]+deploy[[:space:]]+--prod' .github/workflows/casualty-245-integrated-qa.yml
       - name: Deploy to existing separate research site ONLY (not production)
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
