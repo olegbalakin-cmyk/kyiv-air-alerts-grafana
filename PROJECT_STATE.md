@@ -24,6 +24,12 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 - **DST VERIFIED; extra correction NOT REQUIRED:** #43706909819 confirms eight correct witnesses and three stale UIDs already excluded from calculations; research selector stays disabled, no Neon mutation.
 
 
+## Casualty track — first publication preparation (NO GO)
+
+- **Priority:** safely publish partial September/October civilian fatality data for 23 cities, without treating incomplete values as exact totals. September has partial baseline in every city; October has 4 verified attacks/11 fatalities in 4 cities, remaining 19 unknown. First UI preview PR #237 passed only offline (#45073738532). Never interpret 11 as full October total.
+- **Parallel prepared scopes:** September coverage/proof #238, Sep+Oct UI + real browser preview #239, Git-only sidecar/publisher contract #240. Their proof and release gates are independent; prevent cross-track writes.
+- **Casualty latest Nov23:** #251→PR #253 offline #45190794160 PASS (121 isolated browser, artifact #14825787011) but C6 moved site-prod and blocked GO; #252→PR #254 offline #45190860163 PASS (22/22, artifact #14826450630): Kyiv Sep +15 and Oct +11 still **NOT VERIFIED FOR CREDIT**; no newly releasable. Coordinator created fresh scoped Release-1 **Draft PR #256**, based on site-prod@58634812 preserving 11 C6 changes; HEAD 5a607a18; #45202488008 SUCCESS, proof #14831583664, UI regression #45202505200 PASS, active23 preflight #45202505458 PASS (release skipped). Production Netlify still deploy 6b02d5ed... READY; its lock must be confirmed at GO. Draft only, PROMOTE=OFF; owner GO remains separate.
+
 ## Concrete next tasks
 
 1. Verify actual Netlify `c6-backup` scheduled invocation and, once both age gates permit, one owner-actor `c6_run_now` C2→Neon→Git-only publish. Production Netlify must remain locked; GitHub cron remains active but unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
@@ -36,6 +42,12 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-RELEASE1-REPinned-C6-SAMEBASE-2026-11-23-01
+- #251 PR #253 HEAD e5428063 #45190794160 SUCCESS, 121 isolated browser assertions; advanced C6 production base prevented owner-GO readiness. #252 PR #254 HEAD ea6bef7 #45190860163 SUCCESS, independent credit audit holds Sep +15/Oct +11; requires full primary-source bodies. Coordinator prepared Draft #256 HEAD 5a607a18 on site-prod@58634812 with no C6 changes, Actions #45202488008 SUCCESS and artifact #14831583664; #45202505200 UI regression SUCCESS, #45202505458 active23 preflight SUCCESS with production job SKIPPED. Production Netlify current deployed 6b02d5ed remains READY. No deploy, no new death credit; PROMOTE=OFF; owner publication GO not yet obtained.
+
+## CASUALTY-THREE-WORKS-INDEPENDENT-PASS-RELEASE-SPLIT-2026-11-23-01
+- PR #250 HEAD 71be304e, Actions #45158190608 PASS: 113 isolated browser assertions; no production. PR #249 HEAD 8212719e, #45156236536 PASS: Sep Kyiv +15 proposed, 2 held. PR #248 HEAD 9b832784, #45155998766 PASS: Oct Kyiv +11 proposed, not publication-ready. Inherited regressions #45158200553/#45158200572 fail on old JS asset query. #251 first release proof, #252 independent verification; publication GO not granted. PROMOTE=OFF.
+
 ## DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — documentation label only
 - Clarified the current coordination status to `DST_EXTRA_CORRECTION=NOT_REQUIRED`: eight valid DST witnesses are already counted and three stale physical UIDs excluded, supported by readback Actions #43706909819 and proof artifact #14159523883. Superseded research selector PR #182 remains disabled/unmerged. No runtime flag rename, Neon mutation, C2 change, production publication, or Netlify deploy.
 
