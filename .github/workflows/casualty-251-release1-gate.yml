@@ -1,0 +1,122 @@
+name: Casualty 251 Release-1 evidence gate and isolated browser QA (NO PUBLISH)
+on:
+  push:
+    branches: [research/casualty-251-release1-owner-go-20261123]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated-qa:
+    if: github.ref == 'refs/heads/research/casualty-251-release1-owner-go-20261123'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    env:
+      PROMOTE: 'OFF'
+      CASUALTY_PUBLICATION_ALLOWED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify corrected publisher and integration regression (read-only)
+        run: |
+          set -euo pipefail
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node --check kyiv-air-alerts-grafana/pages-preview/casualty-partial-preview.js
+          node --check kyiv-air-alerts-grafana/pages-preview/casualty-partial-source.js
+          node tests/test_casualty_245_integrated.cjs
+          node kyiv-air-alerts-grafana/tests/test_city_period_kpi_sync.js
+          node kyiv-air-alerts-grafana/tests/test_current_period_completion.js
+          node --test tests/test_active23_live_ui.cjs
+          node --test tests/test_active23_daily28_url.cjs
+          node tests/test_casualty_251_release_gate.cjs
+          python3 kyiv-air-alerts-grafana/scripts/build_casualty_partial_sidecar.py --check
+          python3 -m unittest discover -s tests -p test_casualty_240_sidecar.py -v 2>&1 | tee casualty-245-python-tests.txt
+      - name: Verify immutable real Git candidate canonical source and failure cases (NO PUBLISH)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node tests/test_casualty_251_git_source.cjs
+      - name: Build exact isolated snapshot and frozen SHA-256 read binding
+        run: |
+          set -euo pipefail
+          mkdir -p _casualty245_site
+          cp kyiv-air-alerts-grafana/pages-preview/{index.html,styles.css,app.js,features.json,chart-share.js,kpi-range.js,weekday-distribution.js,weekday-ui.js,weekday-dayparts.json,active-23-provisional.js,active-23-chart-overlay.js,current-period-completion.js,forecast-trend.js,quarterly-rolling-preview.js,brand-mark.svg,brand-horizontal-uk-dark.svg,brand-horizontal-en-dark.svg,favicon.svg,favicon-32.png,casualty-partial-preview.js,casualty-partial-source.js,kyiv_threat_mix_archive.json} _casualty245_site/
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _casualty245_site/data.json
+          cp kyiv-air-alerts-grafana/data/casualty_partial_months.json _casualty245_site/
+          python3 kyiv-air-alerts-grafana/scripts/build_bilingual_html.py --source kyiv-air-alerts-grafana/pages-preview/index.html --output-dir _casualty245_site
+          printf 'User-agent: *\nDisallow: /\n' > _casualty245_site/robots.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path("_casualty245_site")
+          original=json.loads((root/"features.json").read_text())
+          assert original["casualty_partial_source"]=="canonical_site_prod"
+          original["casualty_partial_source"]="frozen_test"
+          original["isolated_test_only"]=True
+          (root/"features.json").write_text(json.dumps(original,indent=2)+"\n")
+          side=json.loads((root/"casualty_partial_months.json").read_text())
+          assert side["promotion"]=="OFF" and side["publication_allowed"] is False
+          pin=side["baseline_ref"].removeprefix("site-prod@")
+          assert len(pin)==40
+          sha=lambda p:hashlib.sha256((root/p).read_bytes()).hexdigest()
+          binding=dict(schema="casualty-245-frozen-binding-v1",mode="frozen_test",
+            site_prod_sha=pin,dashboard_sha256=sha("data.json"),
+            sidecar_sha256=sha("casualty_partial_months.json"),promotion="OFF",production=False)
+          (root/"casualty-test-binding.json").write_text(json.dumps(binding,indent=2)+"\n")
+          files={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob("*") if p.is_file()}
+          Path("casualty-245-bundle-sha256.json").write_text(json.dumps(files,indent=2,sort_keys=True)+"\n")
+          assert "casualty_partial_months.json" in files and len(files)>=23
+          print("CASUALTY_245_EXACT_FROZEN_BUNDLE_PASS",len(files),pin)
+          PY
+          test "$(grep -c 'casualty-partial-source.js' _casualty245_site/index.html)" -eq 1
+          test "$(grep -c 'casualty-partial-source.js' _casualty245_site/en/index.html)" -eq 1
+          ! grep -E -q 'netlify[[:space:]]+deploy[[:space:]]+--prod' .github/workflows/casualty-251-release1-gate.yml
+      - name: Deploy to existing separate research site ONLY (not production)
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy --dir=_casualty245_site --site=42159ba4-a142-4c7b-ad42-9b6ba4de4dcb --auth="$NETLIFY_AUTH_TOKEN" --json > casualty-245-preview-deploy.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open("casualty-245-preview-deploy.json"))
+          assert x.get("deploy_url") and "casualty-partial-239-draft-preview.netlify.app" in x["deploy_url"]
+          assert x.get("site_id") in (None,"42159ba4-a142-4c7b-ad42-9b6ba4de4dcb")
+          print("ISOLATED_PREVIEW",x["deploy_url"])
+          PY
+      - name: Physical browser QA - 23 cities x UA/EN x desktop/mobile, negative 404
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p /tmp/casualty245-puppeteer
+          npm --prefix /tmp/casualty245-puppeteer install --no-audit --no-fund --no-save puppeteer-core@24
+          export NODE_PATH=/tmp/casualty245-puppeteer/node_modules
+          export PREVIEW_URL="$(python3 - <<'PY'
+          import json
+          print(json.load(open("casualty-245-preview-deploy.json"))["deploy_url"].replace("http://","https://",1))
+          PY
+          )"
+          node tests/smoke_casualty_245_integrated.cjs
+      - name: Preserve actual proof even on failed QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-251-release1-no-publish-proof
+          path: |
+            casualty-245-python-tests.txt
+            casualty-245-preview-deploy.json
+            casualty-245-bundle-sha256.json
+            casualty-245-browser.json
+            casualty-251-release-gate.json
+            casualty-251-git-source.json
+            casualty-245-uk-desktop.png
+            casualty-245-uk-mobile.png
+            casualty-245-en-desktop.png
+            casualty-245-en-mobile.png
+          if-no-files-found: ignore
+          retention-days: 30

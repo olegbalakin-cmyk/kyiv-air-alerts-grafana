@@ -7,7 +7,25 @@ const marker = "\nif(!canonicalizeLanguagePath()){";
 assert.ok(code.includes(marker));
 assert.ok(code.includes('if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();'));
 assert.match(code,/const activeRange = syncDateRange\("cityDateFrom", "cityDateTo",\s*cityPeriodDateValues\(city, period, allRows\)\);/);
-assert.match(html,/app\.js\?v=20261120-active23-live1/);
+// Guard real cache-busting release contract rather than a superseded active23 tag.
+const appScripts=[...html.matchAll(/<script src="app\.js\?v=([^"]+)"><\/script>/g)];
+assert.equal(appScripts.length,1,"one canonical app.js entry");
+assert.equal(appScripts[0][1],"20261123-casualty-245","pinned Release-1 UI asset version");
+for(const file of ["casualty-partial-preview.js","casualty-partial-source.js"])
+  assert.ok(html.includes('<script src="'+file+'?v='+appScripts[0][1]+'"></script>'),"paired release asset: "+file);
+const featureConfig=JSON.parse(fs.readFileSync(path.join(__dirname,"../pages-preview/features.json"),"utf8"));
+assert.equal(featureConfig.casualty_partial_preview,true);
+assert.equal(featureConfig.casualty_partial_source,"canonical_site_prod");
+assert.equal(featureConfig.isolated_test_only,undefined);
+const c6Capture=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/active23_source_capture.json"),"utf8"));
+const c6Dashboard=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/dashboard_data.json"),"utf8"));
+const c6Derived=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/site_derived.json"),"utf8"));
+const c6Binding=c6Capture.release_manifest_sha256;
+assert.match(c6Binding,/^[a-f0-9]{64}$/);
+assert.equal(c6Dashboard.meta.publication_authority.release_manifest_sha256,c6Binding);
+assert.equal(c6Derived.meta.publication_authority.release_manifest_sha256,c6Binding);
+assert.deepEqual(Object.keys(c6Dashboard.casualties_by_city).sort(),c6Dashboard.multicity_meta.production_city_keys.map(k=>k.replace('ivano_frankivsk','ivano-frankivsk')).sort());
+
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname,"fixtures/daily28_20261020_live.json"),"utf8"));
 assert.equal(Object.keys(fixture.complete_daily28).length,23);
 const rows = [...fixture.complete_daily28.kyiv.slice(-27),fixture.current_day.cities.kyiv];
