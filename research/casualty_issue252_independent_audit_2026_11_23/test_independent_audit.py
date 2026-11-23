@@ -135,6 +135,10 @@ def validate(matrix, proof, witness, request):
                    "K25-CITYWIDE-RESIDUAL-2")["unresolved_count"] == "2",
           "September 25 unallocated two must remain blocked")
     check(next(x for x in matrix if x["record_id"] ==
+               "K25-CITYWIDE-RESIDUAL-2")["decision"] ==
+          "HELD_INSUFFICIENT_PROOF",
+          "Sep25 residual two must be HELD, not approved")
+    check(next(x for x in matrix if x["record_id"] ==
                "SEP27-CITYWIDE-SECOND-UNMAPPED")["decision"] ==
           "HELD_INSUFFICIENT_PROOF",
           "Sep27 potential additional victim requires scope reconciliation")
@@ -190,7 +194,8 @@ def validate(matrix, proof, witness, request):
     check(len(request["targets"]) == guard["max_gets"] == 12
           and len(set(t["url"] for t in request["targets"])) == 12,
           "12 unique exact GO targets required")
-    check(all(t["url"] == sources[t["id"]]["url"]
+    check(all(t["id"] in sources
+              and t["url"] == sources[t["id"]]["url"]
               and t["prior_saved_source_sha256"] == sources[t["id"]]["sha256"]
               for t in request["targets"]), "GO targets not source-pinned")
     check(guard["https_only"] and guard["public_ip_only"]
