@@ -67,7 +67,7 @@ const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok){er
   const csvLutsk=await readCsv("lutsk");
   const csvOct=csvLutsk.replace(/^\uFEFF/,"").split(/\r?\n/).find(x=>x.startsWith("2026-10,"))||"";
   check(lang+mode+"-csv-lutsk",csvLutsk.includes("[value_status]") &&
-    /^2026-10,6,verified_incident_lower_bound_not_monthly_total/.test(csvOct),
+    /^2026-10,,verified_incident_lower_bound_not_monthly_total,6,verified_incident_lower_bound_not_monthly_total,true,/.test(csvOct),
     {oct:csvOct,hasStatus:csvLutsk.includes("[value_status]")});
   const csvKyiv=await readCsv("kyiv");
   const csvOctUnknown=csvKyiv.replace(/^\uFEFF/,"").split(/\r?\n/).find(x=>x.startsWith("2026-10,"))||"";
