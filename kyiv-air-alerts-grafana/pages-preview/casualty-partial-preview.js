@@ -9,12 +9,10 @@
   async function verifyFrozenSource(sourceText) {
     if (!globalThis.crypto?.subtle || typeof TextEncoder !== "function") reject("checksum unavailable");
     const bytes = new TextEncoder().encode(sourceText);
-    const header = new TextEncoder().encode("blob " + bytes.byteLength + "\\0");
-    // Node/Git blob identity uses the NUL byte, not the literal backslash characters.
-    header[header.length - 2] = 0;
-    const input = new Uint8Array(header.length - 1 + bytes.length);
-    input.set(header.subarray(0, header.length - 1));
-    input.set(bytes, header.length - 1);
+    const header = new TextEncoder().encode("blob " + bytes.byteLength + String.fromCharCode(0));
+    const input = new Uint8Array(header.length + bytes.length);
+    input.set(header);
+    input.set(bytes, header.length);
     const hash = await globalThis.crypto.subtle.digest("SHA-1", input);
     const actual = [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,"0")).join("");
     if (actual !== SOURCE_BLOB_SHA) reject("frozen sidecar checksum mismatch");
