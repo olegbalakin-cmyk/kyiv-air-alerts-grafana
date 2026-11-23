@@ -76,7 +76,7 @@ def validate(j, csv_text):
             assert d["count_kind"] == "DISTINCT_BOUNDED_IDENTITIES"
             assert d["verified_new_delta"] == len(d["victim_slots"]) > 0
             assert len(d["source_refs"]) >= 2
-            assert d["civilian_aerial_evidence"].startswith(("Russian UAV", "Night ballistic", "Russian UAV", "Morning UAV"))
+            assert d["civilian_aerial_evidence"].startswith(("Russian UAV", "Night ballistic", "Night missile/UAV", "Morning UAV"))
         else:
             assert d["verified_new_delta"] == 0
             assert not d["victim_slots"]
@@ -126,8 +126,8 @@ def negative_cases(j, csv_text):
     fail_mutation("citywide_duplicate", lambda x: x["decisions"][0].update(verified_new_delta=3))
     fail_mutation("identity_duplicate", lambda x: x["decisions"][1]["victim_slots"].__setitem__(0, x["decisions"][0]["victim_slots"][0]))
     fail_mutation("out_of_city_credit", lambda x: x["decisions"][11].update(verified_new_delta=2))
-    fail_mutation("held_auto_credit", lambda x: x["decisions"][4].update(automatic_credit=True))
-    fail_mutation("unknown_as_credit", lambda x: x["decisions"][4].update(verified_new_delta=2))
+    fail_mutation("held_auto_credit", lambda x: x["decisions"][8].update(automatic_credit=True))
+    fail_mutation("unknown_as_credit", lambda x: x["decisions"][8].update(verified_new_delta=2))
     fail_mutation("sep25_double_count", lambda x: x["date_groups"][2].update(safe_new_delta=7))
     fail_mutation("late_date_wrong_month", lambda x: x["decisions"][0].update(attack_date="2026-10-01"))
     fail_mutation("missing_source", lambda x: x["decisions"][0]["source_refs"].append("q90000"))
