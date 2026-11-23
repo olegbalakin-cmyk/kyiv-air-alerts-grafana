@@ -51,9 +51,9 @@ def validate(slots, coverage, go, metrics):
                 and s["proposed_slot_count"] == "1"
                 and s["independently_releasable_delta"] == "0"
                 for s in slots), "unapproved credit")
-    require(all(s["full_body_witness"] == "MISSING_NOT_FETCHED"
+    require(all(s["body_witness"] == "MISSING_NOT_FETCHED"
                 and s["body_sha256"] == ""
-                and s["source_date_verification"] == "COMMENT_ONLY_UNVERIFIED"
+                and s["publication_date_proof"] == "COMMENT_ONLY_UNVERIFIED"
                 for s in slots), "false publisher body or date attestation")
     require(all(s["proposed_evidence_sufficiency"] == "INSUFFICIENT_FULL_BODY"
                 and s["missing_full_body_witness"] == "YES"
