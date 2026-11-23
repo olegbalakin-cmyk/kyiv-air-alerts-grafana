@@ -49,7 +49,7 @@ if (!/^https:\/\/[a-z0-9-]+(?:--[a-z0-9-]+)?\.netlify\.app\/?$/.test(base || "")
     const annual=await page.evaluate(()=>({note:document.querySelector("#casualtySourceNote").textContent,
       labels:window.Chart.getChart(document.querySelector("#casualtyChart"))?.data?.labels}));
     check(lang+"-annual-cutoff",lang==="uk"?/січень–серпень/.test(annual.note):/January–August/.test(annual.note),annual.note);
-    check(lang+"-2026-year",annual.labels.includes("2026"),annual.chart.labels);
+    check(lang+"-2026-year",annual.labels.includes("2026"),annual.labels);
     await page.select("#compareA","lutsk");await page.select("#compareB","kyiv");await page.select("#compareC","khmelnytskyi");
     const comparison=await page.evaluate(()=>{
       const ch=window.Chart.getChart(document.querySelector("#compareCasualtiesChart"));
