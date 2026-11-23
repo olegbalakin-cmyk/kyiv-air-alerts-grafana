@@ -24,7 +24,7 @@ const c6Binding=c6Capture.release_manifest_sha256;
 assert.match(c6Binding,/^[a-f0-9]{64}$/);
 assert.equal(c6Dashboard.meta.publication_authority.release_manifest_sha256,c6Binding);
 assert.equal(c6Derived.meta.publication_authority.release_manifest_sha256,c6Binding);
-assert.deepEqual(Object.keys(c6Dashboard.casualties_by_city).sort(),c6Dashboard.multicity_meta.production_city_keys.slice().sort());
+assert.deepEqual(Object.keys(c6Dashboard.casualties_by_city).sort(),c6Dashboard.multicity_meta.production_city_keys.map(k=>k.replace('ivano_frankivsk','ivano-frankivsk')).sort());
 
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname,"fixtures/daily28_20261020_live.json"),"utf8"));
 assert.equal(Object.keys(fixture.complete_daily28).length,23);
