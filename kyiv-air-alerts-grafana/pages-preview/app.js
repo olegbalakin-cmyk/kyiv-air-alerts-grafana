@@ -3778,12 +3778,17 @@ function renderShortHorizon(key) {
   });
 }
 
+function casualtyDataKey(key) {
+  // Dashboard city-select uses underscore; casualty JSON uses a hyphen.
+  return key === "ivano_frankivsk" ? "ivano-frankivsk" : key;
+}
 function casualtyPreviewRows(key) {
   if (state.casualtyUnavailable) return [];
-  const series = state.data.casualties_by_city?.[key] ||
-    (key === "kyiv" ? state.data.casualties : null);
+  const slug = casualtyDataKey(key);
+  const series = state.data.casualties_by_city?.[slug] ||
+    (slug === "kyiv" ? state.data.casualties : null);
   if (!series) return [];
-  return window.CasualtyPartialPreview?.rows(series.monthly, key, state.casualtyPartial) ||
+  return window.CasualtyPartialPreview?.rows(series.monthly, slug, state.casualtyPartial) ||
     series.monthly || [];
 }
 function casualtyCsvStatus(row, yearly = false) {
@@ -3795,7 +3800,7 @@ function casualtyCsvStatus(row, yearly = false) {
 function appendCasualtyEvidence(container, key) {
   if (!container) return;
   container.replaceChildren();
-  const url = window.CasualtyPartialPreview?.sourceFor(key, state.casualtyPartial);
+  const url = window.CasualtyPartialPreview?.sourceFor(casualtyDataKey(key), state.casualtyPartial);
   if (!state.casualtyPartial || !url) return;
   container.append(document.createTextNode(tr("Джерело перевіреної атаки: ","Verified attack source: ")));
   const link=document.createElement("a");
@@ -3806,7 +3811,8 @@ function appendCasualtyEvidence(container, key) {
 
 function renderCasualties(key) {
   const section = $("casualtySection");
-  const series = state.data.casualties_by_city?.[key] || (key === "kyiv" ? state.data.casualties : null);
+  const slug = casualtyDataKey(key);
+  const series = state.data.casualties_by_city?.[slug] || (slug === "kyiv" ? state.data.casualties : null);
   const allRows = casualtyPreviewRows(key);
   if (!allRows.length) {
     section.classList.toggle("hidden", !state.casualtyUnavailable);
