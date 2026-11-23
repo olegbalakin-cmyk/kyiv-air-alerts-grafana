@@ -5040,6 +5040,16 @@ async function init() {
   bind();
   renderCity();
   renderComparison();
+  if (state.casualtyUnavailable) {
+    $("casualtySection")?.classList.remove("hidden");
+    $("casualtySection")?.querySelector(".casualty-chart")?.classList.add("hidden");
+    $("casualtySourceNote").textContent = tr(
+      "Дані про загиблих тимчасово недоступні: перевірка джерела не пройдена.",
+      "Casualty data temporarily unavailable: source verification failed.");
+    if ($("compareCasualtiesNote")) $("compareCasualtiesNote").textContent = tr(
+      "Порівняння загиблих недоступне: джерело не пройшло перевірку.",
+      "Casualty comparison unavailable: source verification failed.");
+  }
   renderAllCitiesTable();
   setupCsvExports();
   window.ChartShare?.setup({
