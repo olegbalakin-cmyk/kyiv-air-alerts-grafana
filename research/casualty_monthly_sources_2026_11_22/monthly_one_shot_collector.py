@@ -475,11 +475,13 @@ def capture(env: dict, *, manifest_path: Path = MANIFEST,
                     "status": "PENDING", "deaths_auto_credit": 0}
             try:
                 reply = transport(url, set(manifest["allowed_hosts"]))
+                if "_decoded" not in reply or "_raw" not in reply:
+                    raise ArchiveError("TRANSPORT_FULL_BODY_MISSING")
                 decoded = reply.pop("_decoded")
                 raw_body = reply.pop("_raw")
                 if (reply.get("raw_sha256") != sha256(raw_body) or
                         reply.get("decoded_sha256") != sha256(decoded)):
-                    raise Blocked("TRANSPORT_DIGEST_MISMATCH")
+                    raise ArchiveError("TRANSPORT_DIGEST_MISMATCH")
                 receipt = archive.store(
                     target_id=target["id"], url=url,
                     content_type=reply["content_type"],
