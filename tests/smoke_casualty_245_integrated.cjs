@@ -45,7 +45,9 @@ const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok){er
       source:!!document.querySelector("#casualtyEvidence a")};
    });
    const sep=r.sep.find(v=>v.st?.startsWith("september_"));
-   const oct=r.oct.find(v=>v.st==="unknown_not_zero"||v.st==="verified_incident_lower_bound_not_monthly_total");
+   const oct=Object.hasOwn(verified,key)
+     ?r.oct.find(v=>v.st==="verified_incident_lower_bound_not_monthly_total"&&v.n===verified[key])
+     :r.oct.find(v=>v.st==="unknown_not_zero"&&v.n===null);
    check(lang+mode+key,!!sep&&!!oct&&r.sep.some(v=>v.n===null)&&
      oct.n===(verified[key]??null)&&r.source===Object.hasOwn(verified,key),r);
   }
