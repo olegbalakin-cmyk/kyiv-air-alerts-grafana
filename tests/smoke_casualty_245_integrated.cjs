@@ -2,7 +2,7 @@ const fs=require("node:fs"),puppeteer=require("puppeteer-core");
 const base=process.env.PREVIEW_URL;
 if(!/^https:\/\/[a-z0-9-]+--casualty-partial-239-draft-preview\.netlify\.app\/?$/.test(base||""))throw Error("ISOLATED_ONLY");
 const checks=[],errors=[],screens=[];
-const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok)errors.push(name);};
+const check=(name,ok,details)=>{checks.push({name,pass:!!ok,details});if(!ok){errors.push(name);console.error("CASUALTY_245_FAIL_DETAIL",name,JSON.stringify(details));}};
 (async()=>{
  const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_BIN||"/usr/bin/google-chrome",args:["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]});
  try{
