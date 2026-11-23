@@ -258,6 +258,31 @@ class OfflineCollectorTests(unittest.TestCase):
         claim.assert_not_called()
         transport.assert_not_called()
 
+    def test_bad_original_digest_stops_after_first_get(self):
+        with tempfile.TemporaryDirectory(prefix="casualty-monthly-test-") as tmp:
+            self.env["CASUALTY_MONTHLY_OUTPUT"] = tmp
+            calls = []
+            def tampered_transport(url, hosts):
+                calls.append(url)
+                data = b"<html><article>synthetic report</article></html>"
+                return {
+                    "http_status": 200, "content_type": "text/html",
+                    "raw_bytes": len(data), "decoded_bytes": len(data),
+                    "raw_sha256": "0" * 64,
+                    "decoded_sha256": m.sha256(data),
+                    "_raw": data, "_decoded": data,
+                }
+            with mock.patch.object(m.subprocess, "run",
+                                   return_value=mock.Mock(stdout=HEAD + "\n")):
+                with self.assertRaisesRegex(m.Blocked, "PRIVATE_ARCHIVE_FAILURE_STOP"):
+                    m.capture(self.env, transport=tampered_transport,
+                              tag_claim=lambda ref, head: True, now=NOW)
+            self.assertEqual(len(calls), 1)
+            report = json.loads((Path(tmp) / "capture_report.json").read_text())
+            self.assertEqual(report["successful_gets"], 0)
+            self.assertEqual(report["encrypted_archive"]["record_count"], 0)
+            self.assertEqual(report["results"][0]["status"], "ARCHIVE_FAILED_STOP")
+
     def test_pdf_is_hash_only(self):
         evidence = m.brief_evidence(b"%PDF-1.4 fake", "application/pdf")
         self.assertEqual(evidence["review_note"], "PDF_CAPTURED_HASH_ONLY")
