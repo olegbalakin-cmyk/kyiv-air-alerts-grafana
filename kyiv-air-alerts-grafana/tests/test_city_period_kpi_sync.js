@@ -8,7 +8,7 @@ assert.ok(code.includes(marker));
 assert.ok(code.includes('if (["daily28", "allTime"].includes($("cityPeriod").value)) resetCityDisplayRange();'));
 assert.match(code,/const activeRange = syncDateRange\("cityDateFrom", "cityDateTo",\s*cityPeriodDateValues\(city, period, allRows\)\);/);
 // Guard real cache-busting release contract rather than a superseded active23 tag.
-const appScripts=[...html.matchAll(/<script src="app\\.js\\?v=([^"]+)"><\\/script>/g)];
+const appScripts=[...html.matchAll(/<script src="app\.js\?v=([^"]+)"><\/script>/g)];
 assert.equal(appScripts.length,1,"one canonical app.js entry");
 assert.equal(appScripts[0][1],"20261123-casualty-245","pinned Release-1 UI asset version");
 for(const file of ["casualty-partial-preview.js","casualty-partial-source.js"])
