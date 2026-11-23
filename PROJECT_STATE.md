@@ -24,6 +24,12 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 - **DST VERIFIED; extra correction NOT REQUIRED:** #43706909819 confirms eight correct witnesses and three stale UIDs already excluded from calculations; research selector stays disabled, no Neon mutation.
 
 
+## Casualty track — first publication preparation (NO GO)
+
+- **Priority:** safely publish partial September/October civilian fatality data for 23 cities, without treating incomplete values as exact totals. September has partial baseline in every city; October has 4 verified attacks/11 fatalities in 4 cities, remaining 19 unknown. First UI preview PR #237 passed only offline (#45073738532). Never interpret 11 as full October total.
+- **Parallel prepared scopes:** September coverage/proof #238, Sep+Oct UI + real browser preview #239, Git-only sidecar/publisher contract #240. Their proof and release gates are independent; prevent cross-track writes.
+- **Next decision:** collect physical preview/screenshots, incident/baseline credit proofs, immutable Git JSON hashes, rollback and same-release 23-city comparison; request **separate owner publish GO**. No write to production site, C6, Neon or `site-prod` now; `PROMOTE=OFF`.
+
 ## Concrete next tasks
 
 1. Verify actual Netlify `c6-backup` scheduled invocation and, once both age gates permit, one owner-actor `c6_run_now` C2→Neon→Git-only publish. Production Netlify must remain locked; GitHub cron remains active but unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
@@ -36,6 +42,9 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## CASUALTY-FIRST-PUBLICATION-TASKS-2026-11-23-01 — preparatory gates only
+- Owner prioritizes first correct casualty publication; owner permits executor briefs, **not** production publication. Coordinator created September 23-city audit issue #238, UI partial Sep+Oct browser-preview issue #239, and Git-only sidecar/publisher contract issue #240. PR #237 (HEAD b8f29139, Actions #45073738532 SUCCESS) proves offline October UI only, not browser or production; source PR #236 (HEAD 270702cc, #45073045655 SUCCESS) contains 4 October events/11 deceased, 19 city-months unknown. All September baselines remain partial; existing Kyiv original Sep cutoff 2026-09-15, three independent validated-city cutoffs are Kherson Sep17 and Odesa/Zaporizhzhia Sep18. Freeze Sumy Sep20 confirmed revision. Collector #45070256716 used its one-shot 27 GET grant; no grant remains. Release is BLOCKED until source proofs, 23-city browser+CSV parity, and publish/rollback contract PASS, followed by separate owner GO. Keep PROMOTE=OFF, zero production/Neon/Netlify changes.
+
 ## DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — documentation label only
 - Clarified the current coordination status to `DST_EXTRA_CORRECTION=NOT_REQUIRED`: eight valid DST witnesses are already counted and three stale physical UIDs excluded, supported by readback Actions #43706909819 and proof artifact #14159523883. Superseded research selector PR #182 remains disabled/unmerged. No runtime flag rename, Neon mutation, C2 change, production publication, or Netlify deploy.
 
