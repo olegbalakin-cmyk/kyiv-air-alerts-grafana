@@ -13,6 +13,12 @@
 - Prior collector [#45070256716](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/45070256716), artifact **#14773425588**: **physically downloaded ZIP (8,022 bytes) and rehashed** SHA256 `f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f`; extracted `capture_report.json` rehashed `be053f77ade09db833eb976a67a6bcb036fb42cff1c98f81bfd90dde1fbe7ed8`. Exactly **27 attempted GET**, **21 HTTP200**, zero credits/writes, `source_full_text_saved=false`. The archived JSON records **metadata and short context, not 21 full publisher bodies**. Earlier GO is spent and cannot be reused.
 - Git source hashes are chain-of-custody evidence for **saved excerpts**; URL matching or a prior Actions SUCCESS **is not a primary-source attestation**. No new publisher HTTP request was made here.
 
+## Concurrent site-prod advance — independent latest readback
+
+While this audit branch was being tested, a separate Git-only C6 publication advanced `site-prod` **one commit** from `f7e0681ca6aa98405638dae7a63c884f4ed55d20` to **`58634812155ddc6b4324c26d694cf3de6cfb9bbe`**. This audit did **not** push that commit. Read-only compare revealed 11 file changes (air-alert metrics/checkpoints plus casualty review queue/source state), **no revisions, baseline, or monthly casualty rows changes**.
+
+Directly fetched latest: Kyiv Sep baseline blob unchanged `52238c1e72bdba3b06fc0c0469d699f018d8e353`; revisions unchanged `8d7a2e2540bf4bf0f8c6227023821390bf82ce13`; wide CSV unchanged `f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801`. Review queue changed blob from `8ae078bc...` to **`280eff9296fc872510462e7d4f3ff02e3ff4a4ce`**, still **132 entries**. Independently compared every entry in the old/new decoded JSON: **only index 0** changed its saved content hash; **all 29 September and 10 October issue witnesses are at other unchanged indices**. Thus the historical **old queue blob remains an immutable exact reference** used in the audit matrix, and the current live queue is shown separately as a readback; its one updated candidate does not alter the pending Kyiv groups. This does **not** eliminate the need to re-pin production again just before any eventual release.
+
 ## Incident-by-incident acceptance (see full 36-row matrix)
 
 | Date and group | Source-backed proposal; **not release-certified** | Reconciliation issue |
