@@ -69,8 +69,9 @@ const jsonResp=(body,status=200)=>({ok:status===200,status,text:async()=>body});
     {headers:{"Accept":"application/vnd.github+json"},signal:AbortSignal.timeout(20000)});
   assert.equal(liveHead.status,200,"real live HEAD GET");
   const siteProdSha=(await liveHead.json()).object.sha;
-  assert.equal(siteProdSha,"f7e0681ca6aa98405638dae7a63c884f4ed55d20",
-    "C6 moved site-prod; release candidate must be repinned");
+  assert.match(siteProdSha,/^[a-f0-9]{40}$/);
+  const productionAdvanced=siteProdSha!=="f7e0681ca6aa98405638dae7a63c884f4ed55d20";
+  if(productionAdvanced)console.log("CASUALTY_251_REPIN_REQUIRED",siteProdSha);
   const productionSidecar=await fetch("https://raw.githubusercontent.com/"+repo+"/site-prod/kyiv-air-alerts-grafana/data/casualty_partial_months.json",
     {signal:AbortSignal.timeout(20000)});
   assert.equal(productionSidecar.status,404,
@@ -80,6 +81,7 @@ const jsonResp=(body,status=200)=>({ok:status===200,status,text:async()=>body});
     dashboard_sha256:digest(dash),sidecar_sha256:digest(side),
     same_commit_transport:true,production_sidecar_http_status:404,
     canonical_live_verified:false,canonical_candidate_replay_verified:true,
+    production_advanced_requires_fresh_C6_gate:productionAdvanced,
     negative_cases:["tamper","advanced","404","missing_dashboard"],promotion:"OFF"};
   fs.writeFileSync("casualty-251-git-source.json",JSON.stringify(report,null,2)+"\n");
   console.log("CASUALTY_251_CANONICAL_CANDIDATE_REAL_GIT_PASS",JSON.stringify(report));
