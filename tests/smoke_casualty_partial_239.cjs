@@ -42,15 +42,14 @@ if (!/^https:\/\/[a-z0-9-]+(?:--[a-z0-9-]+)?\.netlify\.app\/?$/.test(base || "")
     const screen="casualty-239-"+lang+".png";await page.screenshot({path:screen,fullPage:true});screenshots.push(screen);
     await page.select("#citySelect","kyiv");
     const unknown=await page.evaluate(()=>({note:document.querySelector("#casualtySourceNote").textContent,
-      chart:window.Chart.getChart(document.querySelector("#casualtyChart")),
       monthValues:window.Chart.getChart(document.querySelector("#casualtyChart"))?.data?.datasets?.map(d=>d.data.at(-1))}));
     check(lang+"-oct-unknown",unknown.monthValues.every(v=>v===null),unknown.monthValues);
     check(lang+"-unknown-copy",lang==="uk"?/невідомо/.test(unknown.note):/unknown/.test(unknown.note),unknown.note);
     await page.select("#casualtyInterval","yearly");
     const annual=await page.evaluate(()=>({note:document.querySelector("#casualtySourceNote").textContent,
-      chart:window.Chart.getChart(document.querySelector("#casualtyChart"))?.data}));
+      labels:window.Chart.getChart(document.querySelector("#casualtyChart"))?.data?.labels}));
     check(lang+"-annual-cutoff",lang==="uk"?/січень–серпень/.test(annual.note):/January–August/.test(annual.note),annual.note);
-    check(lang+"-2026-year",annual.chart.labels.includes("2026"),annual.chart.labels);
+    check(lang+"-2026-year",annual.labels.includes("2026"),annual.chart.labels);
     await page.select("#compareA","lutsk");await page.select("#compareB","kyiv");await page.select("#compareC","khmelnytskyi");
     const comparison=await page.evaluate(()=>{
       const ch=window.Chart.getChart(document.querySelector("#compareCasualtiesChart"));
@@ -71,4 +70,4 @@ if (!/^https:\/\/[a-z0-9-]+(?:--[a-z0-9-]+)?\.netlify\.app\/?$/.test(base || "")
   console.log("CASUALTY_239_BROWSER "+JSON.stringify({checks:checks.length,failures:errors}));
   await browser.close();
   if(errors.length)process.exitCode=1;
-})().catch(err=>{console.error(err);process.exitCode=1});
+})().catch(err=>{console.error(err);process.exit(1)});
