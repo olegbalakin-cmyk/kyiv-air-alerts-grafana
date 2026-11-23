@@ -33,7 +33,7 @@ if (!/^https:\/\/[a-z0-9-]+(?:--[a-z0-9-]+)?\.netlify\.app\/?$/.test(base || "")
         yearOption:[...document.querySelector("#casualtyYear").options].map(e=>e.value)};
     });
     check(lang+"-23-city",snapshot.cities===23,snapshot.cities);
-    check(lang+"-sep-partial",snapshot.sep.some(v=>v.status==="september_partial_confirmed_lower_bound"),snapshot.sep);
+    check(lang+"-sep-partial",snapshot.sep.some(v=>v.status==="september_partial_confirmed_lower_bound" || v.status==="september_unknown_not_zero") && snapshot.sep.every(v=>v.value===null),snapshot.sep);
     check(lang+"-oct-minimum",snapshot.oct.some(v=>v.value===6 && v.status==="verified_incident_lower_bound_not_monthly_total"),snapshot.oct);
     check(lang+"-labels",snapshot.compareLabels.includes("2026-09")&&snapshot.compareLabels.includes("2026-10"),snapshot.compareLabels);
     check(lang+"-note",lang==="uk"?/Вересень/.test(snapshot.note)&&/Жовтень/.test(snapshot.note):/September/.test(snapshot.note)&&/October/.test(snapshot.note),snapshot.note);
