@@ -65,8 +65,11 @@ const jsonResp=(body,status=200)=>({ok:status===200,status,text:async()=>body});
   };
   for(const kind of ["tamper","advanced","404","missing_dashboard"])await faulty(kind);
   await assert.rejects(()=>src.load("frozen_test",async()=>jsonResp("",404)),/HTTP/);
+  const token=process.env.GITHUB_TOKEN;
+  assert.ok(token && token.length>10,"read-only GitHub Actions token required for authenticated API HEAD");
   const liveHead=await fetch("https://api.github.com/repos/"+repo+"/git/ref/heads/site-prod",
-    {headers:{"Accept":"application/vnd.github+json"},signal:AbortSignal.timeout(20000)});
+    {headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+token,
+      "X-GitHub-Api-Version":"2022-11-28"},signal:AbortSignal.timeout(20000)});
   assert.equal(liveHead.status,200,"real live HEAD GET");
   const siteProdSha=(await liveHead.json()).object.sha;
   assert.match(siteProdSha,/^[a-f0-9]{40}$/);
