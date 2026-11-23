@@ -1,0 +1,100 @@
+{
+  "schema": "casualty-september-2026-pinned-source-witness-v1",
+  "read_only": true,
+  "promotion": "OFF",
+  "issue": 238,
+  "research_parent_sha": "270702ccc4a76d81ee8cc5b9cf73059fd19df025",
+  "site_prod_sha": "f7e0681ca6aa98405638dae7a63c884f4ed55d20",
+  "published_master": {
+    "path": "kyiv-air-alerts-grafana/data/casualties/master_20cities_monthly_wide.csv",
+    "blob_sha": "f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801",
+    "header": "month,kyiv,kharkiv,sevastopol,cherkasy,zhytomyr,dnipro,khmelnytskyi,poltava,rivne,sumy,vinnytsia,kropyvnytskyi,lviv,chernihiv,mykolaiv,lutsk,uzhhorod,ivano-frankivsk,ternopil,chernivtsi",
+    "september_row": "2026-09,18,1,2,0,0,7,1,0,0,3,0,0,0,0,4,0,0,0,0,0",
+    "city_count": 20,
+    "month_partial": true,
+    "individual_cutoff_for_non_kyiv": "UNPROVEN"
+  },
+  "kyiv_baseline": {
+    "path": "kyiv-air-alerts-grafana/data/casualties/baseline_monthly.csv",
+    "blob_sha": "52238c1e72bdba3b06fc0c0469d699f018d8e353",
+    "september_row": "2026-09,18,2026-09-15,partial month through 2026-09-15",
+    "validated_through": "2026-09-15"
+  },
+  "city_baselines": {
+    "kherson": {
+      "city": "kherson",
+      "month_row": "2026-09,12,11",
+      "baseline_deaths": 12,
+      "monthly_path": "cities/kherson/kherson_air_attack_deaths_monthly.csv",
+      "monthly_blob_sha": "5520e34c5d0696a167ed0eea378a8648c8836c49",
+      "manifest_path": "cities/kherson/manifest.json",
+      "manifest_blob_sha": "8f343b2fb01774ed476910d34489e03fbf190cb5",
+      "validated_through": "2026-09-17",
+      "unresolved_alltime": 13,
+      "scope": "Kherson city administrative boundaries only; deaths causally linked to aerial attacks",
+      "partial": true
+    },
+    "odesa": {
+      "city": "odesa",
+      "month_row": "2026-09,3,2,0",
+      "baseline_deaths": 3,
+      "monthly_path": "cities/odesa/odesa_air_attack_deaths_monthly.csv",
+      "monthly_blob_sha": "b51a2cd204b3a3c977025e7acd9311ba98e3a317",
+      "manifest_path": "cities/odesa/manifest.json",
+      "manifest_blob_sha": "bc9e487f63cf4c67c0c9c86757c3ded04537ee24",
+      "validated_through": "2026-09-18",
+      "unresolved_alltime": 8,
+      "scope": "Odesa city administrative boundaries only; deaths causally linked to aerial attacks",
+      "partial": true
+    },
+    "zaporizhzhia": {
+      "city": "zaporizhzhia",
+      "month_row": "2026-09,4,3,1",
+      "baseline_deaths": 4,
+      "monthly_path": "cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv",
+      "monthly_blob_sha": "1b32d8808069b4499fda35b092fd56f51c64583f",
+      "manifest_path": "cities/zaporizhzhia/manifest.json",
+      "manifest_blob_sha": "4dcfb6a14949820b4934a100063f549e22799e8b",
+      "validated_through": "2026-09-18",
+      "unresolved_alltime": 2,
+      "scope": "Zaporizhzhia city administrative boundaries only; deaths causally linked to aerial attacks",
+      "partial": true
+    }
+  },
+  "revision_ledger": {
+    "path": "kyiv-air-alerts-grafana/data/casualties/revisions.csv",
+    "blob_sha": "8d7a2e2540bf4bf0f8c6227023821390bf82ce13",
+    "rows": 1,
+    "sumy_record_id": "casualty:sumy:2026-09-20:fpv-double-strike-zarichnyi-apartment-entrance",
+    "city": "sumy",
+    "attack_date": "2026-09-20",
+    "deaths_delta": 1,
+    "status": "confirmed",
+    "primary_url": "https://npu.gov.ua/news/dvoie-liudei-zahynuly-troie-poraneni-sered-nykh-dytyna-politsiia-dokumentuie-naslidky-obstriliv-sumshchyny"
+  },
+  "review_queue": {
+    "path": "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+    "blob_sha": "8ae078bc60f2c27838b61e9aebf90b7286e0dd55",
+    "records_total": 132,
+    "needs_review_with_september_date_tag": 53,
+    "of_those_first_discovered_after_kyiv_cutoff": 48,
+    "interpretation": "source cards, not unique incident/death counts; Kyiv-only discovery feed"
+  },
+  "prior_run": {
+    "id": 45070256716,
+    "status": "success",
+    "approved_get_budget_consumed": 27,
+    "http_200": 21,
+    "artifact_id": 14773425588,
+    "capture_report_sha256": "be053f77ade09db833eb976a67a6bcb036fb42cff1c98f81bfd90dde1fbe7ed8",
+    "artifact_zip_sha256": "f2a95945e98dc92cdc49529be2bb127a5d4c3fe8a9e71ad82ebf2437b7c2eb9f",
+    "interpretation": "October and source pilot; does not establish September 23-city coverage"
+  },
+  "october_offline_run": {
+    "id": 45073045655,
+    "status": "success",
+    "head_sha": "270702ccc4a76d81ee8cc5b9cf73059fd19df025"
+  },
+  "scope": "civilian fatalities from aerial attacks inside city administrative boundaries, attributed to month of attack",
+  "note": "Frozen bounded source fields; no complete ZIP, HTML history or active publisher collection copied."
+}
