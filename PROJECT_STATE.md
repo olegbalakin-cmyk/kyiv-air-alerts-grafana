@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
 **Date:** 2026-11-28. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_EXTRA_CORRECTION=NOT_REQUIRED` (status label only; research selector remains disabled); live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01**; previous **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**. Historical details below.
+Latest accepted transition: **NEON-ARCHIVED-LEAVES-REMOVED-2026-11-28-01**; previous **C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01**. Historical details below.
 
 ## Working instructions
 
@@ -15,6 +15,7 @@ Latest accepted transition: **C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01**; 
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
+- **Neon capacity/backup:** 3/10 branches remain (live + 2 ancestors); six archived leaves removed by owner. Independent encrypted backup pending; PITR 6h; native snapshot rejected for live non-root branch. No branch consolidation or recovery test yet.
 - **Sevastopol C6 boundary fix:** PRs #261/#260 merged; exact pinned collector active for next cycle; offline PASS, physical publication pending. Last successful C6 #46123335756, failed #46151335220. No Netlify deploy.
 - **Scheduled C2/C6:** backup scheduler PR #224 merged; owner PAT saved as Netlify secret, backup enabled in isolated deploy `6b02b299b68451c6ef022581` READY (cron :47 UTC hourly). Seven actual checks verified; fallback dispatch pending. #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
 - **UI/SEO LIVE:** PR #194 bilingual archive/trends (936 sitemap URLs); Netlify locked, #43875088810 PASS. Monthly cron OFF.
@@ -34,10 +35,14 @@ Latest accepted transition: **C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01**; 
 4. UI/SEO: archive and trend LIVE, Netlify locked. Investigate strict HTML post-smoke #43874825782 without unnecessary deploy. Monthly automation requires separate owner GO; preserve four-hour Git updates.
 5. Verify weekday split after next scheduled 23-city Git-only refresh; preserve release-manifest binding, zero Netlify auto-deploy and percentage denominators per weekday bar. Investigate Netlify-injected HTML strict byte-comparison smoke without redeploy.
 6. Mark C6 stabilization CLOSED only after repeat-cycle proof; keep casualty/backfill separate.
+7. Prepare encrypted independent PostgreSQL 18 logical backup, dedicated read-only role, owner-managed GitHub secret and offline-held encryption key; verify isolated restore and free-tier transfer/storage budget before activation. Keep live branch and both ancestors untouched.
 
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## NEON-ARCHIVED-LEAVES-REMOVED-2026-11-28-01 — capacity recovered, backup pending
+- Owner manually removed six archived Neon leaves: br-small-wind-b5yah69o, br-quiet-tooth-b51ewryz, br-polished-haze-b5u6rpiz, br-icy-forest-b5mfyezq, br-quiet-hat-b5z5hdqu, br-misty-darkness-b5wkoiyk. Independent list_branches on green-cake-44216048 confirms 3 remaining: live br-bold-mode-b5rub8pq and ancestors br-young-feather-b5q19nli / br-wandering-sunset-b5835alw. Prior production reader #46123335756 targets live branch. Seven slots free under 10-branch limit. No production branch or pipeline change. Independent encrypted backup not yet configured; native snapshot rejected on non-root live branch.
+
 ## C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01 — code activated; physical proof pending
 - Owner GO; incident #46151335220 blocked 22/23 on old boundary orphan 25036; C2 artifacts #15266786068 and #15254954934. PR #261 main@838222e54ee825478e9f9ff73c5da112e8f1295a exact reader pin, PR #260 site-prod@5bc03fd875fe762700424e2fed363ac0d9147da6 exact parser blob 22a0ca10664ec485db0780375ba4805c2296c674. Offline #46159874132 and #46159895861 SUCCESS (15 collector, 8 pins, 4 weekday); at most 3 extra history pages within 100-page cap; orphan veto, 23-city gate and freshness unchanged. No manual dispatch or Netlify deploy, no data changes in merge. Next physical C2/Neon/readback/Git-only cycle pending.
 
