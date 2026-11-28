@@ -33,6 +33,9 @@ Newest first; current coordination lives in [PROJECT_STATE.md](PROJECT_STATE.md)
 - Chromium regression #44702699636 FAIL showed Nov19, missing snapshot and `site-derived.json` 404 despite static source PASS. PR #208 HEAD `3101a468` isolates complete Netlify draft bundle, Actions [#44703989283](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/44703989283) SUCCESS: 27 browser cases, 23 cities, UA desktop/EN mobile, actual Nov20 axis tick/bar, trend on/off; proof artifact #14614097420 (screenshots/JSON), Netlify draft `6b0007017cdb6d8c97bdbc05` READY/unpublished. Production unchanged; frozen source is not live publisher.
 
 <!-- coordination:history:start -->
+### C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01 — code activated, physical proof pending
+- Owner GO; incident #46151335220 blocked 22/23 on old boundary orphan 25036; C2 artifacts #15266786068 and #15254954934. PR #261 main@838222e54ee825478e9f9ff73c5da112e8f1295a exact reader pin, PR #260 site-prod@5bc03fd875fe762700424e2fed363ac0d9147da6 exact parser blob 22a0ca10664ec485db0780375ba4805c2296c674. Offline #46159874132 and #46159895861 SUCCESS (15 collector, 8 pins, 4 weekday); at most 3 extra history pages within 100-page cap; orphan veto, 23-city gate and freshness unchanged. No manual dispatch or Netlify deploy, no data changes in merge. Next physical C2/Neon/readback/Git-only cycle pending.
+
 ### DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — extra correction not required
 - Documentation-only clarification: replace ambiguous `DST_CORRECTION=OFF` *status label* in current state with `DST_EXTRA_CORRECTION=NOT_REQUIRED`. Actions #43706909819 SUCCESS and proof artifact #14159523883 confirm eight valid witnesses and three excluded stale UIDs. Research PR #182 remains unmerged/disabled; no environment flag, C2, Neon, Netlify or production data changes.
 
