@@ -261,5 +261,80 @@ class SevastopolContinuityTests(unittest.TestCase):
         self.assertEqual(self.checkpoint_path.read_bytes(), before)
 
 
+
+class SevastopolBoundaryFetchTests(unittest.TestCase):
+    # Incident 46151335220: previous run observed the pair 25035 -> 25036;
+    # the next run's cutoff excluded 25035. All HTTP below is mocked.
+    NOW = datetime(2026, 11, 28, 14, 12, 43, tzinfo=UTC)
+    START = datetime(2026, 11, 7, 0, 5, 54, tzinfo=UTC)
+    END = datetime(2026, 11, 7, 0, 50, 16, tzinfo=UTC)
+
+    def fetch(self, raw_pages):
+        from unittest.mock import Mock
+        class Frozen(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return self.NOW if tz else self.NOW.replace(tzinfo=None)
+
+        responses = []
+        for messages in raw_pages:
+            raw = html_messages(messages)
+            response = Mock(content=raw, text=raw.decode("utf-8"))
+            responses.append(response)
+        with patch.object(sev, "datetime", Frozen), \
+                patch.object(sev.time, "sleep"), \
+                patch.object(sev.history_capture, "enabled", return_value=False), \
+                patch.object(sev.requests, "Session") as session:
+            get = session.return_value.get
+            get.side_effect = responses
+            result, meta = sev.fetch_recent_messages()
+            urls = [call.args[0] for call in get.call_args_list]
+        return result, meta, urls
+
+    def test_boundary_orphan_fetches_start_and_pairs_exact_incident(self):
+        messages, meta, urls = self.fetch([
+            [(25036, self.END, "Отбой воздушной тревоги"),
+             (25037, self.END + timedelta(minutes=15), "Воздушная тревога"),
+             (25038, self.END + timedelta(hours=1), "Отбой воздушной тревоги")],
+            [(25035, self.START, "Воздушная тревога")],
+        ])
+        pairs, anomalies = sev.pair_recent(messages)
+        self.assertEqual(urls, [sev.SOURCE_URL, sev.SOURCE_URL + "?before=25036"])
+        self.assertEqual(meta["pages_requested"], 2)
+        self.assertEqual([(p["start_id"], p["end_id"]) for p in pairs],
+                         [(25035, 25036), (25037, 25038)])
+        self.assertEqual(anomalies, [])
+
+    def test_normal_boundary_does_not_fetch_extra(self):
+        messages, meta, urls = self.fetch([
+            [(25035, self.START, "Воздушная тревога"),
+             (25036, self.END, "Отбой воздушной тревоги")],
+        ])
+        self.assertEqual(urls, [sev.SOURCE_URL])
+        self.assertEqual(meta["pages_requested"], 1)
+        self.assertEqual(sev.pair_recent(messages)[1], [])
+
+    def test_missing_start_stays_orphan_after_bounded_extension(self):
+        raw_pages = [[(25036, self.END, "Отбой воздушной тревоги")]]
+        for i in range(sev.MAX_BOUNDARY_EXTRA_PAGES):
+            raw_pages.append([(25035 - i, self.START - timedelta(hours=i), "Other post")])
+        messages, meta, urls = self.fetch(raw_pages)
+        self.assertEqual(meta["pages_requested"], 1 + sev.MAX_BOUNDARY_EXTRA_PAGES)
+        self.assertEqual(len(urls), 1 + sev.MAX_BOUNDARY_EXTRA_PAGES)
+        pairs, anomalies = sev.pair_recent(messages)
+        self.assertEqual(pairs, [])
+        self.assertEqual([a["type"] for a in anomalies], ["orphan_end"])
+
+    def test_interior_orphan_remains_anomaly_without_boundary_extension(self):
+        messages, meta, urls = self.fetch([
+            [(25035, self.START, "Воздушная тревога"),
+             (25036, self.END, "Отбой воздушной тревоги"),
+             (25037, self.END + timedelta(minutes=15), "Отбой воздушной тревоги")],
+        ])
+        self.assertEqual(meta["pages_requested"], 1)
+        self.assertEqual(len(urls), 1)
+        self.assertEqual([a["type"] for a in sev.pair_recent(messages)[1]], ["orphan_end"])
+
+
 if __name__ == "__main__":
     unittest.main()
