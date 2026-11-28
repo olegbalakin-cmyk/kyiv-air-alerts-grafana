@@ -1,0 +1,76 @@
+# Issue #252: branch-only OFFLINE research CI. No dispatch, media GET, writes or deploy.
+name: Casualty Issue 252 independent evidence audit (OFFLINE ONLY)
+on:
+  push:
+    branches:
+      - research-casualty-issue252-independent-audit-2026-11-23
+    paths:
+      - "research/casualty_issue252_independent_audit_2026_11_23/**"
+      - ".github/workflows/casualty-issue252-independent-audit.yml"
+permissions:
+  contents: read
+jobs:
+  independent_audit:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/research-casualty-issue252-independent-audit-2026-11-23'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      PROMOTE: "OFF"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independent fail-closed matrix and negative tests, no network
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PROMOTE" = "OFF"
+          python -m unittest discover -s research/casualty_issue252_independent_audit_2026_11_23 -p 'test_*.py' -v
+      - name: Generate immutable offline audit manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os
+          root=Path('research/casualty_issue252_independent_audit_2026_11_23')
+          names=['acceptance_matrix.csv','source_witness_manifest.json',
+                 'audit_proof.json','owner_article_go_request.json',
+                 'evidence_gaps.md','test_independent_audit.py']
+          hashes={n:hashlib.sha256((root/n).read_bytes()).hexdigest() for n in names}
+          proof=json.loads((root/'audit_proof.json').read_text())
+          assert proof['PROMOTE']=='OFF'
+          assert proof['issue252_matrix']['independently_releasable_total']==0
+          assert proof['publication_gate']['READY_FOR_OWNER_GO'] is False
+          out=root/'offline_ci_proof.json'
+          out.write_text(json.dumps({
+            'schema':'casualty-issue252-independent-audit-ci-v1',
+            'research_head':os.environ['GITHUB_SHA'],
+            'promotion':'OFF',
+            'production_writes':0,
+            'publisher_gets':0,
+            'newly_releasable_sep':'NOT_YET_VERIFIED',
+            'newly_releasable_oct':'NOT_YET_VERIFIED',
+            'release1_11_not_blocked':True,
+            'source_sha256':hashes
+          },indent=2)+'\n')
+          print('ISSUE252_OFFLINE_AUDIT_PASS',hashes)
+          PY
+      - name: Upload audit evidence only, NO publisher bodies
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-issue252-independent-offline-proof
+          path: |
+            research/casualty_issue252_independent_audit_2026_11_23/offline_ci_proof.json
+            research/casualty_issue252_independent_audit_2026_11_23/acceptance_matrix.csv
+            research/casualty_issue252_independent_audit_2026_11_23/audit_proof.json
+            research/casualty_issue252_independent_audit_2026_11_23/evidence_gaps.md
+            research/casualty_issue252_independent_audit_2026_11_23/owner_article_go_request.json
+            research/casualty_issue252_independent_audit_2026_11_23/source_witness_manifest.json
+          retention-days: 30
+          if-no-files-found: error
