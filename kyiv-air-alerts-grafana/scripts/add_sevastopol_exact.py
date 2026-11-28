@@ -30,6 +30,7 @@ COVERAGE_START = "2023-09-25"
 CHANNEL = "razvozhaev"
 SOURCE_URL = f"https://t.me/s/{CHANNEL}"
 LOOKBACK_DAYS = 21
+MAX_BOUNDARY_EXTRA_PAGES = 3
 UTC = timezone.utc
 HEADERS = {
     "User-Agent": "kyiv-air-alerts-grafana/1.0 (+public dashboard updater)",
@@ -89,6 +90,7 @@ def fetch_recent_messages() -> tuple[list[dict], dict]:
     pages = 0
     stalled = 0
     capture_pages = []
+    boundary_extra_pages = 0
 
     while pages < 100:
         url = SOURCE_URL + (f"?before={before}" if before else "")
@@ -105,7 +107,14 @@ def fetch_recent_messages() -> tuple[list[dict], dict]:
             found[row["id"]] = row
         oldest = min(rows, key=lambda x: x["id"])
         if min(x["at"] for x in rows) <= cutoff:
-            break
+            # A moving cutoff can start in the middle of a completed alert.
+            # Fetch older evidence, never waive the orphan-end continuity veto.
+            first_kind = next((kind for message in sorted(
+                found.values(), key=lambda m: (m["at"], m["id"]))
+                if (kind := strict_kind(message["text"])) is not None), None)
+            if first_kind != "end" or boundary_extra_pages >= MAX_BOUNDARY_EXTRA_PAGES:
+                break
+            boundary_extra_pages += 1
         next_before = oldest["id"]
         if before is not None and next_before >= before:
             stalled += 1
