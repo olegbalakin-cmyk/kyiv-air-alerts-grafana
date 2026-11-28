@@ -46,12 +46,12 @@ class MonthReconciliation(unittest.TestCase):
         self.assertEqual(sum(int(d["research_held_proposed_delta"] or 0)
                              for d in self.days if d["month"] == "2026-10"), 11)
         self.assertEqual([int(by_day[x]["additional_indexed_official_event_minimum"])
-                          for x in ("2026-10-13", "2026-10-21")], [5, 2])
+                          for x in ("2026-10-13", "2026-10-21", "2026-10-19", "2026-10-26")], [5, 2, 1, 1])
         self.assertEqual(self.doc["research_proposals"]["september"]["published_partial_baseline"], 18)
-        self.assertEqual(self.doc["research_proposals"]["october"]["arithmetic_research_only_11_plus_5_plus_2"], 18)
+        self.assertEqual(self.doc["research_proposals"]["october"]["arithmetic_research_only_11_plus_5_plus_2_plus_1_plus_1"], 20)
 
     def test_leads_are_indexed_not_archived(self):
-        self.assertEqual(len(self.sources), 7)
+        self.assertEqual(len(self.sources), 9)
         self.assertTrue(all(s["url"].startswith("https://") for s in self.sources))
         self.assertEqual(self.doc["body_captures_performed"], 0)
         self.assertEqual(self.doc["netlify_deploys"], 0)
