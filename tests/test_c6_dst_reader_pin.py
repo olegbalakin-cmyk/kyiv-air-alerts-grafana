@@ -30,6 +30,7 @@ def accepted_namespace(generated):
         "CAPTURE_HOOK_BLOBS", "C6_INTEGRATION_HOOK_BLOBS",
         "C6_SEVASTOPOL_CHECKPOINT_BLOBS", "C6_SEVASTOPOL_PR93_BLOBS",
         "C6_DST_UTC_BRIDGE_BLOBS", "C6_WEEKDAY_HEATMAP_BLOBS",
+        "C6_SEVASTOPOL_BOUNDARY_BLOBS",
     }
     nodes = []
     for node in source.body:
@@ -102,6 +103,22 @@ class ExactDstBridgePinTests(unittest.TestCase):
             pin.patched_bytes(self.generator + b"\n", self.parser, self.bridge)
         with self.assertRaisesRegex(pin.PinBlocked, "PR93_PARSER_BLOB_MISMATCH"):
             pin.patched_bytes(self.generator, self.parser + b"\n", self.bridge)
+
+    def test_exact_boundary_parser_pin_and_negative_drift(self):
+        candidate = (ROOT / "site-boundary-candidate" / "kyiv-air-alerts-grafana" /
+                     "scripts" / "add_sevastopol_exact.py").read_bytes()
+        self.assertEqual(pin.git_blob(candidate), pin.SEVASTOPOL_BOUNDARY_PARSER_GIT_BLOB)
+        expected = "e4c091a677622eb28e504b0592a89e4d92d5fe02"
+        for parser in (self.parser, candidate):
+            updated = pin.patched_bytes(self.generator, parser, self.bridge)
+            accepted = accepted_namespace(updated)["accepted_builder_blob"]
+            self.assertTrue(accepted("scripts/add_sevastopol_exact.py", self.parser, expected))
+            self.assertTrue(accepted("scripts/add_sevastopol_exact.py", candidate, expected))
+            self.assertFalse(accepted("scripts/add_sevastopol_exact.py", candidate + b"\n", expected))
+            self.assertFalse(accepted("scripts/add_sevastopol_exact.py", candidate, "wrong"))
+            self.assertFalse(accepted("scripts/update_data.py", candidate, expected))
+        with self.assertRaises(pin.PinBlocked):
+            pin.patched_bytes(self.generator, candidate + b"\n", self.bridge)
 
     def test_exact_existing_patch_remains_idempotence_guarded(self):
         updated = pin.patched_bytes(self.generator, self.parser, self.bridge)

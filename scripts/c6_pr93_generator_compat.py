@@ -12,6 +12,7 @@ from pathlib import Path
 
 BASE_GENERATOR_GIT_BLOB = "34d8fa1dc0b25d0a88de2d6dcc73061cfe0771da"
 MERGED_PR93_PARSER_GIT_BLOB = "d31c5ac43ac9e76491ee38033f9a46838c5abfbb"
+SEVASTOPOL_BOUNDARY_PARSER_GIT_BLOB = "22a0ca10664ec485db0780375ba4805c2296c674"
 MERGED_DST_UTC_BRIDGE_GIT_BLOB = "1e3860df58d229b566ff0383409dd7527ad25576"
 ANCHOR = """C6_SEVASTOPOL_CHECKPOINT_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '6698ec743b6efcd9aeb059dd81b51cc05ae93493'),
@@ -21,6 +22,11 @@ EXTRA = """
 # Exact owner-approved PR #93 blob at site-prod@6704c483; no wildcard drift.
 C6_SEVASTOPOL_PR93_BLOBS = {
  'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', 'd31c5ac43ac9e76491ee38033f9a46838c5abfbb'),
+}
+
+# Exact bounded boundary lookback from PR #260; no wildcard drift.
+C6_SEVASTOPOL_BOUNDARY_BLOBS = {
+ 'scripts/add_sevastopol_exact.py': ('e4c091a677622eb28e504b0592a89e4d92d5fe02', '22a0ca10664ec485db0780375ba4805c2296c674'),
 }
 
 # Exact source union-only UTC fix: site-prod@66a5120a (Actions #43645246989 PASS).
@@ -37,6 +43,7 @@ C6_WEEKDAY_HEATMAP_BLOBS = {
 ORIGINAL_PREDICATE = "            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual))"
 PATCHED_PREDICATE = ("            C6_SEVASTOPOL_CHECKPOINT_BLOBS.get(path) == (expected, actual) or\n"
                      "            C6_SEVASTOPOL_PR93_BLOBS.get(path) == (expected, actual) or\n"
+                     "            C6_SEVASTOPOL_BOUNDARY_BLOBS.get(path) == (expected, actual) or\n"
                      "            C6_DST_UTC_BRIDGE_BLOBS.get(path) == (expected, actual) or\n"
                      "            C6_WEEKDAY_HEATMAP_BLOBS.get(path) == (expected, actual))")
 
@@ -53,7 +60,8 @@ def patched_bytes(raw: bytes, parser_raw: bytes,
                   bridge_raw: bytes | None = None) -> bytes:
     if git_blob(raw) != BASE_GENERATOR_GIT_BLOB:
         raise PinBlocked("PINNED_GENERATOR_BLOB_MISMATCH")
-    if git_blob(parser_raw) != MERGED_PR93_PARSER_GIT_BLOB:
+    if git_blob(parser_raw) not in (MERGED_PR93_PARSER_GIT_BLOB,
+                                    SEVASTOPOL_BOUNDARY_PARSER_GIT_BLOB):
         raise PinBlocked("PR93_PARSER_BLOB_MISMATCH")
     if bridge_raw is not None and git_blob(bridge_raw) != MERGED_DST_UTC_BRIDGE_GIT_BLOB:
         raise PinBlocked("DST_UTC_BRIDGE_BLOB_MISMATCH")
