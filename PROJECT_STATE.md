@@ -1,7 +1,7 @@
 # Project State — current coordination snapshot
 
-**Date:** 2026-11-22. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_EXTRA_CORRECTION=NOT_REQUIRED` (status label only; research selector remains disabled); live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
-Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous **UI-WEEKDAY-SPLIT-LIVE-LOCKED-2026-11-22-01**. Historical details below.
+**Date:** 2026-11-28. **Weekday split per-column percentages LIVE on locked Netlify; 23-city same-release PASS.** Historical Neon cutover `GLOBAL_CUTOVER=YES`; four-hour Git-only updates unchanged. `DST_EXTRA_CORRECTION=NOT_REQUIRED` (status label only; research selector remains disabled); live active-alert status uncertified. English/trend/SEO LIVE. C6 stabilization tracked separately.
+Latest accepted transition: **C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01**; previous **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**. Historical details below.
 
 ## Working instructions
 
@@ -15,6 +15,7 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Current tracks and open release gates
 
 - **Historical production cutover/C3:** PR #78 accepted GLOBAL_CUTOVER=YES for historical JSON; owner-gated Netlify #43496568449 and Git #43497605769 SUCCESS, 23-city KPI/CSV/browser PASS. Not active-alert live status.
+- **Sevastopol C6 boundary fix:** PRs #261/#260 merged; exact pinned collector active for next cycle; offline PASS, physical publication pending. Last successful C6 #46123335756, failed #46151335220. No Netlify deploy.
 - **Scheduled C2/C6:** backup scheduler PR #224 merged; owner PAT saved as Netlify secret, backup enabled in isolated deploy `6b02b299b68451c6ef022581` READY (cron :47 UTC hourly). Seven actual checks verified; fallback dispatch pending. #44850889425 last confirmed data publish; #44905215404 writer/readback PASS but Git-only publish blocked after concurrent UI PR #219. PR #221 merged `main@8eba3cd7`, UI-only race recovery offline 8+12 tests PASS (#44950124198), no Netlify. Physical repeat-cycle proof pending; `C6_STABILIZATION=OPEN`; 4h cron delivery unreliable (`C6_SCHEDULE_RELIABILITY=OPEN`).
 - **UI/SEO LIVE:** PR #194 bilingual archive/trends (936 sitemap URLs); Netlify locked, #43875088810 PASS. Monthly cron OFF.
 
@@ -26,6 +27,7 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 
 ## Concrete next tasks
 
+0. Verify next real C6 run with the new Sevastopol parser: all 23 receipts, writer/readback, Git-only publish and zero Netlify. Do not mark physical proof PASS before evidence.
 1. Verify actual Netlify `c6-backup` scheduled invocation and, once both age gates permit, one owner-actor `c6_run_now` C2→Neon→Git-only publish. Production Netlify must remain locked; GitHub cron remains active but unreliable. Verify next physical 23-city C2→Git cycles after UI-race fix PR #221: writer, 21/21 continuity, reader, Git-only publication and zero Netlify. A change in data/non-UI files blocks stale publication; next scheduled cycle or separately owner-triggered `c6_run_now` collects anew. Keep stabilization OPEN.
 2. Monitor Active23 current-day rows after subsequent Git-only cycles, including URL rollover, 23-city parity, stale unclosed cap, clear behavior and trend; no regular Netlify deploys.
 3. DST: no further activation/promotion. Preserve the source UTC fix and exact C2 canonical selector; in the next **scheduled** 23-city proof, verify the same eight witnesses and that three stale UIDs remain absent from calculations. Do not delete physical Neon evidence or enable the superseded research selector in PR #182.
@@ -36,6 +38,9 @@ Latest accepted transition: **DOC-DST-STATUS-CLARIFIED-2026-11-22-01**; previous
 ## Latest accepted checkpoint — full text
 
 <!-- coordination:history:start -->
+## C6-SEVASTOPOL-BOUNDARY-ACTIVATED-2026-11-28-01 — code activated; physical proof pending
+- Owner GO; incident #46151335220 blocked 22/23 on old boundary orphan 25036; C2 artifacts #15266786068 and #15254954934. PR #261 main@838222e54ee825478e9f9ff73c5da112e8f1295a exact reader pin, PR #260 site-prod@5bc03fd875fe762700424e2fed363ac0d9147da6 exact parser blob 22a0ca10664ec485db0780375ba4805c2296c674. Offline #46159874132 and #46159895861 SUCCESS (15 collector, 8 pins, 4 weekday); at most 3 extra history pages within 100-page cap; orphan veto, 23-city gate and freshness unchanged. No manual dispatch or Netlify deploy, no data changes in merge. Next physical C2/Neon/readback/Git-only cycle pending.
+
 ## DOC-DST-STATUS-CLARIFIED-2026-11-22-01 — documentation label only
 - Clarified the current coordination status to `DST_EXTRA_CORRECTION=NOT_REQUIRED`: eight valid DST witnesses are already counted and three stale physical UIDs excluded, supported by readback Actions #43706909819 and proof artifact #14159523883. Superseded research selector PR #182 remains disabled/unmerged. No runtime flag rename, Neon mutation, C2 change, production publication, or Netlify deploy.
 
