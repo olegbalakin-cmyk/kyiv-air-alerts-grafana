@@ -2,7 +2,7 @@ name: C6 exact DST and weekday reader pins (offline, no publication)
 
 on:
   push:
-    branches: [fix-c6-dst-reader-pin-2026-11-15]
+    branches: [fix-c6-dst-reader-pin-2026-11-15, fix-c6-sevastopol-boundary-reader-2026-11-28]
     paths:
       - "scripts/c6_pr93_generator_compat.py"
       - "tests/test_c6_dst_reader_pin.py"
@@ -58,6 +58,12 @@ jobs:
           ref: ae650feadef8e8d028ffadc2c5dc5a8e3f0f041b
           path: site-weekday-current
           persist-credentials: false
+      - name: Checkout exact proposed Sevastopol parser (PR 260)
+        uses: actions/checkout@v4
+        with:
+          ref: 3a51345d76331fc7a9f9f119d78c707758bf5ba9
+          path: site-boundary-candidate
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -67,6 +73,9 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_c6_dst_reader_pin.py -v
           python -m unittest discover -s site-weekday-current/tests -p test_weekday_local_bands.py -v
+      - name: Sevastopol source capture and cutoff regressions (mocked HTTP only)
+        working-directory: site-boundary-candidate/kyiv-air-alerts-grafana
+        run: python -m unittest discover -s tests -p test_c6_sevastopol_checkpoint.py -v
       - name: Verify production workflow only passes the exact bridge to the gate
         run: |
           python - <<'PY'
